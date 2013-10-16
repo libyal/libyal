@@ -483,20 +483,19 @@ def Main():
         for line in fileinput.input(config_filename, inplace=1):
           # Remove trailing whitespace and end-of-line characters.
           line = line.rstrip()
+
+          if parsing_mode != 2 or line:
+            if parsing_mode == 1:
+              if not line.startswith('#define WINVER 0x0501'):
+                print '#define WINVER 0x0501'
+                print ''
+                force_build = True
+              parsing_mode = 2
+
+            elif line.startswith('#define _CONFIG_'):
+              parsing_mode = 1
+
           print line
-
-          if parsing_mode == 2 or not line:
-            continue
-
-          elif parsing_mode == 1:
-            if not line.startswith('#define WINVER 0x0501'):
-              print '#define WINVER 0x0501'
-              print ''
-              force_build = True
-            parsing_mode = 2
-
-          elif line.startswith('#define _CONFIG_'):
-            parsing_mode = 1
 
         release_directory = os.path.join(
             libyal_directory, 'msvscpp', 'Release')
@@ -518,36 +517,36 @@ def Main():
                 'msbuild.log').format(libyal_filename)
             return False
 
-        python_module_name = 'py{0:s}'.format(libyal_name[3:])
-        python_module_directory = os.path.join(
-            libyal_directory, python_module_name)
-        python_module_dist_directory = os.path.join(
-            python_module_directory, 'dist')
-
-        if not os.path.exists(python_module_dist_directory) or force_build:
-          build_directory = os.path.join('..', '..')
-
-          os.chdir(python_module_directory)
-
-          # TODO: redirect the output to build.log?
-          command = '{0:s} setup.py bdist_msi'.format(
-              PYTHON_WINDOWS)
-
-          exit_code = subprocess.call(command, shell=False)
-
-          if exit_code != 0:
-            print (
-                'Build of: msi failed for more info check '
-                'build.log').format(libyal_filename)
-            return False
-
-          msi_filename = glob.glob(os.path.join(
-              'dist', '{0:s}-{1:d}.1.*.msi'.format(
-              python_module_name, libyal_version)))
-
-          shutil.copy(msi_filename, build_directory)
-
-          os.chdir(build_directory)
+          python_module_name = 'py{0:s}'.format(libyal_name[3:])
+          python_module_directory = os.path.join(
+              libyal_directory, python_module_name)
+          python_module_dist_directory = os.path.join(
+              python_module_directory, 'dist')
+  
+          if not os.path.exists(python_module_dist_directory) or force_build:
+            build_directory = os.path.join('..', '..')
+  
+            os.chdir(python_module_directory)
+  
+            # TODO: redirect the output to build.log?
+            command = '{0:s} setup.py bdist_msi'.format(
+                PYTHON_WINDOWS)
+  
+            exit_code = subprocess.call(command, shell=False)
+  
+            if exit_code != 0:
+              print (
+                  'Build of: msi failed for more info check '
+                  'build.log').format(libyal_filename)
+              return False
+  
+            msi_filename = glob.glob(os.path.join(
+                'dist', '{0:s}-{1:d}.1.*.msi'.format(
+                python_module_name, libyal_version)))
+  
+            shutil.copy(msi_filename[0], build_directory)
+  
+            os.chdir(build_directory)
 
       else:
         print 'Unsupported build target: {0:s}.'.format(options.build_target)
