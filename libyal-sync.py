@@ -35,7 +35,8 @@ MSBUILD = '{0:s}:{1:s}{2:s}'.format(
     'Windows', 'Microsoft.NET', 'Framework', 'v3.5', 'MSBuild.exe'))
 
 PACKAGEMAKER = os.path.join(
-    'Applications', 'PackageMaker.app', 'Contents', 'MacOS', 'PackageMaker')
+    '/', 'Applications', 'PackageMaker.app', 'Contents', 'MacOS',
+    'PackageMaker')
 
 PYTHON_WINDOWS = '{0:s}:{1:s}{2:s}'.format(
     'C', os.sep, os.path.join('Python27', 'python.exe'))
@@ -385,9 +386,8 @@ def Main():
               libyal_filename)
           return False
 
-        # TODO: notify about running sudo
-
         command = 'sudo chown -R root:wheel macosx/tmp/'
+        print 'This script now needs to run sudo as in: {0:s}'.format(command)
         exit_code = subprocess.call(
             '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
 
@@ -406,6 +406,8 @@ def Main():
           print 'Build of: {0:s} failed for more info check build.log'.format(
               libyal_filename)
           return False
+
+        # TODO: remove macosx/tmp/ otherwise access issues will arise when deleting it.
 
         command = (
             'hdiutil create {0:s}-{1:d}.dmg -srcfolder {0:s}-{1:d}.pkg '
