@@ -20,6 +20,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# TODO: vs2010 writer add 64-bit target.
+# TODO: allow to generate from source tree, e.g. Makefile.am?
 # TODO: add automated tests.
 # TODO: complete vs2010 reader.
 # TODO: complete vs2008 writer.
@@ -145,6 +147,7 @@ class VSProjectConfiguration(object):
   @property
   def precompiled_header_string(self):
     precompiled_header = int(self.precompiled_header, 10)
+    # TODO: do something with precompiled_header.
     return ''
 
   @property
@@ -706,6 +709,10 @@ class VS2008ProjectFileReader(VSProjectFileReader):
           found_filter = True
 
     return source_files, header_files, resource_files
+
+
+class VS2010ProjectFileReader(VSProjectFileReader):
+  """Class to represent a Visual Studio 2010 project file reader."""
 
 
 class VSProjectFileWriter(object):
@@ -1368,7 +1375,8 @@ class VSSolutionFileReader(FileReader):
 
             configurations.append(configuration)
 
-      elif line == 'GlobalSection(SolutionConfigurationPlatforms) = preSolution':
+      elif line == ('GlobalSection(SolutionConfigurationPlatforms) = '
+                    'preSolution'):
         found_section = True
 
     return configurations
@@ -1472,11 +1480,10 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
           '        ProjectSection(ProjectDependencies) = postProject\r\n')
 
       for dependency_guid in project.dependencies:
-        self._file.write((
-            '                {0:s} = {0:s}\r\n').format(dependency_guid.upper()))
+        self._file.write('                {0:s} = {0:s}\r\n'.format(
+            dependency_guid.upper()))
 
-      self._file.write(
-          '        EndProjectSection\r\n')
+      self._file.write('        EndProjectSection\r\n')
 
     self._file.write(
         'EndProject\r\n')
@@ -1507,14 +1514,16 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
 
     if len(configurations) > 0:
       self._file.write(
-          '        GlobalSection(ProjectConfigurationPlatforms) = postSolution\r\n')
+          '        GlobalSection(ProjectConfigurationPlatforms) = '
+          'postSolution\r\n')
 
       for project in projects:
         for configuration in configurations:
           self._file.write(
               '                {0:s}.{1:s}|{2:s}.ActiveCfg = {1:s}|{2:s}\r\n'
-              '                {0:s}.{1:s}|{2:s}.Build = {1:s}|{2:s}\r\n'.format(
-              project.guid.upper(), configuration.name, configuration.platform))
+              '                {0:s}.{1:s}|{2:s}.Build = '
+              '{1:s}|{2:s}\r\n'.format(project.guid.upper(), configuration.name,
+                                       configuration.platform))
 
       self._file.write(
           '        EndGlobalSection\r\n')

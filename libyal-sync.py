@@ -273,13 +273,14 @@ def Main():
 
       exit_code = 0
 
-      if options.build_target in ['dpkg', 'macosx', 'vs2008']:
+      if options.build_target in ['dpkg', 'macosx', 'vs2008', 'vs2010']:
         libyal_directory = libyal_helper.Extract(
             libyal_name, libyal_version, libyal_filename)
 
         # Remove previous versions.
         directory_names = glob.glob(
-            '{0:s}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'.format(libyal_name))
+            '{0:s}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'.format(
+            libyal_name))
         for directory_name in directory_names:
           if directory_name != libyal_directory:
             print 'Removing: {0:s}'.format(directory_name)
@@ -299,8 +300,8 @@ def Main():
         # Remove files of previous versions in the format:
         # library[-_]version-1_architecture.*
         filenames = glob.glob(
-            '{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-1_{1:s}.*'.format(
-                libyal_name, architecture))
+            '{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-1_'
+            '{1:s}.*'.format(libyal_name, architecture))
 
         for filename in filenames:
           if not ignore_filename.match(filename):
@@ -330,7 +331,7 @@ def Main():
             # If there is a debian directory remove it
             # and recreate it from the dpkg directory.
             if os.path.exists(debian_directory):
-              print 'Removing: {0:s}'.format(directory_name)
+              print 'Removing: {0:s}'.format(debian_directory)
               shutil.rmtree(debian_directory)
             shutil.copytree(dpkg_directory, debian_directory)
 
@@ -344,14 +345,14 @@ def Main():
             print 'Building deb of: {0:s}'.format(libyal_filename)
             command = 'dpkg-buildpackage -rfakeroot > ../build.log 2>&1'
             exit_code = subprocess.call(
-                '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
+                '(cd {0:s} && {1:s})'.format(libyal_directory, command),
+                shell=True)
 
             if exit_code != 0:
-              print 'Build of: {0:s} failed for more info check build.log'.format(
-                  libyal_filename)
+              print (
+                  'Build of: {0:s} failed for more info check '
+                  'build.log'.format(libyal_filename))
               return False
-
-            pass
 
       elif options.build_target == 'macosx':
         # TODO: check for existing dmg
@@ -407,7 +408,8 @@ def Main():
               libyal_filename)
           return False
 
-        # TODO: remove macosx/tmp/ otherwise access issues will arise when deleting it.
+        # TODO: remove macosx/tmp/ otherwise access issues will arise
+        # when deleting it.
 
         command = (
             'hdiutil create {0:s}-{1:d}.dmg -srcfolder {0:s}-{1:d}.pkg '
@@ -460,7 +462,9 @@ def Main():
                 libyal_filename)
             return False
 
-      elif options.build_target == 'vs2008':
+      elif options.build_target in ['vs2008', 'vs2010']:
+        # Search common locations for MSBuild.exe
+
         if not os.path.exists(MSBUILD):
           print 'Cannot find MSBuild.exe'
           return False
@@ -469,44 +473,81 @@ def Main():
           print 'Cannot find python.exe'
           return False
 
-        force_build = False
+        if options.build_target == 'vs2010':
+          msvscpp_convert_script = os.path.join('..', 'msvscpp-convert.py')
 
-        config_filename = os.path.join(
-            libyal_directory, 'common', 'config_winapi.h')
+          if not os.path.exists(msvscpp_convert_script):
+            print 'Cannot find msvscpp-convert.py'
+            return False
 
-        # If the WINAPI config file is not available use the MS C compiler one.
-        if not os.path.exists(config_filename):
+        # For the vs2008 build make sure the binary is XP compatible,
+        # by setting WINVER to 0x0501 in common\config_winapi.h or
+        # common\config_msc.h.
+        if options.build_target == 'vs2008':
+          force_build = False
+
           config_filename = os.path.join(
-              libyal_directory, 'common', 'config_msc.h')
+              libyal_directory, 'common', 'config_winapi.h')
 
-        # Add a line to the config file that sets WINVER to 0x0501.
-        parsing_mode = 0
+          # If the WINAPI configuration file is not available use
+          # the MSC compiler configuration file instead.
+          if not os.path.exists(config_filename):
+            config_filename = os.path.join(
+                libyal_directory, 'common', 'config_msc.h')
 
-        for line in fileinput.input(config_filename, inplace=1):
-          # Remove trailing whitespace and end-of-line characters.
-          line = line.rstrip()
+          # Add a line to the config file that sets WINVER to 0x0501.
+          parsing_mode = 0
 
-          if parsing_mode != 2 or line:
-            if parsing_mode == 1:
-              if not line.startswith('#define WINVER 0x0501'):
-                print '#define WINVER 0x0501'
-                print ''
-                force_build = True
-              parsing_mode = 2
+          for line in fileinput.input(config_filename, inplace=1):
+            # Remove trailing whitespace and end-of-line characters.
+            line = line.rstrip()
 
-            elif line.startswith('#define _CONFIG_'):
-              parsing_mode = 1
+            if parsing_mode != 2 or line:
+              if parsing_mode == 1:
+                if not line.startswith('#define WINVER 0x0501'):
+                  print '#define WINVER 0x0501'
+                  print ''
+                  force_build = True
+                parsing_mode = 2
 
-          print line
+              elif line.startswith('#define _CONFIG_'):
+                parsing_mode = 1
+
+            print line
+
+        # For the vs2010 build convert the vs2008 solution and project files
+        # to vs2010.
+        elif options.build_target == 'vs2010':
+          os.chdir(libyal_directory)
+  
+          # TODO: redirect the output to build.log?
+          command = '{0:s} {1:s}'.format(
+              PYTHON_WINDOWS, msvscpp_convert_script)
+  
+          exit_code = subprocess.call(command, shell=False)
+  
+          if exit_code != 0:
+            print (
+                'Conversion of vs2008 solution and project files to vs2010 '
+                'failed for more info check build.log')
+            return False
+  
+          os.chdir('..')
+
+        if options.build_target == 'vs2008':
+          msvscpp_solution_directory = 'msvscpp'
+        elif options.build_target == 'vs2010':
+          msvscpp_solution_directory = 'vs2010'
 
         release_directory = os.path.join(
-            libyal_directory, 'msvscpp', 'Release')
+            libyal_directory, msvscpp_solution_directory, 'Release')
 
         if not os.path.exists(release_directory) or force_build:
           print 'Building: {0:s}'.format(libyal_name)
 
           solution_filename = os.path.join(
-              libyal_directory, 'msvscpp', '{0:s}.sln'.format(libyal_name))
+              libyal_directory, msvscpp_solution_directory,
+              '{0:s}.sln'.format(libyal_name))
           command = (
               '{0:s} /p:Configuration=Release /noconsolelogger '
               '/fileLogger {1:s}').format(MSBUILD, solution_filename)
@@ -538,8 +579,7 @@ def Main():
   
             if exit_code != 0:
               print (
-                  'Build of: msi failed for more info check '
-                  'build.log').format(libyal_filename)
+                  'Build of MSI failed for more info check build.log')
               return False
   
             msi_filename = glob.glob(os.path.join(
