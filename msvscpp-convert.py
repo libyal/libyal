@@ -35,7 +35,9 @@ import sys
 
 class VSProjectConfiguration(object):
   """Class to represent a Visual Studio project configuration."""
+
   def __init__(self):
+    """Initializes a Visual Studio project configuration."""
     self.basic_runtime_checks = ''
     self.character_set = ''
     self.compile_as = ''
@@ -59,6 +61,7 @@ class VSProjectConfiguration(object):
     self.optimization = ''
     self.output_type = ''
     self.platform = ''
+    self.platform_toolset = ''
     self.precompiled_header = ''
     self.preprocessor_definitions = ''
     self.randomized_base_address = ''
@@ -180,6 +183,9 @@ class VSProjectConfiguration(object):
     target_machine = int(self.target_machine, 10)
     if target_machine == 1:
       return 'MachineX86'
+    # TODO: assuming here that 2 is x64
+    elif target_machine == 2:
+      return 'MachineX64'
     return ''
 
   @property
@@ -196,6 +202,114 @@ class VSProjectConfiguration(object):
       return 'true'
     return ''
 
+  def CopyToX64(self):
+    """Copies the Visual Studio project configuration to an x64 equivalent."""
+    copy = VSProjectConfiguration()
+
+    copy.basic_runtime_checks = self.basic_runtime_checks
+    copy.character_set = self.character_set
+    copy.compile_as = self.compile_as
+    copy.data_execution_prevention = self.data_execution_prevention
+    copy.debug_information_format = self.debug_information_format
+    copy.dependencies = self.dependencies
+    copy.dependencies_set = self.dependencies_set
+    copy.enable_comdat_folding = self.enable_comdat_folding
+    copy.generate_debug_information = self.generate_debug_information
+    copy.import_library = self.import_library
+    copy.include_directories = self.include_directories
+    copy.librarian_ignore_defaults = self.librarian_ignore_defaults
+    copy.librarian_output_file = self.librarian_output_file
+    copy.library_directories = self.library_directories
+    copy.link_incremental = self.link_incremental
+    copy.linker_output_directory = self.linker_output_directory
+    copy.linker_output_file = self.linker_output_file
+    copy.linker_values_set = self.linker_values_set
+    copy.name = self.name
+    copy.optimize_references = self.optimize_references
+    copy.optimization = self.optimization
+    copy.output_type = self.output_type
+    copy.platform = 'x64'
+    copy.platform_toolset = 'Windows7.1SDK'
+    copy.precompiled_header = self.precompiled_header
+    copy.preprocessor_definitions = self.preprocessor_definitions
+    copy.randomized_base_address = self.randomized_base_address
+    copy.runtime_library = self.runtime_library
+    copy.smaller_type_check = self.smaller_type_check
+    copy.sub_system = self.sub_system
+    copy.target_machine = '2'
+    copy.warning_as_error = self.warning_as_error
+    copy.warning_level = self.warning_level
+    copy.whole_program_optimization = self.whole_program_optimization
+
+    return copy
+
+
+class VSProjectConfigurations(object):
+  """Class to represent a Visual Studio project configurations."""
+
+  def __init__(self):
+    """Initializes a Visual Studio project configurations."""
+    self._configurations = {}
+    self.names = []
+    self.platforms = []
+
+  def Append(self, configuration):
+    """Appends a configuration.
+
+    Args:
+      configuration: the configuration (instance of VSProjectConfiguration).
+    """
+    if configuration.name not in self.names:
+      self.names.append(configuration.name)
+
+    if configuration.platform not in self.platforms:
+      self.platforms.append(configuration.platform)
+
+    identifier = '{0:s}|{1:s}'.format(
+        configuration.name, configuration.platform)
+
+    self._configurations[identifier] = configuration
+
+  def ExtendWithX64(self):
+    """Extends the configurations with the x64 platform."""
+    if 'x64' not in self.platforms:
+      for configuration in self._configurations.values():
+        if configuration.platform != 'x64':
+          self.Append(configuration.CopyToX64())
+
+  def GetByIdentifier(self, name, platform):
+    """Retrieves a specific configuration by identtifier.
+
+    The identifier is formatted as: name|platform.
+
+    Args:
+      name: the configuration name.
+      platform: the configuration platform.
+
+    Returns:
+      The configuration (instance of VSProjectConfiguration).
+    """
+    identifier = '{0:s}|{1:s}'.format(name, platform)
+    return self._configurations[identifier]
+
+  def GetSorted(self, reverse=False):
+    """Retrieves configurations in sorted order.
+
+    The sorting order is first alphabetacally by name,
+    secondly alphabetacally by platform.
+
+    Args:
+      reverse: optional boolean to indicate the name sort order should be
+               reversed, which is False by default. The platform sort
+               order does not change.
+
+    Yields:
+      The configuration (instance of VSProjectConfiguration).
+    """
+    for name in sorted(self.names, reverse=reverse):
+      for platform in sorted(self.platforms):
+        yield self.GetByIdentifier(name, platform)
+
 
 class VSProjectInformation(object):
   """Class to represent a Visual Studio project information."""
@@ -211,12 +325,21 @@ class VSSolutionConfiguration(object):
     self.name = ''
     self.platform = ''
 
+  def CopyToX64(self):
+    """Copies the Visual Studio solution configuration to an x64 equivalent."""
+    copy = VSSolutionConfiguration()
+
+    copy.name = self.name
+    copy.platform = 'x64'
+
+    return copy
+
 
 class VSSolutionProject(object):
   """Class to represent a Visual Studio solution project."""
 
   def __init__(self, name, filename, guid):
-    """Initializes a Visual Studio Project.
+    """Initializes a Visual Studio project.
 
     Args:
       name: the project name.
@@ -370,11 +493,9 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     """Reads the configurations.
 
     Returns:
-      A list containing the configurations (instances of
-      VSProjectConfiguration). The list is used to preserve the
-      order of configurations.
+      The configurations (instance of VSProjectConfigurations).
     """
-    configurations = []
+    configurations = VSProjectConfigurations()
 
     # Find the start of the configurations section.
     result = False
@@ -397,7 +518,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
           configuration = self._ReadConfiguration(line)
 
           if configuration:
-            configurations.append(configuration)
+            configurations.Append(configuration)
 
     return configurations
 
@@ -631,6 +752,8 @@ class VS2008ProjectFileReader(VSProjectFileReader):
         if len(values) == 1:
           configuration.whole_program_optimization = values[0]
 
+      # TODO: PlatformToolset.
+
     return configuration
 
   def ReadFiles(self):
@@ -754,19 +877,15 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
         '<Project DefaultTargets="Build" ToolsVersion="4.0" '
         'xmlns="http://schemas.microsoft.com/developer/msbuild/2003">\r\n')
 
-  def WriteProjectConfigurations(self, configurations_by_identifier):
+  def WriteProjectConfigurations(self, configurations):
     """Writes the project configurations.
 
     Args:
-      configurations_by_identifier: a dictionary of the configuration with
-                                    their identifier string: name|platform
-                                    as the key.
+      configurations: the configurations (instance of VSProjectConfigurations).
     """
     self._file.write('  <ItemGroup Label="ProjectConfigurations">\r\n')
 
-    for identifier in sorted(configurations_by_identifier.keys()):
-      configuration = configurations_by_identifier[identifier]
-
+    for configuration in configurations.GetSorted():
       self._file.write(
           ('    <ProjectConfiguration Include="{0:s}|{1:s}">\r\n'
            '      <Configuration>{0:s}</Configuration>\r\n'
@@ -799,24 +918,19 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     self._file.write('  </PropertyGroup>\r\n')
 
 
-  def WriteConfigurations(self, configurations_by_identifier):
+  def WriteConfigurations(self, configurations):
     """Writes the configurations.
 
     Args:
-      configurations_by_identifier: a dictionary of the configuration with
-                                    their identifier string: name|platform
-                                    as the key.
+      configurations: the configurations (instance of VSProjectConfigurations).
     """
     self._file.write(
         '  <Import Project="$(VCTargetsPath)'
         '\\Microsoft.Cpp.Default.props" />\r\n')
 
     # Mimic Visual Studio behavior and output the configurations
-    # in reverse.
-    for identifier in sorted(configurations_by_identifier.keys(),
-                             reverse=True):
-      configuration = configurations_by_identifier[identifier]
-
+    # in reverse order of name.
+    for configuration in configurations.GetSorted(reverse=True):
       self._file.write(
           ('  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'=='
            '\'{0:s}|{1:s}\'" Label="Configuration">\r\n').format(
@@ -834,6 +948,11 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
              '</WholeProgramOptimization>\r\n').format(
             configuration.whole_program_optimization_string))
 
+      if configuration.platform_toolset:
+        self._file.write(
+            '    <PlatformToolset>{0:s}</PlatformToolset>\r\n'.format(
+            configuration.platform_toolset))
+
       self._file.write('  </PropertyGroup>\r\n')
 
     self._file.write(
@@ -842,11 +961,8 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
         '  </ImportGroup>\r\n')
 
     # Mimic Visual Studio behavior and output the configurations
-    # in reverse.
-    for identifier in sorted(configurations_by_identifier.keys(),
-                             reverse=True):
-      configuration = configurations_by_identifier[identifier]
-
+    # in reverse of name.
+    for configuration in configurations.GetSorted(reverse=True):
       self._file.write(
           ('  <ImportGroup Condition="\'$(Configuration)|$(Platform)\'=='
            '\'{0:s}|{1:s}\'" Label="PropertySheets">\r\n'
@@ -861,29 +977,43 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
         '  <PropertyGroup>\r\n'
         '    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>\r\n')
 
-    for identifier in sorted(configurations_by_identifier.keys()):
-      configuration = configurations_by_identifier[identifier]
+    # Mimic Visual Studio behavior and output the configurations
+    # in platforms by name.
+    for configuration_name in configurations.names:
+      for configuration_platform in configurations.platforms:
+        configuration = configurations.GetByIdentifier(
+            configuration_name, configuration_platform)
 
-      self._file.write(
-          ('    <OutDir Condition="\'$(Configuration)|$(Platform)\'=='
-           '\'{0:s}|{1:s}\'">$(SolutionDir)$(Configuration)\\</OutDir>\r\n'
-           '    <IntDir Condition="\'$(Configuration)|$(Platform)\'=='
-           '\'{0:s}|{1:s}\'">$(Configuration)\\</IntDir>\r\n').format(
-          configuration.name, configuration.platform))
-
-      if configuration.link_incremental != '':
         self._file.write(
-            ('    <LinkIncremental Condition="\'$(Configuration)|'
-             '$(Platform)\'==\'{0:s}|{1:s}\'">{2:s}</LinkIncremental>'
-             '\r\n').format(
-            configuration.name, configuration.platform,
-            configuration.link_incremental_string))
+            ('    <OutDir Condition="\'$(Configuration)|$(Platform)\'=='
+             '\'{0:s}|{1:s}\'">$(SolutionDir)$(Configuration)\\'
+             '</OutDir>\r\n').format(
+            configuration.name, configuration.platform))
+
+      for configuration_platform in configurations.platforms:
+        configuration = configurations.GetByIdentifier(
+            configuration_name, configuration_platform)
+
+        self._file.write((
+             '    <IntDir Condition="\'$(Configuration)|$(Platform)\'=='
+             '\'{0:s}|{1:s}\'">$(Configuration)\\</IntDir>\r\n').format(
+            configuration.name, configuration.platform))
+
+      for configuration_platform in configurations.platforms:
+        configuration = configurations.GetByIdentifier(
+            configuration_name, configuration_platform)
+
+        if configuration.link_incremental != '':
+          self._file.write(
+              ('    <LinkIncremental Condition="\'$(Configuration)|'
+               '$(Platform)\'==\'{0:s}|{1:s}\'">{2:s}</LinkIncremental>'
+               '\r\n').format(
+              configuration.name, configuration.platform,
+              configuration.link_incremental_string))
 
     self._file.write('  </PropertyGroup>\r\n')
 
-    for identifier in sorted(configurations_by_identifier.keys()):
-      configuration = configurations_by_identifier[identifier]
-
+    for configuration in configurations.GetSorted():
       self._file.write(
           ('  <ItemDefinitionGroup Condition="\'$(Configuration)|'
            '$(Platform)\'==\'{0:s}|{1:s}\'">\r\n').format(
@@ -1669,13 +1799,10 @@ class VSSolution(object):
     source_files, header_files, resource_files = project_reader.ReadFiles()
     project_reader.Close()
 
-    configurations_by_identifier = {}
+    # Add x64 as a platform.
+    configurations.ExtendWithX64()
 
-    for configuration in configurations:
-      identifier_string = '{0:s}|{1:s}'.format(
-          configuration.name, configuration.platform)
-      configurations_by_identifier[identifier_string] = configuration
-
+    # Create the output directory.
     output_directory = os.path.dirname(output_project_filename)
 
     os.mkdir(output_directory)
@@ -1689,9 +1816,9 @@ class VSSolution(object):
 
     project_writer.Open(output_project_filename)
     project_writer.WriteHeader()
-    project_writer.WriteProjectConfigurations(configurations_by_identifier)
+    project_writer.WriteProjectConfigurations(configurations)
     project_writer.WriteProjectInformation(project_information)
-    project_writer.WriteConfigurations(configurations_by_identifier)
+    project_writer.WriteConfigurations(configurations)
     project_writer.WriteFiles(source_files, header_files, resource_files)
     project_writer.WriteDependencies(project.dependencies, projects_by_guid)
     project_writer.WriteFooter()
@@ -1725,17 +1852,27 @@ class VSSolution(object):
       solution_reader = VS2010SolutionFileReader()
 
     solution_reader.Open(input_sln_filename)
-    result = solution_reader.ReadHeader()
 
-    if result:
-      projects = solution_reader.ReadProjects()
-      configurations = solution_reader.ReadConfigurations()
-
-    solution_reader.Close()
-
-    if not result:
+    if not solution_reader.ReadHeader():
       return False
 
+    projects = solution_reader.ReadProjects()
+    configurations = solution_reader.ReadConfigurations()
+    solution_reader.Close()
+
+    # Add x64 as a platform.
+    platforms = []
+
+    for configuration in configurations:
+      if configuration.platform not in platforms:
+        platforms.append(configuration.platform)
+
+    if 'x64' not in platforms:
+      for configuration in configurations:
+        if configuration.platform != 'x64':
+          configurations.append(configuration.CopyToX64())
+
+    # Create the output directory.
     os.mkdir(output_directory)
 
     output_sln_filename = os.path.join(
