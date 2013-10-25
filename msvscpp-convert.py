@@ -20,7 +20,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO: vs2010 writer add 64-bit target.
 # TODO: allow to generate from source tree, e.g. Makefile.am?
 # TODO: add automated tests.
 # TODO: complete vs2010 reader.
@@ -771,6 +770,14 @@ class VS2008ProjectFileReader(VSProjectFileReader):
           configuration.whole_program_optimization = values[0]
 
       # TODO: PlatformToolset.
+
+    # Add the target machine when not defined.
+    if not configuration.target_machine:
+      if configuration.platform == 'Win32':
+        configuration.target_machine = '1'
+      # TODO: assuming here that 2 is x64.
+      elif configuration.platform == 'x64':
+        configuration.target_machine = '2'
 
     return configuration
 
