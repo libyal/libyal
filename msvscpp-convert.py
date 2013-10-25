@@ -33,11 +33,99 @@ import os
 import sys
 
 
-class VSProjectConfiguration(object):
+class VSConfiguration(object):
+  """Class to represent a Visual Studio configurations."""
+
+  def __init__(self):
+    """Initializes a Visual Studio configuration."""
+    self.name = ''
+    self.platform = ''
+
+  @abc.abstractmethod
+  def CopyToX64(self):
+    """Copies the Visual Studio solution configuration to an x64 equivalent."""
+
+
+class VSConfigurations(object):
+  """Class to represent a Visual Studio solution and project configurations."""
+
+  def __init__(self):
+    """Initializes a Visual Studio configurations."""
+    self._configurations = {}
+    self.names = []
+    self.platforms = []
+
+  @property
+  def number_of_configurations(self):
+    return len(self._configurations.values())
+
+  def Append(self, configuration):
+    """Appends a configuration.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    if configuration.name not in self.names:
+      self.names.append(configuration.name)
+
+    if configuration.platform not in self.platforms:
+      self.platforms.append(configuration.platform)
+
+    identifier = '{0:s}|{1:s}'.format(
+        configuration.name, configuration.platform)
+
+    self._configurations[identifier] = configuration
+
+  def ExtendWithX64(self):
+    """Extends the configurations with the x64 platform."""
+    if 'x64' not in self.platforms:
+      for configuration in self._configurations.values():
+        if configuration.platform != 'x64':
+          self.Append(configuration.CopyToX64())
+
+  def GetByIdentifier(self, name, platform):
+    """Retrieves a specific configuration by identtifier.
+
+    The identifier is formatted as: name|platform.
+
+    Args:
+      name: the configuration name.
+      platform: the configuration platform.
+
+    Returns:
+      The configuration (instance of VSProjectConfiguration or
+      VSProjectConfiguration).
+    """
+    identifier = '{0:s}|{1:s}'.format(name, platform)
+    return self._configurations[identifier]
+
+  def GetSorted(self, reverse=False):
+    """Retrieves configurations in sorted order.
+
+    The sorting order is first alphabetacally by name,
+    secondly alphabetacally by platform.
+
+    Args:
+      reverse: optional boolean to indicate the name sort order should be
+               reversed, which is False by default. The platform sort
+               order does not change.
+
+    Yields:
+      The configuration (instance of VSConfiguration).
+    """
+    for name in sorted(self.names, reverse=reverse):
+      for platform in sorted(self.platforms):
+        yield self.GetByIdentifier(name, platform)
+
+
+class VSProjectConfiguration(VSConfiguration):
   """Class to represent a Visual Studio project configuration."""
 
   def __init__(self):
     """Initializes a Visual Studio project configuration."""
+    super(VSProjectConfiguration, self).__init__()
+
+    # Note that name and platform are inherited from VSConfiguration.
     self.basic_runtime_checks = ''
     self.character_set = ''
     self.compile_as = ''
@@ -56,11 +144,9 @@ class VSProjectConfiguration(object):
     self.linker_output_directory = ''
     self.linker_output_file = ''
     self.linker_values_set = False
-    self.name = ''
     self.optimize_references = ''
     self.optimization = ''
     self.output_type = ''
-    self.platform = ''
     self.platform_toolset = ''
     self.precompiled_header = ''
     self.preprocessor_definitions = ''
@@ -183,7 +269,7 @@ class VSProjectConfiguration(object):
     target_machine = int(self.target_machine, 10)
     if target_machine == 1:
       return 'MachineX86'
-    # TODO: assuming here that 2 is x64
+    # TODO: assuming here that 2 is x64.
     elif target_machine == 2:
       return 'MachineX64'
     return ''
@@ -244,86 +330,18 @@ class VSProjectConfiguration(object):
     return copy
 
 
-class VSProjectConfigurations(object):
-  """Class to represent a Visual Studio project configurations."""
-
-  def __init__(self):
-    """Initializes a Visual Studio project configurations."""
-    self._configurations = {}
-    self.names = []
-    self.platforms = []
-
-  def Append(self, configuration):
-    """Appends a configuration.
-
-    Args:
-      configuration: the configuration (instance of VSProjectConfiguration).
-    """
-    if configuration.name not in self.names:
-      self.names.append(configuration.name)
-
-    if configuration.platform not in self.platforms:
-      self.platforms.append(configuration.platform)
-
-    identifier = '{0:s}|{1:s}'.format(
-        configuration.name, configuration.platform)
-
-    self._configurations[identifier] = configuration
-
-  def ExtendWithX64(self):
-    """Extends the configurations with the x64 platform."""
-    if 'x64' not in self.platforms:
-      for configuration in self._configurations.values():
-        if configuration.platform != 'x64':
-          self.Append(configuration.CopyToX64())
-
-  def GetByIdentifier(self, name, platform):
-    """Retrieves a specific configuration by identtifier.
-
-    The identifier is formatted as: name|platform.
-
-    Args:
-      name: the configuration name.
-      platform: the configuration platform.
-
-    Returns:
-      The configuration (instance of VSProjectConfiguration).
-    """
-    identifier = '{0:s}|{1:s}'.format(name, platform)
-    return self._configurations[identifier]
-
-  def GetSorted(self, reverse=False):
-    """Retrieves configurations in sorted order.
-
-    The sorting order is first alphabetacally by name,
-    secondly alphabetacally by platform.
-
-    Args:
-      reverse: optional boolean to indicate the name sort order should be
-               reversed, which is False by default. The platform sort
-               order does not change.
-
-    Yields:
-      The configuration (instance of VSProjectConfiguration).
-    """
-    for name in sorted(self.names, reverse=reverse):
-      for platform in sorted(self.platforms):
-        yield self.GetByIdentifier(name, platform)
-
-
 class VSProjectInformation(object):
   """Class to represent a Visual Studio project information."""
+
   def __init__(self):
+    """Initializes Visual Studio project information."""
     self.project_guid = ''
     self.root_name_space = ''
     self.keyword = ''
 
 
-class VSSolutionConfiguration(object):
+class VSSolutionConfiguration(VSConfiguration):
   """Class to represent a Visual Studio solution configuration."""
-  def __init__(self):
-    self.name = ''
-    self.platform = ''
 
   def CopyToX64(self):
     """Copies the Visual Studio solution configuration to an x64 equivalent."""
@@ -493,9 +511,9 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     """Reads the configurations.
 
     Returns:
-      The configurations (instance of VSProjectConfigurations).
+      The configurations (instance of VSConfigurations).
     """
-    configurations = VSProjectConfigurations()
+    configurations = VSConfigurations()
 
     # Find the start of the configurations section.
     result = False
@@ -881,7 +899,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the project configurations.
 
     Args:
-      configurations: the configurations (instance of VSProjectConfigurations).
+      configurations: the configurations (instance of VSConfigurations).
     """
     self._file.write('  <ItemGroup Label="ProjectConfigurations">\r\n')
 
@@ -922,7 +940,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the configurations.
 
     Args:
-      configurations: the configurations (instance of VSProjectConfigurations).
+      configurations: the configurations (instance of VSConfigurations).
     """
     self._file.write(
         '  <Import Project="$(VCTargetsPath)'
@@ -979,8 +997,8 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
 
     # Mimic Visual Studio behavior and output the configurations
     # in platforms by name.
-    for configuration_name in configurations.names:
-      for configuration_platform in configurations.platforms:
+    for configuration_name in sorted(configurations.names):
+      for configuration_platform in sorted(configurations.platforms):
         configuration = configurations.GetByIdentifier(
             configuration_name, configuration_platform)
 
@@ -990,7 +1008,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
              '</OutDir>\r\n').format(
             configuration.name, configuration.platform))
 
-      for configuration_platform in configurations.platforms:
+      for configuration_platform in sorted(configurations.platforms):
         configuration = configurations.GetByIdentifier(
             configuration_name, configuration_platform)
 
@@ -999,7 +1017,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
              '\'{0:s}|{1:s}\'">$(Configuration)\\</IntDir>\r\n').format(
             configuration.name, configuration.platform))
 
-      for configuration_platform in configurations.platforms:
+      for configuration_platform in sorted(configurations.platforms):
         configuration = configurations.GetByIdentifier(
             configuration_name, configuration_platform)
 
@@ -1468,11 +1486,9 @@ class VSSolutionFileReader(FileReader):
     """Reads the configurations.
 
     Returns:
-      A list containing solution configurations (instances of
-      VSSolutionConfiguration). The list is used to preserve
-      the order of configurations.
+      The configurations (instance of VSConfigurations).
     """
-    configurations = []
+    configurations = VSConfigurations()
 
     line = self._ReadLine(look_ahead=True)
 
@@ -1503,7 +1519,7 @@ class VSSolutionFileReader(FileReader):
             configuration.name = values[0]
             configuration.platform = values[1]
 
-            configurations.append(configuration)
+            configurations.Append(configuration)
 
       elif line == ('GlobalSection(SolutionConfigurationPlatforms) = '
                     'preSolution'):
@@ -1622,41 +1638,46 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
     """Writes the configurations.
 
     Args:
-      configurations: a list containing the solution configurations (instances
-                      of VSSolutionConfiguration).
+      configurations: the configurations (instance of VSConfigurations).
       projects: a list containing the projects (instances of VSSolutionProject).
     """
-    self._file.write(
-        'Global\r\n')
+    self._file.write('Global\r\n')
 
-    if len(configurations) > 0:
+    if configurations.number_of_configurations > 0:
       self._file.write(
           '        GlobalSection(SolutionConfigurationPlatforms) = '
           'preSolution\r\n')
 
-      for configuration in configurations:
-        self._file.write(
-            '                {0:s}|{1:s} = {0:s}|{1:s}\r\n'.format(
-            configuration.name, configuration.platform))
+      for configuration_platform in sorted(configurations.platforms):
+        for configuration_name in sorted(configurations.names):
+          configuration = configurations.GetByIdentifier(
+              configuration_name, configuration_platform)
 
-      self._file.write(
-          '        EndGlobalSection\r\n')
+          self._file.write(
+              '                {0:s}|{1:s} = {0:s}|{1:s}\r\n'.format(
+              configuration.name, configuration.platform))
 
-    if len(configurations) > 0:
+      self._file.write('        EndGlobalSection\r\n')
+
+    if configurations.number_of_configurations > 0:
       self._file.write(
           '        GlobalSection(ProjectConfigurationPlatforms) = '
           'postSolution\r\n')
 
-      for project in projects:
-        for configuration in configurations:
-          self._file.write(
-              '                {0:s}.{1:s}|{2:s}.ActiveCfg = {1:s}|{2:s}\r\n'
-              '                {0:s}.{1:s}|{2:s}.Build = '
-              '{1:s}|{2:s}\r\n'.format(project.guid.upper(), configuration.name,
-                                       configuration.platform))
+      for configuration_platform in sorted(configurations.platforms):
+        for project in projects:
+          for configuration_name in sorted(configurations.names):
+            configuration = configurations.GetByIdentifier(
+                configuration_name, configuration_platform)
 
-      self._file.write(
-          '        EndGlobalSection\r\n')
+            self._file.write((
+                '                {0:s}.{1:s}|{2:s}.ActiveCfg = {1:s}|{2:s}\r\n'
+                '                {0:s}.{1:s}|{2:s}.Build = '
+                '{1:s}|{2:s}\r\n').format(
+                project.guid.upper(), configuration.name,
+                configuration.platform))
+
+      self._file.write('        EndGlobalSection\r\n')
 
     self._file.write(
         '        GlobalSection(SolutionProperties) = preSolution\r\n'
@@ -1701,34 +1722,40 @@ class VS2010SolutionFileWriter(VSSolutionFileWriter):
                       of VSSolutionConfiguration).
       projects: a list containing the projects (instances of VSSolutionProject).
     """
-    self._file.write(
-        'Global\r\n')
+    self._file.write('Global\r\n')
 
-    if len(configurations) > 0:
+    if configurations.number_of_configurations > 0:
       self._file.write(
           '\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\r\n')
 
-      for configuration in configurations:
-        self._file.write(
-            '\t\t{0:s}|{1:s} = {0:s}|{1:s}\r\n'.format(
-            configuration.name, configuration.platform))
+      for configuration_platform in sorted(configurations.platforms):
+        for configuration_name in sorted(configurations.names):
+          configuration = configurations.GetByIdentifier(
+              configuration_name, configuration_platform)
 
-      self._file.write(
-          '\tEndGlobalSection\r\n')
+          self._file.write(
+              '\t\t{0:s}|{1:s} = {0:s}|{1:s}\r\n'.format(
+              configuration.name, configuration.platform))
 
-    if len(configurations) > 0:
+      self._file.write('\tEndGlobalSection\r\n')
+
+    if configurations.number_of_configurations > 0:
       self._file.write(
           '\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\r\n')
 
-      for project in projects:
-        for configuration in configurations:
-          self._file.write(
-              '\t\t{0:s}.{1:s}|{2:s}.ActiveCfg = {1:s}|{2:s}\r\n'
-              '\t\t{0:s}.{1:s}|{2:s}.Build.0 = {1:s}|{2:s}\r\n'.format(
-              project.guid.upper(), configuration.name, configuration.platform))
+      for configuration_platform in sorted(configurations.platforms):
+        for project in projects:
+          for configuration_name in sorted(configurations.names):
+            configuration = configurations.GetByIdentifier(
+                configuration_name, configuration_platform)
 
-      self._file.write(
-          '\tEndGlobalSection\r\n')
+            self._file.write((
+                '\t\t{0:s}.{1:s}|{2:s}.ActiveCfg = {1:s}|{2:s}\r\n'
+                '\t\t{0:s}.{1:s}|{2:s}.Build.0 = {1:s}|{2:s}\r\n').format(
+                project.guid.upper(), configuration.name,
+                configuration.platform))
+
+      self._file.write('\tEndGlobalSection\r\n')
 
     self._file.write(
         '\tGlobalSection(SolutionProperties) = preSolution\r\n'
@@ -1861,16 +1888,7 @@ class VSSolution(object):
     solution_reader.Close()
 
     # Add x64 as a platform.
-    platforms = []
-
-    for configuration in configurations:
-      if configuration.platform not in platforms:
-        platforms.append(configuration.platform)
-
-    if 'x64' not in platforms:
-      for configuration in configurations:
-        if configuration.platform != 'x64':
-          configurations.append(configuration.CopyToX64())
+    configurations.ExtendWithX64()
 
     # Create the output directory.
     os.mkdir(output_directory)
