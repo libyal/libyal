@@ -535,46 +535,46 @@ def Main():
 
             print line
 
-        # For the vs2010 build convert the vs2008 solution and project files
-        # to vs2010.
-        elif options.build_target == 'vs2010':
-          os.chdir(libyal_directory)
-
-          solution_filename = os.path.join(
-              'msvscpp', '{0:s}.sln'.format(libyal_name))
-  
-          # TODO: redirect the output to build.log?
-          command = '{0:s} {1:s} {2:s}'.format(
-              PYTHON_WINDOWS, os.path.join('..', msvscpp_convert_script),
-              solution_filename)
-  
-          exit_code = subprocess.call(command, shell=False)
-  
-          if exit_code != 0:
-            print (
-                'Conversion of vs2008 solution and project files to vs2010 '
-                'failed for more info check build.log')
-            return False
-  
-          # Note that setup.py needs the Visual Studio solution directory to
-          # be named: msvscpp. So replace the vs2008 msvscpp solution directory
-          # with the vs2010 one.
-          os.rename('msvscpp', 'vs2008')
-          os.rename('vs2010', 'msvscpp')
-
-          os.chdir('..')
-
-        # TODO: detect architecture, e.g.
-        # python -c 'import platform; print platform.architecture()[0];'
-        if options.build_target == 'vs2008':
-          msvscpp_platform = 'Win32'
-        elif options.build_target == 'vs2010':
-          msvscpp_platform = 'x64'
-
         release_directory = os.path.join(
             libyal_directory, 'msvscpp', 'Release')
 
         if not os.path.exists(release_directory) or force_build:
+          # For the vs2010 build convert the vs2008 solution and project files
+          # to vs2010.
+          if options.build_target == 'vs2010':
+            os.chdir(libyal_directory)
+  
+            solution_filename = os.path.join(
+                'msvscpp', '{0:s}.sln'.format(libyal_name))
+    
+            # TODO: redirect the output to build.log?
+            command = '{0:s} {1:s} {2:s}'.format(
+                PYTHON_WINDOWS, os.path.join('..', msvscpp_convert_script),
+                solution_filename)
+    
+            exit_code = subprocess.call(command, shell=False)
+    
+            if exit_code != 0:
+              print (
+                  'Conversion of vs2008 solution and project files to vs2010 '
+                  'failed for more info check build.log')
+              return False
+    
+            # Note that setup.py needs the Visual Studio solution directory
+            # to be named: msvscpp. So replace the vs2008 msvscpp solution
+            # directory with the vs2010 one.
+            os.rename('msvscpp', 'vs2008')
+            os.rename('vs2010', 'msvscpp')
+  
+            os.chdir('..')
+  
+          # TODO: detect architecture, e.g.
+          # python -c 'import platform; print platform.architecture()[0];'
+          if options.build_target == 'vs2008':
+            msvscpp_platform = 'Win32'
+          elif options.build_target == 'vs2010':
+            msvscpp_platform = 'x64'
+
           print 'Building: {0:s}'.format(libyal_name)
 
           solution_filename = os.path.join(
