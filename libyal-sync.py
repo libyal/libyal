@@ -560,7 +560,7 @@ def Main():
           # be named: msvscpp. So replace the vs2008 msvscpp solution directory
           # with the vs2010 one.
           os.rename('msvscpp', 'vs2008')
-          os.rename('rename', 'msvscpp')
+          os.rename('vs2010', 'msvscpp')
 
           os.chdir('..')
 
