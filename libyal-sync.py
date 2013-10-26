@@ -500,12 +500,12 @@ def Main():
             print 'Cannot find msvscpp-convert.py'
             return False
 
+        force_build = False
+
         # For the vs2008 build make sure the binary is XP compatible,
         # by setting WINVER to 0x0501 in common\config_winapi.h or
         # common\config_msc.h.
         if options.build_target == 'vs2008':
-          force_build = False
-
           config_filename = os.path.join(
               libyal_directory, 'common', 'config_winapi.h')
 
