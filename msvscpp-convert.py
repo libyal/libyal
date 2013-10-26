@@ -967,7 +967,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
 
       if configuration.character_set:
         self._file.write(
-             '    <CharacterSet>{1:s}</CharacterSet>\r\n'.format(
+             '    <CharacterSet>{0:s}</CharacterSet>\r\n'.format(
             configuration.character_set_string))
 
       if configuration.whole_program_optimization:
