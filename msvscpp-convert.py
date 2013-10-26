@@ -1130,7 +1130,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
                '</DebugInformationFormat>\r\n').format(
               configuration.debug_information_format_string))
 
-      if configuration.compile_as_string:
+      if configuration.compile_as:
         self._file.write('      <CompileAs>{0:s}</CompileAs>\r\n'.format(
             configuration.compile_as_string))
 
