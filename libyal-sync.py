@@ -478,6 +478,21 @@ def Main():
           print 'Cannot find python.exe'
           return False
 
+        if options.build_target == 'vs2008':
+          if not os.environ['VS90COMNTOOLS']:
+            print 'Missing VS90COMNTOOLS environment variable.'
+            return False
+
+        elif options.build_target == 'vs2010':
+          if not os.environ['VS100COMNTOOLS']:
+            print 'Missing VS100COMNTOOLS environment variable.'
+            return False
+
+        elif options.build_target == 'vs2012':
+          if not os.environ['VS110COMNTOOLS']:
+            print 'Missing VS110COMNTOOLS environment variable.'
+            return False
+
         if options.build_target == 'vs2010':
           msvscpp_convert_script = os.path.join('libyal', 'msvscpp-convert.py')
 
@@ -541,13 +556,13 @@ def Main():
                 'failed for more info check build.log')
             return False
   
-          os.chdir('..')
-
           # Note that setup.py needs the Visual Studio solution directory to
           # be named: msvscpp. So replace the vs2008 msvscpp solution directory
           # with the vs2010 one.
-          shutil.move('msvscpp', 'vs2008')
-          shutil.move('vs2010', 'msvscpp')
+          os.rename('msvscpp', 'vs2008')
+          os.move('rename', 'msvscpp')
+
+          os.chdir('..')
 
         # TODO: detect architecture, e.g.
         # python -c 'import platform; print platform.architecture()[0];'
@@ -591,17 +606,11 @@ def Main():
             # Setup.py uses VS90COMNTOOLS which is vs2008 specific
             # so we need to set it for the other Visual Studio versions.
             if options.build_target == 'vs2010':
-              command = 'set VS90COMNTOOLS=%VS100COMNTOOLS%'
+              os.environ['VS90COMNTOOLS'] = os.environ['VS100COMNTOOLS']
 
             elif options.build_target == 'vs2012':
-              command = 'set VS90COMNTOOLS=%VS100COMNTOOLS%'
+              os.environ['VS90COMNTOOLS'] = os.environ['VS110COMNTOOLS']
 
-            exit_code = subprocess.call(command, shell=False)
-  
-            if exit_code != 0:
-              print 'Unable to set VS90COMNTOOLS environment variable'
-              return False
-  
             # TODO: redirect the output to build.log?
             command = '{0:s} setup.py bdist_msi'.format(
                 PYTHON_WINDOWS)
