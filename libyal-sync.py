@@ -30,10 +30,6 @@ import tarfile
 import urllib2
 
 
-MSBUILD = '{0:s}:{1:s}{2:s}'.format(
-    'C', os.sep, os.path.join(
-    'Windows', 'Microsoft.NET', 'Framework', 'v3.5', 'MSBuild.exe'))
-
 PACKAGEMAKER = os.path.join(
     '/', 'Applications', 'PackageMaker.app', 'Contents', 'MacOS',
     'PackageMaker')
@@ -464,6 +460,15 @@ def Main():
 
       elif options.build_target in ['vs2008', 'vs2010']:
         # Search common locations for MSBuild.exe
+        if options.build_target == 'vs2008':
+         MSBUILD = '{0:s}:{1:s}{2:s}'.format('C', os.sep, os.path.join(
+             'Windows', 'Microsoft.NET', 'Framework', 'v3.5', 'MSBuild.exe'))
+
+        # Note that MSBuild in .NET 3.5 does not support vs2010 solution files.
+        elif options.build_target == 'vs2010':
+         MSBUILD = '{0:s}:{1:s}{2:s}'.format('C', os.sep, os.path.join(
+             'Windows', 'Microsoft.NET', 'Framework', 'v4.0.30319',
+             'MSBuild.exe'))
 
         if not os.path.exists(MSBUILD):
           print 'Cannot find MSBuild.exe'
@@ -474,7 +479,7 @@ def Main():
           return False
 
         if options.build_target == 'vs2010':
-          msvscpp_convert_script = os.path.join('..', 'msvscpp-convert.py')
+          msvscpp_convert_script = os.path.join('libyal', 'msvscpp-convert.py')
 
           if not os.path.exists(msvscpp_convert_script):
             print 'Cannot find msvscpp-convert.py'
@@ -519,10 +524,14 @@ def Main():
         # to vs2010.
         elif options.build_target == 'vs2010':
           os.chdir(libyal_directory)
+
+          solution_filename = os.path.join(
+              'msvscpp', '{0:s}.sln'.format(libyal_name))
   
           # TODO: redirect the output to build.log?
-          command = '{0:s} {1:s}'.format(
-              PYTHON_WINDOWS, msvscpp_convert_script)
+          command = '{0:s} {1:s} {2:s}'.format(
+              PYTHON_WINDOWS, os.path.join('..', msvscpp_convert_script),
+              solution_filename)
   
           exit_code = subprocess.call(command, shell=False)
   
@@ -534,23 +543,31 @@ def Main():
   
           os.chdir('..')
 
+          # Note that setup.py needs the Visual Studio solution directory to
+          # be named: msvscpp. So replace the vs2008 msvscpp solution directory
+          # with the vs2010 one.
+          shutil.move('msvscpp', 'vs2008')
+          shutil.move('vs2010', 'msvscpp')
+
+        # TODO: detect architecture, e.g.
+        # python -c 'import platform; print platform.architecture()[0];'
         if options.build_target == 'vs2008':
-          msvscpp_solution_directory = 'msvscpp'
+          msvscpp_platform = 'Win32'
         elif options.build_target == 'vs2010':
-          msvscpp_solution_directory = 'vs2010'
+          msvscpp_platform = 'x64'
 
         release_directory = os.path.join(
-            libyal_directory, msvscpp_solution_directory, 'Release')
+            libyal_directory, 'msvscpp', 'Release')
 
         if not os.path.exists(release_directory) or force_build:
           print 'Building: {0:s}'.format(libyal_name)
 
           solution_filename = os.path.join(
-              libyal_directory, msvscpp_solution_directory,
-              '{0:s}.sln'.format(libyal_name))
+              libyal_directory, 'msvscpp', '{0:s}.sln'.format(libyal_name))
           command = (
-              '{0:s} /p:Configuration=Release /noconsolelogger '
-              '/fileLogger {1:s}').format(MSBUILD, solution_filename)
+              '{0:s} /p:Configuration=Release /p:Platform={1:s} '
+              '/noconsolelogger /fileLogger {2:s}').format(
+              MSBUILD, msvscpp_platform, solution_filename)
 
           exit_code = subprocess.call(command, shell=False)
 
@@ -570,6 +587,20 @@ def Main():
             build_directory = os.path.join('..', '..')
   
             os.chdir(python_module_directory)
+ 
+            # Setup.py uses VS90COMNTOOLS which is vs2008 specific
+            # so we need to set it for the other Visual Studio versions.
+            if options.build_target == 'vs2010':
+              command = 'set VS90COMNTOOLS=%VS100COMNTOOLS%'
+
+            elif options.build_target == 'vs2012':
+              command = 'set VS90COMNTOOLS=%VS100COMNTOOLS%'
+
+            exit_code = subprocess.call(command, shell=False)
+  
+            if exit_code != 0:
+              print 'Unable to set VS90COMNTOOLS environment variable'
+              return False
   
             # TODO: redirect the output to build.log?
             command = '{0:s} setup.py bdist_msi'.format(

@@ -1935,7 +1935,7 @@ class VSSolution(object):
 
 def Main():
   args_parser = argparse.ArgumentParser(description=(
-      'Converts Visual Studio express solution and project files'
+      'Converts Visual Studio express solution and project files '
       'from one version to another.'))
 
   args_parser.add_argument(
