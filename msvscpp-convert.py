@@ -962,10 +962,13 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
           configuration.name, configuration.platform))
 
       self._file.write(
-          ('    <ConfigurationType>{0:s}</ConfigurationType>\r\n'
-           '    <CharacterSet>{1:s}</CharacterSet>\r\n').format(
-          configuration.output_type_string,
-          configuration.character_set_string))
+          '    <ConfigurationType>{0:s}</ConfigurationType>\r\n'.format(
+          configuration.output_type_string))
+
+      if configuration.character_set:
+        self._file.write(
+             '    <CharacterSet>{1:s}</CharacterSet>\r\n'.format(
+            configuration.character_set_string))
 
       if configuration.whole_program_optimization:
         self._file.write(
