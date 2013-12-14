@@ -292,7 +292,7 @@ def Main():
 
         # File names to ignore while removing previous versions.
         ignore_filename = re.compile(
-            "^{0:s}[-_].*{1:d}".format(libyal_name, libyal_version))
+            '^{0:s}[-_].*{1:d}'.format(libyal_name, libyal_version))
 
         # Remove files of previous versions in the format:
         # library[-_]version-1_architecture.*
@@ -306,7 +306,7 @@ def Main():
             os.remove(filename)
 
         # Remove files of previous versions in the format:
-        # library[-_]version-1.*
+        # library[-_]*version-1.*
         filenames = glob.glob(
             '{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-1.*'.format(
                 libyal_name))
@@ -352,78 +352,98 @@ def Main():
               return False
 
       elif options.build_target == 'macosx':
-        # TODO: check for existing dmg
-        # TODO: remove older packaging files
+        # File names to ignore while removing previous versions.
+        ignore_filename = re.compile(
+            '^{0:s}-.*{1:d}'.format(libyal_name, libyal_version))
 
-        command = (
-            './configure --prefix=$PWD/macosx/tmp/ --enable-python '
-            '> ../build.log 2>&1')
-        exit_code = subprocess.call(
-            '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
+        # Remove files of previous versions in the format:
+        # library-*version.*
+        filenames = glob.glob(
+            '{0:s}-*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].*'.format(
+                libyal_name))
 
-        if exit_code != 0:
-          print 'Build of: {0:s} failed for more info check build.log'.format(
-              libyal_filename)
-          return False
+        for filename in filenames:
+          if not ignore_filename.match(filename):
+            print 'Removing: {0:s}'.format(filename)
+            os.remove(filename)
 
-        command = 'make >> ../build.log 2>&1'
-        exit_code = subprocess.call(
-            '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
+        dmg_filename = '{0:s}-{1:d}.dmg'.format(
+            libyal_name, libyal_version)
 
-        if exit_code != 0:
-          print 'Build of: {0:s} failed for more info check build.log'.format(
-              libyal_filename)
-          return False
+        if libyal_directory and not os.path.exists(dmg_filename):
+          pkg_filename = '{0:s}-{1:d}.pkg'.format(
+              libyal_name, libyal_version)
 
-        command = 'make install >> ../build.log 2>&1'
-        exit_code = subprocess.call(
-            '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
+          if not os.path.exists(pkg_filename):
+            command = (
+                './configure --prefix=$PWD/macosx/tmp/ --enable-python '
+                '> ../build.log 2>&1')
+            exit_code = subprocess.call(
+                '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
 
-        if exit_code != 0:
-          print 'Build of: {0:s} failed for more info check build.log'.format(
-              libyal_filename)
-          return False
+            if exit_code != 0:
+              print 'Build of: {0:s} failed for more info check build.log'.format(
+                  libyal_filename)
+              return False
 
-        command = 'sudo chown -R root:wheel macosx/tmp/'
-        print 'This script now needs to run sudo as in: {0:s}'.format(command)
-        exit_code = subprocess.call(
-            '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
+            command = 'make >> ../build.log 2>&1'
+            exit_code = subprocess.call(
+                '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
 
-        if exit_code != 0:
-          print 'Build of: {0:s} failed for more info check build.log'.format(
-              libyal_filename)
-          return False
+            if exit_code != 0:
+              print 'Build of: {0:s} failed for more info check build.log'.format(
+                  libyal_filename)
+              return False
 
-        command = (
-            '{0:s} --doc {1:s}/macosx/{2:s}.pmdoc '
-            '--out {2:s}-{3:d}.pkg').format(
-            PACKAGEMAKER, libyal_directory, libyal_name, libyal_version)
-        exit_code = subprocess.call(command, shell=True)
+            command = 'make install >> ../build.log 2>&1'
+            exit_code = subprocess.call(
+                '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
 
-        if exit_code != 0:
-          print 'Build of: {0:s} failed for more info check build.log'.format(
-              libyal_filename)
-          return False
+            if exit_code != 0:
+              print 'Build of: {0:s} failed for more info check build.log'.format(
+                  libyal_filename)
+              return False
 
-        command = 'sudo rm -rf macosx/tmp/'
-        print 'This script now needs to run sudo as in: {0:s}'.format(command)
-        exit_code = subprocess.call(
-            '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
+            command = 'sudo chown -R root:wheel macosx/tmp/'
+            print 'This script now needs to run sudo as in: {0:s}'.format(command)
+            exit_code = subprocess.call(
+                '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
 
-        if exit_code != 0:
-          print 'Build of: {0:s} failed for more info check build.log'.format(
-              libyal_filename)
-          return False
+            if exit_code != 0:
+              print 'Build of: {0:s} failed for more info check build.log'.format(
+                  libyal_filename)
+              return False
 
-        command = (
-            'hdiutil create {0:s}-{1:d}.dmg -srcfolder {0:s}-{1:d}.pkg '
-            '-fs HFS+').format(libyal_name, libyal_version)
-        exit_code = subprocess.call(command, shell=True)
+            command = (
+                '{0:s} --doc {1:s}/macosx/{2:s}.pmdoc '
+                '--out {2:s}-{3:d}.pkg').format(
+                PACKAGEMAKER, libyal_directory, libyal_name, libyal_version)
+            exit_code = subprocess.call(command, shell=True)
 
-        if exit_code != 0:
-          print 'Build of: {0:s} failed for more info check build.log'.format(
-              libyal_filename)
-          return False
+            if exit_code != 0:
+              print 'Build of: {0:s} failed for more info check build.log'.format(
+                  libyal_filename)
+              return False
+
+            command = 'sudo rm -rf macosx/tmp/'
+            print 'This script now needs to run sudo as in: {0:s}'.format(command)
+            exit_code = subprocess.call(
+                '(cd {0:s} && {1:s})'.format(libyal_directory, command), shell=True)
+
+            if exit_code != 0:
+              print 'Build of: {0:s} failed for more info check build.log'.format(
+                  libyal_filename)
+              return False
+
+          command = (
+              'hdiutil create {0:s}-{1:d}.dmg -srcfolder {0:s}-{1:d}.pkg '
+              '-fs HFS+').format(libyal_name, libyal_version)
+          exit_code = subprocess.call(command, shell=True)
+
+          if exit_code != 0:
+            print 'Build of: {0:s} failed for more info check build.log'.format(
+                libyal_filename)
+            return False
 
       elif options.build_target == 'rpm':
         architecture = platform.machine()
@@ -560,31 +580,31 @@ def Main():
           # to vs2010.
           if options.build_target == 'vs2010':
             os.chdir(libyal_directory)
-  
+
             solution_filename = os.path.join(
                 'msvscpp', '{0:s}.sln'.format(libyal_name))
-    
+
             # TODO: redirect the output to build.log?
             command = '{0:s} {1:s} {2:s}'.format(
                 PYTHON_WINDOWS, os.path.join('..', msvscpp_convert_script),
                 solution_filename)
-    
+
             exit_code = subprocess.call(command, shell=False)
-    
+
             if exit_code != 0:
               print (
                   'Conversion of vs2008 solution and project files to vs2010 '
                   'failed for more info check build.log')
               return False
-    
+
             # Note that setup.py needs the Visual Studio solution directory
             # to be named: msvscpp. So replace the vs2008 msvscpp solution
             # directory with the vs2010 one.
             os.rename('msvscpp', 'vs2008')
             os.rename('vs2010', 'msvscpp')
-  
+
             os.chdir('..')
-  
+
           # TODO: detect architecture, e.g.
           # python -c 'import platform; print platform.architecture()[0];'
           if options.build_target == 'vs2008':
@@ -614,12 +634,12 @@ def Main():
               libyal_directory, python_module_name)
           python_module_dist_directory = os.path.join(
               python_module_directory, 'dist')
-  
+
           if not os.path.exists(python_module_dist_directory) or force_build:
             build_directory = os.path.join('..', '..')
-  
+
             os.chdir(python_module_directory)
- 
+
             # Setup.py uses VS90COMNTOOLS which is vs2008 specific
             # so we need to set it for the other Visual Studio versions.
             if options.build_target == 'vs2010':
@@ -631,20 +651,20 @@ def Main():
             # TODO: redirect the output to build.log?
             command = '{0:s} setup.py bdist_msi'.format(
                 PYTHON_WINDOWS)
-  
+
             exit_code = subprocess.call(command, shell=False)
-  
+
             if exit_code != 0:
               print (
                   'Build of MSI failed for more info check build.log')
               return False
-  
+
             msi_filename = glob.glob(os.path.join(
                 'dist', '{0:s}-{1:d}.1.*.msi'.format(
                 python_module_name, libyal_version)))
-  
+
             shutil.copy(msi_filename[0], build_directory)
-  
+
             os.chdir(build_directory)
 
       else:
