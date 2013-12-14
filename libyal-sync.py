@@ -45,7 +45,7 @@ class LibyalBuildHelper(object):
   """Class that helps in building libyal libraries."""
 
   def __init__(self):
-    """Initialize the libyal build helper."""
+    """Initializes the libyal build helper."""
     self._cached_url = ''
     self._cached_page_content = ''
 
