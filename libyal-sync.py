@@ -518,39 +518,39 @@ def Main():
         config_filename = os.path.join(
             libyal_directory, 'common', 'config_winapi.h')
 
-         # If the WINAPI configuration file is not available use
-         # the MSC compiler configuration file instead.
-         if not os.path.exists(config_filename):
-           config_filename = os.path.join(
-               libyal_directory, 'common', 'config_msc.h')
+        # If the WINAPI configuration file is not available use
+        # the MSC compiler configuration file instead.
+        if not os.path.exists(config_filename):
+          config_filename = os.path.join(
+              libyal_directory, 'common', 'config_msc.h')
 
-         # Add a line to the config file that sets WINVER.
-         parsing_mode = 0
+        # Add a line to the config file that sets WINVER.
+        parsing_mode = 0
 
-         for line in fileinput.input(config_filename, inplace=1):
-           # Remove trailing whitespace and end-of-line characters.
-           line = line.rstrip()
+        for line in fileinput.input(config_filename, inplace=1):
+          # Remove trailing whitespace and end-of-line characters.
+          line = line.rstrip()
 
-           if parsing_mode != 2 or line:
-             if parsing_mode == 1:
-               if options.build_target == 'vs2008':
-                 if not line.startswith('#define WINVER 0x0501'):
-                   print '#define WINVER 0x0501'
-                   print ''
-                   force_build = True
+          if parsing_mode != 2 or line:
+            if parsing_mode == 1:
+              if options.build_target == 'vs2008':
+                if not line.startswith('#define WINVER 0x0501'):
+                  print '#define WINVER 0x0501'
+                  print ''
+                  force_build = True
 
-               else:
-                 if not line.startswith('#define WINVER 0x0600'):
-                   print '#define WINVER 0x0600'
-                   print ''
-                   force_build = True
+              else:
+                if not line.startswith('#define WINVER 0x0600'):
+                  print '#define WINVER 0x0600'
+                  print ''
+                  force_build = True
 
-               parsing_mode = 2
+              parsing_mode = 2
 
-             elif line.startswith('#define _CONFIG_'):
-               parsing_mode = 1
+            elif line.startswith('#define _CONFIG_'):
+              parsing_mode = 1
 
-           print line
+          print line
 
         release_directory = os.path.join(
             libyal_directory, 'msvscpp', 'Release')
