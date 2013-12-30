@@ -225,7 +225,7 @@ class BuildHelper(object):
     archive = tarfile.open(source_filename, 'r:gz', encoding='utf-8')
     directory_name = ''
 
-    for tar_info in tarfile.getmembers():
+    for tar_info in archive.getmembers():
       filename = getattr(tar_info, 'name', None)
       if filename is None:
         logging.warning(
@@ -647,7 +647,7 @@ class VisualStudioBuildHelper(BuildHelper):
     os.chdir(source_directory)
 
     solution_filenames = glob.glob(os.path.join(u'msvscpp', u'*.sln'))
-    if len(solution_filenames) == 1:
+    if len(solution_filenames) != 1:
       logging.error(u'Unable to find Visual Studio solution file')
       return False
 
@@ -735,7 +735,7 @@ class VisualStudioBuildHelper(BuildHelper):
 
     solution_filenames = glob.glob(os.path.join(
         source_directory, u'msvscpp', u'*.sln'))
-    if len(solution_filenames) == 1:
+    if len(solution_filenames) != 1:
       logging.error(u'Unable to find Visual Studio solution file')
       return False
 
