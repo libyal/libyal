@@ -638,7 +638,7 @@ class VisualStudioBuildHelper(BuildHelper):
       source_directory: the name of the source directory.
     """
     msvscpp_convert = os.path.join(
-        os.path.dirname(__file__), u'msvscpp-convert.py')
+        os.path.dirname(os.path.abspath(__file__)), u'msvscpp-convert.py')
 
     if not os.path.exists(msvscpp_convert):
       logging.error(u'Unable to find msvscpp-convert.py')
@@ -653,7 +653,7 @@ class VisualStudioBuildHelper(BuildHelper):
 
     solution_filename = solution_filenames[0]
 
-    if not os.exists(u'vs2008'):
+    if not os.path.exists(u'vs2008'):
       # TODO: redirect the output to build.log?
       command = u'{0:s} {1:s} {2:s}'.format(
           sys.executable, msvscpp_convert, solution_filename)
@@ -743,7 +743,7 @@ class VisualStudioBuildHelper(BuildHelper):
 
     command = (
         u'{0:s} /p:Configuration=Release /p:Platform={1:s} /noconsolelogger '
-        u'/fileLogger {2:s}').format(
+        u'/fileLogger /maxcpucount {2:s}').format(
             msbuild, msvscpp_platform, solution_filename)
     exit_code = subprocess.call(command, shell=False)
     if exit_code != 0:
