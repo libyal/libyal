@@ -53,14 +53,68 @@ LIBYAL_LIBRARIES = frozenset([
 ])
 
 
-class LibyalDownloadHelper(object):
-  """Class that helps in downloading libyal libraries."""
+class DownloadHelper(object):
+  """Class that helps in downloading."""
 
   def __init__(self):
-    """Initializes the download helper."""
-    super(LibyalDownloadHelper, self).__init__()
-    self._cached_url = u''
+    """Initializes the build helper."""
+    super(DownloadHelper, self).__init__()
+    self._cached_url = ''
     self._cached_page_content = ''
+
+  def DownloadPageContent(self, download_url):
+    """Downloads the page content from the URL and caches it.
+
+    Args:
+      download_url: the URL where to download the page content.
+
+    Returns:
+      The page content if successful, None otherwise.
+    """
+    if not download_url:
+      return None
+
+    if self._cached_url != download_url:
+      url_object = urllib2.urlopen(download_url)
+
+      if url_object.code != 200:
+        return False
+
+      self._cached_page_content = url_object.read()
+      self._cached_url = download_url
+
+    return self._cached_page_content
+
+  def DownloadFile(self, download_url):
+    """Downloads a file from the URL.
+
+       The filename is extracted from the last part of the URL.
+
+    Args:
+      download_url: the URL where to download the file.
+
+    Returns:
+      The filename if successful also if the file was already downloaded
+      or None on error.
+    """
+    filename = download_url.split('/')[-1]
+
+    if not os.path.exists(filename):
+      logging.info(u'Downloading: {0:s}'.format(download_url))
+
+      url_object = urllib2.urlopen(download_url)
+      if url_object.code != 200:
+        return None
+
+      file_object = open(filename, 'wb')
+      file_object.write(url_object.read())
+      file_object.close()
+
+    return filename
+
+
+class LibyalDownloadHelper(DownloadHelper):
+  """Class that helps in downloading libyal libraries."""
 
   def GetGoogleCodeDownloadsUrl(self, library_name):
     """Retrieves the Download URL from the Google Code library page.
@@ -71,52 +125,22 @@ class LibyalDownloadHelper(object):
     Returns:
       The downloads URL or None on error.
     """
-    url = u'https://code.google.com/p/{0:s}/'.format(library_name)
+    download_url = u'https://code.google.com/p/{0:s}/'.format(library_name)
 
-    if self._cached_url != url:
-      url_object = urllib2.urlopen(url)
-
-      if url_object.code != 200:
-        return None
-
-      self._cached_page_content = url_object.read()
-      self._cached_url = url
+    page_content = self.DownloadPageContent(download_url)
+    if not page_content:
+      return None
 
     # The format of the library downloads URL is:
     # https://googledrive.com/host/{random string}/
     expression_string = (
         u'<a href="(https://googledrive.com/host/[^/]*/)"[^>]*>Downloads</a>')
-    matches = re.findall(expression_string, self._cached_page_content)
+    matches = re.findall(expression_string, page_content)
 
     if not matches or len(matches) != 1:
       return None
 
     return matches[0]
-
-  def GetGoogleDrivePageContent(self, library_name):
-    """Retrieves the Google Drive page content for a given library name.
-
-    Args:
-      library_name: the name of the library.
-
-    Returns:
-      The page content or None on error.
-    """
-    url = self.GetGoogleCodeDownloadsUrl(library_name)
-
-    if not url:
-      return None
-
-    if self._cached_url != url:
-      url_object = urllib2.urlopen(url)
-
-      if url_object.code != 200:
-        return None
-
-      self._cached_page_content = url_object.read()
-      self._cached_url = url
-
-    return self._cached_page_content
 
   def GetLatestVersion(self, library_name):
     """Retrieves the latest version number for a given library name.
@@ -127,9 +151,10 @@ class LibyalDownloadHelper(object):
     Returns:
       The latest version number or 0 on error.
     """
-    data = self.GetGoogleDrivePageContent(library_name)
+    download_url = self.GetGoogleCodeDownloadsUrl(library_name)
 
-    if not data:
+    page_content = self.DownloadPageContent(download_url)
+    if not page_content:
       return 0
 
     # The format of the library download URL is:
@@ -137,7 +162,7 @@ class LibyalDownloadHelper(object):
     # Note that the status is optional and will be: beta, alpha or experimental.
     expression_string = u'/host/[^/]*/{0:s}-[a-z-]*([0-9]+)[.]tar[.]gz'.format(
         library_name)
-    matches = re.findall(expression_string, data)
+    matches = re.findall(expression_string, page_content)
 
     if not matches:
       return 0
@@ -154,9 +179,10 @@ class LibyalDownloadHelper(object):
     Returns:
       The download URL of the library or None on error.
     """
-    data = self.GetGoogleDrivePageContent(library_name)
+    download_url = self.GetGoogleCodeDownloadsUrl(library_name)
 
-    if not data:
+    page_content = self.DownloadPageContent(download_url)
+    if not page_content:
       return None
 
     # The format of the library download URL is:
@@ -164,7 +190,7 @@ class LibyalDownloadHelper(object):
     # Note that the status is optional and will be: beta, alpha or experimental.
     expression_string = u'/host/[^/]*/{0:s}-[a-z-]*{1:d}[.]tar[.]gz'.format(
         library_name, library_version)
-    matches = re.findall(expression_string, data)
+    matches = re.findall(expression_string, page_content)
 
     if not matches or len(matches) != 1:
       return None
@@ -184,20 +210,7 @@ class LibyalDownloadHelper(object):
     """
     download_url = self.GetDownloadUrl(library_name, library_version)
 
-    filename = download_url.split('/')[-1]
-
-    if not os.path.exists(filename):
-      logging.info(u'Downloading: {0:s}'.format(download_url))
-
-      url = urllib2.urlopen(download_url)
-      if url.code != 200:
-        return None
-
-      file_object = open(filename, 'wb')
-      file_object.write(url.read())
-      file_object.close()
-
-    return filename
+    return self.DownloadFile(download_url)
 
 
 class BuildHelper(object):
@@ -235,8 +248,8 @@ class BuildHelper(object):
       if not directory_name:
         # Note that this will set directory name to an empty string
         # if filename start with a /.
-        directory_name, _, _ = filename.partition('/')
-        if not directory_name or directory_name.startswith('..'):
+        directory_name, _, _ = filename.partition(u'/')
+        if not directory_name or directory_name.startswith(u'..'):
           logging.error(
               u'Unsuppored directory name in tar file: {0:s}'.format(
                   source_filename))
@@ -270,6 +283,47 @@ class DpkgBuildHelper(BuildHelper):
     elif self.architecture == 'x86_64':
       self.architecture = 'amd64'
 
+  def _BuildPrepare(self, source_directory):
+    """Make the necassary preperations before building the dpkg packages.
+
+    Args:
+      source_directory: the name of the source directory.
+
+    Returns:
+      True if the preparations were successful, False otherwise.
+    """
+    # Script to run before building, e.g. to change the dpkg packing files.
+    if os.path.exists(u'prep-dpkg.sh'):
+      command = u'sh ../prep-dpkg.sh'
+      exit_code = subprocess.call(
+          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+    return True
+
+  def _BuildFinalize(self, source_directory):
+    """Make the necassary finalizations after building the dpkg packages.
+
+    Args:
+      source_directory: the name of the source directory.
+
+    Returns:
+      True if the finalizations were successful, False otherwise.
+    """
+    # Script to run after building, e.g. to automatically upload the dpkg
+    # package files to an apt repository.
+    if os.path.exists(u'post-dpkg.sh'):
+      command = u'sh ../post-dpkg.sh'
+      exit_code = subprocess.call(
+          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+    return True
+
   def Build(self, source_filename):
     """Builds the dpkg packages.
 
@@ -300,14 +354,8 @@ class DpkgBuildHelper(BuildHelper):
       shutil.rmtree(debian_directory)
     shutil.copytree(dpkg_directory, debian_directory)
 
-    # Script to run before building, e.g. to change the dpkg packing files.
-    if os.path.exists(u'prep-dpkg.sh'):
-      command = u'sh ../prep-dpkg.sh'
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
+    if not self._BuildPrepare(source_directory):
+      return False
 
     command = u'dpkg-buildpackage -rfakeroot > {0:s} 2>&1'.format(
         os.path.join(u'..', self.LOG_FILENAME))
@@ -317,15 +365,8 @@ class DpkgBuildHelper(BuildHelper):
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
 
-    # Script to run after building, e.g. to automatically upload the dpkg
-    # package files to an apt repository.
-    if os.path.exists(u'post-dpkg.sh'):
-      command = u'sh ../post-dpkg.sh'
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
+    if not self._BuildFinalize(source_directory):
+      return False
 
     return True
 
@@ -400,8 +441,8 @@ class PkgBuildHelper(BuildHelper):
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
 
-    dmg_filename = '{0:s}.dmg'.format(source_directory)
-    pkg_filename = '{0:s}.pkg'.format(source_directory)
+    dmg_filename = u'{0:s}.dmg'.format(source_directory)
+    pkg_filename = u'{0:s}.pkg'.format(source_directory)
     log_filename = os.path.join(u'..', self.LOG_FILENAME)
 
     if not os.path.exists(pkg_filename):
@@ -421,39 +462,39 @@ class PkgBuildHelper(BuildHelper):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      command = 'make install >> {0:s} 2>&1'.format(log_filename)
+      command = u'make install >> {0:s} 2>&1'.format(log_filename)
       exit_code = subprocess.call(
-          '(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      command = 'sudo chown -R root:wheel macosx/tmp/'
+      command = u'sudo chown -R root:wheel macosx/tmp/'
       print 'This script now needs to run sudo as in: {0:s}'.format(command)
       exit_code = subprocess.call(
-          '(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
       command = (
-          '{0:s} --doc {1:s}/macosx/{2:s}.pmdoc --out {2:s}').format(
+          u'{0:s} --doc {1:s}/macosx/{2:s}.pmdoc --out {2:s}').format(
           self._package_maker, source_directory, pkg_filename)
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      command = 'sudo rm -rf macosx/tmp/'
+      command = u'sudo rm -rf macosx/tmp/'
       print 'This script now needs to run sudo as in: {0:s}'.format(command)
       exit_code = subprocess.call(
-          '(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
     command = (
-        'hdiutil create {0:s} -srcfolder {1:s} -fs HFS+').format(
+        u'hdiutil create {0:s} -srcfolder {1:s} -fs HFS+').format(
             dmg_filename, pkg_filename)
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
@@ -668,7 +709,7 @@ class VisualStudioBuildHelper(BuildHelper):
       os.rename(u'msvscpp', u'vs2008')
       os.rename(u'vs{0:s}'.format(self.version), u'msvscpp')
 
-    os.chdir('..')
+    os.chdir(u'..')
 
   def Build(self, source_filename):
     """Builds using Visual Studio.
@@ -750,7 +791,7 @@ class VisualStudioBuildHelper(BuildHelper):
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
 
-    python_module_name, _, _ = source_directory.partition('-')
+    python_module_name, _, _ = source_directory.partition(u'-')
     python_module_name = u'py{0:s}'.format(python_module_name[3:])
     python_module_directory = os.path.join(
         source_directory, python_module_name)
@@ -853,7 +894,7 @@ def Main():
 
       # Remove files of previous versions in the format:
       # library-*.tar.gz
-      filenames = glob.glob('{0:s}-*.tar.gz'.format(libyal_name))
+      filenames = glob.glob(u'{0:s}-*.tar.gz'.format(libyal_name))
       for filename in filenames:
         if not filenames_to_ignore.match(filename):
           logging.info(u'Removing: {0:s}'.format(filename))
@@ -862,7 +903,7 @@ def Main():
       # Remove directories of previous versions in the format:
       # library-{version}
       filenames = glob.glob(
-          '{0:s}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'.format(
+          u'{0:s}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'.format(
           libyal_name))
       for filename in filenames:
         if not filenames_to_ignore.match(filename):
@@ -906,7 +947,7 @@ def Main():
 
         if not os.path.exists(rpm_filename):
           # rpmbuild wants the library filename without the status indication.
-          source_filename = '{0:s}-{1:d}.tar.gz'.format(
+          source_filename = u'{0:s}-{1:d}.tar.gz'.format(
               libyal_name, libyal_version)
           os.rename(libyal_filename, source_filename)
 
@@ -936,12 +977,12 @@ def Main():
                 libyal_filename, build_helper.LOG_FILENAME)
             return False
 
-      if os.path.exists('build.log'):
+      if os.path.exists(u'build.log'):
         print 'Removing: build.log'
-        os.remove('build.log')
-      if os.path.exists('msbuild.log'):
+        os.remove(u'build.log')
+      if os.path.exists(u'msbuild.log'):
         print 'Removing: msbuild.log'
-        os.remove('msbuild.log')
+        os.remove(u'msbuild.log')
 
   return True
 
