@@ -1138,6 +1138,12 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
             '      <IntrinsicFunctions>{0:s}</IntrinsicFunctions>').format(
                 configuration.enable_intrinsic_functions))
 
+      if configuration.whole_program_optimization:
+        self.WriteLine((
+            '    <WholeProgramOptimization>{0:s}'
+            '</WholeProgramOptimization>').format(
+                configuration.whole_program_optimization_string))
+
       self.WriteLine((
           '      <AdditionalIncludeDirectories>{0:s}'
           '</AdditionalIncludeDirectories>').format(include_directories))
@@ -1324,10 +1330,10 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
               '</RandomizedBaseAddress>').format(
                   configuration.randomized_base_address_string))
 
-        if configuration.fixed_base_address != '0':
+        if configuration.fixed_base_address == '0':
           self.WriteLines([
               '      <FixedBaseAddress>',
-              '      <FixeddBaseAddress>'])
+              '      </FixedBaseAddress>'])
 
         if configuration.data_execution_prevention != '':
           # A value of 0 is represented by a new line.
