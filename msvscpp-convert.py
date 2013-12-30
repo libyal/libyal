@@ -1230,8 +1230,9 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
         # Visual Studio will convert an empty additional dependencies value.
         if configuration.dependencies_set:
           dependencies = re.sub(
-              r'[$][(]OutDir[)]\\', r'$(OutDir)',
-              configuration.dependencies)
+              r'[.]lib ', r'.lib;', configuration.dependencies)
+          dependencies = re.sub(
+              r'[$][(]OutDir[)]\\', r'$(OutDir)', dependencies)
 
           if dependencies and dependencies[-1] != ';':
             dependencies = '{0:s};'.format(dependencies)
