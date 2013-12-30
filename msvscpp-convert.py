@@ -135,6 +135,7 @@ class VSProjectConfiguration(VSConfiguration):
     self.enable_comdat_folding = ''
     self.enable_function_level_linking = ''
     self.enable_intrinsic_functions = ''
+    self.fixed_base_address = ''
     self.generate_debug_information = ''
     self.import_library = ''
     self.include_directories = ''
@@ -145,6 +146,7 @@ class VSProjectConfiguration(VSConfiguration):
     self.linker_output_directory = ''
     self.linker_output_file = ''
     self.linker_values_set = False
+    self.managed_extensions = ''
     self.module_definition_file = ''
     self.name = ''
     self.optimize_references = ''
@@ -166,7 +168,9 @@ class VSProjectConfiguration(VSConfiguration):
   @property
   def basic_runtime_checks_string(self):
     basic_runtime_checks = int(self.basic_runtime_checks, 10)
-    if basic_runtime_checks == 3:
+    if basic_runtime_checks == 0:
+      return 'Default'
+    elif basic_runtime_checks == 3:
       return 'EnableFastChecks'
     return ''
 
@@ -294,7 +298,9 @@ class VSProjectConfiguration(VSConfiguration):
   @property
   def whole_program_optimization_string(self):
     whole_program_optimization = int(self.whole_program_optimization, 10)
-    if whole_program_optimization == 1:
+    if whole_program_optimization == 0:
+      return 'false'
+    elif whole_program_optimization == 1:
       return 'true'
     return ''
 
@@ -313,6 +319,7 @@ class VSProjectConfiguration(VSConfiguration):
     copy.enable_function_level_linking = self.enable_function_level_linking
     copy.enable_intrinsic_functions = self.enable_intrinsic_functions
     copy.generate_debug_information = self.generate_debug_information
+    copy.fixed_base_address = self.fixed_base_address
     copy.import_library = self.import_library
     copy.include_directories = self.include_directories
     copy.librarian_ignore_defaults = self.librarian_ignore_defaults
@@ -322,6 +329,7 @@ class VSProjectConfiguration(VSConfiguration):
     copy.linker_output_directory = self.linker_output_directory
     copy.linker_output_file = self.linker_output_file
     copy.linker_values_set = self.linker_values_set
+    copy.managed_extensions = self.managed_extensions
     copy.module_definition_file = self.module_definition_file
     copy.name = self.name
     copy.optimize_references = self.optimize_references
@@ -739,6 +747,13 @@ class VS2008ProjectFileReader(VSProjectFileReader):
             if len(values) == 1:
               configuration.randomized_base_address = values[0]
 
+          elif line.startswith('FixedBaseAddress='):
+            configuration.linker_values_set = True
+            values = re.findall(
+                'FixedBaseAddress="([^"]*)"', line)
+            if len(values) == 1:
+              configuration.fixed_base_address = values[0]
+
           elif line.startswith('EnableCOMDATFolding='):
             configuration.linker_values_set = True
             values = re.findall(
@@ -794,6 +809,11 @@ class VS2008ProjectFileReader(VSProjectFileReader):
         values = re.findall('CharacterSet="([^"]*)"', line)
         if len(values) == 1:
           configuration.character_set = values[0]
+
+      elif line.startswith('ManagedExtensions='):
+        values = re.findall('ManagedExtensions="([^"]*)"', line)
+        if len(values) == 1:
+          configuration.managed_extensions = values[0]
 
       elif line.startswith('WholeProgramOptimization='):
         values = re.findall('WholeProgramOptimization="([^"]*)"', line)
@@ -1008,6 +1028,9 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
         self.WriteLine('    <CharacterSet>{0:s}</CharacterSet>'.format(
             configuration.character_set_string))
 
+      if configuration.managed_extensions == '1':
+        self.WriteLine('    <CLRSupport>true</CLRSupport>')
+
       if configuration.whole_program_optimization:
         self.WriteLine((
             '    <WholeProgramOptimization>{0:s}'
@@ -1213,20 +1236,6 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
       if configuration.linker_values_set:
         self.WriteLine('    <Link>')
 
-        if configuration.linker_output_file:
-          linker_output_file = re.sub(
-              r'[$][(]OutDir[)]\\', r'$(OutDir)',
-              configuration.linker_output_file)
-  
-          self.WriteLine('      <OutputFile>{0:s}</OutputFile>'.format(
-              linker_output_file))
-
-          if configuration.module_definition_file != '':
-            self.WriteLine((
-                 '      <ModuleDefinitionFile>{0:s}'
-                 '</ModuleDefinitionFile>').format(
-                     configuration.module_definition_file))
-
         # Visual Studio will convert an empty additional dependencies value.
         if configuration.dependencies_set:
           dependencies = re.sub(
@@ -1245,6 +1254,20 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
               '      <AdditionalDependencies>{0:s}'
               '</AdditionalDependencies>').format(
                   dependencies))
+
+        if configuration.linker_output_file:
+          linker_output_file = re.sub(
+              r'[$][(]OutDir[)]\\', r'$(OutDir)',
+              configuration.linker_output_file)
+  
+          self.WriteLine('      <OutputFile>{0:s}</OutputFile>'.format(
+              linker_output_file))
+
+          if configuration.module_definition_file != '':
+            self.WriteLine((
+                 '      <ModuleDefinitionFile>{0:s}'
+                 '</ModuleDefinitionFile>').format(
+                     configuration.module_definition_file))
 
         if configuration.library_directories:
           library_directories = re.sub(
@@ -1300,6 +1323,11 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
               '      <RandomizedBaseAddress>{0:s}'
               '</RandomizedBaseAddress>').format(
                   configuration.randomized_base_address_string))
+
+        if configuration.fixed_base_address != '0':
+          self.WriteLines([
+              '      <FixedBaseAddress>',
+              '      <FixeddBaseAddress>'])
 
         if configuration.data_execution_prevention != '':
           # A value of 0 is represented by a new line.
