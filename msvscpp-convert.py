@@ -1108,7 +1108,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
       if configuration.enable_intrinsic_functions != '':
         self.WriteLine((
             '      <IntrinsicFunctions>{0:s}</IntrinsicFunctions>').format(
-                configuration.optimization_string))
+                configuration.enable_intrinsic_functions))
 
       self.WriteLine((
           '      <AdditionalIncludeDirectories>{0:s}'
@@ -1266,7 +1266,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
 
         if configuration.optimize_references == '0':
           self.WriteLines([
-              '      <OptimizeReferences>'
+              '      <OptimizeReferences>',
               '      </OptimizeReferences>'])
 
         elif configuration.optimize_references != '':
@@ -1274,7 +1274,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
               '      <OptimizeReferences>{0:s}</OptimizeReferences>').format(
                   configuration.optimize_references_string))
 
-        if configuration.enable_comdat_folding != '0':
+        if configuration.enable_comdat_folding == '0':
           self.WriteLines([
               '      <EnableCOMDATFolding>',
               '      </EnableCOMDATFolding>'])
