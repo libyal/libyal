@@ -134,7 +134,7 @@ class VSProjectConfiguration(VSConfiguration):
     self.dependencies_set = False
     self.enable_comdat_folding = ''
     self.enable_function_level_linking = ''
-    self.enable_intrinsic_function = ''
+    self.enable_intrinsic_functions = ''
     self.generate_debug_information = ''
     self.import_library = ''
     self.include_directories = ''
@@ -624,7 +624,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
           elif line.startswith('EnableFunctionLevelLinking='):
             values = re.findall('EnableFunctionLevelLinking="([^"]*)"', line)
             if len(values) == 1:
-              self.enable_function_level_linking = values[0]
+              configuration.enable_function_level_linking = values[0]
 
           elif line.startswith('UsePrecompiledHeader='):
             values = re.findall('UsePrecompiledHeader="([^"]*)"', line)
@@ -969,7 +969,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     self.WriteLine('    <ProjectGuid>{0:s}</ProjectGuid>'.format(
         project_information.project_guid))
 
-    self.WriteLine('    <RootNamespace>{1:s}</RootNamespace>'.format(
+    self.WriteLine('    <RootNamespace>{0:s}</RootNamespace>'.format(
         project_information.root_name_space))
 
     if project_information.keyword:
@@ -1133,10 +1133,10 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
           '      <RuntimeLibrary>{0:s}</RuntimeLibrary>').format(
               configuration.runtime_librarian_string))
 
-      if self.enable_function_level_linking != '':
+      if configuration.enable_function_level_linking != '':
         self.WriteLine((
             '      <FunctionLevelLinking>{0:s}</FunctionLevelLinking>').format(
-                self.enable_function_level_linking))
+                configuration.enable_function_level_linking))
 
       if configuration.precompiled_header != '':
         # A value of 0 is represented by a new line.
@@ -1404,7 +1404,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
         self.WriteLines([
             ('    <ProjectReference Include="{0:s}">').format(
                 dependency_filename),
-            '      <Project>{1:s}</Project>'.format(dependency_guid),
+            '      <Project>{0:s}</Project>'.format(dependency_guid),
             '      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>',
             '    </ProjectReference>'])
 
@@ -1793,7 +1793,7 @@ class VS2010SolutionFileWriter(VSSolutionFileWriter):
           configuration = configurations.GetByIdentifier(
               configuration_name, configuration_platform)
 
-          self.WriteLine('\t\t{0:s}|{1:s} = {0:s}|{1:s}\r\n'.format(
+          self.WriteLine('\t\t{0:s}|{1:s} = {0:s}|{1:s}'.format(
               configuration.name, configuration.platform))
 
       self.WriteLine('\tEndGlobalSection')
