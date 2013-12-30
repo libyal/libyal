@@ -146,9 +146,11 @@ class VSProjectConfiguration(VSConfiguration):
     self.linker_output_file = ''
     self.linker_values_set = False
     self.module_definition_file = ''
+    self.name = ''
     self.optimize_references = ''
     self.optimization = ''
     self.output_type = ''
+    self.platform = ''
     self.platform_toolset = ''
     self.precompiled_header = ''
     self.preprocessor_definitions = ''
@@ -308,6 +310,8 @@ class VSProjectConfiguration(VSConfiguration):
     copy.dependencies = self.dependencies
     copy.dependencies_set = self.dependencies_set
     copy.enable_comdat_folding = self.enable_comdat_folding
+    copy.enable_function_level_linking = self.enable_function_level_linking
+    copy.enable_intrinsic_functions = self.enable_intrinsic_functions
     copy.generate_debug_information = self.generate_debug_information
     copy.import_library = self.import_library
     copy.include_directories = self.include_directories
@@ -318,6 +322,7 @@ class VSProjectConfiguration(VSConfiguration):
     copy.linker_output_directory = self.linker_output_directory
     copy.linker_output_file = self.linker_output_file
     copy.linker_values_set = self.linker_values_set
+    copy.module_definition_file = self.module_definition_file
     copy.name = self.name
     copy.optimize_references = self.optimize_references
     copy.optimization = self.optimization
@@ -1216,8 +1221,13 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
           self.WriteLine('      <OutputFile>{0:s}</OutputFile>'.format(
               linker_output_file))
 
-        # Visual Studio will convert an empty additional dependencies
-        # value.
+          if configuration.module_definition_file != '':
+            self.WriteLine((
+                 '      <ModuleDefinitionFile>{0:s}'
+                 '</ModuleDefinitionFile>').format(
+                     configuration.module_definition_file))
+
+        # Visual Studio will convert an empty additional dependencies value.
         if configuration.dependencies_set:
           dependencies = re.sub(
               r'[$][(]OutDir[)]\\', r'$(OutDir)',
