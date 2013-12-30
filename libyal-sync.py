@@ -583,8 +583,6 @@ class VisualStudioBuildHelper(BuildHelper):
       version: the version of Visual Studio.
     """
     super(VisualStudioBuildHelper, self).__init__()
-    self._python = u'{0:s}:{1:s}{2:s}'.format(
-        u'C', os.sep, os.path.join(u'Python27', u'python.exe'))
     self.version = version
 
   def _BuildPrepare(self, source_directory):
@@ -659,7 +657,7 @@ class VisualStudioBuildHelper(BuildHelper):
     if not os.exists(u'vs2008'):
       # TODO: redirect the output to build.log?
       command = u'{0:s} {1:s} {2:s}'.format(
-          self._python, os.path.join('..', msvscpp_convert),
+          sys.executable, os.path.join('..', msvscpp_convert),
           solution_filename)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
@@ -723,10 +721,6 @@ class VisualStudioBuildHelper(BuildHelper):
         logging.error(u'Missing VS110COMNTOOLS environment variable.')
         return False
 
-    if not os.path.exists(self._python):
-      logging.error(u'Unable to find python.exe')
-      return False
-
     # For the Visual Studio builds later than 2008 the convert the 2008
     # solution and project files need to be converted to the newer version.
     if self.version in ['2010', '2012']:
@@ -779,7 +773,7 @@ class VisualStudioBuildHelper(BuildHelper):
         os.environ['VS90COMNTOOLS'] = os.environ['VS110COMNTOOLS']
 
       # TODO: redirect the output to build.log?
-      command = u'{0:s} setup.py bdist_msi'.format(self._python)
+      command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
