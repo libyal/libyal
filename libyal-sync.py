@@ -637,15 +637,14 @@ class VisualStudioBuildHelper(BuildHelper):
     Args:
       source_directory: the name of the source directory.
     """
-    os.chdir(source_directory)
-
-    msvscpp_convert = os.path.join(u'..', u'msvscpp-convert.py')
-    if not os.path.exists(msvscpp_convert):
-      msvscpp_convert = os.path.join(u'..', u'libyal', u'msvscpp-convert.py')
+    msvscpp_convert = os.path.join(
+        os.path.dirname(__file__), u'msvscpp-convert.py')
 
     if not os.path.exists(msvscpp_convert):
       logging.error(u'Unable to find msvscpp-convert.py')
       return False
+
+    os.chdir(source_directory)
 
     solution_filenames = glob.glob(os.path.join(u'msvscpp', u'*.sln'))
     if len(solution_filenames) == 1:
@@ -657,8 +656,7 @@ class VisualStudioBuildHelper(BuildHelper):
     if not os.exists(u'vs2008'):
       # TODO: redirect the output to build.log?
       command = u'{0:s} {1:s} {2:s}'.format(
-          sys.executable, os.path.join('..', msvscpp_convert),
-          solution_filename)
+          sys.executable, msvscpp_convert, solution_filename)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
