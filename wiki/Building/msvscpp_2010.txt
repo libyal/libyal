@@ -1,0 +1,41 @@
+== 64-bit with Microsoft Visual Studio express ==
+To build a 64-bit version of ${project_name} with Microsoft Visual Studio
+express you'll need at least the 2010 version.
+
+=== Microsoft Visual Studio 2010 ===
+First make sure to enabling 64-bit compilation support on Microsoft Visual
+Studio 2010 express. Since this can be a tedious process, some relevant links:
+  * http://msdn.microsoft.com/en-us/library/vstudio/9yb4317s(v=vs.100).aspx
+  * http://support.microsoft.com/kb/2519277
+
+If you have set it up correctly the following should work:
+
+Go to:
+{{{
+Configuration manager -> Active solution platform
+}}}
+
+Select "{{{<New>}}}"
+  * Type or select the new platform: "x64"
+  * Copy settings from: "Win32"
+  * Create new project platforms: enabled
+
+
+Additionally for every project change:
+{{{
+Configuration Properties -> General -> Platform Toolset
+}}}
+
+Into "Windows7.1SDK"
+
+If you've Cygwin installed on your Visual Studio build machine you can try
+running one of the following scripts to add the x64 settings for you:
+{{{
+sh msvscpp/scripts/vs2008_x64.sh
+}}}
+
+Make sure to convert the solution first from 2008 to 2010.
+{{{
+sh msvscpp/scripts/vs2010_x64.sh
+}}}
+

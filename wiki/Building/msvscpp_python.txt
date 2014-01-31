@@ -1,0 +1,14 @@
+== Python-bindings ==
+To compile the ${python_bindings_name} Python-bindings you'll need the Python development files which are part of the Python.org windows installer package.
+
+The Microsoft Visual Studio files are configured to look in:
+{{{
+C:\Python2.7\
+}}}
+
+If you want to have the Python development files in a different location you'll have to change the pyyal Microsoft Visual Studio settings.
+
+Note that the VSDebug build of the Python-bindings will fail since the Python development files do not come with python2.7_d.lib.
+
+If you do not intend to build the Python-bindings you can safely ignore build errors regarding: ${python_bindings_name}.
+

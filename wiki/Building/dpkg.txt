@@ -1,0 +1,23 @@
+= Using Debian package tools (DEB) =
+
+To build ${project_name} using the Debian package tools make sure you have the following packages installed:
+{{{
+sudo apt-get install build-essential debhelper fakeroot autotools-dev ${dpkg_build_dependencies}
+}}}
+
+To build the Debian packages change into the source directory and run:
+{{{
+cp -rf dpkg debian
+dpkg-buildpackage -rfakeroot
+}}}
+
+This will create the following files in the parent directory:
+{{{
+${dpkg_filenames}
+}}}
+
+To install, e.g. the library:
+{{{
+sudo dpkg -i ${project_name}_<version>-1_<arch>.deb
+}}}
+

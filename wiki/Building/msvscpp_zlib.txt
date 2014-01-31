@@ -1,0 +1,5 @@
+== zlib ==
+Download the latest zlib source package including from the zlib project site: http://www.gzip.org/zlib/.
+Extract the contents of the zlib source package to the directory containing the ${project_name}-{{{<version>}}} directory.
+Normally the extracted zlib source directory will have a version number e.g. zlib-1.2.8, to remain version independent rename the directory to zlib.
+

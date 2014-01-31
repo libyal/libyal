@@ -1,0 +1,21 @@
+== Cygwin ==
+If you want to use Cygwin to build ${project_name} make sure to have the following packages installed:
+  * autoconf
+  * automake
+  * binutils
+  * gcc-core
+  * gettext
+  * libiconv
+  * libtool
+  * make
+${cygwin_build_dependencies}
+
+After following the GNU Compiler Collection (GCC) build instructions you should end up with the following DLL:
+{{{
+${project_name}/.libs/${cygwin_dll_filename}
+}}}
+${cygwin_executables}
+
+=== Using the DLL ===
+Make sure you use define ${project_name_upper_case}_DLL_IMPORT before including <${project_name}.h>.
+${cygwin_dll_dependencies}

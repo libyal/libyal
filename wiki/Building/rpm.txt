@@ -1,0 +1,21 @@
+= Using !RedHat package tools (RPM) =
+To build ${project_name} using the !RedHat package tools make sure you have the following packages installed:
+{{{
+yum install rpm-build ${rpm_build_dependencies}
+}}}
+
+To build:
+{{{
+${rpm_rename_source_package}rpmbuild -ta ${project_name}-<version>.tar.gz
+}}}
+
+This will create the following files in the rpmbuild directory:
+{{{
+${rpm_filenames}
+}}}
+
+To install, e.g. the library:
+{{{
+sudo rpm -ivh ${project_name}-<version>-1.<arch>.rpm
+}}}
+

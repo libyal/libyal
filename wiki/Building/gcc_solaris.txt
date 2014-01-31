@@ -1,0 +1,3 @@
+== Sun Solaris ==
+To build ${project_name} on Sun Solaris make sure that /usr/ccs/bin and /usr/sfw/bin are defined in the PATH environment variable.
+

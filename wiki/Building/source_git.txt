@@ -1,0 +1,11 @@
+== Git ==
+To retrieve the source from the git repository make sure to install: git, aclocal, autoconf, automake, autopoint, gettextize and libtoolize.
+
+To download and prepare the source for building run:
+{{{
+git clone ${git_url}
+cd ${project_name}/
+./synclibs.sh
+./autogen.sh
+}}}
+

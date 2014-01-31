@@ -1,0 +1,19 @@
+== Building ==
+Open the file:
+{{{
+msvscpp\${project_name}.sln
+}}}
+
+Note that the project files contain a Release and VSDebug configuration.
+The VSDebug builds the binaries with debug information.
+Note that this is not the same as debug output.
+
+Make sure to check if your build environment defines the correct WINVER for your build.
+The code uses WINAPI version specific functions based on WINVER.
+You can define a custom WINVER in the Microsoft Visual Studio C++ project files or in common\config_winapi.h
+
+And build the solution. The build files will be places in:
+{{{
+msvscpp\Release\
+}}}
+

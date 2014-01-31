@@ -1,0 +1,10 @@
+== Verbose and debug output ==
+To troubleshoot issues or for low-level format analysis ${project_name} supports verbose and debug output.
+
+To enable verbose and debug output support add --enable-verbose-output and --enable-debug-output to configure, e.g.
+{{{
+./configure --enable-verbose-output --enable-debug-output
+}}}
+
+This will generate vast amounts of debug information on stderr when the tools are run with -v.
+

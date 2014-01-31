@@ -1,0 +1,30 @@
+= Mac OS X package =
+!PackageMaker can be used to create a Mac OS X package.
+
+The following instructions show how to build ${project_name}.pkg and ${project_name}.dmg from the command line.
+First build ${project_name} a build as a universal binary with Python-bindings, therefore add the following argument to the "./configure" statement:
+{{{
+--prefix=$$PWD/macosx/tmp/${package_maker_configure_options}
+}}}
+
+${package_maker_pyprefix}
+After running "make install" the binaries are installed in:
+{{{
+$$PWD/macosx/tmp/
+}}}
+
+Before creating the ${project_name}.pkg the file permissions and ownership needs to be corrected, by running:
+{{{
+sudo chown -R root:wheel macosx/tmp/
+}}}
+
+To create the package (directory):
+{{{
+/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc macosx/${project_name}.pmdoc --out ../${project_name}-<version>.pkg
+}}}
+
+To create a distributable disk image:
+{{{
+hdiutil create ../${project_name}-<version>.dmg -srcfolder ../${project_name}-<version>.pkg -fs HFS+
+}}}
+

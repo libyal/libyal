@@ -1,0 +1,6 @@
+== Static library ==
+To make a static library add --enable-shared=no to configure, .e.g:
+{{{
+./configure --enable-shared=no
+}}}
+

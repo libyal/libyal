@@ -1,0 +1,6 @@
+== Using the DLL ==
+Make sure you use define ${project_name_upper_case}_DLL_IMPORT before including <${project_name}.h>.
+${msvscpp_dll_dependencies}
+
+On other systems than the build system you'll also need to install the Visual Studio Redistributable package for the DLL to run.
+

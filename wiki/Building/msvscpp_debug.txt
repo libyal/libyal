@@ -1,0 +1,14 @@
+== Verbose and debug output ==
+To troubleshoot issues or for low-level format analysis ${project_name} supports verbose and debug output.
+
+To enable verbose and debug output support edit:
+{{{
+common\config_winapi.h
+}}}
+
+Add the following definitions:
+{{{
+#define HAVE_VERBOSE_OUTPUT     1
+#define HAVE_DEBUG_OUTPUT       1
+}}}
+
