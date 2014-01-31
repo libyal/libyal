@@ -453,86 +453,168 @@ class BuildPageGenerator(WikiPageGenerator):
     file_object.close()
     return string.Template(file_data)
 
-  def _GenerateSection(self, project_configuration, template_filename):
+  def _GenerateSection(
+      self, project_configuration, template_filename, output_writer):
     """Generates a section from template filename.
 
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
       template_filename: the name of the file containing the template string.
+      output_write: the output writer.
     """
     template_string = self._ReadTemplateFile(template_filename)
 
-    return template_string.substitute(
-        project_configuration.GetTemplateMappings())
+    output_writer.Write(
+        template_string.substitute(
+            project_configuration.GetTemplateMappings()))
 
-  def Generate(self, project_configuration):
+  def Generate(self, project_configuration, output_writer):
     """Generates the wiki page.
 
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
+      output_write: the output writer.
     """
-    print self._GenerateSection(project_configuration, 'page_header.txt'),
-    print self._GenerateSection(project_configuration, 'introduction.txt'),
+    self._GenerateSection(
+        project_configuration, 'page_header.txt', output_writer)
+    self._GenerateSection(
+        project_configuration, 'introduction.txt', output_writer)
 
     if (project_configuration.supports_source_package or
         project_configuration.supports_git):
-      print self._GenerateSection(project_configuration, 'source.txt'),
+      self._GenerateSection(project_configuration, 'source.txt', output_writer)
 
       if project_configuration.supports_source_package:
-        print self._GenerateSection(
-            project_configuration, 'source_package.txt'),
+        self._GenerateSection(
+            project_configuration, 'source_package.txt', output_writer)
 
       if project_configuration.supports_git:
-        print self._GenerateSection(project_configuration, 'source_git.txt'),
+        self._GenerateSection(
+            project_configuration, 'source_git.txt', output_writer)
 
     if project_configuration.supports_gcc:
-      print self._GenerateSection(project_configuration, 'gcc.txt'),
+      self._GenerateSection(project_configuration, 'gcc.txt', output_writer)
 
       if project_configuration.supports_debug_output:
-        print self._GenerateSection(project_configuration, 'gcc_debug_output.txt'),
+        self._GenerateSection(
+            project_configuration, 'gcc_debug_output.txt', output_writer)
 
-      print self._GenerateSection(project_configuration, 'gcc_static_library.txt'),
+      self._GenerateSection(
+        project_configuration, 'gcc_static_library.txt', output_writer)
 
       if project_configuration.supports_tools:
-        print self._GenerateSection(project_configuration, 'gcc_static_executables.txt'),
+        self._GenerateSection(
+            project_configuration, 'gcc_static_executables.txt', output_writer)
 
-      print self._GenerateSection(project_configuration, 'cygwin.txt'),
-      print self._GenerateSection(project_configuration, 'gcc_macosx.txt'),
-      print self._GenerateSection(project_configuration, 'gcc_solaris.txt'),
+      self._GenerateSection(project_configuration, 'cygwin.txt', output_writer)
+      self._GenerateSection(
+          project_configuration, 'gcc_macosx.txt', output_writer)
+      self._GenerateSection(
+          project_configuration, 'gcc_solaris.txt', output_writer)
 
     if project_configuration.supports_mingw:
-      print self._GenerateSection(project_configuration, 'mingw.txt'),
+      self._GenerateSection(project_configuration, 'mingw.txt', output_writer)
 
     if project_configuration.supports_msvscpp:
-      print self._GenerateSection(project_configuration, 'msvscpp.txt'),
+      self._GenerateSection(project_configuration, 'msvscpp.txt', output_writer)
 
       if project_configuration.supports_debug_output:
-        print self._GenerateSection(project_configuration, 'msvscpp_debug.txt'),
+        self._GenerateSection(
+            project_configuration, 'msvscpp_debug.txt', output_writer)
 
       if project_configuration.msvsvpp_zlib_dependency:
-        print self._GenerateSection(project_configuration, 'msvscpp_zlib.txt'),
+        self._GenerateSection(
+            project_configuration, 'msvscpp_zlib.txt', output_writer)
 
       if project_configuration.supports_dokan:
-        print self._GenerateSection(project_configuration, 'msvscpp_dokan.txt'),
+        self._GenerateSection(
+            project_configuration, 'msvscpp_dokan.txt', output_writer)
 
       if project_configuration.supports_python:
-        print self._GenerateSection(project_configuration, 'msvscpp_python.txt'),
+        self._GenerateSection(
+            project_configuration, 'msvscpp_python.txt', output_writer)
 
-      print self._GenerateSection(project_configuration, 'msvscpp_build.txt'),
-      print self._GenerateSection(project_configuration, 'msvscpp_dll.txt'),
+      self._GenerateSection(
+          project_configuration, 'msvscpp_build.txt', output_writer)
+      self._GenerateSection(
+          project_configuration, 'msvscpp_dll.txt', output_writer)
 
-      print self._GenerateSection(project_configuration, 'msvscpp_2010.txt'),
+      self._GenerateSection(
+          project_configuration, 'msvscpp_2010.txt', output_writer)
 
     if project_configuration.supports_dpkg:
-      print self._GenerateSection(project_configuration, 'dpkg.txt'),
+      self._GenerateSection(project_configuration, 'dpkg.txt', output_writer)
 
     if project_configuration.supports_rpm:
-      print self._GenerateSection(project_configuration, 'rpm.txt'),
+      self._GenerateSection(project_configuration, 'rpm.txt', output_writer)
 
     if project_configuration.supports_package_maker:
-      print self._GenerateSection(project_configuration, 'package_maker.txt'),
+      self._GenerateSection(
+          project_configuration, 'package_maker.txt', output_writer)
+
+
+class FileWriter(object):
+  """Class that defines a file output writer."""
+
+  def __init__(self, name):
+    """Initialize the output writer.
+
+    Args:
+      name: the name of the output.
+    """
+    super(FileWriter, self).__init__()
+    self._name = name
+
+  def Open(self):
+    """Opens the output writer object.
+
+    Returns:
+      A boolean containing True if successful or False if not.
+    """
+    self._file_object = open(self._name, 'wb')
+    return True
+
+  def Close(self):
+    """Closes the output writer object."""
+    self._file_object.close()
+
+  def Write(self, data):
+    """Writes the data to file.
+
+    Args:
+      data: the data to write.
+    """
+    self._file_object.write(data)
+
+
+class StdoutWriter(object):
+  """Class that defines a stdout output writer."""
+
+  def __init__(self):
+    """Initialize the output writer."""
+    super(StdoutWriter, self).__init__()
+
+  def Open(self):
+    """Opens the output writer object.
+
+    Returns:
+      A boolean containing True if successful or False if not.
+    """
+    return True
+
+  def Close(self):
+    """Closes the output writer object."""
+    pass
+
+  def Write(self, data):
+    """Writes the data to stdout (without the default trailing newline).
+
+    Args:
+      data: the data to write.
+    """
+    print data,
 
 
 def Main():
@@ -543,20 +625,49 @@ def Main():
       'config_file', action='store', metavar='CONFIG_FILE',
       default='wiki.conf', help='The wiki generation config file.')
 
+  args_parser.add_argument(
+      '--output', dest='output_directory', action='store',
+      metavar='OUTPUT_DIRECTORY', default=None,
+      help='path of the output files to write to.')
+
   options = args_parser.parse_args()
 
   if not options.config_file:
-    print 'Config file missing.'
-    print ''
+    print u'Config file missing.'
+    print u''
     args_parser.print_help()
-    print ''
+    print u''
+    return False
+
+  if not os.path.exists(options.config_file):
+    print u'No such config file: {0:s}.'.format(options.config_file)
+    print u''
+    return False
+
+  if options.output_directory and not os.path.exists(options.output_directory):
+    print u'No such output directory: {0:s}.'.format(options.output_directory)
+    print u''
     return False
 
   project_configuration = ProjectConfiguration()
   project_configuration.ReadFromFile(options.config_file)
 
-  wiki_page = BuildPageGenerator(os.path.join('wiki', 'Building'))
-  wiki_page.Generate(project_configuration)
+  if options.output_directory:
+    output_file = os.path.join(options.output_directory, 'Building.wiki')
+    output_writer = FileWriter(output_file)
+  else:
+    output_writer = StdoutWriter()
+
+  if not output_writer.Open():
+    print u'Unable to open output writer.'
+    print u''
+    return False
+
+  template_directory = os.path.join('wiki', 'Building')
+  wiki_page = BuildPageGenerator(template_directory)
+  wiki_page.Generate(project_configuration, output_writer)
+
+  output_writer.Close()
 
   # TODO: generate wiki pages.
 
