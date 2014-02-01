@@ -393,7 +393,7 @@ class ProjectConfiguration(object):
 
       if self.project_status:
         rpm_rename_source_package += (
-            'mv {0:s}{1:s}-<version>.tar.gz {0:s}-<version>.tar.gz\n'.format(
+            'mv {0:s}-{1:s}-<version>.tar.gz {0:s}-<version>.tar.gz\n'.format(
                 self.project_name, self.project_status))
 
       rpm_filenames += (
