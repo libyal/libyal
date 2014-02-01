@@ -98,6 +98,7 @@ class ProjectConfiguration(object):
     self.mount_tool_mounted_fuse = None
     self.mount_tool_source = None
     self.mount_tool_source_description = None
+    self.mount_tool_source_description_long = None
     self.mount_tool_supported_backends = None
 
   def ReadFromFile(self, filename):
@@ -185,6 +186,15 @@ class ProjectConfiguration(object):
         config_parser, 'mount_tool', 'source')
     self.mount_tool_source_description = GetConfigValue(
         config_parser, 'mount_tool', 'source_description')
+
+    # If the long source description is not set it will default to
+    # source description.
+    try:
+      self.mount_tool_source_description_long = GetConfigValue(
+          config_parser, 'mount_tool', 'source_description_long')
+    except configparser.NoOptionError:
+      pass
+
     self.mount_tool_supported_backends = GetConfigValue(
         config_parser, 'mount_tool', 'supported_backends')
 
@@ -221,6 +231,7 @@ class ProjectConfiguration(object):
     rpm_build_dependencies = ''
     rpm_filenames = ''
     rpm_rename_source_package = ''
+    mount_tool_source_description_long = ''
     mount_tool_supported_backends = ''
 
     python_bindings_name = 'py{0:s}'.format(self.project_name[3:])
@@ -436,6 +447,11 @@ class ProjectConfiguration(object):
             '$PWD/macosx/tmp/ path and install them into the corresponding '
             'system directory.')
 
+    if self.mount_tool_source_description_long:
+      mount_tool_source_description_long = self.mount_tool_source_description_long
+    else:
+      mount_tool_source_description_long = self.mount_tool_source_description
+
     if self.mount_tool_supported_backends:
       for backend in self.mount_tool_supported_backends:
         mount_tool_supported_backends += '  * {0:s}\n'.format(backend)
@@ -491,6 +507,7 @@ class ProjectConfiguration(object):
         'mount_tool_mounted_fuse': self.mount_tool_mounted_fuse,
         'mount_tool_source': self.mount_tool_source,
         'mount_tool_source_description': self.mount_tool_source_description,
+        'mount_tool_source_description_long': mount_tool_source_description_long,
         'mount_tool_supported_backends': mount_tool_supported_backends,
     }
     return template_mappings
@@ -641,6 +658,8 @@ class MountingPageGenerator(WikiPageGenerator):
     """
     self._GenerateSection(
         project_configuration, 'page_header.txt', output_writer)
+    self._GenerateSection(
+        project_configuration, 'introduction.txt', output_writer)
     self._GenerateSection(
         project_configuration, 'mounting.txt', output_writer)
     self._GenerateSection(
