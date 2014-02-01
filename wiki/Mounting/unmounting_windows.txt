@@ -1,0 +1,3 @@
+== Windows ==
+At the moment terminate the process running in the console.
+

@@ -1,0 +1,19 @@
+== Why is ${mount_tool_mount_point} not accessible as root ==
+By default fuse prevents root access to the mount point when ${mount_tool_source_description} is mounted.
+To enable this functionality first check the fuse documentation.
+
+Make sure the fuse configuration file:
+{{{
+/etc/fuse.conf
+}}}
+
+Contains:
+{{{
+user_allow_other
+}}}
+
+Pass "allow_root" to the fuse sub system using the ${mount_tool_name} -X option:
+{{{
+${mount_tool_name} -X allow_root ${mount_tool_source} ${mount_tool_mount_point}
+}}}
+

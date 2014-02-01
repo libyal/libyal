@@ -1,0 +1,18 @@
+= Introduction =
+To mount ${mount_tool_source_description} you can use ${mount_tool_name}.
+
+There is support for the following back-ends:
+${mount_tool_supported_backends}
+To build ${mount_tool_name} see [Building].
+
+= Mounting =
+To mount ${mount_tool_source_description}:
+{{{
+${mount_tool_name} ${mount_tool_source} ${mount_tool_mount_point}
+}}}
+
+This will expose ${mount_tool_mounted_description}.
+{{{
+${mount_tool_mounted_fuse}
+}}}
+
