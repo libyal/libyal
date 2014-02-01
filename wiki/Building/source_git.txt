@@ -9,3 +9,5 @@ cd ${project_name}/
 ./autogen.sh
 }}}
 
+*Note that the source from the git repository will not work without synchronizing the library dependencies "./synclibs.sh" and having the autotools generate the necessary files "./autogen.sh".*
+
