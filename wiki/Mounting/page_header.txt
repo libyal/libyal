@@ -1,5 +1,5 @@
 #summary Mounting ${mount_tool_source_description}
-#labels Featured
+#labels Featured,Phase-Deploy
 
 <wiki:toc max_depth="3" />
 

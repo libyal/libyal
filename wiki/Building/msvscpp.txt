@@ -6,7 +6,5 @@ Version 2010 is able to convert these files into its newer versions.
 The Microsoft Visual Studio express version is sufficient.
 Note that if you want to build 64-bit version with the express version you'll need at least 2010.
 Also see the section: Microsoft Visual Studio 2010 express and 64-bit compilation.
-${msvscpp_build_git}
-To compile ${project_name} using Microsoft Visual Studio you'll need:
-${msvscpp_build_dependencies}${msvscpp_mount_tool}
+${msvscpp_build_git}${msvscpp_build_dependencies}${msvscpp_mount_tool}
 

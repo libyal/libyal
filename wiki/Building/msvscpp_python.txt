@@ -6,7 +6,7 @@ The Microsoft Visual Studio files are configured to look in:
 C:\Python2.7\
 }}}
 
-If you want to have the Python development files in a different location you'll have to change the pyyal Microsoft Visual Studio settings.
+If you want to have the Python development files in a different location you'll have to change the ${python_bindings_name} Microsoft Visual Studio settings.
 
 Note that the VSDebug build of the Python-bindings will fail since the Python development files do not come with python2.7_d.lib.
 

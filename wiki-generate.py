@@ -91,6 +91,7 @@ class ProjectConfiguration(object):
 
     self.rpm_build_dependencies = None
 
+    self.mount_tool_missing_backend_error = None
     self.mount_tool_mount_point = None
     self.mount_tool_mounted_description = None
     self.mount_tool_mounted_dokan = None
@@ -170,6 +171,8 @@ class ProjectConfiguration(object):
     self.rpm_build_dependencies = GetConfigValue(
         config_parser, 'rpm', 'build_dependencies')
 
+    self.mount_tool_missing_backend_error = GetConfigValue(
+        config_parser, 'mount_tool', 'missing_backend_error')
     self.mount_tool_mount_point = GetConfigValue(
         config_parser, 'mount_tool', 'mount_point')
     self.mount_tool_mounted_description = GetConfigValue(
@@ -222,6 +225,7 @@ class ProjectConfiguration(object):
 
     python_bindings_name = 'py{0:s}'.format(self.project_name[3:])
     mount_tool_name = '{0:s}mount'.format(self.project_name[3:])
+    tools_name = '{0:s}tools'.format(self.project_name[3:])
 
     if self.project_status:
       project_status += '-{0:s}'.format(self.project_status)
@@ -235,7 +239,7 @@ class ProjectConfiguration(object):
       building_table_of_contents += '  * Using GNU Compiler Collection (GCC)\n'
 
       if self.gcc_build_dependencies:
-        gcc_build_dependencies += (
+        gcc_build_dependencies = (
             '\n'
             'Also make sure to have the following dependencies including '
             'source headers installed:\n')
@@ -309,6 +313,11 @@ class ProjectConfiguration(object):
       building_table_of_contents += '  * Using Microsoft Visual Studio\n'
 
       if self.msvscpp_build_dependencies:
+        msvscpp_build_dependencies = (
+            '\n'
+            'To compile {0:s} using Microsoft Visual Studio you\'ll '
+            'need:\n').format(self.project_name)
+
         for dependency in self.msvscpp_build_dependencies:
           msvscpp_build_dependencies += '  * {0:s}\n'.format(dependency)
 
@@ -440,6 +449,7 @@ class ProjectConfiguration(object):
 
         'python_bindings_name': python_bindings_name,
         'mount_tool_name': mount_tool_name,
+        'tools_name': tools_name,
 
         'source_package_url': self.source_package_url,
 
@@ -474,6 +484,7 @@ class ProjectConfiguration(object):
         'rpm_filenames': rpm_filenames,
         'rpm_rename_source_package': rpm_rename_source_package,
 
+        'mount_tool_missing_backend_error': self.mount_tool_missing_backend_error,
         'mount_tool_mount_point': self.mount_tool_mount_point,
         'mount_tool_mounted_description': self.mount_tool_mounted_description,
         'mount_tool_mounted_dokan': self.mount_tool_mounted_dokan,
