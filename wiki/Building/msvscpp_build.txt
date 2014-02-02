@@ -17,3 +17,17 @@ And build the solution. The build files will be places in:
 msvscpp\Release\
 }}}
 
+=== Using MSBuild ===
+Another way to build ${project_name} with Visual Studio is to use MSBuild via the command line.
+MSBuild can be installed as part of the Microsoft.NET Framework.
+
+First set-up the Visual Studio variables:
+{{{
+C:\Program Files\Microsoft Visual Studio 9.0\VC\bin\vcvars32.bat
+}}}
+
+Next run MSBuild:
+{{{
+msbuild msvscpp\${project_name}.sln /p:Configuration=Release;Platform=Win32
+}}}
+
