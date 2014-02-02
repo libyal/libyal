@@ -419,6 +419,7 @@ class ProjectConfiguration(object):
           msvscpp_dll_dependencies += '  * {0:s}\n'.format(dependency)
 
         msvscpp_dll_dependencies += (
+            '\n'
             'These DLLs can be found in the same directory as '
             '{0:s}.dll.\n').format(self.project_name)
 
