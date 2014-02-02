@@ -29,6 +29,10 @@ except ImportError:
   import configparser
 
 
+class ConfigError(Exception):
+  """Class that defines a configuration error."""
+
+
 class ProjectConfiguration(object):
   """Class that contains the libyal project configuration."""
 
@@ -149,39 +153,98 @@ class ProjectConfiguration(object):
     self.supports_dokan = 'dokan' in features
     self.supports_fuse = 'fuse' in features
 
-    self.tools_directory = self._GetConfigValue(
-        config_parser, 'tools', 'directory')
-    self.tools_names = self._GetConfigValue(config_parser, 'tools', 'names')
+    if self.supports_tools and not config_parser.has_section('tools'):
+      raise ConfigError(
+          'Support for tools enabled but no corresponding section: '
+          'tools is missing.')
 
-    self.cygwin_build_dependencies = self._GetConfigValue(
-        config_parser, 'cygwin', 'build_dependencies')
-    self.cygwin_dll_dependencies = self._GetConfigValue(
-        config_parser, 'cygwin', 'dll_dependencies')
-    self.cygwin_dll_filename = self._GetConfigValue(
-        config_parser, 'cygwin', 'dll_filename')
+    if config_parser.has_section('tools'):
+      self.tools_directory = self._GetConfigValue(
+          config_parser, 'tools', 'directory')
+      self.tools_names = self._GetConfigValue(
+          config_parser, 'tools', 'names')
 
-    self.gcc_build_dependencies = self._GetConfigValue(
-        config_parser, 'gcc', 'build_dependencies')
-    self.gcc_static_build_dependencies = self._GetConfigValue(
-        config_parser, 'gcc', 'static_build_dependencies')
+    if self.supports_cygwin and not config_parser.has_section('cygwin'):
+      raise ConfigError(
+          'Support for Cygwin enabled but no corresponding section: '
+          'cygwin is missing.')
 
-    self.mingw_build_dependencies = self._GetConfigValue(
-        config_parser, 'mingw', 'build_dependencies')
-    self.mingw_dll_dependencies = self._GetConfigValue(
-        config_parser, 'mingw', 'dll_dependencies')
-    self.mingw_dll_filename = self._GetConfigValue(
-        config_parser, 'mingw', 'dll_filename')
+    if config_parser.has_section('cygwin'):
+      self.cygwin_build_dependencies = self._GetConfigValue(
+          config_parser, 'cygwin', 'build_dependencies')
+      self.cygwin_dll_dependencies = self._GetConfigValue(
+          config_parser, 'cygwin', 'dll_dependencies')
+      self.cygwin_dll_filename = self._GetConfigValue(
+          config_parser, 'cygwin', 'dll_filename')
 
-    self.msvscpp_build_dependencies = self._GetConfigValue(
-        config_parser, 'msvscpp', 'build_dependencies')
-    self.msvscpp_dll_dependencies = self._GetConfigValue(
-        config_parser, 'msvscpp', 'dll_dependencies')
+    if self.supports_gcc and not config_parser.has_section('gcc'):
+      raise ConfigError(
+          'Support for GCC enabled but no corresponding section: '
+          'gcc is missing.')
 
-    self.dpkg_build_dependencies = self._GetConfigValue(
-        config_parser, 'dpkg', 'build_dependencies')
+    if config_parser.has_section('gcc'):
+      self.gcc_build_dependencies = self._GetConfigValue(
+          config_parser, 'gcc', 'build_dependencies')
+      self.gcc_static_build_dependencies = self._GetConfigValue(
+          config_parser, 'gcc', 'static_build_dependencies')
 
-    self.rpm_build_dependencies = self._GetConfigValue(
-        config_parser, 'rpm', 'build_dependencies')
+    if self.supports_mingw and not config_parser.has_section('mingw'):
+      raise ConfigError(
+          'Support for MinGW enabled but no corresponding section: '
+          'mingw is missing.')
+
+    if config_parser.has_section('mingw'):
+      self.mingw_build_dependencies = self._GetConfigValue(
+          config_parser, 'mingw', 'build_dependencies')
+      self.mingw_dll_dependencies = self._GetConfigValue(
+          config_parser, 'mingw', 'dll_dependencies')
+      self.mingw_dll_filename = self._GetConfigValue(
+          config_parser, 'mingw', 'dll_filename')
+
+    if self.supports_msvscpp and not config_parser.has_section('msvscpp'):
+      raise ConfigError(
+          'Support for Visual Studio enabled but no corresponding section: '
+          'msvscpp is missing.')
+
+    if config_parser.has_section('msvscpp'):
+      self.msvscpp_build_dependencies = self._GetConfigValue(
+          config_parser, 'msvscpp', 'build_dependencies')
+      self.msvscpp_dll_dependencies = self._GetConfigValue(
+          config_parser, 'msvscpp', 'dll_dependencies')
+
+    if self.supports_dpkg and not config_parser.has_section('dpkg'):
+      raise ConfigError(
+          'Support for dpkg enabled but no corresponding section: '
+          'dpkg is missing.')
+
+    if config_parser.has_section('dpkg'):
+      self.dpkg_build_dependencies = self._GetConfigValue(
+          config_parser, 'dpkg', 'build_dependencies')
+
+    if (self.supports_package_maker and
+        not config_parser.has_section('package_maker')):
+      raise ConfigError(
+          'Support for PackageMaker enabled but no corresponding section: '
+          'package_maker is missing.')
+
+    if config_parser.has_section('package_maker'):
+      # TODO: implement.
+      pass
+
+    if self.supports_rpm and not config_parser.has_section('rpm'):
+      raise ConfigError(
+          'Support for rpm enabled but no corresponding section: '
+          'rpm is missing.')
+
+    if config_parser.has_section('rpm'):
+      self.rpm_build_dependencies = self._GetConfigValue(
+          config_parser, 'rpm', 'build_dependencies')
+
+    if ((self.supports_dokan or self.supports_fuse) and
+        not config_parser.has_section('mount_tool')):
+      raise ConfigError(
+          'Support for dokan and/or fuse enabled but no corresponding section: '
+          'mount_tool is missing.')
 
     if config_parser.has_section('mount_tool'):
       self.mount_tool_missing_backend_error = self._GetConfigValue(
@@ -274,6 +337,10 @@ class ProjectConfiguration(object):
       if self.gcc_static_build_dependencies:
         for dependency in self.gcc_static_build_dependencies:
           gcc_static_build_dependencies += '  * {0:s}\n'.format(dependency)
+
+        if self.supports_fuse:
+          gcc_static_build_dependencies += (
+              '  * fuse (optional, can be disabled by --with-libfuse=no)')
 
       if self.supports_cygwin:
         building_table_of_contents += '    * Using Cygwin\n'
