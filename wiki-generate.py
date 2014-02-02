@@ -29,10 +29,6 @@ except ImportError:
   import configparser
 
 
-def GetConfigValue(config_parser, section_name, value_name):
-  return json.loads(config_parser.get(section_name, value_name))
-
-
 class ProjectConfiguration(object):
   """Class that contains the libyal project configuration."""
 
@@ -101,6 +97,19 @@ class ProjectConfiguration(object):
     self.mount_tool_source_description_long = None
     self.mount_tool_supported_backends = None
 
+  def _GetConfigValue(self, config_parser, section_name, value_name):
+    """Retrieves a value from the config parser.
+
+    Args:
+      config_parser: the configuration parser (instance of ConfigParser).
+      section_name: the name of the section that contains the value.
+      value_name: the name of the value.
+
+    Returns:
+      An object containing the value.
+    """
+    return json.loads(config_parser.get(section_name, value_name))
+
   def ReadFromFile(self, filename):
     """Reads the configuration from file.
 
@@ -110,15 +119,16 @@ class ProjectConfiguration(object):
     config_parser = configparser.RawConfigParser()
     config_parser.read([filename])
 
-    self.project_name = GetConfigValue(config_parser, 'Project', 'name')
-    self.project_status = GetConfigValue(config_parser, 'Project', 'status')
+    self.project_name = self._GetConfigValue(config_parser, 'Project', 'name')
+    self.project_status = self._GetConfigValue(
+        config_parser, 'Project', 'status')
 
-    self.source_package_url = GetConfigValue(
+    self.source_package_url = self._GetConfigValue(
         config_parser, 'source_package', 'url')
 
-    self.git_url = GetConfigValue(config_parser, 'git', 'url')
+    self.git_url = self._GetConfigValue(config_parser, 'git', 'url')
 
-    features = GetConfigValue(config_parser, 'Project', 'features')
+    features = self._GetConfigValue(config_parser, 'Project', 'features')
 
     self.supports_debug_output = 'debug_output' in features
     self.supports_tools = 'tools' in features
@@ -139,64 +149,66 @@ class ProjectConfiguration(object):
     self.supports_dokan = 'dokan' in features
     self.supports_fuse = 'fuse' in features
 
-    self.tools_directory = GetConfigValue(config_parser, 'tools', 'directory')
-    self.tools_names = GetConfigValue(config_parser, 'tools', 'names')
+    self.tools_directory = self._GetConfigValue(
+        config_parser, 'tools', 'directory')
+    self.tools_names = self._GetConfigValue(config_parser, 'tools', 'names')
 
-    self.cygwin_build_dependencies = GetConfigValue(
+    self.cygwin_build_dependencies = self._GetConfigValue(
         config_parser, 'cygwin', 'build_dependencies')
-    self.cygwin_dll_dependencies = GetConfigValue(
+    self.cygwin_dll_dependencies = self._GetConfigValue(
         config_parser, 'cygwin', 'dll_dependencies')
-    self.cygwin_dll_filename = GetConfigValue(
+    self.cygwin_dll_filename = self._GetConfigValue(
         config_parser, 'cygwin', 'dll_filename')
 
-    self.gcc_build_dependencies = GetConfigValue(
+    self.gcc_build_dependencies = self._GetConfigValue(
         config_parser, 'gcc', 'build_dependencies')
-    self.gcc_static_build_dependencies = GetConfigValue(
+    self.gcc_static_build_dependencies = self._GetConfigValue(
         config_parser, 'gcc', 'static_build_dependencies')
 
-    self.mingw_build_dependencies = GetConfigValue(
+    self.mingw_build_dependencies = self._GetConfigValue(
         config_parser, 'mingw', 'build_dependencies')
-    self.mingw_dll_dependencies = GetConfigValue(
+    self.mingw_dll_dependencies = self._GetConfigValue(
         config_parser, 'mingw', 'dll_dependencies')
-    self.mingw_dll_filename = GetConfigValue(
+    self.mingw_dll_filename = self._GetConfigValue(
         config_parser, 'mingw', 'dll_filename')
 
-    self.msvscpp_build_dependencies = GetConfigValue(
+    self.msvscpp_build_dependencies = self._GetConfigValue(
         config_parser, 'msvscpp', 'build_dependencies')
-    self.msvscpp_dll_dependencies = GetConfigValue(
+    self.msvscpp_dll_dependencies = self._GetConfigValue(
         config_parser, 'msvscpp', 'dll_dependencies')
 
-    self.dpkg_build_dependencies = GetConfigValue(
+    self.dpkg_build_dependencies = self._GetConfigValue(
         config_parser, 'dpkg', 'build_dependencies')
 
-    self.rpm_build_dependencies = GetConfigValue(
+    self.rpm_build_dependencies = self._GetConfigValue(
         config_parser, 'rpm', 'build_dependencies')
 
-    self.mount_tool_missing_backend_error = GetConfigValue(
-        config_parser, 'mount_tool', 'missing_backend_error')
-    self.mount_tool_mount_point = GetConfigValue(
-        config_parser, 'mount_tool', 'mount_point')
-    self.mount_tool_mounted_description = GetConfigValue(
-        config_parser, 'mount_tool', 'mounted_description')
-    self.mount_tool_mounted_dokan = GetConfigValue(
-        config_parser, 'mount_tool', 'mounted_dokan')
-    self.mount_tool_mounted_fuse = GetConfigValue(
-        config_parser, 'mount_tool', 'mounted_fuse')
-    self.mount_tool_source = GetConfigValue(
-        config_parser, 'mount_tool', 'source')
-    self.mount_tool_source_description = GetConfigValue(
-        config_parser, 'mount_tool', 'source_description')
+    if config_parser.has_section('mount_tool'):
+      self.mount_tool_missing_backend_error = self._GetConfigValue(
+          config_parser, 'mount_tool', 'missing_backend_error')
+      self.mount_tool_mount_point = self._GetConfigValue(
+          config_parser, 'mount_tool', 'mount_point')
+      self.mount_tool_mounted_description = self._GetConfigValue(
+          config_parser, 'mount_tool', 'mounted_description')
+      self.mount_tool_mounted_dokan = self._GetConfigValue(
+          config_parser, 'mount_tool', 'mounted_dokan')
+      self.mount_tool_mounted_fuse = self._GetConfigValue(
+          config_parser, 'mount_tool', 'mounted_fuse')
+      self.mount_tool_source = self._GetConfigValue(
+          config_parser, 'mount_tool', 'source')
+      self.mount_tool_source_description = self._GetConfigValue(
+          config_parser, 'mount_tool', 'source_description')
 
-    # If the long source description is not set it will default to
-    # source description.
-    try:
-      self.mount_tool_source_description_long = GetConfigValue(
-          config_parser, 'mount_tool', 'source_description_long')
-    except configparser.NoOptionError:
-      pass
+      # If the long source description is not set it will default to
+      # source description.
+      try:
+        self.mount_tool_source_description_long = self._GetConfigValue(
+            config_parser, 'mount_tool', 'source_description_long')
+      except configparser.NoOptionError:
+        pass
 
-    self.mount_tool_supported_backends = GetConfigValue(
-        config_parser, 'mount_tool', 'supported_backends')
+      self.mount_tool_supported_backends = self._GetConfigValue(
+          config_parser, 'mount_tool', 'supported_backends')
 
     self.msvscpp_zlib_dependency = False
     for dependency in self.msvscpp_build_dependencies:
@@ -258,6 +270,7 @@ class ProjectConfiguration(object):
         for dependency in self.gcc_build_dependencies:
           gcc_build_dependencies += '  * {0:s}\n'.format(dependency)
 
+      # TODO: automatically add fuse dependency.
       if self.gcc_static_build_dependencies:
         for dependency in self.gcc_static_build_dependencies:
           gcc_static_build_dependencies += '  * {0:s}\n'.format(dependency)
@@ -598,9 +611,18 @@ class BuildingPageGenerator(WikiPageGenerator):
         self._GenerateSection(
             project_configuration, 'gcc_static_executables.txt', output_writer)
 
+      if project_configuration.supports_python:
+        self._GenerateSection(
+            project_configuration, 'gcc_python.txt', output_writer)
+
       self._GenerateSection(project_configuration, 'cygwin.txt', output_writer)
       self._GenerateSection(
           project_configuration, 'gcc_macosx.txt', output_writer)
+
+      if project_configuration.supports_python:
+        self._GenerateSection(
+            project_configuration, 'gcc_macosx_python.txt', output_writer)
+
       self._GenerateSection(
           project_configuration, 'gcc_solaris.txt', output_writer)
 
