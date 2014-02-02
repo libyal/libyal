@@ -341,14 +341,13 @@ class ProjectConfiguration(object):
         for dependency in self.gcc_build_dependencies:
           gcc_build_dependencies += '  * {0:s}\n'.format(dependency)
 
-      # TODO: automatically add fuse dependency.
       if self.gcc_static_build_dependencies:
         for dependency in self.gcc_static_build_dependencies:
           gcc_static_build_dependencies += '  * {0:s}\n'.format(dependency)
 
-        if self.supports_fuse:
-          gcc_static_build_dependencies += (
-              '  * fuse (optional, can be disabled by --with-libfuse=no)')
+      if self.supports_fuse:
+        gcc_static_build_dependencies += (
+            '  * fuse (optional, can be disabled by --with-libfuse=no)')
 
       if self.supports_cygwin:
         building_table_of_contents += '    * Using Cygwin\n'
