@@ -770,14 +770,12 @@ class MountingPageGenerator(WikiPageGenerator):
 
     if project_configuration.mount_tool_source_type == 'volume':
       self._GenerateSection(
+          project_configuration, 'mounting_volume_loopback.txt', output_writer)
+      self._GenerateSection(
           project_configuration, 'obtaining_volume_offset.txt', output_writer)
 
     self._GenerateSection(
         project_configuration, 'mounting_root_access.txt', output_writer)
-
-    if project_configuration.mount_tool_source_type == 'volume':
-      self._GenerateSection(
-          project_configuration, 'mounting_volume_loopback.txt', output_writer)
 
     if project_configuration.supports_dokan:
       if project_configuration.mount_tool_source_type == 'image':
