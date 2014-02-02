@@ -363,8 +363,7 @@ class ProjectConfiguration(object):
                   '{0:s}/.libs/{1:s}.exe\n'.format(self.tools_directory, name))
 
           cygwin_executables += (
-              '}}}\n'
-              '\n')
+              '}}}\n')
 
       if self.supports_fuse:
         gcc_mount_tool += (
