@@ -1,0 +1,25 @@
+= Mounting =
+To mount ${mount_tool_source_description} you can either:
+  * mount it directly from a device file;
+  * mount it directly our of a RAW storage media image at a certain offset.
+
+To mount directly from a device file:
+{{{
+${mount_tool_name} /dev/sda2 ${mount_tool_mount_point}
+}}}
+
+To mount directly our of a RAW storage media image at a certain offset:
+{{{
+${mount_tool_name} -o 524288 ${mount_tool_source} ${mount_tool_mount_point}
+}}}
+
+Note that ${mount_tool_name} takes an offset in bytes if you're copying the output from mmls multiply by the sector size:
+{{{
+${mount_tool_name} -o $$(( 1024 * 512 )) ${mount_tool_source} ${mount_tool_mount_point}
+}}}
+
+This will expose ${mount_tool_mounted_description}.
+{{{
+${mount_tool_mounted_fuse}
+}}}
+

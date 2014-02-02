@@ -1,0 +1,5 @@
+You can now mount the device file as a loopback device:
+{{{
+mount -o loop,ro ${mount_tool_mounted_fuse} /mnt/ntfs_file_system
+}}}
+

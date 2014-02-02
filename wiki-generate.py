@@ -99,6 +99,7 @@ class ProjectConfiguration(object):
     self.mount_tool_source = None
     self.mount_tool_source_description = None
     self.mount_tool_source_description_long = None
+    self.mount_tool_source_type = None
     self.mount_tool_supported_backends = None
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
@@ -269,6 +270,13 @@ class ProjectConfiguration(object):
             config_parser, 'mount_tool', 'source_description_long')
       except configparser.NoOptionError:
         pass
+
+      self.mount_tool_source_type = self._GetConfigValue(
+          config_parser, 'mount_tool', 'source_type')
+
+      if self.mount_tool_source_type not in ['image', 'volume']:
+        raise ConfigError('unsupported mount tool source type: {0:s}'.format(
+            self.mount_tool_source_type))
 
       self.mount_tool_supported_backends = self._GetConfigValue(
           config_parser, 'mount_tool', 'supported_backends')
@@ -749,14 +757,37 @@ class MountingPageGenerator(WikiPageGenerator):
         project_configuration, 'page_header.txt', output_writer)
     self._GenerateSection(
         project_configuration, 'introduction.txt', output_writer)
+
+    if project_configuration.mount_tool_source_type == 'image':
+      self._GenerateSection(
+          project_configuration, 'mounting_image.txt', output_writer)
+
+    elif project_configuration.mount_tool_source_type == 'volume':
+      self._GenerateSection(
+          project_configuration, 'mounting_volume.txt', output_writer)
+
     self._GenerateSection(
-        project_configuration, 'mounting.txt', output_writer)
+        project_configuration, 'mounting_missing_backend.txt', output_writer)
+
+    if project_configuration.mount_tool_source_type == 'volume':
+      self._GenerateSection(
+          project_configuration, 'obtaining_volume_offset.txt', output_writer)
+
     self._GenerateSection(
         project_configuration, 'mounting_root_access.txt', output_writer)
 
-    if project_configuration.supports_dokan:
+    if project_configuration.mount_tool_source_type == 'volume':
       self._GenerateSection(
-          project_configuration, 'mounting_windows.txt', output_writer)
+          project_configuration, 'mounting_volume_loopback.txt', output_writer)
+
+    if project_configuration.supports_dokan:
+      if project_configuration.mount_tool_source_type == 'image':
+        self._GenerateSection(
+            project_configuration, 'mounting_image_windows.txt', output_writer)
+
+      elif project_configuration.mount_tool_source_type == 'volume':
+        self._GenerateSection(
+            project_configuration, 'mounting_volume_windows.txt', output_writer)
 
     self._GenerateSection(
         project_configuration, 'unmounting.txt', output_writer)
