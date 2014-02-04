@@ -944,7 +944,7 @@ def Main():
 
         build_helper.Clean(libyal_name, libyal_version)
 
-        if os.path.exists(dmg_filename):
+        if not os.path.exists(dmg_filename):
           print 'Building pkg of: {0:s}'.format(libyal_filename)
           if not build_helper.Build(libyal_filename):
             print 'Build of: {0:s} failed for more info check {1:s}'.format(
