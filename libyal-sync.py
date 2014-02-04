@@ -500,9 +500,11 @@ class PkgBuildHelper(BuildHelper):
 
       else:
         command = (
-            u'{0:s} --root macosx/tmp/ --identifier com.google.code.p.{1:s} '
-            u'--version {2:s} --ownership recommended {3:s}').format(
-                self._pkgbuild, library_name, library_version, pkg_filename)
+            u'{0:s} --root {1:s}/macosx/tmp/ '
+            u'--identifier com.google.code.p.{2:s} '
+            u'--version {3:d} --ownership recommended {4:s}').format(
+                self._pkgbuild, source_directory, library_name,
+                library_version, pkg_filename)
         exit_code = subprocess.call(command, shell=True)
         if exit_code != 0:
           logging.error(u'Running: "{0:s}" failed.'.format(command))
