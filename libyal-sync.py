@@ -427,11 +427,13 @@ class PkgBuildHelper(BuildHelper):
         u'/', u'Applications', u'PackageMaker.app', u'Contents', u'MacOS',
         u'PackageMaker')
 
-  def Build(self, source_filename):
+  def Build(self, source_filename, library_name, library_version):
     """Builds the pkg package and distributable disk image (.dmg).
 
     Args:
       source_filename: the name of the source package file.
+      library_name: the name of the library.
+      library_version: the version of the library.
 
     Returns:
       True if the build was successful, False otherwise.
@@ -946,7 +948,8 @@ def Main():
 
         if not os.path.exists(dmg_filename):
           print 'Building pkg of: {0:s}'.format(libyal_filename)
-          if not build_helper.Build(libyal_filename):
+          if not build_helper.Build(
+              libyal_filename, libyal_name, libyal_version):
             print 'Build of: {0:s} failed for more info check {1:s}'.format(
                 libyal_filename, build_helper.LOG_FILENAME)
             return False
