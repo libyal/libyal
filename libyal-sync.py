@@ -422,6 +422,7 @@ class PkgBuildHelper(BuildHelper):
   def __init__(self):
     """Initializes the build helper."""
     super(PkgBuildHelper, self).__init__()
+    self._pkgbuild = os.path.join(u'/', u'usr', u'bin', u'pkgbuild')
     self._package_maker = os.path.join(
         u'/', u'Applications', u'PackageMaker.app', u'Contents', u'MacOS',
         u'PackageMaker')
@@ -469,29 +470,41 @@ class PkgBuildHelper(BuildHelper):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      command = u'sudo chown -R root:wheel macosx/tmp/'
-      print 'This script now needs to run sudo as in: {0:s}'.format(command)
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
+      if os.path.exists(self._package_maker):
+        command = u'sudo chown -R root:wheel macosx/tmp/'
+        print 'This script now needs to run sudo as in: {0:s}'.format(command)
+        exit_code = subprocess.call(
+            u'(cd {0:s} && {1:s})'.format(source_directory, command),
+            shell=True)
+        if exit_code != 0:
+          logging.error(u'Running: "{0:s}" failed.'.format(command))
+          return False
 
-      command = (
-          u'{0:s} --doc {1:s}/macosx/{2:s}.pmdoc --out {2:s}').format(
-          self._package_maker, source_directory, pkg_filename)
-      exit_code = subprocess.call(command, shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
+        command = (
+            u'{0:s} --doc {1:s}/macosx/{2:s}.pmdoc --out {2:s}').format(
+                self._package_maker, source_directory, pkg_filename)
+        exit_code = subprocess.call(command, shell=True)
+        if exit_code != 0:
+          logging.error(u'Running: "{0:s}" failed.'.format(command))
+          return False
 
-      command = u'sudo rm -rf macosx/tmp/'
-      print 'This script now needs to run sudo as in: {0:s}'.format(command)
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
+        command = u'sudo rm -rf macosx/tmp/'
+        print 'This script now needs to run sudo as in: {0:s}'.format(command)
+        exit_code = subprocess.call(
+            u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+        if exit_code != 0:
+          logging.error(u'Running: "{0:s}" failed.'.format(command))
+          return False
+
+      else:
+        command = (
+            u'{0:s} --root macosx/tmp/ --identifier com.google.code.p.{1:s} '
+            u'--version {2:s} --ownership recommended {3:s}').format(
+                self._pkgbuild, library_name, library_version, pkg_filename)
+        exit_code = subprocess.call(command, shell=True)
+        if exit_code != 0:
+          logging.error(u'Running: "{0:s}" failed.'.format(command))
+          return False
 
     command = (
         u'hdiutil create {0:s} -srcfolder {1:s} -fs HFS+').format(
