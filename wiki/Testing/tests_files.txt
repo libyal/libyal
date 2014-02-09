@@ -1,5 +1,5 @@
 == Test files ==
-Note that *no* test files are provided by the project.
+*Note that no test files are provided by the project.*
 
 If you have your own test files the automated tests expect the files to be stored in sub directories of:
 {{{
