@@ -44,6 +44,7 @@ class ProjectConfiguration(object):
 
     # Functionality the project offsers.
     self.supports_debug_output = False
+    self.supports_tests = False
     self.supports_tools = False
     self.supports_python = False
 
@@ -69,6 +70,11 @@ class ProjectConfiguration(object):
     self.source_package_url = None
 
     self.git_url = None
+
+    self.tests_supports_valgrind = None
+    self.tests_profiles = None
+    self.tests_example_filename1 = None
+    self.tests_example_filename2 = None
 
     self.tools_names = None
 
@@ -136,6 +142,7 @@ class ProjectConfiguration(object):
     features = self._GetConfigValue(config_parser, 'Project', 'features')
 
     self.supports_debug_output = 'debug_output' in features
+    self.supports_tests = 'tests' in features
     self.supports_tools = 'tools' in features
     self.supports_python = 'python' in features
 
@@ -153,6 +160,23 @@ class ProjectConfiguration(object):
 
     self.supports_dokan = 'dokan' in features
     self.supports_fuse = 'fuse' in features
+
+    if self.supports_tests and not config_parser.has_section('tests'):
+      raise ConfigError(
+          'Support for tests enabled but no corresponding section: '
+          'tests is missing.')
+
+    if config_parser.has_section('tests'):
+      tests_features = self._GetConfigValue(config_parser, 'tests', 'features')
+
+      self.tests_supports_valgrind = 'valgrind' in tests_features
+
+      self.tests_profiles = self._GetConfigValue(
+          config_parser, 'tests', 'profiles')
+      self.tests_example_filename1 = self._GetConfigValue(
+          config_parser, 'tests', 'example_filename1')
+      self.tests_example_filename2 = self._GetConfigValue(
+          config_parser, 'tests', 'example_filename2')
 
     if self.supports_tools and not config_parser.has_section('tools'):
       raise ConfigError(
@@ -293,27 +317,38 @@ class ProjectConfiguration(object):
       A dictionary containing the string template mappings.
     """
     building_table_of_contents = ''
+
     project_status = ''
+
+    tests_profiles = ''
+
     cygwin_build_dependencies = ''
     cygwin_dll_dependencies = ''
     cygwin_executables = ''
+
     gcc_build_dependencies = ''
     gcc_static_build_dependencies = ''
     gcc_mount_tool = ''
+
     mingw_build_dependencies = ''
     mingw_dll_dependencies = ''
     mingw_executables = ''
+
     msvscpp_build_dependencies = ''
     msvscpp_build_git = ''
     msvscpp_dll_dependencies = ''
     msvscpp_mount_tool = ''
+
     dpkg_build_dependencies = ''
     dpkg_filenames = ''
+
     package_maker_configure_options = ''
     package_maker_pyprefix = ''
+
     rpm_build_dependencies = ''
     rpm_filenames = ''
     rpm_rename_source_package = ''
+
     mount_tool_source_description_long = ''
     mount_tool_supported_backends = ''
 
@@ -323,6 +358,10 @@ class ProjectConfiguration(object):
 
     if self.project_status:
       project_status += '-{0:s}'.format(self.project_status)
+
+    if self.supports_tests:
+      for profile in self.tests_profiles:
+        tests_profiles += '  * {0:s}\n'.format(profile)
 
     if self.supports_gcc or self.supports_mingw or self.supports_msvscpp:
       building_table_of_contents += (
@@ -557,6 +596,10 @@ class ProjectConfiguration(object):
         'source_package_url': self.source_package_url,
 
         'git_url': self.git_url,
+
+        'tests_profiles': tests_profiles,
+        'tests_example_filename1': self.tests_example_filename1,
+        'tests_example_filename2': self.tests_example_filename2,
 
         'cygwin_build_dependencies': cygwin_build_dependencies,
         'cygwin_dll_dependencies': cygwin_dll_dependencies,
@@ -797,6 +840,31 @@ class MountingPageGenerator(WikiPageGenerator):
         project_configuration, 'troubleshooting.txt', output_writer)
 
 
+class TestingPageGenerator(WikiPageGenerator):
+  """Class that generates the "Testing" wiki page."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates the wiki page.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_write: the output writer.
+    """
+    self._GenerateSection(
+        project_configuration, 'page_header.txt', output_writer)
+    self._GenerateSection(
+        project_configuration, 'tests.txt', output_writer)
+    self._GenerateSection(
+        project_configuration, 'tests_files.txt', output_writer)
+    self._GenerateSection(
+        project_configuration, 'tests_profiles.txt', output_writer)
+
+    if project_configuration.tests_supports_valgrind:
+      self._GenerateSection(
+          project_configuration, 'tests_valgrind.txt', output_writer)
+
+
 class FileWriter(object):
   """Class that defines a file output writer."""
 
@@ -912,6 +980,24 @@ def Main():
   wiki_page.Generate(project_configuration, output_writer)
 
   output_writer.Close()
+
+  if project_configuration.supports_tests:
+    if options.output_directory:
+      output_file = os.path.join(options.output_directory, 'Testing.wiki')
+      output_writer = FileWriter(output_file)
+    else:
+      output_writer = StdoutWriter()
+
+    if not output_writer.Open():
+      print u'Unable to open output writer.'
+      print u''
+      return False
+
+    template_directory = os.path.join(script_directory, 'wiki', 'Testing')
+    wiki_page = TestingPageGenerator(template_directory)
+    wiki_page.Generate(project_configuration, output_writer)
+
+    output_writer.Close()
 
   if (project_configuration.supports_dokan or
       project_configuration.supports_fuse):

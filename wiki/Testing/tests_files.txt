@@ -1,0 +1,13 @@
+== Test files ==
+Note that *no* test files are provided by the project.
+
+If you have your own test files the automated tests expect the files to be stored in sub directories of:
+{{{
+tests/input/
+}}}
+
+Every sub directory is considered a test set, e.g. the basic test set would be the directory:
+{{{
+tests/input/basic
+}}}
+

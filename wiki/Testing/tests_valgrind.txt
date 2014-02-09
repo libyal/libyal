@@ -1,0 +1,12 @@
+== Detecting memory leakage ==
+The tests can also be run with valgrind to detect memory leakage.
+
+*Running the automated tests with valgrind will significantly impact the speed at which they are run.*
+
+To run the automated tests with valgrind:
+{{{
+export CHECK_WITH_VALGRIND=1; make check; export CHECK_WITH_VALGRIND=;
+}}}
+
+If the automated test process detects memory leaks it will end the specific test and indicate it failed.
+
