@@ -33,7 +33,6 @@ import urllib2
 
 LIBYAL_LIBRARIES = frozenset([
     'libbde',
-    'libesedb',
     'libevt',
     'libevtx',
     'libewf',
@@ -868,7 +867,8 @@ class VisualStudioBuildHelper(BuildHelper):
 
 
 def Main():
-  build_targets = frozenset(['dpkg', 'pkg', 'rpm', 'vs2008', 'vs2010'])
+  build_targets = frozenset([
+      'download', 'dpkg', 'pkg', 'rpm', 'vs2008', 'vs2010'])
 
   args_parser = argparse.ArgumentParser(description=(
       'Downloads and builds the latest versions of the libyal libraries.'))
