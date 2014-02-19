@@ -482,7 +482,7 @@ class PkgBuildHelper(BuildHelper):
           return False
 
         command = (
-            u'{0:s} --doc {1:s}/macosx/{2:s}.pmdoc --out {2:s}').format(
+            u'{0:s} --doc {1:s}/macosx/{1:s}.pmdoc --out {2:s}').format(
                 self._package_maker, source_directory, pkg_filename)
         exit_code = subprocess.call(command, shell=True)
         if exit_code != 0:
