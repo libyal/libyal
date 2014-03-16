@@ -579,9 +579,9 @@ class RpmBuildHelper(BuildHelper):
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
-      return True
+      return False
 
-    return False
+    return True
 
   def Clean(self, library_name, dummy_library_version):
     """Cleans the rpmbuild directory.
