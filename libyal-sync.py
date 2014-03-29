@@ -44,6 +44,7 @@ LIBYAL_LIBRARIES = frozenset([
     'libpff',
     'libqcow',
     'libregf',
+    'libsmdev',
     'libsmraw',
     'libvhdi',
     'libvmdk',
@@ -583,7 +584,7 @@ class RpmBuildHelper(BuildHelper):
 
     return True
 
-  def Clean(self, library_name, dummy_library_version):
+  def Clean(self, library_name, unused_library_version):
     """Cleans the rpmbuild directory.
 
     Args:
