@@ -1057,7 +1057,7 @@ def Main():
             return False
 
       elif options.build_target in ['vs2008', 'vs2010', 'vs2012', 'vs2013']:
-        if self.version == '2013':
+        if options.build_target == 'vs2013':
           logging.warning(u'Untested experimental build target: vs2013.')
 
         build_helper = VisualStudioBuildHelper(options.build_target[2:])
