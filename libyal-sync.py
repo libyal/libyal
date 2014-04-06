@@ -836,12 +836,20 @@ class VisualStudioBuildHelper(BuildHelper):
 
     self._BuildPrepare(source_directory)
 
-    # TODO: detect architecture, e.g.
-    # python -c 'import platform; print platform.architecture()[0];'
-    if self.version == '2008':
+    # Detect architecture based on Visual Studion Platform environment
+    # variable. If not set the platform with default to Win32.
+    msvscpp_platform = os.environ['Platform']
+    if not msvscpp_platform:
       msvscpp_platform = 'Win32'
-    elif self.version in ['2010', '2012', '2013']:
-      msvscpp_platform = 'x64'
+
+    if msvscpp_platform not in ['Win32', 'x64']:
+      logging.error(u'Unsupported build platform: {0:s}'.format(
+          msvscpp_platform))
+      return False
+
+    if self.version == '2008' and msvscpp_platform == 'x64':
+      logging.error(u'Unsupported 64-build platform for vs2008.')
+      return False
 
     solution_filenames = glob.glob(os.path.join(
         source_directory, u'msvscpp', u'*.sln'))
@@ -1049,6 +1057,9 @@ def Main():
             return False
 
       elif options.build_target in ['vs2008', 'vs2010', 'vs2012', 'vs2013']:
+        if self.version == '2013':
+          logging.warning(u'Untested experimental build target: vs2013.')
+
         build_helper = VisualStudioBuildHelper(options.build_target[2:])
         release_directory = build_helper.GetOutputFilename(
             libyal_name, libyal_version)
