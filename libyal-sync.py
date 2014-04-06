@@ -3,7 +3,7 @@
 #
 # Script to automate creating builds of libyal libraries.
 #
-# Copyright (c) 2013, Joachim Metz <joachim.metz@gmail.com>
+# Copyright (c) 2013-2014, Joachim Metz <joachim.metz@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ LIBYAL_LIBRARIES = frozenset([
     'libevtx',
     'libewf',
     'libexe',
-    'libfvde',
     'liblnk',
     'libmsiecf',
     'libolecf',
@@ -273,6 +272,24 @@ class BuildHelper(object):
 class DpkgBuildHelper(BuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
+  BUILD_DEPENDENCIES = frozenset([
+      'build-essential',
+      'autoconf',
+      'automake',
+      'autopoint',
+      'libtool',
+      'gettext',
+      'debhelper',
+      'fakeroot',
+      'quilt',
+      'autotools-dev',
+      'zlib1g-dev',
+      'libssl-dev',
+      'libfuse-dev',
+      'python-dev',
+      'python-setuptools',
+  ])
+
   def __init__(self):
     """Initializes the build helper."""
     super(DpkgBuildHelper, self).__init__()
@@ -369,6 +386,14 @@ class DpkgBuildHelper(BuildHelper):
       return False
 
     return True
+
+  def CheckBuildEnvironment(self):
+    """Checks if the build environment is sane."""
+    # TODO: allow to pass additional dependencies or determine them
+    # from the dpkg files.
+
+    # TODO: check if build environment has all the dependencies.
+    # sudo dpkg -l <package>
 
   def Clean(self, library_name, library_version):
     """Cleans the dpkg packages in the current directory.
@@ -566,11 +591,13 @@ class RpmBuildHelper(BuildHelper):
     self.rpmbuild_path = os.path.join(u'~', u'rpmbuild')
     self.rpmbuild_path = os.path.expanduser(self.rpmbuild_path)
 
-  def Build(self, source_filename):
+  def Build(self, source_filename, library_name, library_version):
     """Builds the rpms.
 
     Args:
       source_filename: the name of the source package file.
+      library_name: the name of the library.
+      library_version: the version of the library.
 
     Returns:
       True if the build was successful, False otherwise.
@@ -582,9 +609,17 @@ class RpmBuildHelper(BuildHelper):
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
 
+    # Move the rpms to the build directory.
+    filenames = glob.glob(os.path.join(
+        self.rpmbuild_path, u'RPMS', self.architecture,
+        u'{0:s}-*-1.{1:s}.rpm'.format(library_name, self.architecture)))
+    for filename in filenames:
+      logging.info(u'Moving: {0:s}'.format(filename))
+      shutil.move(filename, '.')
+
     return True
 
-  def Clean(self, library_name, unused_library_version):
+  def Clean(self, library_name, library_version):
     """Cleans the rpmbuild directory.
 
     Args:
@@ -599,12 +634,25 @@ class RpmBuildHelper(BuildHelper):
       shutil.rmtree(filename)
 
     # Remove previous versions of rpms.
-    filenames = glob.glob(os.path.join(
-        self.rpmbuild_path, u'RPMS', self.architecture,
-        u'{0:s}-*-1.{1:s}.rpm'.format(library_name, self.architecture)))
+    filenames_to_ignore = re.compile(
+        u'{0:s}-.*{1:d}-1.{2:s}.rpm'.format(
+            library_name, library_version, self.architecture))
+
+    rpm_filenames_glob = u'{0:s}-*-1.{1:s}.rpm'.format(
+        library_name, self.architecture)
+
+    filenames = glob.glob(rpm_filenames_glob)
     for filename in filenames:
-      logging.info(u'Removing: {0:s}'.format(filename))
-      os.remove(filename)
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    filenames = glob.glob(os.path.join(
+        self.rpmbuild_path, u'RPMS', self.architecture, rpm_filenames_glob))
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
 
     # Remove previous versions of source rpms.
     filenames = glob.glob(os.path.join(
@@ -624,10 +672,8 @@ class RpmBuildHelper(BuildHelper):
     Returns:
       A filename of one of the resulting rpms.
     """
-    return os.path.join(
-        self.rpmbuild_path, u'RPMS', self.architecture,
-        u'{0:s}-{1:d}-1.{2:s}.rpm'.format(
-            library_name, library_version, self.architecture))
+    return u'{0:s}-{1:d}-1.{2:s}.rpm'.format(
+        library_name, library_version, self.architecture)
 
 
 class VisualStudioBuildHelper(BuildHelper):
@@ -937,10 +983,21 @@ def Main():
         build_helper.Clean(libyal_name, libyal_version)
 
         if not os.path.exists(deb_filename):
+          # TODO: add call to CheckBuildEnvironment or only do this once?
+
           print 'Building deb of: {0:s}'.format(libyal_filename)
           if not build_helper.Build(libyal_filename):
             print 'Build of: {0:s} failed for more info check {1:s}'.format(
                 libyal_filename, build_helper.LOG_FILENAME)
+            return False
+
+      elif options.build_target == 'download':
+        # If available run the script post-download.sh after download.
+        if os.path.exists(u'post-download.sh'):
+          command = u'sh ./post-download.sh {0:s}'.format(libyal_filename)
+          exit_code = subprocess.call(command, shell=True)
+          if exit_code != 0:
+            logging.error(u'Running: "{0:s}" failed.'.format(command))
             return False
 
       elif options.build_target == 'pkg':
@@ -972,7 +1029,8 @@ def Main():
           os.rename(libyal_filename, source_filename)
 
           print 'Building rpm of: {0:s}'.format(libyal_filename)
-          build_successful = build_helper.Build(source_filename)
+          build_successful = build_helper.Build(
+              source_filename, libyal_name, libyal_version)
 
           # Change the library filename back to the original.
           os.rename(source_filename, libyal_filename)
