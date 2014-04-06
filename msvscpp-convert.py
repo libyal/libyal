@@ -90,7 +90,7 @@ class VSConfigurations(object):
         if configuration.platform != 'x64':
           x64_configuration = configuration.CopyToX64()
 
-          #self.Append(x64_configuration)
+          self.Append(x64_configuration)
 
   def GetByIdentifier(self, name, platform):
     """Retrieves a specific configuration by identtifier.
