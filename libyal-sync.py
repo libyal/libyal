@@ -760,8 +760,8 @@ class VisualStudioBuildHelper(BuildHelper):
 
     if not os.path.exists(u'vs2008'):
       # TODO: redirect the output to build.log?
-      command = u'{0:s} {1:s} {2:s}'.format(
-          sys.executable, msvscpp_convert, solution_filename)
+      command = u'{0:s} {1:s} --to {2:s} {3:s}'.format(
+          sys.executable, msvscpp_convert, self.version, solution_filename)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -799,7 +799,7 @@ class VisualStudioBuildHelper(BuildHelper):
 
     # Note that MSBuild in .NET 3.5 does not support vs2010 solution files
     # and MSBuild in .NET 4.0 is needed instead.
-    elif self.version == '2010':
+    elif self.version in ['2010', '2012', '2013']:
       msbuild = u'{0:s}:{1:s}{2:s}'.format(
           u'C', os.sep, os.path.join(
               u'Windows', u'Microsoft.NET', u'Framework', u'v4.0.30319',
@@ -824,9 +824,14 @@ class VisualStudioBuildHelper(BuildHelper):
         logging.error(u'Missing VS110COMNTOOLS environment variable.')
         return False
 
+    elif self.version == '2013':
+      if not os.environ['VS120COMNTOOLS']:
+        logging.error(u'Missing VS120COMNTOOLS environment variable.')
+        return False
+
     # For the Visual Studio builds later than 2008 the convert the 2008
     # solution and project files need to be converted to the newer version.
-    if self.version in ['2010', '2012']:
+    if self.version in ['2010', '2012', '2013']:
       self._ConvertSolutionFiles(source_directory)
 
     self._BuildPrepare(source_directory)
@@ -835,7 +840,7 @@ class VisualStudioBuildHelper(BuildHelper):
     # python -c 'import platform; print platform.architecture()[0];'
     if self.version == '2008':
       msvscpp_platform = 'Win32'
-    elif self.version == '2010':
+    elif self.version in ['2010', '2012', '2013']:
       msvscpp_platform = 'x64'
 
     solution_filenames = glob.glob(os.path.join(
@@ -874,6 +879,9 @@ class VisualStudioBuildHelper(BuildHelper):
 
       elif self.version == '2012':
         os.environ['VS90COMNTOOLS'] = os.environ['VS110COMNTOOLS']
+
+      elif self.version == '2013':
+        os.environ['VS90COMNTOOLS'] = os.environ['VS120COMNTOOLS']
 
       # TODO: redirect the output to build.log?
       command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
@@ -916,13 +924,13 @@ class VisualStudioBuildHelper(BuildHelper):
 
 def Main():
   build_targets = frozenset([
-      'download', 'dpkg', 'pkg', 'rpm', 'vs2008', 'vs2010'])
+      'download', 'dpkg', 'pkg', 'rpm', 'vs2008', 'vs2010', 'vs2012', 'vs2013'])
 
   args_parser = argparse.ArgumentParser(description=(
       'Downloads and builds the latest versions of the libyal libraries.'))
 
   args_parser.add_argument(
-      'build_target', choices=build_targets, action='store',
+      'build_target', choices=sorted(build_targets), action='store',
       metavar='BUILD_TARGET', default=None, help='The build target.')
 
   # TODO allow to set msbuild, packagemaker, python path
@@ -1040,7 +1048,7 @@ def Main():
                 libyal_filename, build_helper.LOG_FILENAME)
             return False
 
-      elif options.build_target in ['vs2008', 'vs2010']:
+      elif options.build_target in ['vs2008', 'vs2010', 'vs2012', 'vs2013']:
         build_helper = VisualStudioBuildHelper(options.build_target[2:])
         release_directory = build_helper.GetOutputFilename(
             libyal_name, libyal_version)
