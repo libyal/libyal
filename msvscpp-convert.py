@@ -23,7 +23,11 @@
 # TODO: allow to generate from source tree, e.g. Makefile.am?
 # TODO: add automated tests.
 # TODO: complete vs2010 reader.
+# TODO: complete vs2012 reader.
+# TODO: complete vs2013 reader.
 # TODO: complete vs2008 writer.
+# TODO: complete vs2012 writer.
+# TODO: complete vs2013 writer.
 
 import abc
 import argparse
@@ -75,12 +79,18 @@ class VSConfigurations(object):
 
     self._configurations[identifier] = configuration
 
-  def ExtendWithX64(self):
-    """Extends the configurations with the x64 platform."""
+  def ExtendWithX64(self, output_version):
+    """Extends the configurations with the x64 platform.
+
+    Args:
+      output_version: the output Visual Studio version.
+    """
     if 'x64' not in self.platforms:
       for configuration in self._configurations.values():
         if configuration.platform != 'x64':
-          self.Append(configuration.CopyToX64())
+          x64_configuration = configuration.CopyToX64()
+
+          #self.Append(x64_configuration)
 
   def GetByIdentifier(self, name, platform):
     """Retrieves a specific configuration by identtifier.
@@ -336,7 +346,7 @@ class VSProjectConfiguration(VSConfiguration):
     copy.optimization = self.optimization
     copy.output_type = self.output_type
     copy.platform = 'x64'
-    copy.platform_toolset = 'Windows7.1SDK'
+    copy.platform_toolset = ''
     copy.precompiled_header = self.precompiled_header
     copy.preprocessor_definitions = self.preprocessor_definitions
     copy.randomized_base_address = self.randomized_base_address
@@ -349,6 +359,20 @@ class VSProjectConfiguration(VSConfiguration):
     copy.whole_program_optimization = self.whole_program_optimization
 
     return copy
+
+  def GetPlatformToolset(self, output_version):
+    """Retrieves the platform toolset.
+
+    Args:
+      output_version: the output Visual Studio version.
+    """
+    platform_toolset = self.platform_toolset
+    if not platform_toolset:
+      if output_version == 2010 and self.platform == 'x64':
+        platform_toolset = 'Windows7.1SDK'
+      elif output_version == 2012:
+        platform_toolset = 'v110'
+    return platform_toolset
 
 
 class VSProjectInformation(object):
@@ -403,20 +427,20 @@ class FileReader(object):
   """Class to represent a file reader."""
 
   def __init__(self):
-    """Initializes a Visual Studio solution file reader."""
+    """Initializes a file reader."""
     self._line = None
 
   def Open(self, filename):
-    """Opens the solution file.
+    """Opens the file.
 
     Args:
-      filename: the filename of the solution file.
+      filename: the filename of the file.
     """
     # For reading these files we don't care about the actual end of lines.
     self._file = open(filename, 'r')
 
   def Close(self):
-    """Closes the solution file."""
+    """Closes the file."""
     self._file.close()
 
   def _ReadLine(self, look_ahead=False):
@@ -912,6 +936,17 @@ class VS2008ProjectFileReader(VSProjectFileReader):
 
 class VS2010ProjectFileReader(VSProjectFileReader):
   """Class to represent a Visual Studio 2010 project file reader."""
+  # TODO: implement.
+
+
+class VS2012ProjectFileReader(VSProjectFileReader):
+  """Class to represent a Visual Studio 2012 project file reader."""
+  # TODO: implement.
+
+
+class VS2013ProjectFileReader(VSProjectFileReader):
+  """Class to represent a Visual Studio 2013 project file reader."""
+  # TODO: implement.
 
 
 class VSProjectFileWriter(object):
@@ -950,18 +985,27 @@ class VSProjectFileWriter(object):
 
 class VS2008ProjectFileWriter(VSProjectFileWriter):
   """Class to represent a Visual Studio 2008 project file writer."""
+  # TODO: implement.
 
 
 class VS2010ProjectFileWriter(VSProjectFileWriter):
   """Class to represent a Visual Studio 2010 project file writer."""
+
+  def __init__(self):
+    """Initializes a Visual Studio project file writer."""
+    super(VS2010ProjectFileWriter, self).__init__()
+    self._project_file_version = '10.0.40219.1'
+    self._tools_version = '4.0'
+    self._version = 2010
 
   def WriteHeader(self):
     """Writes a file header."""
     self._file.write('\xef\xbb\xbf')
     self.WriteLines([
         '<?xml version="1.0" encoding="utf-8"?>',
-        '<Project DefaultTargets="Build" ToolsVersion="4.0" '
-        'xmlns="http://schemas.microsoft.com/developer/msbuild/2003">'])
+        ('<Project DefaultTargets="Build" ToolsVersion="{0:s}" '
+         'xmlns="http://schemas.microsoft.com/developer/msbuild/2003">').format(
+            self._tools_version)])
 
   def WriteProjectConfigurations(self, configurations):
     """Writes the project configurations.
@@ -1003,6 +1047,385 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
 
     self.WriteLine('  </PropertyGroup>')
 
+  def _WriteConfigurationPropertyGroup(self, configuration):
+    """Writes the configuration property group.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    self.WriteLine((
+        '  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'=='
+        '\'{0:s}|{1:s}\'" Label="Configuration">').format(
+            configuration.name, configuration.platform))
+
+    self.WriteLine('    <ConfigurationType>{0:s}</ConfigurationType>'.format(
+        configuration.output_type_string))
+
+    if configuration.character_set:
+      self.WriteLine('    <CharacterSet>{0:s}</CharacterSet>'.format(
+          configuration.character_set_string))
+
+    if configuration.managed_extensions == '1':
+      self.WriteLine('    <CLRSupport>true</CLRSupport>')
+
+    if configuration.whole_program_optimization:
+      self.WriteLine((
+          '    <WholeProgramOptimization>{0:s}'
+          '</WholeProgramOptimization>').format(
+              configuration.whole_program_optimization_string))
+
+    platform_toolset = configuration.GetPlatformToolset(self._version)
+    if platform_toolset:
+      self.WriteLine('    <PlatformToolset>{0:s}</PlatformToolset>'.format(
+          platform_toolset))
+
+    self.WriteLine('  </PropertyGroup>')
+
+  def _WriteOutIntDirConditions(self, configuration_name, configurations):
+    """Writes the OutDir and IntDir conditions.
+
+    Args:
+      configuration_name: the name of the configuration.
+      configurations: the configurations (instance of VSConfigurations).
+    """
+    for configuration_platform in sorted(configurations.platforms):
+      configuration = configurations.GetByIdentifier(
+          configuration_name, configuration_platform)
+
+      self.WriteLine((
+          '    <OutDir Condition="\'$(Configuration)|$(Platform)\'=='
+          '\'{0:s}|{1:s}\'">$(SolutionDir)$(Configuration)\\'
+          '</OutDir>').format(
+              configuration.name, configuration.platform))
+
+    for configuration_platform in sorted(configurations.platforms):
+      configuration = configurations.GetByIdentifier(
+          configuration_name, configuration_platform)
+
+      self.WriteLine((
+          '    <IntDir Condition="\'$(Configuration)|$(Platform)\'=='
+          '\'{0:s}|{1:s}\'">$(Configuration)\\</IntDir>').format(
+              configuration.name, configuration.platform))
+
+  def _WriteOutIntDirPropertyGroups(self, configurations):
+    """Writes the OutDir and IntDir property groups.
+
+    Args:
+      configurations: the configurations (instance of VSConfigurations).
+    """
+    self.WriteLines([
+        '  <PropertyGroup>',
+        '    <_ProjectFileVersion>{0:s}</_ProjectFileVersion>'.format(
+            self._project_file_version)])
+
+    # Mimic Visual Studio behavior and output the configurations
+    # in platforms by name.
+    for configuration_name in sorted(configurations.names):
+      self._WriteOutIntDirConditions(configuration_name, configurations)
+
+      for configuration_platform in sorted(configurations.platforms):
+        configuration = configurations.GetByIdentifier(
+            configuration_name, configuration_platform)
+
+        if configuration.link_incremental != '':
+          self.WriteLine((
+              '    <LinkIncremental Condition="\'$(Configuration)|'
+              '$(Platform)\'==\'{0:s}|{1:s}\'">{2:s}</LinkIncremental>').format(
+                  configuration.name, configuration.platform,
+                  configuration.link_incremental_string))
+
+    self.WriteLine('  </PropertyGroup>')
+
+  def _WriteClCompileSection(self, configuration):
+    """Writes the CLCompile section.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    include_directories = re.sub(
+        r'&quot;', r'', configuration.include_directories)
+
+    if include_directories and include_directories[-1] != ';':
+      include_directories = '{0:s};'.format(
+          include_directories)
+
+    include_directories = (
+        '{0:s}%(AdditionalIncludeDirectories)').format(
+        include_directories)
+
+    preprocessor_definitions = configuration.preprocessor_definitions
+
+    if preprocessor_definitions and preprocessor_definitions[-1] != ';':
+      preprocessor_definitions = '{0:s};'.format(preprocessor_definitions)
+
+    preprocessor_definitions = (
+        '{0:s}%(PreprocessorDefinitions)').format(
+        preprocessor_definitions)
+
+    self.WriteLine('    <ClCompile>')
+
+    if configuration.optimization != '':
+      self.WriteLine('      <Optimization>{0:s}</Optimization>'.format(
+          configuration.optimization_string))
+
+    if configuration.enable_intrinsic_functions != '':
+      self.WriteLine((
+          '      <IntrinsicFunctions>{0:s}</IntrinsicFunctions>').format(
+              configuration.enable_intrinsic_functions))
+
+    if configuration.whole_program_optimization:
+      self.WriteLine((
+          '      <WholeProgramOptimization>{0:s}'
+          '</WholeProgramOptimization>').format(
+              configuration.whole_program_optimization_string))
+
+    self.WriteLine((
+        '      <AdditionalIncludeDirectories>{0:s}'
+        '</AdditionalIncludeDirectories>').format(include_directories))
+
+    self.WriteLine((
+        '      <PreprocessorDefinitions>{0:s}'
+        '</PreprocessorDefinitions>').format(preprocessor_definitions))
+
+    if configuration.basic_runtime_checks != '':
+      self.WriteLine((
+          '      <BasicRuntimeChecks>{0:s}'
+          '</BasicRuntimeChecks>').format(
+              configuration.basic_runtime_checks_string))
+
+    if configuration.smaller_type_check != '':
+      self.WriteLine((
+          '      <SmallerTypeCheck>{0:s}</SmallerTypeCheck>').format(
+              configuration.smaller_type_check))
+
+    self.WriteLine((
+        '      <RuntimeLibrary>{0:s}</RuntimeLibrary>').format(
+            configuration.runtime_librarian_string))
+
+    if configuration.enable_function_level_linking != '':
+      self.WriteLine((
+          '      <FunctionLevelLinking>{0:s}</FunctionLevelLinking>').format(
+              configuration.enable_function_level_linking))
+
+    if configuration.precompiled_header != '':
+      # A value of 0 is represented by a new line.
+      if configuration.precompiled_header == '0':
+        self.WriteLines([
+            '      <PrecompiledHeader>',
+            '      </PrecompiledHeader>'])
+      else:
+        self.WriteLine((
+            '      <PrecompiledHeader>{0:s}</PrecompiledHeader>').format(
+                configuration.precompiled_header_string))
+
+    self.WriteLine('      <WarningLevel>{0:s}</WarningLevel>'.format(
+        configuration.warning_level_string))
+
+    if configuration.warning_as_error:
+      self.WriteLine((
+          '      <TreatWarningAsError>{0:s}'
+          '</TreatWarningAsError>').format(configuration.warning_as_error))
+
+    if configuration.debug_information_format != '':
+      # A value of 0 is represented by a new line.
+      if configuration.debug_information_format == '0':
+        self.WriteLines([
+            '      <DebugInformationFormat>',
+            '      </DebugInformationFormat>'])
+      else:
+        self.WriteLine((
+            '      <DebugInformationFormat>{0:s}'
+            '</DebugInformationFormat>').format(
+                configuration.debug_information_format_string))
+
+    if configuration.compile_as:
+      self.WriteLine('      <CompileAs>{0:s}</CompileAs>'.format(
+          configuration.compile_as_string))
+
+    self.WriteLine('    </ClCompile>')
+
+  def _WriteLibrarianSection(self, configuration):
+    """Writes the librarian section.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    librarian_output_file = re.sub(
+        r'[$][(]OutDir[)]\\', r'$(OutDir)',
+        configuration.librarian_output_file)
+
+    self.WriteLines([
+        '    <Lib>',
+        '      <OutputFile>{0:s}</OutputFile>'.format(librarian_output_file)])
+
+    if configuration.module_definition_file != '':
+      self.WriteLine((
+           '      <ModuleDefinitionFile>{0:s}'
+           '</ModuleDefinitionFile>').format(
+               configuration.module_definition_file))
+    else:
+      self.WriteLines([
+           '      <ModuleDefinitionFile>',
+           '      </ModuleDefinitionFile>'])
+
+    if configuration.librarian_ignore_defaults != '':
+      self.WriteLine((
+           '      <IgnoreAllDefaultLibraries>{0:s}'
+           '</IgnoreAllDefaultLibraries>').format(
+               configuration.librarian_ignore_defaults))
+
+    self.WriteLine('    </Lib>')
+
+  def _WriteLinkerSection(self, configuration):
+    """Writes the linker section.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    self.WriteLine('    <Link>')
+
+    # Visual Studio will convert an empty additional dependencies value.
+    if configuration.dependencies_set:
+      dependencies = re.sub(
+          r'[.]lib ', r'.lib;', configuration.dependencies)
+      dependencies = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)', dependencies)
+
+      if dependencies and dependencies[-1] != ';':
+        dependencies = '{0:s};'.format(dependencies)
+
+      dependencies = (
+          '{0:s}%(AdditionalDependencies)').format(
+          dependencies)
+
+      self.WriteLine((
+          '      <AdditionalDependencies>{0:s}'
+          '</AdditionalDependencies>').format(
+              dependencies))
+
+    if configuration.linker_output_file:
+      linker_output_file = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)',
+          configuration.linker_output_file)
+
+      self.WriteLine('      <OutputFile>{0:s}</OutputFile>'.format(
+          linker_output_file))
+
+      if configuration.module_definition_file != '':
+        self.WriteLine((
+             '      <ModuleDefinitionFile>{0:s}'
+             '</ModuleDefinitionFile>').format(
+                 configuration.module_definition_file))
+
+    if configuration.library_directories:
+      library_directories = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)',
+          configuration.library_directories)
+      library_directories = re.sub(
+          r'&quot;', r'', library_directories)
+
+      if library_directories and library_directories[-1] != ';':
+        library_directories = '{0:s};'.format(library_directories)
+
+      library_directories = (
+          '{0:s}%(AdditionalLibraryDirectories)').format(
+          library_directories)
+
+      self.WriteLine((
+          '      <AdditionalLibraryDirectories>{0:s}'
+          '</AdditionalLibraryDirectories>').format(
+              library_directories))
+
+    if configuration.generate_debug_information != '':
+      self.WriteLine((
+          '      <GenerateDebugInformation>{0:s}'
+          '</GenerateDebugInformation>').format(
+              configuration.generate_debug_information))
+
+    if configuration.sub_system != '':
+      self.WriteLine('      <SubSystem>{0:s}</SubSystem>'.format(
+          configuration.sub_system_string))
+
+    if configuration.optimize_references == '0':
+      self.WriteLines([
+          '      <OptimizeReferences>',
+          '      </OptimizeReferences>'])
+
+    elif configuration.optimize_references != '':
+      self.WriteLine((
+          '      <OptimizeReferences>{0:s}</OptimizeReferences>').format(
+              configuration.optimize_references_string))
+
+    if configuration.enable_comdat_folding == '0':
+      self.WriteLines([
+          '      <EnableCOMDATFolding>',
+          '      </EnableCOMDATFolding>'])
+
+    elif configuration.enable_comdat_folding != '':
+      self.WriteLine((
+          '      <EnableCOMDATFolding>{0:s}</EnableCOMDATFolding>').format(
+              configuration.enable_comdat_folding_string))
+
+    if configuration.randomized_base_address != '':
+      self.WriteLine((
+          '      <RandomizedBaseAddress>{0:s}'
+          '</RandomizedBaseAddress>').format(
+              configuration.randomized_base_address_string))
+
+    if configuration.fixed_base_address == '0':
+      self.WriteLines([
+          '      <FixedBaseAddress>',
+          '      </FixedBaseAddress>'])
+
+    if configuration.data_execution_prevention != '':
+      # A value of 0 is represented by a new line.
+      if configuration.data_execution_prevention == '0':
+        self.WriteLines([
+            '      <DataExecutionPrevention>',
+            '      </DataExecutionPrevention>'])
+      else:
+        self.WriteLine((
+            '      <DataExecutionPrevention>{0:s}'
+            '</DataExecutionPrevention>').format(
+                configuration.data_execution_prevention_string))
+
+    if configuration.import_library:
+      import_library = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)',
+          configuration.import_library)
+
+      self.WriteLine('      <ImportLibrary>{0:s}</ImportLibrary>'.format(
+          import_library))
+
+    if configuration.target_machine != '':
+      self.WriteLine('      <TargetMachine>{0:s}</TargetMachine>'.format(
+          configuration.target_machine_string))
+
+    self.WriteLine('    </Link>')
+
+  def _WriteItemDefinitionGroup(self, configuration):
+    """Writes the item definition group.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    self.WriteLine((
+        '  <ItemDefinitionGroup Condition="\'$(Configuration)|'
+        '$(Platform)\'==\'{0:s}|{1:s}\'">').format(
+            configuration.name, configuration.platform))
+
+    # Write the compiler specific section.
+    self._WriteClCompileSection(configuration)
+
+    # Write the librarian specific section.
+    if configuration.librarian_output_file:
+      self._WriteLibrarianSection(configuration)
+
+    # Write the linker specific section.
+    if configuration.linker_values_set:
+      self._WriteLinkerSection(configuration)
+
+    self.WriteLine('  </ItemDefinitionGroup>')
 
   def WriteConfigurations(self, configurations):
     """Writes the configurations.
@@ -1016,32 +1439,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     # Mimic Visual Studio behavior and output the configurations
     # in reverse order of name.
     for configuration in configurations.GetSorted(reverse=True):
-      self.WriteLine((
-          '  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'=='
-          '\'{0:s}|{1:s}\'" Label="Configuration">').format(
-              configuration.name, configuration.platform))
-
-      self.WriteLine('    <ConfigurationType>{0:s}</ConfigurationType>'.format(
-          configuration.output_type_string))
-
-      if configuration.character_set:
-        self.WriteLine('    <CharacterSet>{0:s}</CharacterSet>'.format(
-            configuration.character_set_string))
-
-      if configuration.managed_extensions == '1':
-        self.WriteLine('    <CLRSupport>true</CLRSupport>')
-
-      if configuration.whole_program_optimization:
-        self.WriteLine((
-            '    <WholeProgramOptimization>{0:s}'
-            '</WholeProgramOptimization>').format(
-                configuration.whole_program_optimization_string))
-
-      if configuration.platform_toolset:
-        self.WriteLine('    <PlatformToolset>{0:s}</PlatformToolset>'.format(
-            configuration.platform_toolset))
-
-      self.WriteLine('  </PropertyGroup>')
+      self._WriteConfigurationPropertyGroup(configuration)
 
     self.WriteLines([
         '  <Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />',
@@ -1060,308 +1458,12 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
            '.$(Platform).user.props\')" Label="LocalAppDataPlatform" />'),
           '  </ImportGroup>'])
 
-    self.WriteLines([
-        '  <PropertyGroup Label="UserMacros" />',
-        '  <PropertyGroup>',
-        '    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>'])
+    self.WriteLine('  <PropertyGroup Label="UserMacros" />')
 
-    # Mimic Visual Studio behavior and output the configurations
-    # in platforms by name.
-    for configuration_name in sorted(configurations.names):
-      for configuration_platform in sorted(configurations.platforms):
-        configuration = configurations.GetByIdentifier(
-            configuration_name, configuration_platform)
-
-        self.WriteLine((
-            '    <OutDir Condition="\'$(Configuration)|$(Platform)\'=='
-            '\'{0:s}|{1:s}\'">$(SolutionDir)$(Configuration)\\'
-            '</OutDir>').format(
-                configuration.name, configuration.platform))
-
-      for configuration_platform in sorted(configurations.platforms):
-        configuration = configurations.GetByIdentifier(
-            configuration_name, configuration_platform)
-
-        self.WriteLine((
-            '    <IntDir Condition="\'$(Configuration)|$(Platform)\'=='
-            '\'{0:s}|{1:s}\'">$(Configuration)\\</IntDir>').format(
-                configuration.name, configuration.platform))
-
-      for configuration_platform in sorted(configurations.platforms):
-        configuration = configurations.GetByIdentifier(
-            configuration_name, configuration_platform)
-
-        if configuration.link_incremental != '':
-          self.WriteLine((
-              '    <LinkIncremental Condition="\'$(Configuration)|'
-              '$(Platform)\'==\'{0:s}|{1:s}\'">{2:s}</LinkIncremental>').format(
-                  configuration.name, configuration.platform,
-                  configuration.link_incremental_string))
-
-    self.WriteLine('  </PropertyGroup>')
+    self._WriteOutIntDirPropertyGroups(configurations)
 
     for configuration in configurations.GetSorted():
-      self.WriteLine((
-          '  <ItemDefinitionGroup Condition="\'$(Configuration)|'
-          '$(Platform)\'==\'{0:s}|{1:s}\'">').format(
-              configuration.name, configuration.platform))
-
-      include_directories = re.sub(
-          r'&quot;', r'', configuration.include_directories)
-
-      if include_directories and include_directories[-1] != ';':
-        include_directories = '{0:s};'.format(
-            include_directories)
-  
-      include_directories = (
-          '{0:s}%(AdditionalIncludeDirectories)').format(
-          include_directories)
-  
-      preprocessor_definitions = configuration.preprocessor_definitions
-
-      if preprocessor_definitions and preprocessor_definitions[-1] != ';':
-        preprocessor_definitions = '{0:s};'.format(preprocessor_definitions)
-  
-      preprocessor_definitions = (
-          '{0:s}%(PreprocessorDefinitions)').format(
-          preprocessor_definitions)
-  
-      # Write the compiler specific section.
-      self.WriteLine('    <ClCompile>')
-
-      if configuration.optimization != '':
-        self.WriteLine('      <Optimization>{0:s}</Optimization>'.format(
-            configuration.optimization_string))
-
-      if configuration.enable_intrinsic_functions != '':
-        self.WriteLine((
-            '      <IntrinsicFunctions>{0:s}</IntrinsicFunctions>').format(
-                configuration.enable_intrinsic_functions))
-
-      if configuration.whole_program_optimization:
-        self.WriteLine((
-            '    <WholeProgramOptimization>{0:s}'
-            '</WholeProgramOptimization>').format(
-                configuration.whole_program_optimization_string))
-
-      self.WriteLine((
-          '      <AdditionalIncludeDirectories>{0:s}'
-          '</AdditionalIncludeDirectories>').format(include_directories))
-
-      self.WriteLine((
-          '      <PreprocessorDefinitions>{0:s}'
-          '</PreprocessorDefinitions>').format(preprocessor_definitions))
-
-      if configuration.basic_runtime_checks != '':
-        self.WriteLine((
-            '      <BasicRuntimeChecks>{0:s}'
-            '</BasicRuntimeChecks>').format(
-                configuration.basic_runtime_checks_string))
-
-      if configuration.smaller_type_check != '':
-        self.WriteLine((
-            '      <SmallerTypeCheck>{0:s}</SmallerTypeCheck>').format(
-                configuration.smaller_type_check))
-
-      self.WriteLine((
-          '      <RuntimeLibrary>{0:s}</RuntimeLibrary>').format(
-              configuration.runtime_librarian_string))
-
-      if configuration.enable_function_level_linking != '':
-        self.WriteLine((
-            '      <FunctionLevelLinking>{0:s}</FunctionLevelLinking>').format(
-                configuration.enable_function_level_linking))
-
-      if configuration.precompiled_header != '':
-        # A value of 0 is represented by a new line.
-        if configuration.precompiled_header == '0':
-          self.WriteLines([
-              '      <PrecompiledHeader>',
-              '      </PrecompiledHeader>'])
-        else:
-          self.WriteLine((
-              '      <PrecompiledHeader>{0:s}</PrecompiledHeader>').format(
-                  configuration.precompiled_header_string))
-
-      self.WriteLine('      <WarningLevel>{0:s}</WarningLevel>'.format(
-          configuration.warning_level_string))
-
-      if configuration.warning_as_error:
-        self.WriteLine((
-            '      <TreatWarningAsError>{0:s}'
-            '</TreatWarningAsError>').format(configuration.warning_as_error))
-
-      if configuration.debug_information_format != '':
-        # A value of 0 is represented by a new line.
-        if configuration.debug_information_format == '0':
-          self.WriteLines([
-              '      <DebugInformationFormat>',
-              '      </DebugInformationFormat>'])
-        else:
-          self.WriteLine((
-              '      <DebugInformationFormat>{0:s}'
-              '</DebugInformationFormat>').format(
-                  configuration.debug_information_format_string))
-
-      if configuration.compile_as:
-        self.WriteLine('      <CompileAs>{0:s}</CompileAs>'.format(
-            configuration.compile_as_string))
-
-      self.WriteLine('    </ClCompile>')
-
-      # Write the librarian specific section.
-      if configuration.librarian_output_file:
-        librarian_output_file = re.sub(
-            r'[$][(]OutDir[)]\\', r'$(OutDir)',
-            configuration.librarian_output_file)
-  
-        self.WriteLine('    <Lib>')
-
-        self.WriteLine('      <OutputFile>{0:s}</OutputFile>'.format(
-            librarian_output_file))
-
-        if configuration.module_definition_file != '':
-          self.WriteLine((
-               '      <ModuleDefinitionFile>{0:s}'
-               '</ModuleDefinitionFile>').format(
-                   configuration.module_definition_file))
-        else:
-          self.WriteLines([
-               '      <ModuleDefinitionFile>',
-               '      </ModuleDefinitionFile>'])
-
-        if configuration.librarian_ignore_defaults != '':
-          self.WriteLine((
-               '      <IgnoreAllDefaultLibraries>{0:s}'
-               '</IgnoreAllDefaultLibraries>').format(
-                   configuration.librarian_ignore_defaults))
-
-        self.WriteLine('    </Lib>')
-  
-      # Write the linker specific section.
-      if configuration.linker_values_set:
-        self.WriteLine('    <Link>')
-
-        # Visual Studio will convert an empty additional dependencies value.
-        if configuration.dependencies_set:
-          dependencies = re.sub(
-              r'[.]lib ', r'.lib;', configuration.dependencies)
-          dependencies = re.sub(
-              r'[$][(]OutDir[)]\\', r'$(OutDir)', dependencies)
-
-          if dependencies and dependencies[-1] != ';':
-            dependencies = '{0:s};'.format(dependencies)
-
-          dependencies = (
-              '{0:s}%(AdditionalDependencies)').format(
-              dependencies)
-  
-          self.WriteLine((
-              '      <AdditionalDependencies>{0:s}'
-              '</AdditionalDependencies>').format(
-                  dependencies))
-
-        if configuration.linker_output_file:
-          linker_output_file = re.sub(
-              r'[$][(]OutDir[)]\\', r'$(OutDir)',
-              configuration.linker_output_file)
-  
-          self.WriteLine('      <OutputFile>{0:s}</OutputFile>'.format(
-              linker_output_file))
-
-          if configuration.module_definition_file != '':
-            self.WriteLine((
-                 '      <ModuleDefinitionFile>{0:s}'
-                 '</ModuleDefinitionFile>').format(
-                     configuration.module_definition_file))
-
-        if configuration.library_directories:
-          library_directories = re.sub(
-              r'[$][(]OutDir[)]\\', r'$(OutDir)',
-              configuration.library_directories)
-          library_directories = re.sub(
-              r'&quot;', r'', library_directories)
-
-          if library_directories and library_directories[-1] != ';':
-            library_directories = '{0:s};'.format(library_directories)
-
-          library_directories = (
-              '{0:s}%(AdditionalLibraryDirectories)').format(
-              library_directories)
-  
-          self.WriteLine((
-              '      <AdditionalLibraryDirectories>{0:s}'
-              '</AdditionalLibraryDirectories>').format(
-                  library_directories))
-
-        if configuration.generate_debug_information != '':
-          self.WriteLine((
-              '      <GenerateDebugInformation>{0:s}'
-              '</GenerateDebugInformation>').format(
-                  configuration.generate_debug_information))
-
-        if configuration.sub_system != '':
-          self.WriteLine('      <SubSystem>{0:s}</SubSystem>'.format(
-              configuration.sub_system_string))
-
-        if configuration.optimize_references == '0':
-          self.WriteLines([
-              '      <OptimizeReferences>',
-              '      </OptimizeReferences>'])
-
-        elif configuration.optimize_references != '':
-          self.WriteLine((
-              '      <OptimizeReferences>{0:s}</OptimizeReferences>').format(
-                  configuration.optimize_references_string))
-
-        if configuration.enable_comdat_folding == '0':
-          self.WriteLines([
-              '      <EnableCOMDATFolding>',
-              '      </EnableCOMDATFolding>'])
-
-        elif configuration.enable_comdat_folding != '':
-          self.WriteLine((
-              '      <EnableCOMDATFolding>{0:s}</EnableCOMDATFolding>').format(
-                  configuration.enable_comdat_folding_string))
-
-        if configuration.randomized_base_address != '':
-          self.WriteLine((
-              '      <RandomizedBaseAddress>{0:s}'
-              '</RandomizedBaseAddress>').format(
-                  configuration.randomized_base_address_string))
-
-        if configuration.fixed_base_address == '0':
-          self.WriteLines([
-              '      <FixedBaseAddress>',
-              '      </FixedBaseAddress>'])
-
-        if configuration.data_execution_prevention != '':
-          # A value of 0 is represented by a new line.
-          if configuration.data_execution_prevention == '0':
-            self.WriteLines([
-                '      <DataExecutionPrevention>',
-                '      </DataExecutionPrevention>'])
-          else:
-            self.WriteLine((
-                '      <DataExecutionPrevention>{0:s}'
-                '</DataExecutionPrevention>').format(
-                    configuration.data_execution_prevention_string))
-
-        if configuration.import_library:
-          import_library = re.sub(
-              r'[$][(]OutDir[)]\\', r'$(OutDir)',
-              configuration.import_library)
-
-          self.WriteLine('      <ImportLibrary>{0:s}</ImportLibrary>'.format(
-              import_library))
-
-        if configuration.target_machine != '':
-          self.WriteLine('      <TargetMachine>{0:s}</TargetMachine>'.format(
-              configuration.target_machine_string))
-
-        self.WriteLine('    </Link>')
-
-      self.WriteLine('  </ItemDefinitionGroup>')
+      self._WriteItemDefinitionGroup(configuration)
 
   def _WriteSourceFiles(self, source_files):
     """Writes the source files.
@@ -1464,6 +1566,385 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
 
     # The last line has no \r\n.
     self._file.write('</Project>')
+
+
+class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
+  """Class to represent a Visual Studio 2012 project file writer."""
+
+  def __init__(self):
+    """Initializes a Visual Studio project file writer."""
+    super(VS2010ProjectFileWriter, self).__init__()
+    self._project_file_version = '11.0.61030.0'
+    self._tools_version = '4.0'
+    self._version = 2012
+
+  def _WriteConfigurationPropertyGroup(self, configuration):
+    """Writes the configuration property group.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    self.WriteLine((
+        '  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'=='
+        '\'{0:s}|{1:s}\'" Label="Configuration">').format(
+            configuration.name, configuration.platform))
+
+    self.WriteLine('    <ConfigurationType>{0:s}</ConfigurationType>'.format(
+        configuration.output_type_string))
+
+    platform_toolset = configuration.GetPlatformToolset(self._version)
+    if platform_toolset:
+      self.WriteLine('    <PlatformToolset>{0:s}</PlatformToolset>'.format(
+          platform_toolset))
+
+    if configuration.character_set:
+      self.WriteLine('    <CharacterSet>{0:s}</CharacterSet>'.format(
+          configuration.character_set_string))
+
+    if configuration.managed_extensions == '1':
+      self.WriteLine('    <CLRSupport>true</CLRSupport>')
+
+    if configuration.whole_program_optimization:
+      self.WriteLine((
+          '    <WholeProgramOptimization>{0:s}'
+          '</WholeProgramOptimization>').format(
+              configuration.whole_program_optimization_string))
+
+    self.WriteLine('  </PropertyGroup>')
+
+  def _WriteOutIntDirConditions(self, configuration_name, configurations):
+    """Writes the OutDir and IntDir conditions.
+
+    Args:
+      configuration_name: the name of the configuration.
+      configurations: the configurations (instance of VSConfigurations).
+    """
+    for configuration_platform in sorted(configurations.platforms):
+      configuration = configurations.GetByIdentifier(
+          configuration_name, configuration_platform)
+
+      self.WriteLines([
+          ('  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'=='
+           '\'{0:s}|{1:s}\'">').format(
+              configuration.name, configuration.platform),
+          '    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>',
+          '    <IntDir>$(Configuration)\</IntDir>'])
+
+      if configuration.linker_values_set:
+        self.WriteLine('    <LinkIncremental>false</LinkIncremental>')
+
+      self.WriteLine('  </PropertyGroup>')
+
+  def _WriteOutIntDirPropertyGroups(self, configurations):
+    """Writes the OutDir and IntDir property groups.
+
+    Args:
+      configurations: the configurations (instance of VSConfigurations).
+    """
+    self.WriteLines([
+        '  <PropertyGroup>',
+        '    <_ProjectFileVersion>{0:s}</_ProjectFileVersion>'.format(
+            self._project_file_version),
+        '  </PropertyGroup>'])
+
+    # Mimic Visual Studio behavior and output the configurations
+    # in platforms by name.
+    for configuration_name in sorted(configurations.names):
+      self._WriteOutIntDirConditions(configuration_name, configurations)
+
+      # for configuration_platform in sorted(configurations.platforms):
+      #   configuration = configurations.GetByIdentifier(
+      #       configuration_name, configuration_platform)
+
+      #   if configuration.link_incremental != '':
+      #     self.WriteLine((
+      #         '    <LinkIncremental Condition="\'$(Configuration)|'
+      #         '$(Platform)\'==\'{0:s}|{1:s}\'">{2:s}</LinkIncremental>').format(
+      #             configuration.name, configuration.platform,
+      #             configuration.link_incremental_string))
+
+  def _WriteClCompileSection(self, configuration):
+    """Writes the CLCompile section.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    include_directories = re.sub(
+        r'&quot;', r'', configuration.include_directories)
+
+    if include_directories and include_directories[-1] != ';':
+      include_directories = '{0:s};'.format(
+          include_directories)
+
+    include_directories = (
+        '{0:s}%(AdditionalIncludeDirectories)').format(
+        include_directories)
+
+    preprocessor_definitions = configuration.preprocessor_definitions
+
+    if preprocessor_definitions and preprocessor_definitions[-1] != ';':
+      preprocessor_definitions = '{0:s};'.format(preprocessor_definitions)
+
+    preprocessor_definitions = (
+        '{0:s}%(PreprocessorDefinitions)').format(
+        preprocessor_definitions)
+
+    self.WriteLine('    <ClCompile>')
+
+    if configuration.optimization != '':
+      self.WriteLine('      <Optimization>{0:s}</Optimization>'.format(
+          configuration.optimization_string))
+
+    if configuration.enable_intrinsic_functions != '':
+      self.WriteLine((
+          '      <IntrinsicFunctions>{0:s}</IntrinsicFunctions>').format(
+              configuration.enable_intrinsic_functions))
+
+    self.WriteLine((
+        '      <AdditionalIncludeDirectories>{0:s}'
+        '</AdditionalIncludeDirectories>').format(include_directories))
+
+    self.WriteLine((
+        '      <PreprocessorDefinitions>{0:s}'
+        '</PreprocessorDefinitions>').format(preprocessor_definitions))
+
+    if configuration.basic_runtime_checks != '':
+      self.WriteLine((
+          '      <BasicRuntimeChecks>{0:s}'
+          '</BasicRuntimeChecks>').format(
+              configuration.basic_runtime_checks_string))
+
+    if configuration.smaller_type_check != '':
+      self.WriteLine((
+          '      <SmallerTypeCheck>{0:s}</SmallerTypeCheck>').format(
+              configuration.smaller_type_check))
+
+    self.WriteLine((
+        '      <RuntimeLibrary>{0:s}</RuntimeLibrary>').format(
+            configuration.runtime_librarian_string))
+
+    if configuration.enable_function_level_linking != '':
+      self.WriteLine((
+          '      <FunctionLevelLinking>{0:s}</FunctionLevelLinking>').format(
+              configuration.enable_function_level_linking))
+
+    if configuration.precompiled_header != '':
+      # A value of 0 is represented by an empty XML tag.
+      if configuration.precompiled_header == '0':
+        self.WriteLine('      <PrecompiledHeader />')
+      else:
+        self.WriteLine((
+            '      <PrecompiledHeader>{0:s}</PrecompiledHeader>').format(
+                configuration.precompiled_header_string))
+
+    self.WriteLine('      <WarningLevel>{0:s}</WarningLevel>'.format(
+        configuration.warning_level_string))
+
+    if configuration.warning_as_error:
+      self.WriteLine((
+          '      <TreatWarningAsError>{0:s}'
+          '</TreatWarningAsError>').format(configuration.warning_as_error))
+
+    if configuration.debug_information_format != '':
+      # A value of 0 is represented by an empty XML tag.
+      if configuration.debug_information_format == '0':
+        self.WriteLine('      <DebugInformationFormat />')
+      else:
+        self.WriteLine((
+            '      <DebugInformationFormat>{0:s}'
+            '</DebugInformationFormat>').format(
+                configuration.debug_information_format_string))
+
+    if configuration.compile_as:
+      self.WriteLine('      <CompileAs>{0:s}</CompileAs>'.format(
+          configuration.compile_as_string))
+
+    self.WriteLine('    </ClCompile>')
+
+  def _WriteLibrarianSection(self, configuration):
+    """Writes the librarian section.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    librarian_output_file = re.sub(
+        r'[$][(]OutDir[)]\\', r'$(OutDir)',
+        configuration.librarian_output_file)
+
+    self.WriteLines([
+        '    <Lib>',
+        '      <OutputFile>{0:s}</OutputFile>'.format(librarian_output_file)])
+
+    if configuration.module_definition_file != '':
+      self.WriteLine((
+           '      <ModuleDefinitionFile>{0:s}'
+           '</ModuleDefinitionFile>').format(
+               configuration.module_definition_file))
+    else:
+      self.WriteLine('      <ModuleDefinitionFile />')
+
+    if configuration.librarian_ignore_defaults != '':
+      self.WriteLine((
+           '      <IgnoreAllDefaultLibraries>{0:s}'
+           '</IgnoreAllDefaultLibraries>').format(
+               configuration.librarian_ignore_defaults))
+
+    self.WriteLine('    </Lib>')
+
+  def _WriteLinkerSection(self, configuration):
+    """Writes the linker section.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    self.WriteLine('    <Link>')
+
+    # Visual Studio will convert an empty additional dependencies value.
+    if configuration.dependencies_set:
+      dependencies = re.sub(
+          r'[.]lib ', r'.lib;', configuration.dependencies)
+      dependencies = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)', dependencies)
+
+      if dependencies and dependencies[-1] != ';':
+        dependencies = '{0:s};'.format(dependencies)
+
+      dependencies = (
+          '{0:s}%(AdditionalDependencies)').format(
+          dependencies)
+
+      self.WriteLine((
+          '      <AdditionalDependencies>{0:s}'
+          '</AdditionalDependencies>').format(
+              dependencies))
+
+    if configuration.linker_output_file:
+      linker_output_file = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)',
+          configuration.linker_output_file)
+
+      self.WriteLine('      <OutputFile>{0:s}</OutputFile>'.format(
+          linker_output_file))
+
+      if configuration.module_definition_file != '':
+        self.WriteLine((
+             '      <ModuleDefinitionFile>{0:s}'
+             '</ModuleDefinitionFile>').format(
+                 configuration.module_definition_file))
+
+    if configuration.library_directories:
+      library_directories = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)',
+          configuration.library_directories)
+      library_directories = re.sub(
+          r'&quot;', r'', library_directories)
+
+      if library_directories and library_directories[-1] != ';':
+        library_directories = '{0:s};'.format(library_directories)
+
+      library_directories = (
+          '{0:s}%(AdditionalLibraryDirectories)').format(
+          library_directories)
+
+      self.WriteLine((
+          '      <AdditionalLibraryDirectories>{0:s}'
+          '</AdditionalLibraryDirectories>').format(
+              library_directories))
+
+    if configuration.generate_debug_information != '':
+      self.WriteLine((
+          '      <GenerateDebugInformation>{0:s}'
+          '</GenerateDebugInformation>').format(
+              configuration.generate_debug_information))
+
+    if configuration.sub_system != '':
+      self.WriteLine('      <SubSystem>{0:s}</SubSystem>'.format(
+          configuration.sub_system_string))
+
+    if configuration.optimize_references == '0':
+      self.WriteLine('      <OptimizeReferences />')
+
+    elif configuration.optimize_references != '':
+      self.WriteLine((
+          '      <OptimizeReferences>{0:s}</OptimizeReferences>').format(
+              configuration.optimize_references_string))
+
+    if configuration.enable_comdat_folding == '0':
+      self.WriteLine('      <EnableCOMDATFolding />')
+
+    elif configuration.enable_comdat_folding != '':
+      self.WriteLine((
+          '      <EnableCOMDATFolding>{0:s}</EnableCOMDATFolding>').format(
+              configuration.enable_comdat_folding_string))
+
+    if configuration.randomized_base_address != '':
+      self.WriteLine((
+          '      <RandomizedBaseAddress>{0:s}'
+          '</RandomizedBaseAddress>').format(
+              configuration.randomized_base_address_string))
+
+    if configuration.fixed_base_address == '0':
+      # A value of 0 is represented by an empty XML tag.
+      self.WriteLine('      <FixedBaseAddress />')
+
+    if configuration.data_execution_prevention != '':
+      # A value of 0 is represented by an empty XML tag.
+      if configuration.data_execution_prevention == '0':
+        self.WriteLine('      <DataExecutionPrevention />')
+      else:
+        self.WriteLine((
+            '      <DataExecutionPrevention>{0:s}'
+            '</DataExecutionPrevention>').format(
+                configuration.data_execution_prevention_string))
+
+    if configuration.target_machine != '' and configuration.linker_values_set:
+      self.WriteLine('      <TargetMachine>{0:s}</TargetMachine>'.format(
+          configuration.target_machine_string))
+
+    if configuration.import_library:
+      import_library = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)',
+          configuration.import_library)
+
+      self.WriteLine('      <ImportLibrary>{0:s}</ImportLibrary>'.format(
+          import_library))
+
+    self.WriteLine('    </Link>')
+
+  def _WriteItemDefinitionGroup(self, configuration):
+    """Writes the item definition group.
+
+    Args:
+      configuration: the configuration (instance of VSConfiguration).
+    """
+    self.WriteLine((
+        '  <ItemDefinitionGroup Condition="\'$(Configuration)|'
+        '$(Platform)\'==\'{0:s}|{1:s}\'">').format(
+            configuration.name, configuration.platform))
+
+    # Write the compiler specific section.
+    self._WriteClCompileSection(configuration)
+
+    # Write the librarian specific section.
+    if configuration.librarian_output_file:
+      self._WriteLibrarianSection(configuration)
+
+    # Write the linker specific section.
+    if configuration.linker_values_set:
+      self._WriteLinkerSection(configuration)
+
+    self.WriteLine('  </ItemDefinitionGroup>')
+
+
+class VS2013ProjectFileWriter(VS2010ProjectFileWriter):
+  """Class to represent a Visual Studio 2013 project file writer."""
+
+  def __init__(self):
+    """Initializes a Visual Studio project file writer."""
+    super(VS2010ProjectFileWriter, self).__init__()
+    self._project_file_version = '12.0.21005.1'
+    self._tools_version = '12.0'
+    self._version = 2013
 
 
 class VSSolutionFileReader(FileReader):
@@ -1871,6 +2352,50 @@ class VS2010SolutionFileWriter(VSSolutionFileWriter):
         'EndGlobal'])
 
 
+class VS2012SolutionFileWriter(VS2010SolutionFileWriter):
+  """Class to represent a Visual Studio 2013 solution file writer."""
+
+  def WriteHeader(self):
+    """Writes a file header."""
+    self.WriteLines([
+        '\xef\xbb\xbf',
+        'Microsoft Visual Studio Solution File, Format Version 12.00',
+        '# Visual Studio Express 2012 for Windows Desktop'])
+
+  def WriteProject(self, project):
+    """Writes a project section.
+
+    Args:
+      project: the project (instance of VSSolutionProject).
+    """
+    project_filename = '{0:s}.vcxproj'.format(project.filename)
+
+    self.WriteLine((
+        'Project("{{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}}") = "{0:s}", '
+        '"{1:s}", "{2:s}"').format(
+            project.name, project_filename, project.guid.upper()))
+
+    # TODO: what about:
+    # '\tProjectSection(ProjectDependencies) = postProject'
+    # '\t\t{%GUID%} = {%GUID}'
+    # '\tEndProjectSection'
+
+    self.WriteLine('EndProject')
+
+
+class VS2013SolutionFileWriter(VS2010SolutionFileWriter):
+  """Class to represent a Visual Studio 2013 solution file writer."""
+
+  def WriteHeader(self):
+    """Writes a file header."""
+    self.WriteLines([
+        '\xef\xbb\xbf',
+        'Microsoft Visual Studio Solution File, Format Version 12.00',
+        '# Visual Studio Express 2013 for Windows Desktop',
+        'VisualStudioVersion = 12.0.21005.1'
+        'MinimumVisualStudioVersion = 10.0.40219.1'])
+
+
 class VSSolution(object):
   """Class to represent a Visual Studio solution."""
 
@@ -1904,24 +2429,28 @@ class VSSolution(object):
     # TODO: move logic into the reader?
     if input_version == '2008':
       input_project_filename = '{0:s}.vcproj'.format(input_project_filename)
-    elif input_version == '2010':
+    elif output_version in ['2010', '2012', '2013']:
       input_project_filename = '{0:s}.vcxproj'.format(input_project_filename)
 
     # TODO: move logic into the writer?
     if output_version == '2008':
       output_project_filename = '{0:s}.vcproj'.format(output_project_filename)
-    elif output_version == '2010':
+    elif output_version in ['2010', '2012', '2013']:
       output_project_filename = '{0:s}.vcxproj'.format(output_project_filename)
 
     if not os.path.exists(input_project_filename):
       return False
 
-    print 'Reading: {0:s}'.format(input_project_filename)
-
     if input_version == '2008':
       project_reader = VS2008ProjectFileReader()
     elif input_version == '2010':
       project_reader = VS2010ProjectFileReader()
+    elif input_version == '2012':
+      project_reader = VS2012ProjectFileReader()
+    elif input_version == '2013':
+      project_reader = VS2013ProjectFileReader()
+
+    print 'Reading: {0:s}'.format(input_project_filename)
 
     project_reader.Open(input_project_filename)
 
@@ -1934,7 +2463,7 @@ class VSSolution(object):
     project_reader.Close()
 
     # Add x64 as a platform.
-    configurations.ExtendWithX64()
+    configurations.ExtendWithX64(output_version)
 
     # Create the output directory.
     output_directory = os.path.dirname(output_project_filename)
@@ -1945,6 +2474,10 @@ class VSSolution(object):
       project_writer = VS2008ProjectFileWriter()
     elif output_version == '2010':
       project_writer = VS2010ProjectFileWriter()
+    elif output_version == '2012':
+      project_writer = VS2012ProjectFileWriter()
+    elif output_version == '2013':
+      project_writer = VS2013ProjectFileWriter()
 
     print 'Writing: {0:s}'.format(output_project_filename)
 
@@ -1984,6 +2517,10 @@ class VSSolution(object):
       solution_reader = VS2008SolutionFileReader()
     elif input_version == '2010':
       solution_reader = VS2010SolutionFileReader()
+    elif input_version == '2012':
+      solution_reader = VS2012SolutionFileReader()
+    elif input_version == '2013':
+      solution_reader = VS2013SolutionFileReader()
 
     solution_reader.Open(input_sln_filename)
 
@@ -1995,7 +2532,7 @@ class VSSolution(object):
     solution_reader.Close()
 
     # Add x64 as a platform.
-    configurations.ExtendWithX64()
+    configurations.ExtendWithX64(output_version)
 
     # Create the output directory.
     os.mkdir(output_directory)
@@ -2009,6 +2546,10 @@ class VSSolution(object):
       solution_writer = VS2008SolutionFileWriter()
     elif output_version == '2010':
       solution_writer = VS2010SolutionFileWriter()
+    elif output_version == '2012':
+      solution_writer = VS2012SolutionFileWriter()
+    elif output_version == '2013':
+      solution_writer = VS2013SolutionFileWriter()
 
     solution_writer.Open(output_sln_filename)
     solution_writer.WriteHeader()
@@ -2034,17 +2575,20 @@ class VSSolution(object):
 
 
 def Main():
+  output_formats = frozenset(['2008', '2010', '2012', '2013'])
+
   args_parser = argparse.ArgumentParser(description=(
       'Converts Visual Studio express solution and project files '
       'from one version to another.'))
 
   args_parser.add_argument(
-      'solution_file', nargs='?', action='store', metavar='SOLUTION_FILE',
+      'solution_file', nargs='?', action='store', metavar='FILENAME',
       default=None, help='The solution file (.sln).')
 
   args_parser.add_argument(
-      '--to', dest='output_format', nargs='?', action='store', metavar='FORMAT',
-      default='2010', help='The format to convert to.')
+      '--to', dest='output_format', nargs='?', choices=sorted(output_formats),
+      action='store', metavar='FORMAT', default='2010',
+      help='The format to convert to.')
 
   options = args_parser.parse_args()
 
@@ -2055,7 +2599,7 @@ def Main():
     print ''
     return False
 
-  if options.output_format != '2010':
+  if options.output_format not in output_formats:
     print 'Unsupported output format: {0:s}.'.format(options.format_to)
     print ''
     return False
