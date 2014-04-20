@@ -112,25 +112,25 @@ class DownloadHelper(object):
     return filename
 
 
-class LibyalDownloadHelper(DownloadHelper):
-  """Class that helps in downloading libyal libraries."""
+class GoogleCodeDownloadHelper(DownloadHelper):
+  """Class that helps in downloading a Google Code project."""
 
-  def GetGoogleCodeDownloadsUrl(self, library_name):
-    """Retrieves the Download URL from the Google Code library page.
+  def GetGoogleCodeDownloadsUrl(self, project_name):
+    """Retrieves the Download URL from the Google Code project page.
 
     Args:
-      library_name: the name of the library.
+      project_name: the name of the project.
 
     Returns:
       The downloads URL or None on error.
     """
-    download_url = u'https://code.google.com/p/{0:s}/'.format(library_name)
+    download_url = u'https://code.google.com/p/{0:s}/'.format(project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return None
 
-    # The format of the library downloads URL is:
+    # The format of the project downloads URL is:
     # https://googledrive.com/host/{random string}/
     expression_string = (
         u'<a href="(https://googledrive.com/host/[^/]*/)"[^>]*>Downloads</a>')
@@ -141,26 +141,26 @@ class LibyalDownloadHelper(DownloadHelper):
 
     return matches[0]
 
-  def GetLatestVersion(self, library_name):
-    """Retrieves the latest version number for a given library name.
+  def GetLatestVersion(self, project_name):
+    """Retrieves the latest version number for a given project name.
 
     Args:
-      library_name: the name of the library.
+      project_name: the name of the project.
 
     Returns:
       The latest version number or 0 on error.
     """
-    download_url = self.GetGoogleCodeDownloadsUrl(library_name)
+    download_url = self.GetGoogleCodeDownloadsUrl(project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return 0
 
-    # The format of the library download URL is:
-    # /host/{random string}/{library name}-{status-}{version}.tar.gz
+    # The format of the project download URL is:
+    # /host/{random string}/{project name}-{status-}{version}.tar.gz
     # Note that the status is optional and will be: beta, alpha or experimental.
     expression_string = u'/host/[^/]*/{0:s}-[a-z-]*([0-9]+)[.]tar[.]gz'.format(
-        library_name)
+        project_name)
     matches = re.findall(expression_string, page_content)
 
     if not matches:
@@ -168,27 +168,27 @@ class LibyalDownloadHelper(DownloadHelper):
 
     return int(max(matches))
 
-  def GetDownloadUrl(self, library_name, library_version):
-    """Retrieves the download URL for a given library name and version.
+  def GetDownloadUrl(self, project_name, project_version):
+    """Retrieves the download URL for a given project name and version.
 
     Args:
-      library_name: the name of the library.
-      library_version: the version of the library.
+      project_name: the name of the project.
+      project_version: the version of the project.
 
     Returns:
-      The download URL of the library or None on error.
+      The download URL of the project or None on error.
     """
-    download_url = self.GetGoogleCodeDownloadsUrl(library_name)
+    download_url = self.GetGoogleCodeDownloadsUrl(project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return None
 
-    # The format of the library download URL is:
-    # /host/{random string}/{library name}-{status-}{version}.tar.gz
+    # The format of the project download URL is:
+    # /host/{random string}/{project name}-{status-}{version}.tar.gz
     # Note that the status is optional and will be: beta, alpha or experimental.
     expression_string = u'/host/[^/]*/{0:s}-[a-z-]*{1:d}[.]tar[.]gz'.format(
-        library_name, library_version)
+        project_name, project_version)
     matches = re.findall(expression_string, page_content)
 
     if not matches or len(matches) != 1:
@@ -196,18 +196,18 @@ class LibyalDownloadHelper(DownloadHelper):
 
     return u'https://googledrive.com{0:s}'.format(matches[0])
 
-  def Download(self, library_name, library_version):
-    """Downloads the library for a given library name and version.
+  def Download(self, project_name, project_version):
+    """Downloads the project for a given project name and version.
 
     Args:
-      library_name: the name of the library.
-      library_version: the version of the library.
+      project_name: the name of the project.
+      project_version: the version of the project.
 
     Returns:
       The filename if successful also if the file was already downloaded
       or None on error.
     """
-    download_url = self.GetDownloadUrl(library_name, library_version)
+    download_url = self.GetDownloadUrl(project_name, project_version)
 
     return self.DownloadFile(download_url)
 
@@ -272,33 +272,9 @@ class BuildHelper(object):
 class DpkgBuildHelper(BuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
-  BUILD_DEPENDENCIES = frozenset([
-      'build-essential',
-      'autoconf',
-      'automake',
-      'autopoint',
-      'libtool',
-      'gettext',
-      'debhelper',
-      'fakeroot',
-      'quilt',
-      'autotools-dev',
-      'zlib1g-dev',
-      'libssl-dev',
-      'libfuse-dev',
-      'python-dev',
-      'python-setuptools',
-  ])
-
   def __init__(self):
     """Initializes the build helper."""
     super(DpkgBuildHelper, self).__init__()
-    self.architecture = platform.machine()
-
-    if self.architecture == 'i686':
-      self.architecture = 'i386'
-    elif self.architecture == 'x86_64':
-      self.architecture = 'amd64'
 
   def _BuildPrepare(self, source_directory):
     """Make the necassary preperations before building the dpkg packages.
@@ -358,6 +334,9 @@ class DpkgBuildHelper(BuildHelper):
 
     dpkg_directory = os.path.join(source_directory, u'dpkg')
     if not os.path.exists(dpkg_directory):
+      dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
+
+    if not os.path.exists(dpkg_directory):
       logging.error(u'Missing dpkg sub directory in: {0:s}'.format(
           source_directory))
       return False
@@ -386,6 +365,39 @@ class DpkgBuildHelper(BuildHelper):
       return False
 
     return True
+
+
+class LibyalDpkgBuildHelper(DpkgBuildHelper):
+  """Class that helps in building libyal dpkg packages (.deb)."""
+
+  # TODO: determine BUILD_DEPENDENCIES from spec files?
+  BUILD_DEPENDENCIES = frozenset([
+      'build-essential',
+      'autoconf',
+      'automake',
+      'autopoint',
+      'libtool',
+      'gettext',
+      'debhelper',
+      'fakeroot',
+      'quilt',
+      'autotools-dev',
+      'zlib1g-dev',
+      'libssl-dev',
+      'libfuse-dev',
+      'python-dev',
+      'python-setuptools',
+  ])
+
+  def __init__(self):
+    """Initializes the build helper."""
+    super(LibyalDpkgBuildHelper, self).__init__()
+    self.architecture = platform.machine()
+
+    if self.architecture == 'i686':
+      self.architecture = 'i386'
+    elif self.architecture == 'x86_64':
+      self.architecture = 'amd64'
 
   def CheckBuildEnvironment(self):
     """Checks if the build environment is sane."""
@@ -586,8 +598,16 @@ class RpmBuildHelper(BuildHelper):
   def __init__(self):
     """Initializes the build helper."""
     super(RpmBuildHelper, self).__init__()
-    self.architecture = platform.machine()
 
+
+class LibyalRpmBuildHelper(RpmBuildHelper):
+  """Class that helps in building libyal rpm packages (.rpm)."""
+  # TODO: move common rpm build helper code into RpmBuildHelper.
+
+  def __init__(self):
+    """Initializes the build helper."""
+    super(LibyalRpmBuildHelper, self).__init__()
+    self.architecture = platform.machine()
     self.rpmbuild_path = os.path.join(u'~', u'rpmbuild')
     self.rpmbuild_path = os.path.expanduser(self.rpmbuild_path)
 
@@ -612,7 +632,8 @@ class RpmBuildHelper(BuildHelper):
     # Move the rpms to the build directory.
     filenames = glob.glob(os.path.join(
         self.rpmbuild_path, u'RPMS', self.architecture,
-        u'{0:s}-*-1.{1:s}.rpm'.format(library_name, self.architecture)))
+        u'{0:s}-*{1:d}-1.{2:s}.rpm'.format(
+            library_name, library_version, self.architecture)))
     for filename in filenames:
       logging.info(u'Moving: {0:s}'.format(filename))
       shutil.move(filename, '.')
@@ -838,7 +859,7 @@ class VisualStudioBuildHelper(BuildHelper):
 
     # Detect architecture based on Visual Studion Platform environment
     # variable. If not set the platform with default to Win32.
-    msvscpp_platform = os.environ['Platform']
+    msvscpp_platform = getattr(os.environ, 'Platform', None)
     if not msvscpp_platform:
       msvscpp_platform = 'Win32'
 
@@ -962,7 +983,7 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
-  libyal_download_helper = LibyalDownloadHelper()
+  libyal_download_helper = GoogleCodeDownloadHelper()
 
   for libyal_name in LIBYAL_LIBRARIES:
     libyal_version = libyal_download_helper.GetLatestVersion(libyal_name)
@@ -992,7 +1013,7 @@ def Main():
           shutil.rmtree(filename)
 
       if options.build_target == 'dpkg':
-        build_helper = DpkgBuildHelper()
+        build_helper = LibyalDpkgBuildHelper()
         deb_filename = build_helper.GetOutputFilename(
             libyal_name, libyal_version)
 
@@ -1032,13 +1053,15 @@ def Main():
             return False
 
       elif options.build_target == 'rpm':
-        build_helper = RpmBuildHelper()
+        build_helper = LibyalRpmBuildHelper()
         rpm_filename = build_helper.GetOutputFilename(
             libyal_name, libyal_version)
 
         build_helper.Clean(libyal_name, libyal_version)
 
         if not os.path.exists(rpm_filename):
+          # TODO: move the rename into the builder class?
+
           # rpmbuild wants the library filename without the status indication.
           source_filename = u'{0:s}-{1:d}.tar.gz'.format(
               libyal_name, libyal_version)
