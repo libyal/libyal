@@ -859,8 +859,11 @@ class VisualStudioBuildHelper(BuildHelper):
 
     # Detect architecture based on Visual Studion Platform environment
     # variable. If not set the platform with default to Win32.
-    msvscpp_platform = getattr(os.environ, 'Platform', None)
+    msvscpp_platform = os.environ.get('Platform', None)
     if not msvscpp_platform:
+      msvscpp_platform = os.environ.get('TARGET_CPU', None)
+
+    if not msvscpp_platform or msvscpp_platform == 'x86'
       msvscpp_platform = 'Win32'
 
     if msvscpp_platform not in ['Win32', 'x64']:
