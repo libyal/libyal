@@ -33,6 +33,7 @@ import urllib2
 
 LIBYAL_LIBRARIES = frozenset([
     'libbde',
+    'libesedb',
     'libevt',
     'libevtx',
     'libewf',
@@ -863,7 +864,7 @@ class VisualStudioBuildHelper(BuildHelper):
     if not msvscpp_platform:
       msvscpp_platform = os.environ.get('TARGET_CPU', None)
 
-    if not msvscpp_platform or msvscpp_platform == 'x86'
+    if not msvscpp_platform or msvscpp_platform == 'x86':
       msvscpp_platform = 'Win32'
 
     if msvscpp_platform not in ['Win32', 'x64']:
