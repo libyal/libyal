@@ -497,17 +497,17 @@ class PkgBuildHelper(BuildHelper):
 
     if sdk_path:
       cflags = u'CFLAGS="-isysroot {0:s}"'.format(sdk_path)
-      ldlags = u'LDFLAGS="-Wl,-syslibroot,{0:s}"'.format(sdk_path)
+      ldflags = u'LDFLAGS="-Wl,-syslibroot,{0:s}"'.format(sdk_path)
     else:
       cflags = u''
-      ldlags = u''
+      ldflags = u''
 
     if not os.path.exists(pkg_filename):
-      if cflags and ldlags:
+      if cflags and ldflags:
         command = (
             u'{0:s} {1:s} ./configure --disable-dependency-tracking '
             u'--prefix=$PWD/macosx/tmp/ --enable-python > {2:s} 2>&1').format(
-                cflags, ldlags, log_filename)
+                cflags, ldflags, log_filename)
       else:
         command = (
             u'./configure --prefix=$PWD/macosx/tmp/ --enable-python '
