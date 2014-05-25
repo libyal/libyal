@@ -18,7 +18,6 @@
 # limitations under the License.
 
 import argparse
-import distutils.sysconfig
 import fileinput
 import glob
 import logging
@@ -30,6 +29,7 @@ import subprocess
 import sys
 import tarfile
 import urllib2
+from distutils import sysconfig
 
 
 LIBYAL_LIBRARIES = frozenset([
@@ -568,11 +568,12 @@ class PkgBuildHelper(BuildHelper):
           return False
 
       else:
-        python_site_packages_path = distutils.sysconfig.get_python_lib()
+        python_install_path = sysconfig.get_python_lib(1, 0, prefix='')
+        python_site_packages_path = sysconfig.get_python_lib()
 
-        # TODO: determine the correct source python path.
         os.renames(
-            u'{0:s}/macosx/tmp/usr/lib/python2.7'.format(source_directory),
+            u'{0:s}/macosx/tmp/usr/{1:s}'.format(
+                source_directory, python_install_path),
             u'{0:s}/macosx/tmp/{1:s}'.format(
                 source_directory, python_site_packages_path))
 
