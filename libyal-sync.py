@@ -18,6 +18,7 @@
 # limitations under the License.
 
 import argparse
+import distutils.sysconfig
 import fileinput
 import glob
 import logging
@@ -567,6 +568,14 @@ class PkgBuildHelper(BuildHelper):
           return False
 
       else:
+        python_site_packages_path = distutils.sysconfig.get_python_lib()
+
+        # TODO: determine the correct source python path.
+        os.renames(
+            u'{0:s}/macosx/tmp/usr/lib/python2.7'.format(source_directory),
+            u'{0:s}/macosx/tmp/{1:s}'.format(
+                source_directory, python_site_packages_path))
+
         command = (
             u'{0:s} --root {1:s}/macosx/tmp/ '
             u'--identifier com.google.code.p.{2:s} '
