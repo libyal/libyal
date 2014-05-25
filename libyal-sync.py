@@ -502,16 +502,23 @@ class PkgBuildHelper(BuildHelper):
       cflags = u''
       ldflags = u''
 
+    if self._package_maker and os.path.exists(self._package_maker):
+      has_package_maker = True
+      prefix = u'$PWD/macosx/tmp'
+    else:
+      has_package_maker = False
+      prefix = u'$PWD/macosx/tmp/usr'
+
     if not os.path.exists(pkg_filename):
       if cflags and ldflags:
         command = (
             u'{0:s} {1:s} ./configure --disable-dependency-tracking '
-            u'--prefix=$PWD/macosx/tmp/ --enable-python > {2:s} 2>&1').format(
-                cflags, ldflags, log_filename)
+            u'--prefix={2:s} --enable-python > {3:s} 2>&1').format(
+                cflags, ldflags, prefix, log_filename)
       else:
         command = (
-            u'./configure --prefix=$PWD/macosx/tmp/ --enable-python '
-            u'> {0:s} 2>&1').format(log_filename)
+            u'./configure --prefix={0:s} --enable-python > {1:s} 2>&1').format(
+                prefix, log_filename)
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
@@ -532,7 +539,7 @@ class PkgBuildHelper(BuildHelper):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      if self._package_maker and os.path.exists(self._package_maker):
+      if has_package_maker:
         command = u'sudo chown -R root:wheel macosx/tmp/'
         print 'This script now needs to run sudo as in: {0:s}'.format(command)
         exit_code = subprocess.call(
