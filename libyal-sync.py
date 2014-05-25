@@ -486,10 +486,32 @@ class PkgBuildHelper(BuildHelper):
     pkg_filename = u'{0:s}.pkg'.format(source_directory)
     log_filename = os.path.join(u'..', self.LOG_FILENAME)
 
+    sdks_path = os.path.join(
+        u'/', u'Applications', u'Xcode.app', u'Contents', u'Developer', u'Platforms',
+        u'MacOSX.platform', u'Developer', u'SDKs')
+
+    for sub_path in [u'MacOSX10.7.sdk', u'MacOSX10.8.sdk', u'MacOSX10.9.sdk']:
+      sdk_path = os.path.join(sdks_path, sub_path)
+      if os.path.isdir(sub_path):
+        break
+
+    if sdk_path:
+      cflags = u'CFLAGS="-isysroot {0:s}"'.format(sdk_path)
+      ldlags = u'LDFLAGS="-Wl,-syslibroot,{0:s}"'.format(sdk_path)
+    else:
+      cflags = u''
+      ldlags = u''
+
     if not os.path.exists(pkg_filename):
-      command = (
-          u'./configure --prefix=$PWD/macosx/tmp/ --enable-python '
-          u'> {0:s} 2>&1').format(log_filename)
+      if cflags and ldlags:
+        command = (
+            u'{0:s} {1:s} ./configure --disable-dependency-tracking '
+            u'--prefix=$PWD/macosx/tmp/ --enable-python > {2:s} 2>&1').format(
+                cflags, ldlags, log_filename)
+      else:
+        command = (
+            u'./configure --prefix=$PWD/macosx/tmp/ --enable-python '
+            u'> {0:s} 2>&1').format(log_filename)
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
@@ -510,7 +532,7 @@ class PkgBuildHelper(BuildHelper):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      if os.path.exists(self._package_maker):
+      if self._package_maker and os.path.exists(self._package_maker):
         command = u'sudo chown -R root:wheel macosx/tmp/'
         print 'This script now needs to run sudo as in: {0:s}'.format(command)
         exit_code = subprocess.call(
@@ -570,15 +592,26 @@ class PkgBuildHelper(BuildHelper):
         u'^{0:s}-.*{1:d}'.format(library_name, library_version))
 
     # Remove files of previous versions in the format:
-    # library-*version.*
+    # library-*version.dmg
     filenames = glob.glob(
-        u'{0:s}-*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].*'.format(
+        u'{0:s}-*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].dmg'.format(
             library_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
+
+    # Remove files of previous versions in the format:
+    # library-*version.pkg
+    filenames = glob.glob(
+        u'{0:s}-*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].pkg'.format(
+            library_name))
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        shutil.rmtree(filename)
 
   def GetOutputFilename(self, library_name, library_version):
     """Retrieves the filename of one of the resulting files.

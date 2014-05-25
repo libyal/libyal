@@ -77,8 +77,10 @@ def Main():
     print ''
     return False
 
-  if platform.system() != 'Windows':
-    logging.error(u'Platform: {0:s} not supported.'.format(platform.system())
+  operating_system = platform.system()
+  if operating_system != 'Windows':
+    logging.error(u'Operating system: {0:s} not supported.'.format(
+        operating_system))
     return False
 
   package_filenames = {}
@@ -107,7 +109,7 @@ def Main():
           version, _, _ = version.partition(u'.')
 
           if name in LIBYAL_PACKAGES:
-            if name not in package_versions or package_versions[name] < version:
+            if name in package_versions and version < package_versions[name]:
               print 'Removing: {0:s} {1:s}'.format(name, version)
               product.Uninstall()
 
