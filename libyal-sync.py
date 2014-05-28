@@ -649,26 +649,46 @@ class RpmBuildHelper(BuildHelper):
   def __init__(self):
     """Initializes the build helper."""
     super(RpmBuildHelper, self).__init__()
-
-
-class LibyalRpmBuildHelper(RpmBuildHelper):
-  """Class that helps in building libyal rpm packages (.rpm)."""
-  # TODO: move common rpm build helper code into RpmBuildHelper.
-
-  def __init__(self):
-    """Initializes the build helper."""
-    super(LibyalRpmBuildHelper, self).__init__()
     self.architecture = platform.machine()
+
     self.rpmbuild_path = os.path.join(u'~', u'rpmbuild')
     self.rpmbuild_path = os.path.expanduser(self.rpmbuild_path)
 
-  def Build(self, source_filename, library_name, library_version):
-    """Builds the rpms.
+    self._rpmbuild_rpms_path = os.path.join(
+        self.rpmbuild_path, u'RPMS', self.architecture)
+    self._rpmbuild_sources_path = os.path.join(self.rpmbuild_path, u'SOURCES')
+    self._rpmbuild_specs_path = os.path.join(self.rpmbuild_path, u'SPECS')
+
+  def _BuildFromSpecFile(self, spec_filename):
+    """Builds the rpms directly from a spec file.
+
+    Args:
+      spec_filename: the name of the spec file as stored in the rpmbuild
+                     SPECS sub directory.
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    current_path = os.getcwd()
+    os.chdir(self.rpmbuild_path)
+
+    command = u'rpmbuild -ba {0:s} > {1:s} 2>&1'.format(
+        os.path.join(u'SPECS', spec_filename), self.LOG_FILENAME)
+    exit_code = subprocess.call(command, shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+
+    os.chdir(current_path)
+
+    return exit_code == 0
+
+  def _BuildFromSourcePackage(self, source_filename):
+    """Builds the rpms directly from the source package file.
+
+    For this to work the source package needs to contain a valid rpm .spec file.
 
     Args:
       source_filename: the name of the source package file.
-      library_name: the name of the library.
-      library_version: the version of the library.
 
     Returns:
       True if the build was successful, False otherwise.
@@ -680,27 +700,65 @@ class LibyalRpmBuildHelper(RpmBuildHelper):
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
 
-    # Move the rpms to the build directory.
+    return True
+
+  def _CreateRpmbuildDirectories(self):
+    """Creates the rpmbuild and sub directories."""
+    if not os.path.exists(self.rpmbuild_path):
+      os.mkdir(self.rpmbuild_path)
+
+    if not os.path.exists(self._rpmbuild_sources_path):
+      os.mkdir(self._rpmbuild_sources_path)
+
+    if not os.path.exists(self._rpmbuild_specs_path):
+      os.mkdir(self._rpmbuild_specs_path)
+
+  def _CreateSpecFile(self, project_name, spec_file_data):
+    """Creates a spec file in the rpmbuild directory.
+
+    Args:
+      project_name: the name of the project.
+      spec_file_data: the spec file data.
+    """
+    spec_filename = os.path.join(
+        self._rpmbuild_specs_path, u'{0:s}.spec'.format(project_name))
+
+    spec_file = open(spec_filename, 'w')
+    spec_file.write(spec_file_data)
+    spec_file.close()
+
+  def _CopySourceFile(self, source_filename):
+    """Copies the source file to the rpmbuild directory.
+
+    Args:
+      source_filename: the name of the source package file.
+    """
+    shutil.copy(source_filename, self._rpmbuild_sources_path)
+
+  def _MoveRpms(self, project_name, project_version):
+    """Moves the rpms from the rpmbuild directory into to current directory.
+
+    Args:
+      project_name: the name of the project.
+      project_version: the version of the project.
+    """
     filenames = glob.glob(os.path.join(
-        self.rpmbuild_path, u'RPMS', self.architecture,
-        u'{0:s}-*{1:d}-1.{2:s}.rpm'.format(
-            library_name, library_version, self.architecture)))
+        self._rpmbuild_rpms_path, u'{0:s}-*{1!s}-1.{2:s}.rpm'.format(
+            project_name, project_version, self.architecture)))
     for filename in filenames:
       logging.info(u'Moving: {0:s}'.format(filename))
       shutil.move(filename, '.')
 
-    return True
-
-  def Clean(self, library_name, library_version):
+  def Clean(self, project_name, project_version):
     """Cleans the rpmbuild directory.
 
     Args:
-      library_name: the name of the library.
-      library_version: the version of the library.
+      project_name: the name of the project.
+      project_version: the version of the project.
     """
     # Remove previous versions build directories.
     filenames = glob.glob(os.path.join(
-        self.rpmbuild_path, u'BUILD', u'{0:s}-*'.format(library_name)))
+        self.rpmbuild_path, u'BUILD', u'{0:s}-*'.format(project_name)))
     for filename in filenames:
       logging.info(u'Removing: {0:s}'.format(filename))
       shutil.rmtree(filename)
@@ -708,10 +766,10 @@ class LibyalRpmBuildHelper(RpmBuildHelper):
     # Remove previous versions of rpms.
     filenames_to_ignore = re.compile(
         u'{0:s}-.*{1:d}-1.{2:s}.rpm'.format(
-            library_name, library_version, self.architecture))
+            project_name, project_version, self.architecture))
 
     rpm_filenames_glob = u'{0:s}-*-1.{1:s}.rpm'.format(
-        library_name, self.architecture)
+        project_name, self.architecture)
 
     filenames = glob.glob(rpm_filenames_glob)
     for filename in filenames:
@@ -729,23 +787,46 @@ class LibyalRpmBuildHelper(RpmBuildHelper):
     # Remove previous versions of source rpms.
     filenames = glob.glob(os.path.join(
         self.rpmbuild_path, u'SRPMS',
-        u'{0:s}-*-1.src.rpm'.format(library_name)))
+        u'{0:s}-*-1.src.rpm'.format(project_name)))
     for filename in filenames:
       logging.info(u'Removing: {0:s}'.format(filename))
       os.remove(filename)
 
-  def GetOutputFilename(self, library_name, library_version):
+  def GetOutputFilename(self, project_name, project_version):
     """Retrieves the filename of one of the resulting files.
 
     Args:
-      library_name: the name of the library.
-      library_version: the version of the library.
+      project_name: the name of the project.
+      project_version: the version of the project.
 
     Returns:
       A filename of one of the resulting rpms.
     """
-    return u'{0:s}-{1:d}-1.{2:s}.rpm'.format(
-        library_name, library_version, self.architecture)
+    return u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
+        project_name, project_version, self.architecture)
+
+
+class LibyalRpmBuildHelper(RpmBuildHelper):
+  """Class that helps in building libyal rpm packages (.rpm)."""
+
+  def Build(self, source_filename, library_name, library_version):
+    """Builds the rpms.
+
+    Args:
+      source_filename: the name of the source package file.
+      library_name: the name of the library.
+      library_version: the version of the library.
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    if not self._BuildFromSourcePackage(source_filename):
+      return False
+
+    # Move the rpms to the build directory.
+    self._MoveRpms(library_name, library_version)
+
+    return True
 
 
 class VisualStudioBuildHelper(BuildHelper):
@@ -1062,7 +1143,7 @@ def Main():
           u'{0:s}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'.format(
           libyal_name))
       for filename in filenames:
-        if not filenames_to_ignore.match(filename):
+        if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
           logging.info(u'Removing: {0:s}'.format(filename))
           shutil.rmtree(filename)
 
