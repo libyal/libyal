@@ -534,12 +534,12 @@ class PkgBuildHelper(BuildHelper):
 
       share_doc_path = os.path.join(
           source_directory, u'tmp', u'usr', u'share', u'doc', library_name)
-      os.makedirs(share_doc_path, exist_ok=True)
+      os.makedirs(share_doc_path)
 
-      shutil.copy(u'AUTHORS', share_doc_path)
-      shutil.copy(u'COPYING', share_doc_path)
-      shutil.copy(u'NEWS', share_doc_path)
-      shutil.copy(u'README', share_doc_path)
+      shutil.copy(os.path.join(source_directory, u'AUTHORS'), share_doc_path)
+      shutil.copy(os.path.join(source_directory, u'COPYING'), share_doc_path)
+      shutil.copy(os.path.join(source_directory, u'NEWS'), share_doc_path)
+      shutil.copy(os.path.join(source_directory, u'README'), share_doc_path)
 
       command = (
           u'{0:s} --root {1:s}/tmp/ '
