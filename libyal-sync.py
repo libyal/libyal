@@ -525,7 +525,7 @@ class PkgBuildHelper(BuildHelper):
         return False
 
       command = u'make install DESTDIR={0:s}/tmp >> {1:s} 2>&1'.format(
-          source_directory, log_filename)
+          os.path.abspath(source_directory), log_filename)
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
@@ -534,7 +534,7 @@ class PkgBuildHelper(BuildHelper):
 
       share_doc_path = os.path.join(
           source_directory, u'tmp', u'usr', u'share', u'doc', library_name)
-      os.makedirs(directory_name, exist_ok=True)
+      os.makedirs(share_doc_path, exist_ok=True)
 
       shutil.copy(u'AUTHORS', share_doc_path)
       shutil.copy(u'COPYING', share_doc_path)
