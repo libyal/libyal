@@ -534,7 +534,8 @@ class PkgBuildHelper(BuildHelper):
 
       share_doc_path = os.path.join(
           source_directory, u'tmp', u'usr', u'share', u'doc', library_name)
-      os.makedirs(share_doc_path)
+      if not os.path.exists(share_doc_path):
+        os.makedirs(share_doc_path)
 
       shutil.copy(os.path.join(source_directory, u'AUTHORS'), share_doc_path)
       shutil.copy(os.path.join(source_directory, u'COPYING'), share_doc_path)
