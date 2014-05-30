@@ -504,12 +504,12 @@ class PkgBuildHelper(BuildHelper):
       if cflags and ldflags:
         command = (
             u'{0:s} {1:s} ./configure --prefix=/usr --enable-python '
-            u'--with-pyprefix --disable-dependency-tracking > {3:s} '
+            u'--with-pyprefix --disable-dependency-tracking > {2:s} '
             u'2>&1').format(cflags, ldflags, log_filename)
       else:
         command = (
             u'./configure --prefix=/usr --enable-python --with-pyprefix '
-            u'> {1:s} 2>&1').format(log_filename)
+            u'> {0:s} 2>&1').format(log_filename)
 
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
