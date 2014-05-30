@@ -60,7 +60,6 @@ class ProjectConfiguration(object):
 
     # Packaging methods the project supports.
     self.supports_dpkg = False
-    self.supports_package_maker = False
     self.supports_rpm = False
 
     # Other.
@@ -155,7 +154,6 @@ class ProjectConfiguration(object):
     self.supports_mingw = 'mingw' in features
 
     self.supports_dpkg = 'dpkg' in features
-    self.supports_package_maker = 'package_maker' in features
     self.supports_rpm = 'rpm' in features
 
     self.supports_dokan = 'dokan' in features
@@ -246,16 +244,6 @@ class ProjectConfiguration(object):
       self.dpkg_build_dependencies = self._GetConfigValue(
           config_parser, 'dpkg', 'build_dependencies')
 
-    if (self.supports_package_maker and
-        not config_parser.has_section('package_maker')):
-      raise ConfigError(
-          'Support for PackageMaker enabled but no corresponding section: '
-          'package_maker is missing.')
-
-    if config_parser.has_section('package_maker'):
-      # TODO: implement.
-      pass
-
     if self.supports_rpm and not config_parser.has_section('rpm'):
       raise ConfigError(
           'Support for rpm enabled but no corresponding section: '
@@ -342,8 +330,7 @@ class ProjectConfiguration(object):
     dpkg_build_dependencies = ''
     dpkg_filenames = ''
 
-    package_maker_configure_options = ''
-    package_maker_pyprefix = ''
+    macosx_pkg_configure_options = ''
 
     rpm_build_dependencies = ''
     rpm_filenames = ''
@@ -489,10 +476,9 @@ class ProjectConfiguration(object):
     if self.supports_gcc or self.supports_mingw or self.supports_msvscpp:
       building_table_of_contents += '\n'
 
-    if self.supports_dpkg or self.supports_package_maker or self.supports_rpm:
-      building_table_of_contents += (
-          'Or directly packaged with different package managers:\n').format(
-              self.project_name)
+    building_table_of_contents += (
+        'Or directly packaged with different package managers:\n').format(
+            self.project_name)
 
     if self.supports_dpkg:
       building_table_of_contents += '  * Using Debian package tools (DEB)\n'
@@ -561,17 +547,10 @@ class ProjectConfiguration(object):
          '~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm').format(
              self.project_name)
 
-    if self.supports_package_maker:
-      building_table_of_contents += '  * Using Mac OS X !PackageMaker\n'
+    building_table_of_contents += '  * Using Mac OS X pkgbuild\n'
 
-      if self.supports_python:
-        package_maker_configure_options += ' --enable-python'
-
-        package_maker_pyprefix += (
-            'Do not use --with-pyprefix here. The !PackageMaker files are '
-            'configured to look for the Python-bindings in the '
-            '$PWD/macosx/tmp/ path and install them into the corresponding '
-            'system directory.')
+    if self.supports_python:
+      macosx_pkg_configure_options = ' --enable-python --with-pyprefix'
 
     if self.mount_tool_source_description_long:
       mount_tool_source_description_long = self.mount_tool_source_description_long
@@ -623,8 +602,7 @@ class ProjectConfiguration(object):
         'dpkg_build_dependencies': dpkg_build_dependencies,
         'dpkg_filenames': dpkg_filenames,
 
-        'package_maker_configure_options': package_maker_configure_options,
-        'package_maker_pyprefix': package_maker_pyprefix,
+        'macosx_pkg_configure_options': macosx_pkg_configure_options,
 
         'rpm_build_dependencies': rpm_build_dependencies,
         'rpm_filenames': rpm_filenames,
@@ -779,9 +757,8 @@ class BuildingPageGenerator(WikiPageGenerator):
     if project_configuration.supports_rpm:
       self._GenerateSection(project_configuration, 'rpm.txt', output_writer)
 
-    if project_configuration.supports_package_maker:
-      self._GenerateSection(
-          project_configuration, 'package_maker.txt', output_writer)
+    self._GenerateSection(
+        project_configuration, 'macosx_pkg.txt', output_writer)
 
 
 class MountingPageGenerator(WikiPageGenerator):

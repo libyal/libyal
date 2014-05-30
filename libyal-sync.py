@@ -456,15 +456,12 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
 
 
 class PkgBuildHelper(BuildHelper):
-  """Class that helps in building PackageMaker packages (.pkg)."""
+  """Class that helps in building MacOS-X packages (.pkg)."""
 
   def __init__(self):
     """Initializes the build helper."""
     super(PkgBuildHelper, self).__init__()
     self._pkgbuild = os.path.join(u'/', u'usr', u'bin', u'pkgbuild')
-    self._package_maker = os.path.join(
-        u'/', u'Applications', u'PackageMaker.app', u'Contents', u'MacOS',
-        u'PackageMaker')
 
   def Build(self, source_filename, library_name, library_version):
     """Builds the pkg package and distributable disk image (.dmg).
@@ -503,23 +500,17 @@ class PkgBuildHelper(BuildHelper):
       cflags = u''
       ldflags = u''
 
-    if self._package_maker and os.path.exists(self._package_maker):
-      has_package_maker = True
-      prefix = u'$PWD/macosx/tmp'
-    else:
-      has_package_maker = False
-      prefix = u'$PWD/macosx/tmp/usr'
-
     if not os.path.exists(pkg_filename):
       if cflags and ldflags:
         command = (
-            u'{0:s} {1:s} ./configure --disable-dependency-tracking '
-            u'--prefix={2:s} --enable-python > {3:s} 2>&1').format(
-                cflags, ldflags, prefix, log_filename)
+            u'{0:s} {1:s} ./configure --prefix=/usr --enable-python '
+            u'--with-pyprefix --disable-dependency-tracking > {3:s} '
+            u'2>&1').format(cflags, ldflags, log_filename)
       else:
         command = (
-            u'./configure --prefix={0:s} --enable-python > {1:s} 2>&1').format(
-                prefix, log_filename)
+            u'./configure --prefix=/usr --enable-python --with-pyprefix '
+            u'> {1:s} 2>&1').format(log_filename)
+
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
@@ -540,53 +531,25 @@ class PkgBuildHelper(BuildHelper):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      if has_package_maker:
-        command = u'sudo chown -R root:wheel macosx/tmp/'
-        print 'This script now needs to run sudo as in: {0:s}'.format(command)
-        exit_code = subprocess.call(
-            u'(cd {0:s} && {1:s})'.format(source_directory, command),
-            shell=True)
-        if exit_code != 0:
-          logging.error(u'Running: "{0:s}" failed.'.format(command))
-          return False
+      share_doc_path = os.path.join(
+          source_directory, u'tmp', u'usr', u'share', u'doc', library_name)
+      os.makedirs(directory_name, exist_ok=True)
 
-        command = (
-            u'{0:s} --doc {1:s}/macosx/{2:s}.pmdoc --out {3:s}').format(
-                self._package_maker, source_directory, library_name,
-                pkg_filename)
-        exit_code = subprocess.call(command, shell=True)
-        if exit_code != 0:
-          logging.error(u'Running: "{0:s}" failed.'.format(command))
-          return False
+      shutil.copy(u'AUTHORS', share_doc_path)
+      shutil.copy(u'COPYING', share_doc_path)
+      shutil.copy(u'NEWS', share_doc_path)
+      shutil.copy(u'README', share_doc_path)
 
-        command = u'sudo rm -rf macosx/tmp/'
-        print 'This script now needs to run sudo as in: {0:s}'.format(command)
-        exit_code = subprocess.call(
-            u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
-        if exit_code != 0:
-          logging.error(u'Running: "{0:s}" failed.'.format(command))
-          return False
-
-      else:
-        python_install_path = sysconfig.get_python_lib(1, 0, prefix='')
-        python_site_packages_path = sysconfig.get_python_lib()
-
-        os.renames(
-            u'{0:s}/macosx/tmp/usr/{1:s}'.format(
-                source_directory, python_install_path),
-            u'{0:s}/macosx/tmp/{1:s}'.format(
-                source_directory, python_site_packages_path))
-
-        command = (
-            u'{0:s} --root {1:s}/macosx/tmp/ '
-            u'--identifier com.google.code.p.{2:s} '
-            u'--version {3:d} --ownership recommended {4:s}').format(
-                self._pkgbuild, source_directory, library_name,
-                library_version, pkg_filename)
-        exit_code = subprocess.call(command, shell=True)
-        if exit_code != 0:
-          logging.error(u'Running: "{0:s}" failed.'.format(command))
-          return False
+      command = (
+          u'{0:s} --root {1:s}/tmp/ '
+          u'--identifier com.google.code.p.{2:s} '
+          u'--version {3:d} --ownership recommended {4:s}').format(
+              self._pkgbuild, source_directory, library_name,
+              library_version, pkg_filename)
+      exit_code = subprocess.call(command, shell=True)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
 
     command = (
         u'hdiutil create {0:s} -srcfolder {1:s} -fs HFS+').format(
@@ -599,7 +562,7 @@ class PkgBuildHelper(BuildHelper):
     return True
 
   def Clean(self, library_name, library_version):
-    """Cleans the PackageMaker packages in the current directory.
+    """Cleans the MacOS-X packages in the current directory.
 
     Args:
       library_name: the name of the library.
@@ -638,7 +601,7 @@ class PkgBuildHelper(BuildHelper):
       library_version: the version of the library.
 
     Returns:
-      A filename of one of the resulting PackageMaker package.
+      A filename of one of the resulting MacOS-X package.
     """
     return u'{0:s}-{1:d}.dmg'.format(library_name, library_version)
 
