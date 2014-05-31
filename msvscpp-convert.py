@@ -152,6 +152,7 @@ class VSProjectConfiguration(VSConfiguration):
     self.debug_information_format = ''
     self.dependencies = ''
     self.dependencies_set = False
+    self.detect_64bit_portability_problems = ''
     self.enable_comdat_folding = ''
     self.enable_function_level_linking = ''
     self.enable_intrinsic_functions = ''
@@ -335,6 +336,7 @@ class VSProjectConfiguration(VSConfiguration):
     copy.debug_information_format = self.debug_information_format
     copy.dependencies = self.dependencies
     copy.dependencies_set = self.dependencies_set
+    copy.detect_64bit_portability_problems = self.detect_64bit_portability_problems
     copy.enable_comdat_folding = self.enable_comdat_folding
     copy.enable_function_level_linking = self.enable_function_level_linking
     copy.enable_intrinsic_functions = self.enable_intrinsic_functions
@@ -391,6 +393,7 @@ class VSProjectInformation(object):
   def __init__(self):
     """Initializes Visual Studio project information."""
     self.configurations = VSConfigurations()
+    self.dependencies = []
     self.guid = ''
     self.header_files = []
     self.keyword = ''
@@ -579,6 +582,11 @@ class VS2008ProjectFileReader(VSProjectFileReader):
             values = re.findall('WarningLevel="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.warning_level = values[0]
+
+          elif line.startswith('Detect64BitPortabilityProblems='):
+            values = re.findall('Detect64BitPortabilityProblems="([^"]*)"', line)
+            if len(values) == 1:
+              project_configuration.detect_64bit_portability_problems = values[0]
 
           elif line.startswith('WarnAsError='):
             values = re.findall('WarnAsError="([^"]*)"', line)
@@ -1045,6 +1053,10 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     self.WriteLine(
         '\tRootNamespace="{0:s}"'.format(project_information.root_name_space))
 
+    if project_information.keyword:
+      self.WriteLine(
+          '\tKeyword="{0:s}"'.format(project_information.keyword))
+
     self.WriteLines([
         '\tTargetFrameworkVersion="131072"',
         '\t>'])
@@ -1082,6 +1094,10 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
 
     self.WriteLine('\t\t\tCharacterSet="{0:s}"'.format(
         project_configuration.character_set))
+
+    if project_configuration.whole_program_optimization:
+      self.WriteLine('\t\t\tWholeProgramOptimization="{0:s}"'.format(
+          project_configuration.whole_program_optimization))
 
     self.WriteLine('\t\t\t>')
 
@@ -1135,12 +1151,20 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     self.WriteLine('\t\t\t\tRuntimeLibrary="{0:s}"'.format(
         project_configuration.runtime_library))
 
+    if project_configuration.precompiled_header:
+      self.WriteLine('\t\t\t\tUsePrecompiledHeader="{0:s}"'.format(
+          project_configuration.precompiled_header))
+
     self.WriteLine('\t\t\t\tWarningLevel="{0:s}"'.format(
         project_configuration.warning_level))
 
     if project_configuration.warning_as_error:
       self.WriteLine('\t\t\t\tWarnAsError="{0:s}"'.format(
           project_configuration.warning_as_error))
+
+    if project_configuration.detect_64bit_portability_problems:
+      self.WriteLine('\t\t\t\tDetect64BitPortabilityProblems="{0:s}"'.format(
+          project_configuration.detect_64bit_portability_problems))
 
     if project_configuration.debug_information_format:
       self.WriteLine('\t\t\t\tDebugInformationFormat="{0:s}"'.format(
@@ -1189,15 +1213,37 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
 
       # TODO: AdditionalDependencies="zlib.lib"
 
-      self.WriteLine('\t\t\t\tOutputFile="{0:s}"'.format(
-          project_configuration.linker_output_file))
+      if project_configuration.linker_output_file:
+        self.WriteLine('\t\t\t\tOutputFile="{0:s}"'.format(
+            project_configuration.linker_output_file))
 
-      self.WriteLine(
-          '\t\t\t\tAdditionalLibraryDirectories="&quot;$(OutDir)&quot;"')
+      if project_configuration.link_incremental:
+        self.WriteLine('\t\t\t\tLinkIncremental="{0:s}"'.format(
+            project_configuration.link_incremental))
+
+      library_directories = '&quot;$(OutDir)&quot;'
+      if project_configuration.library_directories:
+        library_directories = '{0:s};{1:s}'.format(
+            library_directories, project_configuration.library_directories)
+
+      self.WriteLine('\t\t\t\tAdditionalLibraryDirectories="{0:s}"'.format(
+          library_directories))
 
       if project_configuration.generate_debug_information:
         self.WriteLine('\t\t\t\tGenerateDebugInformation="{0:s}"'.format(
             project_configuration.generate_debug_information))
+
+      if project_configuration.sub_system:
+        self.WriteLine('\t\t\t\tSubSystem="{0:s}"'.format(
+            project_configuration.sub_system))
+
+      if project_configuration.optimize_references:
+        self.WriteLine('\t\t\t\tOptimizeReferences="{0:s}"'.format(
+            project_configuration.optimize_references))
+
+      if project_configuration.enable_comdat_folding:
+        self.WriteLine('\t\t\t\tEnableCOMDATFolding="{0:s}"'.format(
+            project_configuration.enable_comdat_folding))
 
       if project_configuration.randomized_base_address:
         self.WriteLine('\t\t\t\tRandomizedBaseAddress="{0:s}"'.format(
@@ -1207,8 +1253,13 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
         self.WriteLine('\t\t\t\tDataExecutionPrevention="{0:s}"'.format(
             project_configuration.data_execution_prevention))
 
-      self.WriteLine('\t\t\t\tImportLibrary="{0:s}"'.format(
-          project_configuration.import_library))
+      if project_configuration.target_machine:
+        self.WriteLine('\t\t\t\tTargetMachine="{0:s}"'.format(
+            project_configuration.target_machine))
+
+      if project_configuration.import_library:
+        self.WriteLine('\t\t\t\tImportLibrary="{0:s}"'.format(
+            project_configuration.import_library))
 
       self.WriteLine('\t\t\t/>')
 
@@ -1367,7 +1418,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     Args:
       dependencies: a list of the GUID of the dependencies.
       solution_projects_by_guid: a dictionary of the projects (instances of
-                                 VSSolutionProject)with their GUID in lower
+                                 VSSolutionProject) with their GUID in lower
                                  case as the key.
     """
     return
@@ -1925,7 +1976,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     Args:
       dependencies: a list of the GUID of the dependencies.
       solution_projects_by_guid: a dictionary of the projects (instances of
-                                 VSSolutionProject)with their GUID in lower
+                                 VSSolutionProject) with their GUID in lower
                                  case as the key.
     """
     if len(dependencies) > 0:
@@ -2632,13 +2683,13 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
 
     if len(solution_project.dependencies) > 0:
       self.WriteLine(
-          '        ProjectSection(ProjectDependencies) = postProject')
+          '\tProjectSection(ProjectDependencies) = postProject')
 
       for dependency_guid in solution_project.dependencies:
-        self.WriteLine('                {{{0:s}}} = {{{0:s}}}'.format(
+        self.WriteLine('\t\t{{{0:s}}} = {{{0:s}}}'.format(
             dependency_guid.upper()))
 
-      self.WriteLine('        EndProjectSection')
+      self.WriteLine('\tEndProjectSection')
 
     self.WriteLine('EndProject')
 
@@ -2655,21 +2706,21 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
 
     if solution_configurations.number_of_configurations > 0:
       self.WriteLine(
-          '        GlobalSection(SolutionConfigurationPlatforms) = preSolution')
+          '\tGlobalSection(SolutionConfigurationPlatforms) = preSolution')
 
       for configuration_platform in sorted(solution_configurations.platforms):
         for configuration_name in sorted(solution_configurations.names):
           configuration = solution_configurations.GetByIdentifier(
               configuration_name, configuration_platform)
 
-          self.WriteLine('                {0:s}|{1:s} = {0:s}|{1:s}'.format(
+          self.WriteLine('\t\t{0:s}|{1:s} = {0:s}|{1:s}'.format(
               configuration.name, configuration.platform))
 
-      self.WriteLine('        EndGlobalSection')
+      self.WriteLine('\tEndGlobalSection')
 
     if solution_configurations.number_of_configurations > 0:
       self.WriteLine(
-          '        GlobalSection(ProjectConfigurationPlatforms) = postSolution')
+          '\tGlobalSection(ProjectConfigurationPlatforms) = postSolution')
 
       for configuration_platform in sorted(solution_configurations.platforms):
         for solution_project in solution_projects:
@@ -2678,21 +2729,21 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
                 configuration_name, configuration_platform)
 
             self.WriteLine((
-                '                {{{0:s}}}.{1:s}|{2:s}.ActiveCfg = '
+                '\t\t{{{0:s}}}.{1:s}|{2:s}.ActiveCfg = '
                 '{1:s}|{2:s}').format(
                     solution_project.guid.upper(), configuration.name,
                     configuration.platform))
             self.WriteLine((
-                '                {{{0:s}}}.{1:s}|{2:s}.Build = {1:s}|{2:s}').format(
+                '\t\t{{{0:s}}}.{1:s}|{2:s}.Build.0 = {1:s}|{2:s}').format(
                     solution_project.guid.upper(), configuration.name,
                     configuration.platform))
 
-      self.WriteLine('        EndGlobalSection')
+      self.WriteLine('\tEndGlobalSection')
 
     self.WriteLines([
-        '        GlobalSection(SolutionProperties) = preSolution',
-        '                HideSolutionNode = FALSE',
-        '        EndGlobalSection',
+        '\tGlobalSection(SolutionProperties) = preSolution',
+        '\t\tHideSolutionNode = FALSE',
+        '\tEndGlobalSection',
         'EndGlobal'])
 
 
@@ -2836,7 +2887,7 @@ class VSSolution(object):
       output_version: the output version of the Visual Studio.
       solution_project: the project (instance of VSSolutionProject).
       solution_projects_by_guid: a dictionary of the projects (instances of
-                                 VSSolutionProject)with their GUID in lower
+                                 VSSolutionProject) with their GUID in lower
                                  case as the key.
 
     Returns:
@@ -2898,7 +2949,7 @@ class VSSolution(object):
       project_information: the project information (instance of
                            VSProjectInformation).
       solution_projects_by_guid: a dictionary of the projects (instances of
-                                 VSSolutionProject)with their GUID in lower
+                                 VSSolutionProject) with their GUID in lower
                                  case as the key.
     """
     output_directory = 'vs{0:s}'.format(output_version)
@@ -3050,7 +3101,10 @@ class LibyalReleaseVSProjectConfiguration(VSProjectConfiguration):
     self.character_set = '1'
 
     self.runtime_library = '2'
+    # self.smaller_type_check = 'false'
+    # self.precompiled_header = '0'
     self.warning_level = '4'
+    # self.warning_as_error = 'false'
     self.compile_as = '1'
 
     self.target_machine = '1'
@@ -3071,7 +3125,9 @@ class LibyalDebugVSProjectConfiguration(VSProjectConfiguration):
     self.basic_runtime_checks = '3'
     self.smaller_type_check = 'true'
     self.runtime_library = '3'
+    # self.precompiled_header = '0'
     self.warning_level = '4'
+    # self.warning_as_error = 'false'
     self.debug_information_format = '3'
     self.compile_as = '1'
 
@@ -3080,6 +3136,256 @@ class LibyalDebugVSProjectConfiguration(VSProjectConfiguration):
 
 class LibyalSourceVSSolution(VSSolution):
   """Class to represent a libyal source Visual Studio solution generator."""
+
+  def _ReadMakefile(
+      self, makefile_am_path, solution_name, project_information,
+      release_project_configuration, debug_project_configuration):
+    """Reads the Makefile.am.
+
+    Args:
+      makefile_am_path: the path of the Makefile.am file.
+      solution_name: the name of the solution.
+      project_information: the project information (instance of
+                           VSProjectInformation).
+      release_project_configuration: the release project configuration (instance
+                                     of LibyalReleaseVSProjectConfiguration).
+      debug_project_configuration: the debug project configuration (instance
+                                   of LibyalReleaseVSProjectConfiguration).
+    """
+    project_name = project_information.name
+
+    file_object = open(makefile_am_path, 'r')
+
+    include_directories = []
+    preprocessor_definitions = []
+
+    include_directories.append('\\'.join(['..', '..', 'include']))
+    include_directories.append('\\'.join(['..', '..', 'common']))
+
+    if not project_name.startswith('lib'):
+      preprocessor_definitions.append('WIN32')
+      preprocessor_definitions.append('NDEBUG')
+      preprocessor_definitions.append('_CONSOLE')
+
+    preprocessor_definitions.append('_CRT_SECURE_NO_DEPRECATE')
+
+    alternate_dependencies = []
+    dependencies = []
+    source_files = []
+    header_files = []
+    resource_files = []
+
+    rc_filename = '{0:s}.rc'.format(project_name)
+
+    in_am_cppflags_section = False
+    in_extra_dist_section = False
+    in_la_libadd_section = False
+    in_la_sources_section = False
+    in_ldadd_section = False
+    in_sources_section = False
+
+    for line in file_object.readlines():
+      line = line.strip()
+
+      if in_am_cppflags_section:
+        if not line:
+          in_am_cppflags_section = False
+
+        else:
+          if line.endswith(' \\'):
+            line = line[:-2]
+
+          if line.startswith('@') and line.endswith('_CPPFLAGS@'):
+            directory_name = line[1:-10].lower()
+            if os.path.isdir(directory_name):
+              include_directories.append(
+                  '\\'.join(['..', '..', directory_name]))
+
+              preprocessor_definitions.append(
+                  'HAVE_LOCAL_{0:s}'.format(line[1:-10]))
+
+              alternate_dependencies.append(directory_name)
+
+      elif in_extra_dist_section:
+        if not line:
+          in_extra_dist_section = False
+
+        else:
+          if line.endswith(' \\'):
+            line = line[:-2]
+
+          if line == rc_filename:
+            resource_files.append(
+                '\\'.join(['..', '..', project_name, rc_filename]))
+
+      elif in_la_libadd_section:
+        if not line:
+          in_la_libadd_section = False
+
+        else:
+          if line.endswith(' \\'):
+            line = line[:-2]
+
+          if line.startswith('@') and line.endswith('_LIBADD@'):
+            dependency_name = line[1:-8].lower()
+          elif line.endswith('.la'):
+            _, _, dependency_name = line.rpartition('/')
+            dependency_name = dependency_name[:-3]
+          else:
+            if line not in ['@LIBINTL@', 'endif']:
+              logging.warning(
+                  u'Unuspported dependency definition: {0:s}'.format(line))
+            dependency_name = ''
+
+          if dependency_name:
+            dependencies.append(dependency_name)
+
+      elif in_la_sources_section:
+        if not line:
+          in_la_sources_section = False
+
+        else:
+          if line.endswith(' \\'):
+            line = line[:-2]
+
+          for filename in line.split(' '):
+            if filename.endswith('.c'):
+              source_files.append(
+                  '\\'.join(['..', '..', project_name, filename]))
+
+            elif filename.endswith('.h'):
+              header_files.append(
+                  '\\'.join(['..', '..', project_name, filename]))
+
+      elif in_ldadd_section:
+        if not line:
+          in_ldadd_section = False
+
+        else:
+          if line.endswith(' \\'):
+            line = line[:-2]
+
+          if line.startswith('@') and line.endswith('_LIBADD@'):
+            dependency_name = line[1:-8].lower()
+          elif line.endswith('.la'):
+            _, _, dependency_name = line.rpartition('/')
+            dependency_name = dependency_name[:-3]
+          else:
+            if line not in ['@LIBINTL@', 'endif']:
+              logging.warning(
+                  u'Unuspported dependency definition: {0:s}'.format(line))
+            dependency_name = ''
+
+          if dependency_name:
+            dependencies.append(dependency_name)
+
+      elif in_sources_section:
+        if not line:
+          in_sources_section = False
+
+        else:
+          if line.endswith(' \\'):
+            line = line[:-2]
+
+          directory_name = '{0:s}tools'.format(solution_name[3:])
+
+          for filename in line.split(' '):
+            if filename.endswith('.c'):
+              source_files.append(
+                  '\\'.join(['..', '..', directory_name, filename]))
+
+            elif filename.endswith('.h'):
+              header_files.append(
+                  '\\'.join(['..', '..', directory_name, filename]))
+
+      elif line.startswith('AM_CPPFLAGS'):
+        in_am_cppflags_section = True
+
+      elif line.startswith('{0:s}_la_LIBADD'.format(project_name)):
+        in_la_libadd_section = True
+
+      elif line.startswith('{0:s}_la_SOURCES'.format(project_name)):
+        in_la_sources_section = True
+
+      elif line.startswith('{0:s}_LDADD'.format(project_name)):
+        in_ldadd_section = True
+
+      elif line.startswith('{0:s}_SOURCES'.format(project_name)):
+        in_sources_section = True
+
+      elif line.startswith('EXTRA_DIST'):
+        in_extra_dist_section = True
+
+    file_object.close()
+
+    if dependencies:
+      project_information.dependencies = dependencies
+    else:
+      project_information.dependencies = alternate_dependencies
+
+    if project_name == solution_name:
+      preprocessor_definitions.append(
+          '{0:s}_DLL_EXPORT'.format(project_name.upper()))
+
+    elif project_name.startswith('lib'):
+      preprocessor_definitions.append(
+          'HAVE_LOCAL_{0:s}'.format(project_name.upper()))
+
+    else:
+      preprocessor_definitions.append(
+          '{0:s}_DLL_IMPORT'.format(solution_name.upper()))
+
+    if project_name.startswith('py'):
+      include_directories.append('C:\\Python27\\include')
+
+    release_project_configuration.include_directories = ';'.join(
+        include_directories)
+    release_project_configuration.preprocessor_definitions = ';'.join(
+        preprocessor_definitions)
+
+    debug_project_configuration.include_directories = ';'.join(
+        include_directories)
+    debug_project_configuration.preprocessor_definitions = ';'.join(
+        preprocessor_definitions)
+
+    project_information.source_files = sorted(source_files)
+    project_information.header_files = sorted(header_files)
+    project_information.resource_files = sorted(resource_files)
+
+  def _ReadMakefileBinPrograms(self, makefile_am_path):
+    """Reads bin programs section in the Makefile.am.
+
+    Args:
+      makefile_am_path: the path of the Makefile.am file.
+
+    Returns:
+      A list containing the binary program names.
+    """
+    file_object = open(makefile_am_path, 'r')
+
+    bin_programs = []
+
+    in_bin_programs_section = False
+
+    for line in file_object.readlines():
+      line = line.strip()
+
+      if in_bin_programs_section:
+        if not line:
+          in_bin_programs_section = False
+
+        else:
+          if line.endswith(' \\'):
+            line = line[:-2]
+
+          bin_programs.append(line)
+
+      elif line.startswith('bin_PROGRAMS'):
+        in_bin_programs_section = True
+
+    file_object.close()
+
+    return bin_programs
 
   def Convert(self, input_directory, output_version):
     """Converts a Visual Studio solution.
@@ -3155,203 +3461,129 @@ class LibyalSourceVSSolution(VSSolution):
         logging.warning(u'No such file: {0:s}.'.format(makefile_am_path))
         continue
 
-      project_filename = '{0:s}\\{0:s}'.format(directory_entry)
+      if directory_entry.endswith('tools'):
+        project_names = self._ReadMakefileBinPrograms(makefile_am_path)
+      else:
+        project_names = [directory_entry]
 
-      project_guid = project_guids_by_name.get(directory_entry, '')
-      if not project_guid:
-        project_guid = str(uuid.uuid4())
+      for project_name in project_names:
+        project_filename = '{0:s}\\{0:s}'.format(project_name)
 
-      solution_project = VSSolutionProject(
-          directory_entry, project_filename, project_guid)
+        project_guid = project_guids_by_name.get(project_name, '')
+        if not project_guid:
+          project_guid = str(uuid.uuid4())
 
-      solution_projects.append(solution_project)
+        solution_project = VSSolutionProject(
+            project_name, project_filename, project_guid)
 
-      project_information = VSProjectInformation()
-      project_information.name = directory_entry
-      project_information.guid = project_guid
-      project_information.root_name_space = directory_entry
-      # project_information.keyword = 'Win32Proj'
+        solution_projects.append(solution_project)
 
-      release_project_configuration = LibyalReleaseVSProjectConfiguration()
-      debug_project_configuration = LibyalDebugVSProjectConfiguration()
+        project_information = VSProjectInformation()
+        project_information.name = project_name
+        project_information.guid = project_guid
+        project_information.root_name_space = project_name
 
-      if (directory_entry == solution_name or
-          directory_entry.startswith('py')):
-        release_project_configuration.output_type = '2'
-        debug_project_configuration.output_type = '2'
+        release_project_configuration = LibyalReleaseVSProjectConfiguration()
+        debug_project_configuration = LibyalDebugVSProjectConfiguration()
 
-      elif directory_entry.startswith('lib'):
-        release_project_configuration.output_type = '4'
-        debug_project_configuration.output_type = '4'
+        if project_name == solution_name or project_name.startswith('py'):
+          release_project_configuration.output_type = '2'
+          debug_project_configuration.output_type = '2'
 
-      elif directory_entry.endswith('tools'):
-        # TODO.
-        release_project_configuration.output_type = '1'
-        debug_project_configuration.output_type = '1'
+        elif project_name.startswith('lib'):
+          release_project_configuration.output_type = '4'
+          debug_project_configuration.output_type = '4'
 
-      include_directories = []
-      preprocessor_definitions = []
+        else:
+          release_project_configuration.output_type = '1'
+          debug_project_configuration.output_type = '1'
 
-      include_directories.append('\\'.join(['..', '..', 'include']))
-      include_directories.append('\\'.join(['..', '..', 'common']))
+        # TODO: generate main library project file; AdditionalDependencies.
+        # TODO: what about non local dependencies e.g. zlib or dokan.
 
-      preprocessor_definitions.append('_CRT_SECURE_NO_DEPRECATE')
+        # TODO: generate tool project files.
+        # TODO: determine autogenerated source.
 
-      file_object = open(makefile_am_path, 'r')
+        self._ReadMakefile(
+            makefile_am_path, solution_name, project_information,
+            release_project_configuration, debug_project_configuration)
 
-      # TODO: generate main library project file; AdditionalDependencies.
-      # TODO: what about non local dependencies e.g. zlib or dokan.
+        if project_name == solution_name:
+          dll_filename = '$(OutDir)\\{0:s}.dll'.format(project_name)
+          # dll_filename = '$(OutDir)\\$(ProjectName).dll'
+          lib_filename = '$(OutDir)\\{0:s}.lib'.format(project_name)
+          # lib_filename = '$(OutDir)\\$(ProjectName).lib'
 
-      # TODO: generate tool project files.
-      # TODO: generate Python binding project file.
-      # TODO: determine autogenerated source.
+          release_project_configuration.linker_output_file = dll_filename
+          release_project_configuration.randomized_base_address = '2'
+          release_project_configuration.data_execution_prevention = '2'
+          release_project_configuration.import_library = lib_filename
+          release_project_configuration.linker_values_set = True
 
-      in_am_cppflags_section = False
-      in_sources_section = False
-      in_extra_dist_section = False
-      rc_filename = '{0:s}.rc'.format(directory_entry)
-      source_files = []
-      header_files = []
-      resource_files = []
+          debug_project_configuration.linker_output_file = dll_filename
+          debug_project_configuration.generate_debug_information = 'true'
+          debug_project_configuration.randomized_base_address = '1'
+          debug_project_configuration.data_execution_prevention = '1'
+          debug_project_configuration.import_library = lib_filename
+          debug_project_configuration.linker_values_set = True
 
-      for line in file_object.readlines():
-        line = line.strip()
+        elif project_name.startswith('lib'):
+          lib_filename = '$(OutDir)\\{0:s}.lib'.format(project_name)
+          # lib_filename = '$(OutDir)\\$(ProjectName).lib'
 
-        if in_am_cppflags_section:
-          if not line:
-            in_am_cppflags_section = False
+          release_project_configuration.librarian_output_file = lib_filename
+          release_project_configuration.librarian_ignore_defaults = 'false'
 
+          debug_project_configuration.librarian_output_file = lib_filename
+          debug_project_configuration.librarian_ignore_defaults = 'false'
+
+        else:
+          project_information.keyword = 'Win32Proj'
+
+          if project_name.startswith('py'):
+            dll_filename = '$(OutDir)\\$(ProjectName).pyd'
+            # lib_filename = '$(OutDir)\\{0:s}.lib'.format(project_name)
+            # lib_filename = '$(OutDir)\\$(ProjectName).lib'
+            library_directories = 'C:\\Python27\\libs'
           else:
-            if line.endswith(' \\'):
-              line = line[:-2]
+            dll_filename = ''
+            library_directories =  ''
 
-            if line.startswith('@') and line.endswith('_CPPFLAGS@'):
-              directory_name = line[1:-10].lower()
-              if os.path.isdir(directory_name):
-                include_directories.append(
-                    '\\'.join(['..', '..', directory_name]))
+          release_project_configuration.whole_program_optimization = '1'
 
-                preprocessor_definitions.append(
-                    'HAVE_LOCAL_{0:s}'.format(line[1:-10]))
+          # release_project_configuration.precompiled_header = '0'
 
-        elif in_sources_section:
-          if not line:
-            in_sources_section = False
+          release_project_configuration.linker_output_file = dll_filename
+          release_project_configuration.link_incremental = '1'
+          release_project_configuration.library_directories = library_directories
+          release_project_configuration.sub_system = '1'
+          release_project_configuration.optimize_references = '2'
+          release_project_configuration.enable_comdat_folding = '2'
+          release_project_configuration.randomized_base_address = '2'
+          release_project_configuration.data_execution_prevention = '2'
+          release_project_configuration.target_machine = '1'
+          # release_project_configuration.import_library = lib_filename
+          release_project_configuration.linker_values_set = True
 
-          else:
-            if line.endswith(' \\'):
-              line = line[:-2]
+          # debug_project_configuration.precompiled_header = '0'
 
-            for filename in line.split(' '):
-              if filename.endswith('.c'):
-                source_files.append(
-                    '\\'.join(['..', '..', directory_entry, filename]))
+          debug_project_configuration.linker_output_file = dll_filename
+          debug_project_configuration.generate_debug_information = 'true'
+          debug_project_configuration.link_incremental = '1'
+          debug_project_configuration.library_directories = library_directories
+          debug_project_configuration.sub_system = '1'
+          debug_project_configuration.optimize_references = '2'
+          debug_project_configuration.enable_comdat_folding = '2'
+          debug_project_configuration.randomized_base_address = '1'
+          debug_project_configuration.data_execution_prevention = '1'
+          debug_project_configuration.target_machine = '1'
+          # debug_project_configuration.import_library = lib_filename
+          debug_project_configuration.linker_values_set = True
 
-              elif filename.endswith('.h'):
-                header_files.append(
-                    '\\'.join(['..', '..', directory_entry, filename]))
+        project_information.configurations.Append(release_project_configuration)
+        project_information.configurations.Append(debug_project_configuration)
 
-        elif in_extra_dist_section:
-          if not line:
-            in_extra_dist_section = False
-
-          else:
-            if line.endswith(' \\'):
-              line = line[:-2]
-
-            if line == rc_filename:
-              resource_files.append(
-                  '\\'.join(['..', '..', directory_entry, rc_filename]))
-
-        elif line.startswith('AM_CPPFLAGS'):
-          in_am_cppflags_section = True
-
-        elif line.startswith('{0:s}_la_SOURCES'.format(directory_entry)):
-          in_sources_section = True
-
-        elif line.startswith('EXTRA_DIST'):
-          in_extra_dist_section = True
-
-      file_object.close()
-
-      if directory_entry == solution_name:
-        preprocessor_definitions.append(
-            '{0:s}_DLL_EXPORT'.format(directory_entry.upper()))
-
-      elif directory_entry.startswith('lib'):
-        preprocessor_definitions.append(
-            'HAVE_LOCAL_{0:s}'.format(directory_entry.upper()))
-
-      elif (directory_entry.endswith('tools') or
-            directory_entry.startswith('py')):
-        preprocessor_definitions.append(
-            '{0:s}_DLL_IMPORT'.format(solution_name.upper()))
-
-      release_project_configuration.include_directories = ';'.join(
-          include_directories)
-      release_project_configuration.preprocessor_definitions = ';'.join(
-          preprocessor_definitions)
-
-      debug_project_configuration.include_directories = ';'.join(
-          include_directories)
-      debug_project_configuration.preprocessor_definitions = ';'.join(
-          preprocessor_definitions)
-
-      if directory_entry == solution_name:
-        dll_filename = '$(OutDir)\{0:s}.dll'.format(directory_entry)
-        # dll_filename = '$(OutDir)\$(ProjectName).dll'
-        lib_filename = '$(OutDir)\{0:s}.lib'.format(directory_entry)
-        # lib_filename = '$(OutDir)\$(ProjectName).lib'
-
-        release_project_configuration.linker_output_file = dll_filename
-        release_project_configuration.randomized_base_address = '2'
-        release_project_configuration.data_execution_prevention = '2'
-        release_project_configuration.import_library = lib_filename
-        release_project_configuration.linker_values_set = True
-
-        debug_project_configuration.linker_output_file = dll_filename
-        debug_project_configuration.generate_debug_information = 'true'
-        debug_project_configuration.randomized_base_address = '2'
-        debug_project_configuration.data_execution_prevention = '2'
-        debug_project_configuration.import_library = lib_filename
-        debug_project_configuration.linker_values_set = True
-
-      elif directory_entry.startswith('lib'):
-        lib_filename = '$(OutDir)\{0:s}.lib'.format(directory_entry)
-        # lib_filename = '$(OutDir)\$(ProjectName).lib'
-
-        release_project_configuration.librarian_output_file = lib_filename
-        release_project_configuration.librarian_ignore_defaults = 'false'
-
-        debug_project_configuration.librarian_output_file = lib_filename
-        debug_project_configuration.librarian_ignore_defaults = 'false'
-
-      elif directory_entry.startswith('lpy'):
-        dll_filename = '$(OutDir)\$(ProjectName).pyd'
-        lib_filename = '$(OutDir)\{0:s}.lib'.format(directory_entry)
-        # lib_filename = '$(OutDir)\$(ProjectName).lib'
-
-        release_project_configuration.linker_output_file = dll_filename
-        release_project_configuration.randomized_base_address = '1'
-        release_project_configuration.data_execution_prevention = '0'
-        release_project_configuration.import_library = lib_filename
-        release_project_configuration.linker_values_set = True
-
-        debug_project_configuration.linker_output_file = dll_filename
-        debug_project_configuration.generate_debug_information = 'true'
-        debug_project_configuration.randomized_base_address = '1'
-        debug_project_configuration.data_execution_prevention = '0'
-        debug_project_configuration.import_library = lib_filename
-        debug_project_configuration.linker_values_set = True
-
-      project_information.configurations.Append(release_project_configuration)
-      project_information.configurations.Append(debug_project_configuration)
-
-      project_information.source_files = sorted(source_files)
-      project_information.header_files = sorted(header_files)
-      project_information.resource_files = sorted(resource_files)
-
-      projects_by_guid[project_guid] = project_information
+        projects_by_guid[project_guid] = project_information
 
     solution_configurations = VSConfigurations()
     solution_configurations.Append(
@@ -3359,17 +3591,35 @@ class LibyalSourceVSSolution(VSSolution):
     solution_configurations.Append(
         VSSolutionConfiguration(name='VSDebug', platform='Win32'))
 
-    # Add x64 as a platform.
-    solution_configurations.ExtendWithX64(output_version)
+    if output_version not in ['2008']:
+      # Add x64 as a platform.
+      solution_configurations.ExtendWithX64(output_version)
+
+    # Create some look-up dictionaries.
+    solution_project_guids_by_name = {}
+    solution_projects_by_guid = {}
+    for solution_project in solution_projects:
+      solution_project_guids_by_name[solution_project.name] = solution_project.guid
+      solution_projects_by_guid[solution_project.guid] = solution_project
+
+    # Set-up the solution dependencies.
+    for guid, project_information in projects_by_guid.iteritems():
+      solution_project = solution_projects_by_guid[guid]
+
+      for dependency in project_information.dependencies:
+        if dependency in ['pthread']:
+          continue
+
+        dependency_guid = solution_project_guids_by_name.get(dependency, '')
+        if not dependency_guid:
+          logging.info('Missing GUID for dependency: {0:s}'.format(dependency))
+
+        solution_project.AddDependency(dependency_guid)
 
     solution_filename = '{0:s}.sln'.format(solution_name)
     self._WriteSolution(
         solution_filename, output_version, solution_projects,
         solution_configurations)
-
-    solution_projects_by_guid = {}
-    for solution_project in solution_projects:
-      solution_projects_by_guid[solution_project.guid] = solution_project
 
     for solution_project in solution_projects:
       project_information = projects_by_guid[solution_project.guid]
@@ -3389,7 +3639,7 @@ def Main():
 
   args_parser.add_argument(
       'solution_file', nargs='?', action='store', metavar='FILENAME',
-      default=None, help='The solution file (.sln).')
+      default=None, help='The solution file (.sln) or the source directory.')
 
   args_parser.add_argument(
       '--to', dest='output_format', nargs='?', choices=sorted(output_formats),
