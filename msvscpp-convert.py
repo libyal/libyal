@@ -3298,7 +3298,7 @@ class LibyalSourceVSSolution(VSSolution):
               header_files.append(
                   '\\'.join(['..', '..', directory_name, filename]))
 
-      elif line.startswith('AM_CPPFLAGS'):
+      n_am_cflags_sectionelif line.startswith('AM_CFLAGS') or line.startswith('AM_CPPFLAGS'):
         in_am_cppflags_section = True
 
       elif line.startswith('{0:s}_la_LIBADD'.format(project_name)):
