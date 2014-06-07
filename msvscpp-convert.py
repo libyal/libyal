@@ -145,13 +145,13 @@ class VSProjectConfiguration(VSConfiguration):
     super(VSProjectConfiguration, self).__init__()
 
     # Note that name and platform are inherited from VSConfiguration.
+    self.additional_dependencies = ''
+    self.additional_dependencies_set = False
     self.basic_runtime_checks = ''
     self.character_set = ''
     self.compile_as = ''
     self.data_execution_prevention = ''
     self.debug_information_format = ''
-    self.dependencies = ''
-    self.dependencies_set = False
     self.detect_64bit_portability_problems = ''
     self.enable_comdat_folding = ''
     self.enable_function_level_linking = ''
@@ -329,13 +329,13 @@ class VSProjectConfiguration(VSConfiguration):
     """Copies the Visual Studio project configuration to an x64 equivalent."""
     copy = VSProjectConfiguration()
 
+    copy.additional_dependencies = self.additional_dependencies
+    copy.additional_dependencies_set = self.additional_dependencies_set
     copy.basic_runtime_checks = self.basic_runtime_checks
     copy.character_set = self.character_set
     copy.compile_as = self.compile_as
     copy.data_execution_prevention = self.data_execution_prevention
     copy.debug_information_format = self.debug_information_format
-    copy.dependencies = self.dependencies
-    copy.dependencies_set = self.dependencies_set
     copy.detect_64bit_portability_problems = self.detect_64bit_portability_problems
     copy.enable_comdat_folding = self.enable_comdat_folding
     copy.enable_function_level_linking = self.enable_function_level_linking
@@ -401,6 +401,7 @@ class VSProjectInformation(object):
     self.resource_files = []
     self.root_name_space = ''
     self.source_files = []
+    self.third_party_dependencies = []
 
 
 class VSSolutionConfiguration(VSConfiguration):
@@ -636,8 +637,8 @@ class VS2008ProjectFileReader(VSProjectFileReader):
             values = re.findall(
                 'AdditionalDependencies="([^"]*)"', line)
             if len(values) == 1:
-              project_configuration.dependencies = values[0]
-              project_configuration.dependencies_set = True
+              project_configuration.additional_dependencies = values[0]
+              project_configuration.additional_dependencies_set = True
 
           elif line.startswith('LinkIncremental='):
             project_configuration.linker_values_set = True
@@ -1057,6 +1058,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
       self.WriteLine(
           '\tKeyword="{0:s}"'.format(project_information.keyword))
 
+    # Also seen 196613.
     self.WriteLines([
         '\tTargetFrameworkVersion="131072"',
         '\t>'])
@@ -1211,7 +1213,9 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
         '\t\t\t<Tool',
         '\t\t\t\tName="VCLinkerTool"'])
 
-      # TODO: AdditionalDependencies="zlib.lib"
+      if project_configuration.additional_dependencies_set:
+        self.WriteLine('\t\t\t\tAdditionalDependencies="{0:s}"'.format(
+            project_configuration.additional_dependencies))
 
       if project_configuration.linker_output_file:
         self.WriteLine('\t\t\t\tOutputFile="{0:s}"'.format(
@@ -1734,23 +1738,23 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     self.WriteLine('    <Link>')
 
     # Visual Studio will convert an empty additional dependencies value.
-    if project_configuration.dependencies_set:
-      dependencies = re.sub(
-          r'[.]lib ', r'.lib;', project_configuration.dependencies)
-      dependencies = re.sub(
-          r'[$][(]OutDir[)]\\', r'$(OutDir)', dependencies)
+    if project_configuration.additional_dependencies_set:
+      additional_dependencies = re.sub(
+          r'[.]lib ', r'.lib;', project_configuration.additional_dependencies)
+      additional_dependencies = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)', additional_dependencies)
 
-      if dependencies and dependencies[-1] != ';':
-        dependencies = '{0:s};'.format(dependencies)
+      if additional_dependencies and additional_dependencies[-1] != ';':
+        additional_dependencies = '{0:s};'.format(additional_dependencies)
 
-      dependencies = (
+      additional_dependencies = (
           '{0:s}%(AdditionalDependencies)').format(
-          dependencies)
+          additional_dependencies)
 
       self.WriteLine((
           '      <AdditionalDependencies>{0:s}'
           '</AdditionalDependencies>').format(
-              dependencies))
+              additional_dependencies))
 
     if project_configuration.linker_output_file:
       linker_output_file = re.sub(
@@ -3197,7 +3201,14 @@ class LibyalSourceVSSolution(VSSolution):
 
           if line.startswith('@') and line.endswith('_CPPFLAGS@'):
             directory_name = line[1:-10].lower()
-            if os.path.isdir(directory_name):
+            if directory_name == 'libfuse' and project_name.endswith('mount'):
+              include_directories.append('..\..\..\dokan\dokan')
+
+              preprocessor_definitions.append('HAVE_LIBDOKAN')
+
+              alternate_dependencies.append('dokan')
+
+            elif os.path.isdir(directory_name):
               include_directories.append(
                   '\\'.join(['..', '..', directory_name]))
 
@@ -3226,19 +3237,31 @@ class LibyalSourceVSSolution(VSSolution):
           if line.endswith(' \\'):
             line = line[:-2]
 
-          if line.startswith('@') and line.endswith('_LIBADD@'):
+          if line in frozenset([
+              'endif', '@LIBDL_LIBADD@', '@LIBINTL@', '@PTHREAD_LIBADD@']):
+            dependency_name = ''
+          elif line.startswith('@') and line.endswith('_LIBADD@'):
             dependency_name = line[1:-8].lower()
           elif line.endswith('.la'):
             _, _, dependency_name = line.rpartition('/')
             dependency_name = dependency_name[:-3]
           else:
-            if line not in ['@LIBINTL@', 'endif']:
-              logging.warning(
-                  u'Unuspported dependency definition: {0:s}'.format(line))
+            logging.warning(
+                u'Unuspported dependency definition: {0:s}'.format(line))
             dependency_name = ''
 
           if dependency_name:
-            dependencies.append(dependency_name)
+            if dependency_name == 'libcrypto':
+              release_project_configuration.additional_dependencies = (
+                  'advapi32.lib')
+              release_project_configuration.additional_dependencies_set = True
+
+              debug_project_configuration.additional_dependencies = (
+                  'advapi32.lib')
+              debug_project_configuration.additional_dependencies_set = True
+
+            else:
+              dependencies.append(dependency_name)
 
       elif in_la_sources_section:
         if not line:
@@ -3265,19 +3288,32 @@ class LibyalSourceVSSolution(VSSolution):
           if line.endswith(' \\'):
             line = line[:-2]
 
-          if line.startswith('@') and line.endswith('_LIBADD@'):
+          if line in frozenset([
+              'endif', '@LIBDL_LIBADD@', '@LIBINTL@', '@PTHREAD_LIBADD@']):
+            dependency_name = ''
+          elif line.startswith('@') and line.endswith('_LIBADD@'):
             dependency_name = line[1:-8].lower()
           elif line.endswith('.la'):
             _, _, dependency_name = line.rpartition('/')
             dependency_name = dependency_name[:-3]
           else:
-            if line not in ['@LIBINTL@', 'endif']:
-              logging.warning(
-                  u'Unuspported dependency definition: {0:s}'.format(line))
+            logging.warning(
+                u'Unuspported dependency definition: {0:s}'.format(line))
             dependency_name = ''
 
           if dependency_name:
-            dependencies.append(dependency_name)
+            if dependency_name == 'libcrypto':
+              release_project_configuration.dependencies = 'advapi32.lib'
+              release_project_configuration.dependencies_set = True
+
+              debug_project_configuration.dependencies = 'advapi32.lib'
+              debug_project_configuration.dependencies_set = True
+
+            elif dependency_name == 'libfuse':
+              dependencies.append('dokan')
+
+            else:
+              dependencies.append(dependency_name)
 
       elif in_sources_section:
         if not line:
@@ -3322,6 +3358,9 @@ class LibyalSourceVSSolution(VSSolution):
       project_information.dependencies = dependencies
     else:
       project_information.dependencies = alternate_dependencies
+
+    if 'dokan' in project_information.dependencies:
+      project_information.third_party_dependencies.append('dokan')
 
     if project_name == solution_name:
       preprocessor_definitions.append(
@@ -3471,6 +3510,9 @@ class LibyalSourceVSSolution(VSSolution):
 
         project_guid = project_guids_by_name.get(project_name, '')
         if not project_guid:
+          project_guid = project_guids_by_name.get(
+              '{0:s}.dll'.format(project_name), '')
+        if not project_guid:
           project_guid = str(uuid.uuid4())
 
         solution_project = VSSolutionProject(
@@ -3594,6 +3636,118 @@ class LibyalSourceVSSolution(VSSolution):
     if output_version not in ['2008']:
       # Add x64 as a platform.
       solution_configurations.ExtendWithX64(output_version)
+
+    third_party_dependencies = []
+    for project_information in projects_by_guid.itervalues():
+      for dependency in project_information.third_party_dependencies:
+        if dependency not in third_party_dependencies:
+          third_party_dependencies.append(dependency)
+
+    for project_name in third_party_dependencies:
+      if project_name not in ['dokan']:
+        logging.info('Unsupported third party dependency: {0:s}'.format(
+            project_name))
+        continue
+
+      project_filename = '{0:s}\\{0:s}'.format(project_name)
+
+      project_guid = project_guids_by_name.get(project_name, '')
+      if not project_guid:
+        project_guid = project_guids_by_name.get(
+            '{0:s}.dll'.format(project_name), '')
+      if not project_guid:
+        project_guid = str(uuid.uuid4())
+
+      solution_project = VSSolutionProject(
+          project_name, project_filename, project_guid)
+
+      solution_projects.append(solution_project)
+
+      if project_name == 'dokan':
+        dll_filename = '$(OutDir)\\{0:s}.dll'.format(project_name)
+        lib_filename = '$(OutDir)\\{0:s}.lib'.format(project_name)
+        module_definition_file = '..\..\..\dokan\dokan\dokan.def'
+
+        project_information = VSProjectInformation()
+        project_information.name = project_name
+        project_information.guid = project_guid
+        project_information.root_name_space = project_name
+
+        project_information.source_files = sorted([
+            '..\\..\\..\\dokan\\dokan\\access.c',
+            '..\\..\\..\\dokan\\dokan\\cleanup.c',
+            '..\\..\\..\\dokan\\dokan\\close.c',
+            '..\\..\\..\\dokan\\dokan\\create.c',
+            '..\\..\\..\\dokan\\dokan\\directory.c',
+            '..\\..\\..\\dokan\\dokan\\dokan.c',
+            '..\\..\\..\\dokan\\dokan\\fileinfo.c',
+            '..\\..\\..\\dokan\\dokan\\flush.c',
+            '..\\..\\..\\dokan\\dokan\\lock.c',
+            '..\\..\\..\\dokan\\dokan\\mount.c',
+            '..\\..\\..\\dokan\\dokan\\read.c',
+            '..\\..\\..\\dokan\\dokan\\security.c',
+            '..\\..\\..\\dokan\\dokan\\setfile.c',
+            '..\\..\\..\\dokan\\dokan\\status.c',
+            '..\\..\\..\\dokan\\dokan\\timeout.c',
+            '..\\..\\..\\dokan\\dokan\\version.c',
+            '..\\..\\..\\dokan\\dokan\\volume.c',
+            '..\\..\\..\\dokan\\dokan\\write.c'])
+
+        project_information.header_files = sorted([
+            '..\\..\\..\\dokan\\dokan\\dokan.h',
+            '..\\..\\..\\dokan\\dokan\\dokanc.h',
+            '..\\..\\..\\dokan\\dokan\\dokani.h',
+            '..\\..\\..\\dokan\\dokan\\fileinfo.h',
+            '..\\..\\..\\dokan\\dokan\\list.h'])
+
+        include_directories = sorted([
+            '..\\..\\..\\dokan\\sys\\'])
+
+        preprocessor_definitions = [
+            'WIN32',
+            'NDEBUG',
+            '_WINDOWS',
+            '_USRDLL',
+            '_CRT_SECURE_NO_WARNINGS',
+            'DOKAN_DLL']
+
+        release_project_configuration = LibyalReleaseVSProjectConfiguration()
+
+        release_project_configuration.include_directories = ';'.join(
+            include_directories)
+        release_project_configuration.preprocessor_definitions = ';'.join(
+            preprocessor_definitions)
+
+        release_project_configuration.output_type = '2'
+        release_project_configuration.linker_output_file = dll_filename
+        release_project_configuration.module_definition_file = (
+            module_definition_file)
+        release_project_configuration.randomized_base_address = '2'
+        release_project_configuration.data_execution_prevention = '2'
+        release_project_configuration.import_library = lib_filename
+        release_project_configuration.linker_values_set = True
+
+        debug_project_configuration = LibyalDebugVSProjectConfiguration()
+
+        debug_project_configuration.include_directories = ';'.join(
+            include_directories)
+        debug_project_configuration.preprocessor_definitions = ';'.join(
+            preprocessor_definitions)
+
+        debug_project_configuration.output_type = '2'
+        debug_project_configuration.linker_output_file = dll_filename
+        debug_project_configuration.module_definition_file = (
+            module_definition_file)
+        debug_project_configuration.generate_debug_information = 'true'
+        debug_project_configuration.randomized_base_address = '1'
+        debug_project_configuration.data_execution_prevention = '1'
+        debug_project_configuration.import_library = lib_filename
+        debug_project_configuration.linker_values_set = True
+
+        project_information.configurations.Append(release_project_configuration)
+        project_information.configurations.Append(debug_project_configuration)
+
+        projects_by_guid[project_guid] = project_information
 
     # Create some look-up dictionaries.
     solution_project_guids_by_name = {}
