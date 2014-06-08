@@ -145,8 +145,7 @@ class VSProjectConfiguration(VSConfiguration):
     super(VSProjectConfiguration, self).__init__()
 
     # Note that name and platform are inherited from VSConfiguration.
-    self.additional_dependencies = ''
-    self.additional_dependencies_set = False
+    self.additional_dependencies = []
     self.basic_runtime_checks = ''
     self.character_set = ''
     self.compile_as = ''
@@ -330,7 +329,6 @@ class VSProjectConfiguration(VSConfiguration):
     copy = VSProjectConfiguration()
 
     copy.additional_dependencies = self.additional_dependencies
-    copy.additional_dependencies_set = self.additional_dependencies_set
     copy.basic_runtime_checks = self.basic_runtime_checks
     copy.character_set = self.character_set
     copy.compile_as = self.compile_as
@@ -637,8 +635,8 @@ class VS2008ProjectFileReader(VSProjectFileReader):
             values = re.findall(
                 'AdditionalDependencies="([^"]*)"', line)
             if len(values) == 1:
-              project_configuration.additional_dependencies = values[0]
-              project_configuration.additional_dependencies_set = True
+              values = values[0].split(' ')
+              project_configuration.additional_dependencies = values
 
           elif line.startswith('LinkIncremental='):
             project_configuration.linker_values_set = True
@@ -1213,9 +1211,9 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
         '\t\t\t<Tool',
         '\t\t\t\tName="VCLinkerTool"'])
 
-      if project_configuration.additional_dependencies_set:
+      if project_configuration.additional_dependencies:
         self.WriteLine('\t\t\t\tAdditionalDependencies="{0:s}"'.format(
-            project_configuration.additional_dependencies))
+            ' '.join(sorted(project_configuration.additional_dependencies))))
 
       if project_configuration.linker_output_file:
         self.WriteLine('\t\t\t\tOutputFile="{0:s}"'.format(
@@ -1738,9 +1736,10 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     self.WriteLine('    <Link>')
 
     # Visual Studio will convert an empty additional dependencies value.
-    if project_configuration.additional_dependencies_set:
-      additional_dependencies = re.sub(
-          r'[.]lib ', r'.lib;', project_configuration.additional_dependencies)
+    if project_configuration.additional_dependencies:
+      additional_dependencies = ';'.join(
+          sorted(project_configuration.additional_dependencies))
+
       additional_dependencies = re.sub(
           r'[$][(]OutDir[)]\\', r'$(OutDir)', additional_dependencies)
 
@@ -2260,23 +2259,24 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     self.WriteLine('    <Link>')
 
     # Visual Studio will convert an empty additional dependencies value.
-    if project_configuration.dependencies_set:
-      dependencies = re.sub(
-          r'[.]lib ', r'.lib;', project_configuration.dependencies)
-      dependencies = re.sub(
-          r'[$][(]OutDir[)]\\', r'$(OutDir)', dependencies)
+    if project_configuration.additional_dependencies_set:
+      additional_dependencies = ';'.join(
+          sorted(project_configuration.additional_dependencies))
 
-      if dependencies and dependencies[-1] != ';':
-        dependencies = '{0:s};'.format(dependencies)
+      additional_dependencies = re.sub(
+          r'[$][(]OutDir[)]\\', r'$(OutDir)', additional_dependencies)
 
-      dependencies = (
+      if additional_dependencies and additional_dependencies[-1] != ';':
+        additional_dependencies = '{0:s};'.format(additional_dependencies)
+
+      additional_dependencies = (
           '{0:s}%(AdditionalDependencies)').format(
-          dependencies)
+          additional_dependencies)
 
       self.WriteLine((
           '      <AdditionalDependencies>{0:s}'
           '</AdditionalDependencies>').format(
-              dependencies))
+              additional_dependencies))
 
     if project_configuration.linker_output_file:
       linker_output_file = re.sub(
@@ -3157,13 +3157,18 @@ class LibyalSourceVSSolution(VSSolution):
       debug_project_configuration: the debug project configuration (instance
                                    of LibyalReleaseVSProjectConfiguration).
     """
-    # TODO: implement.
-
     project_information.source_files = sorted([
-        '..\\..\\..\\bzip2\\bzip2.c'])
+        '..\\..\\..\\bzip2\\blocksort.c',
+        '..\\..\\..\\bzip2\\bzlib.c',
+        '..\\..\\..\\bzip2\\compress.c',
+        '..\\..\\..\\bzip2\\crctable.c',
+        '..\\..\\..\\bzip2\\decompress.c',
+        '..\\..\\..\\bzip2\\huffman.c',
+        '..\\..\\..\\bzip2\\randtable.c'])
 
     project_information.header_files = sorted([
-        '..\\..\\..\\bzip2\\bzip2.h'])
+        '..\\..\\..\\bzip2\\bzlib.h',
+        '..\\..\\..\\bzip2\\bzlib_private.h'])
 
     include_directories = sorted([
         '..\\..\\..\\bzip2'])
@@ -3174,7 +3179,7 @@ class LibyalSourceVSSolution(VSSolution):
         '_WINDOWS',
         '_USRDLL',
         '_CRT_SECURE_NO_WARNINGS',
-        'BZIP2_DLL']
+        'BZ_DLL']
 
     release_project_configuration.include_directories = ';'.join(
         include_directories)
@@ -3203,6 +3208,8 @@ class LibyalSourceVSSolution(VSSolution):
       debug_project_configuration: the debug project configuration (instance
                                    of LibyalReleaseVSProjectConfiguration).
     """
+    # TODO: add .net DLL support
+    # project_information.name.endswith('.net')
     if project_information.name.startswith('py'):
       dll_extension = 'pyd'
       library_directories = 'C:\\Python27\\libs'
@@ -3316,6 +3323,8 @@ class LibyalSourceVSSolution(VSSolution):
     """
     project_information.keyword = 'Win32Proj'
 
+    release_project_configuration.output_type = '1'
+
     release_project_configuration.whole_program_optimization = '1'
 
     # release_project_configuration.precompiled_header = '0'
@@ -3328,6 +3337,8 @@ class LibyalSourceVSSolution(VSSolution):
     release_project_configuration.data_execution_prevention = '2'
     release_project_configuration.target_machine = '1'
     release_project_configuration.linker_values_set = True
+
+    debug_project_configuration.output_type = '1'
 
     # debug_project_configuration.precompiled_header = '0'
 
@@ -3434,6 +3445,48 @@ class LibyalSourceVSSolution(VSSolution):
     self._ConfigureAsDll(
         project_information, release_project_configuration,
         debug_project_configuration)
+
+  def _ConfigureLibcrypto(
+      self, project_information, release_project_configuration,
+      debug_project_configuration):
+    """Configures the project for the Windows libcrypto equivalent.
+
+    Args:
+      project_information: the project information (instance of
+                           VSProjectInformation).
+      release_project_configuration: the release project configuration (instance
+                                     of LibyalReleaseVSProjectConfiguration).
+      debug_project_configuration: the debug project configuration (instance
+                                   of LibyalReleaseVSProjectConfiguration).
+    """
+    dependency = 'advapi32.lib'
+
+    if dependency not in release_project_configuration.additional_dependencies:
+      release_project_configuration.additional_dependencies.append(dependency)
+
+    if dependency not in debug_project_configuration.additional_dependencies:
+      debug_project_configuration.additional_dependencies.append(dependency)
+
+  def _ConfigureLibuuid(
+      self, project_information, release_project_configuration,
+      debug_project_configuration):
+    """Configures the project for the Windows libuuid equivalent.
+
+    Args:
+      project_information: the project information (instance of
+                           VSProjectInformation).
+      release_project_configuration: the release project configuration (instance
+                                     of LibyalReleaseVSProjectConfiguration).
+      debug_project_configuration: the debug project configuration (instance
+                                   of LibyalReleaseVSProjectConfiguration).
+    """
+    dependency = 'rpcrt4.lib'
+
+    if dependency not in release_project_configuration.additional_dependencies:
+      release_project_configuration.additional_dependencies.append(dependency)
+
+    if dependency not in debug_project_configuration.additional_dependencies:
+      debug_project_configuration.additional_dependencies.append(dependency)
 
   def _CreateThirdPartyDepencies(
       self, solution_projects, projects_by_guid, project_guids_by_name):
@@ -3563,6 +3616,12 @@ class LibyalSourceVSSolution(VSSolution):
           if line.endswith(' \\'):
             line = line[:-2]
 
+          elif line.endswith('\\'):
+            logging.warning(
+                u'Detected missing space before \\ in line: ${0:s}'.format(
+                    line))
+            line = line[:-1]
+
           if line.startswith('@') and line.endswith('_CPPFLAGS@'):
             directory_name = line[1:-10].lower()
             if directory_name == 'bzip2':
@@ -3630,13 +3689,14 @@ class LibyalSourceVSSolution(VSSolution):
 
           if dependency_name:
             if dependency_name == 'libcrypto':
-              release_project_configuration.additional_dependencies = (
-                  'advapi32.lib')
-              release_project_configuration.additional_dependencies_set = True
+              self._ConfigureLibcrypto(
+                  project_information, release_project_configuration,
+                  debug_project_configuration)
 
-              debug_project_configuration.additional_dependencies = (
-                  'advapi32.lib')
-              debug_project_configuration.additional_dependencies_set = True
+            elif dependency_name == 'libuuid':
+              self._ConfigureLibuuid(
+                  project_information, release_project_configuration,
+                  debug_project_configuration)
 
             else:
               dependencies.append(dependency_name)
@@ -3681,14 +3741,17 @@ class LibyalSourceVSSolution(VSSolution):
 
           if dependency_name:
             if dependency_name == 'libcrypto':
-              release_project_configuration.dependencies = 'advapi32.lib'
-              release_project_configuration.dependencies_set = True
-
-              debug_project_configuration.dependencies = 'advapi32.lib'
-              debug_project_configuration.dependencies_set = True
+              self._ConfigureLibcrypto(
+                  project_information, release_project_configuration,
+                  debug_project_configuration)
 
             elif dependency_name == 'libfuse':
               dependencies.append('dokan')
+
+            elif dependency_name == 'libuuid':
+              self._ConfigureLibuuid(
+                  project_information, release_project_configuration,
+                  debug_project_configuration)
 
             else:
               dependencies.append(dependency_name)
@@ -3877,6 +3940,7 @@ class LibyalSourceVSSolution(VSSolution):
       if (not directory_entry.startswith('lib') and
           not directory_entry.startswith('py') and
           not directory_entry == 'tests' and
+          not directory_entry.endswith('.net') and
           not directory_entry.endswith('tools')):
         continue
 
@@ -3914,21 +3978,14 @@ class LibyalSourceVSSolution(VSSolution):
         release_project_configuration = LibyalReleaseVSProjectConfiguration()
         debug_project_configuration = LibyalDebugVSProjectConfiguration()
 
-        if project_name == solution_name or project_name.startswith('py'):
-          release_project_configuration.output_type = '2'
-          debug_project_configuration.output_type = '2'
-
-        elif not project_name.startswith('lib'):
-          release_project_configuration.output_type = '1'
-          debug_project_configuration.output_type = '1'
-
         # TODO: determine autogenerated source.
 
         self._ReadMakefile(
             makefile_am_path, solution_name, project_information,
             release_project_configuration, debug_project_configuration)
 
-        if project_name == solution_name or project_name.startswith('py'):
+        if (project_name == solution_name or project_name.startswith('py') or
+            project_name.endswith('.net')):
           self._ConfigureAsDll(
               project_information, release_project_configuration,
               debug_project_configuration)
