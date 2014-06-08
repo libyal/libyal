@@ -3323,7 +3323,8 @@ class LibyalSourceVSSolution(VSSolution):
           if line.endswith(' \\'):
             line = line[:-2]
 
-          directory_name = '{0:s}tools'.format(solution_name[3:])
+          _, _, directory_name = os.path.dirname(
+              makefile_am_path).rpartition(os.path.sep)
 
           for filename in line.split(' '):
             if filename.endswith('.c'):
@@ -3391,8 +3392,8 @@ class LibyalSourceVSSolution(VSSolution):
     project_information.header_files = sorted(header_files)
     project_information.resource_files = sorted(resource_files)
 
-  def _ReadMakefileBinPrograms(self, makefile_am_path):
-    """Reads bin programs section in the Makefile.am.
+  def _ReadMakefilePrograms(self, makefile_am_path):
+    """Reads the programs section in the Makefile.am.
 
     Args:
       makefile_am_path: the path of the Makefile.am file.
@@ -3419,7 +3420,7 @@ class LibyalSourceVSSolution(VSSolution):
 
           bin_programs.append(line)
 
-      elif line.startswith('bin_PROGRAMS'):
+      elif line.endswith('_PROGRAMS = \\'):
         in_bin_programs_section = True
 
     file_object.close()
@@ -3491,6 +3492,7 @@ class LibyalSourceVSSolution(VSSolution):
 
       if (not directory_entry.startswith('lib') and
           not directory_entry.startswith('py') and
+          not directory_entry == 'tests' and
           not directory_entry.endswith('tools')):
         continue
 
@@ -3500,8 +3502,8 @@ class LibyalSourceVSSolution(VSSolution):
         logging.warning(u'No such file: {0:s}.'.format(makefile_am_path))
         continue
 
-      if directory_entry.endswith('tools'):
-        project_names = self._ReadMakefileBinPrograms(makefile_am_path)
+      if directory_entry == 'tests' or directory_entry.endswith('tools'):
+        project_names = self._ReadMakefilePrograms(makefile_am_path)
       else:
         project_names = [directory_entry]
 
