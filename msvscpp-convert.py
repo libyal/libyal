@@ -3711,12 +3711,18 @@ class LibyalSourceVSSolution(VSSolution):
 
           for filename in line.split(' '):
             if filename.endswith('.c'):
-              source_files.append(
-                  '\\'.join(['..', '..', project_name, filename]))
+              source_files.append('\\'.join([
+                  '..', '..', project_name, filename]))
 
             elif filename.endswith('.h'):
-              header_files.append(
-                  '\\'.join(['..', '..', project_name, filename]))
+              header_files.append('\\'.join([
+                  '..', '..', project_name, filename]))
+
+            elif filename.endswith('.l') or filename.endswith('.y'):
+              source_files.append('\\'.join([
+                  '..', '..', project_name, '{0:s}.c'.format(filename[:-2])]))
+              header_files.append('\\'.join([
+                  '..', '..', project_name, '{0:s}.h'.format(filename[:-2])]))
 
       elif in_ldadd_section:
         if not line:
@@ -3769,12 +3775,18 @@ class LibyalSourceVSSolution(VSSolution):
 
           for filename in line.split(' '):
             if filename.endswith('.c'):
-              source_files.append(
-                  '\\'.join(['..', '..', directory_name, filename]))
+              source_files.append('\\'.join([
+                  '..', '..', directory_name, filename]))
 
             elif filename.endswith('.h'):
-              header_files.append(
-                  '\\'.join(['..', '..', directory_name, filename]))
+              header_files.append('\\'.join([
+                  '..', '..', directory_name, filename]))
+
+            elif filename.endswith('.l') or filename.endswith('.y'):
+              source_files.append('\\'.join([
+                  '..', '..', directory_name, '{0:s}.c'.format(filename[:-2])]))
+              header_files.append('\\'.join([
+                  '..', '..', directory_name, '{0:s}.h'.format(filename[:-2])]))
 
       if line.startswith('AM_CFLAGS') or line.startswith('AM_CPPFLAGS'):
         in_am_cppflags_section = True
@@ -4059,8 +4071,9 @@ class LibyalSourceVSSolution(VSSolution):
       else:
         solution_project_extension = 'vcxproj'
 
+      path_segments = solution_project.filename.split('\\')
       solution_project_filenames.append('\t{0:s}.{1:s} \\'.format(
-          solution_project.filename, solution_project_extension))
+          os.path.join(*path_segments), solution_project_extension))
 
     makefile_am_lines = ['MSVSCPP_FILES = \\']
     for solution_project_filename in sorted(solution_project_filenames):
