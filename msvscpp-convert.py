@@ -206,6 +206,8 @@ class VSProjectConfiguration(VSConfiguration):
     compile_as = int(self.compile_as, 10)
     if compile_as == 1:
       return 'CompileAsC'
+    elif compile_as == 2:
+      return 'CompileAsCpp'
     return ''
 
   @property
@@ -3246,6 +3248,8 @@ class LibyalSourceVSSolution(VSSolution):
     if project_information.name.endswith('.net'):
       debug_project_configuration.compile_as = '2'
       debug_project_configuration.managed_extensions = '1'
+      debug_project_configuration.basic_runtime_checks = ''
+      debug_project_configuration.smaller_type_check = ''
 
   def _ConfigureAsDokanDll(
       self, project_information, release_project_configuration,
