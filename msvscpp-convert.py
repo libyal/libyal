@@ -3627,7 +3627,7 @@ class LibyalSourceVSSolution(VSSolution):
             if directory_name == 'bzip2':
               include_directories.append('..\\..\\..\\bzip2')
 
-              preprocessor_definitions.append('BZIP2_DLL')
+              preprocessor_definitions.append('BZ_DLL')
 
               alternate_dependencies.append('bzip2')
 
