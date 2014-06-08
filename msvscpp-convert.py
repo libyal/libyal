@@ -1095,6 +1095,10 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     self.WriteLine('\t\t\tCharacterSet="{0:s}"'.format(
         project_configuration.character_set))
 
+    if project_configuration.managed_extensions:
+      self.WriteLine('\t\t\tManagedExtensions="{0:s}"'.format(
+          project_configuration.managed_extensions))
+
     if project_configuration.whole_program_optimization:
       self.WriteLine('\t\t\tWholeProgramOptimization="{0:s}"'.format(
           project_configuration.whole_program_optimization))
@@ -3208,8 +3212,6 @@ class LibyalSourceVSSolution(VSSolution):
       debug_project_configuration: the debug project configuration (instance
                                    of LibyalReleaseVSProjectConfiguration).
     """
-    # TODO: add .net DLL support
-    # project_information.name.endswith('.net')
     if project_information.name.startswith('py'):
       dll_extension = 'pyd'
       library_directories = 'C:\\Python27\\libs'
@@ -3228,6 +3230,10 @@ class LibyalSourceVSSolution(VSSolution):
     release_project_configuration.import_library = lib_filename
     release_project_configuration.linker_values_set = True
 
+    if project_information.name.endswith('.net'):
+      release_project_configuration.compile_as = '2'
+      release_project_configuration.managed_extensions = '1'
+
     debug_project_configuration.output_type = '2'
     debug_project_configuration.linker_output_file = dll_filename
     debug_project_configuration.library_directories = library_directories
@@ -3236,6 +3242,10 @@ class LibyalSourceVSSolution(VSSolution):
     debug_project_configuration.data_execution_prevention = '1'
     debug_project_configuration.import_library = lib_filename
     debug_project_configuration.linker_values_set = True
+
+    if project_information.name.endswith('.net'):
+      debug_project_configuration.compile_as = '2'
+      debug_project_configuration.managed_extensions = '1'
 
   def _ConfigureAsDokanDll(
       self, project_information, release_project_configuration,
@@ -3583,7 +3593,9 @@ class LibyalSourceVSSolution(VSSolution):
     include_directories.append('\\'.join(['..', '..', 'include']))
     include_directories.append('\\'.join(['..', '..', 'common']))
 
-    if not project_name.startswith('lib'):
+    if (not project_name.startswith('lib') and
+        not project_name.startswith('py') and
+        not project_name.endswith('.net')):
       preprocessor_definitions.append('WIN32')
       preprocessor_definitions.append('NDEBUG')
       preprocessor_definitions.append('_CONSOLE')
@@ -3595,8 +3607,6 @@ class LibyalSourceVSSolution(VSSolution):
     source_files = []
     header_files = []
     resource_files = []
-
-    rc_filename = '{0:s}.rc'.format(project_name)
 
     in_am_cppflags_section = False
     in_extra_dist_section = False
@@ -3662,9 +3672,24 @@ class LibyalSourceVSSolution(VSSolution):
           if line.endswith(' \\'):
             line = line[:-2]
 
-          if line == rc_filename:
-            resource_files.append(
-                '\\'.join(['..', '..', project_name, rc_filename]))
+          elif line.endswith('\\'):
+            logging.warning(
+                u'Detected missing space before \\ in line: ${0:s}'.format(
+                    line))
+            line = line[:-1]
+
+          for filename in line.split(' '):
+            if filename.endswith('.c') or filename.endswith('.cpp'):
+              source_files.append('\\'.join([
+                  '..', '..', project_name, filename]))
+
+            elif filename.endswith('.h'):
+              header_files.append('\\'.join([
+                  '..', '..', project_name, filename]))
+
+            elif filename.endswith('.rc'):
+              resource_files.append('\\'.join([
+                  '..', '..', project_name, filename]))
 
       elif in_la_libadd_section:
         if not line:
@@ -3709,20 +3734,20 @@ class LibyalSourceVSSolution(VSSolution):
           if line.endswith(' \\'):
             line = line[:-2]
 
+          elif line.endswith('\\'):
+            logging.warning(
+                u'Detected missing space before \\ in line: ${0:s}'.format(
+                    line))
+            line = line[:-1]
+
           for filename in line.split(' '):
-            if filename.endswith('.c'):
+            if filename.endswith('.c') or filename.endswith('.cpp'):
               source_files.append('\\'.join([
                   '..', '..', project_name, filename]))
 
             elif filename.endswith('.h'):
               header_files.append('\\'.join([
                   '..', '..', project_name, filename]))
-
-            elif filename.endswith('.l') or filename.endswith('.y'):
-              source_files.append('\\'.join([
-                  '..', '..', project_name, '{0:s}.c'.format(filename[:-2])]))
-              header_files.append('\\'.join([
-                  '..', '..', project_name, '{0:s}.h'.format(filename[:-2])]))
 
       elif in_ldadd_section:
         if not line:
@@ -3774,19 +3799,13 @@ class LibyalSourceVSSolution(VSSolution):
               makefile_am_path).rpartition(os.path.sep)
 
           for filename in line.split(' '):
-            if filename.endswith('.c'):
+            if filename.endswith('.c') or filename.endswith('.cpp'):
               source_files.append('\\'.join([
                   '..', '..', directory_name, filename]))
 
             elif filename.endswith('.h'):
               header_files.append('\\'.join([
                   '..', '..', directory_name, filename]))
-
-            elif filename.endswith('.l') or filename.endswith('.y'):
-              source_files.append('\\'.join([
-                  '..', '..', directory_name, '{0:s}.c'.format(filename[:-2])]))
-              header_files.append('\\'.join([
-                  '..', '..', directory_name, '{0:s}.h'.format(filename[:-2])]))
 
       if line.startswith('AM_CFLAGS') or line.startswith('AM_CPPFLAGS'):
         in_am_cppflags_section = True
@@ -3846,6 +3865,14 @@ class LibyalSourceVSSolution(VSSolution):
         include_directories)
     debug_project_configuration.preprocessor_definitions = ';'.join(
         preprocessor_definitions)
+
+    if project_information.name.endswith('.net'):
+      dependency = '{0:s}.lib'.format(solution_name)
+
+      release_project_configuration.additional_dependencies.append(
+         dependency)
+      debug_project_configuration.additional_dependencies.append(
+         dependency)
 
     project_information.source_files = sorted(source_files)
     project_information.header_files = sorted(header_files)
