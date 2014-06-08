@@ -3141,6 +3141,370 @@ class LibyalDebugVSProjectConfiguration(VSProjectConfiguration):
 class LibyalSourceVSSolution(VSSolution):
   """Class to represent a libyal source Visual Studio solution generator."""
 
+  _SUPPORTED_THIRD_PARTY_DEPENDENCIES = frozenset([
+      'bzip2', 'dokan', 'zlib'])
+
+  def _ConfigureAsBzip2Dll(
+      self, project_information, release_project_configuration,
+      debug_project_configuration):
+    """Configures the project as the bzip2 DLL.
+
+    Args:
+      project_information: the project information (instance of
+                           VSProjectInformation).
+      release_project_configuration: the release project configuration (instance
+                                     of LibyalReleaseVSProjectConfiguration).
+      debug_project_configuration: the debug project configuration (instance
+                                   of LibyalReleaseVSProjectConfiguration).
+    """
+    # TODO: implement.
+
+    project_information.source_files = sorted([
+        '..\\..\\..\\bzip2\\bzip2.c'])
+
+    project_information.header_files = sorted([
+        '..\\..\\..\\bzip2\\bzip2.h'])
+
+    include_directories = sorted([
+        '..\\..\\..\\bzip2'])
+
+    preprocessor_definitions = [
+        'WIN32',
+        'NDEBUG',
+        '_WINDOWS',
+        '_USRDLL',
+        '_CRT_SECURE_NO_WARNINGS',
+        'BZIP2_DLL']
+
+    release_project_configuration.include_directories = ';'.join(
+        include_directories)
+    release_project_configuration.preprocessor_definitions = ';'.join(
+        preprocessor_definitions)
+
+    debug_project_configuration.include_directories = ';'.join(
+        include_directories)
+    debug_project_configuration.preprocessor_definitions = ';'.join(
+        preprocessor_definitions)
+
+    self._ConfigureAsDll(
+        project_information, release_project_configuration,
+        debug_project_configuration)
+
+  def _ConfigureAsDll(
+      self, project_information, release_project_configuration,
+      debug_project_configuration):
+    """Configures the project as a DLL.
+
+    Args:
+      project_information: the project information (instance of
+                           VSProjectInformation).
+      release_project_configuration: the release project configuration (instance
+                                     of LibyalReleaseVSProjectConfiguration).
+      debug_project_configuration: the debug project configuration (instance
+                                   of LibyalReleaseVSProjectConfiguration).
+    """
+    if project_information.name.startswith('py'):
+      dll_extension = 'pyd'
+      library_directories = 'C:\\Python27\\libs'
+    else:
+      dll_extension = 'dll'
+      library_directories = ''
+
+    dll_filename = '$(OutDir)\\$(ProjectName).{0:s}'.format(dll_extension)
+    lib_filename = '$(OutDir)\\$(ProjectName).lib'
+
+    release_project_configuration.output_type = '2'
+    release_project_configuration.linker_output_file = dll_filename
+    release_project_configuration.library_directories = library_directories
+    release_project_configuration.randomized_base_address = '2'
+    release_project_configuration.data_execution_prevention = '2'
+    release_project_configuration.import_library = lib_filename
+    release_project_configuration.linker_values_set = True
+
+    debug_project_configuration.output_type = '2'
+    debug_project_configuration.linker_output_file = dll_filename
+    debug_project_configuration.library_directories = library_directories
+    debug_project_configuration.generate_debug_information = 'true'
+    debug_project_configuration.randomized_base_address = '1'
+    debug_project_configuration.data_execution_prevention = '1'
+    debug_project_configuration.import_library = lib_filename
+    debug_project_configuration.linker_values_set = True
+
+  def _ConfigureAsDokanDll(
+      self, project_information, release_project_configuration,
+      debug_project_configuration):
+    """Configures the project as the dokan DLL.
+
+    Args:
+      project_information: the project information (instance of
+                           VSProjectInformation).
+      release_project_configuration: the release project configuration (instance
+                                     of LibyalReleaseVSProjectConfiguration).
+      debug_project_configuration: the debug project configuration (instance
+                                   of LibyalReleaseVSProjectConfiguration).
+    """
+    project_information.source_files = sorted([
+        '..\\..\\..\\dokan\\dokan\\access.c',
+        '..\\..\\..\\dokan\\dokan\\cleanup.c',
+        '..\\..\\..\\dokan\\dokan\\close.c',
+        '..\\..\\..\\dokan\\dokan\\create.c',
+        '..\\..\\..\\dokan\\dokan\\directory.c',
+        '..\\..\\..\\dokan\\dokan\\dokan.c',
+        '..\\..\\..\\dokan\\dokan\\fileinfo.c',
+        '..\\..\\..\\dokan\\dokan\\flush.c',
+        '..\\..\\..\\dokan\\dokan\\lock.c',
+        '..\\..\\..\\dokan\\dokan\\mount.c',
+        '..\\..\\..\\dokan\\dokan\\read.c',
+        '..\\..\\..\\dokan\\dokan\\security.c',
+        '..\\..\\..\\dokan\\dokan\\setfile.c',
+        '..\\..\\..\\dokan\\dokan\\status.c',
+        '..\\..\\..\\dokan\\dokan\\timeout.c',
+        '..\\..\\..\\dokan\\dokan\\version.c',
+        '..\\..\\..\\dokan\\dokan\\volume.c',
+        '..\\..\\..\\dokan\\dokan\\write.c'])
+
+    project_information.header_files = sorted([
+        '..\\..\\..\\dokan\\dokan\\dokan.h',
+        '..\\..\\..\\dokan\\dokan\\dokanc.h',
+        '..\\..\\..\\dokan\\dokan\\dokani.h',
+        '..\\..\\..\\dokan\\dokan\\fileinfo.h',
+        '..\\..\\..\\dokan\\dokan\\list.h'])
+
+    include_directories = sorted([
+        '..\\..\\..\\dokan\\sys\\'])
+
+    preprocessor_definitions = [
+        'WIN32',
+        'NDEBUG',
+        '_WINDOWS',
+        '_USRDLL',
+        '_CRT_SECURE_NO_WARNINGS',
+        'DOKAN_DLL']
+
+    module_definition_file = '..\\..\\..\\dokan\\dokan\\dokan.def'
+
+    release_project_configuration.include_directories = ';'.join(
+        include_directories)
+    release_project_configuration.preprocessor_definitions = ';'.join(
+        preprocessor_definitions)
+    release_project_configuration.module_definition_file = (
+        module_definition_file)
+
+    debug_project_configuration.include_directories = ';'.join(
+        include_directories)
+    debug_project_configuration.preprocessor_definitions = ';'.join(
+        preprocessor_definitions)
+    debug_project_configuration.module_definition_file = (
+        module_definition_file)
+
+    self._ConfigureAsDll(
+        project_information, release_project_configuration,
+        debug_project_configuration)
+
+  def _ConfigureAsExe(
+      self, project_information, release_project_configuration,
+      debug_project_configuration):
+    """Configures the project as an EXE.
+
+    Args:
+      project_information: the project information (instance of
+                           VSProjectInformation).
+      release_project_configuration: the release project configuration (instance
+                                     of LibyalReleaseVSProjectConfiguration).
+      debug_project_configuration: the debug project configuration (instance
+                                   of LibyalReleaseVSProjectConfiguration).
+    """
+    project_information.keyword = 'Win32Proj'
+
+    release_project_configuration.whole_program_optimization = '1'
+
+    # release_project_configuration.precompiled_header = '0'
+
+    release_project_configuration.link_incremental = '1'
+    release_project_configuration.sub_system = '1'
+    release_project_configuration.optimize_references = '2'
+    release_project_configuration.enable_comdat_folding = '2'
+    release_project_configuration.randomized_base_address = '2'
+    release_project_configuration.data_execution_prevention = '2'
+    release_project_configuration.target_machine = '1'
+    release_project_configuration.linker_values_set = True
+
+    # debug_project_configuration.precompiled_header = '0'
+
+    debug_project_configuration.generate_debug_information = 'true'
+    debug_project_configuration.link_incremental = '1'
+    debug_project_configuration.sub_system = '1'
+    debug_project_configuration.optimize_references = '2'
+    debug_project_configuration.enable_comdat_folding = '2'
+    debug_project_configuration.randomized_base_address = '1'
+    debug_project_configuration.data_execution_prevention = '1'
+    debug_project_configuration.target_machine = '1'
+    debug_project_configuration.linker_values_set = True
+
+  def _ConfigureAsLibrary(
+      self, project_information, release_project_configuration,
+      debug_project_configuration):
+    """Configures the project as a local library.
+
+    Args:
+      project_information: the project information (instance of
+                           VSProjectInformation).
+      release_project_configuration: the release project configuration (instance
+                                     of LibyalReleaseVSProjectConfiguration).
+      debug_project_configuration: the debug project configuration (instance
+                                   of LibyalReleaseVSProjectConfiguration).
+    """
+    lib_filename = '$(OutDir)\\$(ProjectName).lib'
+
+    release_project_configuration.output_type = '4'
+    release_project_configuration.librarian_output_file = lib_filename
+    release_project_configuration.librarian_ignore_defaults = 'false'
+
+    debug_project_configuration.output_type = '4'
+    debug_project_configuration.librarian_output_file = lib_filename
+    debug_project_configuration.librarian_ignore_defaults = 'false'
+
+  def _ConfigureAsZlibDll(
+      self, project_information, release_project_configuration,
+      debug_project_configuration):
+    """Configures the project as the zlib DLL.
+
+    Args:
+      project_information: the project information (instance of
+                           VSProjectInformation).
+      release_project_configuration: the release project configuration (instance
+                                     of LibyalReleaseVSProjectConfiguration).
+      debug_project_configuration: the debug project configuration (instance
+                                   of LibyalReleaseVSProjectConfiguration).
+    """
+    project_information.source_files = sorted([
+        '..\\..\\..\\zlib\\adler32.c',
+        '..\\..\\..\\zlib\\compress.c',
+        '..\\..\\..\\zlib\\crc32.c',
+        '..\\..\\..\\zlib\\deflate.c',
+        '..\\..\\..\\zlib\\gzclose.c',
+        '..\\..\\..\\zlib\\gzlib.c',
+        '..\\..\\..\\zlib\\gzread.c',
+        '..\\..\\..\\zlib\\gzwrite.c',
+        '..\\..\\..\\zlib\\infback.c',
+        '..\\..\\..\\zlib\\inffast.c',
+        '..\\..\\..\\zlib\\inflate.c',
+        '..\\..\\..\\zlib\\inftrees.c',
+        '..\\..\\..\\zlib\\trees.c',
+        '..\\..\\..\\zlib\\uncompr.c',
+        '..\\..\\..\\zlib\\zutil.c'])
+
+    project_information.header_files = sorted([
+        '..\\..\\..\\zlib\\crc32.h',
+        '..\\..\\..\\zlib\\deflate.h',
+        '..\\..\\..\\zlib\\gzguts.h',
+        '..\\..\\..\\zlib\\inffast.h',
+        '..\\..\\..\\zlib\\inffixed.h',
+        '..\\..\\..\\zlib\\inflate.h',
+        '..\\..\\..\\zlib\\inftrees.h',
+        '..\\..\\..\\zlib\\trees.h',
+        '..\\..\\..\\zlib\\zconf.h',
+        '..\\..\\..\\zlib\\zlib.h',
+        '..\\..\\..\\zlib\\zutil.h'])
+
+    project_information.resource_files = sorted([
+        '..\\..\\..\\zlib\\win32\\zlib1.rc'])
+
+    include_directories = sorted([
+        '..\\..\\..\\zlib'])
+
+    preprocessor_definitions = [
+        'WIN32',
+        'NDEBUG',
+        '_WINDOWS',
+        '_USRDLL',
+        '_CRT_SECURE_NO_WARNINGS',
+        'ZLIB_DLL']
+
+    release_project_configuration.include_directories = ';'.join(
+        include_directories)
+    release_project_configuration.preprocessor_definitions = ';'.join(
+        preprocessor_definitions)
+
+    debug_project_configuration.include_directories = ';'.join(
+        include_directories)
+    debug_project_configuration.preprocessor_definitions = ';'.join(
+        preprocessor_definitions)
+
+    self._ConfigureAsDll(
+        project_information, release_project_configuration,
+        debug_project_configuration)
+
+  def _CreateThirdPartyDepencies(
+      self, solution_projects, projects_by_guid, project_guids_by_name):
+    """Creates the project files for third party dependencies.
+
+    Args:
+      solution_projects: a list containing the projects (instances of
+                         VSSolutionProject).
+      projects_by_guid: a dictionary of the projects (instances of
+                        VSProjectInformation) with their GUID in lower case
+                        as the key.
+      project_guids_by_name: a dictionary of the project GUIDs in lower case
+                             with their name as the key. This dictionary is
+                             use as a lookup table to preserve the existing
+                             GUIDs.
+    """
+    third_party_dependencies = []
+    for project_information in projects_by_guid.itervalues():
+      for dependency in project_information.third_party_dependencies:
+        if dependency not in third_party_dependencies:
+          third_party_dependencies.append(dependency)
+
+    for project_name in third_party_dependencies:
+      if project_name not in self._SUPPORTED_THIRD_PARTY_DEPENDENCIES:
+        logging.info('Unsupported third party dependency: {0:s}'.format(
+            project_name))
+        continue
+
+      project_filename = '{0:s}\\{0:s}'.format(project_name)
+
+      project_guid = project_guids_by_name.get(project_name, '')
+      if not project_guid:
+        project_guid = project_guids_by_name.get(
+            '{0:s}.dll'.format(project_name), '')
+      if not project_guid:
+        project_guid = str(uuid.uuid4())
+
+      solution_project = VSSolutionProject(
+          project_name, project_filename, project_guid)
+
+      solution_projects.append(solution_project)
+
+      project_information = VSProjectInformation()
+
+      project_information.name = project_name
+      project_information.guid = project_guid
+      project_information.root_name_space = project_name
+
+      release_project_configuration = LibyalReleaseVSProjectConfiguration()
+      debug_project_configuration = LibyalDebugVSProjectConfiguration()
+
+      if project_name == 'bzip2':
+        self._ConfigureAsBzip2Dll(
+            project_information, release_project_configuration,
+            debug_project_configuration)
+
+      elif project_name == 'dokan':
+        self._ConfigureAsDokanDll(
+            project_information, release_project_configuration,
+            debug_project_configuration)
+
+      elif project_name == 'zlib':
+        self._ConfigureAsZlibDll(
+            project_information, release_project_configuration,
+            debug_project_configuration)
+
+      project_information.configurations.Append(release_project_configuration)
+      project_information.configurations.Append(debug_project_configuration)
+
+      projects_by_guid[project_guid] = project_information
+
   def _ReadMakefile(
       self, makefile_am_path, solution_name, project_information,
       release_project_configuration, debug_project_configuration):
@@ -3201,12 +3565,26 @@ class LibyalSourceVSSolution(VSSolution):
 
           if line.startswith('@') and line.endswith('_CPPFLAGS@'):
             directory_name = line[1:-10].lower()
-            if directory_name == 'libfuse' and project_name.endswith('mount'):
-              include_directories.append('..\..\..\dokan\dokan')
+            if directory_name == 'bzip2':
+              include_directories.append('..\\..\\..\\bzip2')
+
+              preprocessor_definitions.append('BZIP2_DLL')
+
+              alternate_dependencies.append('bzip2')
+
+            elif directory_name == 'libfuse' and project_name.endswith('mount'):
+              include_directories.append('..\\..\\..\\dokan\\dokan')
 
               preprocessor_definitions.append('HAVE_LIBDOKAN')
 
               alternate_dependencies.append('dokan')
+
+            elif directory_name == 'zlib':
+              include_directories.append('..\\..\\..\\zlib')
+
+              preprocessor_definitions.append('ZLIB_DLL')
+
+              alternate_dependencies.append('zlib')
 
             elif os.path.isdir(directory_name):
               include_directories.append(
@@ -3360,8 +3738,14 @@ class LibyalSourceVSSolution(VSSolution):
     else:
       project_information.dependencies = alternate_dependencies
 
+    if 'bzip2' in project_information.dependencies:
+      project_information.third_party_dependencies.append('bzip2')
+
     if 'dokan' in project_information.dependencies:
       project_information.third_party_dependencies.append('dokan')
+
+    if 'zlib' in project_information.dependencies:
+      project_information.third_party_dependencies.append('zlib')
 
     if project_name == solution_name:
       preprocessor_definitions.append(
@@ -3534,101 +3918,40 @@ class LibyalSourceVSSolution(VSSolution):
           release_project_configuration.output_type = '2'
           debug_project_configuration.output_type = '2'
 
-        elif project_name.startswith('lib'):
-          release_project_configuration.output_type = '4'
-          debug_project_configuration.output_type = '4'
-
-        else:
+        elif not project_name.startswith('lib'):
           release_project_configuration.output_type = '1'
           debug_project_configuration.output_type = '1'
 
-        # TODO: generate main library project file; AdditionalDependencies.
-        # TODO: what about non local dependencies e.g. zlib or dokan.
-
-        # TODO: generate tool project files.
         # TODO: determine autogenerated source.
 
         self._ReadMakefile(
             makefile_am_path, solution_name, project_information,
             release_project_configuration, debug_project_configuration)
 
-        if project_name == solution_name:
-          dll_filename = '$(OutDir)\\{0:s}.dll'.format(project_name)
-          # dll_filename = '$(OutDir)\\$(ProjectName).dll'
-          lib_filename = '$(OutDir)\\{0:s}.lib'.format(project_name)
-          # lib_filename = '$(OutDir)\\$(ProjectName).lib'
-
-          release_project_configuration.linker_output_file = dll_filename
-          release_project_configuration.randomized_base_address = '2'
-          release_project_configuration.data_execution_prevention = '2'
-          release_project_configuration.import_library = lib_filename
-          release_project_configuration.linker_values_set = True
-
-          debug_project_configuration.linker_output_file = dll_filename
-          debug_project_configuration.generate_debug_information = 'true'
-          debug_project_configuration.randomized_base_address = '1'
-          debug_project_configuration.data_execution_prevention = '1'
-          debug_project_configuration.import_library = lib_filename
-          debug_project_configuration.linker_values_set = True
+        if project_name == solution_name or project_name.startswith('py'):
+          self._ConfigureAsDll(
+              project_information, release_project_configuration,
+              debug_project_configuration)
 
         elif project_name.startswith('lib'):
-          lib_filename = '$(OutDir)\\{0:s}.lib'.format(project_name)
-          # lib_filename = '$(OutDir)\\$(ProjectName).lib'
-
-          release_project_configuration.librarian_output_file = lib_filename
-          release_project_configuration.librarian_ignore_defaults = 'false'
-
-          debug_project_configuration.librarian_output_file = lib_filename
-          debug_project_configuration.librarian_ignore_defaults = 'false'
+          self._ConfigureAsLibrary(
+              project_information, release_project_configuration,
+              debug_project_configuration)
 
         else:
-          project_information.keyword = 'Win32Proj'
-
-          if project_name.startswith('py'):
-            dll_filename = '$(OutDir)\\$(ProjectName).pyd'
-            # lib_filename = '$(OutDir)\\{0:s}.lib'.format(project_name)
-            # lib_filename = '$(OutDir)\\$(ProjectName).lib'
-            library_directories = 'C:\\Python27\\libs'
-          else:
-            dll_filename = ''
-            library_directories =  ''
-
-          release_project_configuration.whole_program_optimization = '1'
-
-          # release_project_configuration.precompiled_header = '0'
-
-          release_project_configuration.linker_output_file = dll_filename
-          release_project_configuration.link_incremental = '1'
-          release_project_configuration.library_directories = library_directories
-          release_project_configuration.sub_system = '1'
-          release_project_configuration.optimize_references = '2'
-          release_project_configuration.enable_comdat_folding = '2'
-          release_project_configuration.randomized_base_address = '2'
-          release_project_configuration.data_execution_prevention = '2'
-          release_project_configuration.target_machine = '1'
-          # release_project_configuration.import_library = lib_filename
-          release_project_configuration.linker_values_set = True
-
-          # debug_project_configuration.precompiled_header = '0'
-
-          debug_project_configuration.linker_output_file = dll_filename
-          debug_project_configuration.generate_debug_information = 'true'
-          debug_project_configuration.link_incremental = '1'
-          debug_project_configuration.library_directories = library_directories
-          debug_project_configuration.sub_system = '1'
-          debug_project_configuration.optimize_references = '2'
-          debug_project_configuration.enable_comdat_folding = '2'
-          debug_project_configuration.randomized_base_address = '1'
-          debug_project_configuration.data_execution_prevention = '1'
-          debug_project_configuration.target_machine = '1'
-          # debug_project_configuration.import_library = lib_filename
-          debug_project_configuration.linker_values_set = True
+          self._ConfigureAsExe(
+              project_information, release_project_configuration,
+              debug_project_configuration)
 
         project_information.configurations.Append(release_project_configuration)
         project_information.configurations.Append(debug_project_configuration)
 
         projects_by_guid[project_guid] = project_information
 
+    self._CreateThirdPartyDepencies(
+        solution_projects, projects_by_guid, project_guids_by_name)
+
+    # Set-up the solution configurations.
     solution_configurations = VSConfigurations()
     solution_configurations.Append(
         VSSolutionConfiguration(name='Release', platform='Win32'))
@@ -3638,118 +3961,6 @@ class LibyalSourceVSSolution(VSSolution):
     if output_version not in ['2008']:
       # Add x64 as a platform.
       solution_configurations.ExtendWithX64(output_version)
-
-    third_party_dependencies = []
-    for project_information in projects_by_guid.itervalues():
-      for dependency in project_information.third_party_dependencies:
-        if dependency not in third_party_dependencies:
-          third_party_dependencies.append(dependency)
-
-    for project_name in third_party_dependencies:
-      if project_name not in ['dokan']:
-        logging.info('Unsupported third party dependency: {0:s}'.format(
-            project_name))
-        continue
-
-      project_filename = '{0:s}\\{0:s}'.format(project_name)
-
-      project_guid = project_guids_by_name.get(project_name, '')
-      if not project_guid:
-        project_guid = project_guids_by_name.get(
-            '{0:s}.dll'.format(project_name), '')
-      if not project_guid:
-        project_guid = str(uuid.uuid4())
-
-      solution_project = VSSolutionProject(
-          project_name, project_filename, project_guid)
-
-      solution_projects.append(solution_project)
-
-      if project_name == 'dokan':
-        dll_filename = '$(OutDir)\\{0:s}.dll'.format(project_name)
-        lib_filename = '$(OutDir)\\{0:s}.lib'.format(project_name)
-        module_definition_file = '..\..\..\dokan\dokan\dokan.def'
-
-        project_information = VSProjectInformation()
-        project_information.name = project_name
-        project_information.guid = project_guid
-        project_information.root_name_space = project_name
-
-        project_information.source_files = sorted([
-            '..\\..\\..\\dokan\\dokan\\access.c',
-            '..\\..\\..\\dokan\\dokan\\cleanup.c',
-            '..\\..\\..\\dokan\\dokan\\close.c',
-            '..\\..\\..\\dokan\\dokan\\create.c',
-            '..\\..\\..\\dokan\\dokan\\directory.c',
-            '..\\..\\..\\dokan\\dokan\\dokan.c',
-            '..\\..\\..\\dokan\\dokan\\fileinfo.c',
-            '..\\..\\..\\dokan\\dokan\\flush.c',
-            '..\\..\\..\\dokan\\dokan\\lock.c',
-            '..\\..\\..\\dokan\\dokan\\mount.c',
-            '..\\..\\..\\dokan\\dokan\\read.c',
-            '..\\..\\..\\dokan\\dokan\\security.c',
-            '..\\..\\..\\dokan\\dokan\\setfile.c',
-            '..\\..\\..\\dokan\\dokan\\status.c',
-            '..\\..\\..\\dokan\\dokan\\timeout.c',
-            '..\\..\\..\\dokan\\dokan\\version.c',
-            '..\\..\\..\\dokan\\dokan\\volume.c',
-            '..\\..\\..\\dokan\\dokan\\write.c'])
-
-        project_information.header_files = sorted([
-            '..\\..\\..\\dokan\\dokan\\dokan.h',
-            '..\\..\\..\\dokan\\dokan\\dokanc.h',
-            '..\\..\\..\\dokan\\dokan\\dokani.h',
-            '..\\..\\..\\dokan\\dokan\\fileinfo.h',
-            '..\\..\\..\\dokan\\dokan\\list.h'])
-
-        include_directories = sorted([
-            '..\\..\\..\\dokan\\sys\\'])
-
-        preprocessor_definitions = [
-            'WIN32',
-            'NDEBUG',
-            '_WINDOWS',
-            '_USRDLL',
-            '_CRT_SECURE_NO_WARNINGS',
-            'DOKAN_DLL']
-
-        release_project_configuration = LibyalReleaseVSProjectConfiguration()
-
-        release_project_configuration.include_directories = ';'.join(
-            include_directories)
-        release_project_configuration.preprocessor_definitions = ';'.join(
-            preprocessor_definitions)
-
-        release_project_configuration.output_type = '2'
-        release_project_configuration.linker_output_file = dll_filename
-        release_project_configuration.module_definition_file = (
-            module_definition_file)
-        release_project_configuration.randomized_base_address = '2'
-        release_project_configuration.data_execution_prevention = '2'
-        release_project_configuration.import_library = lib_filename
-        release_project_configuration.linker_values_set = True
-
-        debug_project_configuration = LibyalDebugVSProjectConfiguration()
-
-        debug_project_configuration.include_directories = ';'.join(
-            include_directories)
-        debug_project_configuration.preprocessor_definitions = ';'.join(
-            preprocessor_definitions)
-
-        debug_project_configuration.output_type = '2'
-        debug_project_configuration.linker_output_file = dll_filename
-        debug_project_configuration.module_definition_file = (
-            module_definition_file)
-        debug_project_configuration.generate_debug_information = 'true'
-        debug_project_configuration.randomized_base_address = '1'
-        debug_project_configuration.data_execution_prevention = '1'
-        debug_project_configuration.import_library = lib_filename
-        debug_project_configuration.linker_values_set = True
-
-        project_information.configurations.Append(release_project_configuration)
-        project_information.configurations.Append(debug_project_configuration)
-
-        projects_by_guid[project_guid] = project_information
 
     # Create some look-up dictionaries.
     solution_project_guids_by_name = {}
@@ -3782,6 +3993,52 @@ class LibyalSourceVSSolution(VSSolution):
       self._WriteProject(
           output_version, solution_project, project_information,
           solution_projects_by_guid)
+
+    # Create the corresponding Makefile.am
+    solution_project_filenames = []
+    for solution_project in solution_projects:
+      if output_version in ['2008']:
+        solution_project_extension = 'vcproj'
+      else:
+        solution_project_extension = 'vcxproj'
+
+      solution_project_filenames.append('\t{0:s}.{1:s} \\'.format(
+          solution_project.filename, solution_project_extension))
+
+    makefile_am_lines = ['MSVSCPP_FILES = \\']
+    for solution_project_filename in sorted(solution_project_filenames):
+      makefile_am_lines.append(solution_project_filename)
+
+    makefile_am_lines.append('\t{0:s}'.format(solution_filename))
+
+    makefile_am_lines.extend([
+        '',
+        'SCRIPT_FILES = \\',
+        '\tscripts/vs2008_x64.sh \\',
+        '\tscripts/vs2008_x64_sln.sed \\',
+        '\tscripts/vs2008_x64_vcproj.sed \\',
+        '\tscripts/vs2010_x64.sh \\',
+        '\tscripts/vs2010_x64_sln.sed \\',
+        '\tscripts/vs2010_x64_vcxproj.sed',
+        '',
+        'EXTRA_DIST = \\',
+        '\t$(MSVSCPP_FILES) \\',
+        '\t$(SCRIPT_FILES)',
+        '',
+        'MAINTAINERCLEANFILES = \\',
+        '\tMakefile.in',
+        '',
+        'distclean: clean',
+        '\t/bin/rm -f Makefile',
+        '',
+        ''])
+
+    filename = os.path.join('vs{0:s}'.format(output_version), 'Makefile.am')
+    logging.info('Writing: {0:s}'.format(filename))
+
+    makefile_am = open(filename, 'wb')
+    makefile_am.write('\n'.join(makefile_am_lines))
+    makefile_am.close()
 
     return True
 
