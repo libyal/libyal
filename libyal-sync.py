@@ -733,11 +733,15 @@ class RpmBuildHelper(BuildHelper):
       project_version: the version of the project.
     """
     # Remove previous versions build directories.
+    filenames_to_ignore = re.compile(
+        u'{0:s}-{1:d}'.format(project_name, project_version))
+
     filenames = glob.glob(os.path.join(
         self.rpmbuild_path, u'BUILD', u'{0:s}-*'.format(project_name)))
     for filename in filenames:
-      logging.info(u'Removing: {0:s}'.format(filename))
-      shutil.rmtree(filename)
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        shutil.rmtree(filename)
 
     # Remove previous versions of rpms.
     filenames_to_ignore = re.compile(
@@ -761,12 +765,16 @@ class RpmBuildHelper(BuildHelper):
         os.remove(filename)
 
     # Remove previous versions of source rpms.
+    filenames_to_ignore = re.compile(
+        u'{0:s}-.*{1:d}-1.src.rpm'.format(project_name, project_version))
+
     filenames = glob.glob(os.path.join(
         self.rpmbuild_path, u'SRPMS',
         u'{0:s}-*-1.src.rpm'.format(project_name)))
     for filename in filenames:
-      logging.info(u'Removing: {0:s}'.format(filename))
-      os.remove(filename)
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
 
   def GetOutputFilename(self, project_name, project_version):
     """Retrieves the filename of one of the resulting files.
