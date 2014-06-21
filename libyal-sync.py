@@ -193,6 +193,13 @@ class GoogleCodeDownloadHelper(DownloadHelper):
         project_name, project_version)
     matches = re.findall(expression_string, page_content)
 
+    if len(matches) != 1:
+      # Try finding a match without the status in case the project provides
+      # multiple versions with a different status.
+      expression_string = u'/host/[^/]*/{0:s}-{1:d}[.]tar[.]gz'.format(
+          project_name, project_version)
+      matches = re.findall(expression_string, page_content)
+
     if not matches or len(matches) != 1:
       return None
 
@@ -210,6 +217,10 @@ class GoogleCodeDownloadHelper(DownloadHelper):
       or None on error.
     """
     download_url = self.GetDownloadUrl(project_name, project_version)
+    if not download_url:
+      logging.warning(u'Unable to determine download URL for: {0:s}'.format(
+          project_name))
+      return None
 
     return self.DownloadFile(download_url)
 
