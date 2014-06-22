@@ -773,6 +773,7 @@ class RpmBuildHelper(BuildHelper):
         u'{0:s}-*-1.src.rpm'.format(project_name)))
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
+        print "A", filenames_to_ignore.pattern, filename
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 

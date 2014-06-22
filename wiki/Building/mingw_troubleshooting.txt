@@ -1,0 +1,11 @@
+== Troubleshooting ==
+While running make I get an error similar to the following:
+{{{
+libclocale_locale.c: In function 'libclocal_local_get_decimal_point':
+libclocale_locale.c:357:2: warning implicit declaration of function 'GetLocaleInfoEx' [-Wimplicit-function-declaration]
+libclocale_locale.c:358:7: error: 'LOCALE_NAME_USER_DEFAULT' undeclared (first use in this function)
+libclocale_locale.c:358:7: note: each undeclared identifier is reported only once for every function it appears in
+}}}
+
+The version of MinGW does not support a WINAPI version of Vista or later (0x0600) try setting WINVER to 0x0501.
+

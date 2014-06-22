@@ -723,6 +723,12 @@ class BuildingPageGenerator(WikiPageGenerator):
 
     if project_configuration.supports_mingw:
       self._GenerateSection(project_configuration, 'mingw.txt', output_writer)
+      self._GenerateSection(
+          project_configuration, 'mingw_msys.txt', output_writer)
+      self._GenerateSection(
+          project_configuration, 'mingw_dll.txt', output_writer)
+      self._GenerateSection(
+          project_configuration, 'mingw_troubleshooting.txt', output_writer)
 
     if project_configuration.supports_msvscpp:
       self._GenerateSection(project_configuration, 'msvscpp.txt', output_writer)
@@ -996,6 +1002,7 @@ def Main():
     output_writer.Close()
 
   # TODO: generate more wiki pages.
+  # TODO: add support for Unicode templates.
 
   return True
 

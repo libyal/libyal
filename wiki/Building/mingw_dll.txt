@@ -1,0 +1,4 @@
+== Using the DLL ==
+Make sure you use define ${project_name_upper_case}_DLL_IMPORT before including <${project_name}.h>.
+
+${mingw_dll_dependencies}
