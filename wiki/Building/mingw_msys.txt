@@ -31,6 +31,8 @@ mkdir /mingw
 mount C:\\MinGW /mingw
 }}}
 
+*Note: make sure to use the the double \\ and that /mingw has no trailing /*
+
 To build use:
 {{{
 tar xfv ${project_name}${project_status}-<version>.tar.gz
