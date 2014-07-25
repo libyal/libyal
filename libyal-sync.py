@@ -39,6 +39,7 @@ LIBYAL_LIBRARIES = frozenset([
     'libevtx',
     'libewf',
     'libexe',
+    'libfwsi',
     'liblnk',
     'libmsiecf',
     'libolecf',
