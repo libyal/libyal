@@ -17,6 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import abc
 import argparse
 import fileinput
 import glob
@@ -64,28 +65,24 @@ class DownloadHelper(object):
     self._cached_url = ''
     self._cached_page_content = ''
 
-  def DownloadPageContent(self, download_url):
-    """Downloads the page content from the URL and caches it.
+  def Download(self, project_name, project_version):
+    """Downloads the project for a given project name and version.
 
     Args:
-      download_url: the URL where to download the page content.
+      project_name: the name of the project.
+      project_version: the version of the project.
 
     Returns:
-      The page content if successful, None otherwise.
+      The filename if successful also if the file was already downloaded
+      or None on error.
     """
+    download_url = self.GetDownloadUrl(project_name, project_version)
     if not download_url:
-      return None
+      logging.warning(u'Unable to determine download URL for: {0:s}'.format(
+          project_name))
+      return
 
-    if self._cached_url != download_url:
-      url_object = urllib2.urlopen(download_url)
-
-      if url_object.code != 200:
-        return False
-
-      self._cached_page_content = url_object.read()
-      self._cached_url = download_url
-
-    return self._cached_page_content
+    return self.DownloadFile(download_url)
 
   def DownloadFile(self, download_url):
     """Downloads a file from the URL.
@@ -99,20 +96,55 @@ class DownloadHelper(object):
       The filename if successful also if the file was already downloaded
       or None on error.
     """
-    filename = download_url.split('/')[-1]
+    _, _, filename = download_url.rpartition(u'/')
 
     if not os.path.exists(filename):
       logging.info(u'Downloading: {0:s}'.format(download_url))
 
       url_object = urllib2.urlopen(download_url)
       if url_object.code != 200:
-        return None
+        return
 
       file_object = open(filename, 'wb')
       file_object.write(url_object.read())
       file_object.close()
 
     return filename
+
+  def DownloadPageContent(self, download_url):
+    """Downloads the page content from the URL and caches it.
+
+    Args:
+      download_url: the URL where to download the page content.
+
+    Returns:
+      The page content if successful, None otherwise.
+    """
+    if not download_url:
+      return
+
+    if self._cached_url != download_url:
+      url_object = urllib2.urlopen(download_url)
+
+      if url_object.code != 200:
+        return
+
+      self._cached_page_content = url_object.read()
+      self._cached_url = download_url
+
+    return self._cached_page_content
+
+  @abc.abstractmethod
+  def GetDownloadUrl(self, project_name, project_version):
+    """Retrieves the download URL for a given project name and version.
+
+    Args:
+      project_name: the name of the project.
+      project_version: the version of the project.
+
+    Returns:
+      The download URL of the project or None on error.
+    """
 
 
 class GoogleCodeDownloadHelper(DownloadHelper):
@@ -131,7 +163,7 @@ class GoogleCodeDownloadHelper(DownloadHelper):
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return None
+      return
 
     # The format of the project downloads URL is:
     # https://googledrive.com/host/{random string}/
@@ -140,7 +172,7 @@ class GoogleCodeDownloadHelper(DownloadHelper):
     matches = re.findall(expression_string, page_content)
 
     if not matches or len(matches) != 1:
-      return None
+      return
 
     return matches[0]
 
@@ -185,7 +217,7 @@ class GoogleCodeDownloadHelper(DownloadHelper):
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return None
+      return
 
     # The format of the project download URL is:
     # /host/{random string}/{project name}-{status-}{version}.tar.gz
@@ -202,28 +234,9 @@ class GoogleCodeDownloadHelper(DownloadHelper):
       matches = re.findall(expression_string, page_content)
 
     if not matches or len(matches) != 1:
-      return None
+      return
 
     return u'https://googledrive.com{0:s}'.format(matches[0])
-
-  def Download(self, project_name, project_version):
-    """Downloads the project for a given project name and version.
-
-    Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
-
-    Returns:
-      The filename if successful also if the file was already downloaded
-      or None on error.
-    """
-    download_url = self.GetDownloadUrl(project_name, project_version)
-    if not download_url:
-      logging.warning(u'Unable to determine download URL for: {0:s}'.format(
-          project_name))
-      return None
-
-    return self.DownloadFile(download_url)
 
 
 class BuildHelper(object):
@@ -246,7 +259,7 @@ class BuildHelper(object):
       or None on error.
     """
     if not source_filename or not os.path.exists(source_filename):
-      return None
+      return
 
     archive = tarfile.open(source_filename, 'r:gz', encoding='utf-8')
     directory_name = ''
@@ -266,7 +279,7 @@ class BuildHelper(object):
           logging.error(
               u'Unsuppored directory name in tar file: {0:s}'.format(
                   source_filename))
-          return None
+          return
         if os.path.exists(directory_name):
           break
         logging.info(u'Extracting: {0:s}'.format(source_filename))
@@ -774,7 +787,6 @@ class RpmBuildHelper(BuildHelper):
         u'{0:s}-*-1.src.rpm'.format(project_name)))
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        print "A", filenames_to_ignore.pattern, filename
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
@@ -898,7 +910,6 @@ class VisualStudioBuildHelper(BuildHelper):
     solution_filename = solution_filenames[0]
 
     if not os.path.exists(u'vs2008'):
-      # TODO: redirect the output to build.log?
       command = u'{0:s} {1:s} --to {2:s} {3:s}'.format(
           sys.executable, msvscpp_convert, self.version, solution_filename)
       exit_code = subprocess.call(command, shell=False)
@@ -1033,7 +1044,6 @@ class VisualStudioBuildHelper(BuildHelper):
       elif self.version == '2013':
         os.environ['VS90COMNTOOLS'] = os.environ['VS120COMNTOOLS']
 
-      # TODO: redirect the output to build.log?
       command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
@@ -1072,6 +1082,150 @@ class VisualStudioBuildHelper(BuildHelper):
         u'Release')
 
 
+class LibyalBuilder(object):
+  """Class that helps in building libyal libaries."""
+
+  def __init__(self, build_target):
+    """Initializes the dependency builder.
+
+    Args:
+      build_target: the build target.
+    """
+    super(LibyalBuilder, self).__init__()
+    self._build_target = build_target
+    self._download_helper = GoogleCodeDownloadHelper()
+
+  def Build(self, project_name):
+    """Builds a libyal library.
+
+    Args:
+      project_name: the project name.
+
+    Returns:
+      True if the build is successful or False on error.
+    """
+    project_version = self._download_helper.GetLatestVersion(project_name)
+    project_filename = self._download_helper.Download(
+        project_name, project_version)
+
+    if project_filename:
+      filenames_to_ignore = re.compile(
+          u'^{0:s}-.*{1:d}'.format(project_name, project_version))
+
+      # Remove files of previous versions in the format:
+      # library-*.tar.gz
+      filenames = glob.glob(u'{0:s}-*.tar.gz'.format(project_name))
+      for filename in filenames:
+        if not filenames_to_ignore.match(filename):
+          logging.info(u'Removing: {0:s}'.format(filename))
+          os.remove(filename)
+
+      # Remove directories of previous versions in the format:
+      # library-{version}
+      filenames = glob.glob(
+          u'{0:s}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'.format(
+          project_name))
+      for filename in filenames:
+        if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
+          logging.info(u'Removing: {0:s}'.format(filename))
+          shutil.rmtree(filename)
+
+      if self._build_target == 'dpkg':
+        build_helper = LibyalDpkgBuildHelper()
+        deb_filename = build_helper.GetOutputFilename(
+            project_name, project_version)
+
+        build_helper.Clean(project_name, project_version)
+
+        if not os.path.exists(deb_filename):
+          # TODO: add call to CheckBuildEnvironment or only do this once?
+
+          logging.info(u'Building deb of: {0:s}'.format(project_filename))
+          if not build_helper.Build(project_filename):
+            logging.ingo(
+                u'Build of: {0:s} failed for more info check {1:s}'.format(
+                    project_filename, build_helper.LOG_FILENAME))
+            return False
+
+      elif self._build_target == 'download':
+        # If available run the script post-download.sh after download.
+        if os.path.exists(u'post-download.sh'):
+          command = u'sh ./post-download.sh {0:s}'.format(project_filename)
+          exit_code = subprocess.call(command, shell=True)
+          if exit_code != 0:
+            logging.error(u'Running: "{0:s}" failed.'.format(command))
+            return False
+
+      elif self._build_target == 'pkg':
+        build_helper = PkgBuildHelper()
+        dmg_filename = build_helper.GetOutputFilename(
+            project_name, project_version)
+
+        build_helper.Clean(project_name, project_version)
+
+        if not os.path.exists(dmg_filename):
+          logging.info(u'Building pkg of: {0:s}'.format(project_filename))
+          if not build_helper.Build(
+              project_filename, project_name, project_version):
+            logging.info(
+                u'Build of: {0:s} failed for more info check {1:s}'.format(
+                    project_filename, build_helper.LOG_FILENAME))
+            return False
+
+      elif self._build_target == 'rpm':
+        build_helper = LibyalRpmBuildHelper()
+        rpm_filename = build_helper.GetOutputFilename(
+            project_name, project_version)
+
+        build_helper.Clean(project_name, project_version)
+
+        if not os.path.exists(rpm_filename):
+          # TODO: move the rename into the builder class?
+
+          # rpmbuild wants the library filename without the status indication.
+          source_filename = u'{0:s}-{1:d}.tar.gz'.format(
+              project_name, project_version)
+          os.rename(project_filename, source_filename)
+
+          logging.info(u'Building rpm of: {0:s}'.format(project_filename))
+          build_successful = build_helper.Build(
+              source_filename, project_name, project_version)
+
+          # Change the library filename back to the original.
+          os.rename(source_filename, project_filename)
+
+          if not build_successful:
+            logging.info(
+                u'Build of: {0:s} failed for more info check {1:s}'.format(
+                    project_filename, build_helper.LOG_FILENAME))
+            return False
+
+      elif self._build_target in ['vs2008', 'vs2010', 'vs2012', 'vs2013']:
+        if self._build_target == 'vs2013':
+          logging.warning(u'Untested experimental build target: vs2013.')
+
+        build_helper = VisualStudioBuildHelper(self._build_target[2:])
+        release_directory = build_helper.GetOutputFilename(
+            project_name, project_version)
+
+        build_helper.Clean(project_name, project_version)
+
+        if not os.path.exists(release_directory):
+          logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
+              project_filename, build_helper.version))
+          if not build_helper.Build(project_filename):
+            logging.info(
+                u'Build of: {0:s} failed for more info check {1:s}'.format(
+                    project_filename, build_helper.LOG_FILENAME))
+            return False
+
+      if os.path.exists(build_helper.LOG_FILENAME):
+        logging.info(u'Removing: {0:s}'.format(build_helper.LOG_FILENAME))
+        os.remove(build_helper.LOG_FILENAME)
+
+    return True
+
+
 def Main():
   build_targets = frozenset([
       'download', 'dpkg', 'pkg', 'rpm', 'vs2008', 'vs2010', 'vs2012', 'vs2013'])
@@ -1104,128 +1258,16 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
-  libyal_download_helper = GoogleCodeDownloadHelper()
+  libyal_builder = LibyalBuilder(options.build_target)
 
-  for libyal_name in LIBYAL_LIBRARIES:
-    libyal_version = libyal_download_helper.GetLatestVersion(libyal_name)
-    libyal_filename = libyal_download_helper.Download(
-        libyal_name, libyal_version)
+  result = True
+  for project_name in LIBYAL_LIBRARIES:
+    if not libyal_builder.Build(project_name):
+      print u'Failed building: {0:s}'.format(project_name)
+      result = False
+      break
 
-    if libyal_filename:
-      filenames_to_ignore = re.compile(
-          u'^{0:s}-.*{1:d}'.format(libyal_name, libyal_version))
-
-      # Remove files of previous versions in the format:
-      # library-*.tar.gz
-      filenames = glob.glob(u'{0:s}-*.tar.gz'.format(libyal_name))
-      for filename in filenames:
-        if not filenames_to_ignore.match(filename):
-          logging.info(u'Removing: {0:s}'.format(filename))
-          os.remove(filename)
-
-      # Remove directories of previous versions in the format:
-      # library-{version}
-      filenames = glob.glob(
-          u'{0:s}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'.format(
-          libyal_name))
-      for filename in filenames:
-        if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
-          logging.info(u'Removing: {0:s}'.format(filename))
-          shutil.rmtree(filename)
-
-      if options.build_target == 'dpkg':
-        build_helper = LibyalDpkgBuildHelper()
-        deb_filename = build_helper.GetOutputFilename(
-            libyal_name, libyal_version)
-
-        build_helper.Clean(libyal_name, libyal_version)
-
-        if not os.path.exists(deb_filename):
-          # TODO: add call to CheckBuildEnvironment or only do this once?
-
-          print 'Building deb of: {0:s}'.format(libyal_filename)
-          if not build_helper.Build(libyal_filename):
-            print 'Build of: {0:s} failed for more info check {1:s}'.format(
-                libyal_filename, build_helper.LOG_FILENAME)
-            return False
-
-      elif options.build_target == 'download':
-        # If available run the script post-download.sh after download.
-        if os.path.exists(u'post-download.sh'):
-          command = u'sh ./post-download.sh {0:s}'.format(libyal_filename)
-          exit_code = subprocess.call(command, shell=True)
-          if exit_code != 0:
-            logging.error(u'Running: "{0:s}" failed.'.format(command))
-            return False
-
-      elif options.build_target == 'pkg':
-        build_helper = PkgBuildHelper()
-        dmg_filename = build_helper.GetOutputFilename(
-            libyal_name, libyal_version)
-
-        build_helper.Clean(libyal_name, libyal_version)
-
-        if not os.path.exists(dmg_filename):
-          print 'Building pkg of: {0:s}'.format(libyal_filename)
-          if not build_helper.Build(
-              libyal_filename, libyal_name, libyal_version):
-            print 'Build of: {0:s} failed for more info check {1:s}'.format(
-                libyal_filename, build_helper.LOG_FILENAME)
-            return False
-
-      elif options.build_target == 'rpm':
-        build_helper = LibyalRpmBuildHelper()
-        rpm_filename = build_helper.GetOutputFilename(
-            libyal_name, libyal_version)
-
-        build_helper.Clean(libyal_name, libyal_version)
-
-        if not os.path.exists(rpm_filename):
-          # TODO: move the rename into the builder class?
-
-          # rpmbuild wants the library filename without the status indication.
-          source_filename = u'{0:s}-{1:d}.tar.gz'.format(
-              libyal_name, libyal_version)
-          os.rename(libyal_filename, source_filename)
-
-          print 'Building rpm of: {0:s}'.format(libyal_filename)
-          build_successful = build_helper.Build(
-              source_filename, libyal_name, libyal_version)
-
-          # Change the library filename back to the original.
-          os.rename(source_filename, libyal_filename)
-
-          if not build_successful:
-            print 'Build of: {0:s} failed for more info check {1:s}'.format(
-                libyal_filename, build_helper.LOG_FILENAME)
-            return False
-
-      elif options.build_target in ['vs2008', 'vs2010', 'vs2012', 'vs2013']:
-        if options.build_target == 'vs2013':
-          logging.warning(u'Untested experimental build target: vs2013.')
-
-        build_helper = VisualStudioBuildHelper(options.build_target[2:])
-        release_directory = build_helper.GetOutputFilename(
-            libyal_name, libyal_version)
-
-        build_helper.Clean(libyal_name, libyal_version)
-
-        if not os.path.exists(release_directory):
-          print 'Building: {0:s} with Visual Studio {1:s}'.format(
-              libyal_filename, build_helper.version)
-          if not build_helper.Build(libyal_filename):
-            print 'Build of: {0:s} failed for more info check {1:s}'.format(
-                libyal_filename, build_helper.LOG_FILENAME)
-            return False
-
-      if os.path.exists(u'build.log'):
-        print 'Removing: build.log'
-        os.remove(u'build.log')
-      if os.path.exists(u'msbuild.log'):
-        print 'Removing: msbuild.log'
-        os.remove(u'msbuild.log')
-
-  return True
+  return result
 
 
 if __name__ == '__main__':
