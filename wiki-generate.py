@@ -483,7 +483,10 @@ class ProjectConfiguration(object):
     if self.supports_dpkg:
       building_table_of_contents += '  * Using Debian package tools (DEB)\n'
 
-      dpkg_build_dependencies = list(self.dpkg_build_dependencies)
+      if self.dpkg_build_dependencies is None:
+        dpkg_build_dependencies = []
+      else:
+        dpkg_build_dependencies = self.dpkg_build_dependencies
 
       if self.supports_fuse:
         dpkg_build_dependencies.append('libfuse-dev')
@@ -512,7 +515,10 @@ class ProjectConfiguration(object):
     if self.supports_rpm:
       building_table_of_contents += '  * Using !RedHat package tools (RPM)\n'
 
-      rpm_build_dependencies = list(self.rpm_build_dependencies)
+      if self.rpm_build_dependencies is None:
+        rpm_build_dependencies = []
+      else:
+        rpm_build_dependencies = self.rpm_build_dependencies
 
       if self.supports_fuse:
         rpm_build_dependencies.append('fuse-devel')
