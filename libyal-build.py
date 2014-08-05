@@ -1130,6 +1130,7 @@ class LibyalBuilder(object):
           logging.info(u'Removing: {0:s}'.format(filename))
           shutil.rmtree(filename)
 
+      build_helper = None
       if self._build_target == 'dpkg':
         build_helper = LibyalDpkgBuildHelper()
         deb_filename = build_helper.GetOutputFilename(
