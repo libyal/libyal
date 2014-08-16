@@ -1130,6 +1130,7 @@ class LibyalBuilder(object):
           logging.info(u'Removing: {0:s}'.format(filename))
           shutil.rmtree(filename)
 
+      build_helper = None
       if self._build_target == 'dpkg':
         build_helper = LibyalDpkgBuildHelper()
         deb_filename = build_helper.GetOutputFilename(
@@ -1219,7 +1220,7 @@ class LibyalBuilder(object):
                     project_filename, build_helper.LOG_FILENAME))
             return False
 
-      if os.path.exists(build_helper.LOG_FILENAME):
+      if build_helper and os.path.exists(build_helper.LOG_FILENAME):
         logging.info(u'Removing: {0:s}'.format(build_helper.LOG_FILENAME))
         os.remove(build_helper.LOG_FILENAME)
 
