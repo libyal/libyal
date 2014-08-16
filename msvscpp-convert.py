@@ -3831,6 +3831,9 @@ class LibyalSourceVSSolution(VSSolution):
 
     file_object.close()
 
+    if project_name.endswith('.net'):
+      dependencies.append(solution_name)
+
     if dependencies:
       project_information.dependencies = dependencies
     else:
@@ -3870,7 +3873,7 @@ class LibyalSourceVSSolution(VSSolution):
     debug_project_configuration.preprocessor_definitions = ';'.join(
         preprocessor_definitions)
 
-    if project_information.name.endswith('.net'):
+    if project_name.endswith('.net'):
       dependency = '{0:s}.lib'.format(solution_name)
 
       release_project_configuration.additional_dependencies.append(
