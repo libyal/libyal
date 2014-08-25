@@ -380,7 +380,7 @@ class DpkgBuildHelper(BuildHelper):
     if not self._BuildPrepare(source_directory):
       return False
 
-    command = u'dpkg-buildpackage -rfakeroot > {0:s} 2>&1'.format(
+    command = u'dpkg-buildpackage -uc -us -rfakeroot > {0:s} 2>&1'.format(
         os.path.join(u'..', self.LOG_FILENAME))
     exit_code = subprocess.call(
         u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
