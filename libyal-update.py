@@ -36,6 +36,7 @@ LIBYAL_PACKAGES = frozenset([
     'libevtx',
     'libewf',
     'libexe',
+    'libfwsi',
     'liblnk',
     'libmsiecf',
     'libolecf',
