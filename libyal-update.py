@@ -118,7 +118,11 @@ def Main():
           name = u'lib{0:s}'.format(name[2:])
 
           if name in LIBYAL_PACKAGES:
-            if name in package_versions and version < package_versions[name]:
+            if name in package_versions and version >= package_versions[name]:
+              # The latest or newer version is already installed.
+              del package_versions[name]
+
+            elif name in package_versions and version < package_versions[name]:
               print 'Removing: {0:s} {1:s}'.format(name, version)
               product.Uninstall()
 
@@ -185,7 +189,11 @@ def Main():
             elif attribute.startswith(u'volume: '):
               _, _, volume = attribute.rpartition(u'volume: ')
 
-          if name in package_versions and version < package_versions[name]:
+          if name in package_versions and version >= package_versions[name]:
+            # The latest or newer version is already installed.
+            del package_versions[name]
+
+          elif name in package_versions and version < package_versions[name]:
             # Determine the files in the package.
             command = u'/usr/sbin/pkgutil --files {0:s}'.format(package_name)
             print 'Running: "{0:s}"'.format(command)
