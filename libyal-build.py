@@ -60,7 +60,7 @@ class DownloadHelper(object):
   """Class that helps in downloading."""
 
   def __init__(self):
-    """Initializes the build helper."""
+    """Initializes the download helper."""
     super(DownloadHelper, self).__init__()
     self._cached_url = ''
     self._cached_page_content = ''
@@ -222,14 +222,14 @@ class GoogleCodeDownloadHelper(DownloadHelper):
     # The format of the project download URL is:
     # /host/{random string}/{project name}-{status-}{version}.tar.gz
     # Note that the status is optional and will be: beta, alpha or experimental.
-    expression_string = u'/host/[^/]*/{0:s}-[a-z-]*{1:d}[.]tar[.]gz'.format(
+    expression_string = u'/host/[^/]*/{0:s}-[a-z-]*{1!s}[.]tar[.]gz'.format(
         project_name, project_version)
     matches = re.findall(expression_string, page_content)
 
     if len(matches) != 1:
       # Try finding a match without the status in case the project provides
       # multiple versions with a different status.
-      expression_string = u'/host/[^/]*/{0:s}-{1:d}[.]tar[.]gz'.format(
+      expression_string = u'/host/[^/]*/{0:s}-{1!s}[.]tar[.]gz'.format(
           project_name, project_version)
       matches = re.findall(expression_string, page_content)
 
@@ -243,10 +243,6 @@ class BuildHelper(object):
   """Base class that helps in building."""
 
   LOG_FILENAME = u'build.log'
-
-  def __init__(self):
-    """Initializes the build helper."""
-    super(BuildHelper, self).__init__()
 
   def Extract(self, source_filename):
     """Extracts the given source filename.
@@ -299,10 +295,6 @@ class BuildHelper(object):
 class DpkgBuildHelper(BuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
-  def __init__(self):
-    """Initializes the build helper."""
-    super(DpkgBuildHelper, self).__init__()
-
   def _BuildPrepare(self, source_directory):
     """Make the necassary preperations before building the dpkg packages.
 
@@ -343,6 +335,39 @@ class DpkgBuildHelper(BuildHelper):
         return False
 
     return True
+
+
+class LibyalDpkgBuildHelper(DpkgBuildHelper):
+  """Class that helps in building libyal dpkg packages (.deb)."""
+
+  # TODO: determine BUILD_DEPENDENCIES from spec files?
+  BUILD_DEPENDENCIES = frozenset([
+      'build-essential',
+      'autoconf',
+      'automake',
+      'autopoint',
+      'libtool',
+      'gettext',
+      'debhelper',
+      'fakeroot',
+      'quilt',
+      'autotools-dev',
+      'zlib1g-dev',
+      'libssl-dev',
+      'libfuse-dev',
+      'python-dev',
+      'python-setuptools',
+  ])
+
+  def __init__(self):
+    """Initializes the build helper."""
+    super(LibyalDpkgBuildHelper, self).__init__()
+    self.architecture = platform.machine()
+
+    if self.architecture == 'i686':
+      self.architecture = 'i386'
+    elif self.architecture == 'x86_64':
+      self.architecture = 'amd64'
 
   def Build(self, source_filename):
     """Builds the dpkg packages.
@@ -393,39 +418,6 @@ class DpkgBuildHelper(BuildHelper):
 
     return True
 
-
-class LibyalDpkgBuildHelper(DpkgBuildHelper):
-  """Class that helps in building libyal dpkg packages (.deb)."""
-
-  # TODO: determine BUILD_DEPENDENCIES from spec files?
-  BUILD_DEPENDENCIES = frozenset([
-      'build-essential',
-      'autoconf',
-      'automake',
-      'autopoint',
-      'libtool',
-      'gettext',
-      'debhelper',
-      'fakeroot',
-      'quilt',
-      'autotools-dev',
-      'zlib1g-dev',
-      'libssl-dev',
-      'libfuse-dev',
-      'python-dev',
-      'python-setuptools',
-  ])
-
-  def __init__(self):
-    """Initializes the build helper."""
-    super(LibyalDpkgBuildHelper, self).__init__()
-    self.architecture = platform.machine()
-
-    if self.architecture == 'i686':
-      self.architecture = 'i386'
-    elif self.architecture == 'x86_64':
-      self.architecture = 'amd64'
-
   def CheckBuildEnvironment(self):
     """Checks if the build environment is sane."""
     # TODO: allow to pass additional dependencies or determine them
@@ -442,7 +434,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
       library_version: the version of the library.
     """
     filenames_to_ignore = re.compile(
-        u'^{0:s}[-_].*{1:d}'.format(library_name, library_version))
+        u'^{0:s}[-_].*{1!s}'.format(library_name, library_version))
 
     # Remove files of previous versions in the format:
     # library[-_]version-1_architecture.*
@@ -476,7 +468,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     Returns:
       A filename of one of the resulting dpkg packages.
     """
-    return u'{0:s}_{1:d}-1_{2:s}.deb'.format(
+    return u'{0:s}_{1!s}-1_{2:s}.deb'.format(
         library_name, library_version, self.architecture)
 
 
@@ -487,6 +479,98 @@ class PkgBuildHelper(BuildHelper):
     """Initializes the build helper."""
     super(PkgBuildHelper, self).__init__()
     self._pkgbuild = os.path.join(u'/', u'usr', u'bin', u'pkgbuild')
+
+  def _BuildDmg(self, pkg_filename, dmg_filename):
+    """Builds the distributable disk image (.dmg) from the pkg.
+
+    Args:
+      pkg_filename: the name of the pkg file (which is technically
+                    a directory).
+      dmg_filename: the name of the dmg file.
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    command = (
+        u'hdiutil create {0:s} -srcfolder {1:s} -fs HFS+').format(
+            dmg_filename, pkg_filename)
+    exit_code = subprocess.call(command, shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+  def _BuildPkg(
+      self, source_directory, project_identifier, project_version,
+      pkg_filename):
+    """Builds the distributable disk image (.dmg) from the pkg.
+
+    Args:
+      source_directory: the name of the source directory.
+      project_identifier: the project identifier.
+      project_version: the version of the project.
+      pkg_filename: the name of the pkg file (which is technically
+                    a directory).
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    command = (
+        u'{0:s} --root {1:s}/tmp/ --identifier {2:s} '
+        u'--version {3!s} --ownership recommended {4:s}').format(
+            self._pkgbuild, source_directory, project_identifier,
+            project_version, pkg_filename)
+    exit_code = subprocess.call(command, shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+  def Clean(self, project_name, project_version):
+    """Cleans the MacOS-X packages in the current directory.
+
+    Args:
+      project_name: the name of the project.
+      project_version: the version of the project.
+    """
+    filenames_to_ignore = re.compile(
+        u'^{0:s}-.*{1!s}'.format(project_name, project_version))
+
+    # Remove files of previous versions in the format:
+    # project-*version.dmg
+    filenames = glob.glob(u'{0:s}-*.dmg'.format(project_name))
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove files of previous versions in the format:
+    # project-*version.pkg
+    filenames = glob.glob(u'{0:s}-*.pkg'.format(project_name))
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        shutil.rmtree(filename)
+
+  def GetOutputFilename(self, project_name, project_version):
+    """Retrieves the filename of one of the resulting files.
+
+    Args:
+      project_name: the name of the project.
+      project_version: the version of the project.
+
+    Returns:
+      A filename of one of the resulting rpms.
+    """
+    return u'{0:s}-{1!s}.dmg'.format(project_name, project_version)
+
+
+class LibyalPkgBuildHelper(PkgBuildHelper):
+  """Class that helps in building MacOS-X packages (.pkg)."""
 
   def Build(self, source_filename, library_name, library_version):
     """Builds the pkg package and distributable disk image (.dmg).
@@ -567,70 +651,15 @@ class PkgBuildHelper(BuildHelper):
       shutil.copy(os.path.join(source_directory, u'NEWS'), share_doc_path)
       shutil.copy(os.path.join(source_directory, u'README'), share_doc_path)
 
-      command = (
-          u'{0:s} --root {1:s}/tmp/ '
-          u'--identifier com.google.code.p.{2:s} '
-          u'--version {3:d} --ownership recommended {4:s}').format(
-              self._pkgbuild, source_directory, library_name,
-              library_version, pkg_filename)
-      exit_code = subprocess.call(command, shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
+      project_identifier = u'com.google.code.p.{0:s}'.format(library_name)
+      if not self._BuildPkg(
+          source_directory, project_identifier, library_version, pkg_filename):
         return False
 
-    command = (
-        u'hdiutil create {0:s} -srcfolder {1:s} -fs HFS+').format(
-            dmg_filename, pkg_filename)
-    exit_code = subprocess.call(command, shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
+    if not self._BuildDmg(pkg_filename, dmg_filename):
       return False
 
     return True
-
-  def Clean(self, library_name, library_version):
-    """Cleans the MacOS-X packages in the current directory.
-
-    Args:
-      library_name: the name of the library.
-      library_version: the version of the library.
-    """
-    filenames_to_ignore = re.compile(
-        u'^{0:s}-.*{1:d}'.format(library_name, library_version))
-
-    # Remove files of previous versions in the format:
-    # library-*version.dmg
-    filenames = glob.glob(
-        u'{0:s}-*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].dmg'.format(
-            library_name))
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove files of previous versions in the format:
-    # library-*version.pkg
-    filenames = glob.glob(
-        u'{0:s}-*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].pkg'.format(
-            library_name))
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        shutil.rmtree(filename)
-
-  def GetOutputFilename(self, library_name, library_version):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      library_name: the name of the library.
-      library_version: the version of the library.
-
-    Returns:
-      A filename of one of the resulting MacOS-X package.
-    """
-    return u'{0:s}-{1:d}.dmg'.format(library_name, library_version)
 
 
 class RpmBuildHelper(BuildHelper):
@@ -748,7 +777,7 @@ class RpmBuildHelper(BuildHelper):
     """
     # Remove previous versions build directories.
     filenames_to_ignore = re.compile(
-        u'{0:s}-{1:d}'.format(project_name, project_version))
+        u'{0:s}-{1!s}'.format(project_name, project_version))
 
     filenames = glob.glob(os.path.join(
         self.rpmbuild_path, u'BUILD', u'{0:s}-*'.format(project_name)))
@@ -759,7 +788,7 @@ class RpmBuildHelper(BuildHelper):
 
     # Remove previous versions of rpms.
     filenames_to_ignore = re.compile(
-        u'{0:s}-.*{1:d}-1.{2:s}.rpm'.format(
+        u'{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
             project_name, project_version, self.architecture))
 
     rpm_filenames_glob = u'{0:s}-*-1.{1:s}.rpm'.format(
@@ -780,7 +809,7 @@ class RpmBuildHelper(BuildHelper):
 
     # Remove previous versions of source rpms.
     filenames_to_ignore = re.compile(
-        u'{0:s}-.*{1:d}-1.src.rpm'.format(project_name, project_version))
+        u'{0:s}-.*{1!s}-1.src.rpm'.format(project_name, project_version))
 
     filenames = glob.glob(os.path.join(
         self.rpmbuild_path, u'SRPMS',
@@ -1078,7 +1107,7 @@ class VisualStudioBuildHelper(BuildHelper):
       A filename of one of the resulting build directory.
     """
     return os.path.join(
-        u'{0:s}-{1:d}'.format(library_name, library_version), u'msvscpp',
+        u'{0:s}-{1!s}'.format(library_name, library_version), u'msvscpp',
         u'Release')
 
 
@@ -1095,6 +1124,105 @@ class LibyalBuilder(object):
     self._build_target = build_target
     self._download_helper = GoogleCodeDownloadHelper()
 
+  def _BuildLibyalLibrary(
+      self, source_filename, project_name, project_version):
+    """Builds a libyal library and its Python module.
+
+    Args:
+      source_filename: the name of the source package file.
+      project_name: the name of the project
+      project_version: the version of the project.
+
+    Returns:
+      True if the build is successful or False on error.
+    """
+    build_helper = None
+    if self._build_target == 'dpkg':
+      build_helper = LibyalDpkgBuildHelper()
+      deb_filename = build_helper.GetOutputFilename(
+          project_name, project_version)
+
+      build_helper.Clean(project_name, project_version)
+
+      if not os.path.exists(deb_filename):
+        # TODO: add call to CheckBuildEnvironment or only do this once?
+
+        logging.info(u'Building deb of: {0:s}'.format(source_filename))
+        if not build_helper.Build(source_filename):
+          logging.ingo(
+              u'Build of: {0:s} failed for more info check {1:s}'.format(
+                  source_filename, build_helper.LOG_FILENAME))
+          return False
+
+    elif self._build_target == 'pkg':
+      build_helper = LibyalPkgBuildHelper()
+      dmg_filename = build_helper.GetOutputFilename(
+          project_name, project_version)
+
+      build_helper.Clean(project_name, project_version)
+
+      if not os.path.exists(dmg_filename):
+        logging.info(u'Building pkg of: {0:s}'.format(source_filename))
+        if not build_helper.Build(
+            source_filename, project_name, project_version):
+          logging.info(
+              u'Build of: {0:s} failed for more info check {1:s}'.format(
+                  source_filename, build_helper.LOG_FILENAME))
+          return False
+
+    elif self._build_target == 'rpm':
+      build_helper = LibyalRpmBuildHelper()
+      rpm_filename = build_helper.GetOutputFilename(
+          project_name, project_version)
+
+      build_helper.Clean(project_name, project_version)
+
+      if not os.path.exists(rpm_filename):
+        # TODO: move the rename into the builder class?
+
+        # rpmbuild wants the library filename without the status indication.
+        source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+            project_name, project_version)
+        os.rename(source_filename, source_filename)
+
+        logging.info(u'Building rpm of: {0:s}'.format(source_filename))
+        build_successful = build_helper.Build(
+            source_filename, project_name, project_version)
+
+        # Change the library filename back to the original.
+        os.rename(source_filename, source_filename)
+
+        if not build_successful:
+          logging.info(
+              u'Build of: {0:s} failed for more info check {1:s}'.format(
+                  source_filename, build_helper.LOG_FILENAME))
+          return False
+
+    elif self._build_target in ['vs2008', 'vs2010', 'vs2012', 'vs2013']:
+      if self._build_target == 'vs2013':
+        logging.warning(u'Untested experimental build target: vs2013.')
+
+      build_helper = VisualStudioBuildHelper(self._build_target[2:])
+      release_directory = build_helper.GetOutputFilename(
+          project_name, project_version)
+
+      build_helper.Clean(project_name, project_version)
+
+      if not os.path.exists(release_directory):
+        logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
+            source_filename, build_helper.version))
+        if not build_helper.Build(source_filename):
+          logging.info(
+              u'Build of: {0:s} failed for more info check {1:s}'.format(
+                  source_filename, build_helper.LOG_FILENAME))
+          return False
+
+    if build_helper and os.path.exists(build_helper.LOG_FILENAME):
+      logging.info(u'Removing: {0:s}'.format(build_helper.LOG_FILENAME))
+      os.remove(build_helper.LOG_FILENAME)
+
+    return True
+
   def Build(self, project_name):
     """Builds a libyal library.
 
@@ -1105,12 +1233,12 @@ class LibyalBuilder(object):
       True if the build is successful or False on error.
     """
     project_version = self._download_helper.GetLatestVersion(project_name)
-    project_filename = self._download_helper.Download(
+    source_filename = self._download_helper.Download(
         project_name, project_version)
 
-    if project_filename:
+    if source_filename:
       filenames_to_ignore = re.compile(
-          u'^{0:s}-.*{1:d}'.format(project_name, project_version))
+          u'^{0:s}-.*{1!s}'.format(project_name, project_version))
 
       # Remove files of previous versions in the format:
       # library-*.tar.gz
@@ -1122,107 +1250,25 @@ class LibyalBuilder(object):
 
       # Remove directories of previous versions in the format:
       # library-{version}
-      filenames = glob.glob(
-          u'{0:s}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'.format(
-          project_name))
+      filenames = glob.glob(u'{0:s}-*'.format(project_name))
       for filename in filenames:
         if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
           logging.info(u'Removing: {0:s}'.format(filename))
           shutil.rmtree(filename)
 
-      build_helper = None
-      if self._build_target == 'dpkg':
-        build_helper = LibyalDpkgBuildHelper()
-        deb_filename = build_helper.GetOutputFilename(
-            project_name, project_version)
-
-        build_helper.Clean(project_name, project_version)
-
-        if not os.path.exists(deb_filename):
-          # TODO: add call to CheckBuildEnvironment or only do this once?
-
-          logging.info(u'Building deb of: {0:s}'.format(project_filename))
-          if not build_helper.Build(project_filename):
-            logging.ingo(
-                u'Build of: {0:s} failed for more info check {1:s}'.format(
-                    project_filename, build_helper.LOG_FILENAME))
-            return False
-
-      elif self._build_target == 'download':
+      if self._build_target == 'download':
         # If available run the script post-download.sh after download.
         if os.path.exists(u'post-download.sh'):
-          command = u'sh ./post-download.sh {0:s}'.format(project_filename)
+          command = u'sh ./post-download.sh {0:s}'.format(source_filename)
           exit_code = subprocess.call(command, shell=True)
           if exit_code != 0:
             logging.error(u'Running: "{0:s}" failed.'.format(command))
             return False
 
-      elif self._build_target == 'pkg':
-        build_helper = PkgBuildHelper()
-        dmg_filename = build_helper.GetOutputFilename(
-            project_name, project_version)
-
-        build_helper.Clean(project_name, project_version)
-
-        if not os.path.exists(dmg_filename):
-          logging.info(u'Building pkg of: {0:s}'.format(project_filename))
-          if not build_helper.Build(
-              project_filename, project_name, project_version):
-            logging.info(
-                u'Build of: {0:s} failed for more info check {1:s}'.format(
-                    project_filename, build_helper.LOG_FILENAME))
-            return False
-
-      elif self._build_target == 'rpm':
-        build_helper = LibyalRpmBuildHelper()
-        rpm_filename = build_helper.GetOutputFilename(
-            project_name, project_version)
-
-        build_helper.Clean(project_name, project_version)
-
-        if not os.path.exists(rpm_filename):
-          # TODO: move the rename into the builder class?
-
-          # rpmbuild wants the library filename without the status indication.
-          source_filename = u'{0:s}-{1:d}.tar.gz'.format(
-              project_name, project_version)
-          os.rename(project_filename, source_filename)
-
-          logging.info(u'Building rpm of: {0:s}'.format(project_filename))
-          build_successful = build_helper.Build(
-              source_filename, project_name, project_version)
-
-          # Change the library filename back to the original.
-          os.rename(source_filename, project_filename)
-
-          if not build_successful:
-            logging.info(
-                u'Build of: {0:s} failed for more info check {1:s}'.format(
-                    project_filename, build_helper.LOG_FILENAME))
-            return False
-
-      elif self._build_target in ['vs2008', 'vs2010', 'vs2012', 'vs2013']:
-        if self._build_target == 'vs2013':
-          logging.warning(u'Untested experimental build target: vs2013.')
-
-        build_helper = VisualStudioBuildHelper(self._build_target[2:])
-        release_directory = build_helper.GetOutputFilename(
-            project_name, project_version)
-
-        build_helper.Clean(project_name, project_version)
-
-        if not os.path.exists(release_directory):
-          logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
-              project_filename, build_helper.version))
-          if not build_helper.Build(project_filename):
-            logging.info(
-                u'Build of: {0:s} failed for more info check {1:s}'.format(
-                    project_filename, build_helper.LOG_FILENAME))
-            return False
-
-      if build_helper and os.path.exists(build_helper.LOG_FILENAME):
-        logging.info(u'Removing: {0:s}'.format(build_helper.LOG_FILENAME))
-        os.remove(build_helper.LOG_FILENAME)
+      else:
+        if not self._BuildLibyalLibrary(
+            source_filename, project_name, project_version):
+          return False
 
     return True
 
