@@ -1181,16 +1181,16 @@ class LibyalBuilder(object):
         # TODO: move the rename into the builder class?
 
         # rpmbuild wants the library filename without the status indication.
-        source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        rpm_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
             project_name, project_version)
-        os.rename(source_filename, source_filename)
+        os.rename(source_filename, rpm_source_filename)
 
         logging.info(u'Building rpm of: {0:s}'.format(source_filename))
         build_successful = build_helper.Build(
-            source_filename, project_name, project_version)
+            rpm_source_filename, project_name, project_version)
 
         # Change the library filename back to the original.
-        os.rename(source_filename, source_filename)
+        os.rename(rpm_source_filename, source_filename)
 
         if not build_successful:
           logging.info(
