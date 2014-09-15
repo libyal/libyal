@@ -38,7 +38,7 @@ cp AUTHORS COPYING NEWS README $$PWD/tmp/usr/share/doc/${project_name}
 
 To create the package (directory):
 ```
-pkgbuild --root $$PWD/tmp --identifier com.google.code.p.${project_name} --version <version> --ownership recommended ../${project_name}-<version>.pkg
+pkgbuild --root $$PWD/tmp --identifier com.github.libyal.${project_name} --version <version> --ownership recommended ../${project_name}-<version>.pkg
 ```
 
 To create a distributable disk image:

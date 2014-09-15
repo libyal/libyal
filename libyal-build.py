@@ -33,6 +33,9 @@ import urllib2
 from distutils import sysconfig
 
 
+# TODO: add support for com.github.libyal.
+
+
 LIBYAL_LIBRARIES = frozenset([
     'libbde',
     'libesedb',

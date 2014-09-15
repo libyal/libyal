@@ -29,6 +29,9 @@ if platform.system() == 'Windows':
   import wmi
 
 
+# TODO: add support for com.github.libyal.
+
+
 LIBYAL_PACKAGES = frozenset([
     'libbde',
     'libesedb',
