@@ -1,13 +1,13 @@
-== Windows ==
+## Windows
 To mount ${mount_tool_source_description} on Windows:
-{{{
+```
 ${mount_tool_name} -o 524288 ${mount_tool_source} x:
-}}}
+```
 
 At the moment the ${mount_tool_name} keeps a hold on the console.
 
 This will expose ${mount_tool_mounted_description}.
-{{{
+```
 ${mount_tool_mounted_dokan}
-}}}
+```
 

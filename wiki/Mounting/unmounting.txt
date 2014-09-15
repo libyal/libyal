@@ -1,11 +1,11 @@
-= Unmounting =
+# Unmounting
 You can unmount ${mount_tool_mount_point} using umount:
-{{{
+```
 umount ${mount_tool_mount_point}
-}}}
+```
 
 Or fusermount:
-{{{
+```
 fusermount -u ${mount_tool_mount_point}
-}}}
+```
 

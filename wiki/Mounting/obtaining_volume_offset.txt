@@ -1,16 +1,16 @@
-== Obtaining the volume offset ==
+## Obtaining the volume offset
 There are several ways to obtain the volume offset.
-  * Linux fdisk
-  * mmls of the [http://www.sleuthkit.org SleuthKit]
+* Linux fdisk
+* mmls of the [SleuthKit](http://www.sleuthkit.org)
 
-=== Linux fdisk ===
+### Linux fdisk
 On Linux you can run fdisk with the list option (-l):
-{{{
+```
 sudo fdisk -l /dev/sda
-}}}
+```
 
 Or directly on a partitioned RAW storage media image file:
-{{{
+```
 fdisk -l image.raw
-}}}
+```
 

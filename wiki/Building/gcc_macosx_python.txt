@@ -1,19 +1,19 @@
-=== Python-bindings ===
+### Python-bindings
 Mac OS X comes with multiple platform specific build Python versions. If you install a different version of Python on Mac OS X make sure that when building and running the Python-bindings you're using the correct version otherwise it will likely result in one of the following errors:
-{{{
+```
 Fatal Python error: Interpreter not initialized (version mismatch?)
-}}}
+```
 
-{{{
+```
 Fatal Python error: PyThreadState_Get: no current thread
-}}}
+```
 
 To build against a specific version you can tell configure where to look:
-{{{
+```
 CFLAGS=-I/Library/Frameworks/Python.framework/Versions/2.7/include/ \
 LDFLAGS=-L/Library/Frameworks/Python.framework/Versions/2.7/lib/ \
 ./configure --enable-python --with-pyprefix
-}}}
+```
 
 Adding --with-pyprefix tells configure to use Python to determine where to install the Python-bindings.
 

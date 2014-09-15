@@ -1,5 +1,0 @@
-#summary Building from source
-#labels Featured,Phase-Deploy
-
-<wiki:toc max_depth="3" />
-

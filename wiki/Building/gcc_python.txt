@@ -1,12 +1,12 @@
-== Python-bindings ==
+## Python-bindings
 To compile the Python-bindings you'll need the Python development files.
 
 Make sure that on:
-  * a Linux machine, you have python-dev (Debian-based) or python-devel (!RedHat-based) installed.
-  * a Mac OS X machine, XCode if you're using a different Python source tree see Mac OS X notes below.
+* a Linux machine, you have python-dev (Debian-based) or python-devel (RedHat-based) installed.
+* a Mac OS X machine, XCode if you're using a different Python source tree see Mac OS X notes below.
 
 Adding --enable-python when running ./configure will enable the Python-bindings to be build.
-{{{
+```
 ./configure --enable-python
-}}}
+```
 

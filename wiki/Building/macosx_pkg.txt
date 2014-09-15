@@ -1,48 +1,48 @@
-= Mac OS X package =
+# Mac OS X package
 pkgbuild can be used to create a Mac OS X package.
 
 The following instructions show how to build ${project_name}.pkg and ${project_name}.dmg from the command line.
 
 First build ${project_name} with Python-bindings:
-{{{
+```
 ./configure --prefix=/usr${macosx_pkg_configure_options}
 make
-}}}
+```
 
 Next install the build files using DESTDIR
-{{{
+```
 make install DESTDIR=$$PWD/tmp
-}}}
+```
 
 This will make sure that library paths in the dylib file is set correctly for distribution.
 This is not the case when you use:
-{{{
+```
 ./configure --prefix=$$PWD/tmp
-}}}
+```
 
 You can check the library paths in the dylib by running:
-{{{
+```
 otool -LT tmp/usr/lib/${project_name}.1.dylib
-}}}
+```
 
 After running "make install" the binaries are installed in:
-{{{
+```
 $$PWD/tmp/
-}}}
+```
 
 If you are planning to distribute ${project_name}.pkg make sure it contains a copy of LGPL license:
-{{{
+```
 mkdir -p $$PWD/tmp/usr/share/doc/${project_name}
 cp AUTHORS COPYING NEWS README $$PWD/tmp/usr/share/doc/${project_name}
-}}}
+```
 
 To create the package (directory):
-{{{
+```
 pkgbuild --root $$PWD/tmp --identifier com.google.code.p.${project_name} --version <version> --ownership recommended ../${project_name}-<version>.pkg
-}}}
+```
 
 To create a distributable disk image:
-{{{
+```
 hdiutil create ../${project_name}-<version>.dmg -srcfolder ../${project_name}-<version>.pkg -fs HFS+
-}}}
+```
 

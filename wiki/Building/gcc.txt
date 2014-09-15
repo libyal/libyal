@@ -1,27 +1,27 @@
-= Using GNU Compiler Collection (GCC) =
+# Using GNU Compiler Collection (GCC)
 
 Before you build the ${project_name} source code using the GNU Compiler Collection (GCC) you'll need to have compilation and build tools installed.
-  * On a Linux system make sure you have build-essential (Debian-based) or the Development Tools (!RedHat-based) packages installed.
-  * On a Mac OS X system make sure you have XCode (with command line tools) or !MacPorts (or equivalent) installed.
+* On a Linux system make sure you have build-essential (Debian-based) or the Development Tools (RedHat-based) packages installed.
+* On a Mac OS X system make sure you have XCode (with command line tools) or MacPorts (or equivalent) installed.
 ${gcc_build_dependencies}${gcc_mount_tool}
 To build the ${project_name} source code change into the source directory and run the following commands:
-{{{
+```
 ./configure
 make
-}}}
+```
 
 You can install the binaries that were build by running:
-{{{
+```
 sudo make install
-}}}
+```
 
 By default this will install the binaries in /usr/local. If you want to change this to e.g. /usr, add the configuration option --prefix=/usr, e.g.
-{{{
+```
 ./configure --prefix=/usr
-}}}
+```
 
 On Linux make sure ${project_name}.so is in the library cache. Normally it suffices to run:
-{{{
+```
 sudo ldconfig
-}}}
+```
 

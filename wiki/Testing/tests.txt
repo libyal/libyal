@@ -1,10 +1,10 @@
-= Automated tests =
+# Automated tests
 The ${project_name} package comes with automated tests, which are stored in the sub directory: tests.
 
 To run the automated tests:
-{{{
+```
 make check
-}}}
+```
 
 The automated tests are currently only intended to run on a system that can run a bash shell.
 

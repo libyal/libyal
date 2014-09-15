@@ -1,13 +1,13 @@
-== Git ==
+## Git
 To retrieve the source from the git repository make sure to install: git, aclocal, autoconf, automake, autopoint, gettextize and libtoolize.
 
 To download and prepare the source for building run:
-{{{
+```
 git clone ${git_url}
 cd ${project_name}/
 ./synclibs.sh
 ./autogen.sh
-}}}
+```
 
-*Note that the source from the git repository will not work without synchronizing the library dependencies "./synclibs.sh" and having the autotools generate the necessary files "./autogen.sh".*
+**Note that the source from the git repository will not work without synchronizing the library dependencies "./synclibs.sh" and having the autotools generate the necessary files "./autogen.sh".**
 

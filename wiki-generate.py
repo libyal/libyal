@@ -3,7 +3,7 @@
 #
 # Script to automate generation of wiki pages of libyal libraries.
 #
-# Copyright (c) 2013, Joachim Metz <joachim.metz@gmail.com>
+# Copyright (c) 2013-2014, Joachim Metz <joachim.metz@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ class ProjectConfiguration(object):
     super(ProjectConfiguration, self).__init__()
     self.project_name = None
     self.project_status = None
+    self.project_description = None
 
     # Functionality the project offsers.
     self.supports_debug_output = False
@@ -132,6 +133,8 @@ class ProjectConfiguration(object):
     self.project_name = self._GetConfigValue(config_parser, 'Project', 'name')
     self.project_status = self._GetConfigValue(
         config_parser, 'Project', 'status')
+    self.project_description = self._GetConfigValue(
+        config_parser, 'Project', 'description')
 
     self.source_package_url = self._GetConfigValue(
         config_parser, 'source_package', 'url')
@@ -348,7 +351,7 @@ class ProjectConfiguration(object):
 
     if self.supports_tests:
       for profile in self.tests_profiles:
-        tests_profiles += '  * {0:s}\n'.format(profile)
+        tests_profiles += '* {0:s}\n'.format(profile)
 
     if self.supports_gcc or self.supports_mingw or self.supports_msvscpp:
       building_table_of_contents += (
@@ -356,7 +359,7 @@ class ProjectConfiguration(object):
               self.project_name)
 
     if self.supports_gcc:
-      building_table_of_contents += '  * Using GNU Compiler Collection (GCC)\n'
+      building_table_of_contents += '* Using GNU Compiler Collection (GCC)\n'
 
       if self.gcc_build_dependencies:
         gcc_build_dependencies = (
@@ -365,75 +368,75 @@ class ProjectConfiguration(object):
             'source headers installed:\n')
 
         for dependency in self.gcc_build_dependencies:
-          gcc_build_dependencies += '  * {0:s}\n'.format(dependency)
+          gcc_build_dependencies += '* {0:s}\n'.format(dependency)
 
       if self.gcc_static_build_dependencies:
         for dependency in self.gcc_static_build_dependencies:
-          gcc_static_build_dependencies += '  * {0:s}\n'.format(dependency)
+          gcc_static_build_dependencies += '* {0:s}\n'.format(dependency)
 
       if self.supports_fuse:
         gcc_static_build_dependencies += (
-            '  * fuse (optional, can be disabled by --with-libfuse=no)')
+            '* fuse (optional, can be disabled by --with-libfuse=no)')
 
       if self.supports_cygwin:
-        building_table_of_contents += '    * Using Cygwin\n'
+        building_table_of_contents += '  * Using Cygwin\n'
 
         if self.cygwin_build_dependencies:
           for dependency in self.cygwin_build_dependencies:
-            cygwin_build_dependencies += '  * {0:s}\n'.format(dependency)
+            cygwin_build_dependencies += '* {0:s}\n'.format(dependency)
 
         if self.cygwin_dll_dependencies:
           for dependency in self.cygwin_dll_dependencies:
-            cygwin_dll_dependencies += '  * {0:s}\n'.format(dependency)
+            cygwin_dll_dependencies += '* {0:s}\n'.format(dependency)
 
         if self.supports_tools:
           cygwin_executables += (
               'And the following executables:\n'
-              '{{{\n')
+              '```\n')
 
           for name in self.tools_names:
               cygwin_executables += (
                   '{0:s}/.libs/{1:s}.exe\n'.format(self.tools_directory, name))
 
           cygwin_executables += (
-              '}}}\n')
+              '```\n')
 
       if self.supports_fuse:
         gcc_mount_tool += (
             '\n'
             'If you want to be able to use {0:s}, make sure that:\n'
-            '  * on a Linux system you have libfuse-dev (Debian-based) or '
+            '* on a Linux system you have libfuse-dev (Debian-based) or '
             'fuse-devel (!RedHat-based) installed.\n'
-            '  * on a Mac OS X system, you have OSXFuse '
+            '* on a Mac OS X system, you have OSXFuse '
             '(http://osxfuse.github.com/) installed.\n').format(mount_tool_name)
 
     if self.supports_mingw:
       building_table_of_contents += (
-          '  * Using Minimalist GNU for Windows (MinGW)\n')
+          '* Using Minimalist GNU for Windows (MinGW)\n')
 
       if self.mingw_build_dependencies:
         for dependency in self.mingw_build_dependencies:
-          mingw_build_dependencies += '  * {0:s}\n'.format(dependency)
+          mingw_build_dependencies += '* {0:s}\n'.format(dependency)
 
       if self.mingw_dll_dependencies:
         for dependency in self.mingw_dll_dependencies:
-          mingw_dll_dependencies += '  * {0:s}\n'.format(dependency)
+          mingw_dll_dependencies += '* {0:s}\n'.format(dependency)
 
       if self.supports_tools:
         mingw_executables += (
             'And the following executables:\n'
-            '{{{\n')
+            '```\n')
 
         for name in self.tools_names:
             mingw_executables += (
                 '{0:s}/.libs/{1:s}.exe\n'.format(self.tools_directory, name))
 
         mingw_executables += (
-            '}}}\n'
+            '```\n'
             '\n')
 
     if self.supports_msvscpp:
-      building_table_of_contents += '  * Using Microsoft Visual Studio\n'
+      building_table_of_contents += '* Using Microsoft Visual Studio\n'
 
       if self.msvscpp_build_dependencies:
         msvscpp_build_dependencies = (
@@ -442,14 +445,14 @@ class ProjectConfiguration(object):
             'need:\n').format(self.project_name)
 
         for dependency in self.msvscpp_build_dependencies:
-          msvscpp_build_dependencies += '  * {0:s}\n'.format(dependency)
+          msvscpp_build_dependencies += '* {0:s}\n'.format(dependency)
 
       if self.msvscpp_dll_dependencies:
         msvscpp_dll_dependencies = '{0:s}.dll is dependent on:\n'.format(
             self.project_name)
 
         for dependency in self.msvscpp_dll_dependencies:
-          msvscpp_dll_dependencies += '  * {0:s}\n'.format(dependency)
+          msvscpp_dll_dependencies += '* {0:s}\n'.format(dependency)
 
         msvscpp_dll_dependencies += (
             '\n'
@@ -481,7 +484,7 @@ class ProjectConfiguration(object):
             self.project_name)
 
     if self.supports_dpkg:
-      building_table_of_contents += '  * Using Debian package tools (DEB)\n'
+      building_table_of_contents += '* Using Debian package tools (DEB)\n'
 
       if self.dpkg_build_dependencies is None:
         dpkg_build_dependencies = []
@@ -513,7 +516,7 @@ class ProjectConfiguration(object):
                 self.project_name)
 
     if self.supports_rpm:
-      building_table_of_contents += '  * Using !RedHat package tools (RPM)\n'
+      building_table_of_contents += '* Using !RedHat package tools (RPM)\n'
 
       if self.rpm_build_dependencies is None:
         rpm_build_dependencies = []
@@ -553,7 +556,7 @@ class ProjectConfiguration(object):
          '~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm').format(
              self.project_name)
 
-    building_table_of_contents += '  * Using Mac OS X pkgbuild\n'
+    building_table_of_contents += '* Using Mac OS X pkgbuild\n'
 
     if self.supports_python:
       macosx_pkg_configure_options = ' --enable-python --with-pyprefix'
@@ -565,7 +568,7 @@ class ProjectConfiguration(object):
 
     if self.mount_tool_supported_backends:
       for backend in self.mount_tool_supported_backends:
-        mount_tool_supported_backends += '  * {0:s}\n'.format(backend)
+        mount_tool_supported_backends += '* {0:s}\n'.format(backend)
 
     template_mappings = {
         'building_table_of_contents': building_table_of_contents,
@@ -573,6 +576,7 @@ class ProjectConfiguration(object):
         'project_name': self.project_name,
         'project_name_upper_case': self.project_name.upper(),
         'project_status': project_status,
+        'project_description': self.project_description,
 
         'python_bindings_name': python_bindings_name,
         'mount_tool_name': mount_tool_name,
@@ -682,8 +686,6 @@ class BuildingPageGenerator(WikiPageGenerator):
       output_write: the output writer.
     """
     self._GenerateSection(
-        project_configuration, 'page_header.txt', output_writer)
-    self._GenerateSection(
         project_configuration, 'introduction.txt', output_writer)
 
     if (project_configuration.supports_source_package or
@@ -773,6 +775,21 @@ class BuildingPageGenerator(WikiPageGenerator):
         project_configuration, 'macosx_pkg.txt', output_writer)
 
 
+class HomePageGenerator(WikiPageGenerator):
+  """Class that generates the "Home" wiki page."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates the wiki page.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_write: the output writer.
+    """
+    self._GenerateSection(
+        project_configuration, 'introduction.txt', output_writer)
+
+
 class MountingPageGenerator(WikiPageGenerator):
   """Class that generates the "Mounting a ..." wiki page."""
 
@@ -784,8 +801,6 @@ class MountingPageGenerator(WikiPageGenerator):
                              ProjectConfiguration).
       output_write: the output writer.
     """
-    self._GenerateSection(
-        project_configuration, 'page_header.txt', output_writer)
     self._GenerateSection(
         project_configuration, 'introduction.txt', output_writer)
 
@@ -840,8 +855,6 @@ class TestingPageGenerator(WikiPageGenerator):
                              ProjectConfiguration).
       output_write: the output writer.
     """
-    self._GenerateSection(
-        project_configuration, 'page_header.txt', output_writer)
     self._GenerateSection(
         project_configuration, 'tests.txt', output_writer)
     self._GenerateSection(
@@ -952,7 +965,26 @@ def Main():
   project_configuration.ReadFromFile(options.config_file)
 
   if options.output_directory:
-    output_file = os.path.join(options.output_directory, 'Building.wiki')
+    output_file = os.path.join(options.output_directory, 'Home.md')
+    output_writer = FileWriter(output_file)
+  else:
+    output_writer = StdoutWriter()
+
+  if not output_writer.Open():
+    print u'Unable to open output writer.'
+    print u''
+    return False
+
+  script_directory = os.path.dirname(os.path.abspath(__file__))
+
+  template_directory = os.path.join(script_directory, 'wiki', 'Home')
+  wiki_page = HomePageGenerator(template_directory)
+  wiki_page.Generate(project_configuration, output_writer)
+
+  output_writer.Close()
+
+  if options.output_directory:
+    output_file = os.path.join(options.output_directory, 'Building.md')
     output_writer = FileWriter(output_file)
   else:
     output_writer = StdoutWriter()
@@ -972,7 +1004,7 @@ def Main():
 
   if project_configuration.supports_tests:
     if options.output_directory:
-      output_file = os.path.join(options.output_directory, 'Testing.wiki')
+      output_file = os.path.join(options.output_directory, 'Testing.md')
       output_writer = FileWriter(output_file)
     else:
       output_writer = StdoutWriter()
@@ -991,7 +1023,7 @@ def Main():
   if (project_configuration.supports_dokan or
       project_configuration.supports_fuse):
     if options.output_directory:
-      output_file = os.path.join(options.output_directory, 'Mounting.wiki')
+      output_file = os.path.join(options.output_directory, 'Mounting.md')
       output_writer = FileWriter(output_file)
     else:
       output_writer = StdoutWriter()

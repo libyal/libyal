@@ -1,10 +1,10 @@
-== Static executables ==
+## Static executables
 Some distributions provide separate packages for static versions of libraries. Make sure you have a static versions of:
-  * glibc
+* glibc
 ${gcc_static_build_dependencies}
 
 To make static executables add --enable-static-executables=yes to configure, .e.g:
-{{{
+```
 ./configure --enable-static-executables=yes
-}}}
+```
 

@@ -1,7 +1,7 @@
 If you get the error:
-{{{
+```
 ${mount_tool_missing_backend_error}
-}}}
+```
 
 That means fuse was not detected when building the ${tools_name}, check if you have fuse-dev installed and if ./configure is able to detect it.
 The last part of the ./configure output shows you this in an overview.

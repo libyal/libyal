@@ -1,4 +1,4 @@
-= Using Microsoft Visual Studio =
+# Using Microsoft Visual Studio
 Before you build ${project_name} using Microsoft Visual Studio you'll need to have it installed.
 The ${project_name} packages comes with Microsoft Visual Studio files for version 2008.
 Version 2010 is able to convert these files into its newer versions.
