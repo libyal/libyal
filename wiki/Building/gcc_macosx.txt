@@ -2,6 +2,9 @@
 ### Universal binary
 With XCode you can build a Mac OS X universal binary to run on multiple architectures. The supported architectures and exact command differs per version of Mac OS X.
 
+### libtoolize
+If you find that libtoolize is missing use glibtoolize instead.
+
 #### Mac OS X 10.4
 E.g. on Mac OS X 10.4 to build an PPC and Intel 32-bit multi binary, run the following commands:
 ```
