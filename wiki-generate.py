@@ -406,7 +406,7 @@ class ProjectConfiguration(object):
             '\n'
             'If you want to be able to use {0:s}, make sure that:\n'
             '* on a Linux system you have libfuse-dev (Debian-based) or '
-            'fuse-devel (!RedHat-based) installed.\n'
+            'fuse-devel (RedHat-based) installed.\n'
             '* on a Mac OS X system, you have OSXFuse '
             '(http://osxfuse.github.com/) installed.\n').format(mount_tool_name)
 
@@ -516,7 +516,7 @@ class ProjectConfiguration(object):
                 self.project_name)
 
     if self.supports_rpm:
-      building_table_of_contents += '* Using !RedHat package tools (RPM)\n'
+      building_table_of_contents += '* Using RedHat package tools (RPM)\n'
 
       if self.rpm_build_dependencies is None:
         rpm_build_dependencies = []
