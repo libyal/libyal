@@ -172,12 +172,13 @@ class ProjectConfiguration(object):
 
       self.tests_supports_valgrind = 'valgrind' in tests_features
 
-      self.tests_profiles = self._GetConfigValue(
-          config_parser, 'tests', 'profiles')
-      self.tests_example_filename1 = self._GetConfigValue(
-          config_parser, 'tests', 'example_filename1')
-      self.tests_example_filename2 = self._GetConfigValue(
-          config_parser, 'tests', 'example_filename2')
+      if 'profiles' in tests_features:
+        self.tests_profiles = self._GetConfigValue(
+            config_parser, 'tests', 'profiles')
+        self.tests_example_filename1 = self._GetConfigValue(
+            config_parser, 'tests', 'example_filename1')
+        self.tests_example_filename2 = self._GetConfigValue(
+            config_parser, 'tests', 'example_filename2')
 
     if self.supports_tools and not config_parser.has_section('tools'):
       raise ConfigError(
@@ -349,7 +350,7 @@ class ProjectConfiguration(object):
     if self.project_status:
       project_status += '-{0:s}'.format(self.project_status)
 
-    if self.supports_tests:
+    if self.supports_tests and self.tests_profiles:
       for profile in self.tests_profiles:
         tests_profiles += '* {0:s}\n'.format(profile)
 
@@ -857,10 +858,12 @@ class TestingPageGenerator(WikiPageGenerator):
     """
     self._GenerateSection(
         project_configuration, 'tests.txt', output_writer)
-    self._GenerateSection(
-        project_configuration, 'tests_files.txt', output_writer)
-    self._GenerateSection(
-        project_configuration, 'tests_profiles.txt', output_writer)
+
+    if project_configuration.tests_profiles:
+      self._GenerateSection(
+          project_configuration, 'tests_files.txt', output_writer)
+      self._GenerateSection(
+          project_configuration, 'tests_profiles.txt', output_writer)
 
     if project_configuration.tests_supports_valgrind:
       self._GenerateSection(
