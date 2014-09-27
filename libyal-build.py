@@ -873,6 +873,10 @@ class VisualStudioBuildHelper(BuildHelper):
     super(VisualStudioBuildHelper, self).__init__()
     self.version = version
 
+
+class LibyalVisualStudioBuildHelper(VisualStudioBuildHelper):
+  """Class that helps in building using Visual Studio."""
+
   def _BuildPrepare(self, source_directory):
     """Prepares the source for building with Visual Studio.
 
@@ -1205,7 +1209,7 @@ class LibyalBuilder(object):
       if self._build_target == 'vs2013':
         logging.warning(u'Untested experimental build target: vs2013.')
 
-      build_helper = VisualStudioBuildHelper(self._build_target[2:])
+      build_helper = LibyalVisualStudioBuildHelper(self._build_target[2:])
       release_directory = build_helper.GetOutputFilename(
           project_name, project_version)
 
