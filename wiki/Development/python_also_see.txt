@@ -1,0 +1,8 @@
+## Also see
+```
+import ${python_bindings_name}
+
+help(${python_bindings_name})
+help(${python_bindings_name}.${development_main_object})
+```
+

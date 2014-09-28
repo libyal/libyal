@@ -1,0 +1,30 @@
+## Open ${development_main_object}
+```
+import ${python_bindings_name}
+
+${development_prefix}_${development_main_object} = ${python_bindings_name}.${development_main_object}()
+
+${development_main_object_python_pre_open}
+${development_prefix}_${development_main_object}.open("${development_main_object_filename}")
+
+${development_prefix}_${development_main_object}.close()
+```
+
+**Note that the explicit call to close is not required.**
+
+## Open file-like object
+```
+import ${python_bindings_name}
+
+file_object = open("${development_main_object_filename}", "rb")
+
+${development_prefix}_${development_main_object} = ${python_bindings_name}.${development_main_object}()
+
+${development_main_object_python_pre_open}
+${development_prefix}_${development_main_object}.open_file_object(file_object)
+
+${development_prefix}_${development_main_object}.close()
+```
+
+**Note that the explicit call to close is not required.**
+

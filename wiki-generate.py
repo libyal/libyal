@@ -71,6 +71,10 @@ class ProjectConfiguration(object):
 
     self.git_url = None
 
+    self.development_main_object = None
+    self.development_main_object_filename = None
+    self.development_main_object_python_pre_open = None
+
     self.tests_supports_valgrind = None
     self.tests_profiles = None
     self.tests_example_filename1 = None
@@ -161,6 +165,16 @@ class ProjectConfiguration(object):
 
     self.supports_dokan = 'dokan' in features
     self.supports_fuse = 'fuse' in features
+
+    if config_parser.has_section('development'):
+      self.development_main_object = self._GetConfigValue(
+          config_parser, 'development', 'main_object')
+
+      self.development_main_object_filename = self._GetConfigValue(
+          config_parser, 'development', 'main_object_filename')
+
+      self.development_main_object_python_pre_open = self._GetConfigValue(
+          config_parser, 'development', 'main_object_python_pre_open')
 
     if self.supports_tests and not config_parser.has_section('tests'):
       raise ConfigError(
@@ -312,6 +326,8 @@ class ProjectConfiguration(object):
 
     project_status = ''
 
+    development_main_object_python_pre_open = ''
+
     tests_profiles = ''
 
     cygwin_build_dependencies = ''
@@ -343,6 +359,7 @@ class ProjectConfiguration(object):
     mount_tool_source_description_long = ''
     mount_tool_supported_backends = ''
 
+    development_prefix = self.project_name[3:]
     python_bindings_name = 'py{0:s}'.format(self.project_name[3:])
     mount_tool_name = '{0:s}mount'.format(self.project_name[3:])
     tools_name = '{0:s}tools'.format(self.project_name[3:])
@@ -490,7 +507,7 @@ class ProjectConfiguration(object):
       if self.dpkg_build_dependencies is None:
         dpkg_build_dependencies = []
       else:
-        dpkg_build_dependencies = self.dpkg_build_dependencies
+        dpkg_build_dependencies = list(self.dpkg_build_dependencies)
 
       if self.supports_fuse:
         dpkg_build_dependencies.append('libfuse-dev')
@@ -522,7 +539,7 @@ class ProjectConfiguration(object):
       if self.rpm_build_dependencies is None:
         rpm_build_dependencies = []
       else:
-        rpm_build_dependencies = self.rpm_build_dependencies
+        rpm_build_dependencies = list(self.rpm_build_dependencies)
 
       if self.supports_fuse:
         rpm_build_dependencies.append('fuse-devel')
@@ -562,6 +579,10 @@ class ProjectConfiguration(object):
     if self.supports_python:
       macosx_pkg_configure_options = ' --enable-python --with-pyprefix'
 
+    if self.development_main_object_python_pre_open:
+      development_main_object_python_pre_open = '{0:s}\n'.format(
+          self.development_main_object_python_pre_open)
+
     if self.mount_tool_source_description_long:
       mount_tool_source_description_long = self.mount_tool_source_description_long
     else:
@@ -586,6 +607,11 @@ class ProjectConfiguration(object):
         'source_package_url': self.source_package_url,
 
         'git_url': self.git_url,
+
+        'development_prefix': development_prefix,
+        'development_main_object': self.development_main_object,
+        'development_main_object_filename': self.development_main_object_filename,
+        'development_main_object_python_pre_open': development_main_object_python_pre_open,
 
         'tests_profiles': tests_profiles,
         'tests_example_filename1': self.tests_example_filename1,
@@ -776,6 +802,32 @@ class BuildingPageGenerator(WikiPageGenerator):
         project_configuration, 'macosx_pkg.txt', output_writer)
 
 
+class DevelopmentPageGenerator(WikiPageGenerator):
+  """Class that generates the "Development" wiki page."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates the wiki page.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_write: the output writer.
+    """
+    if project_configuration.supports_python:
+      self._GenerateSection(
+          project_configuration, 'python.txt', output_writer)
+
+      if project_configuration.development_main_object:
+        self._GenerateSection(
+            project_configuration, 'python_main_object.txt', output_writer)
+
+      # TODO: add support for python_pytsk3.txt template.
+
+      # TODO: move main object out of this template and create on demand.
+      self._GenerateSection(
+          project_configuration, 'python_also_see.txt', output_writer)
+
+
 class HomePageGenerator(WikiPageGenerator):
   """Class that generates the "Home" wiki page."""
 
@@ -802,47 +854,49 @@ class MountingPageGenerator(WikiPageGenerator):
                              ProjectConfiguration).
       output_write: the output writer.
     """
-    self._GenerateSection(
-        project_configuration, 'introduction.txt', output_writer)
-
-    if project_configuration.mount_tool_source_type == 'image':
+    if (project_configuration.supports_dokan or
+        project_configuration.supports_fuse):
       self._GenerateSection(
-          project_configuration, 'mounting_image.txt', output_writer)
+          project_configuration, 'introduction.txt', output_writer)
 
-    elif project_configuration.mount_tool_source_type == 'volume':
-      self._GenerateSection(
-          project_configuration, 'mounting_volume.txt', output_writer)
-
-    self._GenerateSection(
-        project_configuration, 'mounting_missing_backend.txt', output_writer)
-
-    if project_configuration.mount_tool_source_type == 'volume':
-      self._GenerateSection(
-          project_configuration, 'mounting_volume_loopback.txt', output_writer)
-      self._GenerateSection(
-          project_configuration, 'obtaining_volume_offset.txt', output_writer)
-
-    self._GenerateSection(
-        project_configuration, 'mounting_root_access.txt', output_writer)
-
-    if project_configuration.supports_dokan:
       if project_configuration.mount_tool_source_type == 'image':
         self._GenerateSection(
-            project_configuration, 'mounting_image_windows.txt', output_writer)
+            project_configuration, 'mounting_image.txt', output_writer)
 
       elif project_configuration.mount_tool_source_type == 'volume':
         self._GenerateSection(
-            project_configuration, 'mounting_volume_windows.txt', output_writer)
+            project_configuration, 'mounting_volume.txt', output_writer)
 
-    self._GenerateSection(
-        project_configuration, 'unmounting.txt', output_writer)
-
-    if project_configuration.supports_dokan:
       self._GenerateSection(
-          project_configuration, 'unmounting_windows.txt', output_writer)
+          project_configuration, 'mounting_missing_backend.txt', output_writer)
 
-    self._GenerateSection(
-        project_configuration, 'troubleshooting.txt', output_writer)
+      if project_configuration.mount_tool_source_type == 'volume':
+        self._GenerateSection(
+            project_configuration, 'mounting_volume_loopback.txt', output_writer)
+        self._GenerateSection(
+            project_configuration, 'obtaining_volume_offset.txt', output_writer)
+
+      self._GenerateSection(
+          project_configuration, 'mounting_root_access.txt', output_writer)
+
+      if project_configuration.supports_dokan:
+        if project_configuration.mount_tool_source_type == 'image':
+          self._GenerateSection(
+              project_configuration, 'mounting_image_windows.txt', output_writer)
+
+        elif project_configuration.mount_tool_source_type == 'volume':
+          self._GenerateSection(
+              project_configuration, 'mounting_volume_windows.txt', output_writer)
+
+      self._GenerateSection(
+          project_configuration, 'unmounting.txt', output_writer)
+
+      if project_configuration.supports_dokan:
+        self._GenerateSection(
+            project_configuration, 'unmounting_windows.txt', output_writer)
+
+      self._GenerateSection(
+          project_configuration, 'troubleshooting.txt', output_writer)
 
 
 class TestingPageGenerator(WikiPageGenerator):
@@ -856,18 +910,19 @@ class TestingPageGenerator(WikiPageGenerator):
                              ProjectConfiguration).
       output_write: the output writer.
     """
-    self._GenerateSection(
-        project_configuration, 'tests.txt', output_writer)
+    if project_configuration.supports_tests:
+      self._GenerateSection(
+          project_configuration, 'tests.txt', output_writer)
 
-    if project_configuration.tests_profiles:
-      self._GenerateSection(
-          project_configuration, 'tests_files.txt', output_writer)
-      self._GenerateSection(
-          project_configuration, 'tests_profiles.txt', output_writer)
+      if project_configuration.tests_profiles:
+        self._GenerateSection(
+            project_configuration, 'tests_files.txt', output_writer)
+        self._GenerateSection(
+            project_configuration, 'tests_profiles.txt', output_writer)
 
-    if project_configuration.tests_supports_valgrind:
-      self._GenerateSection(
-          project_configuration, 'tests_valgrind.txt', output_writer)
+      if project_configuration.tests_supports_valgrind:
+        self._GenerateSection(
+            project_configuration, 'tests_valgrind.txt', output_writer)
 
 
 class FileWriter(object):
@@ -967,82 +1022,37 @@ def Main():
   project_configuration = ProjectConfiguration()
   project_configuration.ReadFromFile(options.config_file)
 
-  if options.output_directory:
-    output_file = os.path.join(options.output_directory, 'Home.md')
-    output_writer = FileWriter(output_file)
-  else:
-    output_writer = StdoutWriter()
-
-  if not output_writer.Open():
-    print u'Unable to open output writer.'
-    print u''
-    return False
-
-  script_directory = os.path.dirname(os.path.abspath(__file__))
-
-  template_directory = os.path.join(script_directory, 'wiki', 'Home')
-  wiki_page = HomePageGenerator(template_directory)
-  wiki_page.Generate(project_configuration, output_writer)
-
-  output_writer.Close()
-
-  if options.output_directory:
-    output_file = os.path.join(options.output_directory, 'Building.md')
-    output_writer = FileWriter(output_file)
-  else:
-    output_writer = StdoutWriter()
-
-  if not output_writer.Open():
-    print u'Unable to open output writer.'
-    print u''
-    return False
-
-  script_directory = os.path.dirname(os.path.abspath(__file__))
-
-  template_directory = os.path.join(script_directory, 'wiki', 'Building')
-  wiki_page = BuildingPageGenerator(template_directory)
-  wiki_page.Generate(project_configuration, output_writer)
-
-  output_writer.Close()
-
-  if project_configuration.supports_tests:
-    if options.output_directory:
-      output_file = os.path.join(options.output_directory, 'Testing.md')
-      output_writer = FileWriter(output_file)
-    else:
-      output_writer = StdoutWriter()
-
-    if not output_writer.Open():
-      print u'Unable to open output writer.'
-      print u''
-      return False
-
-    template_directory = os.path.join(script_directory, 'wiki', 'Testing')
-    wiki_page = TestingPageGenerator(template_directory)
-    wiki_page.Generate(project_configuration, output_writer)
-
-    output_writer.Close()
-
-  if (project_configuration.supports_dokan or
-      project_configuration.supports_fuse):
-    if options.output_directory:
-      output_file = os.path.join(options.output_directory, 'Mounting.md')
-      output_writer = FileWriter(output_file)
-    else:
-      output_writer = StdoutWriter()
-
-    if not output_writer.Open():
-      print u'Unable to open output writer.'
-      print u''
-      return False
-
-    template_directory = os.path.join(script_directory, 'wiki', 'Mounting')
-    wiki_page = MountingPageGenerator(template_directory)
-    wiki_page.Generate(project_configuration, output_writer)
-
-    output_writer.Close()
-
   # TODO: generate more wiki pages.
+  wiki_pages = [
+      ('Building', BuildingPageGenerator),
+      ('Development', DevelopmentPageGenerator),
+      ('Home', HomePageGenerator),
+      ('Mounting', MountingPageGenerator),
+      ('Testing', TestingPageGenerator),
+  ]
+
+  for page_name, page_generator_class in wiki_pages:
+    filename = '{0:s}.md'.format(page_name)
+
+    if options.output_directory:
+      output_file = os.path.join(options.output_directory, filename)
+      output_writer = FileWriter(output_file)
+    else:
+      output_writer = StdoutWriter()
+
+    if not output_writer.Open():
+      print u'Unable to open output writer.'
+      print u''
+      return False
+
+    script_directory = os.path.dirname(os.path.abspath(__file__))
+
+    template_directory = os.path.join(script_directory, 'wiki', page_name)
+    wiki_page = page_generator_class(template_directory)
+    wiki_page.Generate(project_configuration, output_writer)
+
+    output_writer.Close()
+
   # TODO: add support for Unicode templates.
 
   return True
