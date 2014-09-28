@@ -12,7 +12,7 @@ ${development_prefix}_${development_main_object}.close()
 
 **Note that the explicit call to close is not required.**
 
-## Open file-like object
+## Open ${development_main_object} using a file-like object
 ```
 import ${python_bindings_name}
 
