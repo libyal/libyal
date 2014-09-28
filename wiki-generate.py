@@ -21,6 +21,7 @@ import argparse
 import json
 import string
 import os
+import re
 import sys
 
 try:
@@ -101,6 +102,7 @@ class ProjectConfiguration(object):
 
     self.rpm_build_dependencies = None
 
+    self.mount_tool_additional_arguments = None
     self.mount_tool_missing_backend_error = None
     self.mount_tool_mount_point = None
     self.mount_tool_mounted_description = None
@@ -137,8 +139,6 @@ class ProjectConfiguration(object):
     self.project_name = self._GetConfigValue(config_parser, 'Project', 'name')
     self.project_status = self._GetConfigValue(
         config_parser, 'Project', 'status')
-    self.project_description = self._GetConfigValue(
-        config_parser, 'Project', 'description')
 
     self.source_package_url = self._GetConfigValue(
         config_parser, 'source_package', 'url')
@@ -173,8 +173,11 @@ class ProjectConfiguration(object):
       self.development_main_object_filename = self._GetConfigValue(
           config_parser, 'development', 'main_object_filename')
 
-      self.development_main_object_python_pre_open = self._GetConfigValue(
-          config_parser, 'development', 'main_object_python_pre_open')
+      try:
+        self.development_main_object_python_pre_open = self._GetConfigValue(
+            config_parser, 'development', 'main_object_python_pre_open')
+      except configparser.NoOptionError:
+        pass
 
     if self.supports_tests and not config_parser.has_section('tests'):
       raise ConfigError(
@@ -278,6 +281,12 @@ class ProjectConfiguration(object):
           'mount_tool is missing.')
 
     if config_parser.has_section('mount_tool'):
+      try:
+        self.mount_tool_additional_arguments = self._GetConfigValue(
+            config_parser, 'mount_tool', 'additional_arguments')
+      except configparser.NoOptionError:
+        pass
+
       self.mount_tool_missing_backend_error = self._GetConfigValue(
           config_parser, 'mount_tool', 'missing_backend_error')
       self.mount_tool_mount_point = self._GetConfigValue(
@@ -356,6 +365,7 @@ class ProjectConfiguration(object):
     rpm_filenames = ''
     rpm_rename_source_package = ''
 
+    mount_tool_additional_arguments = ''
     mount_tool_source_description_long = ''
     mount_tool_supported_backends = ''
 
@@ -583,6 +593,9 @@ class ProjectConfiguration(object):
       development_main_object_python_pre_open = '{0:s}\n'.format(
           self.development_main_object_python_pre_open)
 
+    if self.mount_tool_additional_arguments:
+      mount_tool_additional_arguments = self.mount_tool_additional_arguments
+
     if self.mount_tool_source_description_long:
       mount_tool_source_description_long = self.mount_tool_source_description_long
     else:
@@ -645,6 +658,7 @@ class ProjectConfiguration(object):
         'rpm_filenames': rpm_filenames,
         'rpm_rename_source_package': rpm_rename_source_package,
 
+        'mount_tool_additional_arguments': self.mount_tool_additional_arguments,
         'mount_tool_missing_backend_error': self.mount_tool_missing_backend_error,
         'mount_tool_mount_point': self.mount_tool_mount_point,
         'mount_tool_mounted_description': self.mount_tool_mounted_description,
@@ -1022,6 +1036,24 @@ def Main():
   project_configuration = ProjectConfiguration()
   project_configuration.ReadFromFile(options.config_file)
 
+  readme_file = os.path.join(
+      os.path.dirname(options.config_file), 'README')
+
+  LINK_RE = re.compile(r'\* (.*): (http[s]://.*)')
+
+  project_description = []
+  if os.path.exists(readme_file):
+    with open(readme_file, 'rb') as file_object:
+      for line in file_object.readlines():
+        if line.startswith('For more information see:'):
+          project_description.pop()
+          break
+
+        line = LINK_RE.sub(r'* [\1](\2)', line)
+        project_description.append(line)
+
+  project_configuration.project_description = ''.join(project_description)
+
   # TODO: generate more wiki pages.
   wiki_pages = [
       ('Building', BuildingPageGenerator),
@@ -1031,6 +1063,7 @@ def Main():
       ('Testing', TestingPageGenerator),
   ]
 
+  # TODO: prevent empty files from being generated.
   for page_name, page_generator_class in wiki_pages:
     filename = '{0:s}.md'.format(page_name)
 

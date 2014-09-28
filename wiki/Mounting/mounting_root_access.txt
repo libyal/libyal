@@ -14,6 +14,6 @@ user_allow_other
 
 Pass "allow_root" to the fuse sub system using the ${mount_tool_name} -X option:
 ```
-${mount_tool_name} -X allow_root ${mount_tool_source} ${mount_tool_mount_point}
+${mount_tool_name} -X allow_root${mount_tool_additional_arguments} ${mount_tool_source} ${mount_tool_mount_point}
 ```
 

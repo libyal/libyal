@@ -1,7 +1,7 @@
 ## Windows
 To mount ${mount_tool_source_description} on Windows:
 ```
-${mount_tool_name} ${mount_tool_source} x:
+${mount_tool_name}${mount_tool_additional_arguments} ${mount_tool_source} x:
 ```
 
 At the moment the ${mount_tool_name} keeps a hold on the console.
