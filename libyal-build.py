@@ -21,6 +21,8 @@ import abc
 import argparse
 import fileinput
 import glob
+import io
+import json
 import logging
 import os
 import platform
@@ -32,8 +34,10 @@ import tarfile
 import urllib2
 from distutils import sysconfig
 
-
-# TODO: add support for com.github.libyal.
+try:
+  import ConfigParser as configparser
+except ImportError:
+  import configparser
 
 
 LIBYAL_LIBRARIES = frozenset([
@@ -150,11 +154,11 @@ class DownloadHelper(object):
     """
 
 
-class GoogleCodeDownloadHelper(DownloadHelper):
-  """Class that helps in downloading a Google Code project."""
+class LibyalGitHubDownloadHelper(DownloadHelper):
+  """Class that helps in downloading a libyal GitHub project."""
 
   def GetGoogleCodeDownloadsUrl(self, project_name):
-    """Retrieves the Download URL from the Google Code project page.
+    """Retrieves the Download URL from the GitHub project page.
 
     Args:
       project_name: the name of the project.
@@ -162,22 +166,18 @@ class GoogleCodeDownloadHelper(DownloadHelper):
     Returns:
       The downloads URL or None on error.
     """
-    download_url = u'https://code.google.com/p/{0:s}/'.format(project_name)
+    download_url = (
+        u'https://raw.githubusercontent.com/libyal/{0:s}/master/'
+        u'{0:s}-wiki.ini').format(project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return
 
-    # The format of the project downloads URL is:
-    # https://googledrive.com/host/{random string}/
-    expression_string = (
-        u'<a href="(https://googledrive.com/host/[^/]*/)"[^>]*>Downloads</a>')
-    matches = re.findall(expression_string, page_content)
+    config_parser = configparser.RawConfigParser()
+    config_parser.readfp(io.BytesIO(page_content))
 
-    if not matches or len(matches) != 1:
-      return
-
-    return matches[0]
+    return json.loads(config_parser.get('source_package', 'url'))
 
   def GetLatestVersion(self, project_name):
     """Retrieves the latest version number for a given project name.
@@ -1129,7 +1129,7 @@ class LibyalBuilder(object):
     """
     super(LibyalBuilder, self).__init__()
     self._build_target = build_target
-    self._download_helper = GoogleCodeDownloadHelper()
+    self._download_helper = LibyalGitHubDownloadHelper()
 
   def _BuildLibyalLibrary(
       self, source_filename, project_name, project_version):
