@@ -1,0 +1,4 @@
+## Also see
+* ${project_name}.h
+* man 3 ${project_name}
+

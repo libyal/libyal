@@ -1,0 +1,102 @@
+## ${development_main_object} structure
+### Allocate ${development_main_object} structure
+```
+${project_name}_error_t *error = NULL;
+${project_name}_${development_main_object}_t *${development_main_object} = NULL;
+
+if( ${project_name}_${development_main_object}_initialize(&${development_main_object}, &error) != 1 )
+{
+    fprintf(stderr, "Unable to initialize ${development_main_object}.\n");
+
+    ${project_name}_error_free(&error);
+
+    exit(EXIT_FAILURE);
+}
+```
+
+When calling the ${project_name}_${development_main_object}_initialize function the ${development_main_object} argument must refer to NULL to allocate and initialize a ${development_main_object} structure.
+The error argument is optional and can be NULL. 
+
+The function will return 1 if successful or -1 on error. On error an the library creates an error structure except if error is NULL e.g.
+```
+${project_name}_${development_main_object}_initialize(&${development_main_object}, NULL)
+```
+
+The error structure must be freed by calling the ${project_name}_error_free function.
+
+### Free ${development_main_object} structure
+```
+if( ${project_name}_${development_main_object}_free(&${development_main_object}, &error) != 1 )
+{
+    fprintf(stderr, "Unable to free ${development_main_object}.\n");
+
+    ${project_name}_error_free(&error);
+
+    exit(EXIT_FAILURE);
+}
+```
+
+The function will return 1 if successful or -1 on error.
+File is set to NULL.
+The function will also close the ${development_main_object} if it was opened.
+
+### Open ${development_main_object}
+```
+filename = "${development_main_object_filename}";
+
+if( ${project_name}_${development_main_object}_open(${development_main_object}, filename, ${project_name_upper_case}_OPEN_READ, &error) != 1 )
+{
+    fprintf(stderr, "Unable to open ${development_main_object}.\n" );
+
+    ${project_name}_${development_main_object}_free(&${development_main_object}, NULL);
+    ${project_name}_error_free(&error);
+
+    exit(EXIT_FAILURE);
+}
+```
+
+${project_name} provides both narrow and wide character string functions for filenames.
+The wide character equivalent of the open function is ${project_name}_${development_main_object}_open_wide.
+By default ${project_name} will only enable wide character string support on Windows since other operating systems have build-in support for UTF-8 narrow character strings.
+
+To compile with wide character support add --enable-wide-character-type=yes to configure, e.g.:
+```
+./configure --enable-wide-character-type=yes
+```
+
+Or on Windows define WINAPI and either ``` _UNICODE ``` or ``` UNICODE ```
+
+When wide character string support is enabled ${project_name_upper_case}_HAVE_WIDE_CHARACTER_TYPE is defined in <${project_name}/features.h>
+
+### Open ${development_main_object} using a file-like object
+**TODO describe**
+
+${project_name} allows to be compiled with file-like object support using libbfio.
+The ${project_name} configure script will automatically detect if a compatible version of libbfio is available.
+
+When libbfio is support is enabled ${project_name_upper_case}_HAVE_BFIO is defined in <${project_name}/features.h>
+
+### Close ${development_main_object}
+```
+if( ${project_name}_${development_main_object}_close(${development_main_object}, &error) != 0 )
+{
+    fprintf(stderr, "Unable to close ${development_main_object}.\n" );
+
+    ${project_name}_${development_main_object}_free(&${development_main_object}, NULL);
+    ${project_name}_error_free(&error);
+
+    exit(EXIT_FAILURE);
+}
+```
+
+### Get local path
+**TODO describe**
+
+${project_name}_${development_main_object}_get_utf8_local_path
+
+Internally ${project_name} uses both ASCII and Unicode (UTF-16 little-endian) strings, as stored in the LNK file.
+ASCII strings in a LNK file contain an extended ASCII string using the codepage of the system it was created on.
+The ${project_name}_set_ascii_codepage function allows to set the required codepage for reading and writing. The default codepage is Windows 1252.
+
+Unsupported extended characters are replaced to the Unicode replacement character (U+fffd).
+

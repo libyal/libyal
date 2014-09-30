@@ -827,6 +827,8 @@ class DevelopmentPageGenerator(WikiPageGenerator):
                              ProjectConfiguration).
       output_write: the output writer.
     """
+    # TODO: add support for c_cpp_also_see.txt, c_cpp_main_object.txt, c_cpp.txt
+
     if project_configuration.supports_python:
       self._GenerateSection(
           project_configuration, 'python.txt', output_writer)
