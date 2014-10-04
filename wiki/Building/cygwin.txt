@@ -8,6 +8,7 @@ If you want to use Cygwin to build ${project_name} make sure to have the followi
 * libiconv
 * libtool
 * make
+* pkg-config
 ${cygwin_build_dependencies}
 
 After following the GNU Compiler Collection (GCC) build instructions you should end up with the following DLL:

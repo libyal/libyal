@@ -1,5 +1,5 @@
 ## Git
-To retrieve the source from the git repository make sure to install: git, aclocal, autoconf, automake, autopoint, gettextize and libtoolize.
+To retrieve the source from the git repository make sure to install: git, aclocal, autoconf, automake, autopoint, gettextize, libtoolize and pkg-config.
 
 To download and prepare the source for building run:
 ```
