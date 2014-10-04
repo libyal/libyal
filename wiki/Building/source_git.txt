@@ -11,3 +11,10 @@ cd ${project_name}/
 
 **Note that the source from the git repository will not work without synchronizing the library dependencies "./synclibs.sh" and having the autotools generate the necessary files "./autogen.sh".**
 
+### Mac OS X
+On Mac OS X the XCode command line tools no longer provide the autotools you can obtain them e.g. via [MacPorts](https://www.macports.org/).
+Install the following packages:
+```
+sudo port install autoconf automake gettext libtool pkgconfig
+```
+
