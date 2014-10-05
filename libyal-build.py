@@ -154,11 +154,12 @@ class DownloadHelper(object):
     """
 
 
-class LibyalGitHubDownloadHelper(DownloadHelper):
-  """Class that helps in downloading a libyal GitHub project."""
+class GoogleDriveDownloadHelper(DownloadHelper):
+  """Class that helps in downloading a Google Drive hosted project."""
 
-  def GetGoogleCodeDownloadsUrl(self, project_name):
-    """Retrieves the Download URL from the GitHub project page.
+  @abc.abstractmethod
+  def GetGoogleDriveDownloadsUrl(self, project_name):
+    """Retrieves the Google Drive Download URL.
 
     Args:
       project_name: the name of the project.
@@ -166,18 +167,6 @@ class LibyalGitHubDownloadHelper(DownloadHelper):
     Returns:
       The downloads URL or None on error.
     """
-    download_url = (
-        u'https://raw.githubusercontent.com/libyal/{0:s}/master/'
-        u'{0:s}-wiki.ini').format(project_name)
-
-    page_content = self.DownloadPageContent(download_url)
-    if not page_content:
-      return
-
-    config_parser = configparser.RawConfigParser()
-    config_parser.readfp(io.BytesIO(page_content))
-
-    return json.loads(config_parser.get('source_package', 'url'))
 
   def GetLatestVersion(self, project_name):
     """Retrieves the latest version number for a given project name.
@@ -188,7 +177,7 @@ class LibyalGitHubDownloadHelper(DownloadHelper):
     Returns:
       The latest version number or 0 on error.
     """
-    download_url = self.GetGoogleCodeDownloadsUrl(project_name)
+    download_url = self.GetGoogleDriveDownloadsUrl(project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -216,7 +205,7 @@ class LibyalGitHubDownloadHelper(DownloadHelper):
     Returns:
       The download URL of the project or None on error.
     """
-    download_url = self.GetGoogleCodeDownloadsUrl(project_name)
+    download_url = self.GetGoogleDriveDownloadsUrl(project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -240,6 +229,32 @@ class LibyalGitHubDownloadHelper(DownloadHelper):
       return
 
     return u'https://googledrive.com{0:s}'.format(matches[0])
+
+
+class LibyalGitHubDownloadHelper(GoogleDriveDownloadHelper):
+  """Class that helps in downloading a libyal GitHub project."""
+
+  def GetGoogleDriveDownloadsUrl(self, project_name):
+    """Retrieves the Download URL from the GitHub project page.
+
+    Args:
+      project_name: the name of the project.
+
+    Returns:
+      The downloads URL or None on error.
+    """
+    download_url = (
+        u'https://raw.githubusercontent.com/libyal/{0:s}/master/'
+        u'{0:s}-wiki.ini').format(project_name)
+
+    page_content = self.DownloadPageContent(download_url)
+    if not page_content:
+      return
+
+    config_parser = configparser.RawConfigParser()
+    config_parser.readfp(io.BytesIO(page_content))
+
+    return json.loads(config_parser.get('source_package', 'url'))
 
 
 class BuildHelper(object):
@@ -855,6 +870,8 @@ class LibyalRpmBuildHelper(RpmBuildHelper):
 
     # Move the rpms to the build directory.
     self._MoveRpms(library_name, library_version)
+
+    # TODO: clean up rpmbuilds directory after move.
 
     return True
 
