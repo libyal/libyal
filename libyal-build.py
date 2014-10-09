@@ -40,6 +40,40 @@ except ImportError:
   import configparser
 
 
+LIBYAL_LIBRARIES_CORE = frozenset([
+    'libbfio',
+    'libcdata',
+    'libcdatetime',
+    'libcdirectory',
+    'libcerror',
+    'libclocale',
+    'libcnotify',
+    'libcfile',
+    'libcpath',
+    'libcsplit',
+    'libcstring',
+    'libcsystem',
+    'libcthreads',
+])
+
+LIBYAL_LIBRARIES_DATA_TYPES = frozenset([
+    'libcaes',
+    'libfcache',
+    'libfdata',
+    'libfdatetime',
+    'libfguid',
+    'libfmapi',
+    'libfole',
+    'libfusn',
+    'libfvalue',
+    'libfwevt',
+    'libfwnt',
+    'libfwsi',
+    'libfwps',
+    'libhmac',
+    'libuna',
+])
+
 LIBYAL_LIBRARIES = frozenset([
     'libbde',
     'libesedb',
