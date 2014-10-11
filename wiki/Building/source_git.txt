@@ -1,4 +1,8 @@
 ## Git
+**Note that the git repository holds the development version of source code.**
+
+If you are not developing it is recommended that you download a source package instead.
+
 To retrieve the source from the git repository make sure to install: git, aclocal, autoconf, automake, autopoint, gettextize, libtoolize and pkg-config.
 
 To download and prepare the source for building run:
@@ -9,7 +13,7 @@ cd ${project_name}/
 ./autogen.sh
 ```
 
-**Note that the source from the git repository will not work without synchronizing the library dependencies "./synclibs.sh" and having the autotools generate the necessary files "./autogen.sh".**
+The source from the git repository will not work without synchronizing the library dependencies "./synclibs.sh" and having the autotools generate the necessary files "./autogen.sh".
 
 ### Mac OS X
 On Mac OS X the XCode command line tools no longer provide the autotools you can obtain them e.g. via [MacPorts](https://www.macports.org/).
