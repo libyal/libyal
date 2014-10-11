@@ -82,6 +82,8 @@ class ProjectConfiguration(object):
     self.tests_example_filename1 = None
     self.tests_example_filename2 = None
 
+    self.troubleshooting_example = None
+
     self.tools_names = None
 
     self.cygwin_build_dependencies = None
@@ -197,6 +199,10 @@ class ProjectConfiguration(object):
             config_parser, 'tests', 'example_filename1')
         self.tests_example_filename2 = self._GetConfigValue(
             config_parser, 'tests', 'example_filename2')
+
+    if config_parser.has_section('troubleshooting'):
+      self.troubleshooting_example = self._GetConfigValue(
+          config_parser, 'troubleshooting', 'example')
 
     if self.supports_tools and not config_parser.has_section('tools'):
       raise ConfigError(
@@ -340,6 +346,8 @@ class ProjectConfiguration(object):
 
     tests_profiles = ''
 
+    troubleshooting_example = ''
+
     cygwin_build_dependencies = ''
     cygwin_dll_dependencies = ''
     cygwin_executables = ''
@@ -381,6 +389,9 @@ class ProjectConfiguration(object):
     if self.supports_tests and self.tests_profiles:
       for profile in self.tests_profiles:
         tests_profiles += '* {0:s}\n'.format(profile)
+
+    if self.troubleshooting_example:
+      troubleshooting_example = self.troubleshooting_example
 
     if self.supports_gcc or self.supports_mingw or self.supports_msvscpp:
       building_table_of_contents += (
@@ -630,6 +641,8 @@ class ProjectConfiguration(object):
         'tests_profiles': tests_profiles,
         'tests_example_filename1': self.tests_example_filename1,
         'tests_example_filename2': self.tests_example_filename2,
+
+        'troubleshooting_example': troubleshooting_example,
 
         'cygwin_build_dependencies': cygwin_build_dependencies,
         'cygwin_dll_dependencies': cygwin_dll_dependencies,
@@ -1034,6 +1047,45 @@ class TestingPageGenerator(WikiPageGenerator):
     return False
 
 
+class TroubleshootingPageGenerator(WikiPageGenerator):
+  """Class that generates the "Troubleshooting" wiki page."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates the wiki page.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_write: the output writer.
+    """
+    self._GenerateSection(
+        project_configuration, 'introduction.txt', output_writer)
+    self._GenerateSection(
+        project_configuration, 'build_errors.txt', output_writer)
+    self._GenerateSection(
+        project_configuration, 'runtime_errors.txt', output_writer)
+
+    if project_configuration.supports_debug_output:
+      self._GenerateSection(
+          project_configuration, 'format_errors.txt', output_writer)
+
+    if project_configuration.supports_tools:
+      self._GenerateSection(
+          project_configuration, 'crashes.txt', output_writer)
+
+  def HasContent(self, unused_project_configuration):
+    """Determines if the generator will generate content.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+
+    Returns:
+      Boolean value to indicate the generator will generate content.
+    """
+    return True
+
+
 class FileWriter(object):
   """Class that defines a file output writer."""
 
@@ -1158,6 +1210,7 @@ def Main():
       ('Home', HomePageGenerator),
       ('Mounting', MountingPageGenerator),
       ('Testing', TestingPageGenerator),
+      ('Troubleshooting', TroubleshootingPageGenerator),
   ]
 
   for page_name, page_generator_class in wiki_pages:

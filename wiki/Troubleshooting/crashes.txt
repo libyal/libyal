@@ -1,5 +1,5 @@
 ## Crashes
-These are errors when running one of the ${tools_directory}.
+These are errors when running one of the ${tools_name}.
 
 If you want to report one of these please include the back trace.
 
@@ -12,7 +12,7 @@ make
 
 Run the crashing tool with a debugger, e.g.:
 ```
-gdb --ex r --args ${tool_name} ${tool_arguments}
+gdb --ex r --args ${troubleshooting_example}
 ```
 
 Generate a back trace:
