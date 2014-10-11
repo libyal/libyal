@@ -1,5 +1,6 @@
 # Troubleshooting issues
 Some common tips for troubleshooting issue:
+
 1. Check if the documentation already describes your issue;
 2. Check the [issues](https://github.com/libyal/${project_name}/issues), to see if you are experiencing a known issue;
 3. Make sure to use a recent version. The latest version could have introduced new bugs so try the one before that as well;
