@@ -201,8 +201,11 @@ class ProjectConfiguration(object):
             config_parser, 'tests', 'example_filename2')
 
     if config_parser.has_section('troubleshooting'):
-      self.troubleshooting_example = self._GetConfigValue(
-          config_parser, 'troubleshooting', 'example')
+      try:
+        self.troubleshooting_example = self._GetConfigValue(
+            config_parser, 'troubleshooting', 'example')
+      except configparser.NoOptionError:
+        pass
 
     if self.supports_tools and not config_parser.has_section('tools'):
       raise ConfigError(
