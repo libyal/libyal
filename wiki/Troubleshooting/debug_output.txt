@@ -1,0 +1,7 @@
+## Format or behavioral errors
+### Verbose and debug output
+${project_name} comes with a build feature named "verbose and debug output".
+This enables the library to output a lot of format debug information when enabled.
+
+Also see: [Building](https://github.com/libyal/${project_name}/wiki/Building)
+

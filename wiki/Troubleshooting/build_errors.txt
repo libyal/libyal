@@ -1,0 +1,31 @@
+## Configure errors
+These are errors when running ./configure.
+
+If you want to report one of these please include config.log.
+
+### GNU Compiler Collection (GCC)
+```
+error: command 'gcc' failed with exit status 1
+```
+
+This means the compilation failed. To determine the cause look for lines containing ": error: " in config.log e.g.
+```
+libclocale_locale.c:358:7: error: 'LOCALE_NAME_USER_DEFAULT' undeclared (first use in this function)
+```
+
+## Compiler and linker errors
+These are errors when running make.
+
+If you want to report one of these please include the last part of the command line output.
+
+### MSYS-MinGW
+```
+libtool: link: cannot find the library `/home/keith/staged/mingw32/lib/libiconv. la' or unhandled argument `/home/keith/staged/mingw32/lib/libiconv.la'
+```
+
+This is a bug in gettext-18.3.2-1 revert to a previous version, e.g.:
+```
+mingw-get remove gettext
+mingw-get install gettext=18.3.1-1
+```
+

@@ -1,0 +1,25 @@
+## Crashes
+These are errors when running one of the ${tools_directory}.
+
+If you want to report one of these please include the back trace.
+
+### GNU Compiler Collection (GCC)
+Compile ${project_name} with debug symbols:
+```
+CPPCFLAGS=-g ./configure --enable-shared=no
+make
+```
+
+Run the crashing tool with a debugger, e.g.:
+```
+gdb --ex r --args ${tool_name} ${tool_arguments}
+```
+
+Generate a back trace:
+```
+bt
+```
+
+### Microsoft Visual Studio
+Build the executables using the VSDebug configuration and run the command via the Visual Studio debugger.
+
