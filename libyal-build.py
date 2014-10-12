@@ -346,6 +346,8 @@ class LibyalGitRepositoryHelper(SourceHelper):
     if not self.project_name:
       return
 
+    source_directory = self.project_name
+
     command = u'git clone https://github.com/libyal/{0:s}.git'.format(
         self.project_name)
     exit_code = subprocess.call(
@@ -353,8 +355,6 @@ class LibyalGitRepositoryHelper(SourceHelper):
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return
-
-    source_directory = self.project_name
 
     command = u'./synclibs.sh'
     exit_code = subprocess.call(
@@ -686,6 +686,37 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     return u'{0:s}_{1!s}-1_{2:s}.deb'.format(
         source_helper.project_name, source_helper.project_version,
         self.architecture)
+
+
+class MakeBuildHelper(BuildHelper):
+  """Class that helps in building using make."""
+
+  def Build(self, source_helper):
+    """Builds the source using make.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    source_directory = source_helper.project_name
+
+    command = u'./configure'
+    exit_code = subprocess.call(
+        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    command = u'make'
+    exit_code = subprocess.call(
+        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
 
 
 class PkgBuildHelper(BuildHelper):
@@ -1452,6 +1483,14 @@ class LibyalBuilder(object):
       source_directory = source_helper.Create()
 
       # TODO: build source.
+      build_helper = MakeBuildHelper()
+
+      if not build_helper.Build(source_helper):
+        logging.warning((
+            u'Build of: {0:s} failed, for more information check '
+            u'{1:s}').format(
+                source_helper.project_name, build_helper.LOG_FILENAME))
+        return False
 
     else:
       source_helper = SourcePackageHelper(project_name)
