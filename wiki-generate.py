@@ -36,7 +36,7 @@ class ConfigError(Exception):
 
 
 class ProjectConfiguration(object):
-  """Class that contains the libyal project configuration."""
+  """Class that contains the project configuration."""
 
   def __init__(self):
     """Initializes the project configuation."""

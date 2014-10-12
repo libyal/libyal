@@ -74,27 +74,43 @@ LIBYAL_LIBRARIES_DATA_TYPES = frozenset([
     'libuna',
 ])
 
-LIBYAL_LIBRARIES = frozenset([
-    'libbde',
-    'libesedb',
-    'libevt',
-    'libevtx',
-    'libewf',
-    'libexe',
-    'libfwsi',
-    'liblnk',
-    'libmsiecf',
-    'libolecf',
-    'libpff',
-    'libqcow',
-    'libregf',
-    'libsmdev',
-    'libsmraw',
-    'libvhdi',
-    'libvmdk',
-    'libvshadow',
-    'libwrc',
-])
+
+class ConfigError(Exception):
+  """Class that defines a configuration error."""
+
+
+class BuildConfiguration(object):
+  """Class that contains the build configuration."""
+
+  def __init__(self):
+    """Initializes the project configuation."""
+    super(BuildConfiguration, self).__init__()
+    self.library_names = []
+
+  def _GetConfigValue(self, config_parser, section_name, value_name):
+    """Retrieves a value from the config parser.
+
+    Args:
+      config_parser: the configuration parser (instance of ConfigParser).
+      section_name: the name of the section that contains the value.
+      value_name: the name of the value.
+
+    Returns:
+      An object containing the value.
+    """
+    return json.loads(config_parser.get(section_name, value_name))
+
+  def ReadFromFile(self, filename):
+    """Reads the configuration from file.
+
+    Args:
+      filename: the configuration filename.
+    """
+    config_parser = configparser.RawConfigParser()
+    config_parser.read([filename])
+
+    self.library_names = self._GetConfigValue(
+        config_parser, 'libraries', 'names')
 
 
 class DownloadHelper(object):
@@ -291,32 +307,132 @@ class LibyalGitHubDownloadHelper(GoogleDriveDownloadHelper):
     return json.loads(config_parser.get('source_package', 'url'))
 
 
-class BuildHelper(object):
-  """Base class that helps in building."""
+class SourceHelper(object):
+  """Base class that helps in managing the source code."""
 
-  LOG_FILENAME = u'build.log'
-
-  def Extract(self, source_filename):
-    """Extracts the given source filename.
+  def __init__(self, project_name):
+    """Initializes the source helper.
 
     Args:
-      source_filename: the name of the source package file.
+      project_name: the name of the project.
+    """
+    super(SourceHelper, self).__init__()
+    self.project_name = project_name
+
+  @abc.abstractmethod
+  def Create(self):
+    """Creates the source directory.
 
     Returns:
-      The name of the directory the files were extracted to if successful
-      or None on error.
+      The name of the source directory if successful or None on error.
     """
-    if not source_filename or not os.path.exists(source_filename):
+
+
+class LibyalGitRepositoryHelper(SourceHelper):
+  """Class that manages the source code from a git repository."""
+
+  def Create(self):
+    """Creates the source directory from the git repository.
+
+    Returns:
+      The name of the source directory if successful or None on error.
+    """
+    if not self.project_name:
       return
 
-    archive = tarfile.open(source_filename, 'r:gz', encoding='utf-8')
+    command = u'git clone https://github.com/libyal/{0:s}.git'.format(
+        self.project_name)
+    exit_code = subprocess.call(
+        u'{0:s}'.format(command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return
+
+    source_directory = self.project_name
+
+    command = u'./synclibs.sh'
+    exit_code = subprocess.call(
+        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return
+
+    command = u'./autogen.sh'
+    exit_code = subprocess.call(
+        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return
+
+    return source_directory
+
+
+class SourcePackageHelper(SourceHelper):
+  """Class that manages the source code from a source package."""
+
+  def __init__(self, project_name):
+    """Initializes the source package helper.
+
+    Args:
+      project_name: the name of the project.
+    """
+    super(SourcePackageHelper, self).__init__(project_name)
+    self._download_helper = LibyalGitHubDownloadHelper()
+    self._project_version = None
+    self._source_filename = None
+
+  @property
+  def project_version(self):
+    """The project version."""
+    if not self._project_version:
+      self._project_version = self._download_helper.GetLatestVersion(
+          self.project_name)
+    return self._project_version
+
+  def Clean(self):
+    """Removes previous versions of source packages and directories."""
+    if not self.project_version:
+      return
+
+    filenames_to_ignore = re.compile(
+        u'^{0:s}-.*{1!s}'.format(self.project_name, self.project_version))
+
+    # Remove previous versions of source packages in the format:
+    # library-*.tar.gz
+    filenames = glob.glob(u'{0:s}-*.tar.gz'.format(self.project_name))
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove previous versions of source directories in the format:
+    # library-{version}
+    filenames = glob.glob(u'{0:s}-*'.format(self.project_name))
+    for filename in filenames:
+      if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        shutil.rmtree(filename)
+
+  def Create(self):
+    """Creates the source directory from the source package.
+
+    Returns:
+      The name of the source directory if successful or None on error.
+    """
+    if not self._source_filename:
+      _ = self.Download()
+
+    if not self._source_filename or not os.path.exists(self._source_filename):
+      return
+
+    archive = tarfile.open(self._source_filename, 'r:gz', encoding='utf-8')
     directory_name = ''
 
     for tar_info in archive.getmembers():
       filename = getattr(tar_info, 'name', None)
       if filename is None:
-        logging.warning(
-            u'Missing filename in tar file: {0:s}'.format(source_filename))
+        logging.warning(u'Missing filename in tar file: {0:s}'.format(
+            self._source_filename))
         continue
 
       if not directory_name:
@@ -326,22 +442,55 @@ class BuildHelper(object):
         if not directory_name or directory_name.startswith(u'..'):
           logging.error(
               u'Unsuppored directory name in tar file: {0:s}'.format(
-                  source_filename))
+                  self._source_filename))
           return
         if os.path.exists(directory_name):
           break
-        logging.info(u'Extracting: {0:s}'.format(source_filename))
+        logging.info(u'Extracting: {0:s}'.format(self._source_filename))
 
       elif not filename.startswith(directory_name):
         logging.warning(
             u'Skipping: {0:s} in tar file: {1:s}'.format(
-                filename, source_filename))
+                filename, self._source_filename))
         continue
 
       archive.extract(tar_info)
     archive.close()
 
     return directory_name
+
+  def Download(self):
+    """Downloads the source package.
+
+    Returns:
+      The filename of the source package if successful also if the file was
+      already downloaded or None on error.
+    """
+    if not self._source_filename:
+      if not self.project_version:
+        return
+
+      self._source_filename = self._download_helper.Download(
+          self.project_name, self.project_version)
+
+    return self._source_filename
+
+
+class BuildHelper(object):
+  """Base class that helps in building."""
+
+  LOG_FILENAME = u'build.log'
+
+  @abc.abstractmethod
+  def Build(self, source_helper):
+    """Builds the source.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
 
 
 class DpkgBuildHelper(BuildHelper):
@@ -421,16 +570,19 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     elif self.architecture == 'x86_64':
       self.architecture = 'amd64'
 
-  def Build(self, source_filename):
+  def Build(self, source_helper):
     """Builds the dpkg packages.
 
     Args:
-      source_filename: the name of the source package file.
+      source_helper: the source helper (instance of SourceHelper).
 
     Returns:
       True if the build was successful, False otherwise.
     """
-    source_directory = self.Extract(source_filename)
+    source_filename = source_helper.Download()
+    logging.info(u'Building deb of: {0:s}'.format(source_filename))
+
+    source_directory = source_helper.Create()
     if not source_directory:
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
@@ -624,25 +776,28 @@ class PkgBuildHelper(BuildHelper):
 class LibyalPkgBuildHelper(PkgBuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
-  def Build(self, source_filename, library_name, library_version):
+  def Build(self, source_helper):
     """Builds the pkg package and distributable disk image (.dmg).
 
     Args:
-      source_filename: the name of the source package file.
-      library_name: the name of the library.
-      library_version: the version of the library.
+      source_helper: the source helper (instance of SourceHelper).
 
     Returns:
       True if the build was successful, False otherwise.
     """
-    source_directory = self.Extract(source_filename)
+    source_filename = source_helper.Download()
+    logging.info(u'Building pkg of: {0:s}'.format(source_filename))
+
+    source_directory = source_helper.Create()
     if not source_directory:
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
 
-    dmg_filename = u'{0:s}.dmg'.format(source_directory)
-    pkg_filename = u'{0:s}.pkg'.format(source_directory)
+    dmg_filename = u'{0:s}-{1!s}.dmg'.format(
+        source_helper.project_name, source_helper.project_version)
+    pkg_filename = u'{0:s}-{1!s}.pkg'.format(
+        source_helper.project_name, source_helper.project_version)
     log_filename = os.path.join(u'..', self.LOG_FILENAME)
 
     sdks_path = os.path.join(
@@ -694,7 +849,8 @@ class LibyalPkgBuildHelper(PkgBuildHelper):
         return False
 
       share_doc_path = os.path.join(
-          source_directory, u'tmp', u'usr', u'share', u'doc', library_name)
+          source_directory, u'tmp', u'usr', u'share', u'doc',
+          source_helper.project_name)
       if not os.path.exists(share_doc_path):
         os.makedirs(share_doc_path)
 
@@ -703,9 +859,11 @@ class LibyalPkgBuildHelper(PkgBuildHelper):
       shutil.copy(os.path.join(source_directory, u'NEWS'), share_doc_path)
       shutil.copy(os.path.join(source_directory, u'README'), share_doc_path)
 
-      project_identifier = u'com.google.code.p.{0:s}'.format(library_name)
+      project_identifier = u'com.google.code.p.{0:s}'.format(
+          source_helper.project_name)
       if not self._BuildPkg(
-          source_directory, project_identifier, library_version, pkg_filename):
+          source_directory, project_identifier, source_helper.project_version,
+          pkg_filename):
         return False
 
     if not self._BuildDmg(pkg_filename, dmg_filename):
@@ -888,26 +1046,35 @@ class RpmBuildHelper(BuildHelper):
 class LibyalRpmBuildHelper(RpmBuildHelper):
   """Class that helps in building libyal rpm packages (.rpm)."""
 
-  def Build(self, source_filename, library_name, library_version):
+  def Build(self, source_helper):
     """Builds the rpms.
 
     Args:
-      source_filename: the name of the source package file.
-      library_name: the name of the library.
-      library_version: the version of the library.
+      source_helper: the source helper (instance of SourceHelper).
 
     Returns:
       True if the build was successful, False otherwise.
     """
-    if not self._BuildFromSourcePackage(source_filename):
-      return False
+    source_filename = source_helper.Download()
+    logging.info(u'Building rpm of: {0:s}'.format(source_filename))
 
-    # Move the rpms to the build directory.
-    self._MoveRpms(library_name, library_version)
+    # rpmbuild wants the library filename without the status indication.
+    rpm_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        source_helper.project_name, source_helper.project_version)
+    os.rename(source_filename, rpm_source_filename)
 
-    # TODO: clean up rpmbuilds directory after move.
+    build_successful = self._BuildFromSourcePackage(rpm_source_filename)
 
-    return True
+    if build_successful:
+      # Move the rpms to the build directory.
+      self._MoveRpms(source_helper.project_name, source_helper.project_version)
+
+      # TODO: clean up rpmbuilds directory after move.
+
+    # Change the library filename back to the original.
+    os.rename(rpm_source_filename, source_filename)
+
+    return build_successful
 
 
 class VisualStudioBuildHelper(BuildHelper):
@@ -1012,16 +1179,20 @@ class LibyalVisualStudioBuildHelper(VisualStudioBuildHelper):
 
     os.chdir(u'..')
 
-  def Build(self, source_filename):
+  def Build(self, source_helper):
     """Builds using Visual Studio.
 
     Args:
-      source_filename: the name of the source package file.
+      source_helper: the source helper (instance of SourceHelper).
 
     Returns:
       True if the build was successful, False otherwise.
     """
-    source_directory = self.Extract(source_filename)
+    source_filename = source_helper.Download()
+    logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
+        source_filename, self.version))
+
+    source_directory = source_helper.Create()
     if not source_directory:
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
@@ -1180,20 +1351,19 @@ class LibyalBuilder(object):
     """
     super(LibyalBuilder, self).__init__()
     self._build_target = build_target
-    self._download_helper = LibyalGitHubDownloadHelper()
 
-  def _BuildLibyalLibrary(
-      self, source_filename, project_name, project_version):
+  def _BuildLibyalLibrary(self, source_helper):
     """Builds a libyal library and its Python module.
 
     Args:
-      source_filename: the name of the source package file.
-      project_name: the name of the project
-      project_version: the version of the project.
+      source_helper: the source helper (instance of SourceHelper).
 
     Returns:
       True if the build is successful or False on error.
     """
+    project_name = source_helper.project_name
+    project_version = source_helper.project_version
+
     build_helper = None
     if self._build_target == 'dpkg':
       build_helper = LibyalDpkgBuildHelper()
@@ -1205,11 +1375,10 @@ class LibyalBuilder(object):
       if not os.path.exists(deb_filename):
         # TODO: add call to CheckBuildEnvironment or only do this once?
 
-        logging.info(u'Building deb of: {0:s}'.format(source_filename))
-        if not build_helper.Build(source_filename):
-          logging.ingo(
+        if not build_helper.Build(source_helper):
+          logging.warning(
               u'Build of: {0:s} failed for more info check {1:s}'.format(
-                  source_filename, build_helper.LOG_FILENAME))
+                  project_name, build_helper.LOG_FILENAME))
           return False
 
     elif self._build_target == 'pkg':
@@ -1220,12 +1389,10 @@ class LibyalBuilder(object):
       build_helper.Clean(project_name, project_version)
 
       if not os.path.exists(dmg_filename):
-        logging.info(u'Building pkg of: {0:s}'.format(source_filename))
-        if not build_helper.Build(
-            source_filename, project_name, project_version):
-          logging.info(
+        if not build_helper.Build(source_helper):
+          logging.warning(
               u'Build of: {0:s} failed for more info check {1:s}'.format(
-                  source_filename, build_helper.LOG_FILENAME))
+                  project_name, build_helper.LOG_FILENAME))
           return False
 
     elif self._build_target == 'rpm':
@@ -1236,24 +1403,10 @@ class LibyalBuilder(object):
       build_helper.Clean(project_name, project_version)
 
       if not os.path.exists(rpm_filename):
-        # TODO: move the rename into the builder class?
-
-        # rpmbuild wants the library filename without the status indication.
-        rpm_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-            project_name, project_version)
-        os.rename(source_filename, rpm_source_filename)
-
-        logging.info(u'Building rpm of: {0:s}'.format(source_filename))
-        build_successful = build_helper.Build(
-            rpm_source_filename, project_name, project_version)
-
-        # Change the library filename back to the original.
-        os.rename(rpm_source_filename, source_filename)
-
-        if not build_successful:
-          logging.info(
+        if not build_helper.Build(source_helper):
+          logging.warning(
               u'Build of: {0:s} failed for more info check {1:s}'.format(
-                  source_filename, build_helper.LOG_FILENAME))
+                  project_name, build_helper.LOG_FILENAME))
           return False
 
     elif self._build_target in ['vs2008', 'vs2010', 'vs2012', 'vs2013']:
@@ -1267,12 +1420,10 @@ class LibyalBuilder(object):
       build_helper.Clean(project_name, project_version)
 
       if not os.path.exists(release_directory):
-        logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
-            source_filename, build_helper.version))
-        if not build_helper.Build(source_filename):
-          logging.info(
+        if not build_helper.Build(soure_helper):
+          logging.warning(
               u'Build of: {0:s} failed for more info check {1:s}'.format(
-                  source_filename, build_helper.LOG_FILENAME))
+                  project_name, build_helper.LOG_FILENAME))
           return False
 
     if build_helper and os.path.exists(build_helper.LOG_FILENAME):
@@ -1290,43 +1441,22 @@ class LibyalBuilder(object):
     Returns:
       True if the build is successful or False on error.
     """
-    project_version = self._download_helper.GetLatestVersion(project_name)
-    source_filename = self._download_helper.Download(
-        project_name, project_version)
+    source_helper = SourcePackageHelper(project_name)
+    source_helper.Clean()
 
-    if source_filename:
-      filenames_to_ignore = re.compile(
-          u'^{0:s}-.*{1!s}'.format(project_name, project_version))
+    if self._build_target == 'download':
+      source_filename = source_helper.Download()
 
-      # Remove files of previous versions in the format:
-      # library-*.tar.gz
-      filenames = glob.glob(u'{0:s}-*.tar.gz'.format(project_name))
-      for filename in filenames:
-        if not filenames_to_ignore.match(filename):
-          logging.info(u'Removing: {0:s}'.format(filename))
-          os.remove(filename)
-
-      # Remove directories of previous versions in the format:
-      # library-{version}
-      filenames = glob.glob(u'{0:s}-*'.format(project_name))
-      for filename in filenames:
-        if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
-          logging.info(u'Removing: {0:s}'.format(filename))
-          shutil.rmtree(filename)
-
-      if self._build_target == 'download':
-        # If available run the script post-download.sh after download.
-        if os.path.exists(u'post-download.sh'):
-          command = u'sh ./post-download.sh {0:s}'.format(source_filename)
-          exit_code = subprocess.call(command, shell=True)
-          if exit_code != 0:
-            logging.error(u'Running: "{0:s}" failed.'.format(command))
-            return False
-
-      else:
-        if not self._BuildLibyalLibrary(
-            source_filename, project_name, project_version):
+      # If available run the script post-download.sh after download.
+      if os.path.exists(u'post-download.sh'):
+        command = u'sh ./post-download.sh {0:s}'.format(source_filename)
+        exit_code = subprocess.call(command, shell=True)
+        if exit_code != 0:
+          logging.error(u'Running: "{0:s}" failed.'.format(command))
           return False
+
+    elif not self._BuildLibyalLibrary(source_helper):
+      return False
 
     return True
 
@@ -1342,7 +1472,12 @@ def Main():
       'build_target', choices=sorted(build_targets), action='store',
       metavar='BUILD_TARGET', default=None, help='The build target.')
 
-  # TODO allow to set msbuild, packagemaker, python path
+  args_parser.add_argument(
+      '-c', '--config', dest='config_file', action='store',
+      metavar='CONFIG_FILE', default=None,
+      help='path of the build configuration file.')
+
+  # TODO allow to set msbuild, python path
 
   options = args_parser.parse_args()
 
@@ -1360,13 +1495,25 @@ def Main():
     print ''
     return False
 
+  if not options.config_file:
+    options.config_file = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'libraries.ini')
+
+  if not os.path.exists(options.config_file):
+    print u'No such config file: {0:s}.'.format(options.config_file)
+    print u''
+    return False
+
+  build_configuration = BuildConfiguration()
+  build_configuration.ReadFromFile(options.config_file)
+
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
   libyal_builder = LibyalBuilder(options.build_target)
 
   result = True
-  for project_name in LIBYAL_LIBRARIES:
+  for project_name in build_configuration.library_names:
     if not libyal_builder.Build(project_name):
       print u'Failed building: {0:s}'.format(project_name)
       result = False
