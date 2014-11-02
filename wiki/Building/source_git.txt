@@ -3,7 +3,15 @@
 
 **If you are not developing it is recommended that you download a source package instead.**
 
-To retrieve the source from the git repository make sure to install: git, aclocal, autoconf, automake, autopoint, gettextize, libtoolize and pkg-config.
+To retrieve the source from the git repository make sure to install:
+* git
+* aclocal
+* autoconf
+* automake
+* autopoint or gettextize
+* libtoolize
+* pkg-config
+${git_build_dependencies}
 
 To download and prepare the source for building run:
 ```

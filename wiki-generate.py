@@ -72,6 +72,7 @@ class ProjectConfiguration(object):
     self.source_package_url = None
 
     self.git_url = None
+    self.git_build_dependencies = None
 
     self.development_main_object = None
     self.development_main_object_filename = None
@@ -147,6 +148,8 @@ class ProjectConfiguration(object):
         config_parser, 'source_package', 'url')
 
     self.git_url = self._GetConfigValue(config_parser, 'git', 'url')
+    self.git_build_dependencies = self._GetConfigValue(
+        config_parser, 'git', 'build_dependencies')
 
     features = self._GetConfigValue(config_parser, 'Project', 'features')
 
@@ -345,6 +348,8 @@ class ProjectConfiguration(object):
 
     project_status = ''
 
+    git_build_dependencies = ''
+
     development_main_object_python_pre_open = ''
 
     tests_profiles = ''
@@ -388,6 +393,11 @@ class ProjectConfiguration(object):
 
     if self.project_status:
       project_status += '-{0:s}'.format(self.project_status)
+
+    if self.supports_git:
+      if self.git_build_dependencies:
+        for dependency in self.git_build_dependencies:
+          git_build_dependencies += '* {0:s}\n'.format(dependency)
 
     if self.supports_tests and self.tests_profiles:
       for profile in self.tests_profiles:
@@ -635,6 +645,7 @@ class ProjectConfiguration(object):
         'source_package_url': self.source_package_url,
 
         'git_url': self.git_url,
+        'git_build_dependencies': git_build_dependencies,
 
         'development_prefix': development_prefix,
         'development_main_object': self.development_main_object,
