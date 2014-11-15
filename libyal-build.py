@@ -509,6 +509,28 @@ class BuildHelper(object):
 class DpkgBuildHelper(BuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
+  # TODO: determine BUILD_DEPENDENCIES from the build files?
+  # TODO: what about flex, byacc?
+  _BUILD_DEPENDENCIES = frozenset([
+      'git',
+      'build-essential',
+      'autotools-dev',
+      'autoconf',
+      'automake',
+      'autopoint',
+      'libtool',
+      'gettext',
+      'debhelper',
+      'fakeroot',
+      'quilt',
+      'zlib1g-dev',
+      'bzip2-dev',
+      'libssl-dev',
+      'libfuse-dev',
+      'python-dev',
+      'python-setuptools',
+  ])
+
   def _BuildPrepare(self, source_directory):
     """Make the necassary preperations before building the dpkg packages.
 
@@ -550,28 +572,38 @@ class DpkgBuildHelper(BuildHelper):
 
     return True
 
+  @classmethod
+  def CheckBuildDependencies(cls):
+    """Checks if the build dependencies are met.
+
+    Returns:
+      A list of package names that need to be installed or an empty list.
+    """
+    missing_packages = []
+    for package_name in cls._BUILD_DEPENDENCIES:
+      if not cls.CheckIsInstalled(package_name):
+        missing_packages.append(package_name)
+
+    return missing_packages
+
+  @classmethod
+  def CheckIsInstalled(cls, package_name):
+    """Checks if a package is installed.
+
+    Args:
+      package_name: the name of the package.
+
+    Returns:
+      A boolean value containing true if the package is installed
+      false otherwise.
+    """
+    command = u'dpkg-query -l {0:s} >/dev/null 2>&1'.format(package_name)
+    exit_code = subprocess.call(command, shell=True)
+    return exit_code == 0
+
 
 class LibyalDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building libyal dpkg packages (.deb)."""
-
-  # TODO: determine BUILD_DEPENDENCIES from spec files?
-  BUILD_DEPENDENCIES = frozenset([
-      'build-essential',
-      'autoconf',
-      'automake',
-      'autopoint',
-      'libtool',
-      'gettext',
-      'debhelper',
-      'fakeroot',
-      'quilt',
-      'autotools-dev',
-      'zlib1g-dev',
-      'libssl-dev',
-      'libfuse-dev',
-      'python-dev',
-      'python-setuptools',
-  ])
 
   def __init__(self):
     """Initializes the build helper."""
@@ -634,14 +666,6 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
       return False
 
     return True
-
-  def CheckBuildEnvironment(self):
-    """Checks if the build environment is sane."""
-    # TODO: allow to pass additional dependencies or determine them
-    # from the dpkg files.
-
-    # TODO: check if build environment has all the dependencies.
-    # sudo dpkg -l <package>
 
   def Clean(self, source_helper):
     """Cleans the dpkg packages in the current directory.
@@ -917,6 +941,27 @@ class LibyalPkgBuildHelper(PkgBuildHelper):
 class RpmBuildHelper(BuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
+  # TODO: determine BUILD_DEPENDENCIES from the build files?
+  _BUILD_DEPENDENCIES = frozenset([
+      'git',
+      'binutils',
+      'autoconf',
+      'automake',
+      'libtool',
+      'gettext-devel',
+      'make',
+      'pkgconfig',
+      'gcc',
+      'flex',
+      'byacc',
+      'zlib-devel',
+      'bzip2-devel',
+      'openssl-devel',
+      'fuse-devel',
+      'rpm-build',
+      'python-devel',
+  ])
+
   def __init__(self):
     """Initializes the build helper."""
     super(RpmBuildHelper, self).__init__()
@@ -1019,6 +1064,35 @@ class RpmBuildHelper(BuildHelper):
     for filename in filenames:
       logging.info(u'Moving: {0:s}'.format(filename))
       shutil.move(filename, '.')
+
+  @classmethod
+  def CheckBuildDependencies(cls):
+    """Checks if the build dependencies are met.
+
+    Returns:
+      A list of package names that need to be installed or an empty list.
+    """
+    missing_packages = []
+    for package_name in cls._BUILD_DEPENDENCIES:
+      if not cls.CheckIsInstalled(package_name):
+        missing_packages.append(package_name)
+
+    return missing_packages
+
+  @classmethod
+  def CheckIsInstalled(cls, package_name):
+    """Checks if a package is installed.
+
+    Args:
+      package_name: the name of the package.
+
+    Returns:
+      A boolean value containing true if the package is installed
+      false otherwise.
+    """
+    command = u'rpm -qi {0:s} >/dev/null 2>&1'.format(package_name)
+    exit_code = subprocess.call(command, shell=True)
+    return exit_code == 0
 
   def Clean(self, source_helper):
     """Cleans the rpmbuild directory.
@@ -1436,8 +1510,6 @@ class LibyalBuilder(object):
       build_helper.Clean(source_helper)
 
       if not os.path.exists(output_filename):
-        # TODO: add call to CheckBuildEnvironment or only do this once?
-
         if not build_helper.Build(source_helper):
           logging.warning((
               u'Build of: {0:s} failed, for more information check '
@@ -1516,6 +1588,12 @@ def Main():
       metavar='BUILD_TARGET', default=None, help='The build target.')
 
   args_parser.add_argument(
+      '--build-directory', '--build_directory', action='store',
+      metavar='DIRECTORY', dest='build_directory', type=unicode,
+      default=u'.', help=(
+          u'The location of the the build directory.'))
+
+  args_parser.add_argument(
       '-c', '--config', dest='config_file', action='store',
       metavar='CONFIG_FILE', default=None,
       help='path of the build configuration file.')
@@ -1553,7 +1631,29 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
+  if options.build_target == 'dpkg':
+    missing_packages = DpkgBuildHelper.CheckBuildDependencies()
+    if missing_packages:
+      print (u'Required build package(s) missing. Please install: '
+             u'{0:s}.'.format(u', '.join(missing_packages)))
+      print u''
+      return False
+
+  elif options.build_target == 'rpm':
+    missing_packages = RpmBuildHelper.CheckBuildDependencies()
+    if missing_packages:
+      print (u'Required build package(s) missing. Please install: '
+             u'{0:s}.'.format(u', '.join(missing_packages)))
+      print u''
+      return False
+
   libyal_builder = LibyalBuilder(options.build_target)
+
+  if not os.path.exists(options.build_directory):
+    os.mkdir(options.build_directory)
+
+  current_working_directory = os.getcwd()
+  os.chdir(options.build_directory)
 
   result = True
   for project_name in build_configuration.library_names:
@@ -1561,6 +1661,8 @@ def Main():
       print u'Failed building: {0:s}'.format(project_name)
       result = False
       break
+
+  os.chdir(current_working_directory)
 
   return result
 
