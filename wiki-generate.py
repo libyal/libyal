@@ -146,8 +146,11 @@ class ProjectConfiguration(object):
     self.project_status = self._GetConfigValue(
         config_parser, 'Project', 'status')
 
-    self.documentation_url = self._GetConfigValue(
-        config_parser, 'documentation', 'url')
+    try:
+      self.documentation_url = self._GetConfigValue(
+          config_parser, 'documentation', 'url')
+    except configparser.NoOptionError:
+      pass
 
     self.source_package_url = self._GetConfigValue(
         config_parser, 'source_package', 'url')
