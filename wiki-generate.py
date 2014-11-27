@@ -69,6 +69,8 @@ class ProjectConfiguration(object):
     self.supports_dokan = False
     self.supports_fuse = False
 
+    self.documentation_url = None
+
     self.source_package_url = None
 
     self.git_url = None
@@ -143,6 +145,9 @@ class ProjectConfiguration(object):
     self.project_name = self._GetConfigValue(config_parser, 'Project', 'name')
     self.project_status = self._GetConfigValue(
         config_parser, 'Project', 'status')
+
+    self.documentation_url = self._GetConfigValue(
+        config_parser, 'documentation', 'url')
 
     self.source_package_url = self._GetConfigValue(
         config_parser, 'source_package', 'url')
@@ -348,6 +353,8 @@ class ProjectConfiguration(object):
 
     project_status = ''
 
+    documentation = ''
+
     git_build_dependencies = ''
 
     development_main_object_python_pre_open = ''
@@ -393,6 +400,10 @@ class ProjectConfiguration(object):
 
     if self.project_status:
       project_status += '-{0:s}'.format(self.project_status)
+
+    if self.documentation_url:
+      documentation = '* [Documentation]({0:s})\n'.format(
+          self.documentation_url)
 
     if self.supports_git:
       if self.git_build_dependencies:
@@ -641,6 +652,8 @@ class ProjectConfiguration(object):
         'python_bindings_name': python_bindings_name,
         'mount_tool_name': mount_tool_name,
         'tools_name': tools_name,
+
+        'documentation': documentation,
 
         'source_package_url': self.source_package_url,
 
