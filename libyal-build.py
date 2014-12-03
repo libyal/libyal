@@ -527,6 +527,8 @@ class LibyalGitRepositoryHelper(SourceHelper):
 class SourcePackageHelper(SourceHelper):
   """Class that manages the source code from a source package."""
 
+  ENCODING = 'utf-8'
+
   def __init__(self, project_name):
     """Initializes the source package helper.
 
@@ -587,6 +589,14 @@ class SourcePackageHelper(SourceHelper):
 
     for tar_info in archive.getmembers():
       filename = getattr(tar_info, 'name', None)
+      try:
+        filename = filename.decode(self.ENCODING)
+      except UnicodeDecodeError:
+        logging.warning(
+            u'Unable to decode filename in tar file: {0:s}'.format(
+                self._source_filename))
+        continue
+
       if filename is None:
         logging.warning(u'Missing filename in tar file: {0:s}'.format(
             self._source_filename))
@@ -1575,16 +1585,19 @@ class LibyalVisualStudioBuildHelper(VisualStudioBuildHelper):
       elif self.version == '2013':
         os.environ['VS90COMNTOOLS'] = os.environ['VS120COMNTOOLS']
 
+      # TODO: append to log file?
       command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
+      # Move the msi to the build directory.
       msi_filename = glob.glob(os.path.join(
-          u'dist', u'{0:s}-*.1.*.msi'.format(python_module_name)))
+          u'dist', u'{0:s}-*.msi'.format(python_module_name)))
 
-      shutil.copy(msi_filename[0], build_directory)
+      logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
+      shutil.move(msi_filename[0], build_directory)
 
       os.chdir(build_directory)
 
@@ -1648,22 +1661,24 @@ class LibyalBuilder(object):
 
       build_helper = LibyalVisualStudioBuildHelper(self._build_target[2:])
 
-    if build_helper:
-      output_filename = build_helper.GetOutputFilename(source_helper)
+    if not build_helper:
+      return False
 
-      build_helper.Clean(source_helper)
+    output_filename = build_helper.GetOutputFilename(source_helper)
 
-      if not os.path.exists(output_filename):
-        if not build_helper.Build(source_helper):
-          logging.warning((
-              u'Build of: {0:s} failed, for more information check '
-              u'{1:s}').format(
-                  source_helper.project_name, build_helper.LOG_FILENAME))
-          return False
+    build_helper.Clean(source_helper)
 
-      if os.path.exists(build_helper.LOG_FILENAME):
-        logging.info(u'Removing: {0:s}'.format(build_helper.LOG_FILENAME))
-        os.remove(build_helper.LOG_FILENAME)
+    if not os.path.exists(output_filename):
+      if not build_helper.Build(source_helper):
+        logging.warning((
+            u'Build of: {0:s} failed, for more information check '
+            u'{1:s}').format(
+                source_helper.project_name, build_helper.LOG_FILENAME))
+        return False
+
+    if os.path.exists(build_helper.LOG_FILENAME):
+      logging.info(u'Removing: {0:s}'.format(build_helper.LOG_FILENAME))
+      os.remove(build_helper.LOG_FILENAME)
 
     return True
 
