@@ -88,6 +88,7 @@ class ProjectConfiguration(object):
     self.troubleshooting_example = None
 
     self.tools_names = None
+    self.tools_directory = None
 
     self.cygwin_build_dependencies = None
     self.cygwin_dll_dependencies = None
@@ -422,8 +423,8 @@ class ProjectConfiguration(object):
 
     if self.supports_gcc or self.supports_mingw or self.supports_msvscpp:
       building_table_of_contents += (
-          'The {0:s} source code can be build with different compilers:\n').format(
-              self.project_name)
+          'The {0:s} source code can be build with different '
+          'compilers:\n').format(self.project_name)
 
     if self.supports_gcc:
       building_table_of_contents += '* Using GNU Compiler Collection (GCC)\n'
@@ -462,8 +463,8 @@ class ProjectConfiguration(object):
               '```\n')
 
           for name in self.tools_names:
-              cygwin_executables += (
-                  '{0:s}/.libs/{1:s}.exe\n'.format(self.tools_directory, name))
+            cygwin_executables += (
+                '{0:s}/.libs/{1:s}.exe\n'.format(self.tools_directory, name))
 
           cygwin_executables += (
               '```\n')
@@ -495,8 +496,8 @@ class ProjectConfiguration(object):
             '```\n')
 
         for name in self.tools_names:
-            mingw_executables += (
-                '{0:s}/.libs/{1:s}.exe\n'.format(self.tools_directory, name))
+          mingw_executables += (
+              '{0:s}/.libs/{1:s}.exe\n'.format(self.tools_directory, name))
 
         mingw_executables += (
             '```\n'
@@ -611,13 +612,13 @@ class ProjectConfiguration(object):
 
       if self.supports_python:
         rpm_filenames += (
-           '~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>.rpm\n').format(
-               self.project_name)
+           '~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>'
+           '.rpm\n').format(self.project_name)
 
       if self.supports_tools:
         rpm_filenames += (
-           '~/rpmbuild/RPMS/<arch>/{0:s}-tools-<version>-1.<arch>.rpm\n').format(
-               self.project_name)
+           '~/rpmbuild/RPMS/<arch>/{0:s}-tools-<version>-1.<arch>'
+           '.rpm\n').format(self.project_name)
 
       rpm_filenames += (
          '~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm').format(
@@ -702,7 +703,7 @@ class ProjectConfiguration(object):
         'rpm_filenames': rpm_filenames,
         'rpm_rename_source_package': rpm_rename_source_package,
 
-        'mount_tool_additional_arguments': self.mount_tool_additional_arguments,
+        'mount_tool_additional_arguments': mount_tool_additional_arguments,
         'mount_tool_missing_backend_error': self.mount_tool_missing_backend_error,
         'mount_tool_mount_point': self.mount_tool_mount_point,
         'mount_tool_mounted_description': self.mount_tool_mounted_description,
@@ -993,7 +994,8 @@ class MountingPageGenerator(WikiPageGenerator):
 
       if project_configuration.mount_tool_source_type == 'volume':
         self._GenerateSection(
-            project_configuration, 'mounting_volume_loopback.txt', output_writer)
+            project_configuration, 'mounting_volume_loopback.txt',
+            output_writer)
         self._GenerateSection(
             project_configuration, 'obtaining_volume_offset.txt', output_writer)
 
@@ -1003,11 +1005,13 @@ class MountingPageGenerator(WikiPageGenerator):
       if project_configuration.supports_dokan:
         if project_configuration.mount_tool_source_type == 'image':
           self._GenerateSection(
-              project_configuration, 'mounting_image_windows.txt', output_writer)
+              project_configuration, 'mounting_image_windows.txt',
+              output_writer)
 
         elif project_configuration.mount_tool_source_type == 'volume':
           self._GenerateSection(
-              project_configuration, 'mounting_volume_windows.txt', output_writer)
+              project_configuration, 'mounting_volume_windows.txt',
+              output_writer)
 
       self._GenerateSection(
           project_configuration, 'unmounting.txt', output_writer)
@@ -1126,6 +1130,7 @@ class FileWriter(object):
       name: the name of the output.
     """
     super(FileWriter, self).__init__()
+    self._file_object = None
     self._name = name
 
   def Open(self):
