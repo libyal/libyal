@@ -1396,7 +1396,7 @@ class LibyalPkgBuildHelper(PkgBuildHelper):
       shutil.copy(os.path.join(source_directory, u'NEWS'), share_doc_path)
       shutil.copy(os.path.join(source_directory, u'README'), share_doc_path)
 
-      project_identifier = u'com.google.code.p.{0:s}'.format(
+      project_identifier = u'com.github.libyal.{0:s}'.format(
           source_helper.project_name)
       if not self._BuildPkg(
           source_directory, project_identifier, source_helper.project_version,

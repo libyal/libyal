@@ -153,7 +153,8 @@ def Main():
       if not package_name:
         continue
 
-      if package_name.startswith(u'com.google.code.p.'):
+      if (package_name.startswith(u'com.github.libyal.') or
+          package_name.startswith(u'com.google.code.p.')):
         # Detect the PackageMaker naming convention.
         if package_name.endswith(u'.pkg'):
           name, _, _ = package_name[18:].partition(u'.')
