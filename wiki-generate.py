@@ -28,7 +28,7 @@ import sys
 try:
   import ConfigParser as configparser
 except ImportError:
-  import configparser
+  import configparser  # pylint: disable=import-error
 
 
 class ConfigError(Exception):
@@ -140,6 +140,8 @@ class ProjectConfiguration(object):
     Args:
       filename: the configuration filename.
     """
+    # TODO: replace by:
+    # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
     config_parser.read([filename])
 

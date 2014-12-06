@@ -36,7 +36,13 @@ import urllib2
 try:
   import ConfigParser as configparser
 except ImportError:
-  import configparser
+  import configparser  # pylint: disable=import-error
+
+
+# Since os.path.abspath() uses the current working directory (cwd)
+# os.path.abspath(__file__) will point to a different location if
+# cwd has been changed. Hence we preserve the absolute location of __file__.
+__file__ = os.path.abspath(__file__)
 
 
 LIBYAL_LIBRARIES_CORE = frozenset([
@@ -105,6 +111,8 @@ class BuildConfiguration(object):
     Args:
       filename: the configuration filename.
     """
+    # TODO: replace by:
+    # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
     config_parser.read([filename])
 
@@ -201,6 +209,89 @@ class DownloadHelper(object):
     Returns:
       The download URL of the project or None on error.
     """
+
+
+class GithubReleasesDownloadHelper(DownloadHelper):
+  """Class that helps in downloading a project with GitHub releases."""
+
+  def __init__(self, organization):
+    """Initializes the download helper.
+
+    Args:
+      organization: the github organization or user name.
+    """
+    super(GithubReleasesDownloadHelper, self).__init__()
+    self.organization = organization
+
+  def GetLatestVersion(self, project_name):
+    """Retrieves the latest version number for a given project name.
+
+    Args:
+      project_name: the name of the project.
+
+    Returns:
+      The latest version number or 0 on error.
+    """
+    download_url = u'https://github.com/{0:s}/{1:s}/releases'.format(
+        self.organization, project_name)
+
+    page_content = self.DownloadPageContent(download_url)
+    if not page_content:
+      return 0
+
+    # The format of the project download URL is:
+    # /{organization}/{project name}/releases/download/{git tag}/
+    # {project name}{status-}{version}.tar.gz
+    # Note that the status is optional and will be: beta, alpha or experimental.
+    expression_string = (
+        u'/{0:s}/{1:s}/releases/download/[^/]*/{1:s}-[a-z-]*([0-9]+)'
+        u'[.]tar[.]gz').format(self.organization, project_name)
+    matches = re.findall(expression_string, page_content)
+
+    if not matches:
+      return 0
+
+    return int(max(matches))
+
+  def GetDownloadUrl(self, project_name, project_version):
+    """Retrieves the download URL for a given project name and version.
+
+    Args:
+      project_name: the name of the project.
+      project_version: the version of the project.
+
+    Returns:
+      The download URL of the project or None on error.
+    """
+    download_url = u'https://github.com/{0:s}/{1:s}/releases'.format(
+        self.organization, project_name)
+
+    page_content = self.DownloadPageContent(download_url)
+    if not page_content:
+      return
+
+    # The format of the project download URL is:
+    # /{organization}/{project name}/releases/download/{git tag}/
+    # {project name}{status-}{version}.tar.gz
+    # Note that the status is optional and will be: beta, alpha or experimental.
+    expression_string = (
+        u'/{0:s}/{1:s}/releases/download/[^/]*/{1:s}-[a-z-]*{2!s}'
+        u'[.]tar[.]gz').format(self.organization, project_name, project_version)
+    matches = re.findall(expression_string, page_content)
+
+    if len(matches) != 1:
+      # Try finding a match without the status in case the project provides
+      # multiple versions with a different status.
+      expression_string = (
+          u'/{0:s}/{1:s}/releases/download/[^/]*/{1:s}-*{2!s}'
+          u'[.]tar[.]gz').format(
+              self.organization, project_name, project_version)
+      matches = re.findall(expression_string, page_content)
+
+    if not matches or len(matches) != 1:
+      return
+
+    return u'https://github.com{0:s}'.format(matches[0])
 
 
 class GoogleDriveDownloadHelper(DownloadHelper):
@@ -307,6 +398,8 @@ class LibyalGitHubDownloadHelper(DownloadHelper):
     if not page_content:
       return
 
+    # TODO: replace by:
+    # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
     config_parser.readfp(io.BytesIO(page_content))
 
@@ -378,77 +471,12 @@ class LibyalGoogleDriveDownloadHelper(GoogleDriveDownloadHelper):
     return self._google_drive_url
 
 
-class LibyalGithubReleasesDownloadHelper(DownloadHelper):
+class LibyalGithubReleasesDownloadHelper(GithubReleasesDownloadHelper):
   """Class that helps in downloading a libyal project with GitHub releases."""
 
-  def GetLatestVersion(self, project_name):
-    """Retrieves the latest version number for a given project name.
-
-    Args:
-      project_name: the name of the project.
-
-    Returns:
-      The latest version number or 0 on error.
-    """
-    download_url = (
-        u'https://github.com/libyal/{0:s}/releases').format(project_name)
-
-    page_content = self.DownloadPageContent(download_url)
-    if not page_content:
-      return 0
-
-    # The format of the project download URL is:
-    # /libyal/{project name}/releases/download/{git tag}/
-    # {project name}{status-}{version}.tar.gz
-    # Note that the status is optional and will be: beta, alpha or experimental.
-    expression_string = (
-        u'/libyal/{0:s}/releases/download/[^/]*/{0:s}-[a-z-]*([0-9]+)'
-        u'[.]tar[.]gz').format(project_name)
-    matches = re.findall(expression_string, page_content)
-
-    if not matches:
-      return 0
-
-    return int(max(matches))
-
-  def GetDownloadUrl(self, project_name, project_version):
-    """Retrieves the download URL for a given project name and version.
-
-    Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
-
-    Returns:
-      The download URL of the project or None on error.
-    """
-    download_url = (
-        u'https://github.com/libyal/{0:s}/releases').format(project_name)
-
-    page_content = self.DownloadPageContent(download_url)
-    if not page_content:
-      return
-
-    # The format of the project download URL is:
-    # /libyal/{project name}/releases/download/{git tag}/
-    # {project name}{status-}{version}.tar.gz
-    # Note that the status is optional and will be: beta, alpha or experimental.
-    expression_string = (
-        u'/libyal/{0:s}/releases/download/[^/]*/{0:s}-[a-z-]*{1!s}'
-        u'[.]tar[.]gz').format(project_name, project_version)
-    matches = re.findall(expression_string, page_content)
-
-    if len(matches) != 1:
-      # Try finding a match without the status in case the project provides
-      # multiple versions with a different status.
-      expression_string = (
-          u'/libyal/{0:s}/releases/download/[^/]*/{0:s}-*{1!s}'
-          u'[.]tar[.]gz').format(project_name, project_version)
-      matches = re.findall(expression_string, page_content)
-
-    if not matches or len(matches) != 1:
-      return
-
-    return u'https://github.com{0:s}'.format(matches[0])
+  def __init__(self):
+    """Initializes the download helper."""
+    super(LibyalGithubReleasesDownloadHelper, self).__init__('libyal')
 
 
 class SourceHelper(object):
@@ -895,6 +923,295 @@ class MakeBuildHelper(BuildHelper):
       return False
 
     return True
+
+
+class MsiBuildHelper(BuildHelper):
+  """Class that helps in building Microsoft Installer packages (.msi)."""
+
+  LOG_FILENAME = u'msbuild.log'
+
+  def __init__(self):
+    """Initializes the build helper."""
+    super(MsiBuildHelper, self).__init__()
+
+    if self.architecture == 'x86':
+      self.architecture = 'win32'
+    elif self.architecture == 'AMD64':
+      self.architecture = 'win-amd64'
+
+
+class LibyalMsiBuildHelper(MsiBuildHelper):
+  """Class that helps in building Microsoft Installer packages (.msi)."""
+
+  def __init__(self):
+    """Initializes the build helper.
+
+    Raises:
+      RuntimeError: if the Visual Studio version could be determined or
+                    msvscpp-convert.py could not be found.
+    """
+    super(LibyalMsiBuildHelper, self).__init__()
+
+    if os.environ['VS90COMNTOOLS']:
+      self.version = '2008'
+
+    elif not os.environ['VS100COMNTOOLS']:
+      self.version = '2010'
+
+    elif not os.environ['VS110COMNTOOLS']:
+      self.version = '2012'
+
+    elif not os.environ['VS120COMNTOOLS']:
+      self.version = '2013'
+
+    else:
+      raise RuntimeError(u'Unable to determine Visual Studio version.')
+
+    if self.version != '2008':
+      self._msvscpp_convert = os.path.join(
+          os.path.dirname(__file__), u'msvscpp-convert.py')
+
+      if not os.path.exists(self._msvscpp_convert):
+        raise RuntimeError(u'Unable to find msvscpp-convert.py')
+
+  def _BuildPrepare(self, source_directory):
+    """Prepares the source for building with Visual Studio.
+
+    Args:
+      source_directory: the name of the source directory.
+    """
+    # For the vs2008 build make sure the binary is XP compatible,
+    # by setting WINVER to 0x0501. For the vs2010 build WINVER is
+    # set to 0x0600 (Windows Vista).
+
+    # WINVER is set in common\config_winapi.h or common\config_msc.h.
+    config_filename = os.path.join(
+        source_directory, u'common', u'config_winapi.h')
+
+    # If the WINAPI configuration file is not available use
+    # the MSC compiler configuration file instead.
+    if not os.path.exists(config_filename):
+      config_filename = os.path.join(
+          source_directory, u'common', u'config_msc.h')
+
+    # Add a line to the config file that sets WINVER.
+    parsing_mode = 0
+
+    for line in fileinput.input(config_filename, inplace=1):
+      # Remove trailing whitespace and end-of-line characters.
+      line = line.rstrip()
+
+      if parsing_mode != 2 or line:
+        if parsing_mode == 1:
+          if self.version == '2008':
+            if not line.startswith('#define WINVER 0x0501'):
+              print '#define WINVER 0x0501'
+              print ''
+
+          else:
+            if not line.startswith('#define WINVER 0x0600'):
+              print '#define WINVER 0x0600'
+              print ''
+
+          parsing_mode = 2
+
+        elif line.startswith('#define _CONFIG_'):
+          parsing_mode = 1
+
+      print line
+
+  def _ConvertSolutionFiles(self, source_directory):
+    """Converts the Visual Studio solution and project files.
+
+    Args:
+      source_directory: the name of the source directory.
+    """
+    os.chdir(source_directory)
+
+    solution_filenames = glob.glob(os.path.join(u'msvscpp', u'*.sln'))
+    if len(solution_filenames) != 1:
+      logging.error(u'Unable to find Visual Studio solution file')
+      return False
+
+    solution_filename = solution_filenames[0]
+
+    if not os.path.exists(u'vs2008'):
+      command = u'{0:s} {1:s} --to {2:s} {3:s}'.format(
+          sys.executable, self._msvscpp_convert, self.version,
+          solution_filename)
+      exit_code = subprocess.call(command, shell=False)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+      # Note that setup.py needs the Visual Studio solution directory
+      # to be named: msvscpp. So replace the Visual Studio 2008 msvscpp
+      # solution directory with the converted one.
+      os.rename(u'msvscpp', u'vs2008')
+      os.rename(u'vs{0:s}'.format(self.version), u'msvscpp')
+
+    os.chdir(u'..')
+
+  def Build(self, source_helper):
+    """Builds using Visual Studio.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    source_filename = source_helper.Download()
+    logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
+        source_filename, self.version))
+
+    source_directory = source_helper.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(source_filename))
+      return False
+
+    # Search common locations for MSBuild.exe
+    if self.version == '2008':
+      msbuild = u'{0:s}:{1:s}{2:s}'.format(
+          u'C', os.sep, os.path.join(
+              u'Windows', u'Microsoft.NET', u'Framework', u'v3.5',
+              u'MSBuild.exe'))
+
+    # Note that MSBuild in .NET 3.5 does not support vs2010 solution files
+    # and MSBuild in .NET 4.0 is needed instead.
+    elif self.version in ['2010', '2012', '2013']:
+      msbuild = u'{0:s}:{1:s}{2:s}'.format(
+          u'C', os.sep, os.path.join(
+              u'Windows', u'Microsoft.NET', u'Framework', u'v4.0.30319',
+              u'MSBuild.exe'))
+
+    if not os.path.exists(msbuild):
+      logging.error(u'Unable to find MSBuild.exe')
+      return False
+
+    if self.version == '2008':
+      if not os.environ['VS90COMNTOOLS']:
+        logging.error(u'Missing VS90COMNTOOLS environment variable.')
+        return False
+
+    elif self.version == '2010':
+      if not os.environ['VS100COMNTOOLS']:
+        logging.error(u'Missing VS100COMNTOOLS environment variable.')
+        return False
+
+    elif self.version == '2012':
+      if not os.environ['VS110COMNTOOLS']:
+        logging.error(u'Missing VS110COMNTOOLS environment variable.')
+        return False
+
+    elif self.version == '2013':
+      if not os.environ['VS120COMNTOOLS']:
+        logging.error(u'Missing VS120COMNTOOLS environment variable.')
+        return False
+
+    # For the Visual Studio builds later than 2008 the convert the 2008
+    # solution and project files need to be converted to the newer version.
+    if self.version in ['2010', '2012', '2013']:
+      self._ConvertSolutionFiles(source_directory)
+
+    self._BuildPrepare(source_directory)
+
+    # Detect architecture based on Visual Studion Platform environment
+    # variable. If not set the platform with default to Win32.
+    msvscpp_platform = os.environ.get('Platform', None)
+    if not msvscpp_platform:
+      msvscpp_platform = os.environ.get('TARGET_CPU', None)
+
+    if not msvscpp_platform or msvscpp_platform == 'x86':
+      msvscpp_platform = 'Win32'
+
+    if msvscpp_platform not in ['Win32', 'x64']:
+      logging.error(u'Unsupported build platform: {0:s}'.format(
+          msvscpp_platform))
+      return False
+
+    if self.version == '2008' and msvscpp_platform == 'x64':
+      logging.error(u'Unsupported 64-build platform for vs2008.')
+      return False
+
+    solution_filenames = glob.glob(os.path.join(
+        source_directory, u'msvscpp', u'*.sln'))
+    if len(solution_filenames) != 1:
+      logging.error(u'Unable to find Visual Studio solution file')
+      return False
+
+    solution_filename = solution_filenames[0]
+
+    command = (
+        u'{0:s} /p:Configuration=Release /p:Platform={1:s} /noconsolelogger '
+        u'/fileLogger /maxcpucount {2:s}').format(
+            msbuild, msvscpp_platform, solution_filename)
+    exit_code = subprocess.call(command, shell=False)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    python_module_name, _, _ = source_directory.partition(u'-')
+    python_module_name = u'py{0:s}'.format(python_module_name[3:])
+    python_module_directory = os.path.join(
+        source_directory, python_module_name)
+    python_module_dist_directory = os.path.join(
+        python_module_directory, u'dist')
+
+    if not os.path.exists(python_module_dist_directory):
+      build_directory = os.path.join(u'..', u'..')
+
+      os.chdir(python_module_directory)
+
+      # Setup.py uses VS90COMNTOOLS which is vs2008 specific
+      # so we need to set it for the other Visual Studio versions.
+      if self.version == '2010':
+        os.environ['VS90COMNTOOLS'] = os.environ['VS100COMNTOOLS']
+
+      elif self.version == '2012':
+        os.environ['VS90COMNTOOLS'] = os.environ['VS110COMNTOOLS']
+
+      elif self.version == '2013':
+        os.environ['VS90COMNTOOLS'] = os.environ['VS120COMNTOOLS']
+
+      # TODO: append to log file?
+      command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
+      exit_code = subprocess.call(command, shell=False)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+      # Move the msi to the build directory.
+      msi_filename = glob.glob(os.path.join(
+          u'dist', u'{0:s}-*.msi'.format(python_module_name)))
+
+      logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
+      shutil.move(msi_filename[0], build_directory)
+
+      os.chdir(build_directory)
+
+    return True
+
+  def Clean(self, unused_source_helper):
+    """Cleans the Visual Studio build directory.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+    """
+
+  def GetOutputFilename(self, source_helper):
+    """Retrieves the filename of one of the resulting files.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+
+    Returns:
+      A filename of one of the resulting build directory.
+    """
+    source_directory = u'{0:s}-{1!s}'.format(
+        source_helper.project_name, source_helper.project_version)
+    return os.path.join(source_directory, u'msvscpp', u'Release')
 
 
 class PkgBuildHelper(BuildHelper):
@@ -1360,270 +1677,6 @@ class LibyalRpmBuildHelper(RpmBuildHelper):
     return build_successful
 
 
-class VisualStudioBuildHelper(BuildHelper):
-  """Class that helps in building using Visual Studio."""
-
-  LOG_FILENAME = u'msbuild.log'
-
-  def __init__(self, version='2008'):
-    """Initializes the build helper.
-
-    Args:
-      version: the version of Visual Studio.
-    """
-    super(VisualStudioBuildHelper, self).__init__()
-    self.version = version
-
-
-class LibyalVisualStudioBuildHelper(VisualStudioBuildHelper):
-  """Class that helps in building using Visual Studio."""
-
-  def _BuildPrepare(self, source_directory):
-    """Prepares the source for building with Visual Studio.
-
-    Args:
-      source_directory: the name of the source directory.
-    """
-    # For the vs2008 build make sure the binary is XP compatible,
-    # by setting WINVER to 0x0501. For the vs2010 build WINVER is
-    # set to 0x0600 (Windows Vista).
-
-    # WINVER is set in common\config_winapi.h or common\config_msc.h.
-    config_filename = os.path.join(
-        source_directory, u'common', u'config_winapi.h')
-
-    # If the WINAPI configuration file is not available use
-    # the MSC compiler configuration file instead.
-    if not os.path.exists(config_filename):
-      config_filename = os.path.join(
-          source_directory, u'common', u'config_msc.h')
-
-    # Add a line to the config file that sets WINVER.
-    parsing_mode = 0
-
-    for line in fileinput.input(config_filename, inplace=1):
-      # Remove trailing whitespace and end-of-line characters.
-      line = line.rstrip()
-
-      if parsing_mode != 2 or line:
-        if parsing_mode == 1:
-          if self.version == '2008':
-            if not line.startswith('#define WINVER 0x0501'):
-              print '#define WINVER 0x0501'
-              print ''
-
-          else:
-            if not line.startswith('#define WINVER 0x0600'):
-              print '#define WINVER 0x0600'
-              print ''
-
-          parsing_mode = 2
-
-        elif line.startswith('#define _CONFIG_'):
-          parsing_mode = 1
-
-      print line
-
-  def _ConvertSolutionFiles(self, source_directory):
-    """Converts the Visual Studio solution and project files.
-
-    Args:
-      source_directory: the name of the source directory.
-    """
-    msvscpp_convert = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), u'msvscpp-convert.py')
-
-    if not os.path.exists(msvscpp_convert):
-      logging.error(u'Unable to find msvscpp-convert.py')
-      return False
-
-    os.chdir(source_directory)
-
-    solution_filenames = glob.glob(os.path.join(u'msvscpp', u'*.sln'))
-    if len(solution_filenames) != 1:
-      logging.error(u'Unable to find Visual Studio solution file')
-      return False
-
-    solution_filename = solution_filenames[0]
-
-    if not os.path.exists(u'vs2008'):
-      command = u'{0:s} {1:s} --to {2:s} {3:s}'.format(
-          sys.executable, msvscpp_convert, self.version, solution_filename)
-      exit_code = subprocess.call(command, shell=False)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
-
-      # Note that setup.py needs the Visual Studio solution directory
-      # to be named: msvscpp. So replace the Visual Studio 2008 msvscpp
-      # solution directory with the converted one.
-      os.rename(u'msvscpp', u'vs2008')
-      os.rename(u'vs{0:s}'.format(self.version), u'msvscpp')
-
-    os.chdir(u'..')
-
-  def Build(self, source_helper):
-    """Builds using Visual Studio.
-
-    Args:
-      source_helper: the source helper (instance of SourceHelper).
-
-    Returns:
-      True if the build was successful, False otherwise.
-    """
-    source_filename = source_helper.Download()
-    logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
-        source_filename, self.version))
-
-    source_directory = source_helper.Create()
-    if not source_directory:
-      logging.error(
-          u'Extraction of source package: {0:s} failed'.format(source_filename))
-      return False
-
-    # Search common locations for MSBuild.exe
-    if self.version == '2008':
-      msbuild = u'{0:s}:{1:s}{2:s}'.format(
-          u'C', os.sep, os.path.join(
-              u'Windows', u'Microsoft.NET', u'Framework', u'v3.5',
-              u'MSBuild.exe'))
-
-    # Note that MSBuild in .NET 3.5 does not support vs2010 solution files
-    # and MSBuild in .NET 4.0 is needed instead.
-    elif self.version in ['2010', '2012', '2013']:
-      msbuild = u'{0:s}:{1:s}{2:s}'.format(
-          u'C', os.sep, os.path.join(
-              u'Windows', u'Microsoft.NET', u'Framework', u'v4.0.30319',
-              u'MSBuild.exe'))
-
-    if not os.path.exists(msbuild):
-      logging.error(u'Unable to find MSBuild.exe')
-      return False
-
-    if self.version == '2008':
-      if not os.environ['VS90COMNTOOLS']:
-        logging.error(u'Missing VS90COMNTOOLS environment variable.')
-        return False
-
-    elif self.version == '2010':
-      if not os.environ['VS100COMNTOOLS']:
-        logging.error(u'Missing VS100COMNTOOLS environment variable.')
-        return False
-
-    elif self.version == '2012':
-      if not os.environ['VS110COMNTOOLS']:
-        logging.error(u'Missing VS110COMNTOOLS environment variable.')
-        return False
-
-    elif self.version == '2013':
-      if not os.environ['VS120COMNTOOLS']:
-        logging.error(u'Missing VS120COMNTOOLS environment variable.')
-        return False
-
-    # For the Visual Studio builds later than 2008 the convert the 2008
-    # solution and project files need to be converted to the newer version.
-    if self.version in ['2010', '2012', '2013']:
-      self._ConvertSolutionFiles(source_directory)
-
-    self._BuildPrepare(source_directory)
-
-    # Detect architecture based on Visual Studion Platform environment
-    # variable. If not set the platform with default to Win32.
-    msvscpp_platform = os.environ.get('Platform', None)
-    if not msvscpp_platform:
-      msvscpp_platform = os.environ.get('TARGET_CPU', None)
-
-    if not msvscpp_platform or msvscpp_platform == 'x86':
-      msvscpp_platform = 'Win32'
-
-    if msvscpp_platform not in ['Win32', 'x64']:
-      logging.error(u'Unsupported build platform: {0:s}'.format(
-          msvscpp_platform))
-      return False
-
-    if self.version == '2008' and msvscpp_platform == 'x64':
-      logging.error(u'Unsupported 64-build platform for vs2008.')
-      return False
-
-    solution_filenames = glob.glob(os.path.join(
-        source_directory, u'msvscpp', u'*.sln'))
-    if len(solution_filenames) != 1:
-      logging.error(u'Unable to find Visual Studio solution file')
-      return False
-
-    solution_filename = solution_filenames[0]
-
-    command = (
-        u'{0:s} /p:Configuration=Release /p:Platform={1:s} /noconsolelogger '
-        u'/fileLogger /maxcpucount {2:s}').format(
-            msbuild, msvscpp_platform, solution_filename)
-    exit_code = subprocess.call(command, shell=False)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      return False
-
-    python_module_name, _, _ = source_directory.partition(u'-')
-    python_module_name = u'py{0:s}'.format(python_module_name[3:])
-    python_module_directory = os.path.join(
-        source_directory, python_module_name)
-    python_module_dist_directory = os.path.join(
-        python_module_directory, u'dist')
-
-    if not os.path.exists(python_module_dist_directory):
-      build_directory = os.path.join(u'..', u'..')
-
-      os.chdir(python_module_directory)
-
-      # Setup.py uses VS90COMNTOOLS which is vs2008 specific
-      # so we need to set it for the other Visual Studio versions.
-      if self.version == '2010':
-        os.environ['VS90COMNTOOLS'] = os.environ['VS100COMNTOOLS']
-
-      elif self.version == '2012':
-        os.environ['VS90COMNTOOLS'] = os.environ['VS110COMNTOOLS']
-
-      elif self.version == '2013':
-        os.environ['VS90COMNTOOLS'] = os.environ['VS120COMNTOOLS']
-
-      # TODO: append to log file?
-      command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
-      exit_code = subprocess.call(command, shell=False)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
-
-      # Move the msi to the build directory.
-      msi_filename = glob.glob(os.path.join(
-          u'dist', u'{0:s}-*.msi'.format(python_module_name)))
-
-      logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
-      shutil.move(msi_filename[0], build_directory)
-
-      os.chdir(build_directory)
-
-    return True
-
-  def Clean(self, unused_source_helper):
-    """Cleans the Visual Studio build directory.
-
-    Args:
-      source_helper: the source helper (instance of SourceHelper).
-    """
-
-  def GetOutputFilename(self, source_helper):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper: the source helper (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting build directory.
-    """
-    source_directory = u'{0:s}-{1!s}'.format(
-        source_helper.project_name, source_helper.project_version)
-    return os.path.join(source_directory, u'msvscpp', u'Release')
-
-
 class LibyalBuilder(object):
   """Class that helps in building libyal libaries."""
 
@@ -1659,7 +1712,7 @@ class LibyalBuilder(object):
       if self._build_target == 'vs2013':
         logging.warning(u'Untested experimental build target: vs2013.')
 
-      build_helper = LibyalVisualStudioBuildHelper(self._build_target[2:])
+      build_helper = LibyalMsiBuildHelper()
 
     if not build_helper:
       return False
@@ -1711,9 +1764,10 @@ class LibyalBuilder(object):
 
       source_helper.Clean()
 
-      source_directory = source_helper.Create()
-
       # TODO: build source.
+      # source_directory = source_helper.Create()
+      _ = source_helper.Create()
+
       build_helper = MakeBuildHelper()
 
       if not build_helper.Build(source_helper):
@@ -1777,7 +1831,7 @@ def Main():
 
   if not options.config_file:
     options.config_file = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), 'libraries.ini')
+        os.path.dirname(__file__), 'libraries.ini')
 
   if not os.path.exists(options.config_file):
     print u'No such config file: {0:s}.'.format(options.config_file)
