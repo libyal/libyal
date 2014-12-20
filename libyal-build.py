@@ -952,16 +952,16 @@ class LibyalMsiBuildHelper(MsiBuildHelper):
     """
     super(LibyalMsiBuildHelper, self).__init__()
 
-    if os.environ['VS90COMNTOOLS']:
+    if 'VS90COMNTOOLS' in os.environ:
       self.version = '2008'
 
-    elif not os.environ['VS100COMNTOOLS']:
+    elif 'VS100COMNTOOLS' in os.environ:
       self.version = '2010'
 
-    elif not os.environ['VS110COMNTOOLS']:
+    elif 'VS110COMNTOOLS' in os.environ:
       self.version = '2012'
 
-    elif not os.environ['VS120COMNTOOLS']:
+    elif 'VS120COMNTOOLS' in os.environ:
       self.version = '2013'
 
     else:
