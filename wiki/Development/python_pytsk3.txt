@@ -4,28 +4,28 @@ import ${python_bindings_name}
 import pytsk3
 
 class ${development_prefix}_Img_Info(pytsk3.Img_Info):
-  def __init__(self, ${development_main_object}):
-    self.${development_main_object} = ${development_main_object}
-    super(${development_prefix}_Img_Info, self).__init__()
+  def __init__(self, ${development_prefix}_${development_main_object}):
+    self._${development_prefix}_${development_main_object} = ${development_prefix}_${development_main_object}
+    super(${development_prefix}_Img_Info, self).__init__(
+        url='', type=pytsk3.TSK_IMG_TYPE_EXTERNAL)
 
   def close(self):
-    self.${development_main_object}.close()
+    self._${development_prefix}_${development_main_object}.close()
 
   def read(self, offset, size):
-    self.${development_main_object}.seek(offset)
-    return self.{development_main_object}.read(size)
+    self._${development_prefix}_${development_main_object}.seek(offset)
+    return self._${development_prefix}_${development_main_object}.read(size)
 
   def get_size(self):
-    return self.{development_main_object}.get_size()
+    return self._${development_prefix}_${development_main_object}.get_${development_main_object_size}()
 
 
 ${development_prefix}_${development_main_object} = ${python_bindings_name}.${development_main_object}()
-
-${development_main_object_python_pre_open}
+${development_main_object_pre_open_python}
 ${development_prefix}_${development_main_object}.open("${development_main_object_filename}")
 
 img_info = ${development_prefix}_Img_Info(${development_prefix}_${development_main_object})
 
-fs_info = pytsk3.FS_Info(img_info, offset=63*512)
+fs_info = pytsk3.FS_Info(img_info, offset=63 * 512)
 ```
 

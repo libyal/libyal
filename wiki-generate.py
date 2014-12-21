@@ -78,7 +78,9 @@ class ProjectConfiguration(object):
 
     self.development_main_object = None
     self.development_main_object_filename = None
-    self.development_main_object_python_pre_open = None
+    self.development_main_object_pre_open_python = None
+    self.development_main_object_size = None
+    self.development_pytsk3 = False
 
     self.tests_supports_valgrind = None
     self.tests_profiles = None
@@ -184,6 +186,14 @@ class ProjectConfiguration(object):
     self.supports_fuse = 'fuse' in features
 
     if config_parser.has_section('development'):
+      try:
+        features = self._GetConfigValue(
+            config_parser, 'development', 'features')
+
+        self.development_pytsk3 = 'pytsk3' in features
+      except configparser.NoOptionError:
+        pass
+
       self.development_main_object = self._GetConfigValue(
           config_parser, 'development', 'main_object')
 
@@ -191,8 +201,14 @@ class ProjectConfiguration(object):
           config_parser, 'development', 'main_object_filename')
 
       try:
-        self.development_main_object_python_pre_open = self._GetConfigValue(
-            config_parser, 'development', 'main_object_python_pre_open')
+        self.development_main_object_size = self._GetConfigValue(
+            config_parser, 'development', 'main_object_size')
+      except configparser.NoOptionError:
+        pass
+
+      try:
+        self.development_main_object_pre_open_python = self._GetConfigValue(
+            config_parser, 'development', 'main_object_pre_open_python')
       except configparser.NoOptionError:
         pass
 
@@ -363,7 +379,7 @@ class ProjectConfiguration(object):
 
     git_build_dependencies = ''
 
-    development_main_object_python_pre_open = ''
+    development_main_object_pre_open_python = ''
 
     tests_profiles = ''
 
@@ -633,9 +649,9 @@ class ProjectConfiguration(object):
     if self.supports_python:
       macosx_pkg_configure_options = ' --enable-python --with-pyprefix'
 
-    if self.development_main_object_python_pre_open:
-      development_main_object_python_pre_open = '{0:s}\n'.format(
-          self.development_main_object_python_pre_open)
+    if self.development_main_object_pre_open_python:
+      development_main_object_pre_open_python = '{0:s}\n'.format(
+          self.development_main_object_pre_open_python)
 
     if self.mount_tool_additional_arguments:
       mount_tool_additional_arguments = self.mount_tool_additional_arguments
@@ -671,7 +687,8 @@ class ProjectConfiguration(object):
         'development_prefix': development_prefix,
         'development_main_object': self.development_main_object,
         'development_main_object_filename': self.development_main_object_filename,
-        'development_main_object_python_pre_open': development_main_object_python_pre_open,
+        'development_main_object_pre_open_python': development_main_object_pre_open_python,
+        'development_main_object_size': self.development_main_object_size,
 
         'tests_profiles': tests_profiles,
         'tests_example_filename1': self.tests_example_filename1,
@@ -920,7 +937,9 @@ class DevelopmentPageGenerator(WikiPageGenerator):
         self._GenerateSection(
             project_configuration, 'python_main_object.txt', output_writer)
 
-      # TODO: add support for python_pytsk3.txt template.
+      if project_configuration.development_pytsk3:
+        self._GenerateSection(
+            project_configuration, 'python_pytsk3.txt', output_writer)
 
       # TODO: move main object out of this template and create on demand.
       self._GenerateSection(
