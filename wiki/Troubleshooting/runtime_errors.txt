@@ -1,6 +1,7 @@
 ## Run-time errors
 ### Microsoft Visual Studio
 On Windows if an executable built with Visual Studio will not run and shows you an error dialog that a certain function is not implemented:
+
 * check that you've installed the Visual Studio run-time DLLs for the version of Visual Studio;
 * check if WINVER is set correctly;
 * check if your version of Visual Studio is compatible with your version of Windows, e.g. a Visual Studio 2008 created binary will not run on Windows 2000.

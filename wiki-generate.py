@@ -425,8 +425,8 @@ class ProjectConfiguration(object):
 
     if self.supports_gcc or self.supports_mingw or self.supports_msvscpp:
       building_table_of_contents += (
-          'The {0:s} source code can be build with different '
-          'compilers:\n').format(self.project_name)
+          'The {0:s} source code can be build with different compilers:\n'
+          '\n').format(self.project_name)
 
     if self.supports_gcc:
       building_table_of_contents += '* Using GNU Compiler Collection (GCC)\n'
@@ -446,7 +446,7 @@ class ProjectConfiguration(object):
 
       if self.supports_fuse:
         gcc_static_build_dependencies += (
-            '* fuse (optional, can be disabled by --with-libfuse=no)')
+            '* fuse (optional, can be disabled by --with-libfuse=no)\n')
 
       if self.supports_cygwin:
         building_table_of_contents += '  * Using Cygwin\n'
@@ -475,6 +475,7 @@ class ProjectConfiguration(object):
         gcc_mount_tool += (
             '\n'
             'If you want to be able to use {0:s}, make sure that:\n'
+            '\n'
             '* on a Linux system you have libfuse-dev (Debian-based) or '
             'fuse-devel (RedHat-based) installed.\n'
             '* on a Mac OS X system, you have OSXFuse '
@@ -512,7 +513,8 @@ class ProjectConfiguration(object):
         msvscpp_build_dependencies = (
             '\n'
             'To compile {0:s} using Microsoft Visual Studio you\'ll '
-            'need:\n').format(self.project_name)
+            'need:\n'
+            '\n').format(self.project_name)
 
         for dependency in self.msvscpp_build_dependencies:
           msvscpp_build_dependencies += '* {0:s}\n'.format(dependency)
@@ -550,8 +552,8 @@ class ProjectConfiguration(object):
       building_table_of_contents += '\n'
 
     building_table_of_contents += (
-        'Or directly packaged with different package managers:\n').format(
-            self.project_name)
+        'Or directly packaged with different package managers:\n'
+        '\n').format(self.project_name)
 
     if self.supports_dpkg:
       building_table_of_contents += '* Using Debian package tools (DEB)\n'
@@ -1235,6 +1237,11 @@ def Main():
 
         line = LINK_RE.sub(r'* [\1](\2)', line)
         project_description.append(line)
+
+        if line.endswith(':\n'):
+          # Add an empty line to make sure unnumbered list are formatted
+          # correctly by most markdown parsers.
+          project_description.append('\n')
 
   project_configuration.project_description = ''.join(project_description)
 

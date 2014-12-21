@@ -5,6 +5,7 @@ express you'll need at least the 2010 version.
 ### Microsoft Visual Studio 2010
 First make sure to enabling 64-bit compilation support on Microsoft Visual
 Studio 2010 express. Since this can be a tedious process, some relevant links:
+
 * http://msdn.microsoft.com/en-us/library/vstudio/9yb4317s(v=vs.100).aspx
 * http://support.microsoft.com/kb/2519277
 
@@ -16,10 +17,10 @@ Configuration manager -> Active solution platform
 ```
 
 Select "```<New>```"
+
 * Type or select the new platform: "x64"
 * Copy settings from: "Win32"
 * Create new project platforms: enabled
-
 
 Additionally for every project change:
 ```

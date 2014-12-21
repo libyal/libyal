@@ -1,5 +1,6 @@
 ## Cygwin
 If you want to use Cygwin to build ${project_name} make sure to have the following packages installed:
+
 * autoconf
 * automake
 * binutils
@@ -21,5 +22,6 @@ ${cygwin_executables}
 Make sure you use define ${project_name_upper_case}_DLL_IMPORT before including <${project_name}.h>.
 
 To be able to use the DLL on other systems than the build system you'll also need to provide:
+
 * cygwin1.dll
 ${cygwin_dll_dependencies}

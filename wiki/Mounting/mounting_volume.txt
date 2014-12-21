@@ -1,5 +1,6 @@
 # Mounting
 To mount ${mount_tool_source_description} you can either:
+
 * mount it directly from a device file;
 * mount it directly our of a RAW storage media image at a certain offset.
 

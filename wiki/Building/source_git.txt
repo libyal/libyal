@@ -4,6 +4,7 @@
 **If you are not developing it is recommended that you download a source package instead.**
 
 To retrieve the source from the git repository make sure to install:
+
 * git
 * aclocal
 * autoconf

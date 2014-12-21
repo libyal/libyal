@@ -8,12 +8,14 @@ Building:
 ```
 
 On Mac OS X:
+
 * make sure that you only have OSXFuse installed and not another variant, like MacFuse, besides it.
 * try adding the C pre processor flags that set the fuse API version, e.g.
 
 ```
 CPPFLAGS=-DFUSE_USE_VERSION=26 ./configure
 ```
+
 * if all else fails; file a support issue and attach config.log
 
 On Ubuntu:

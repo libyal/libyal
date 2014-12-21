@@ -1,5 +1,6 @@
 ${project_description}
 For more information see:
+
 * [How to build from source](https://github.com/libyal/${project_name}/wiki/Building)
 * [Downloads](${source_package_url})
 ${documentation}
