@@ -3,6 +3,7 @@
 import ${python_bindings_name}
 import pytsk3
 
+
 class ${development_prefix}_Img_Info(pytsk3.Img_Info):
   def __init__(self, ${development_prefix}_${development_main_object}):
     self._${development_prefix}_${development_main_object} = ${development_prefix}_${development_main_object}
