@@ -22,7 +22,7 @@ class ${development_prefix}_Img_Info(pytsk3.Img_Info):
 
 ${development_prefix}_${development_main_object} = ${python_bindings_name}.${development_main_object}()
 ${development_main_object_pre_open_python}
-${development_prefix}_${development_main_object}.open("${development_main_object_filename}")
+${development_prefix}_${development_main_object}.open("${development_main_object_filename}", "r")
 
 img_info = ${development_prefix}_Img_Info(${development_prefix}_${development_main_object})
 
