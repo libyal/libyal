@@ -82,6 +82,7 @@ class ProjectConfiguration(object):
     self.development_main_object_post_open_python = None
     self.development_main_object_post_open_file_object_python = None
     self.development_main_object_size = None
+    self.development_glob = False
     self.development_pytsk3 = False
 
     self.tests_supports_valgrind = None
@@ -192,6 +193,7 @@ class ProjectConfiguration(object):
         features = self._GetConfigValue(
             config_parser, 'development', 'features')
 
+        self.development_glob = 'glob' in features
         self.development_pytsk3 = 'pytsk3' in features
       except configparser.NoOptionError:
         pass
@@ -963,12 +965,24 @@ class DevelopmentPageGenerator(WikiPageGenerator):
           project_configuration, 'python.txt', output_writer)
 
       if project_configuration.development_main_object:
-        self._GenerateSection(
-            project_configuration, 'python_main_object.txt', output_writer)
+        if project_configuration.development_glob:
+          self._GenerateSection(
+              project_configuration, 'python_main_object_with_glob.txt',
+              output_writer)
+
+        else:
+          self._GenerateSection(
+              project_configuration, 'python_main_object.txt', output_writer)
 
       if project_configuration.development_pytsk3:
-        self._GenerateSection(
-            project_configuration, 'python_pytsk3.txt', output_writer)
+        if project_configuration.development_glob:
+          self._GenerateSection(
+              project_configuration, 'python_pytsk3_with_glob.txt',
+              output_writer)
+
+        else:
+          self._GenerateSection(
+              project_configuration, 'python_pytsk3.txt', output_writer)
 
       # TODO: move main object out of this template and create on demand.
       self._GenerateSection(
