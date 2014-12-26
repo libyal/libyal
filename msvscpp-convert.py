@@ -4151,12 +4151,15 @@ def Main():
   output_formats = frozenset(['2008', '2010', '2012', '2013'])
 
   args_parser = argparse.ArgumentParser(description=(
-      'Converts Visual Studio express solution and project files '
-      'from one version to another.'))
+      'Converts source directory (autoconf and automake files) into '
+      'Visual Studio express solution and project files. It is also '
+      'possible to convert from one version of Visual Studio to another.'))
 
   args_parser.add_argument(
       'solution_file', nargs='?', action='store', metavar='FILENAME',
-      default=None, help='The solution file (.sln) or the source directory.')
+      default=None, help=(
+          'The location of the source directory or the Visual Studio solution '
+          'file (.sln).'))
 
   args_parser.add_argument(
       '--to', dest='output_format', nargs='?', choices=sorted(output_formats),
