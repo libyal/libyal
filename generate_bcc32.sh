@@ -197,7 +197,7 @@ EOT
 		then
 			cat >> ${FILENAME} <<EOT
 	\$(RM) ${BUILD_TARGET}.dll ${BUILD_TARGET}.lib
-	\$(ILINK32) -Tpd -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib \$(LDFLAGS) \$(${BUILD_TARGET}_OBJECTS), ${BUILD_TARGET}.dll, , \$(${BUILD_TARGET}_LIBADD) import32.lib cw32.lib, ,
+	\$(ILINK32) -Tpd -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib \$(LDFLAGS) \$(${BUILD_TARGET}_OBJECTS) c0d32w.obj, ${BUILD_TARGET}.dll, , \$(${BUILD_TARGET}_LIBADD) import32.lib cw32.lib, ,
 	\$(IMPLIB) ${BUILD_TARGET}.lib ${BUILD_TARGET}.dll
 EOT
 
@@ -268,7 +268,7 @@ zlib_OBJECTS = \$(zlib_SOURCES:.c=.obj)
 
 zlib: \$(zlib_OBJECTS)
 	\$(RM) zlib.dll zlib.lib
-	\$(ILINK32) -Tpd -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib \$(LDFLAGS) \$(zlib_OBJECTS), zlib.dll, , import32.lib cw32.lib, ,
+	\$(ILINK32) -Tpd -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib \$(LDFLAGS) \$(zlib_OBJECTS) c0d32w.obj, zlib.dll, , import32.lib cw32.lib, ,
 	\$(IMPLIB) zlib.lib zlib.dll
 EOT
 
