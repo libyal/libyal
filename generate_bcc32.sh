@@ -205,7 +205,7 @@ EOT
 		then
 			cat >> ${FILENAME} <<EOT
 	\$(RM) ${BUILD_TARGET}.exe
-	\$(ILINK32) -Tpd -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib \$(LDFLAGS) \$(${BUILD_TARGET}_OBJECTS) c0x32w.obj, ${BUILD_TARGET}.exe, , \$(${BUILD_TARGET}_LIBADD) import32.lib cw32.lib, ,
+	\$(ILINK32) -Tpe -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib \$(LDFLAGS) \$(${BUILD_TARGET}_OBJECTS) c0x32w.obj, ${BUILD_TARGET}.exe, , \$(${BUILD_TARGET}_LIBADD) import32.lib cw32.lib, ,
 EOT
 
 		else
