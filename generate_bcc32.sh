@@ -19,6 +19,8 @@
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 
+REQUIRES_ZLIB=0;
+
 for DIRECTORY in lib*;
 do
 	if test ! -d ${DIRECTORY};
@@ -33,7 +35,7 @@ do
 	SOURCES=`sed '/^if / { d }; /^AM_CPPFLAGS =/,/_la_SOURCES =/ { d }; /^endif$/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
 	LIBADD=`sed '/^if / { d }; /^AM_CPPFLAGS =/,/_la_LIBADD =/ { d }; /^endif$/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
 
-	grep '_la_LDFLAGS' ${DIRECTORY}/Makefile.am 2> /dev/null;
+	grep '_la_LDFLAGS' ${DIRECTORY}/Makefile.am > /dev/null;
 	SHARED_LIBRARY=$?;
 
 	# Determine the include directories.
@@ -50,11 +52,28 @@ do
 	fi
 	DEFINITIONS="${DEFINITIONS_PART1}${DEFINITIONS_PART2}";
 
+	grep '@ZLIB_CPPFLAGS@' ${DIRECTORY}/Makefile.am > /dev/null;
+	if test $? -eq 0;
+	then
+		INCLUDES="${INCLUDES}..\\..\\zlib;";
+		DEFINITIONS="${DEFINITIONS} -DZLIB_DLL";
+	fi
+
 	# Determine the source files.
 	SOURCE_FILES=`echo ${SOURCES} | tr ' ' '\n' | grep -e '.c$' | tr '\n' ' '`;
 
+	# Determine the object files for tlib and prefix them with a "+".
+	TLIB_OBJECTS=`echo ${SOURCE_FILES} | tr ' ' '\n'| sed 's/^/+/;s/\.c$/.obj/' | tr '\n' ' '`;
+
 	# Determine the library dependencies. 
-	LIBRARIES=`echo ${LIBADD} | tr ' ' '\n' | grep -e '@LIB[^_]*_LIBADD@' | sed 's/^@\([^_]*\)_LIBADD@$/..\\\\\1\\\\\1.lib/' | tr '[A-Z]' '[a-z]' | tr '\n' ' '`;
+	LIBRARIES=`echo ${LIBADD} | tr ' ' '\n' | grep -e '^@LIB[^_]*_LIBADD@$' | grep -v -e '^@LIBDL_LIBADD@$' | sed 's/^@\([^_]*\)_LIBADD@$/..\\\\\1\\\\\1.lib/' | tr '[A-Z]' '[a-z]' | tr '\n' ' '`;
+
+	grep '@ZLIB_LIBADD@' ${DIRECTORY}/Makefile.am > /dev/null;
+	if test $? -eq 0;
+	then
+		LIBRARIES="${LIBRARIES} ..\\..\\zlib\\zlib.lib";
+		REQUIRES_ZLIB=1;
+	fi
 
 	if test ${SHARED_LIBRARY} -eq 0;
 	then
@@ -71,13 +90,14 @@ do
 BCC32    = bcc32
 CPP32    = cpp32
 ILINK32  = ilink32
+IMPLIB   = implib
 TLIB     = tlib
 RM       = del
 BCCDIR   = C:\\Borland\\BCC55
 
 CFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
 LDFLAGS  = -aa -V4.0 -c -x -Gn
-DEFS     = -DNDEBUG -DWIN32 -DCONSOLE ${DEFINITIONS}
+DEFS     = -DNDEBUG -DWIN32 -DWINVER=0x0501 -DCONSOLE ${DEFINITIONS}
 INCLUDES = -I..\\include;..\\common;${INCLUDES}.;\$(BCCDIR)\\Include;
 
 LIBADD   = ${LIBRARIES}
@@ -106,17 +126,91 @@ EOT
 	then
 		cat >> ${DIRECTORY}/Makefile.bcc <<EOT
 	\$(ILINK32) -Tpd -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib \$(LDFLAGS) \$(OBJECTS), \$(TARGET), , \$(LIBADD) import32.lib cw32.lib, ,
+	\$(IMPLIB) \$(TARGET:.dll=.lib) \$(TARGET)
 EOT
 	else
 		cat >> ${DIRECTORY}/Makefile.bcc <<EOT
-	\$(TLIB) \$(TARGET)
+	\$(TLIB) \$(TARGET) ${TLIB_OBJECTS}
 EOT
 	fi
 
 done
 
-# Create make.bat to recursively build all the libraries and DLL.
-rm -f make.bat;
+DIRECTORY=`basename $PWD`;
+
+if test ${REQUIRES_ZLIB} -ne 0;
+then
+	cat > ../zlib/Makefile.bcc <<EOT
+# Borland's C++ Compiler 5.5 Makefile
+
+BCC32    = bcc32
+CPP32    = cpp32
+ILINK32  = ilink32
+IMPLIB   = implib
+TLIB     = tlib
+RM       = del
+BCCDIR   = C:\\Borland\\BCC55
+
+CFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
+LDFLAGS  = -aa -V4.0 -c -x -Gn
+DEFS     = -DNDEBUG -DWIN32 -DCONSOLE -DZLIB_DLL
+INCLUDES = -I.;\$(BCCDIR)\\Include;
+
+LIBADD   = 
+
+TARGET   = zlib.dll
+
+SOURCES  = adler32.c compress.c crc32.c deflate.c gzclose.c gzlib.c gzread.c gzwrite.c infback.c inffast.c inflate.c inftrees.c trees.c uncompr.c zutil.c
+
+OBJECTS  = \$(SOURCES:.c=.obj)
+
+.SUFFIXES: .c
+
+.c.obj:
+	\$(BCC32) -c \$(INCLUDES) \$(CFLAGS) \$(DEFS) \$<
+
+all:	\$(TARGET)
+
+clean:
+	\$(RM) *.lib *.obj
+
+\$(TARGET): \$(LIBADD) \$(OBJECTS)
+	\$(RM) \$(TARGET)
+	\$(ILINK32) -Tpd -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib \$(LDFLAGS) \$(OBJECTS), \$(TARGET), , \$(LIBADD) import32.lib cw32.lib, ,
+	\$(IMPLIB) \$(TARGET:.dll=.lib) \$(TARGET)
+EOT
+
+fi
+
+# Create make.bat and make_clean.bat to recurse the sub directories.
+cat > make.bat <<EOT
+@echo off
+set PATH=%PATH%;C:\\Borland\\BCC55\\bin
+
+EOT
+
+cat > make_clean.bat <<EOT
+@echo off
+set PATH=%PATH%;C:\\Borland\\BCC55\\bin
+
+EOT
+
+if test ${REQUIRES_ZLIB} -ne 0;
+then
+	cat >> make.bat <<EOT
+cd ..\\zlib
+c:\\Borland\\BCC55\\Bin\\make.exe -fMakefile.bcc
+cd ..\\${DIRECTORY}
+
+EOT
+	cat >> make_clean.bat <<EOT
+cd ..\\zlib
+c:\\Borland\\BCC55\\Bin\\make.exe -fMakefile.bcc
+cd ..\\${DIRECTORY}
+
+EOT
+
+fi
 
 SUBDIRS=`sed '/^ACLOCAL_AMFLAGS =/,/^SUBDIRS =/ { d }; /^$/,$ { d }' Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
 
@@ -134,12 +228,15 @@ cd ..
 
 EOT
 
-	if test -f ${SUBDIR}/${SUBDIR}.rc;
-	then
-		cat >> make.bat <<EOT
-move ${SUBDIR}\\${SUBDIR}.dll .
+	cat >> make_clean.bat <<EOT
+cd ${SUBDIR}
+c:\\Borland\\BCC55\\Bin\\make.exe -fMakefile.bcc clean
+cd ..
+
 EOT
 
+	if test -f ${SUBDIR}/${SUBDIR}.rc;
+	then
 		break;
 	fi
 done
