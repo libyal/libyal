@@ -67,7 +67,6 @@ do
 	if test ${DIRECTORY} = ${PROJECT};
 	then
 		DEFINITIONS_PART2=`echo -D${DIRECTORY}_DLL_EXPORT | tr '[a-z]' '[A-Z]'`;
-		DEFINITIONS_PART2="${DEFINITIONS_PART2} -DHAVE_DLLMAIN";
 
 	elif test ${DIRECTORY} = "${PREFIX}tools";
 	then
