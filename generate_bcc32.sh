@@ -31,7 +31,7 @@ fi
 PROJECT=`grep -A 1 'AC_INIT' configure.ac | grep -v 'AC_INIT' | sed 's/^[^\[]*\[//;s/\][^\]]*$//'`;
 PREFIX=`echo ${PROJECT} | sed 's/lib//'`;
 
-for DIRECTORY in lib* *tools;
+for DIRECTORY in lib* *tools tests;
 do
 	if test ! -d ${DIRECTORY};
 	then
@@ -49,9 +49,19 @@ do
 
 	# Determine the build targets.
 	grep -e '^bin_PROGRAMS' ${DIRECTORY}/Makefile.am > /dev/null;
-	if test $? -eq 0;
+	BIN_PROGRAMS=$?;
+
+	grep -e '^check_PROGRAMS' ${DIRECTORY}/Makefile.am > /dev/null;
+	CHECK_PROGRAMS=$?;
+
+	if test ${BIN_PROGRAMS} -eq 0;
 	then
 		BUILD_TARGETS=`sed '/^AM_CPPFLAGS =/,/^bin_PROGRAMS =/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+
+	elif test ${CHECK_PROGRAMS} -eq 0;
+	then
+		BUILD_TARGETS=`sed '/^AM_CPPFLAGS =/,/^check_PROGRAMS =/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+
 	else
 		BUILD_TARGETS="${DIRECTORY}";
 	fi
@@ -68,7 +78,7 @@ do
 	then
 		DEFINITIONS_PART2=`echo -D${DIRECTORY}_DLL_EXPORT | tr '[a-z]' '[A-Z]'`;
 
-	elif test ${DIRECTORY} = "${PREFIX}tools";
+	elif test ${DIRECTORY} = "${PREFIX}tools" || test ${DIRECTORY} = "tests";
 	then
 		DEFINITIONS_PART2=`echo -D${DIRECTORY}_DLL_IMPORT | tr '[a-z]' '[A-Z]'`;
 
@@ -122,7 +132,7 @@ EOT
 	for BUILD_TARGET in ${BUILD_TARGETS};
 	do
 		# Determine the source files.
-		if test ${DIRECTORY} = "${PREFIX}tools";
+		if test ${DIRECTORY} = "${PREFIX}tools" || test ${DIRECTORY} = "tests";
 		then
 			SOURCES=`sed "/^AM_CPPFLAGS =/,/^${BUILD_TARGET}_SOURCES =/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
 		else
@@ -136,7 +146,7 @@ EOT
 		TLIB_OBJECTS=`echo ${SOURCE_FILES} | tr ' ' '\n'| sed 's/^/+/;s/\.c$/.obj/' | tr '\n' ' '`;
 
 		# Determine the library dependencies. 
-		if test ${DIRECTORY} = "${PREFIX}tools";
+		if test ${DIRECTORY} = "${PREFIX}tools" || test ${DIRECTORY} = "tests";
 		then
 			LIBADD=`sed "/^AM_CPPFLAGS =/,/^${BUILD_TARGET}_LDADD =/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
 
@@ -162,7 +172,7 @@ EOT
 
 		fi
 
-		if test ${DIRECTORY} = "${PREFIX}tools";
+		if test ${DIRECTORY} = "${PREFIX}tools" || test ${DIRECTORY} = "tests";
 		then
 			LIBRARIES="${LIBRARIES}..\\${PROJECT}\\${PROJECT}.lib ";
 		fi
@@ -200,7 +210,7 @@ EOT
 	\$(IMPLIB) ${BUILD_TARGET}.lib ${BUILD_TARGET}.dll
 EOT
 
-		elif test ${DIRECTORY} = "${PREFIX}tools";
+		elif test ${DIRECTORY} = "${PREFIX}tools" || test ${DIRECTORY} = "tests";
 		then
 			cat >> ${FILENAME} <<EOT
 	\$(RM) ${BUILD_TARGET}.exe
@@ -320,6 +330,11 @@ do
 	then
 		continue;
 	fi
+	# Ignore non-code directories.
+	if test ${SUBDIR} = "manuals" || test ${SUBDIR} = "msvscpp" || test ${SUBDIR} = "po";
+	then
+		continue;
+	fi
 
 	cat >> make.bat <<EOT
 cd ${SUBDIR}
@@ -334,11 +349,6 @@ c:\\Borland\\BCC55\\Bin\\make.exe -fMakefile.bcc clean
 cd ..
 
 EOT
-
-	if test ${SUBDIR} = "${PREFIX}tools";
-	then
-		break;
-	fi
 done
 
 exit ${EXIT_SUCCESS};
