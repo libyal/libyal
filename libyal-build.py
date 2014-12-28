@@ -1039,7 +1039,7 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
     """
     return u'{0:s}_{1!s}-1{2:s}1_{3:s}.deb'.format(
         source_helper.project_name, source_helper.project_version,
-        self.local_version, self.architecture)
+        self.local, self.architecture)
 
 
 class MakeBuildHelper(BuildHelper):
