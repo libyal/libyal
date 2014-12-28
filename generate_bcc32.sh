@@ -56,17 +56,17 @@ do
 
 	if test ${BIN_PROGRAMS} -eq 0;
 	then
-		BUILD_TARGETS=`sed '/^AM_CPPFLAGS =/,/^bin_PROGRAMS =/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+		BUILD_TARGETS=`sed '/^AM_CPPFLAGS =/,/^bin_PROGRAMS =/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
 
 	elif test ${CHECK_PROGRAMS} -eq 0;
 	then
-		BUILD_TARGETS=`sed '/^AM_CPPFLAGS =/,/^check_PROGRAMS =/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+		BUILD_TARGETS=`sed '/^AM_CPPFLAGS =/,/^check_PROGRAMS =/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
 
 	else
 		BUILD_TARGETS="${DIRECTORY}";
 	fi
 
-	AM_CPPFLAGS=`sed '/^AM_LFLAGS =/,/^$/ { d }; /^if / { d }; /^AM_CPPFLAGS =/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+	AM_CPPFLAGS=`sed '/^AM_LFLAGS =/,/^$/ { d }; /^if / { d }; /^AM_CPPFLAGS =/ { d }; /^$/,$ { d }' ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
 
 	# Determine the include directories.
 	INCLUDES=`echo ${AM_CPPFLAGS} | tr ' ' '\n' | grep -e '^@LIB[^_]*_CPPFLAGS@$' | grep -v -e '^@LIBCRYPTO_CPPFLAGS@$' -e '^@LIBFUSE_CPPFLAGS@$' | sed 's/^@\([^_]*\)_CPPFLAGS@$/..\\\\\1/' | tr '[A-Z]' '[a-z]' | tr '\n' ';'`;
@@ -134,9 +134,9 @@ EOT
 		# Determine the source files.
 		if test ${DIRECTORY} = "${PREFIX}tools" || test ${DIRECTORY} = "tests";
 		then
-			SOURCES=`sed "/^AM_CPPFLAGS =/,/^${BUILD_TARGET}_SOURCES =/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+			SOURCES=`sed "/^AM_CPPFLAGS =/,/^${BUILD_TARGET}_SOURCES =/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
 		else
-			SOURCES=`sed "/^AM_LFLAGS =/,/^$/ { d }; /^if / { d }; /^AM_CPPFLAGS =/,/^${BUILD_TARGET}_la_SOURCES =/ { d }; /^endif$/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+			SOURCES=`sed "/^AM_LFLAGS =/,/^$/ { d }; /^if / { d }; /^AM_CPPFLAGS =/,/^${BUILD_TARGET}_la_SOURCES =/ { d }; /^endif$/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
 		fi
 
 		# Assume that the .c and .h files for .l and .y have been generated.
@@ -148,7 +148,7 @@ EOT
 		# Determine the library dependencies. 
 		if test ${DIRECTORY} = "${PREFIX}tools" || test ${DIRECTORY} = "tests";
 		then
-			LIBADD=`sed "/^AM_CPPFLAGS =/,/^${BUILD_TARGET}_LDADD =/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+			LIBADD=`sed "/^AM_CPPFLAGS =/,/^${BUILD_TARGET}_LDADD =/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
 
 			LIBRARIES=`echo ${LIBADD} | tr ' ' '\n' | grep -e '^@LIB[^_]*_LIBADD@$' | grep -v -e '^@LIBCRYPTO_LIBADD@$' -e '^@LIBDL_LIBADD@$' -e '^@LIBFUSE_LIBADD@$' -e '^@LIBUUID_LIBADD@$' | sed 's/^@\([^_]*\)_LIBADD@$/\1/' | tr '[A-Z]' '[a-z]' | tr '\n' ' '`;
 
@@ -156,7 +156,7 @@ EOT
 			LIBADD="";
 			for LIBRARY in ${LIBRARIES};
 			do
-				SUB_LIBADD=`sed "/^AM_LFLAGS =/,/^$/ { d }; /^if / { d }; /^AM_CPPFLAGS =/,/^${LIBRARY}_la_LIBADD =/ { d }; /^endif$/ { d }; /^$/,$ { d }" ${LIBRARY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+				SUB_LIBADD=`sed "/^AM_LFLAGS =/,/^$/ { d }; /^if / { d }; /^AM_CPPFLAGS =/,/^${LIBRARY}_la_LIBADD =/ { d }; /^endif$/ { d }; /^$/,$ { d }" ${LIBRARY}/Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
 				if test ! -z "${SUB_LIBADD}";
 				then
 					SUB_LIBRARIES=`echo ${SUB_LIBADD} | tr ' ' '\n' | grep -e '^@LIB[^_]*_LIBADD@$' | grep -v -e '^@LIBCRYPTO_LIBADD@$' -e '^@LIBDL_LIBADD@$' -e '^@LIBFUSE_LIBADD@$' -e '^@LIBUUID_LIBADD@$' | sed 's/^@\([^_]*\)_LIBADD@$/..\\\\\1\\\\\1.lib/' | tr '[A-Z]' '[a-z]' | tr '\n' ' '`;
@@ -167,7 +167,7 @@ EOT
 			done
 			LIBRARIES=`echo ${LIBADD} | tr ' ' '\n' | sort | uniq | tr '\n' ' '`;
 		else
-			LIBADD=`sed "/^AM_LFLAGS =/,/^$/ { d }; /^if / { d }; /^AM_CPPFLAGS =/,/^${BUILD_TARGET}_la_LIBADD =/ { d }; /^endif$/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+			LIBADD=`sed "/^AM_LFLAGS =/,/^$/ { d }; /^if / { d }; /^AM_CPPFLAGS =/,/^${BUILD_TARGET}_la_LIBADD =/ { d }; /^endif$/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
 			LIBRARIES=`echo ${LIBADD} | tr ' ' '\n' | grep -e '^@LIB[^_]*_LIBADD@$' | grep -v -e '^@LIBCRYPTO_LIBADD@$' -e '^@LIBDL_LIBADD@$' -e '^@LIBFUSE_LIBADD@$' -e '^@LIBUUID_LIBADD@$' | sed 's/^@\([^_]*\)_LIBADD@$/..\\\\\1\\\\\1.lib/' | tr '[A-Z]' '[a-z]' | tr '\n' ' '`;
 
 		fi
@@ -316,7 +316,7 @@ EOT
 
 fi
 
-SUBDIRS=`sed '/^ACLOCAL_AMFLAGS =/,/^SUBDIRS =/ { d }; /^$/,$ { d }' Makefile.am | sed 's/^\s*//;s/ \\\\//' | tr '\n' ' '`;
+SUBDIRS=`sed '/^ACLOCAL_AMFLAGS =/,/^SUBDIRS =/ { d }; /^$/,$ { d }' Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
 
 for SUBDIR in ${SUBDIRS};
 do
