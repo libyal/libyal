@@ -254,14 +254,12 @@ INCLUDES = -I.;\$(BCCDIR)\\Include;
 
 LIBADD   = 
 
-TARGET   = zlib.dll
-
 .SUFFIXES: .c
 
 .c.obj:
 	\$(CC) -c \$(INCLUDES) \$(CFLAGS) \$(DEFS) \$<
 
-all:	\$(TARGET)
+all:	zlib
 
 clean:
 	\$(RM) *.dll *.lib *.obj
