@@ -31,14 +31,10 @@ fi
 PROJECT=`grep -A 1 'AC_INIT' configure.ac | grep -v 'AC_INIT' | sed 's/^[^\[]*\[//;s/\][^\]]*$//'`;
 PREFIX=`echo ${PROJECT} | sed 's/lib//'`;
 
+# Do not compile .Net or Python bindings.
 for DIRECTORY in lib* *tools tests;
 do
 	if test ! -d ${DIRECTORY};
-	then
-		continue;
-	fi
-	# Do not compile .Net or Python bindings.
-	if test ${DIRECTORY} = "${PREFIX}.net" || test ${DIRECTORY} = "py${PREFIX}";
 	then
 		continue;
 	fi
@@ -114,8 +110,8 @@ RM       = del
 BCCDIR   = C:\\Borland\\BCC55
 
 CFLAGS   = -5 -O2 -tW -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
-LDFLAGS  = -ap -V4.0 -c -x -Gn
-DEFS     = -DNDEBUG -DWIN32 -DWINVER=0x0501 -DUNICODE -DCONSOLE ${DEFINITIONS}
+LDFLAGS  = -V4.0 -c -x -Gn
+DEFS     = -DNDEBUG -DWIN32 -DWINVER=0x0501 -DUNICODE ${DEFINITIONS}
 INCLUDES = -I..\\include;..\\common;${INCLUDES}.;\$(BCCDIR)\\Include;
 
 .SUFFIXES: .c
@@ -214,7 +210,7 @@ EOT
 		then
 			cat >> ${FILENAME} <<EOT
 	\$(RM) ${BUILD_TARGET}.exe
-	\$(ILINK32) -Tpe -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib \$(LDFLAGS) \$(${BUILD_TARGET}_OBJECTS) c0x32w.obj, ${BUILD_TARGET}.exe, , \$(${BUILD_TARGET}_LIBADD) import32.lib cw32.lib, ,
+	\$(ILINK32) -Tpe -j\$(BCCDIR)\\Lib -L\$(BCCDIR)\\Lib -ap \$(LDFLAGS) \$(${BUILD_TARGET}_OBJECTS) c0x32w.obj, ${BUILD_TARGET}.exe, , \$(${BUILD_TARGET}_LIBADD) import32.lib cw32.lib, ,
 EOT
 
 		else
@@ -252,8 +248,8 @@ RM       = del
 BCCDIR   = C:\\Borland\\BCC55
 
 CFLAGS   = -5 -O2 -tW -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
-LDFLAGS  = -ap -V4.0 -c -x -Gn
-DEFS     = -DNDEBUG -DWIN32 -DCONSOLE -DZLIB_DLL
+LDFLAGS  = -V4.0 -c -x -Gn
+DEFS     = -DNDEBUG -DWIN32 -DUNICODE -DZLIB_DLL
 INCLUDES = -I.;\$(BCCDIR)\\Include;
 
 LIBADD   = 
@@ -320,18 +316,7 @@ SUBDIRS=`sed '/^ACLOCAL_AMFLAGS =/,/^SUBDIRS =/ { d }; /^$/,$ { d }' Makefile.am
 
 for SUBDIR in ${SUBDIRS};
 do
-	# No source files to compile in the include and common sub directories.
-	if test ${SUBDIR} = "include" || test ${SUBDIR} = "common";
-	then
-		continue;
-	fi
-	# Do not compile .Net or Python bindings.
-	if test ${SUBDIR} = "${PREFIX}.net" || test ${SUBDIR} = "py${PREFIX}";
-	then
-		continue;
-	fi
-	# Ignore non-code directories.
-	if test ${SUBDIR} = "manuals" || test ${SUBDIR} = "msvscpp" || test ${SUBDIR} = "po";
+	if test ! -f ${SUBDIR}/Makefile.bcc;
 	then
 		continue;
 	fi
