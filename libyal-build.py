@@ -703,6 +703,7 @@ class DpkgBuildHelper(BuildHelper):
       'libtool',
       'gettext',
       'debhelper',
+      'devscripts',
       'fakeroot',
       'quilt',
       'zlib1g-dev',
@@ -809,6 +810,12 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     source_filename = source_helper.Download()
     logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
+    # dpkg-buildpakcage wants an source package filename without
+    # the status indication and orig indication.
+    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
+        source_helper.project_name, source_helper.project_version)
+    shutil.copy(source_filename, deb_orig_source_filename)
+
     source_directory = source_helper.Create()
     if not source_directory:
       logging.error(
@@ -855,6 +862,20 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     Args:
       source_helper: the source helper (instance of SourceHelper).
     """
+    filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
+        source_helper.project_name, source_helper.project_version))
+
+    # Remove files of previous versions in the format:
+    # library_version.orig.tar.gz
+    filenames = glob.glob(
+        u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
+            source_helper.project_name, self.architecture))
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
     filenames_to_ignore = re.compile(u'^{0:s}[-_].*{1!s}'.format(
         source_helper.project_name, source_helper.project_version))
 
@@ -892,6 +913,133 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     return u'{0:s}_{1!s}-1_{2:s}.deb'.format(
         source_helper.project_name, source_helper.project_version,
         self.architecture)
+
+
+class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
+  """Class that helps in building libyal source dpkg packages (.deb)."""
+
+  def __init__(self):
+    """Initializes the build helper."""
+    super(LibyalSourceDpkgBuildHelper, self).__init__()
+    self.architecture = 'source'
+    self.local = 'ppa'
+
+  def Build(self, source_helper):
+    """Builds the dpkg packages.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    source_filename = source_helper.Download()
+    logging.info(u'Building source deb of: {0:s}'.format(source_filename))
+
+    # dpkg-buildpakcage wants an source package filename without
+    # the status indication and orig indication.
+    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
+        source_helper.project_name, source_helper.project_version)
+    shutil.copy(source_filename, deb_orig_source_filename)
+
+    source_directory = source_helper.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(source_filename))
+      return False
+
+    dpkg_directory = os.path.join(source_directory, u'dpkg')
+    if not os.path.exists(dpkg_directory):
+      dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
+
+    if not os.path.exists(dpkg_directory):
+      logging.error(u'Missing dpkg sub directory in: {0:s}'.format(
+          source_directory))
+      return False
+
+    debian_directory = os.path.join(source_directory, u'debian')
+
+    # If there is a debian directory remove it and recreate it from
+    # the dpkg directory.
+    if os.path.exists(debian_directory):
+      logging.info(u'Removing: {0:s}'.format(debian_directory))
+      shutil.rmtree(debian_directory)
+    shutil.copytree(dpkg_directory, debian_directory)
+
+    if not self._BuildPrepare(source_directory):
+      return False
+
+    command = u'debuild -S -sa > {0:s} 2>&1'.format(
+        os.path.join(u'..', self.LOG_FILENAME))
+    exit_code = subprocess.call(
+        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    if not self._BuildFinalize(source_directory):
+      return False
+
+    return True
+
+  def Clean(self, source_helper):
+    """Cleans the dpkg packages in the current directory.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+    """
+    filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
+        source_helper.project_name, source_helper.project_version))
+
+    # Remove files of previous versions in the format:
+    # library_version.orig.tar.gz
+    filenames = glob.glob(
+        u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
+            source_helper.project_name, self.architecture))
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    filenames_to_ignore = re.compile(u'^{0:s}[-_].*{1!s}'.format(
+        source_helper.project_name, source_helper.project_version))
+
+    # Remove files of previous versions in the format:
+    # library[-_]version-1local1_architecture.*
+    filenames = glob.glob(
+        u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-1{1:s}1_'
+        u'{2:s}.*'.format(
+            source_helper.project_name, self.local, self.architecture))
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove files of previous versions in the format:
+    # library[-_]*version-1local1.*
+    filenames = glob.glob(
+        u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-1{1:s}1.*'.format(
+            source_helper.project_name, self.local))
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+  def GetOutputFilename(self, source_helper):
+    """Retrieves the filename of one of the resulting files.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+
+    Returns:
+      A filename of one of the resulting dpkg packages.
+    """
+    return u'{0:s}_{1!s}-1{2:s}1_{3:s}.deb'.format(
+        source_helper.project_name, source_helper.project_version,
+        self.local_version, self.architecture)
 
 
 class MakeBuildHelper(BuildHelper):
@@ -1646,7 +1794,7 @@ class LibyalRpmBuildHelper(RpmBuildHelper):
     source_filename = source_helper.Download()
     logging.info(u'Building rpm of: {0:s}'.format(source_filename))
 
-    # rpmbuild wants the library filename without the status indication.
+    # rpmbuild wants the source package filename without the status indication.
     rpm_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
         source_helper.project_name, source_helper.project_version)
     os.rename(source_filename, rpm_source_filename)
@@ -1671,7 +1819,7 @@ class LibyalRpmBuildHelper(RpmBuildHelper):
       logging.info(u'Removing: {0:s}'.format(filename))
       os.remove(filename)
 
-    # Change the library filename back to the original.
+    # Change the source package filename back to the original.
     os.rename(rpm_source_filename, source_filename)
 
     return build_successful
@@ -1701,6 +1849,9 @@ class LibyalBuilder(object):
     build_helper = None
     if self._build_target == 'dpkg':
       build_helper = LibyalDpkgBuildHelper()
+
+    elif self._build_target == 'dpkg-source':
+      build_helper = LibyalSourceDpkgBuildHelper()
 
     elif self._build_target == 'pkg':
       build_helper = LibyalPkgBuildHelper()
@@ -1790,8 +1941,8 @@ class LibyalBuilder(object):
 
 def Main():
   build_targets = frozenset([
-      'download', 'dpkg', 'git', 'pkg', 'rpm', 'vs2008', 'vs2010', 'vs2012',
-      'vs2013'])
+      'download', 'dpkg', 'dpkg-source', 'git', 'pkg', 'rpm',
+      'vs2008', 'vs2010', 'vs2012', 'vs2013'])
 
   args_parser = argparse.ArgumentParser(description=(
       'Downloads and builds the latest versions of the libyal libraries.'))
@@ -1844,7 +1995,7 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
-  if options.build_target == 'dpkg':
+  if options.build_target in ['dpkg', 'dpkg-source']:
     missing_packages = DpkgBuildHelper.CheckBuildDependencies()
     if missing_packages:
       print (u'Required build package(s) missing. Please install: '
