@@ -707,7 +707,7 @@ class DpkgBuildHelper(BuildHelper):
       'fakeroot',
       'quilt',
       'zlib1g-dev',
-      'bzip2-dev',
+      'libbz2-dev',
       'libssl-dev',
       'libfuse-dev',
       'python-dev',
