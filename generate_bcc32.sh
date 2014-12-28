@@ -96,23 +96,22 @@ do
 	cat > ${FILENAME} <<EOT
 # Borland's C++ Compiler 5.5 Makefile
 
-BCC32    = bcc32
-CPP32    = cpp32
+CC       = bcc32
 ILINK32  = ilink32
 IMPLIB   = implib
 TLIB     = tlib
 RM       = del
 BCCDIR   = C:\\Borland\\BCC55
 
-CFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
-LDFLAGS  = -aa -V4.0 -c -x -Gn
+CFLAGS   = -5 -O2 -tW -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
+LDFLAGS  = -ap -V4.0 -c -x -Gn
 DEFS     = -DNDEBUG -DWIN32 -DWINVER=0x0501 -DUNICODE -DCONSOLE ${DEFINITIONS}
 INCLUDES = -I..\\include;..\\common;${INCLUDES}.;\$(BCCDIR)\\Include;
 
 .SUFFIXES: .c
 
 .c.obj:
-	\$(BCC32) -c \$(INCLUDES) \$(CFLAGS) \$(DEFS) \$<
+	\$(CC) -c \$(INCLUDES) \$(CFLAGS) \$(DEFS) \$<
 
 all:	${BUILD_TARGETS}
 
@@ -235,16 +234,15 @@ then
 	cat > ${FILENAME} <<EOT
 # Borland's C++ Compiler 5.5 Makefile
 
-BCC32    = bcc32
-CPP32    = cpp32
+CC       = bcc32
 ILINK32  = ilink32
 IMPLIB   = implib
 TLIB     = tlib
 RM       = del
 BCCDIR   = C:\\Borland\\BCC55
 
-CFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
-LDFLAGS  = -aa -V4.0 -c -x -Gn
+CFLAGS   = -5 -O2 -tW -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
+LDFLAGS  = -ap -V4.0 -c -x -Gn
 DEFS     = -DNDEBUG -DWIN32 -DCONSOLE -DZLIB_DLL
 INCLUDES = -I.;\$(BCCDIR)\\Include;
 
@@ -255,7 +253,7 @@ TARGET   = zlib.dll
 .SUFFIXES: .c
 
 .c.obj:
-	\$(BCC32) -c \$(INCLUDES) \$(CFLAGS) \$(DEFS) \$<
+	\$(CC) -c \$(INCLUDES) \$(CFLAGS) \$(DEFS) \$<
 
 all:	\$(TARGET)
 
