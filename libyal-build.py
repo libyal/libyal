@@ -734,11 +734,15 @@ class DpkgBuildHelper(BuildHelper):
 
     return True
 
-  def _BuildFinalize(self, source_directory):
+  def _BuildFinalize(
+      self, source_directory, project_name, project_version, architecture):
     """Make the necassary finalizations after building the dpkg packages.
 
     Args:
       source_directory: the name of the source directory.
+      project_name: the name of the project.
+      project_version: the version of the project.
+      architecture: the architecture.
 
     Returns:
       True if the finalizations were successful, False otherwise.
@@ -746,7 +750,8 @@ class DpkgBuildHelper(BuildHelper):
     # Script to run after building, e.g. to automatically upload the dpkg
     # package files to an apt repository.
     if os.path.exists(u'post-dpkg.sh'):
-      command = u'sh ../post-dpkg.sh'
+      command = u'sh ../post-dpkg.sh {0:s} {1!s} {2:s}'.format(
+          project_name, project_version, architecture)
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
@@ -851,7 +856,9 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
 
-    if not self._BuildFinalize(source_directory):
+    if not self._BuildFinalize(
+        source_directory, source_helper.project_name,
+        source_helper.project_version, self.architecture):
       return False
 
     return True
@@ -922,6 +929,8 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
     """Initializes the build helper."""
     super(LibyalSourceDpkgBuildHelper, self).__init__()
     self.architecture = 'source'
+
+    # TODO: make this configurable from the command line.
     self.local = 'ppa'
 
   def Build(self, source_helper):
@@ -977,7 +986,10 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
 
-    if not self._BuildFinalize(source_directory):
+    # TODO: pass local?
+    if not self._BuildFinalize(
+        source_directory, source_helper.project_name,
+        source_helper.project_version, self.architecture):
       return False
 
     return True
