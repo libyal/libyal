@@ -297,13 +297,13 @@ if test ${REQUIRES_ZLIB} -ne 0;
 then
 	cat >> make.bat <<EOT
 cd ..\\zlib
-c:\\Borland\\BCC55\\Bin\\make.exe -fMakefile.bcc
+make.exe -fMakefile.bcc
 cd ..\\${DIRECTORY}
 
 EOT
 	cat >> make_clean.bat <<EOT
 cd ..\\zlib
-c:\\Borland\\BCC55\\Bin\\make.exe -fMakefile.bcc
+make.exe -fMakefile.bcc
 cd ..\\${DIRECTORY}
 
 EOT
@@ -321,14 +321,14 @@ do
 
 	cat >> make.bat <<EOT
 cd ${SUBDIR}
-c:\\Borland\\BCC55\\Bin\\make.exe -fMakefile.bcc
+make.exe -fMakefile.bcc
 cd ..
 
 EOT
 
 	cat >> make_clean.bat <<EOT
 cd ${SUBDIR}
-c:\\Borland\\BCC55\\Bin\\make.exe -fMakefile.bcc clean
+make.exe -fMakefile.bcc clean
 cd ..
 
 EOT
