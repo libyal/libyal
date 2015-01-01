@@ -3,7 +3,7 @@
 #
 # Script to run pylint on changed files.
 #
-# Copyright (c) 2013-2014, Joachim Metz <joachim.metz@gmail.com>
+# Copyright (c) 2013-2015, Joachim Metz <joachim.metz@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
