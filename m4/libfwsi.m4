@@ -1,6 +1,6 @@
 dnl Functions for libfwsi
 dnl
-dnl Version: 20120501
+dnl Version: 20140827
 
 dnl Function to detect if libfwsi is available
 AC_DEFUN([AX_LIBFWSI_CHECK_LIB],
@@ -23,7 +23,7 @@ AC_DEFUN([AX_LIBFWSI_CHECK_LIB],
    [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
    [PKG_CHECK_MODULES(
     [libfwsi],
-    [libfwsi >= 20120426],
+    [libfwsi >= 20140827],
     [ac_cv_libfwsi=yes],
     [ac_cv_libfwsi=no])
    ])
