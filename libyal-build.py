@@ -714,11 +714,15 @@ class DpkgBuildHelper(BuildHelper):
       'python-setuptools',
   ])
 
-  def _BuildPrepare(self, source_directory):
+  def _BuildPrepare(
+      self, source_directory, project_name, project_version, architecture):
     """Make the necassary preperations before building the dpkg packages.
 
     Args:
       source_directory: the name of the source directory.
+      project_name: the name of the project.
+      project_version: the version of the project.
+      architecture: the architecture.
 
     Returns:
       True if the preparations were successful, False otherwise.
@@ -846,7 +850,9 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
       shutil.rmtree(debian_directory)
     shutil.copytree(dpkg_directory, debian_directory)
 
-    if not self._BuildPrepare(source_directory):
+    if not self._BuildPrepare(
+        source_directory, source_helper.project_name,
+        source_helper.project_version, self.architecture):
       return False
 
     command = u'dpkg-buildpackage -uc -us -rfakeroot > {0:s} 2>&1'.format(
