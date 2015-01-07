@@ -725,7 +725,8 @@ class DpkgBuildHelper(BuildHelper):
     """
     # Script to run before building, e.g. to change the dpkg packing files.
     if os.path.exists(u'prep-dpkg.sh'):
-      command = u'sh ../prep-dpkg.sh'
+      command = u'sh ../prep-dpkg.sh {0:s} {1!s} {2:s}'.format(
+          project_name, project_version, architecture)
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
