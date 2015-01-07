@@ -982,7 +982,9 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
       shutil.rmtree(debian_directory)
     shutil.copytree(dpkg_directory, debian_directory)
 
-    if not self._BuildPrepare(source_directory):
+    if not self._BuildPrepare(
+        source_directory, source_helper.project_name,
+        source_helper.project_version, self.architecture):
       return False
 
     command = u'debuild -S -sa > {0:s} 2>&1'.format(
