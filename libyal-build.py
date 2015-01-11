@@ -730,7 +730,7 @@ class DpkgBuildHelper(BuildHelper):
     Returns:
       True if the preparations were successful, False otherwise.
     """
-    # Script to run before building, e.g. to change the dpkg packing files.
+    # Script to run before building, e.g. to change the dpkg packaging files.
     if os.path.exists(u'prep-dpkg.sh'):
       command = u'sh ../prep-dpkg.sh {0:s} {1!s} {2:s} {3:s} {4:s}'.format(
           project_name, project_version, version_suffix, distribution,
