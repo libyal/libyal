@@ -829,7 +829,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     source_filename = source_helper.Download()
     logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
-    # dpkg-buildpakcage wants an source package filename without
+    # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
         source_helper.project_name, source_helper.project_version)
@@ -962,7 +962,7 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
     source_filename = source_helper.Download()
     logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
-    # dpkg-buildpakcage wants an source package filename without
+    # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
         source_helper.project_name, source_helper.project_version)
