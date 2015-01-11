@@ -811,6 +811,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     super(LibyalDpkgBuildHelper, self).__init__()
     self.architecture = platform.machine()
     self.distribution = ''
+    self.version_suffix = ''
 
     if self.architecture == 'i686':
       self.architecture = 'i386'
