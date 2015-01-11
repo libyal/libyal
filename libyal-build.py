@@ -585,7 +585,7 @@ class SourcePackageHelper(SourceHelper):
         u'^{0:s}-.*{1!s}'.format(self.project_name, self.project_version))
 
     # Remove previous versions of source packages in the format:
-    # library-*.tar.gz
+    # project-*.tar.gz
     filenames = glob.glob(u'{0:s}-*.tar.gz'.format(self.project_name))
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -593,7 +593,7 @@ class SourcePackageHelper(SourceHelper):
         os.remove(filename)
 
     # Remove previous versions of source directories in the format:
-    # library-{version}
+    # project-{version}
     filenames = glob.glob(u'{0:s}-*'.format(self.project_name))
     for filename in filenames:
       if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
@@ -892,7 +892,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
         source_helper.project_name, source_helper.project_version))
 
     # Remove files of previous versions in the format:
-    # library_version.orig.tar.gz
+    # project_version.orig.tar.gz
     filenames = glob.glob(
         u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
             source_helper.project_name, self.architecture))
@@ -906,7 +906,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
         source_helper.project_name, source_helper.project_version))
 
     # Remove files of previous versions in the format:
-    # library[-_]version-1_architecture.*
+    # project[-_]version-1_architecture.*
     filenames = glob.glob(
         u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-1_'
         u'{1:s}.*'.format(source_helper.project_name, self.architecture))
@@ -917,7 +917,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # library[-_]*version-1.*
+    # project[-_]*version-1.*
     filenames = glob.glob(
         u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-1.*'.format(
             source_helper.project_name))
@@ -1025,7 +1025,7 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
         source_helper.project_name, source_helper.project_version))
 
     # Remove files of previous versions in the format:
-    # library_version.orig.tar.gz
+    # project_version.orig.tar.gz
     filenames = glob.glob(
         u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
             source_helper.project_name, self.architecture))
@@ -1039,7 +1039,7 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
         source_helper.project_name, source_helper.project_version))
 
     # Remove files of previous versions in the format:
-    # library[-_]version-1suffix~distribution_architecture.*
+    # project[-_]version-1suffix~distribution_architecture.*
     filenames = glob.glob((
         u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
         u'-1{1:s}~{2:s}_{3:s}.*').format(
@@ -1052,7 +1052,7 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # library[-_]*version-1suffix~distribution.*
+    # project[-_]*version-1suffix~distribution.*
     filenames = glob.glob((
         u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
         u'-1{1:s}~{2:s}.*').format(
@@ -1873,7 +1873,7 @@ class LibyalBuilder(object):
     self._build_target = build_target
 
   def _BuildLibyalLibrary(self, source_helper):
-    """Builds a libyal library and its Python module.
+    """Builds a libyal project and its Python module.
 
     Args:
       source_helper: the source helper (instance of SourceHelper).
@@ -1922,7 +1922,7 @@ class LibyalBuilder(object):
     return True
 
   def Build(self, project_name):
-    """Builds a libyal library.
+    """Builds a libyal project.
 
     Args:
       project_name: the project name.
