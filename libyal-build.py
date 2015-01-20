@@ -1072,7 +1072,7 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
     Returns:
       A filename of one of the resulting dpkg packages.
     """
-    return u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.deb'.format(
+    return u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
         source_helper.project_name, source_helper.project_version,
         self.version_suffix, self.distribution, self.architecture)
 
