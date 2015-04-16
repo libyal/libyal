@@ -10,6 +10,7 @@ Currently supported output formats:
 * 2008 (10.0)
 * 2010 (11.0)
 * 2012 (12.0)
+* 2013 (13.0)
 """
 
 # TODO: add automated tests.
@@ -26,6 +27,8 @@ import os
 import sys
 import uuid
 
+
+# pylint: disable=logging-format-interpolation
 
 class VSConfiguration(object):
   """Class to represent a Visual Studio configurations."""
@@ -77,7 +80,7 @@ class VSConfigurations(object):
 
     self._configurations[identifier] = configuration
 
-  def ExtendWithX64(self, output_version):
+  def ExtendWithX64(self, unused_output_version):
     """Extends the configurations with the x64 platform.
 
     Args:
@@ -254,7 +257,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def precompiled_header_string(self):
-    precompiled_header = int(self.precompiled_header, 10)
+    _ = int(self.precompiled_header, 10)
     # TODO: do something with precompiled_header.
     return ''
 
@@ -323,7 +326,8 @@ class VSProjectConfiguration(VSConfiguration):
     copy.compile_as = self.compile_as
     copy.data_execution_prevention = self.data_execution_prevention
     copy.debug_information_format = self.debug_information_format
-    copy.detect_64bit_portability_problems = self.detect_64bit_portability_problems
+    copy.detect_64bit_portability_problems = (
+        self.detect_64bit_portability_problems)
     copy.enable_comdat_folding = self.enable_comdat_folding
     copy.enable_function_level_linking = self.enable_function_level_linking
     copy.enable_intrinsic_functions = self.enable_intrinsic_functions
@@ -434,6 +438,7 @@ class FileReader(object):
 
   def __init__(self):
     """Initializes a file reader."""
+    self._file = None
     self._line = None
 
   def Open(self, filename):
@@ -572,9 +577,11 @@ class VS2008ProjectFileReader(VSProjectFileReader):
               project_configuration.warning_level = values[0]
 
           elif line.startswith('Detect64BitPortabilityProblems='):
-            values = re.findall('Detect64BitPortabilityProblems="([^"]*)"', line)
+            values = re.findall(
+                'Detect64BitPortabilityProblems="([^"]*)"', line)
             if len(values) == 1:
-              project_configuration.detect_64bit_portability_problems = values[0]
+              project_configuration.detect_64bit_portability_problems = (
+                  values[0])
 
           elif line.startswith('WarnAsError='):
             values = re.findall('WarnAsError="([^"]*)"', line)
@@ -970,6 +977,11 @@ class VS2013ProjectFileReader(VSProjectFileReader):
 class VSProjectFileWriter(object):
   """Class to represent a Visual Studio project file writer."""
 
+  def __init__(self):
+    """Initializes a Visual Studio project configuration."""
+    super(VSProjectFileWriter, self).__init__()
+    self._file = None
+
   def Open(self, filename):
     """Opens the project file.
 
@@ -1013,7 +1025,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes a file header."""
     self.WriteLine('<?xml version="1.0" encoding="Windows-1252"?>')
 
-  def WriteProjectConfigurations(self, project_configurations):
+  def WriteProjectConfigurations(self, unused_project_configurations):
     """Writes the project configurations.
 
     Args:
@@ -1095,33 +1107,33 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     self.WriteLine('\t\t\t>')
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCPreBuildEventTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCPreBuildEventTool"',
+        '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCCustomBuildTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCCustomBuildTool"',
+        '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCXMLDataGeneratorTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCXMLDataGeneratorTool"',
+        '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCWebServiceProxyGeneratorTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCWebServiceProxyGeneratorTool"',
+        '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCMIDLTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCMIDLTool"',
+        '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCCLCompilerTool"'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCCLCompilerTool"'])
 
     if project_configuration.optimization:
       self.WriteLine('\t\t\t\tOptimization="{0:s}"'.format(
@@ -1169,25 +1181,25 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     self.WriteLine('\t\t\t/>')
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCManagedResourceCompilerTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCManagedResourceCompilerTool"',
+        '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCResourceCompilerTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCResourceCompilerTool"',
+        '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCPreLinkEventTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCPreLinkEventTool"',
+        '\t\t\t/>'])
 
     # TODO: add librarian values set?
     if project_configuration.librarian_output_file:
       self.WriteLines([
-        '\t\t\t<Tool',
-        '\t\t\t\tName="VCLibrarianTool"'])
+          '\t\t\t<Tool',
+          '\t\t\t\tName="VCLibrarianTool"'])
 
       self.WriteLine('\t\t\t\tOutputFile="{0:s}"'.format(
           project_configuration.librarian_output_file))
@@ -1201,8 +1213,8 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
 
     if project_configuration.linker_values_set:
       self.WriteLines([
-        '\t\t\t<Tool',
-        '\t\t\t\tName="VCLinkerTool"'])
+          '\t\t\t<Tool',
+          '\t\t\t\tName="VCLinkerTool"'])
 
       if project_configuration.additional_dependencies:
         self.WriteLine('\t\t\t\tAdditionalDependencies="{0:s}"'.format(
@@ -1259,41 +1271,41 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
       self.WriteLine('\t\t\t/>')
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCALinkTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCALinkTool"',
+        '\t\t\t/>'])
 
     if project_configuration.linker_values_set:
-     self.WriteLines([
-       '\t\t\t<Tool',
-       '\t\t\t\tName="VCManifestTool"',
-       '\t\t\t/>'])
+      self.WriteLines([
+          '\t\t\t<Tool',
+          '\t\t\t\tName="VCManifestTool"',
+          '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCXDCMakeTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCXDCMakeTool"',
+        '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCBscMakeTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCBscMakeTool"',
+        '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCFxCopTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCFxCopTool"',
+        '\t\t\t/>'])
 
     if project_configuration.linker_values_set:
-     self.WriteLines([
-       '\t\t\t<Tool',
-       '\t\t\t\tName="VCAppVerifierTool"',
-       '\t\t\t/>'])
+      self.WriteLines([
+          '\t\t\t<Tool',
+          '\t\t\t\tName="VCAppVerifierTool"',
+          '\t\t\t/>'])
 
     self.WriteLines([
-      '\t\t\t<Tool',
-      '\t\t\t\tName="VCPostBuildEventTool"',
-      '\t\t\t/>'])
+        '\t\t\t<Tool',
+        '\t\t\t\tName="VCPostBuildEventTool"',
+        '\t\t\t/>'])
 
     self.WriteLine('\t\t</Configuration>')
 
@@ -1311,8 +1323,8 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     self.WriteLine('\t</Configurations>')
 
     self.WriteLines([
-       '\t<References>',
-       '\t</References>'])
+        '\t<References>',
+        '\t</References>'])
 
   def _WriteSourceFiles(self, source_files):
     """Writes the source files.
@@ -1407,7 +1419,8 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
         '\t<Globals>',
         '\t</Globals>'])
 
-  def WriteDependencies(self, dependencies, solution_projects_by_guid):
+  def WriteDependencies(
+      self, unused_dependencies, unused_solution_projects_by_guid):
     """Writes the dependencies.
 
     Args:
@@ -1440,7 +1453,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
         '<?xml version="1.0" encoding="utf-8"?>',
         ('<Project DefaultTargets="Build" ToolsVersion="{0:s}" '
          'xmlns="http://schemas.microsoft.com/developer/msbuild/2003">').format(
-            self._tools_version)])
+             self._tools_version)])
 
   def WriteProjectConfigurations(self, project_configurations):
     """Writes the project configurations.
@@ -1590,8 +1603,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
       include_directories = '{0:s};'.format(
           include_directories)
 
-    include_directories = (
-        '{0:s}%(AdditionalIncludeDirectories)').format(
+    include_directories = '{0:s}%(AdditionalIncludeDirectories)'.format(
         include_directories)
 
     preprocessor_definitions = project_configuration.preprocessor_definitions
@@ -1599,8 +1611,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     if preprocessor_definitions and preprocessor_definitions[-1] != ';':
       preprocessor_definitions = '{0:s};'.format(preprocessor_definitions)
 
-    preprocessor_definitions = (
-        '{0:s}%(PreprocessorDefinitions)').format(
+    preprocessor_definitions = '{0:s}%(PreprocessorDefinitions)'.format(
         preprocessor_definitions)
 
     self.WriteLine('    <ClCompile>')
@@ -1703,19 +1714,19 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
 
     if project_configuration.module_definition_file != '':
       self.WriteLine((
-           '      <ModuleDefinitionFile>{0:s}'
-           '</ModuleDefinitionFile>').format(
-               project_configuration.module_definition_file))
+          '      <ModuleDefinitionFile>{0:s}'
+          '</ModuleDefinitionFile>').format(
+              project_configuration.module_definition_file))
     else:
       self.WriteLines([
-           '      <ModuleDefinitionFile>',
-           '      </ModuleDefinitionFile>'])
+          '      <ModuleDefinitionFile>',
+          '      </ModuleDefinitionFile>'])
 
     if project_configuration.librarian_ignore_defaults != '':
       self.WriteLine((
-           '      <IgnoreAllDefaultLibraries>{0:s}'
-           '</IgnoreAllDefaultLibraries>').format(
-               project_configuration.librarian_ignore_defaults))
+          '      <IgnoreAllDefaultLibraries>{0:s}'
+          '</IgnoreAllDefaultLibraries>').format(
+              project_configuration.librarian_ignore_defaults))
 
     self.WriteLine('    </Lib>')
 
@@ -1739,8 +1750,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
       if additional_dependencies and additional_dependencies[-1] != ';':
         additional_dependencies = '{0:s};'.format(additional_dependencies)
 
-      additional_dependencies = (
-          '{0:s}%(AdditionalDependencies)').format(
+      additional_dependencies = '{0:s}%(AdditionalDependencies)'.format(
           additional_dependencies)
 
       self.WriteLine((
@@ -1758,9 +1768,9 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
 
       if project_configuration.module_definition_file != '':
         self.WriteLine((
-             '      <ModuleDefinitionFile>{0:s}'
-             '</ModuleDefinitionFile>').format(
-                 project_configuration.module_definition_file))
+            '      <ModuleDefinitionFile>{0:s}'
+            '</ModuleDefinitionFile>').format(
+                project_configuration.module_definition_file))
 
     if project_configuration.library_directories:
       library_directories = re.sub(
@@ -1772,8 +1782,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
       if library_directories and library_directories[-1] != ';':
         library_directories = '{0:s};'.format(library_directories)
 
-      library_directories = (
-          '{0:s}%(AdditionalLibraryDirectories)').format(
+      library_directories = '{0:s}%(AdditionalLibraryDirectories)'.format(
           library_directories)
 
       self.WriteLine((
@@ -1898,7 +1907,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
       self.WriteLines([
           ('  <ImportGroup Condition="\'$(Configuration)|$(Platform)\'=='
            '\'{0:s}|{1:s}\'" Label="PropertySheets">'.format(
-              project_configuration.name, project_configuration.platform)),
+               project_configuration.name, project_configuration.platform)),
           ('    <Import Project="$(UserRootDir)\\Microsoft.Cpp.$(Platform)'
            '.user.props" Condition="exists(\'$(UserRootDir)\\Microsoft.Cpp'
            '.$(Platform).user.props\')" Label="LocalAppDataPlatform" />'),
@@ -2020,7 +2029,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
 
   def __init__(self):
     """Initializes a Visual Studio project file writer."""
-    super(VS2010ProjectFileWriter, self).__init__()
+    super(VS2012ProjectFileWriter, self).__init__()
     self._project_file_version = '11.0.61030.0'
     self._tools_version = '4.0'
     self._version = 2012
@@ -2060,7 +2069,8 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
 
     self.WriteLine('  </PropertyGroup>')
 
-  def _WriteOutIntDirConditions(self, configuration_name, project_configurations):
+  def _WriteOutIntDirConditions(
+      self, configuration_name, project_configurations):
     """Writes the OutDir and IntDir conditions.
 
     Args:
@@ -2074,9 +2084,9 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
       self.WriteLines([
           ('  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'=='
            '\'{0:s}|{1:s}\'">').format(
-              project_configuration.name, project_configuration.platform),
-          '    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>',
-          '    <IntDir>$(Configuration)\</IntDir>'])
+               project_configuration.name, project_configuration.platform),
+          '    <OutDir>$(SolutionDir)$(Configuration)\\</OutDir>',
+          '    <IntDir>$(Configuration)\\</IntDir>'])
 
       if project_configuration.linker_values_set:
         self.WriteLine('    <LinkIncremental>false</LinkIncremental>')
@@ -2107,7 +2117,8 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
       #   if project_configuration.link_incremental != '':
       #     self.WriteLine((
       #         '    <LinkIncremental Condition="\'$(Configuration)|'
-      #         '$(Platform)\'==\'{0:s}|{1:s}\'">{2:s}</LinkIncremental>').format(
+      #         '$(Platform)\'==\'{0:s}|{1:s}\'">{2:s}'
+      #         '</LinkIncremental>').format(
       #             project_configuration.name, project_configuration.platform,
       #             project_configuration.link_incremental_string))
 
@@ -2125,8 +2136,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
       include_directories = '{0:s};'.format(
           include_directories)
 
-    include_directories = (
-        '{0:s}%(AdditionalIncludeDirectories)').format(
+    include_directories = '{0:s}%(AdditionalIncludeDirectories)'.format(
         include_directories)
 
     preprocessor_definitions = project_configuration.preprocessor_definitions
@@ -2134,8 +2144,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     if preprocessor_definitions and preprocessor_definitions[-1] != ';':
       preprocessor_definitions = '{0:s};'.format(preprocessor_definitions)
 
-    preprocessor_definitions = (
-        '{0:s}%(PreprocessorDefinitions)').format(
+    preprocessor_definitions = '{0:s}%(PreprocessorDefinitions)'.format(
         preprocessor_definitions)
 
     self.WriteLine('    <ClCompile>')
@@ -2228,17 +2237,17 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
 
     if project_configuration.module_definition_file != '':
       self.WriteLine((
-           '      <ModuleDefinitionFile>{0:s}'
-           '</ModuleDefinitionFile>').format(
-               project_configuration.module_definition_file))
+          '      <ModuleDefinitionFile>{0:s}'
+          '</ModuleDefinitionFile>').format(
+              project_configuration.module_definition_file))
     else:
       self.WriteLine('      <ModuleDefinitionFile />')
 
     if project_configuration.librarian_ignore_defaults != '':
       self.WriteLine((
-           '      <IgnoreAllDefaultLibraries>{0:s}'
-           '</IgnoreAllDefaultLibraries>').format(
-               project_configuration.librarian_ignore_defaults))
+          '      <IgnoreAllDefaultLibraries>{0:s}'
+          '</IgnoreAllDefaultLibraries>').format(
+              project_configuration.librarian_ignore_defaults))
 
     self.WriteLine('    </Lib>')
 
@@ -2264,7 +2273,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
 
       additional_dependencies = (
           '{0:s}%(AdditionalDependencies)').format(
-          additional_dependencies)
+              additional_dependencies)
 
       self.WriteLine((
           '      <AdditionalDependencies>{0:s}'
@@ -2281,9 +2290,9 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
 
       if project_configuration.module_definition_file != '':
         self.WriteLine((
-             '      <ModuleDefinitionFile>{0:s}'
-             '</ModuleDefinitionFile>').format(
-                 project_configuration.module_definition_file))
+            '      <ModuleDefinitionFile>{0:s}'
+            '</ModuleDefinitionFile>').format(
+                project_configuration.module_definition_file))
 
     if project_configuration.library_directories:
       library_directories = re.sub(
@@ -2297,7 +2306,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
 
       library_directories = (
           '{0:s}%(AdditionalLibraryDirectories)').format(
-          library_directories)
+              library_directories)
 
       self.WriteLine((
           '      <AdditionalLibraryDirectories>{0:s}'
@@ -2396,7 +2405,7 @@ class VS2013ProjectFileWriter(VS2010ProjectFileWriter):
 
   def __init__(self):
     """Initializes a Visual Studio project file writer."""
-    super(VS2010ProjectFileWriter, self).__init__()
+    super(VS2013ProjectFileWriter, self).__init__()
     self._project_file_version = '12.0.21005.1'
     self._tools_version = '12.0'
     self._version = 2013
@@ -2605,8 +2614,23 @@ class VS2010SolutionFileReader(object):
     return line.endswith(' 11.00')
 
 
+class VS2012SolutionFileReader(object):
+  """Class to represent a Visual Studio 2012 solution file reader."""
+  # TODO: implement.
+
+
+class VS2013SolutionFileReader(object):
+  """Class to represent a Visual Studio 2013 solution file reader."""
+  # TODO: implement.
+
+
 class VSSolutionFileWriter(object):
   """Class to represent a Visual Studio solution file writer."""
+
+  def __init__(self):
+    """Initializes a Visual Studio project configuration."""
+    super(VSSolutionFileWriter, self).__init__()
+    self._file = None
 
   def Open(self, filename):
     """Opens the solution file.
@@ -2982,7 +3006,7 @@ class VSSolution(object):
     project_writer.WriteProjectInformation(project_information)
     project_writer.WriteConfigurations(project_information.configurations)
     project_writer.WriteFiles(
-        project_information.source_files, project_information.header_files, 
+        project_information.source_files, project_information.header_files,
         project_information.resource_files)
     project_writer.WriteDependencies(
         solution_project.dependencies, solution_projects_by_guid)
@@ -3354,7 +3378,7 @@ class LibyalSourceVSSolution(VSSolution):
     debug_project_configuration.linker_values_set = True
 
   def _ConfigureAsLibrary(
-      self, project_information, release_project_configuration,
+      self, unused_project_information, release_project_configuration,
       debug_project_configuration):
     """Configures the project as a local library.
 
@@ -3448,7 +3472,7 @@ class LibyalSourceVSSolution(VSSolution):
         debug_project_configuration)
 
   def _ConfigureLibcrypto(
-      self, project_information, release_project_configuration,
+      self, unused_project_information, release_project_configuration,
       debug_project_configuration):
     """Configures the project for the Windows libcrypto equivalent.
 
@@ -3469,7 +3493,7 @@ class LibyalSourceVSSolution(VSSolution):
       debug_project_configuration.additional_dependencies.append(dependency)
 
   def _ConfigureLibuuid(
-      self, project_information, release_project_configuration,
+      self, unused_project_information, release_project_configuration,
       debug_project_configuration):
     """Configures the project for the Windows libuuid equivalent.
 
@@ -3864,9 +3888,9 @@ class LibyalSourceVSSolution(VSSolution):
       dependency = '{0:s}.lib'.format(solution_name)
 
       release_project_configuration.additional_dependencies.append(
-         dependency)
+          dependency)
       debug_project_configuration.additional_dependencies.append(
-         dependency)
+          dependency)
 
     project_information.source_files = sorted(source_files)
     project_information.header_files = sorted(header_files)
@@ -3966,7 +3990,7 @@ class LibyalSourceVSSolution(VSSolution):
     solution_projects = []
     projects_by_guid = {}
 
-    for directory_entry in os.listdir(input_directory): 
+    for directory_entry in os.listdir(input_directory):
       if not os.path.isdir(directory_entry):
         continue
 
@@ -4056,7 +4080,8 @@ class LibyalSourceVSSolution(VSSolution):
     solution_project_guids_by_name = {}
     solution_projects_by_guid = {}
     for solution_project in solution_projects:
-      solution_project_guids_by_name[solution_project.name] = solution_project.guid
+      solution_project_guids_by_name[solution_project.name] = (
+          solution_project.guid)
       solution_projects_by_guid[solution_project.guid] = solution_project
 
     # Set-up the solution dependencies.
