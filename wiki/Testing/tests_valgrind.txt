@@ -5,7 +5,7 @@ The tests can also be run with valgrind to detect memory leakage.
 
 To run the automated tests with valgrind:
 ```
-export CHECK_WITH_VALGRIND=1; make check; export CHECK_WITH_VALGRIND=;
+make check CHECK_WITH_VALGRIND=1;
 ```
 
 If the automated test process detects memory leaks it will end the specific test and indicate it failed.

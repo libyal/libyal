@@ -1,21 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-#
-# Script to automate creating builds of libyal libraries.
-#
-# Copyright (C) 2013-2015, Joachim Metz <joachim.metz@gmail.com>
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+"""Script to automate creating builds of libyal libraries."""
 
 import abc
 import argparse
@@ -694,24 +679,27 @@ class DpkgBuildHelper(BuildHelper):
   # TODO: determine BUILD_DEPENDENCIES from the build files?
   # TODO: what about flex, byacc?
   _BUILD_DEPENDENCIES = frozenset([
-      'git',
-      'build-essential',
-      'autotools-dev',
-      'autoconf',
-      'automake',
-      'autopoint',
-      'libtool',
-      'gettext',
-      'debhelper',
-      'devscripts',
-      'fakeroot',
-      'quilt',
-      'zlib1g-dev',
-      'libbz2-dev',
-      'libssl-dev',
-      'libfuse-dev',
-      'python-dev',
-      'python-setuptools',
+      u'git',
+      u'build-essential',
+      u'autotools-dev',
+      u'autoconf',
+      u'automake',
+      u'autopoint',
+      u'libtool',
+      u'gettext',
+      u'flex',
+      u'byacc',
+      u'debhelper',
+      u'devscripts',
+      u'dpkg-dev',
+      u'fakeroot',
+      u'quilt',
+      u'zlib1g-dev',
+      u'libbz2-dev',
+      u'libssl-dev',
+      u'libfuse-dev',
+      u'python-dev',
+      u'python-setuptools',
   ])
 
   def _BuildPrepare(

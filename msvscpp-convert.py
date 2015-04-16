@@ -1,29 +1,16 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
-#
-# Script to convert Visual Studio (express) solution and project files
-# from one version to another.
-#
-# Currently supported input formats:
-# * libyal source directory (configure.ac and Makefile.am)
-# * 2008 (10.0)
-#
-# Currently supported output formats:
-# * 2008 (10.0)
-# * 2010 (11.0)
-#
-# Copyright (C) 2013-2015, Joachim Metz <joachim.metz@gmail.com>
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+"""Script to generate different versions of Visual Studio (express) files.
+
+Currently supported input formats:
+* libyal source directory (configure.ac and Makefile.am)
+* 2008 (10.0)
+
+Currently supported output formats:
+* 2008 (10.0)
+* 2010 (11.0)
+* 2012 (12.0)
+"""
 
 # TODO: add automated tests.
 # TODO: add vs2010 reader.
