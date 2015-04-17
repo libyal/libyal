@@ -2006,7 +2006,7 @@ def Main():
 
   if not options.config_file:
     options.config_file = os.path.join(
-        os.path.dirname(__file__), 'libraries.ini')
+        os.path.dirname(__file__), 'data', 'libraries.ini')
 
   if not os.path.exists(options.config_file):
     print u'No such config file: {0:s}.'.format(options.config_file)
