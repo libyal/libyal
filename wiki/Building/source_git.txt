@@ -31,3 +31,14 @@ Install the following packages:
 sudo port install autoconf automake gettext libtool pkgconfig
 ```
 
+### Microsoft Visual Studio
+Since Microsoft Visual Studio does not come with a Unix shell or equivalent you'll need to use the Windows PowerShell scripts instead:
+```
+git clone ${git_url}
+cd ${project_name}/
+.\synclibs.ps1
+.\autogen.ps1
+```
+
+Check "appveyor.yml" to make sure there are additional PowerShell scripts you need to run.
+
