@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Script to automate generation of wiki pages of libyal libraries."""
 
+from __future__ import print_function
 import abc
 import argparse
 import json
@@ -208,8 +209,10 @@ class ProjectConfiguration(object):
         pass
 
       try:
-        self.development_main_object_post_open_file_object_python = self._GetConfigValue(
-            config_parser, 'development', 'main_object_post_open_file_object_python')
+        self.development_main_object_post_open_file_object_python = (
+            self._GetConfigValue(
+                config_parser, 'development',
+                'main_object_post_open_file_object_python'))
       except configparser.NoOptionError:
         pass
 
@@ -571,8 +574,7 @@ class ProjectConfiguration(object):
       building_table_of_contents += '\n'
 
     building_table_of_contents += (
-        'Or directly packaged with different package managers:\n'
-        '\n').format(self.project_name)
+        'Or directly packaged with different package managers:\n\n')
 
     if self.supports_dpkg:
       building_table_of_contents += '* Using Debian package tools (DEB)\n'
@@ -629,23 +631,23 @@ class ProjectConfiguration(object):
                 self.project_name, self.project_status))
 
       rpm_filenames += (
-         '~/rpmbuild/RPMS/<arch>/{0:s}-<version>-1.<arch>.rpm\n'
-         '~/rpmbuild/RPMS/<arch>/{0:s}-devel-<version>-1.<arch>.rpm\n').format(
+          '~/rpmbuild/RPMS/<arch>/{0:s}-<version>-1.<arch>.rpm\n'
+          '~/rpmbuild/RPMS/<arch>/{0:s}-devel-<version>-1.<arch>.rpm\n').format(
               self.project_name)
 
       if self.supports_python:
         rpm_filenames += (
-           '~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>'
-           '.rpm\n').format(self.project_name)
+            '~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>'
+            '.rpm\n').format(self.project_name)
 
       if self.supports_tools:
         rpm_filenames += (
-           '~/rpmbuild/RPMS/<arch>/{0:s}-tools-<version>-1.<arch>'
-           '.rpm\n').format(self.project_name)
+            '~/rpmbuild/RPMS/<arch>/{0:s}-tools-<version>-1.<arch>'
+            '.rpm\n').format(self.project_name)
 
       rpm_filenames += (
-         '~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm').format(
-             self.project_name)
+          '~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm').format(
+              self.project_name)
 
     building_table_of_contents += '* Using Mac OS X pkgbuild\n'
 
@@ -671,7 +673,8 @@ class ProjectConfiguration(object):
       mount_tool_additional_arguments = self.mount_tool_additional_arguments
 
     if self.mount_tool_source_description_long:
-      mount_tool_source_description_long = self.mount_tool_source_description_long
+      mount_tool_source_description_long = (
+          self.mount_tool_source_description_long)
     else:
       mount_tool_source_description_long = self.mount_tool_source_description
 
@@ -700,10 +703,14 @@ class ProjectConfiguration(object):
 
         'development_prefix': development_prefix,
         'development_main_object': self.development_main_object,
-        'development_main_object_filename': self.development_main_object_filename,
-        'development_main_object_pre_open_python': development_main_object_pre_open_python,
-        'development_main_object_post_open_python': development_main_object_post_open_python,
-        'development_main_object_post_open_file_object_python': development_main_object_post_open_file_object_python,
+        'development_main_object_filename': (
+            self.development_main_object_filename),
+        'development_main_object_pre_open_python': (
+            development_main_object_pre_open_python),
+        'development_main_object_post_open_python': (
+            development_main_object_post_open_python),
+        'development_main_object_post_open_file_object_python': (
+            development_main_object_post_open_file_object_python),
         'development_main_object_size': self.development_main_object_size,
 
         'tests_profiles': tests_profiles,
@@ -741,14 +748,16 @@ class ProjectConfiguration(object):
         'rpm_rename_source_package': rpm_rename_source_package,
 
         'mount_tool_additional_arguments': mount_tool_additional_arguments,
-        'mount_tool_missing_backend_error': self.mount_tool_missing_backend_error,
+        'mount_tool_missing_backend_error': (
+            self.mount_tool_missing_backend_error),
         'mount_tool_mount_point': self.mount_tool_mount_point,
         'mount_tool_mounted_description': self.mount_tool_mounted_description,
         'mount_tool_mounted_dokan': self.mount_tool_mounted_dokan,
         'mount_tool_mounted_fuse': self.mount_tool_mounted_fuse,
         'mount_tool_source': self.mount_tool_source,
         'mount_tool_source_description': self.mount_tool_source_description,
-        'mount_tool_source_description_long': mount_tool_source_description_long,
+        'mount_tool_source_description_long': (
+            mount_tool_source_description_long),
         'mount_tool_supported_backends': mount_tool_supported_backends,
     }
     return template_mappings
@@ -853,7 +862,7 @@ class BuildingPageGenerator(WikiPageGenerator):
             project_configuration, 'gcc_debug_output.txt', output_writer)
 
       self._GenerateSection(
-        project_configuration, 'gcc_static_library.txt', output_writer)
+          project_configuration, 'gcc_static_library.txt', output_writer)
 
       if project_configuration.supports_tools:
         self._GenerateSection(
@@ -1231,7 +1240,7 @@ class StdoutWriter(object):
     Args:
       data: the data to write.
     """
-    print data,
+    print(data, end='')
 
 
 def Main():
@@ -1250,20 +1259,20 @@ def Main():
   options = args_parser.parse_args()
 
   if not options.config_file:
-    print u'Config file missing.'
-    print u''
+    print(u'Config file missing.')
+    print(u'')
     args_parser.print_help()
-    print u''
+    print(u'')
     return False
 
   if not os.path.exists(options.config_file):
-    print u'No such config file: {0:s}.'.format(options.config_file)
-    print u''
+    print(u'No such config file: {0:s}.'.format(options.config_file))
+    print(u'')
     return False
 
   if options.output_directory and not os.path.exists(options.output_directory):
-    print u'No such output directory: {0:s}.'.format(options.output_directory)
-    print u''
+    print(u'No such output directory: {0:s}.'.format(options.output_directory))
+    print(u'')
     return False
 
   project_configuration = ProjectConfiguration()
@@ -1320,8 +1329,8 @@ def Main():
       output_writer = StdoutWriter()
 
     if not output_writer.Open():
-      print u'Unable to open output writer.'
-      print u''
+      print(u'Unable to open output writer.')
+      print(u'')
       return False
 
     wiki_page.Generate(project_configuration, output_writer)

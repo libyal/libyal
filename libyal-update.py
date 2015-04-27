@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Script to automate (re)installation of libyal packages."""
 
+from __future__ import print_function
 import argparse
 import logging
 import os
@@ -10,11 +11,12 @@ import subprocess
 import sys
 
 if platform.system() == 'Windows':
-  import wmi
+  import wmi  # pylint: disable=import-error
 
 
 # TODO: add support for com.github.libyal.
 
+# pylint: disable=logging-format-interpolation
 
 LIBYAL_PACKAGES = frozenset([
     'libbde',
@@ -54,17 +56,17 @@ def Main():
   options = args_parser.parse_args()
 
   if not options.install_target:
-    print 'Installation target missing.'
-    print ''
+    print('Installation target missing.')
+    print('')
     args_parser.print_help()
-    print ''
+    print('')
     return False
 
   if options.install_target not in install_targets:
-    print 'Unsupported install target: {0:s}.'.format(options.install_target)
-    print ''
+    print('Unsupported install target: {0:s}.'.format(options.install_target))
+    print('')
     args_parser.print_help()
-    print ''
+    print('')
     return False
 
   operating_system = platform.system()
@@ -110,7 +112,7 @@ def Main():
               del package_versions[name]
 
             elif name in package_versions and version < package_versions[name]:
-              print 'Removing: {0:s} {1:s}'.format(name, version)
+              print('Removing: {0:s} {1:s}'.format(name, version))
               product.Uninstall()
 
   elif options.install_target in ['dmg', 'pkg']:
@@ -122,12 +124,12 @@ def Main():
     result = True
 
     command = u'/usr/sbin/pkgutil --packages'
-    print 'Running: "{0:s}"'.format(command)
+    print('Running: "{0:s}"'.format(command))
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     if process.returncode is None:
       packages, _ = process.communicate()
     else:
-      packages = '' 
+      packages = ''
 
     if process.returncode != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -151,13 +153,13 @@ def Main():
         if name in LIBYAL_PACKAGES:
           # Determine the package version.
           command = u'/usr/sbin/pkgutil --pkg-info {0:s}'.format(package_name)
-          print 'Running: "{0:s}"'.format(command)
+          print('Running: "{0:s}"'.format(command))
           process = subprocess.Popen(
               command, stdout=subprocess.PIPE, shell=True)
           if process.returncode is None:
             package_info, _ = process.communicate()
           else:
-            package_info = '' 
+            package_info = ''
 
           if process.returncode != 0:
             logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -184,13 +186,13 @@ def Main():
           elif name in package_versions and version < package_versions[name]:
             # Determine the files in the package.
             command = u'/usr/sbin/pkgutil --files {0:s}'.format(package_name)
-            print 'Running: "{0:s}"'.format(command)
+            print('Running: "{0:s}"'.format(command))
             process = subprocess.Popen(
                 command, stdout=subprocess.PIPE, shell=True)
             if process.returncode is None:
               package_files, _ = process.communicate()
             else:
-              package_files = '' 
+              package_files = ''
 
             if process.returncode != 0:
               logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -211,7 +213,7 @@ def Main():
               else:
                 files.append(filename)
 
-            print 'Removing: {0:s} {1:s}'.format(name, version)
+            print('Removing: {0:s} {1:s}'.format(name, version))
             for filename in files:
               if os.path.exists(filename):
                 os.remove(filename)
@@ -242,7 +244,7 @@ def Main():
 
   result = True
   for name, version in package_versions.iteritems():
-    print 'Installing: {0:s} {1:s}'.format(name, version)
+    print('Installing: {0:s} {1:s}'.format(name, version))
     package_filename = package_filenames[name]
 
     if options.install_target == 'deb':

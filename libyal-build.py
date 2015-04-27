@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Script to automate creating builds of libyal libraries."""
 
+from __future__ import print_function
 import abc
 import argparse
 import fileinput
@@ -23,6 +24,8 @@ try:
 except ImportError:
   import configparser  # pylint: disable=import-error
 
+
+# pylint: disable=logging-format-interpolation
 
 # Since os.path.abspath() uses the current working directory (cwd)
 # os.path.abspath(__file__) will point to a different location if
@@ -676,6 +679,8 @@ class BuildHelper(object):
 class DpkgBuildHelper(BuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
+  # pylint: disable=abstract-method
+
   # TODO: determine BUILD_DEPENDENCIES from the build files?
   # TODO: what about flex, byacc?
   _BUILD_DEPENDENCIES = frozenset([
@@ -883,7 +888,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     # project_version.orig.tar.gz
     filenames = glob.glob(
         u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
-            source_helper.project_name, self.architecture))
+            source_helper.project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -1016,7 +1021,7 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
     # project_version.orig.tar.gz
     filenames = glob.glob(
         u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
-            source_helper.project_name, self.architecture))
+            source_helper.project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -1099,11 +1104,14 @@ class MakeBuildHelper(BuildHelper):
 class MsiBuildHelper(BuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
+  # pylint: disable=abstract-method
+
   LOG_FILENAME = u'msbuild.log'
 
   def __init__(self):
     """Initializes the build helper."""
     super(MsiBuildHelper, self).__init__()
+    self.architecture = platform.machine()
 
     if self.architecture == 'x86':
       self.architecture = 'win32'
@@ -1176,20 +1184,20 @@ class LibyalMsiBuildHelper(MsiBuildHelper):
         if parsing_mode == 1:
           if self.version == '2008':
             if not line.startswith('#define WINVER 0x0501'):
-              print '#define WINVER 0x0501'
-              print ''
+              print('#define WINVER 0x0501')
+              print('')
 
           else:
             if not line.startswith('#define WINVER 0x0600'):
-              print '#define WINVER 0x0600'
-              print ''
+              print('#define WINVER 0x0600')
+              print('')
 
           parsing_mode = 2
 
         elif line.startswith('#define _CONFIG_'):
           parsing_mode = 1
 
-      print line
+      print(line)
 
   def _ConvertSolutionFiles(self, source_directory):
     """Converts the Visual Studio solution and project files.
@@ -1388,6 +1396,8 @@ class LibyalMsiBuildHelper(MsiBuildHelper):
 class PkgBuildHelper(BuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
+  # pylint: disable=abstract-method
+
   def __init__(self):
     """Initializes the build helper."""
     super(PkgBuildHelper, self).__init__()
@@ -1582,6 +1592,8 @@ class LibyalPkgBuildHelper(PkgBuildHelper):
 
 class RpmBuildHelper(BuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
+
+  # pylint: disable=abstract-method
 
   # TODO: determine BUILD_DEPENDENCIES from the build files?
   _BUILD_DEPENDENCIES = frozenset([
@@ -1991,17 +2003,17 @@ def Main():
   options = args_parser.parse_args()
 
   if not options.build_target:
-    print 'Build target missing.'
-    print ''
+    print('Build target missing.')
+    print('')
     args_parser.print_help()
-    print ''
+    print('')
     return False
 
   if options.build_target not in build_targets:
-    print 'Unsupported build target: {0:s}.'.format(options.build_target)
-    print ''
+    print('Unsupported build target: {0:s}.'.format(options.build_target))
+    print('')
     args_parser.print_help()
-    print ''
+    print('')
     return False
 
   if not options.config_file:
@@ -2009,8 +2021,8 @@ def Main():
         os.path.dirname(__file__), 'data', 'libraries.ini')
 
   if not os.path.exists(options.config_file):
-    print u'No such config file: {0:s}.'.format(options.config_file)
-    print u''
+    print(u'No such config file: {0:s}.'.format(options.config_file))
+    print(u'')
     return False
 
   build_configuration = BuildConfiguration()
@@ -2022,17 +2034,17 @@ def Main():
   if options.build_target in ['dpkg', 'dpkg-source']:
     missing_packages = DpkgBuildHelper.CheckBuildDependencies()
     if missing_packages:
-      print (u'Required build package(s) missing. Please install: '
-             u'{0:s}.'.format(u', '.join(missing_packages)))
-      print u''
+      print((u'Required build package(s) missing. Please install: '
+             u'{0:s}.'.format(u', '.join(missing_packages))))
+      print(u'')
       return False
 
   elif options.build_target == 'rpm':
     missing_packages = RpmBuildHelper.CheckBuildDependencies()
     if missing_packages:
-      print (u'Required build package(s) missing. Please install: '
-             u'{0:s}.'.format(u', '.join(missing_packages)))
-      print u''
+      print((u'Required build package(s) missing. Please install: '
+             u'{0:s}.'.format(u', '.join(missing_packages))))
+      print(u'')
       return False
 
   libyal_builder = LibyalBuilder(options.build_target)
@@ -2046,7 +2058,7 @@ def Main():
   result = True
   for project_name in build_configuration.library_names:
     if not libyal_builder.Build(project_name):
-      print u'Failed building: {0:s}'.format(project_name)
+      print(u'Failed building: {0:s}'.format(project_name))
       result = False
       break
 
