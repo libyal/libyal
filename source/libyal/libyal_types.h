@@ -1,7 +1,7 @@
 /*
  * The internal type definitions
  *
- * ${copyright}
+ * Copyright (C) ${copyright}, ${authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *

@@ -1,7 +1,7 @@
 /*
  * Error functions
  *
- * ${copyright}
+ * Copyright (C) ${copyright}, ${authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -23,9 +23,8 @@
 #define _${library_name_upper_case}_INTERNAL_ERROR_H
 
 #include <common.h>
+#include <file_stream.h>
 #include <types.h>
-
-#include <stdio.h>
 
 #if !defined( HAVE_LOCAL_${library_name_upper_case} )
 #include <${library_name}/error.h>
@@ -65,11 +64,11 @@ int ${library_name}_error_backtrace_sprint(
      char *string,
      size_t size );
 
-#endif
+#endif /* !defined( HAVE_LOCAL_${library_name_upper_case} ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif
+#endif /* !defined( _${library_name_upper_case}_INTERNAL_ERROR_H ) */
 

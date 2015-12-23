@@ -1,7 +1,7 @@
 /*
  * The internal unused definition
  *
- * ${copyright}
+ * Copyright (C) ${copyright}, ${authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -40,5 +40,5 @@
 	/* parameter */
 #endif
 
-#endif
+#endif /* !defined( _${library_name_upper_case}_INTERNAL_UNUSED_H ) */
 

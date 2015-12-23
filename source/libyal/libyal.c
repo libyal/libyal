@@ -1,7 +1,7 @@
 /*
  * ${library_description}
  *
- * ${copyright}
+ * Copyright (C) ${copyright}, ${authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *

@@ -24,7 +24,7 @@ BEGIN
       VALUE "FileDescription",		"${library_description}\0"
       VALUE "FileVersion",		"@VERSION@" "\0"
       VALUE "InternalName",		"${library_name}.dll\0"
-      VALUE "LegalCopyright",		"${copyright_short}\0"
+      VALUE "LegalCopyright",		"(C) ${copyright}, ${authors}\0"
       VALUE "OriginalFilename",		"${library_name}.dll\0"
       VALUE "ProductName",		"${library_name}\0"
       VALUE "ProductVersion",		"@VERSION@" "\0"

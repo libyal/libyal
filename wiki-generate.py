@@ -1236,7 +1236,7 @@ class StdoutWriter(object):
 
   def Close(self):
     """Closes the output writer object."""
-    pass
+    return
 
   def Write(self, data):
     """Writes the data to stdout (without the default trailing newline).

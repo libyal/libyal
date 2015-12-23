@@ -1,7 +1,7 @@
 /*
  * Codepage functions
  *
- * ${copyright}
+ * Copyright (C) ${copyright}, ${authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -80,11 +80,11 @@ enum ${library_name_upper_case}_CODEPAGES
 	${library_name_upper_case}_CODEPAGE_WINDOWS_1258			= 1258
 };
 
-#endif
+#endif /* !defined( HAVE_LOCAL_${library_name_upper_case} ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif
+#endif /* !defined( _${library_name_upper_case}_INTERNAL_CODEPAGE_H ) */
 

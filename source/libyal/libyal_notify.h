@@ -1,7 +1,7 @@
 /*
  * Notification function
  *
- * ${copyright}
+ * Copyright (C) ${copyright}, ${authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -23,9 +23,8 @@
 #define _${library_name_upper_case}_NOTIFY_H
 
 #include <common.h>
+#include <file_stream.h>
 #include <types.h>
-
-#include <stdio.h>
 
 #include "${library_name}_extern.h"
 #include "${library_name}_libcerror.h"
@@ -54,11 +53,11 @@ ${library_name_upper_case}_EXTERN \
 int ${library_name}_notify_stream_close(
      libcerror_error_t **error );
 
-#endif
+#endif /* !defined( HAVE_LOCAL_${library_name_upper_case} ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif
+#endif /* !defined( _${library_name_upper_case}_NOTIFY_H ) */
 

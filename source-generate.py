@@ -31,6 +31,7 @@ class ProjectConfiguration(object):
 
     self.library_name = None
     self.library_description = None
+    self.exported_types = None
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
@@ -56,10 +57,17 @@ class ProjectConfiguration(object):
     config_parser = configparser.RawConfigParser()
     config_parser.read([filename])
 
+    self.project_authors = self._GetConfigValue(
+        config_parser, u'Project', u'authors')
+    self.project_copyright = self._GetConfigValue(
+        config_parser, u'Project', u'copyright')
+
     self.library_name = self._GetConfigValue(
         config_parser, u'Library', u'name')
-    self.library_name = self._GetConfigValue(
+    self.library_description = self._GetConfigValue(
         config_parser, u'Library', u'description')
+    self.exported_types = self._GetConfigValue(
+        config_parser, u'Library', u'exported_types')
 
   def GetTemplateMappings(self):
     """Retrieves the template mappings.
@@ -68,6 +76,9 @@ class ProjectConfiguration(object):
       A dictionary containing the string template mappings.
     """
     template_mappings = {
+        u'authors': u', '.join(self.project_authors),
+        u'copyright': self.project_copyright,
+
         u'library_name': self.library_name,
         u'library_name_upper_case': self.library_name.upper(),
         u'library_description': self.library_description,
@@ -91,31 +102,35 @@ class SourceFileGenerator(object):
     """Reads a template string from file.
 
     Args:
-      filename: the name of the file containing the template string.
+      filename: string containing the name of the file containing
+                the template string.
 
     Returns:
       A template string (instance of string.Template).
     """
-    file_object = open(os.path.join(self._template_directory, filename))
+    file_object = open(filename)
     file_data = file_object.read()
     file_object.close()
     return string.Template(file_data)
 
   def _GenerateSection(
-      self, project_configuration, template_filename, output_writer):
+      self, project_configuration, template_filename, output_writer,
+      output_filename):
     """Generates a section from template filename.
 
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      template_filename: the name of the file containing the template string.
+      template_filename: string containing the name of the file containing
+                         the template string.
       output_write: the output writer.
+      output_filename: string containing the name of the output file.
     """
     template_string = self._ReadTemplateFile(template_filename)
 
-    output_writer.Write(
-        template_string.substitute(
-            project_configuration.GetTemplateMappings()))
+    file_data = template_string.substitute(
+        project_configuration.GetTemplateMappings())
+    output_writer.WriteFile(output_filename, file_data)
 
   @abc.abstractmethod
   def Generate(self, project_configuration, output_writer):
@@ -151,10 +166,26 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_write: the output writer.
     """
-    # TODO: process *.[ch] *.rc.in files in the libyal directory
-    filename = u''
+    for directory_entry in os.listdir(self._template_directory):
+      if not directory_entry.startswith(u'libyal_'):
+        continue
 
-    self._GenerateSection(project_configuration, filename, output_writer)
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      # TODO: generate types in _types.h from config.
+      # TODO: generate _libX.h include headers from config.
+
+      output_filename = u'{0:s}_{1:s}'.format(
+          project_configuration.library_name, directory_entry[7:])
+      output_filename = os.path.join(
+          project_configuration.library_name, output_filename)
+
+      self._GenerateSection(
+          project_configuration, template_filename, output_writer,
+          output_filename)
 
   def HasContent(self, unused_project_configuration):
     """Determines if the generator will generate content.
@@ -172,36 +203,25 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
 class FileWriter(object):
   """Class that defines a file output writer."""
 
-  def __init__(self, name):
+  def __init__(self, output_directory):
     """Initialize the output writer.
 
     Args:
-      name: the name of the output.
+      output_directory: string containing the path of the output directory.
     """
     super(FileWriter, self).__init__()
-    self._file_object = None
-    self._name = name
+    self._output_directory = output_directory
 
-  def Open(self):
-    """Opens the output writer object.
-
-    Returns:
-      A boolean containing True if successful or False if not.
-    """
-    self._file_object = open(self._name, 'wb')
-    return True
-
-  def Close(self):
-    """Closes the output writer object."""
-    self._file_object.close()
-
-  def Write(self, data):
+  def WriteFile(self, file_path, file_data):
     """Writes the data to file.
 
     Args:
-      data: the data to write.
+      file_path: string containing the path of the file to write.
+      file_data: binary string containing the data to write.
     """
-    self._file_object.write(data)
+    self._file_object = open(file_path, 'wb')
+    self._file_object.write(file_data)
+    self._file_object.close()
 
 
 class StdoutWriter(object):
@@ -211,25 +231,18 @@ class StdoutWriter(object):
     """Initialize the output writer."""
     super(StdoutWriter, self).__init__()
 
-  def Open(self):
-    """Opens the output writer object.
-
-    Returns:
-      A boolean containing True if successful or False if not.
-    """
-    return True
-
-  def Close(self):
-    """Closes the output writer object."""
-    pass
-
-  def Write(self, data):
+  def WriteFile(self, file_path, file_data):
     """Writes the data to stdout (without the default trailing newline).
 
     Args:
-      data: the data to write.
+      file_path: string containing the path of the file to write.
+      file_data: binary string containing the data to write.
     """
-    print(data, end=u'')
+    print(u'-' * 80)
+    print(u'{0: ^80}'.format(file_path))
+    print(u'-' * 80)
+    print(u'')
+    print(file_data, end=u'')
 
 
 def Main():
@@ -270,11 +283,13 @@ def Main():
   script_directory = os.path.dirname(os.path.abspath(__file__))
 
   # TODO: generate more source files.
+  # include headers
+  # pyyal files
+  # yal.net files
   source_files = [
       (u'libyal', LibrarySourceFileGenerator),
   ]
 
-  # TODO: implement
   for page_name, page_generator_class in source_files:
     template_directory = os.path.join(script_directory, u'source', page_name)
     source_file = page_generator_class(template_directory)
@@ -282,22 +297,12 @@ def Main():
     if not source_file.HasContent(project_configuration):
       continue
 
-    filename = u'{0:s}.md'.format(page_name)
-
     if options.output_directory:
-      output_file = os.path.join(options.output_directory, filename)
-      output_writer = FileWriter(output_file)
+      output_writer = FileWriter(options.output_directory)
     else:
       output_writer = StdoutWriter()
 
-    if not output_writer.Open():
-      print(u'Unable to open output writer.')
-      print(u'')
-      return False
-
     source_file.Generate(project_configuration, output_writer)
-
-    output_writer.Close()
 
   # TODO: add support for Unicode templates.
 

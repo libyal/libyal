@@ -1,7 +1,7 @@
 /*
  * Notification functions
  *
- * ${copyright}
+ * Copyright (C) ${copyright}, ${authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -20,13 +20,12 @@
  */
 
 #include <common.h>
+#include <file_stream.h>
 #include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
 #endif
-
-#include <stdio.h>
 
 #include "${library_name}_libcerror.h"
 #include "${library_name}_libcnotify.h"
@@ -117,5 +116,5 @@ int ${library_name}_notify_stream_close(
 	return( 0 );
 }
 
-#endif
+#endif /* !defined( HAVE_LOCAL_${library_name_upper_case} ) */
 
