@@ -109,6 +109,97 @@ class ProjectsReader(object):
     return projects
 
 
+class ConfigureAcFile(object):
+  """Class that defines a configure.ac file.
+
+  Attributes:
+    name: a string containing the name.
+    version: a string containing the version.
+  """
+
+  def __init__(self, path):
+    """Initializes a configure.ac file.
+
+    Args:
+      path: a string containing the path.
+    """
+    super(ConfigureAcFile, self).__init__()
+    self._path = path
+
+    self.name = os.path.basename(path)
+    self.version = None
+
+  def ReadVersion(self):
+    """Reads the version from the configure.ac file.
+
+    Returns:
+      A boolean to indicate the version was read from the file.
+    """
+    with open(self._path, 'rb') as file_object:
+      line_count = 0
+      for line in file_object.readlines():
+        line = line.strip()
+        if line_count == 2:
+          version = line[1:-2]
+
+          # TODO: convert version to integer?
+          self.version = version.decode(u'ascii')
+
+          return True
+
+        elif line_count:
+          line_count += 1
+
+        elif line.startswith(b'AC_INIT('):
+          line_count += 1
+
+    return False
+
+
+class DefinitionsHeaderFile(object):
+  """Class that defines a definitions header file.
+
+  Attributes:
+    name: a string containing the name.
+    version: a string containing the version.
+  """
+
+  def __init__(self, path):
+    """Initializes a definitions header file.
+
+    Args:
+      path: a string containing the path.
+    """
+    super(DefinitionsHeaderFile, self).__init__()
+    self._path = path
+
+    self.name = os.path.basename(path)
+    self.version = None
+
+  def ReadVersion(self):
+    """Reads the version from the definitions header file.
+
+    Returns:
+      A boolean to indicate the version was read from the file.
+    """
+    library_name, _, _ = self.name.partition(u'_')
+    version_line = b'#define {0:s}_VERSION'.format(library_name.upper())
+
+    with open(self._path, 'rb') as file_object:
+      for line in file_object.readlines():
+        line = line.strip()
+        if line.startswith(version_line):
+          _, _, version = line.rpartition(version_line)
+          version = version.strip()
+
+          # TODO: convert version to integer?
+          self.version = version.decode(u'ascii')
+
+          return True
+
+    return False
+
+
 class M4ScriptFile(object):
   """Class that defines a m4 script file.
 
@@ -147,8 +238,51 @@ class M4ScriptFile(object):
 
     return False
 
+
 class WikiPageGenerator(object):
   """Class that generates wiki pages."""
+
+  _CATEGORIES = {
+      u'cross_platform': (
+          u'Cross-platform functionality',
+          u'Several libraries for cross-platform C functions'),
+      u'data_format': (
+          u'Data formats',
+          u'Several libraries for different types of file format data'),
+      u'file_format': (
+          u'File formats',
+          u'Several libraries for different types of file formats'),
+      u'in_file_format': (
+          u'In-file formats',
+          u'Several libraries for different types of in-file formats'),
+      u'file_system_format': (
+          u'File system formats',
+          u'Several libraries for different types of file systems'),
+      u'volume_system_format': (
+          u'Volume (system) formats',
+          u'Several libraries for different types of volume (system) formats'),
+      u'storage_media_image_format': (
+          u'Storage media image formats',
+          (u'Several libraries for different types of storage media image '
+           u'formats')),
+      u'utility': (
+          u'Utility libraries',
+          u'Several libraries for different "utility" functionality'),
+      u'other': (
+          u'Non-library projects',
+          u''),
+      u'knowledge_base': (
+          u'Knowledge base projects',
+          u''),
+  }
+
+  _ORDER_OF_LIBRARY_CATEGORIES = (
+      u'cross_platform', u'data_format', u'file_format', u'in_file_format',
+      u'file_system_format', u'volume_system_format',
+      u'storage_media_image_format', u'utility')
+
+  _ORDER_OF_OTHER_CATEGORIES = (
+      u'other', u'knowledge_base')
 
   def __init__(self, data_directory, template_directory):
     """Initialize a wiki page generator.
@@ -203,48 +337,6 @@ class WikiPageGenerator(object):
 
 class OverviewWikiPageGenerator(WikiPageGenerator):
   """Class that generates the "Overview" wiki page."""
-
-  _CATEGORIES = {
-      u'cross_platform': (
-          u'Cross-platform functionality',
-          u'Several libraries for cross-platform C functions'),
-      u'data_format': (
-          u'Data formats',
-          u'Several libraries for different types of file format data'),
-      u'file_format': (
-          u'File formats',
-          u'Several libraries for different types of file formats'),
-      u'in_file_format': (
-          u'In-file formats',
-          u'Several libraries for different types of in-file formats'),
-      u'file_system_format': (
-          u'File system formats',
-          u'Several libraries for different types of file systems'),
-      u'volume_system_format': (
-          u'Volume (system) formats',
-          u'Several libraries for different types of volume (system) formats'),
-      u'storage_media_image_format': (
-          u'Storage media image formats',
-          (u'Several libraries for different types of storage media image '
-           u'formats')),
-      u'utility': (
-          u'Utility libraries',
-          u'Several libraries for different "utility" functionality'),
-      u'other': (
-          u'Non-library projects',
-          u''),
-      u'knowledge_base': (
-          u'Knowledge base projects',
-          u''),
-  }
-
-  _ORDER_OF_LIBRARY_CATEGORIES = (
-      u'cross_platform', u'data_format', u'file_format', u'in_file_format',
-      u'file_system_format', u'volume_system_format',
-      u'storage_media_image_format', u'utility')
-
-  _ORDER_OF_OTHER_CATEGORIES = (
-      u'other', u'knowledge_base')
 
   def Generate(self, projects, output_writer):
     """Generates a wiki page.
@@ -375,13 +467,80 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     return u'<br>'.join(lines)
 
-  def Generate(self, projects, output_writer):
-    """Generates a wiki page.
+  def _GetVersionsPerLibrary(self, projects, category):
+    """Retrieves the versions per library.
 
     Args:
       projects: a list of project objects (instances of Project).
-      output_writer: an output writer object (instance of OutputWriter).
+      category: a string containing the category.
+
+    Returns:
+      A dictionary containing the libraries, their versions and the
+      the names of the project that use the specific version. In the form:
+      { library_name: { libraray_version: [ project_name, ... ], ... }, ... }
     """
+    projects_path = os.path.dirname(self._data_directory)
+    projects_path = os.path.dirname(projects_path)
+
+    versions_per_library = {}
+    for project in projects:
+      if project.category != category:
+        continue
+
+      configure_ac_path = os.path.join(
+          projects_path, project.name, u'configure.ac')
+      if not os.path.exists(configure_ac_path):
+        continue
+
+      configure_ac_file = ConfigureAcFile(configure_ac_path)
+
+      version = None
+      if configure_ac_file.ReadVersion():
+        version = configure_ac_file.version
+      if not version:
+        version = u'missing'
+
+      versions_per_library[project.name] = {version: []}
+
+    for project in projects:
+      project_path = os.path.join(projects_path, project.name)
+
+      for library in versions_per_library.keys():
+        definitions_header_path = os.path.join(
+            project_path, library, u'{0:s}_definitions.h'.format(library))
+        if not os.path.exists(definitions_header_path):
+          continue
+
+        definitions_header_file = DefinitionsHeaderFile(definitions_header_path)
+
+        version = None
+        if definitions_header_file.ReadVersion():
+          version = definitions_header_file.version
+        if not version:
+          version = u'missing'
+
+        projects_per_version = versions_per_library[library]
+        if version not in projects_per_version:
+          projects_per_version[version] = []
+
+        projects_per_version[version].append(project.name)
+
+    return versions_per_library
+
+  def _GetVersionsPerM4Scripts(self, projects):
+    """Retrieves the versions per M4 script.
+
+    Args:
+      projects: a list of project objects (instances of Project).
+
+    Returns:
+      A dictionary containing the M4 scripts, their versions and the
+      the names of the project that use the specific version. In the form:
+      { m4_script_name: { m4_script_version: [ project_name, ... ], ... }, ... }
+    """
+    projects_path = os.path.dirname(self._data_directory)
+    projects_path = os.path.dirname(projects_path)
+
     m4_script_glob = os.path.join(self._data_directory, u'm4', u'*.m4')
     versions_per_m4_script = {}
     for path in glob.glob(m4_script_glob):
@@ -396,10 +555,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       versions_per_m4_script[m4_script_file.name] = {version: []}
 
     for project in projects:
-      project_m4_scripts_path = os.path.dirname(self._data_directory)
-      project_m4_scripts_path = os.path.dirname(project_m4_scripts_path)
-      project_m4_scripts_path = os.path.join(
-          project_m4_scripts_path, project.name, u'm4')
+      project_m4_scripts_path = os.path.join(projects_path, project.name, u'm4')
 
       for m4_script in versions_per_m4_script.keys():
         m4_script_path = os.path.join(project_m4_scripts_path, m4_script)
@@ -420,8 +576,24 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
         projects_per_version[version].append(project.name)
 
+    return versions_per_m4_script
+
+  def Generate(self, projects, output_writer):
+    """Generates a wiki page.
+
+    Args:
+      projects: a list of project objects (instances of Project).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
     self._GenerateSection(u'introduction.txt', {}, output_writer)
 
+    # TODO: generate TOC.
+    # output_writer.Write(output_data)
+
+    template_mappings = {u'category_title': u'M4 scripts'}
+    self._GenerateSection(u'category.txt', template_mappings, output_writer)
+
+    versions_per_m4_script = self._GetVersionsPerM4Scripts(projects)
     for m4_script, projects_per_version in sorted(
         versions_per_m4_script.items()):
       template_mappings = {
@@ -440,6 +612,33 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         }
         self._GenerateSection(
             u'table_entry.txt', template_mappings, output_writer)
+
+    # TODO: sort by groups.
+    for category in self._ORDER_OF_LIBRARY_CATEGORIES:
+      template_mappings = {
+          u'category_title': self._CATEGORIES[category][0],
+      }
+      self._GenerateSection(u'category.txt', template_mappings, output_writer)
+
+      versions_per_library = self._GetVersionsPerLibrary(projects, category)
+      for library, projects_per_version in sorted(
+          versions_per_library.items()):
+        template_mappings = {
+            u'title': library,
+        }
+        self._GenerateSection(
+            u'table_header.txt', template_mappings, output_writer)
+
+        for version, project_names in sorted(
+              projects_per_version.items(), reverse=True):
+          project_names = self._FormatProjectNames(project_names)
+
+          template_mappings = {
+              u'project_names': project_names,
+              u'version': version,
+          }
+          self._GenerateSection(
+              u'table_entry.txt', template_mappings, output_writer)
 
 
 class FileWriter(object):
