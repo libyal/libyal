@@ -1,0 +1,1 @@
+[${project_name}](https://github.com/libyal/${project_name}/wiki/) | ${project_description} | [![build status](https://travis-ci.org/libyal/${project_name}.svg?branch=master)](https://travis-ci.org/libyal/${project_name}) | [![Build status](https://ci.appveyor.com/api/projects/status/${appveyor_identifier}?svg=true)](https://ci.appveyor.com/project/joachimmetz/${project_name})

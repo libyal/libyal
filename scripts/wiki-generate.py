@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Script to automate generation of wiki pages of libyal libraries."""
+"""Script to automate generation of wiki pages of the libyal libraries."""
 
 from __future__ import print_function
 import abc
@@ -1318,7 +1318,8 @@ def Main():
   ]
 
   for page_name, page_generator_class in wiki_pages:
-    template_directory = os.path.join(script_directory, u'wiki', page_name)
+    template_directory = os.path.join(
+        script_directory, u'data', u'wiki', page_name)
     wiki_page = page_generator_class(template_directory)
 
     if not wiki_page.HasContent(project_configuration):

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Script to automate generation of source of libyal libraries."""
+"""Script to automate generation of source of the libyal libraries."""
 
 from __future__ import print_function
 import abc
@@ -291,7 +291,8 @@ def Main():
   ]
 
   for page_name, page_generator_class in source_files:
-    template_directory = os.path.join(script_directory, u'source', page_name)
+    template_directory = os.path.join(
+        script_directory, u'data', u'source', page_name)
     source_file = page_generator_class(template_directory)
 
     if not source_file.HasContent(project_configuration):

@@ -1,0 +1,10 @@
+
+# Non-library projects
+* [Assorted](https://github.com/libyal/assorted); experimentation scripts and documentation on various formats
+* [ReviveIt (revit)](https://github.com/libyal/reviveit/); proof of concept file carver that uses the concept of Smart Carving
+
+# Knowledge base projects
+* [esedb-kb](https://github.com/libyal/esedb-kb/wiki/); Extensible Storage Engine (ESE) Database File Knowledge Base
+* [winevt-kb](https://github.com/libyal/winevt-kb/wiki/); Windows Event Log Knowledge Base
+* [winreg-kb](https://github.com/libyal/winreg-kb/wiki/); Windows Registry Knowledge Base
+
