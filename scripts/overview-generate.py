@@ -25,6 +25,7 @@ class Project(object):
     appveyor_identifier: a string containing the AppVeyor identifier.
     category: a string containing the category.
     description: a string containing the description.
+    display_name: a string containing the display name.
     documentation_only: a boolean indicating if the project only contains
                         documentation.
     name: a string containing the name.
@@ -40,6 +41,7 @@ class Project(object):
     self.appveyor_identifier = None
     self.category = None
     self.description = None
+    self.display_name = name
     self.documentation_only = False
     self.name = name
 
@@ -89,6 +91,12 @@ class ProjectsReader(object):
 
       project.category = self._GetConfigValue(project_name, u'category')
       project.description = self._GetConfigValue(project_name, u'description')
+
+      try:
+        project.display_name = self._GetConfigValue(
+            project_name, u'display_name')
+      except configparser.NoOptionError:
+        pass
 
       try:
         project.documentation_only = self._GetConfigValue(
@@ -222,12 +230,21 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
       u'utility': (
           u'Utility libraries',
           u'Several libraries for different "utility" functionality'),
+      u'other': (
+          u'Non-library projects',
+          u''),
+      u'knowledge_base': (
+          u'Knowledge base projects',
+          u''),
   }
 
-  _CATEGORIES_ORDER = (
+  _ORDER_OF_LIBRARY_CATEGORIES = (
       u'cross_platform', u'data_format', u'file_format', u'in_file_format',
       u'file_system_format', u'volume_system_format',
       u'storage_media_image_format', u'utility')
+
+  _ORDER_OF_OTHER_CATEGORIES = (
+      u'other', u'knowledge_base')
 
   def Generate(self, projects, output_writer):
     """Generates a wiki page.
@@ -245,12 +262,13 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
       projects_per_category[project.category].append(project)
 
-    for category in self._CATEGORIES_ORDER:
+    for category in self._ORDER_OF_LIBRARY_CATEGORIES:
       template_mappings = {
           u'category_description': self._CATEGORIES[category][1],
           u'category_title': self._CATEGORIES[category][0]
       }
-      self._GenerateSection(u'category.txt', template_mappings, output_writer)
+      self._GenerateSection(
+          u'category_library.txt', template_mappings, output_writer)
 
       projects = projects_per_category[category]
       for project in projects_per_category[category]:
@@ -290,7 +308,21 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
         }
         self._GenerateSection(u'library.txt', template_mappings, output_writer)
 
-    self._GenerateSection(u'other.txt', {}, output_writer)
+    for category in self._ORDER_OF_OTHER_CATEGORIES:
+      template_mappings = {
+          u'category_title': self._CATEGORIES[category][0]
+      }
+      self._GenerateSection(
+          u'category_other.txt', template_mappings, output_writer)
+
+      projects = projects_per_category[category]
+      for project in projects_per_category[category]:
+        template_mappings = {
+            u'project_description': project.description,
+            u'project_display_name': project.display_name,
+            u'project_name': project.name,
+        }
+        self._GenerateSection(u'other.txt', template_mappings, output_writer)
 
 
 class StatusWikiPageGenerator(WikiPageGenerator):
