@@ -22,6 +22,8 @@ class Project(object):
     appveyor_identifier: a string containing the AppVeyor identifier.
     category: a string containing the category.
     description: a string containing the description.
+    documentation_only: a boolean indicating if the project only contains
+                        documentation.
     name: a string containing the name.
   """
 
@@ -35,6 +37,7 @@ class Project(object):
     self.appveyor_identifier = None
     self.category = None
     self.description = None
+    self.documentation_only = False
     self.name = name
 
 
@@ -83,6 +86,12 @@ class ProjectsReader(object):
 
       project.category = self._GetConfigValue(project_name, u'category')
       project.description = self._GetConfigValue(project_name, u'description')
+
+      try:
+        project.documentation_only = self._GetConfigValue(
+            project_name, u'documentation_only')
+      except configparser.NoOptionError:
+        pass
 
       projects.append(project)
 
@@ -196,16 +205,29 @@ class OverviewWikiPageGenerator(object):
               u'(https://ci.appveyor.com/project/joachimmetz/{1:s})').format(
                   project.appveyor_identifier, project.name)
 
-        # TODO: build status => Build status
-        travis_build_status = (
-            u'[![build status]'
-            u'(https://travis-ci.org/libyal/{0:s}.svg?branch=master)]'
-            u'(https://travis-ci.org/libyal/{0:s})').format(
-                project.name)
+        if project.documentation_only:
+          project_description = (
+              u'{0:s} (**at the moment [documentation]'
+              u'(https://github.com/libyal/{1:s}/blob/master/documentation) '
+              u'only**)').format(project.description, project.name)
+
+          travis_build_status = u''
+        else:
+          project_description = project.description
+
+          travis_build_status = (
+              u'[![Build status]'
+              u'(https://travis-ci.org/libyal/{0:s}.svg?branch=master)]'
+              u'(https://travis-ci.org/libyal/{0:s})').format(
+                  project.name)
+
+        # TODO: solve this in a more elegant way.
+        if project.name == u'libtableau':
+          travis_build_status = u''
 
         template_mappings = {
             u'appveyor_build_status': appveyor_build_status,
-            u'project_description': project.description,
+            u'project_description': project_description,
             u'project_name': project.name,
             u'travis_build_status': travis_build_status
         }
