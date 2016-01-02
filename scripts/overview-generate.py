@@ -3,8 +3,11 @@
 """Script to automate generation of an overview of the libyal libraries."""
 
 from __future__ import print_function
+import abc
 import argparse
+import glob
 import json
+import logging
 import os
 import string
 import sys
@@ -98,49 +101,57 @@ class ProjectsReader(object):
     return projects
 
 
-class OverviewWikiPageGenerator(object):
-  """Class that generates the "Overview" wiki page."""
+class M4ScriptFile(object):
+  """Class that defines a m4 script file.
 
-  _CATEGORIES = {
-      u'cross_platform': (
-          u'Cross-platform functionality',
-          u'Several libraries for cross-platform C functions'),
-      u'data_format': (
-          u'Data formats',
-          u'Several libraries for different types of file format data'),
-      u'file_format': (
-          u'File formats',
-          u'Several libraries for different types of file formats'),
-      u'in_file_format': (
-          u'In-file formats',
-          u'Several libraries for different types of in-file formats'),
-      u'file_system_format': (
-          u'File system formats',
-          u'Several libraries for different types of file systems'),
-      u'volume_system_format': (
-          u'Volume (system) formats',
-          u'Several libraries for different types of volume (system) formats'),
-      u'storage_media_image_format': (
-          u'Storage media image formats',
-          (u'Several libraries for different types of storage media image '
-           u'formats')),
-      u'utility': (
-          u'Utility libraries',
-          u'Several libraries for different "utility" functionality')
-  }
+  Attributes:
+    name: a string containing the name.
+    version: a string containing the version.
+  """
 
-  _CATEGORIES_ORDER = [
-      u'cross_platform', u'data_format', u'file_format', u'in_file_format',
-      u'file_system_format', u'volume_system_format',
-      u'storage_media_image_format', u'utility']
+  def __init__(self, path):
+    """Initializes a m4 script file.
 
-  def __init__(self, template_directory):
+    Args:
+      path: a string containing the path.
+    """
+    super(M4ScriptFile, self).__init__()
+    self._path = path
+
+    self.name = os.path.basename(path)
+    self.version = None
+
+  def ReadVersion(self):
+    """Reads the version from the m4 script file.
+
+    Returns:
+      A boolean to indicate the version was read from the file.
+    """
+    with open(self._path, 'rb') as file_object:
+      for line in file_object.readlines():
+        line = line.strip()
+        if line.startswith(b'dnl Version: '):
+          _, _, version = line.rpartition(b'dnl Version: ')
+          # TODO: convert version to integer?
+          self.version = version.decode(u'ascii')
+
+          return True
+
+    return False
+
+class WikiPageGenerator(object):
+  """Class that generates wiki pages."""
+
+  def __init__(self, data_directory, template_directory):
     """Initialize a wiki page generator.
 
     Args:
-      template_directory: the path of the template directory.
+      data_directory: a string containing the path of the data directory.
+      template_directory: a string containing the path of the template
+                          directory.
     """
-    super(OverviewWikiPageGenerator, self).__init__()
+    super(WikiPageGenerator, self).__init__()
+    self._data_directory = data_directory
     self._template_directory = template_directory
 
   def _GenerateSection(
@@ -171,6 +182,52 @@ class OverviewWikiPageGenerator(object):
     file_data = file_object.read()
     file_object.close()
     return string.Template(file_data)
+
+  @abc.abstractmethod
+  def Generate(self, projects, output_writer):
+    """Generates a wiki page.
+
+    Args:
+      projects: a list of project objects (instances of Project).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+
+
+class OverviewWikiPageGenerator(WikiPageGenerator):
+  """Class that generates the "Overview" wiki page."""
+
+  _CATEGORIES = {
+      u'cross_platform': (
+          u'Cross-platform functionality',
+          u'Several libraries for cross-platform C functions'),
+      u'data_format': (
+          u'Data formats',
+          u'Several libraries for different types of file format data'),
+      u'file_format': (
+          u'File formats',
+          u'Several libraries for different types of file formats'),
+      u'in_file_format': (
+          u'In-file formats',
+          u'Several libraries for different types of in-file formats'),
+      u'file_system_format': (
+          u'File system formats',
+          u'Several libraries for different types of file systems'),
+      u'volume_system_format': (
+          u'Volume (system) formats',
+          u'Several libraries for different types of volume (system) formats'),
+      u'storage_media_image_format': (
+          u'Storage media image formats',
+          (u'Several libraries for different types of storage media image '
+           u'formats')),
+      u'utility': (
+          u'Utility libraries',
+          u'Several libraries for different "utility" functionality'),
+  }
+
+  _CATEGORIES_ORDER = (
+      u'cross_platform', u'data_format', u'file_format', u'in_file_format',
+      u'file_system_format', u'volume_system_format',
+      u'storage_media_image_format', u'utility')
 
   def Generate(self, projects, output_writer):
     """Generates a wiki page.
@@ -234,6 +291,123 @@ class OverviewWikiPageGenerator(object):
         self._GenerateSection(u'library.txt', template_mappings, output_writer)
 
     self._GenerateSection(u'other.txt', {}, output_writer)
+
+
+class StatusWikiPageGenerator(WikiPageGenerator):
+  """Class that generates the "Status" wiki page."""
+
+  _PROJECT_GROUPS = (
+      (u'libcstring', u'libcerror', u'libcthreads', ),
+      (u'libcdata', u'libcdatetime', u'libclocale', u'libcnotify',
+       u'libcsplit', ),
+      (u'libuna', ),
+      (u'libcdirectory', u'libcfile', u'libcpath', u'libcsystem'),
+      (u'libbfio', u'libsigscan', ),
+      (u'libfcache', u'libfdata', u'libfdatetime', u'libfguid', u'libfmapi',
+       u'libfole', u'libftxf', u'libftxr', u'libfusn', u'libfvalue',
+       u'libfwevt', u'libfwnt', u'libfwps', u'libfwsi', ),
+      (u'libcaes', u'libhmac', ),
+      (u'libagdb', u'libcreg', u'libesedb', u'libevt', u'libevtx', u'libexe',
+       u'liblnk', u'libmdmp', u'libmsiecf', u'libnk2', u'libnsfdb',
+       u'libolecf', u'libpff', u'libregf', u'libscca', u'libswf', u'libwtcdb', ),
+      (u'libmapidb', u'libwrc', ),
+      (u'libfsclfs', u'libfsext', u'libfshfs', u'libfsntfs', u'libfsrefs', ),
+      (u'libbde', u'libfvde', u'libluksde', u'libvshadow', u'libvslvm',
+       u'libvsmbr', ),
+      (u'libewf', u'libhibr', u'libodraw', u'libphdi', u'libqcow', u'libsmdev',
+       u'libsmraw', u'libvhdi', u'libvmdk', ),
+  )
+
+  def _FormatProjectNames(self, project_names):
+    """Formats the project names.
+
+    Args:
+      project_names: a list of strings containing the project names.
+
+    Returns:
+      A string containing the formatted project names.
+    """
+    lines = []
+    for project_group in self._PROJECT_GROUPS:
+      line = []
+      for project in project_group:
+        if project in project_names:
+          line.append(project)
+          project_names.pop(project_names.index(project))
+
+      if line:
+        lines.append(u', '.join(line))
+
+    if project_names:
+      lines.append(u', '.join(project_names))
+
+    return u'<br>'.join(lines)
+
+  def Generate(self, projects, output_writer):
+    """Generates a wiki page.
+
+    Args:
+      projects: a list of project objects (instances of Project).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    m4_script_glob = os.path.join(self._data_directory, u'm4', u'*.m4')
+    versions_per_m4_script = {}
+    for path in glob.glob(m4_script_glob):
+      m4_script_file = M4ScriptFile(path)
+
+      version = None
+      if m4_script_file.ReadVersion():
+        version = m4_script_file.version
+      if not version:
+        version = u'missing'
+
+      versions_per_m4_script[m4_script_file.name] = {version: []}
+
+    for project in projects:
+      project_m4_scripts_path = os.path.dirname(self._data_directory)
+      project_m4_scripts_path = os.path.dirname(project_m4_scripts_path)
+      project_m4_scripts_path = os.path.join(
+          project_m4_scripts_path, project.name, u'm4')
+
+      for m4_script in versions_per_m4_script.keys():
+        m4_script_path = os.path.join(project_m4_scripts_path, m4_script)
+        if not os.path.exists(m4_script_path):
+          continue
+
+        m4_script_file = M4ScriptFile(m4_script_path)
+
+        version = None
+        if m4_script_file.ReadVersion():
+          version = m4_script_file.version
+        if not version:
+          version = u'missing'
+
+        projects_per_version = versions_per_m4_script[m4_script]
+        if version not in projects_per_version:
+          projects_per_version[version] = []
+
+        projects_per_version[version].append(project.name)
+
+    self._GenerateSection(u'introduction.txt', {}, output_writer)
+
+    for m4_script, projects_per_version in sorted(
+        versions_per_m4_script.items()):
+      template_mappings = {
+          u'title': m4_script,
+      }
+      self._GenerateSection(
+          u'table_header.txt', template_mappings, output_writer)
+
+      for version, project_names in sorted(
+            projects_per_version.items(), reverse=True):
+        project_names = self._FormatProjectNames(project_names)
+
+        template_mappings = {
+            u'project_names': project_names,
+            u'version': version,
+        }
+        self._GenerateSection(
+            u'table_entry.txt', template_mappings, output_writer)
 
 
 class FileWriter(object):
@@ -346,27 +520,33 @@ def Main():
     print(u'')
     return False
 
-  page_name = u'Overview'
-  template_directory = os.path.join(
-      libyal_directory, u'data', u'wiki', page_name)
-  wiki_page = OverviewWikiPageGenerator(template_directory)
+  wiki_pages = [
+      (u'Overview', OverviewWikiPageGenerator),
+      (u'Status', StatusWikiPageGenerator),
+  ]
 
-  filename = u'{0:s}.md'.format(page_name)
+  for page_name, page_generator_class in wiki_pages:
+    data_directory = os.path.join(libyal_directory, u'data')
+    template_directory = os.path.join(data_directory, u'wiki', page_name)
+    wiki_page = page_generator_class(data_directory, template_directory)
 
-  if options.output_directory:
-    output_file = os.path.join(options.output_directory, filename)
-    output_writer = FileWriter(output_file)
-  else:
-    output_writer = StdoutWriter()
+    if options.output_directory:
+      filename = u'{0:s}.md'.format(page_name)
+      output_file = os.path.join(options.output_directory, filename)
+      output_writer = FileWriter(output_file)
+    else:
+      output_writer = StdoutWriter()
 
-  if not output_writer.Open():
-    print(u'Unable to open output writer.')
-    print(u'')
-    return False
+    if not output_writer.Open():
+      print(u'Unable to open output writer.')
+      print(u'')
+      return False
 
-  wiki_page.Generate(projects, output_writer)
+    wiki_page.Generate(projects, output_writer)
 
-  output_writer.Close()
+    output_writer.Close()
+
+  # TODO: add support for Unicode templates.
 
   return True
 

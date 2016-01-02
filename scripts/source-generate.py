@@ -89,7 +89,8 @@ class SourceFileGenerator(object):
     """Initialize the source file generator.
 
     Args:
-      template_directory: the path of the template directory.
+      template_directory: a string containing the path of the template
+                          directory.
     """
     super(SourceFileGenerator, self).__init__()
     self._template_directory = template_directory
@@ -135,18 +136,6 @@ class SourceFileGenerator(object):
       output_writer: an output writer object (instance of OutputWriter).
     """
 
-  @abc.abstractmethod
-  def HasContent(self, project_configuration):
-    """Determines if the generator will generate content.
-
-    Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-
-    Returns:
-      Boolean value to indicate the generator will generate content.
-    """
-
 
 class LibrarySourceFileGenerator(SourceFileGenerator):
   """Class that generates the library source files."""
@@ -179,18 +168,6 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
-
-  def HasContent(self, unused_project_configuration):
-    """Determines if the generator will generate content.
-
-    Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-
-    Returns:
-      Boolean value to indicate the generator will generate content.
-    """
-    return True
 
 
 class FileWriter(object):
@@ -290,9 +267,6 @@ def Main():
     template_directory = os.path.join(
         libyal_directory, u'data', u'source', page_name)
     source_file = page_generator_class(template_directory)
-
-    if not source_file.HasContent(project_configuration):
-      continue
 
     if options.output_directory:
       output_writer = FileWriter(options.output_directory)

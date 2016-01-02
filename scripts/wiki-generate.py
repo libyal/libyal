@@ -772,7 +772,8 @@ class WikiPageGenerator(object):
     """Initialize a wiki page generator.
 
     Args:
-      template_directory: the path of the template directory.
+      template_directory: a string containing the path of the template
+                          directory.
     """
     super(WikiPageGenerator, self).__init__()
     self._template_directory = template_directory
@@ -1325,9 +1326,8 @@ def Main():
     if not wiki_page.HasContent(project_configuration):
       continue
 
-    filename = u'{0:s}.md'.format(page_name)
-
     if options.output_directory:
+      filename = u'{0:s}.md'.format(page_name)
       output_file = os.path.join(options.output_directory, filename)
       output_writer = FileWriter(output_file)
     else:

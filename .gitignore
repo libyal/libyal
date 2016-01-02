@@ -1,0 +1,11 @@
+# Files to ignore by git
+
+# Generic auto-generated build files
+*.pyc
+*.pyo
+*.swp
+
+# Specific auto-generated build files
+/__pycache__
+/build
+/dist
