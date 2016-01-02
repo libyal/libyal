@@ -16,15 +16,11 @@ except ImportError:
   import configparser  # pylint: disable=import-error
 
 
-class ConfigError(Exception):
-  """Class that defines a configuration error."""
-
-
 class ProjectConfiguration(object):
-  """Class that contains the project configuration."""
+  """Class that defines a project configuration."""
 
   def __init__(self):
-    """Initializes the project configuation."""
+    """Initializes a project configuation object."""
     super(ProjectConfiguration, self).__init__()
     self.project_authors = None
     self.project_copyright = None
@@ -50,7 +46,7 @@ class ProjectConfiguration(object):
     """Reads the configuration from file.
 
     Args:
-      filename: the configuration filename.
+      filename: a string containing the filename.
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
@@ -98,6 +94,22 @@ class SourceFileGenerator(object):
     super(SourceFileGenerator, self).__init__()
     self._template_directory = template_directory
 
+  def _GenerateSection(
+      self, template_filename, template_mappings, output_writer,
+      output_filename):
+    """Generates a section from template filename.
+
+    Args:
+      template_filename: a string containing the name of the template file.
+      template_mpppings: a dictionary containing the template mappings, where
+                         the key maps to the name of a template variable.
+      output_writer: an output writer object (instance of OutputWriter).
+      output_filename: string containing the name of the output file.
+    """
+    template_string = self._ReadTemplateFile(template_filename)
+    output_data = template_string.substitute(template_mappings)
+    output_writer.WriteFile(output_filename, output_data)
+
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.
 
@@ -108,29 +120,10 @@ class SourceFileGenerator(object):
     Returns:
       A template string (instance of string.Template).
     """
-    file_object = open(filename)
+    file_object = open(filename, 'rb')
     file_data = file_object.read()
     file_object.close()
     return string.Template(file_data)
-
-  def _GenerateSection(
-      self, project_configuration, template_filename, output_writer,
-      output_filename):
-    """Generates a section from template filename.
-
-    Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      template_filename: string containing the name of the file containing
-                         the template string.
-      output_write: the output writer.
-      output_filename: string containing the name of the output file.
-    """
-    template_string = self._ReadTemplateFile(template_filename)
-
-    file_data = template_string.substitute(
-        project_configuration.GetTemplateMappings())
-    output_writer.WriteFile(output_filename, file_data)
 
   @abc.abstractmethod
   def Generate(self, project_configuration, output_writer):
@@ -139,7 +132,7 @@ class SourceFileGenerator(object):
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      output_write: the output writer.
+      output_writer: an output writer object (instance of OutputWriter).
     """
 
   @abc.abstractmethod
@@ -164,8 +157,9 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      output_write: the output writer.
+      output_writer: an output writer object (instance of OutputWriter).
     """
+    template_mappings = project_configuration.GetTemplateMappings()
     for directory_entry in os.listdir(self._template_directory):
       if not directory_entry.startswith(u'libyal_'):
         continue
@@ -184,8 +178,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           project_configuration.library_name, output_filename)
 
       self._GenerateSection(
-          project_configuration, template_filename, output_writer,
-          output_filename)
+          template_filename, template_mappings, output_writer, output_filename)
 
   def HasContent(self, unused_project_configuration):
     """Determines if the generator will generate content.
@@ -250,8 +243,8 @@ def Main():
       u'Generates source files of the libyal libraries.'))
 
   args_parser.add_argument(
-      u'config_file', action=u'store', metavar=u'CONFIG_FILE',
-      default='source.conf', help=u'The source generation config file.')
+      u'configuration_file', action=u'store', metavar=u'CONFIGURATION_FILE',
+      default='source.conf', help=u'The source generation configuration file.')
 
   args_parser.add_argument(
       u'-o', u'--output', dest=u'output_directory', action=u'store',
@@ -260,15 +253,16 @@ def Main():
 
   options = args_parser.parse_args()
 
-  if not options.config_file:
+  if not options.configuration_file:
     print(u'Config file missing.')
     print(u'')
     args_parser.print_help()
     print(u'')
     return False
 
-  if not os.path.exists(options.config_file):
-    print(u'No such config file: {0:s}.'.format(options.config_file))
+  if not os.path.exists(options.configuration_file):
+    print(u'No such configuration file: {0:s}.'.format(
+        options.configuration_file))
     print(u'')
     return False
 
@@ -278,9 +272,11 @@ def Main():
     return False
 
   project_configuration = ProjectConfiguration()
-  project_configuration.ReadFromFile(options.config_file)
+  project_configuration.ReadFromFile(options.configuration_file)
 
-  script_directory = os.path.dirname(os.path.abspath(__file__))
+  libyal_directory = os.path.abspath(__file__)
+  libyal_directory = os.path.dirname(libyal_directory)
+  libyal_directory = os.path.dirname(libyal_directory)
 
   # TODO: generate more source files.
   # include headers
@@ -292,7 +288,7 @@ def Main():
 
   for page_name, page_generator_class in source_files:
     template_directory = os.path.join(
-        script_directory, u'data', u'source', page_name)
+        libyal_directory, u'data', u'source', page_name)
     source_file = page_generator_class(template_directory)
 
     if not source_file.HasContent(project_configuration):

@@ -22,10 +22,10 @@ class ConfigError(Exception):
 
 
 class ProjectConfiguration(object):
-  """Class that contains the project configuration."""
+  """Class that defines a project configuration."""
 
   def __init__(self):
-    """Initializes the project configuation."""
+    """Initializes a project configuation object."""
     super(ProjectConfiguration, self).__init__()
     self.project_name = None
     self.project_status = None
@@ -129,7 +129,7 @@ class ProjectConfiguration(object):
     """Reads the configuration from file.
 
     Args:
-      filename: the configuration filename.
+      filename: a string containing the filename.
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
@@ -777,6 +777,20 @@ class WikiPageGenerator(object):
     super(WikiPageGenerator, self).__init__()
     self._template_directory = template_directory
 
+  def _GenerateSection(
+      self, template_filename, template_mappings, output_writer):
+    """Generates a section from template filename.
+
+    Args:
+      template_filename: a string containing the name of the template file.
+      template_mpppings: a dictionary containing the template mappings, where
+                         the key maps to the name of a template variable.
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    template_string = self._ReadTemplateFile(template_filename)
+    output_data = template_string.substitute(template_mappings)
+    output_writer.Write(output_data)
+
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.
 
@@ -786,26 +800,11 @@ class WikiPageGenerator(object):
     Returns:
       A template string (instance of string.Template).
     """
-    file_object = open(os.path.join(self._template_directory, filename))
+    path = os.path.join(self._template_directory, filename)
+    file_object = open(path, 'rb')
     file_data = file_object.read()
     file_object.close()
     return string.Template(file_data)
-
-  def _GenerateSection(
-      self, project_configuration, template_filename, output_writer):
-    """Generates a section from template filename.
-
-    Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      template_filename: the name of the file containing the template string.
-      output_write: the output writer.
-    """
-    template_string = self._ReadTemplateFile(template_filename)
-
-    output_writer.Write(
-        template_string.substitute(
-            project_configuration.GetTemplateMappings()))
 
   @abc.abstractmethod
   def Generate(self, project_configuration, output_writer):
@@ -814,7 +813,7 @@ class WikiPageGenerator(object):
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      output_write: the output writer.
+      output_writer: an output writer object (instance of OutputWriter).
     """
 
   @abc.abstractmethod
@@ -839,97 +838,92 @@ class BuildingPageGenerator(WikiPageGenerator):
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      output_write: the output writer.
+      output_writer: an output writer object (instance of OutputWriter).
     """
-    self._GenerateSection(
-        project_configuration, u'introduction.txt', output_writer)
+    template_mappings = project_configuration.GetTemplateMappings()
+    self._GenerateSection(u'introduction.txt', template_mappings, output_writer)
 
     if (project_configuration.supports_source_package or
         project_configuration.supports_git):
-      self._GenerateSection(project_configuration, u'source.txt', output_writer)
+      self._GenerateSection(u'source.txt', template_mappings, output_writer)
 
       if project_configuration.supports_source_package:
         self._GenerateSection(
-            project_configuration, u'source_package.txt', output_writer)
+            u'source_package.txt', template_mappings, output_writer)
 
       if project_configuration.supports_git:
         self._GenerateSection(
-            project_configuration, u'source_git.txt', output_writer)
+            u'source_git.txt', template_mappings, output_writer)
 
     if project_configuration.supports_gcc:
-      self._GenerateSection(project_configuration, u'gcc.txt', output_writer)
+      self._GenerateSection(u'gcc.txt', template_mappings, output_writer)
 
       if project_configuration.supports_debug_output:
         self._GenerateSection(
-            project_configuration, u'gcc_debug_output.txt', output_writer)
+            u'gcc_debug_output.txt', template_mappings, output_writer)
 
       self._GenerateSection(
-          project_configuration, u'gcc_static_library.txt', output_writer)
+          u'gcc_static_library.txt', template_mappings, output_writer)
 
       if project_configuration.supports_tools:
         self._GenerateSection(
-            project_configuration, u'gcc_static_executables.txt', output_writer)
+            u'gcc_static_executables.txt', template_mappings, output_writer)
 
       if project_configuration.supports_python:
         self._GenerateSection(
-            project_configuration, u'gcc_python.txt', output_writer)
+            u'gcc_python.txt', template_mappings, output_writer)
 
-      self._GenerateSection(project_configuration, u'cygwin.txt', output_writer)
-      self._GenerateSection(
-          project_configuration, u'gcc_macosx.txt', output_writer)
+      self._GenerateSection(u'cygwin.txt', template_mappings, output_writer)
+      self._GenerateSection(u'gcc_macosx.txt', template_mappings, output_writer)
 
       if project_configuration.supports_python:
         self._GenerateSection(
-            project_configuration, u'gcc_macosx_python.txt', output_writer)
+            u'gcc_macosx_python.txt', template_mappings, output_writer)
 
       self._GenerateSection(
-          project_configuration, u'gcc_solaris.txt', output_writer)
+          u'gcc_solaris.txt', template_mappings, output_writer)
 
     if project_configuration.supports_mingw:
-      self._GenerateSection(project_configuration, u'mingw.txt', output_writer)
+      self._GenerateSection(u'mingw.txt', template_mappings, output_writer)
+      self._GenerateSection(u'mingw_msys.txt', template_mappings, output_writer)
+      self._GenerateSection(u'mingw_dll.txt', template_mappings, output_writer)
       self._GenerateSection(
-          project_configuration, u'mingw_msys.txt', output_writer)
-      self._GenerateSection(
-          project_configuration, u'mingw_dll.txt', output_writer)
-      self._GenerateSection(
-          project_configuration, u'mingw_troubleshooting.txt', output_writer)
+          u'mingw_troubleshooting.txt', template_mappings, output_writer)
 
     if project_configuration.supports_msvscpp:
-      self._GenerateSection(
-          project_configuration, u'msvscpp.txt', output_writer)
+      self._GenerateSection(u'msvscpp.txt', template_mappings, output_writer)
 
       if project_configuration.supports_debug_output:
         self._GenerateSection(
-            project_configuration, u'msvscpp_debug.txt', output_writer)
+            u'msvscpp_debug.txt', template_mappings, output_writer)
 
       if project_configuration.msvscpp_zlib_dependency:
         self._GenerateSection(
-            project_configuration, u'msvscpp_zlib.txt', output_writer)
+            u'msvscpp_zlib.txt', template_mappings, output_writer)
 
       if project_configuration.supports_dokan:
         self._GenerateSection(
-            project_configuration, u'msvscpp_dokan.txt', output_writer)
+            u'msvscpp_dokan.txt', template_mappings, output_writer)
 
       if project_configuration.supports_python:
         self._GenerateSection(
-            project_configuration, u'msvscpp_python.txt', output_writer)
+            u'msvscpp_python.txt', template_mappings, output_writer)
 
       self._GenerateSection(
-          project_configuration, u'msvscpp_build.txt', output_writer)
+          u'msvscpp_build.txt', template_mappings, output_writer)
       self._GenerateSection(
-          project_configuration, u'msvscpp_dll.txt', output_writer)
+          u'msvscpp_dll.txt', template_mappings, output_writer)
 
       self._GenerateSection(
-          project_configuration, u'msvscpp_2010.txt', output_writer)
+          u'msvscpp_2010.txt', template_mappings, output_writer)
 
     if project_configuration.supports_dpkg:
-      self._GenerateSection(project_configuration, u'dpkg.txt', output_writer)
+      self._GenerateSection(u'dpkg.txt', template_mappings, output_writer)
 
     if project_configuration.supports_rpm:
-      self._GenerateSection(project_configuration, u'rpm.txt', output_writer)
+      self._GenerateSection(u'rpm.txt', template_mappings, output_writer)
 
-    self._GenerateSection(
-        project_configuration, u'macosx_pkg.txt', output_writer)
+    self._GenerateSection(u'macosx_pkg.txt', template_mappings, output_writer)
 
   def HasContent(self, unused_project_configuration):
     """Determines if the generator will generate content.
@@ -953,37 +947,37 @@ class DevelopmentPageGenerator(WikiPageGenerator):
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      output_write: the output writer.
+      output_writer: an output writer object (instance of OutputWriter).
     """
     # TODO: add support for c_cpp_also_see.txt, c_cpp_main_object.txt, c_cpp.txt
 
+    template_mappings = project_configuration.GetTemplateMappings()
     if project_configuration.supports_python:
-      self._GenerateSection(
-          project_configuration, u'python.txt', output_writer)
+      self._GenerateSection(u'python.txt', template_mappings, output_writer)
 
       if project_configuration.development_main_object:
         if project_configuration.development_glob:
           self._GenerateSection(
-              project_configuration, u'python_main_object_with_glob.txt',
+              u'python_main_object_with_glob.txt', template_mappings,
               output_writer)
 
         else:
           self._GenerateSection(
-              project_configuration, u'python_main_object.txt', output_writer)
+              u'python_main_object.txt', template_mappings, output_writer)
 
       if project_configuration.development_pytsk3:
         if project_configuration.development_glob:
           self._GenerateSection(
-              project_configuration, u'python_pytsk3_with_glob.txt',
+              u'python_pytsk3_with_glob.txt', template_mappings,
               output_writer)
 
         else:
           self._GenerateSection(
-              project_configuration, u'python_pytsk3.txt', output_writer)
+              u'python_pytsk3.txt', template_mappings, output_writer)
 
       # TODO: move main object out of this template and create on demand.
       self._GenerateSection(
-          project_configuration, u'python_also_see.txt', output_writer)
+          u'python_also_see.txt', template_mappings, output_writer)
 
   def HasContent(self, project_configuration):
     """Determines if the generator will generate content.
@@ -1010,10 +1004,10 @@ class HomePageGenerator(WikiPageGenerator):
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      output_write: the output writer.
+      output_writer: an output writer object (instance of OutputWriter).
     """
-    self._GenerateSection(
-        project_configuration, u'introduction.txt', output_writer)
+    template_mappings = project_configuration.GetTemplateMappings()
+    self._GenerateSection(u'introduction.txt', template_mappings, output_writer)
 
   def HasContent(self, unused_project_configuration):
     """Determines if the generator will generate content.
@@ -1037,55 +1031,56 @@ class MountingPageGenerator(WikiPageGenerator):
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      output_write: the output writer.
+      output_writer: an output writer object (instance of OutputWriter).
     """
+    template_mappings = project_configuration.GetTemplateMappings()
     if (project_configuration.supports_dokan or
         project_configuration.supports_fuse):
       self._GenerateSection(
-          project_configuration, u'introduction.txt', output_writer)
+          u'introduction.txt', template_mappings, output_writer)
 
       if project_configuration.mount_tool_source_type == u'image':
         self._GenerateSection(
-            project_configuration, u'mounting_image.txt', output_writer)
+            u'mounting_image.txt', template_mappings, output_writer)
 
       elif project_configuration.mount_tool_source_type == u'volume':
         self._GenerateSection(
-            project_configuration, u'mounting_volume.txt', output_writer)
+            u'mounting_volume.txt', template_mappings, output_writer)
 
       self._GenerateSection(
-          project_configuration, u'mounting_missing_backend.txt', output_writer)
+          u'mounting_missing_backend.txt', template_mappings, output_writer)
 
       if project_configuration.mount_tool_source_type == u'volume':
         self._GenerateSection(
-            project_configuration, u'mounting_volume_loopback.txt',
+            u'mounting_volume_loopback.txt', template_mappings,
             output_writer)
         self._GenerateSection(
-            project_configuration, u'obtaining_volume_offset.txt',
+            u'obtaining_volume_offset.txt', template_mappings,
             output_writer)
 
       self._GenerateSection(
-          project_configuration, u'mounting_root_access.txt', output_writer)
+          u'mounting_root_access.txt', template_mappings, output_writer)
 
       if project_configuration.supports_dokan:
         if project_configuration.mount_tool_source_type == u'image':
           self._GenerateSection(
-              project_configuration, u'mounting_image_windows.txt',
+              u'mounting_image_windows.txt', template_mappings,
               output_writer)
 
         elif project_configuration.mount_tool_source_type == u'volume':
           self._GenerateSection(
-              project_configuration, u'mounting_volume_windows.txt',
+              u'mounting_volume_windows.txt', template_mappings,
               output_writer)
 
       self._GenerateSection(
-          project_configuration, u'unmounting.txt', output_writer)
+          u'unmounting.txt', template_mappings, output_writer)
 
       if project_configuration.supports_dokan:
         self._GenerateSection(
-            project_configuration, u'unmounting_windows.txt', output_writer)
+            u'unmounting_windows.txt', template_mappings, output_writer)
 
       self._GenerateSection(
-          project_configuration, u'troubleshooting.txt', output_writer)
+          u'troubleshooting.txt', template_mappings, output_writer)
 
   def HasContent(self, project_configuration):
     """Determines if the generator will generate content.
@@ -1113,21 +1108,21 @@ class TestingPageGenerator(WikiPageGenerator):
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      output_write: the output writer.
+      output_writer: an output writer object (instance of OutputWriter).
     """
+    template_mappings = project_configuration.GetTemplateMappings()
     if project_configuration.supports_tests:
-      self._GenerateSection(
-          project_configuration, u'tests.txt', output_writer)
+      self._GenerateSection(u'tests.txt', template_mappings, output_writer)
 
       if project_configuration.tests_profiles:
         self._GenerateSection(
-            project_configuration, u'tests_files.txt', output_writer)
+            u'tests_files.txt', template_mappings, output_writer)
         self._GenerateSection(
-            project_configuration, u'tests_profiles.txt', output_writer)
+            u'tests_profiles.txt', template_mappings, output_writer)
 
       if project_configuration.tests_supports_valgrind:
         self._GenerateSection(
-            project_configuration, u'tests_valgrind.txt', output_writer)
+            u'tests_valgrind.txt', template_mappings, output_writer)
 
   def HasContent(self, project_configuration):
     """Determines if the generator will generate content.
@@ -1154,22 +1149,23 @@ class TroubleshootingPageGenerator(WikiPageGenerator):
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
-      output_write: the output writer.
+      output_writer: an output writer object (instance of OutputWriter).
     """
+    template_mappings = project_configuration.GetTemplateMappings()
     self._GenerateSection(
-        project_configuration, u'introduction.txt', output_writer)
+        u'introduction.txt', template_mappings, output_writer)
     self._GenerateSection(
-        project_configuration, u'build_errors.txt', output_writer)
+        u'build_errors.txt', template_mappings, output_writer)
     self._GenerateSection(
-        project_configuration, u'runtime_errors.txt', output_writer)
+        u'runtime_errors.txt', template_mappings, output_writer)
 
     if project_configuration.supports_debug_output:
       self._GenerateSection(
-          project_configuration, u'format_errors.txt', output_writer)
+          u'format_errors.txt', template_mappings, output_writer)
 
     if project_configuration.supports_tools:
       self._GenerateSection(
-          project_configuration, u'crashes.txt', output_writer)
+          u'crashes.txt', template_mappings, output_writer)
 
   def HasContent(self, unused_project_configuration):
     """Determines if the generator will generate content.
@@ -1252,8 +1248,9 @@ def Main():
       u'Generates wiki pages of the libyal libraries.'))
 
   args_parser.add_argument(
-      u'config_file', action=u'store', metavar=u'CONFIG_FILE',
-      default=u'wiki.conf', help=u'The wiki generation config file.')
+      u'configuration_file', action=u'store', metavar=u'CONFIGURATION_FILE',
+      default=u'project-wiki.ini', help=(
+          u'The wiki generation configuration file.'))
 
   args_parser.add_argument(
       u'-o', u'--output', dest=u'output_directory', action=u'store',
@@ -1262,15 +1259,16 @@ def Main():
 
   options = args_parser.parse_args()
 
-  if not options.config_file:
-    print(u'Config file missing.')
+  if not options.configuration_file:
+    print(u'Configuration file missing.')
     print(u'')
     args_parser.print_help()
     print(u'')
     return False
 
-  if not os.path.exists(options.config_file):
-    print(u'No such config file: {0:s}.'.format(options.config_file))
+  if not os.path.exists(options.configuration_file):
+    print(u'No such configuration file: {0:s}.'.format(
+        options.configuration_file))
     print(u'')
     return False
 
@@ -1280,10 +1278,10 @@ def Main():
     return False
 
   project_configuration = ProjectConfiguration()
-  project_configuration.ReadFromFile(options.config_file)
+  project_configuration.ReadFromFile(options.configuration_file)
 
   readme_file = os.path.join(
-      os.path.dirname(options.config_file), u'README')
+      os.path.dirname(options.configuration_file), u'README')
 
   LINK_RE = re.compile(r'\* (.*): (http[s]://.*)')
 
@@ -1305,7 +1303,9 @@ def Main():
 
   project_configuration.project_description = u''.join(project_description)
 
-  script_directory = os.path.dirname(os.path.abspath(__file__))
+  libyal_directory = os.path.abspath(__file__)
+  libyal_directory = os.path.dirname(libyal_directory)
+  libyal_directory = os.path.dirname(libyal_directory)
 
   # TODO: generate more wiki pages.
   wiki_pages = [
@@ -1319,7 +1319,7 @@ def Main():
 
   for page_name, page_generator_class in wiki_pages:
     template_directory = os.path.join(
-        script_directory, u'data', u'wiki', page_name)
+        libyal_directory, u'data', u'wiki', page_name)
     wiki_page = page_generator_class(template_directory)
 
     if not wiki_page.HasContent(project_configuration):
