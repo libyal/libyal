@@ -506,6 +506,9 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       project_path = os.path.join(projects_path, project.name)
 
       for library in versions_per_library.keys():
+        if project.name == library:
+          continue
+
         definitions_header_path = os.path.join(
             project_path, library, u'{0:s}_definitions.h'.format(library))
         if not os.path.exists(definitions_header_path):
@@ -587,13 +590,33 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     """
     self._GenerateSection(u'introduction.txt', {}, output_writer)
 
-    # TODO: generate TOC.
-    # output_writer.Write(output_data)
+    versions_per_m4_script = self._GetVersionsPerM4Scripts(projects)
+
+    # TODO: add version check for common scripts.
+
+    table_of_contents = []
+    table_of_contents.append(u'* [M4 scripts](Status#m4-scripts)')
+    for m4_script in sorted(versions_per_m4_script.keys()):
+      m4_script_reference = m4_script.lower().replace(u'.', u'')
+      table_of_contents.append(u'  * [{0:s}](Status#{1:s})'.format(
+          m4_script, m4_script_reference))
+
+    # TODO: add version check for common.
+
+    for category in self._ORDER_OF_LIBRARY_CATEGORIES:
+      category_title = self._CATEGORIES[category][0]
+      catergory_reference = category_title.lower().replace(u' ', u'-')
+      table_of_contents.append(u'* [{0:s}](Status#{1:s})'.format(
+          category_title, catergory_reference))
+      # TODO: generate TOC of libraries.
+
+    table_of_contents.append(u'')
+    output_data = u'\n'.join(table_of_contents).encode(u'utf-8')
+    output_writer.Write(output_data)
 
     template_mappings = {u'category_title': u'M4 scripts'}
     self._GenerateSection(u'category.txt', template_mappings, output_writer)
 
-    versions_per_m4_script = self._GetVersionsPerM4Scripts(projects)
     for m4_script, projects_per_version in sorted(
         versions_per_m4_script.items()):
       template_mappings = {
