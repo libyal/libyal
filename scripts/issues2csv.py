@@ -7,6 +7,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import sys
 
 # pylint: disable=no-name-in-module
@@ -311,25 +312,30 @@ class StdoutWriter(object):
 
 
 def Main():
-  args_parser = argparse.ArgumentParser(description=(
+  argument_parser = argparse.ArgumentParser(description=(
       u'Generates an overview of open github issues of the libyal libraries.'))
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       u'configuration_file', action=u'store', metavar=u'CONFIGURATION_FILE',
       default=u'projects.ini', help=(
           u'The overview generation configuration file.'))
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       u'-o', u'--output', dest=u'output_file', action=u'store',
       metavar=u'OUTPUT_FILE', default=None, help=(
           u'path of the output file to write to.'))
 
-  options = args_parser.parse_args()
+  argument_parser.add_argument(
+      u'-p', u'--projects', dest=u'projects', action=u'store',
+      metavar=u'PROJECT_NAME(S)', default=None,
+      help=u'comma separated list of specific project names to query.')
+
+  options = argument_parser.parse_args()
 
   if not options.configuration_file:
     print(u'Configuration file missing.')
     print(u'')
-    args_parser.print_help()
+    argument_parser.print_help()
     print(u'')
     return False
 
@@ -341,12 +347,17 @@ def Main():
 
   projects_reader = ProjectsReader()
 
-  projects = projects_reader.ReadFromFile(options.configuration_file)
-  if not projects:
-    print(u'Unable to read projects from configuration file: {0:s}.'.format(
-        options.configuration_file))
-    print(u'')
-    return False
+  if options.projects:
+    project_names = option.projects
+  else:
+    projects = projects_reader.ReadFromFile(options.configuration_file)
+    if not projects:
+      print(u'Unable to read projects from configuration file: {0:s}.'.format(
+          options.configuration_file))
+      print(u'')
+      return False
+
+    project_names = [project.name for project in projects]
 
   if options.output_file:
     output_writer = FileWriter(options.output_file)
@@ -358,6 +369,7 @@ def Main():
     print(u'')
     return False
 
+  # https://developer.github.com/v3/issues/
   # Keys:
   #   assignee: {}
   #   body:
@@ -384,13 +396,30 @@ def Main():
       u'\t'.join([u'{0:s}:'.format(key) for key in keys]))
   output_writer.Write(line.decode(u'utf-8'))
 
-  for project in projects:
-    url_object = urlopen(
-        u'https://api.github.com/repos/libyal/{0:s}/issues'.format(
-            project.name))
+  organization = u'libyal'
+  project_names = [u'libewf']
+
+  organization = u'log2timeline'
+  project_names = [u'plaso']
+
+  last_page_re = re.compile(
+      r'<(https://api.github.com/repositories/[0-9]+/issues\?'
+      r'state=open&page=)([0-9]+)>; rel="last"')
+
+  for project_name in project_names:
+    # TODO: add rate limit support
+    # https://api.github.com/rate_limit
+    # "remaining": 58,
+    # "reset": 1451996174
+    #
+    # Check if remaining hits 0 and wait until reset.
+
+    url_object = urlopen((
+        u'https://api.github.com/repos/{0:s}/{1:s}/issues?'
+        u'state=open').format(organization, project_name))
     if not url_object or url_object.code != 200:
       logging.error(u'Unable to determine issues of project: {0:s}'.format(
-          project.name))
+          project_name))
       continue
 
     issues_data = url_object.read()
@@ -399,8 +428,40 @@ def Main():
 
     for issue_json in json.loads(issues_data):
       values = [u'{0!s}'.format(issue_json[key]) for key in keys]
-      line = u'{0:s}\t{1:s}\n'.format(project.name, u'\t'.join(values))
+      line = u'{0:s}\t{1:s}\n'.format(project_name, u'\t'.join(values))
       output_writer.Write(line.decode(u'utf-8'))
+
+    # Handle the multi-page response.
+    response = url_object.info()
+    link_header = response.getheader(u'Link')
+    if link_header:
+      matches = last_page_re.findall(link_header)
+      if len(matches) != 1 and len(matches[0]) != 2:
+        # TODO print error.
+        continue
+      base_url = matches[0][0]
+      last_page = int(matches[0][1], 10)
+
+      page_number = 2
+      while page_number < last_page:
+        url = u'{0:s}{1:d}'.format(base_url, page_number)
+
+        url_object = urlopen(url)
+        if not url_object or url_object.code != 200:
+          logging.error(u'Unable to determine issues of project: {0:s}'.format(
+              project_name))
+          continue
+
+        issues_data = url_object.read()
+        if not issues_data:
+          continue
+
+        for issue_json in json.loads(issues_data):
+          values = [u'{0!s}'.format(issue_json[key]) for key in keys]
+          line = u'{0:s}\t{1:s}\n'.format(project_name, u'\t'.join(values))
+          output_writer.Write(line.decode(u'utf-8'))
+
+        page_number += 1
 
   output_writer.Write(u'\n'.decode(u'utf-8'))
 

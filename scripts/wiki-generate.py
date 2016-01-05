@@ -1245,25 +1245,25 @@ class StdoutWriter(object):
 
 
 def Main():
-  args_parser = argparse.ArgumentParser(description=(
+  argument_parser = argparse.ArgumentParser(description=(
       u'Generates wiki pages of the libyal libraries.'))
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       u'configuration_file', action=u'store', metavar=u'CONFIGURATION_FILE',
       default=u'project-wiki.ini', help=(
           u'The wiki generation configuration file.'))
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       u'-o', u'--output', dest=u'output_directory', action=u'store',
       metavar=u'OUTPUT_DIRECTORY', default=None,
       help=u'path of the output files to write to.')
 
-  options = args_parser.parse_args()
+  options = argument_parser.parse_args()
 
   if not options.configuration_file:
     print(u'Configuration file missing.')
     print(u'')
-    args_parser.print_help()
+    argument_parser.print_help()
     print(u'')
     return False
 

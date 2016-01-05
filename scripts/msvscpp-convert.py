@@ -4163,28 +4163,28 @@ class LibyalSourceVSSolution(VSSolution):
 def Main():
   output_formats = frozenset(['2008', '2010', '2012', '2013'])
 
-  args_parser = argparse.ArgumentParser(description=(
+  argument_parser = argparse.ArgumentParser(description=(
       'Converts source directory (autoconf and automake files) into '
       'Visual Studio express solution and project files. It is also '
       'possible to convert from one version of Visual Studio to another.'))
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       'solution_file', nargs='?', action='store', metavar='FILENAME',
       default=None, help=(
           'The location of the source directory or the Visual Studio solution '
           'file (.sln).'))
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       '--to', dest='output_format', nargs='?', choices=sorted(output_formats),
       action='store', metavar='FORMAT', default='2010',
       help='The format to convert to.')
 
-  options = args_parser.parse_args()
+  options = argument_parser.parse_args()
 
   if not options.solution_file:
     print('Solution file missing.')
     print('')
-    args_parser.print_help()
+    argument_parser.print_help()
     print('')
     return False
 
