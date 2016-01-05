@@ -118,136 +118,6 @@ class ProjectsReader(object):
     return projects
 
 
-class ConfigureAcFile(object):
-  """Class that defines a configure.ac file.
-
-  Attributes:
-    name: a string containing the name.
-    version: a string containing the version.
-  """
-
-  def __init__(self, path):
-    """Initializes a configure.ac file.
-
-    Args:
-      path: a string containing the path.
-    """
-    super(ConfigureAcFile, self).__init__()
-    self._path = path
-
-    self.name = os.path.basename(path)
-    self.version = None
-
-  def ReadVersion(self):
-    """Reads the version from the configure.ac file.
-
-    Returns:
-      A boolean to indicate the version was read from the file.
-    """
-    with open(self._path, 'rb') as file_object:
-      line_count = 0
-      for line in file_object.readlines():
-        line = line.strip()
-        if line_count == 2:
-          version = line[1:-2]
-
-          # TODO: convert version to integer?
-          self.version = version.decode(u'ascii')
-
-          return True
-
-        elif line_count:
-          line_count += 1
-
-        elif line.startswith(b'AC_INIT('):
-          line_count += 1
-
-    return False
-
-
-class DefinitionsHeaderFile(object):
-  """Class that defines a definitions header file.
-
-  Attributes:
-    name: a string containing the name.
-    version: a string containing the version.
-  """
-
-  def __init__(self, path):
-    """Initializes a definitions header file.
-
-    Args:
-      path: a string containing the path.
-    """
-    super(DefinitionsHeaderFile, self).__init__()
-    self._path = path
-
-    self.name = os.path.basename(path)
-    self.version = None
-
-  def ReadVersion(self):
-    """Reads the version from the definitions header file.
-
-    Returns:
-      A boolean to indicate the version was read from the file.
-    """
-    library_name, _, _ = self.name.partition(u'_')
-    version_line = b'#define {0:s}_VERSION'.format(library_name.upper())
-
-    with open(self._path, 'rb') as file_object:
-      for line in file_object.readlines():
-        line = line.strip()
-        if line.startswith(version_line):
-          _, _, version = line.rpartition(version_line)
-          version = version.strip()
-
-          # TODO: convert version to integer?
-          self.version = version.decode(u'ascii')
-
-          return True
-
-    return False
-
-
-class M4ScriptFile(object):
-  """Class that defines a m4 script file.
-
-  Attributes:
-    name: a string containing the name.
-    version: a string containing the version.
-  """
-
-  def __init__(self, path):
-    """Initializes a m4 script file.
-
-    Args:
-      path: a string containing the path.
-    """
-    super(M4ScriptFile, self).__init__()
-    self._path = path
-
-    self.name = os.path.basename(path)
-    self.version = None
-
-  def ReadVersion(self):
-    """Reads the version from the m4 script file.
-
-    Returns:
-      A boolean to indicate the version was read from the file.
-    """
-    with open(self._path, 'rb') as file_object:
-      for line in file_object.readlines():
-        line = line.strip()
-        if line.startswith(b'dnl Version: '):
-          _, _, version = line.rpartition(b'dnl Version: ')
-          # TODO: convert version to integer?
-          self.version = version.decode(u'ascii')
-
-          return True
-
-    return False
-
-
 class FileWriter(object):
   """Class that defines a file output writer."""
 
@@ -348,7 +218,7 @@ def Main():
   projects_reader = ProjectsReader()
 
   if options.projects:
-    project_names = option.projects
+    project_names = options.projects
   else:
     projects = projects_reader.ReadFromFile(options.configuration_file)
     if not projects:
@@ -370,8 +240,10 @@ def Main():
     return False
 
   # https://developer.github.com/v3/issues/
-  # Keys:
-  #   assignee: {}
+  # Keys: {
+  #   assignee: {
+  #     login:
+  #   }
   #   body:
   #   closed_at:
   #   comments:
@@ -380,18 +252,25 @@ def Main():
   #   events_url:
   #   html_url:
   #   id:
-  #   labels: {}
+  #   labels: [{
+  #     name:
+  #   }]
   #   labels_url:
   #   locked:
-  #   milestone:
+  #   milestone: {
+  #     title:
+  #   }
   #   number:
   #   state:
   #   title:
   #   updated_at:
   #   url:
   #   user: {}
+  # }
 
-  keys = [u'number', u'state', u'created_at', u'title', u'html_url']
+  keys = [
+      u'number', u'state', u'created_at', u'assignee', u'milestone', u'labels',
+      u'title', u'html_url']
   line = u'project:\t{0:s}\n'.format(
       u'\t'.join([u'{0:s}:'.format(key) for key in keys]))
   output_writer.Write(line.decode(u'utf-8'))
@@ -457,6 +336,7 @@ def Main():
           continue
 
         for issue_json in json.loads(issues_data):
+          # TODO: handle assignee, milestone, labels
           values = [u'{0!s}'.format(issue_json[key]) for key in keys]
           line = u'{0:s}\t{1:s}\n'.format(project_name, u'\t'.join(values))
           output_writer.Write(line.decode(u'utf-8'))
