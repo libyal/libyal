@@ -194,7 +194,8 @@ class GithubIssueHelper(object):
 
     matches = self._LAST_PAGE_RE.findall(link_header)
     if len(matches) != 1 and len(matches[0]) != 2:
-      # TODO: print error.
+      logging.error(u'Unsupported Link HTTP header: {0:s}'.format(
+          link_header))
       return
 
     base_url = matches[0][0]
@@ -202,7 +203,8 @@ class GithubIssueHelper(object):
     try:
       last_page = int(matches[0][1], 10) + 1
     except ValueError:
-      # TODO: print error.
+      logging.error(u'Unsupported Link HTTP header: {0:s}'.format(
+          link_header))
       return
 
     for page_number in range(2, last_page):
@@ -211,7 +213,8 @@ class GithubIssueHelper(object):
       download_url = u'{0:s}{1:d}'.format(base_url, page_number)
       issues_data, _ = self._DownloadPageContent(download_url)
       if not issues_data:
-        # TODO: print error.
+        logging.error(u'Missing issues page content: {0:s}'.format(
+            download_url))
         continue
 
       for issue_json in json.loads(issues_data):
@@ -225,24 +228,24 @@ class GithubIssueHelper(object):
     while remaining_count == 0:
       rate_limit_data, _ = self._DownloadPageContent(download_url)
       if not rate_limit_data:
-        # TODO: raise an error
+        logging.error(u'Missing rate limit page content.')
         return
 
       rate_limit_json = json.loads(rate_limit_data)
 
       rate_json = rate_limit_json.get(u'rate', None)
       if not rate_json:
-        # TODO: raise an error
+        logging.error(u'Invalid rate limit information - missing rate.')
         return
 
       remaining_count = rate_json.get(u'remaining', None)
       if remaining_count is None:
-        # TODO: raise an error
+        logging.error(u'Invalid rate limit information - missing remaining.')
         return
 
       reset_timestamp = rate_json.get(u'reset', None)
       if reset_timestamp is None:
-        # TODO: raise an error
+        logging.error(u'Invalid rate limit information - missing reset.')
         return
 
       if remaining_count > 0:
@@ -304,7 +307,9 @@ class GithubIssueHelper(object):
     # }
 
     # TODO: handle assignee, milestone, labels
-    values = [u'{0!s}'.format(issue_json[key]) for key in self._KEYS]
+    for key in self._KEYS:
+      values = u'{0!s}'.format(issue_json[key])
+
     csv_line = u'{0:s}\t{1:s}\n'.format(project_name, u'\t'.join(values))
 
     output_writer.Write(csv_line.decode(u'utf-8'))
