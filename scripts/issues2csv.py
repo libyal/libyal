@@ -9,6 +9,7 @@ import logging
 import os
 import re
 import sys
+import time
 
 # pylint: disable=no-name-in-module
 if sys.version_info[0] < 3:
@@ -118,14 +119,219 @@ class ProjectsReader(object):
     return projects
 
 
+class GithubIssueHelper(object):
+  """Class that defines a github issue helper."""
+
+  _KEYS = [
+      u'number', u'state', u'created_at', u'assignee', u'milestone', u'labels',
+      u'title', u'html_url']
+
+  _LAST_PAGE_RE = re.compile(
+      r'<(https://api.github.com/repositories/[0-9]+/issues\?'
+      r'state=open&page=)([0-9]+)>; rel="last"')
+
+  def __init__(self, organization):
+    """Initialize the issue helper object.
+
+    Args:
+      organization: a string containing the name of the organization.
+    """
+    super(GithubIssueHelper, self).__init__()
+    self._organization = organization
+
+  def _DownloadPageContent(self, download_url):
+    """Downloads the page content from the URL.
+
+    Args:
+      download_url: the URL where to download the page content.
+
+    Returns:
+      A tuple of a binary string containing the page content and
+      TODO conaining the response headers if successful, None otherwise.
+    """
+    if not download_url:
+      return
+
+    try:
+      url_object = urlopen(download_url)
+    except urllib_error.URLError as exception:
+      logging.warning(
+          u'Unable to download URL: {0:s} with error: {1:s}'.format(
+              download_url, exception))
+      return
+
+    if url_object.code != 200:
+      return
+
+    return url_object.read(), url_object.info()
+
+  def _ListIssuesForProject(self, project_name, output_writer):
+    """Lists the issues of a specific project.
+
+    Args:
+      project_name: a string containing the name of the project.
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    self._WaitForRateLimit()
+
+    download_url = (
+        u'https://api.github.com/repos/{0:s}/{1:s}/issues?state=open').format(
+            self._organization, project_name)
+
+    issues_data, response = self._DownloadPageContent(download_url)
+    if not issues_data:
+      return
+
+    for issue_json in json.loads(issues_data):
+      self._WriteIssue(project_name, issue_json, output_writer)
+
+    # TODO: check if response is not None
+
+    # Handle the multi-page response.
+    link_header = response.getheader(u'Link')
+    if not link_header:
+      return
+
+    matches = self._LAST_PAGE_RE.findall(link_header)
+    if len(matches) != 1 and len(matches[0]) != 2:
+      # TODO: print error.
+      return
+
+    base_url = matches[0][0]
+
+    try:
+      last_page = int(matches[0][1], 10) + 1
+    except ValueError:
+      # TODO: print error.
+      return
+
+    for page_number in range(2, last_page):
+      self._WaitForRateLimit()
+
+      download_url = u'{0:s}{1:d}'.format(base_url, page_number)
+      issues_data, _ = self._DownloadPageContent(download_url)
+      if not issues_data:
+        # TODO: print error.
+        continue
+
+      for issue_json in json.loads(issues_data):
+        self._WriteIssue(project_name, issue_json, output_writer)
+
+  def _WaitForRateLimit(self):
+    """Checks and waits for the rate limit."""
+    download_url = u'https://api.github.com/rate_limit'
+
+    remaining_count = 0
+    while remaining_count == 0:
+      rate_limit_data, _ = self._DownloadPageContent(download_url)
+      if not rate_limit_data:
+        # TODO: raise an error
+        return
+
+      rate_limit_json = json.loads(rate_limit_data)
+
+      rate_json = rate_limit_json.get(u'rate', None)
+      if not rate_json:
+        # TODO: raise an error
+        return
+
+      remaining_count = rate_json.get(u'remaining', None)
+      if remaining_count is None:
+        # TODO: raise an error
+        return
+
+      reset_timestamp = rate_json.get(u'reset', None)
+      if reset_timestamp is None:
+        # TODO: raise an error
+        return
+
+      if remaining_count > 0:
+        break
+
+      current_timestamp = time.now()
+      if current_timestamp > reset_timestamp:
+        break
+
+      reset_timestamp -= current_timestamp
+      os.wait(reset_timestamp)
+
+  def _WriteHeader(self, output_writer):
+    """Writes a header to CSV.
+
+    Args:
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    csv_line = u'project:\t{0:s}\n'.format(
+        u'\t'.join([u'{0:s}:'.format(key) for key in self._KEYS]))
+
+    output_writer.Write(csv_line.decode(u'utf-8'))
+
+  def _WriteIssue(self, project_name, issue_json, output_writer):
+    """Writes an issue to CSV.
+
+    Args:
+      project_name: a string containing the name of the project.
+      issue_json: a JSON issue object (instance of TODO).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    # https://developer.github.com/v3/issues/
+    # Keys: {
+    #   assignee: {
+    #     login:
+    #   }
+    #   body:
+    #   closed_at:
+    #   comments:
+    #   comments_url:
+    #   created_at:
+    #   events_url:
+    #   html_url:
+    #   id:
+    #   labels: [{
+    #     name:
+    #   }]
+    #   labels_url:
+    #   locked:
+    #   milestone: {
+    #     title:
+    #   }
+    #   number:
+    #   state:
+    #   title:
+    #   updated_at:
+    #   url:
+    #   user: {}
+    # }
+
+    # TODO: handle assignee, milestone, labels
+    values = [u'{0!s}'.format(issue_json[key]) for key in self._KEYS]
+    csv_line = u'{0:s}\t{1:s}\n'.format(project_name, u'\t'.join(values))
+
+    output_writer.Write(csv_line.decode(u'utf-8'))
+
+  def ListIssues(self, project_names, output_writer):
+    """Lists the issues of projects.
+
+    Args:
+      project_names: a list of strings containing the names of the projects.
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    self._WriteHeader(output_writer)
+
+    for project_name in project_names:
+      self._ListIssuesForProject(project_name, output_writer)
+
+    output_writer.Write(u'\n'.decode(u'utf-8'))
+
+
 class FileWriter(object):
   """Class that defines a file output writer."""
 
   def __init__(self, name):
-    """Initialize the output writer.
+    """Initializes an output writer object.
 
     Args:
-      name: the name of the output.
+      name: a string containing the name of the output.
     """
     super(FileWriter, self).__init__()
     self._file_object = None
@@ -157,7 +363,7 @@ class StdoutWriter(object):
   """Class that defines a stdout output writer."""
 
   def __init__(self):
-    """Initialize the output writer."""
+    """Initializes an output writer object."""
     super(StdoutWriter, self).__init__()
 
   def Open(self):
@@ -239,111 +445,14 @@ def Main():
     print(u'')
     return False
 
-  # https://developer.github.com/v3/issues/
-  # Keys: {
-  #   assignee: {
-  #     login:
-  #   }
-  #   body:
-  #   closed_at:
-  #   comments:
-  #   comments_url:
-  #   created_at:
-  #   events_url:
-  #   html_url:
-  #   id:
-  #   labels: [{
-  #     name:
-  #   }]
-  #   labels_url:
-  #   locked:
-  #   milestone: {
-  #     title:
-  #   }
-  #   number:
-  #   state:
-  #   title:
-  #   updated_at:
-  #   url:
-  #   user: {}
-  # }
-
-  keys = [
-      u'number', u'state', u'created_at', u'assignee', u'milestone', u'labels',
-      u'title', u'html_url']
-  line = u'project:\t{0:s}\n'.format(
-      u'\t'.join([u'{0:s}:'.format(key) for key in keys]))
-  output_writer.Write(line.decode(u'utf-8'))
-
   organization = u'libyal'
   project_names = [u'libewf']
 
   organization = u'log2timeline'
   project_names = [u'plaso']
 
-  last_page_re = re.compile(
-      r'<(https://api.github.com/repositories/[0-9]+/issues\?'
-      r'state=open&page=)([0-9]+)>; rel="last"')
-
-  for project_name in project_names:
-    # TODO: add rate limit support
-    # https://api.github.com/rate_limit
-    # "remaining": 58,
-    # "reset": 1451996174
-    #
-    # Check if remaining hits 0 and wait until reset.
-
-    url_object = urlopen((
-        u'https://api.github.com/repos/{0:s}/{1:s}/issues?'
-        u'state=open').format(organization, project_name))
-    if not url_object or url_object.code != 200:
-      logging.error(u'Unable to determine issues of project: {0:s}'.format(
-          project_name))
-      continue
-
-    issues_data = url_object.read()
-    if not issues_data:
-      continue
-
-    for issue_json in json.loads(issues_data):
-      values = [u'{0!s}'.format(issue_json[key]) for key in keys]
-      line = u'{0:s}\t{1:s}\n'.format(project_name, u'\t'.join(values))
-      output_writer.Write(line.decode(u'utf-8'))
-
-    # Handle the multi-page response.
-    response = url_object.info()
-    link_header = response.getheader(u'Link')
-    if link_header:
-      matches = last_page_re.findall(link_header)
-      if len(matches) != 1 and len(matches[0]) != 2:
-        # TODO print error.
-        continue
-      base_url = matches[0][0]
-      last_page = int(matches[0][1], 10)
-
-      page_number = 2
-      while page_number < last_page:
-        url = u'{0:s}{1:d}'.format(base_url, page_number)
-
-        url_object = urlopen(url)
-        if not url_object or url_object.code != 200:
-          logging.error(u'Unable to determine issues of project: {0:s}'.format(
-              project_name))
-          continue
-
-        issues_data = url_object.read()
-        if not issues_data:
-          continue
-
-        for issue_json in json.loads(issues_data):
-          # TODO: handle assignee, milestone, labels
-          values = [u'{0!s}'.format(issue_json[key]) for key in keys]
-          line = u'{0:s}\t{1:s}\n'.format(project_name, u'\t'.join(values))
-          output_writer.Write(line.decode(u'utf-8'))
-
-        page_number += 1
-
-  output_writer.Write(u'\n'.decode(u'utf-8'))
+  issue_helper = GithubIssueHelper(organization)
+  issue_helper.ListIssues(project_names, output_writer)
 
   return True
 
