@@ -239,6 +239,45 @@ class M4ScriptFile(object):
     return False
 
 
+class ScriptFile(object):
+  """Class that defines a script file.
+
+  Attributes:
+    name: a string containing the name.
+    version: a string containing the version.
+  """
+
+  def __init__(self, path):
+    """Initializes a script file.
+
+    Args:
+      path: a string containing the path.
+    """
+    super(ScriptFile, self).__init__()
+    self._path = path
+
+    self.name = os.path.basename(path)
+    self.version = None
+
+  def ReadVersion(self):
+    """Reads the version from the script file.
+
+    Returns:
+      A boolean to indicate the version was read from the file.
+    """
+    with open(self._path, 'rb') as file_object:
+      for line in file_object.readlines():
+        line = line.strip()
+        if line.startswith(b'# Version: '):
+          _, _, version = line.rpartition(b'# Version: ')
+          # TODO: convert version to integer?
+          self.version = version.decode(u'ascii')
+
+          return True
+
+    return False
+
+
 class WikiPageGenerator(object):
   """Class that generates wiki pages."""
 
@@ -531,13 +570,13 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     return versions_per_library
 
   def _GetVersionsPerM4Scripts(self, projects):
-    """Retrieves the versions per M4 script.
+    """Retrieves the versions per m4 script.
 
     Args:
       projects: a list of project objects (instances of Project).
 
     Returns:
-      A dictionary containing the M4 scripts, their versions and the
+      A dictionary containing the m4 scripts, their versions and the
       the names of the project that use the specific version. In the form:
       { m4_script_name: { m4_script_version: [ project_name, ... ], ... }, ... }
     """
@@ -581,6 +620,108 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     return versions_per_m4_script
 
+  def _GetVersionsPerPyScripts(self, projects):
+    """Retrieves the versions per py script.
+
+    Args:
+      projects: a list of project objects (instances of Project).
+
+    Returns:
+      A dictionary containing the py scripts, their versions and the
+      the names of the project that use the specific version. In the form:
+      { py_script_name: { py_script_version: [ project_name, ... ], ... }, ... }
+    """
+    projects_path = os.path.dirname(self._data_directory)
+    projects_path = os.path.dirname(projects_path)
+
+    py_script_glob = os.path.join(self._data_directory, u'scripts', u'*.py')
+    versions_per_py_script = {}
+    for path in glob.glob(py_script_glob):
+      py_script_file = PyScriptFile(path)
+
+      version = None
+      if py_script_file.ReadVersion():
+        version = py_script_file.version
+      if not version:
+        version = u'missing'
+
+      versions_per_py_script[py_script_file.name] = {version: []}
+
+    for project in projects:
+      project_py_scripts_path = os.path.join(projects_path, project.name)
+
+      for py_script in versions_per_py_script.keys():
+        py_script_path = os.path.join(project_py_scripts_path, py_script)
+        if not os.path.exists(py_script_path):
+          continue
+
+        py_script_file = PyScriptFile(py_script_path)
+
+        version = None
+        if py_script_file.ReadVersion():
+          version = py_script_file.version
+        if not version:
+          version = u'missing'
+
+        projects_per_version = versions_per_py_script[py_script]
+        if version not in projects_per_version:
+          projects_per_version[version] = []
+
+        projects_per_version[version].append(project.name)
+
+    return versions_per_py_script
+
+  def _GetVersionsPerScripts(self, projects):
+    """Retrieves the versions per script.
+
+    Args:
+      projects: a list of project objects (instances of Project).
+
+    Returns:
+      A dictionary containing the scripts, their versions and the
+      the names of the project that use the specific version. In the form:
+      { script_name: { script_version: [ project_name, ... ], ... }, ... }
+    """
+    projects_path = os.path.dirname(self._data_directory)
+    projects_path = os.path.dirname(projects_path)
+
+    script_glob = os.path.join(self._data_directory, u'scripts', u'*.*')
+    versions_per_script = {}
+    for path in glob.glob(script_glob):
+      script_file = ScriptFile(path)
+
+      version = None
+      if script_file.ReadVersion():
+        version = script_file.version
+      if not version:
+        version = u'missing'
+
+      versions_per_script[script_file.name] = {version: []}
+
+    for project in projects:
+      project_scripts_path = os.path.join(projects_path, project.name)
+
+      for script in versions_per_script.keys():
+        script_path = os.path.join(project_scripts_path, script)
+        if not os.path.exists(script_path):
+          continue
+
+        script_file = ScriptFile(script_path)
+
+        version = None
+        if script_file.ReadVersion():
+          version = script_file.version
+        if not version:
+          version = u'missing'
+
+        projects_per_version = versions_per_script[script]
+        if version not in projects_per_version:
+          projects_per_version[version] = []
+
+        projects_per_version[version].append(project.name)
+
+    return versions_per_script
+
   def Generate(self, projects, output_writer):
     """Generates a wiki page.
 
@@ -591,6 +732,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     self._GenerateSection(u'introduction.txt', {}, output_writer)
 
     versions_per_m4_script = self._GetVersionsPerM4Scripts(projects)
+    versions_per_script = self._GetVersionsPerScripts(projects)
 
     projects_per_category = {}
     for project in projects:
@@ -599,9 +741,14 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
       projects_per_category[project.category].append(project)
 
-    # TODO: add version check for common scripts.
-
     table_of_contents = []
+
+    table_of_contents.append(u'* [Scripts](Status#scripts)')
+    for script in sorted(versions_per_script.keys()):
+      script_reference = script.lower().replace(u'.', u'')
+      table_of_contents.append(u'  * [{0:s}](Status#{1:s})'.format(
+          script, script_reference))
+
     table_of_contents.append(u'* [M4 scripts](Status#m4-scripts)')
     for m4_script in sorted(versions_per_m4_script.keys()):
       m4_script_reference = m4_script.lower().replace(u'.', u'')
@@ -623,6 +770,28 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     table_of_contents.append(u'')
     output_data = u'\n'.join(table_of_contents).encode(u'utf-8')
     output_writer.Write(output_data)
+
+    template_mappings = {u'category_title': u'SH scripts'}
+    self._GenerateSection(u'category.txt', template_mappings, output_writer)
+
+    for script, projects_per_version in sorted(
+        versions_per_script.items()):
+      template_mappings = {
+          u'title': script,
+      }
+      self._GenerateSection(
+          u'table_header.txt', template_mappings, output_writer)
+
+      for version, project_names in sorted(
+            projects_per_version.items(), reverse=True):
+        project_names = self._FormatProjectNames(project_names)
+
+        template_mappings = {
+            u'project_names': project_names,
+            u'version': version,
+        }
+        self._GenerateSection(
+            u'table_entry.txt', template_mappings, output_writer)
 
     template_mappings = {u'category_title': u'M4 scripts'}
     self._GenerateSection(u'category.txt', template_mappings, output_writer)
