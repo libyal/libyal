@@ -592,6 +592,13 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     versions_per_m4_script = self._GetVersionsPerM4Scripts(projects)
 
+    projects_per_category = {}
+    for project in projects:
+      if project.category not in projects_per_category:
+        projects_per_category[project.category] = []
+
+      projects_per_category[project.category].append(project)
+
     # TODO: add version check for common scripts.
 
     table_of_contents = []
@@ -608,7 +615,10 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       catergory_reference = category_title.lower().replace(u' ', u'-')
       table_of_contents.append(u'* [{0:s}](Status#{1:s})'.format(
           category_title, catergory_reference))
-      # TODO: generate TOC of libraries.
+
+      for project in projects_per_category[category]:
+        table_of_contents.append(u'  * [{0:s}](Status#{0:s})'.format(
+            project.name))
 
     table_of_contents.append(u'')
     output_data = u'\n'.join(table_of_contents).encode(u'utf-8')
