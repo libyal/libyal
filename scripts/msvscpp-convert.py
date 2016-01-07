@@ -4002,6 +4002,12 @@ class LibyalSourceVSSolution(VSSolution):
           not directory_entry.endswith('tools')):
         continue
 
+      # Ignore the Python version specific build directories.
+      if (directory_entry.startswith('py') and (
+          directory_entry.endswith('2') or
+          directory_entry.endswith('3'))):
+        continue
+
       makefile_am_path = os.path.join(
           input_directory, directory_entry, 'Makefile.am')
       if not os.path.exists(makefile_am_path):
@@ -4041,6 +4047,8 @@ class LibyalSourceVSSolution(VSSolution):
         self._ReadMakefile(
             makefile_am_path, solution_name, project_information,
             release_project_configuration, debug_project_configuration)
+
+        # TODO: add additional Python 3 project.
 
         if (project_name == solution_name or project_name.startswith('py') or
             project_name.endswith('.net')):
