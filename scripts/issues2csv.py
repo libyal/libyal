@@ -147,10 +147,11 @@ class GithubIssueHelper(object):
 
     Returns:
       A tuple of a binary string containing the page content and
-      TODO conaining the response headers if successful, None otherwise.
+      a HTTP response message object containing the response headers
+      (instance of HTTPMessage) if successful, None otherwise.
     """
     if not download_url:
-      return
+      return None, None
 
     try:
       url_object = urlopen(download_url)
@@ -158,10 +159,13 @@ class GithubIssueHelper(object):
       logging.warning(
           u'Unable to download URL: {0:s} with error: {1:s}'.format(
               download_url, exception))
-      return
+      return None, None
 
     if url_object.code != 200:
-      return
+      logging.warning(
+          u'Unable to download URL: {0:s} with status code: {1:d}'.format(
+              download_url, url_object.code))
+      return None, None
 
     return url_object.read(), url_object.info()
 
@@ -185,7 +189,9 @@ class GithubIssueHelper(object):
     for issue_json in json.loads(issues_data):
       self._WriteIssue(project_name, issue_json, output_writer)
 
-    # TODO: check if response is not None
+    if not response:
+      logging.error(u'Missing HTTP response message.')
+      return
 
     # Handle the multi-page response.
     link_header = response.getheader(u'Link')
@@ -251,12 +257,12 @@ class GithubIssueHelper(object):
       if remaining_count > 0:
         break
 
-      current_timestamp = time.now()
+      current_timestamp = int(time.time())
       if current_timestamp > reset_timestamp:
         break
 
       reset_timestamp -= current_timestamp
-      os.wait(reset_timestamp)
+      time.sleep(reset_timestamp)
 
   def _WriteHeader(self, output_writer):
     """Writes a header to CSV.
@@ -274,7 +280,7 @@ class GithubIssueHelper(object):
 
     Args:
       project_name: a string containing the name of the project.
-      issue_json: a JSON issue object (instance of TODO).
+      issue_json: a dictionary containing the JSON issue.
       output_writer: an output writer object (instance of OutputWriter).
     """
     # https://developer.github.com/v3/issues/
@@ -306,11 +312,31 @@ class GithubIssueHelper(object):
     #   user: {}
     # }
 
-    # TODO: handle assignee, milestone, labels
+    csv_values = []
     for key in self._KEYS:
-      values = u'{0!s}'.format(issue_json[key])
+      csv_value = u''
+      if key == u'assignee':
+        assignee_json = issue_json[key]
+        if assignee_json:
+          csv_value = assignee_json[u'login']
 
-    csv_line = u'{0:s}\t{1:s}\n'.format(project_name, u'\t'.join(values))
+      elif key == u'milestone':
+        milestone_json = issue_json[key]
+        if milestone_json:
+          csv_value = milestone_json[u'title']
+
+      elif key == u'labels':
+        labels_json = issue_json[key]
+        if labels_json:
+          csv_value = u', '.join([
+              label_json[u'name'] for label_json in labels_json])
+
+      else:
+        csv_value = u'{0!s}'.format(issue_json[key])
+
+      csv_values.append(csv_value)
+
+    csv_line = u'{0:s}\t{1:s}\n'.format(project_name, u'\t'.join(csv_values))
 
     output_writer.Write(csv_line.decode(u'utf-8'))
 
@@ -429,7 +455,7 @@ def Main():
   projects_reader = ProjectsReader()
 
   if options.projects:
-    project_names = options.projects
+    project_names = options.projects.split(u',')
   else:
     projects = projects_reader.ReadFromFile(options.configuration_file)
     if not projects:
@@ -450,13 +476,7 @@ def Main():
     print(u'')
     return False
 
-  organization = u'libyal'
-  project_names = [u'libewf']
-
-  organization = u'log2timeline'
-  project_names = [u'plaso']
-
-  issue_helper = GithubIssueHelper(organization)
+  issue_helper = GithubIssueHelper(u'libyal')
   issue_helper.ListIssues(project_names, output_writer)
 
   return True
