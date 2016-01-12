@@ -82,6 +82,127 @@ class ProjectConfiguration(object):
     return template_mappings
 
 
+class FunctionPrototype(object):
+  """Class that defines a function prototype.
+
+  Attributes:
+    arguments: a list of strings containing the arguments.
+    name: a string containing the name.
+    return_type: a string containing the return type.
+  """
+
+  def __init__(self, name, return_type):
+    """Initializes a function prototype.
+
+    Args:
+      name: a string containing the name.
+      return_type: a string containing the return type.
+    """
+    super(FunctionPrototype, self).__init__()
+    self.arguments = []
+    self.name = name
+    self.return_type = return_type
+
+  def AddArgument(self, argument):
+    """Adds an argument to the function prototype.
+
+    Args:
+      argument: a string containing the argument.
+    """
+    self.arguments.append(argument)
+
+
+class IncludeHeaderFile(object):
+  """Class that defines an include header file.
+
+  Attributes:
+    functions: a list of function prototype objects (instances of
+               FunctionPrototype).
+    name: a string containing the name.
+  """
+
+  def __init__(self, path):
+    """Initializes an include header file.
+
+    Args:
+      path: a string containing the path.
+    """
+    super(IncludeHeaderFile, self).__init__()
+    self._path = path
+
+    self.name = os.path.basename(path)
+    self.functions = []
+
+  def ReadFunctions(self, project_configuration):
+    """Reads the functions from the include header file.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+
+    Returns:
+      A boolean to indicate the functions were read from the file.
+    """
+    self.functions = []
+
+    define_extern = b'{0:s}_EXTERN'.format(
+        project_configuration.library_name.upper())
+
+    in_define_extern = False
+    function_prototype = None
+    with open(self._path, 'rb') as file_object:
+      for line in file_object.readlines():
+        line = line.strip()
+        if in_define_extern:
+          line = line.decode(u'ascii')
+
+          if function_prototype:
+            # Get the part of the line before the ','.
+            argument, _, _ = line.partition(u',')
+
+            function_prototype.AddArgument(argument)
+
+            if line.endswith(u' );'):
+              self.functions.append(function_prototype)
+              function_prototype = None
+              in_define_extern = False
+
+          else:
+            # Get the part of the line before the library name.
+            return_type, _, _ = line.parition(
+                project_configuration.library_name)
+
+            # Get the part of the line after the return type.
+            line = line[len(return_type):]
+            return_type = return_type.strip()
+
+            # Get the part of the remainder of the line before the '('.
+            name, _, _ = line.partition(u'(')
+
+            function_prototype = FunctionPrototype(name, return_type)
+
+        elif line.startswith(define_extern):
+          in_define_extern = True
+
+        elif line.startswith(b'#endif'):
+          # TODO reset flags
+          pass
+
+        elif line.startswith(b'#if defined( HAVE_DEBUG_OUTPUT )'):
+          # TODO set flag in debug output
+          pass
+
+        elif line.startswith(b'#if defined( {0:s}_HAVE_BFIO )'):
+          # TODO set flag
+          pass
+
+        elif line.startswith(b'#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )'):
+          # TODO set flag
+          pass
+
+    return True
+
+
 class SourceFileGenerator(object):
   """Class that generates source files."""
 
