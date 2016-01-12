@@ -262,6 +262,9 @@ class GithubIssueHelper(object):
         break
 
       reset_timestamp -= current_timestamp
+      logging.info((
+          u'Rate limiting calls to github API - sleeping for {0:d} '
+          u'seconds.').format(reset_timestamp))
       time.sleep(reset_timestamp)
 
   def _WriteHeader(self, output_writer):
@@ -465,6 +468,9 @@ def Main():
       return False
 
     project_names = [project.name for project in projects]
+
+  logging.basicConfig(
+      level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
   if options.output_file:
     output_writer = FileWriter(options.output_file)
