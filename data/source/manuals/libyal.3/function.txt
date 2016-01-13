@@ -1,0 +1,2 @@
+.Ft ${function_return_type}
+.Fn ${function_name} "${function_arguments}"

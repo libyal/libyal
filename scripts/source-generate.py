@@ -6,9 +6,10 @@ from __future__ import print_function
 import abc
 import argparse
 import json
-import string
 import os
+import string
 import sys
+import time
 
 try:
   import ConfigParser as configparser
@@ -116,9 +117,10 @@ class IncludeHeaderFile(object):
   """Class that defines an include header file.
 
   Attributes:
-    functions: a list of function prototype objects (instances of
-               FunctionPrototype).
+    functions_per_sections: a dictionary of a list of function prototype objects
+                            (instances of FunctionPrototype) per section.
     name: a string containing the name.
+    section_names: a list of strings containing the section names.
   """
 
   def __init__(self, path):
@@ -131,7 +133,8 @@ class IncludeHeaderFile(object):
     self._path = path
 
     self.name = os.path.basename(path)
-    self.functions = []
+    self.functions_per_section = {}
+    self.section_names = []
 
   def ReadFunctions(self, project_configuration):
     """Reads the functions from the include header file.
@@ -148,8 +151,13 @@ class IncludeHeaderFile(object):
     define_extern = b'{0:s}_EXTERN'.format(
         project_configuration.library_name.upper())
 
-    in_define_extern = False
     function_prototype = None
+    have_bfio = False
+    have_debug_output = False
+    have_wide_character_type = False
+    in_define_extern = False
+    in_section = False
+    section_name = None
     with open(self._path, 'rb') as file_object:
       for line in file_object.readlines():
         line = line.strip()
@@ -160,16 +168,19 @@ class IncludeHeaderFile(object):
             # Get the part of the line before the ','.
             argument, _, _ = line.partition(u',')
 
+            if argument.endswith(u' );'):
+              argument = argument[:-3]
             function_prototype.AddArgument(argument)
 
             if line.endswith(u' );'):
-              self.functions.append(function_prototype)
+              self.functions_per_section[section_name].append(
+                  function_prototype)
               function_prototype = None
               in_define_extern = False
 
           else:
             # Get the part of the line before the library name.
-            return_type, _, _ = line.parition(
+            return_type, _, _ = line.partition(
                 project_configuration.library_name)
 
             # Get the part of the line after the return type.
@@ -181,24 +192,34 @@ class IncludeHeaderFile(object):
 
             function_prototype = FunctionPrototype(name, return_type)
 
+        elif in_section:
+          if line.startswith(b'* '):
+            section_name = line[2:]
+            self.section_names.append(section_name)
+            self.functions_per_section[section_name] = []
+            in_section = False
+
         elif line.startswith(define_extern):
           in_define_extern = True
 
+        elif line == (
+            b'/* -------------------------------------------------------------'
+            b'------------'):
+          in_section = True
+
         elif line.startswith(b'#endif'):
-          # TODO reset flags
-          pass
+          have_bfio = False
+          have_debug_output = False
+          have_wide_character_type = False
 
         elif line.startswith(b'#if defined( HAVE_DEBUG_OUTPUT )'):
-          # TODO set flag in debug output
-          pass
+          have_debug_output = True
 
         elif line.startswith(b'#if defined( {0:s}_HAVE_BFIO )'):
-          # TODO set flag
-          pass
+          have_bfio = True
 
         elif line.startswith(b'#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )'):
-          # TODO set flag
-          pass
+          have_wide_character_type = True
 
     return True
 
@@ -206,19 +227,22 @@ class IncludeHeaderFile(object):
 class SourceFileGenerator(object):
   """Class that generates source files."""
 
-  def __init__(self, template_directory):
+  def __init__(self, projects_directory, template_directory):
     """Initialize the source file generator.
 
     Args:
+      projects_directory: a string containing the path of the projects
+                          directory.
       template_directory: a string containing the path of the template
                           directory.
     """
     super(SourceFileGenerator, self).__init__()
+    self._projects_directory = projects_directory
     self._template_directory = template_directory
 
   def _GenerateSection(
       self, template_filename, template_mappings, output_writer,
-      output_filename):
+      output_filename, access_mode='wb'):
     """Generates a section from template filename.
 
     Args:
@@ -227,10 +251,12 @@ class SourceFileGenerator(object):
                          the key maps to the name of a template variable.
       output_writer: an output writer object (instance of OutputWriter).
       output_filename: string containing the name of the output file.
+      access_mode: optional string containing the output file access mode.
     """
     template_string = self._ReadTemplateFile(template_filename)
     output_data = template_string.substitute(template_mappings)
-    output_writer.WriteFile(output_filename, output_data)
+    output_writer.WriteFile(
+        output_filename, output_data, access_mode=access_mode)
 
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.
@@ -291,6 +317,62 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
 
+class LibraryManPageGenerator(SourceFileGenerator):
+  """Class that generates the library man page file (libyal.3)."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates a library man page file (libyal.3).
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        u'include', u'{0:s}.h'.format(project_configuration.library_name))
+
+    include_header_file = IncludeHeaderFile(path)
+    include_header_file.ReadFunctions(project_configuration)
+
+    output_filename = u'{0:s}.3'.format(project_configuration.library_name)
+    output_filename = os.path.join(u'manuals', output_filename)
+
+    template_filename = os.path.join(self._template_directory, u'header.txt')
+    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings[u'date'] = time.strftime(
+        u'%B %d, %Y').replace(u' 0', u'  ')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    for section_name in include_header_file.section_names:
+      section_template_mappings = {
+          u'section_name': section_name,
+      }
+      template_filename = os.path.join(self._template_directory, u'section.txt')
+      self._GenerateSection(
+          template_filename, section_template_mappings, output_writer,
+          output_filename, access_mode='ab')
+
+      for function_prototype in include_header_file.functions_per_section.get(
+          section_name, []):
+        function_template_mappings = {
+            u'function_arguments': u', '.join(function_prototype.arguments),
+            u'function_name': function_prototype.name,
+            u'function_return_type': function_prototype.return_type,
+        }
+        template_filename = os.path.join(
+            self._template_directory, u'function.txt')
+        self._GenerateSection(
+            template_filename, function_template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+    template_filename = os.path.join(self._template_directory, u'footer.txt')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+
 class FileWriter(object):
   """Class that defines a file output writer."""
 
@@ -303,14 +385,15 @@ class FileWriter(object):
     super(FileWriter, self).__init__()
     self._output_directory = output_directory
 
-  def WriteFile(self, file_path, file_data):
+  def WriteFile(self, file_path, file_data, access_mode='wb'):
     """Writes the data to file.
 
     Args:
       file_path: string containing the path of the file to write.
       file_data: binary string containing the data to write.
+      access_mode: optional string containing the output file access mode.
     """
-    self._file_object = open(file_path, 'wb')
+    self._file_object = open(file_path, access_mode)
     self._file_object.write(file_data)
     self._file_object.close()
 
@@ -322,12 +405,13 @@ class StdoutWriter(object):
     """Initialize the output writer."""
     super(StdoutWriter, self).__init__()
 
-  def WriteFile(self, file_path, file_data):
+  def WriteFile(self, file_path, file_data, access_mode='wb'):
     """Writes the data to stdout (without the default trailing newline).
 
     Args:
       file_path: string containing the path of the file to write.
       file_data: binary string containing the data to write.
+      access_mode: optional string containing the output file access mode.
     """
     print(u'-' * 80)
     print(u'{0: ^80}'.format(file_path))
@@ -348,6 +432,11 @@ def Main():
       u'-o', u'--output', dest=u'output_directory', action=u'store',
       metavar=u'OUTPUT_DIRECTORY', default=None,
       help=u'path of the output files to write to.')
+
+  argument_parser.add_argument(
+      u'-p', u'--projects', dest=u'projects_directory', action=u'store',
+      metavar=u'PROJECTS_DIRECTORY', default=None,
+      help=u'path of the projects.')
 
   options = argument_parser.parse_args()
 
@@ -376,6 +465,10 @@ def Main():
   libyal_directory = os.path.dirname(libyal_directory)
   libyal_directory = os.path.dirname(libyal_directory)
 
+  projects_directory = options.projects_directory
+  if not projects_directory:
+    projects_directory = os.path.dirname(libyal_directory)
+
   # TODO: generate more source files.
   # include headers
   # pyyal files
@@ -387,7 +480,27 @@ def Main():
   for page_name, page_generator_class in source_files:
     template_directory = os.path.join(
         libyal_directory, u'data', u'source', page_name)
-    source_file = page_generator_class(template_directory)
+    source_file = page_generator_class(
+        projects_directory, template_directory)
+
+    if options.output_directory:
+      output_writer = FileWriter(options.output_directory)
+    else:
+      output_writer = StdoutWriter()
+
+    source_file.Generate(project_configuration, output_writer)
+
+  # TODO: add support for Unicode templates.
+
+  source_files = [
+      (u'libyal.3', LibraryManPageGenerator),
+  ]
+
+  for page_name, page_generator_class in source_files:
+    template_directory = os.path.join(
+        libyal_directory, u'data', u'source', u'manuals', page_name)
+    source_file = page_generator_class(
+        projects_directory, template_directory)
 
     if options.output_directory:
       output_writer = FileWriter(options.output_directory)
