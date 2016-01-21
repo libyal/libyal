@@ -28,7 +28,8 @@ class ProjectConfiguration(object):
 
     self.library_name = None
     self.library_description = None
-    self.exported_types = None
+    self.library_supports_codepage = None
+    self.library_supports_notify = None
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
@@ -63,8 +64,12 @@ class ProjectConfiguration(object):
         config_parser, u'Library', u'name')
     self.library_description = self._GetConfigValue(
         config_parser, u'Library', u'description')
-    self.exported_types = self._GetConfigValue(
-        config_parser, u'Library', u'exported_types')
+
+    library_features = self._GetConfigValue(
+        config_parser, u'Library', u'features')
+
+    self.library_supports_codepage = u'codepage' in library_features
+    self.library_supports_notify = u'notify' in library_features
 
   def GetTemplateMappings(self):
     """Retrieves the template mappings.
@@ -72,6 +77,8 @@ class ProjectConfiguration(object):
     Returns:
       A dictionary containing the string template mappings.
     """
+    # TODO: determine current year for copyright and rename attribute
+    # to year_of_creation or equiv.
     template_mappings = {
         u'authors': u', '.join(self.project_authors),
         u'copyright': self.project_copyright,
@@ -284,11 +291,35 @@ class SourceFileGenerator(object):
     """
 
 
+class CommonSourceFileGenerator(SourceFileGenerator):
+  """Class that generates the common source files."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates common source files.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    template_mappings = project_configuration.GetTemplateMappings()
+    for directory_entry in os.listdir(self._template_directory):
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      output_filename = os.path.join(u'common', directory_entry)
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
+
 class LibrarySourceFileGenerator(SourceFileGenerator):
   """Class that generates the library source files."""
 
   def Generate(self, project_configuration, output_writer):
-    """Generates a library source file.
+    """Generates library source files.
 
     Args:
       project_configuration: the project configuration (instance of
@@ -298,6 +329,16 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     template_mappings = project_configuration.GetTemplateMappings()
     for directory_entry in os.listdir(self._template_directory):
       if not directory_entry.startswith(u'libyal_'):
+        continue
+
+      if not project_configuration.library_supports_codepage and (
+        directory_entry.endswith(u'_codepage.h')):
+        continue
+
+      if not project_configuration.library_supports_notify and (
+        directory_entry.endswith(u'_libcnotify.h') or
+        directory_entry.endswith(u'_notify.c') or
+        directory_entry.endswith(u'_notify.h')):
         continue
 
       template_filename = os.path.join(
@@ -429,6 +470,10 @@ def Main():
       default='source.conf', help=u'The source generation configuration file.')
 
   argument_parser.add_argument(
+      u'-e', u'--experimental', dest=u'experimental', action=u'store_true',
+      default=False, help=u'enable experimental functionality.')
+
+  argument_parser.add_argument(
       u'-o', u'--output', dest=u'output_directory', action=u'store',
       metavar=u'OUTPUT_DIRECTORY', default=None,
       help=u'path of the output files to write to.')
@@ -470,12 +515,18 @@ def Main():
     projects_directory = os.path.dirname(libyal_directory)
 
   # TODO: generate more source files.
+  # configure.ac
+  # common
   # include headers
   # pyyal files
   # yal.net files
   source_files = [
-      (u'libyal', LibrarySourceFileGenerator),
+      (u'common', CommonSourceFileGenerator),
   ]
+  if options.experimental:
+    source_files.extend([
+        (u'libyal', LibrarySourceFileGenerator),
+    ])
 
   for page_name, page_generator_class in source_files:
     template_directory = os.path.join(
@@ -491,6 +542,9 @@ def Main():
     source_file.Generate(project_configuration, output_writer)
 
   # TODO: add support for Unicode templates.
+
+  if not options.experimental:
+    return True
 
   source_files = [
       (u'libyal.3', LibraryManPageGenerator),

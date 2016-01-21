@@ -522,9 +522,9 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
 
-    configuration_glob = os.path.join(self._data_directory, u'configs', u'.*')
+    configs_directory = os.path.join(self._data_directory, u'configs')
     versions_per_configuration = {}
-    for path in glob.glob(configuration_glob):
+    for path in os.listdir(configs_directory):
       configuration_file = ScriptFile(path)
 
       version = None
