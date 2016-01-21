@@ -240,7 +240,7 @@ class M4ScriptFile(object):
 
 
 class ScriptFile(object):
-  """Class that defines a script file.
+  """Class that defines a script or configuration file.
 
   Attributes:
     name: a string containing the name.
@@ -506,6 +506,60 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     return u'<br>'.join(lines)
 
+  def _GetVersionsPerConfigurationFile(self, projects):
+    """Retrieves the versions per configuration file.
+
+    Args:
+      projects: a list of project objects (instances of Project).
+
+    Returns:
+      A dictionary containing the configuration files, their versions and the
+      the names of the project that use the specific version. In the form:
+      { configuration_name: {
+          configuration_version: [ project_name, ... ], ... },
+          ... }
+    """
+    projects_path = os.path.dirname(self._data_directory)
+    projects_path = os.path.dirname(projects_path)
+
+    configuration_glob = os.path.join(self._data_directory, u'configs', u'.*')
+    versions_per_configuration = {}
+    for path in glob.glob(configuration_glob):
+      configuration_file = ScriptFile(path)
+
+      version = None
+      if configuration_file.ReadVersion():
+        version = configuration_file.version
+      if not version:
+        version = u'missing'
+
+      versions_per_configuration[configuration_file.name] = {version: []}
+
+    for project in projects:
+      project_configurations_path = os.path.join(projects_path, project.name)
+
+      for configuration in versions_per_configuration.keys():
+        configuration_path = os.path.join(
+            project_configurations_path, configuration)
+        if not os.path.exists(configuration_path):
+          continue
+
+        configuration_file = ScriptFile(configuration_path)
+
+        version = None
+        if configuration_file.ReadVersion():
+          version = configuration_file.version
+        if not version:
+          version = u'missing'
+
+        projects_per_version = versions_per_configuration[configuration]
+        if version not in projects_per_version:
+          projects_per_version[version] = []
+
+        projects_per_version[version].append(project.name)
+
+    return versions_per_configuration
+
   def _GetVersionsPerLibrary(self, projects, category):
     """Retrieves the versions per library.
 
@@ -731,6 +785,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     """
     self._GenerateSection(u'introduction.txt', {}, output_writer)
 
+    versions_per_configuration = self._GetVersionsPerConfigurationFile(projects)
     versions_per_m4_script = self._GetVersionsPerM4Scripts(projects)
     versions_per_script = self._GetVersionsPerScripts(projects)
 
@@ -742,6 +797,12 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       projects_per_category[project.category].append(project)
 
     table_of_contents = []
+
+    table_of_contents.append(u'* [Configurations](Status#configurations)')
+    for configuration in sorted(versions_per_configuration.keys()):
+      configuration_reference = configuration.lower().replace(u'.', u'')
+      table_of_contents.append(u'  * [{0:s}](Status#{1:s})'.format(
+          configuration, configuration_reference))
 
     table_of_contents.append(u'* [Scripts](Status#scripts)')
     for script in sorted(versions_per_script.keys()):
@@ -771,7 +832,29 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     output_data = u'\n'.join(table_of_contents).encode(u'utf-8')
     output_writer.Write(output_data)
 
-    template_mappings = {u'category_title': u'SH scripts'}
+    template_mappings = {u'category_title': u'Configurations'}
+    self._GenerateSection(u'category.txt', template_mappings, output_writer)
+
+    for configuration, projects_per_version in sorted(
+        versions_per_configuration.items()):
+      template_mappings = {
+          u'title': configuration,
+      }
+      self._GenerateSection(
+          u'table_header.txt', template_mappings, output_writer)
+
+      for version, project_names in sorted(
+            projects_per_version.items(), reverse=True):
+        project_names = self._FormatProjectNames(project_names)
+
+        template_mappings = {
+            u'project_names': project_names,
+            u'version': version,
+        }
+        self._GenerateSection(
+            u'table_entry.txt', template_mappings, output_writer)
+
+    template_mappings = {u'category_title': u'Scripts'}
     self._GenerateSection(u'category.txt', template_mappings, output_writer)
 
     for script, projects_per_version in sorted(
