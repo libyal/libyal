@@ -524,10 +524,12 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     configs_directory = os.path.join(self._data_directory, u'configs')
     versions_per_configuration = {}
-    for path in os.listdir(configs_directory):
+    for directory_entry in os.listdir(configs_directory):
+      path = os.path.join(configs_directory, directory_entry)
       configuration_file = ScriptFile(path)
 
       version = None
+      logging.info(u'Reading: {0:s}'.format(path))
       if configuration_file.ReadVersion():
         version = configuration_file.version
       if not version:
@@ -547,6 +549,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         configuration_file = ScriptFile(configuration_path)
 
         version = None
+        logging.info(u'Reading: {0:s}'.format(path))
         if configuration_file.ReadVersion():
           version = configuration_file.version
         if not version:
@@ -588,6 +591,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       configure_ac_file = ConfigureAcFile(configure_ac_path)
 
       version = None
+      logging.info(u'Reading: {0:s}'.format(configure_ac_path))
       if configure_ac_file.ReadVersion():
         version = configure_ac_file.version
       if not version:
@@ -610,6 +614,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         definitions_header_file = DefinitionsHeaderFile(definitions_header_path)
 
         version = None
+        logging.info(u'Reading: {0:s}'.format(definitions_header_path))
         if definitions_header_file.ReadVersion():
           version = definitions_header_file.version
         if not version:
@@ -643,6 +648,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       m4_script_file = M4ScriptFile(path)
 
       version = None
+      logging.info(u'Reading: {0:s}'.format(path))
       if m4_script_file.ReadVersion():
         version = m4_script_file.version
       if not version:
@@ -661,6 +667,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         m4_script_file = M4ScriptFile(m4_script_path)
 
         version = None
+        logging.info(u'Reading: {0:s}'.format(path))
         if m4_script_file.ReadVersion():
           version = m4_script_file.version
         if not version:
@@ -694,6 +701,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       py_script_file = PyScriptFile(path)
 
       version = None
+      logging.info(u'Reading: {0:s}'.format(path))
       if py_script_file.ReadVersion():
         version = py_script_file.version
       if not version:
@@ -712,6 +720,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         py_script_file = PyScriptFile(py_script_path)
 
         version = None
+        logging.info(u'Reading: {0:s}'.format(path))
         if py_script_file.ReadVersion():
           version = py_script_file.version
         if not version:
@@ -745,6 +754,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       script_file = ScriptFile(path)
 
       version = None
+      logging.info(u'Reading: {0:s}'.format(path))
       if script_file.ReadVersion():
         version = script_file.version
       if not version:
@@ -763,6 +773,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         script_file = ScriptFile(script_path)
 
         version = None
+        logging.info(u'Reading: {0:s}'.format(path))
         if script_file.ReadVersion():
           version = script_file.version
         if not version:
@@ -1022,6 +1033,9 @@ def Main():
     print(u'No such output directory: {0:s}.'.format(options.output_directory))
     print(u'')
     return False
+
+  logging.basicConfig(
+      level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
   libyal_directory = os.path.abspath(__file__)
   libyal_directory = os.path.dirname(libyal_directory)
