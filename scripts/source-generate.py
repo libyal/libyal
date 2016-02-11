@@ -95,6 +95,13 @@ class FunctionPrototype(object):
 
   Attributes:
     arguments: a list of strings containing the arguments.
+    have_bfio: a boolean value to indicate the function prototype is defined
+               if BFIO is defined.
+    have_debug_output: a boolean value to indicate the function prototype
+                       is defined if debug output is defined.
+    have_wide_character_type: a boolean value to indicate the function
+                              prototype is defined if the wide character
+                              type is defined.
     name: a string containing the name.
     return_type: a string containing the return type.
   """
@@ -108,6 +115,9 @@ class FunctionPrototype(object):
     """
     super(FunctionPrototype, self).__init__()
     self.arguments = []
+    self.have_bfio = False
+    self.have_debug_output = False
+    self.have_wide_character_type = False
     self.name = name
     self.return_type = return_type
 
@@ -158,6 +168,15 @@ class IncludeHeaderFile(object):
     define_extern = b'{0:s}_EXTERN'.format(
         project_configuration.library_name.upper())
 
+    define_have_bfio = b'#if defined( {0:s}_HAVE_BFIO )'.format(
+        project_configuration.library_name.upper())
+
+    define_have_debug_output = b'#if defined( HAVE_DEBUG_OUTPUT )'
+
+    define_have_wide_character_type = (
+        b'#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )').format(
+            project_configuration.library_name.upper())
+
     function_prototype = None
     have_bfio = False
     have_debug_output = False
@@ -198,6 +217,9 @@ class IncludeHeaderFile(object):
             name, _, _ = line.partition(u'(')
 
             function_prototype = FunctionPrototype(name, return_type)
+            function_prototype.have_bfio = have_bfio
+            function_prototype.have_debug_output = have_debug_output
+            function_prototype.have_wide_character_type = have_wide_character_type
 
         elif in_section:
           if line.startswith(b'* '):
@@ -219,13 +241,13 @@ class IncludeHeaderFile(object):
           have_debug_output = False
           have_wide_character_type = False
 
-        elif line.startswith(b'#if defined( HAVE_DEBUG_OUTPUT )'):
+        elif line.startswith(define_have_debug_output):
           have_debug_output = True
 
-        elif line.startswith(b'#if defined( {0:s}_HAVE_BFIO )'):
+        elif line.startswith(define_have_bfio):
           have_bfio = True
 
-        elif line.startswith(b'#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )'):
+        elif line.startswith(define_have_wide_character_type):
           have_wide_character_type = True
 
     return True
@@ -395,8 +417,22 @@ class LibraryManPageGenerator(SourceFileGenerator):
           template_filename, section_template_mappings, output_writer,
           output_filename, access_mode='ab')
 
+      bfio_functions = []
+      debug_output_functions = []
+      functions = []
+      wide_character_type_functions = []
       for function_prototype in include_header_file.functions_per_section.get(
           section_name, []):
+        if function_prototype.have_bfio:
+          bfio_functions.append(function_prototype)
+        elif function_prototype.have_debug_output:
+          debug_output_functions.append(function_prototype)
+        elif function_prototype.have_wide_character_type:
+          wide_character_type_functions.append(function_prototype)
+        else:
+          functions.append(function_prototype)
+
+      for function_prototype in functions:
         function_template_mappings = {
             u'function_arguments': u', '.join(function_prototype.arguments),
             u'function_name': function_prototype.name,
@@ -407,6 +443,50 @@ class LibraryManPageGenerator(SourceFileGenerator):
         self._GenerateSection(
             template_filename, function_template_mappings, output_writer,
             output_filename, access_mode='ab')
+
+      if wide_character_type_functions:
+        section_template_mappings = {
+            u'section_name': (
+                u'Available when compiled with wide character string support:')
+        }
+        template_filename = os.path.join(self._template_directory, u'section.txt')
+        self._GenerateSection(
+            template_filename, section_template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+        for function_prototype in wide_character_type_functions:
+          function_template_mappings = {
+              u'function_arguments': u', '.join(function_prototype.arguments),
+              u'function_name': function_prototype.name,
+              u'function_return_type': function_prototype.return_type,
+          }
+          template_filename = os.path.join(
+              self._template_directory, u'function.txt')
+          self._GenerateSection(
+              template_filename, function_template_mappings, output_writer,
+              output_filename, access_mode='ab')
+
+      if bfio_functions:
+        section_template_mappings = {
+            u'section_name': (
+                u'Available when compiled with libbfio support:')
+        }
+        template_filename = os.path.join(self._template_directory, u'section.txt')
+        self._GenerateSection(
+            template_filename, section_template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+        for function_prototype in bfio_functions:
+          function_template_mappings = {
+              u'function_arguments': u', '.join(function_prototype.arguments),
+              u'function_name': function_prototype.name,
+              u'function_return_type': function_prototype.return_type,
+          }
+          template_filename = os.path.join(
+              self._template_directory, u'function.txt')
+          self._GenerateSection(
+              template_filename, function_template_mappings, output_writer,
+              output_filename, access_mode='ab')
 
     template_filename = os.path.join(self._template_directory, u'footer.txt')
     self._GenerateSection(
