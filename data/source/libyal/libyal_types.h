@@ -34,10 +34,10 @@
 /* The following type definitions hide internal data structures
  */
 #if defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI )
-typedef struct ${library_name}_type {}		${library_name}_type_t;
+${library_debug_type_definitions}
 
 #else
-typedef intptr_t ${library_name}_type_t;
+${library_type_definitions}
 
 #endif /* defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI ) */
 

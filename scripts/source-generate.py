@@ -130,8 +130,8 @@ class FunctionPrototype(object):
     self.arguments.append(argument)
 
 
-class IncludeHeaderFile(object):
-  """Class that defines an include header file.
+class LibraryIncludeHeaderFile(object):
+  """Class that defines a library include header file.
 
   Attributes:
     functions_per_sections: a dictionary of a list of function prototype objects
@@ -141,12 +141,12 @@ class IncludeHeaderFile(object):
   """
 
   def __init__(self, path):
-    """Initializes an include header file.
+    """Initializes a library include header file.
 
     Args:
       path: a string containing the path.
     """
-    super(IncludeHeaderFile, self).__init__()
+    super(LibraryIncludeHeaderFile, self).__init__()
     self._path = path
 
     self.name = os.path.basename(path)
@@ -163,8 +163,6 @@ class IncludeHeaderFile(object):
     Returns:
       A boolean to indicate the functions were read from the file.
     """
-    self.functions = []
-
     define_extern = b'{0:s}_EXTERN'.format(
         project_configuration.library_name.upper())
 
@@ -249,6 +247,46 @@ class IncludeHeaderFile(object):
 
         elif line.startswith(define_have_wide_character_type):
           have_wide_character_type = True
+
+    return True
+
+
+class TypesIncludeHeaderFile(object):
+  """Class that defines a types include header file.
+
+  Attributes:
+    types: a list of strings containing the section names.
+  """
+
+  def __init__(self, path):
+    """Initializes a types include header file.
+
+    Args:
+      path: a string containing the path.
+    """
+    super(TypesIncludeHeaderFile, self).__init__()
+    self._path = path
+
+    self.types = []
+
+  def ReadTypes(self, project_configuration):
+    """Reads the types from the include header file.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+
+    Returns:
+      A boolean to indicate the types were read from the file.
+    """
+    typedef = b'typedef intptr_t {0:s}_'.format(
+        project_configuration.library_name)
+
+    with open(self._path, 'rb') as file_object:
+      for line in file_object.readlines():
+        line = line.strip()
+        if line.startswith(typedef) and line.endswith(b'_t;'):
+          self.types.append(line[len(typedef):-3])
 
     return True
 
@@ -348,7 +386,29 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
+    path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        u'include', project_configuration.library_name, u'types.h.in')
+
+    include_header_file = TypesIncludeHeaderFile(path)
+    include_header_file.ReadTypes(project_configuration)
+
+    library_debug_type_definitions = []
+    library_type_definitions = []
+    for type_name in include_header_file.types:
+      library_debug_type_definitions.append(
+          u'typedef struct {0:s}_{1:s} {{}}\t{0:s}_{1:s}_t;'.format(
+              project_configuration.library_name, type_name))
+      library_type_definitions.append(
+          u'typedef intptr_t {0:s}_{1:s}_t;'.format(
+              project_configuration.library_name, type_name))
+
     template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings[u'library_debug_type_definitions'] = u'\n'.join(
+        library_debug_type_definitions)
+    template_mappings[u'library_type_definitions'] = u'\n'.join(
+        library_type_definitions)
+
     for directory_entry in os.listdir(self._template_directory):
       if not directory_entry.startswith(u'libyal_'):
         continue
@@ -368,7 +428,6 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      # TODO: generate types in _types.h from config.
       # TODO: generate _libX.h include headers from config.
 
       output_filename = u'{0:s}_{1:s}'.format(
@@ -393,9 +452,12 @@ class LibraryManPageGenerator(SourceFileGenerator):
     """
     path = os.path.join(
         self._projects_directory, project_configuration.library_name,
-        u'include', u'{0:s}.h'.format(project_configuration.library_name))
+        u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
 
-    include_header_file = IncludeHeaderFile(path)
+    stat_object = os.stat(path)
+    modification_time = time.gmtime(stat_object.st_mtime)
+
+    include_header_file = LibraryIncludeHeaderFile(path)
     include_header_file.ReadFunctions(project_configuration)
 
     output_filename = u'{0:s}.3'.format(project_configuration.library_name)
@@ -404,7 +466,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
     template_filename = os.path.join(self._template_directory, u'header.txt')
     template_mappings = project_configuration.GetTemplateMappings()
     template_mappings[u'date'] = time.strftime(
-        u'%B %d, %Y').replace(u' 0', u'  ')
+        u'%B %d, %Y', modification_time).replace(u' 0', u'  ')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
@@ -487,6 +549,8 @@ class LibraryManPageGenerator(SourceFileGenerator):
           self._GenerateSection(
               template_filename, function_template_mappings, output_writer,
               output_filename, access_mode='ab')
+
+      # TODO: add support for debug output functions.
 
     template_filename = os.path.join(self._template_directory, u'footer.txt')
     self._GenerateSection(
