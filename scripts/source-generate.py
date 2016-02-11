@@ -31,6 +31,8 @@ class ProjectConfiguration(object):
     self.library_supports_codepage = None
     self.library_supports_notify = None
 
+    self.python_module_name = None
+
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
 
@@ -71,6 +73,8 @@ class ProjectConfiguration(object):
     self.library_supports_codepage = u'codepage' in library_features
     self.library_supports_notify = u'notify' in library_features
 
+    self.python_module_name = u'py{0:s}'.format(self.library_name[3:])
+
   def GetTemplateMappings(self):
     """Retrieves the template mappings.
 
@@ -86,6 +90,9 @@ class ProjectConfiguration(object):
         u'library_name': self.library_name,
         u'library_name_upper_case': self.library_name.upper(),
         u'library_description': self.library_description,
+
+        u'python_module_name': self.python_module_name,
+        u'python_module_name_upper_case': self.python_module_name.upper(),
     }
     return template_mappings
 
@@ -558,6 +565,41 @@ class LibraryManPageGenerator(SourceFileGenerator):
         access_mode='ab')
 
 
+class PythonModuleSourceFileGenerator(SourceFileGenerator):
+  """Class that generates the Python module source files."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates Python module source files.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    template_mappings = project_configuration.GetTemplateMappings()
+
+    for directory_entry in os.listdir(self._template_directory):
+      if not directory_entry.startswith(u'pyyal_'):
+        continue
+
+      if not project_configuration.library_supports_codepage and (
+        directory_entry.endswith(u'_codepage.h')):
+        continue
+
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      output_filename = u'{0:s}_{1:s}'.format(
+          project_configuration.python_module_name, directory_entry[6:])
+      output_filename = os.path.join(
+          project_configuration.python_module_name, output_filename)
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
+
 class FileWriter(object):
   """Class that defines a file output writer."""
 
@@ -670,6 +712,7 @@ def Main():
   if options.experimental:
     source_files.extend([
         (u'libyal', LibrarySourceFileGenerator),
+        (u'pyyal', PythonModuleSourceFileGenerator),
     ])
 
   for page_name, page_generator_class in source_files:
