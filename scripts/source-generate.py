@@ -258,6 +258,58 @@ class LibraryIncludeHeaderFile(object):
     return True
 
 
+class MakefileAMFile(object):
+  """Class that defines a Makefile.am file.
+
+  Attributes:
+    libraries: a list of strings containing the library names.
+  """
+
+  def __init__(self, path):
+    """Initializes a Makefile.am file.
+
+    Args:
+      path: a string containing the path.
+    """
+    super(MakefileAMFile, self).__init__()
+    self._path = path
+
+    self.libraries = []
+
+  def ReadLocalLibraries(self, project_configuration):
+    """Reads the local libraries from the Makefile.am file.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+
+    Returns:
+      A boolean to indicate the local libraries were read from the file.
+    """
+    in_subdirs = False
+    with open(self._path, 'rb') as file_object:
+      for line in file_object.readlines():
+        line = line.strip()
+
+        if in_subdirs:
+          if line.endswith(b'\\'):
+            line = line[:-1].strip()
+
+          if not line:
+            in_subdirs = False
+
+          elif line.startswith(b'lib') and not line.startswith(
+              project_configuration.library_name):
+            self.libraries.append(line)
+
+        elif line.startswith(b'SUBDIRS'):
+          in_subdirs = True
+
+    self.libraries = sorted(self.libraries)
+
+    return True
+
+
 class TypesIncludeHeaderFile(object):
   """Class that defines a types include header file.
 
@@ -600,6 +652,42 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
 
+class ScriptFileGenerator(SourceFileGenerator):
+  """Class that generates the script files."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates script files.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        u'Makefile.am')
+
+    makefile_am_file = MakefileAMFile(path)
+    makefile_am_file.ReadLocalLibraries(project_configuration)
+
+    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings[u'local_libs_ps1'] = u','.join(
+        [u'"{0:s}"'.format(library) for library in makefile_am_file.libraries])
+    template_mappings[u'local_libs_sh'] = u' '.join(
+        makefile_am_file.libraries)
+
+    for directory_entry in os.listdir(self._template_directory):
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      output_filename = directory_entry
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
+
 class FileWriter(object):
   """Class that defines a file output writer."""
 
@@ -713,6 +801,7 @@ def Main():
     source_files.extend([
         (u'libyal', LibrarySourceFileGenerator),
         (u'pyyal', PythonModuleSourceFileGenerator),
+        (u'scripts', ScriptFileGenerator),
     ])
 
   for page_name, page_generator_class in source_files:
