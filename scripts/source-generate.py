@@ -30,8 +30,6 @@ class ProjectConfiguration(object):
 
     self.library_name = None
     self.library_description = None
-    self.library_supports_codepage = None
-    self.library_supports_notify = None
 
     self.python_module_name = None
 
@@ -71,15 +69,10 @@ class ProjectConfiguration(object):
     self.library_description = self._GetConfigValue(
         config_parser, u'library', u'description')
 
-    library_features = self._GetConfigValue(
-        config_parser, u'library', u'features')
-
-    self.library_supports_codepage = u'codepage' in library_features
-    self.library_supports_notify = u'notify' in library_features
-
     self.library_name = self.project_name
-    self.python_module_name = u'py{0:s}'.format(self.project_name[3:])
-    self.tools_name = u'{0:s}tools'.format(self.project_name[3:])
+    self.library_name_suffix = self.project_name[3:]
+    self.python_module_name = u'py{0:s}'.format(self.library_name_suffix)
+    self.tools_name = u'{0:s}tools'.format(self.library_name_suffix)
 
   def GetTemplateMappings(self):
     """Retrieves the template mappings.
@@ -106,6 +99,7 @@ class ProjectConfiguration(object):
 
         u'library_name': self.library_name,
         u'library_name_upper_case': self.library_name.upper(),
+        u'library_name_suffix': self.library_name_suffix,
         u'library_description': self.library_description,
 
         u'python_module_name': self.python_module_name,
@@ -454,6 +448,43 @@ class CommonSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
 
+class ConfigurationFileGenerator(SourceFileGenerator):
+  """Class that generates the configuration files."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates configuration files.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    # TODO: generate spec file, what about Python versus non-Python?
+    # TODO: generate dpkg files, what about Python versus non-Python?
+
+    makefile_am_path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        u'Makefile.am')
+
+    makefile_am_file = MakefileAMFile(makefile_am_path)
+    makefile_am_file.ReadLocalLibraries(project_configuration)
+
+    template_mappings = project_configuration.GetTemplateMappings()
+    # TODO: fill pc_libs_private
+    template_mappings[u'pc_libs_private'] = u''
+
+    for directory_entry in os.listdir(self._template_directory):
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      output_filename = directory_entry
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
+
 class LibrarySourceFileGenerator(SourceFileGenerator):
   """Class that generates the library source files."""
 
@@ -465,12 +496,28 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
-    path = os.path.join(
+    # TODO: add support for libcstring/libcstring_types.h
+
+    include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
         u'include', project_configuration.library_name, u'types.h.in')
 
-    include_header_file = TypesIncludeHeaderFile(path)
+    include_header_file = TypesIncludeHeaderFile(include_header_path)
     include_header_file.ReadTypes(project_configuration)
+
+    library_path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        project_configuration.library_name)
+
+    codepage_header_file = os.path.join(
+        library_path, u'{0:s}_codepage.h'.format(
+            project_configuration.library_name))
+    error_header_file = os.path.join(
+        library_path, u'{0:s}_error.h'.format(
+            project_configuration.library_name))
+    notify_header_file = os.path.join(
+        library_path, u'{0:s}_notify.h'.format(
+            project_configuration.library_name))
 
     library_debug_type_definitions = []
     library_type_definitions = []
@@ -492,22 +539,30 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       if not directory_entry.startswith(u'libyal_'):
         continue
 
-      if not project_configuration.library_supports_codepage and (
-        directory_entry.endswith(u'_codepage.h')):
+      if directory_entry.endswith(u'_{0:s}.h'.format(
+          project_configuration.library_name)):
         continue
 
-      if not project_configuration.library_supports_notify and (
-        directory_entry.endswith(u'_libcnotify.h') or
-        directory_entry.endswith(u'_notify.c') or
-        directory_entry.endswith(u'_notify.h')):
+      if (directory_entry.endswith(u'_codepage.h') and
+          not os.path.exists(codepage_header_file)):
+        continue
+
+      if ((directory_entry.endswith(u'_libcerror.h') or
+           directory_entry.endswith(u'_error.c') or
+           directory_entry.endswith(u'_error.h')) and
+          not os.path.exists(error_header_file)):
+        continue
+
+      if ((directory_entry.endswith(u'_libcnotify.h') or
+           directory_entry.endswith(u'_notify.c') or
+           directory_entry.endswith(u'_notify.h')) and
+          not os.path.exists(notify_header_file)):
         continue
 
       template_filename = os.path.join(
           self._template_directory, directory_entry)
       if not os.path.isfile(template_filename):
         continue
-
-      # TODO: generate _libX.h include headers from config.
 
       output_filename = u'{0:s}_{1:s}'.format(
           project_configuration.library_name, directory_entry[7:])
@@ -529,15 +584,17 @@ class LibraryManPageGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
-    path = os.path.join(
+    # TODO: add support for libcstring.h
+
+    include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
         u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
 
     # TODO: improve method of determining main include header has changed.
-    stat_object = os.stat(path)
+    stat_object = os.stat(include_header_path)
     modification_time = time.gmtime(stat_object.st_mtime)
 
-    include_header_file = LibraryIncludeHeaderFile(path)
+    include_header_file = LibraryIncludeHeaderFile(include_header_path)
     include_header_file.ReadFunctions(project_configuration)
 
     output_filename = u'{0:s}.3'.format(project_configuration.library_name)
@@ -649,14 +706,25 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
+    python_module_path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        project_configuration.python_module_name)
+
+    if not os.path.exists(python_module_path):
+      return
+
+    codepage_header_file = os.path.join(
+        python_module_path, u'{0:s}_codepage.h'.format(
+            project_configuration.python_module_name))
+
     template_mappings = project_configuration.GetTemplateMappings()
 
     for directory_entry in os.listdir(self._template_directory):
       if not directory_entry.startswith(u'pyyal_'):
         continue
 
-      if not project_configuration.library_supports_codepage and (
-        directory_entry.endswith(u'_codepage.h')):
+      if (directory_entry.endswith(u'_codepage.h') and
+          not os.path.exists(codepage_header_file)):
         continue
 
       template_filename = os.path.join(
@@ -684,11 +752,11 @@ class ScriptFileGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
-    path = os.path.join(
+    makefile_am_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
         u'Makefile.am')
 
-    makefile_am_file = MakefileAMFile(path)
+    makefile_am_file = MakefileAMFile(makefile_am_path)
     makefile_am_file.ReadLocalLibraries(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings()
@@ -720,6 +788,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
+    tools_path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        project_configuration.tools_name)
+
+    if not os.path.exists(tools_path):
+      return
+
     template_mappings = project_configuration.GetTemplateMappings()
 
     # TODO: add support for ouput.[ch]
@@ -853,6 +928,10 @@ def Main():
       (u'scripts', ScriptFileGenerator),
       (u'yaltools', ToolsSourceFileGenerator),
   ]
+  if options.experimental:
+    source_files.extend([
+        (u'config', ConfigurationFileGenerator),
+    ])
 
   for page_name, page_generator_class in source_files:
     template_directory = os.path.join(

@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: ${library_name}
+Description: ${library_description}
+Version: @VERSION@
+Libs: -L$${libdir} -l${library_name_suffix}
+Libs.private: ${pc_libs_private}
+Cflags: -I$${includedir}
+
