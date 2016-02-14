@@ -79,6 +79,7 @@ class ProjectConfiguration(object):
 
     self.library_name = self.project_name
     self.python_module_name = u'py{0:s}'.format(self.project_name[3:])
+    self.tools_name = u'{0:s}tools'.format(self.project_name[3:])
 
   def GetTemplateMappings(self):
     """Retrieves the template mappings.
@@ -109,6 +110,9 @@ class ProjectConfiguration(object):
 
         u'python_module_name': self.python_module_name,
         u'python_module_name_upper_case': self.python_module_name.upper(),
+
+        u'tools_name': self.tools_name,
+        u'tools_name_upper_case': self.tools_name.upper(),
     }
     return template_mappings
 
@@ -529,6 +533,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
         self._projects_directory, project_configuration.library_name,
         u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
 
+    # TODO: improve method of determining main include header has changed.
     stat_object = os.stat(path)
     modification_time = time.gmtime(stat_object.st_mtime)
 
@@ -704,6 +709,39 @@ class ScriptFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
 
+class ToolsSourceFileGenerator(SourceFileGenerator):
+  """Class that generates the tools source files."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates tools source files.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    template_mappings = project_configuration.GetTemplateMappings()
+
+    # TODO: add support for ouput.[ch]
+
+    for directory_entry in os.listdir(self._template_directory):
+      if not directory_entry.startswith(u'yaltools_'):
+        continue
+
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      output_filename = u'{0:s}_{1:s}'.format(
+          project_configuration.tools_name, directory_entry[9:])
+      output_filename = os.path.join(
+          project_configuration.tools_name, output_filename)
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
+
 class FileWriter(object):
   """Class that defines a file output writer."""
 
@@ -813,6 +851,7 @@ def Main():
       (u'libyal', LibrarySourceFileGenerator),
       (u'pyyal', PythonModuleSourceFileGenerator),
       (u'scripts', ScriptFileGenerator),
+      (u'yaltools', ToolsSourceFileGenerator),
   ]
 
   for page_name, page_generator_class in source_files:
