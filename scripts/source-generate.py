@@ -272,33 +272,87 @@ class LibraryIncludeHeaderFile(object):
     return True
 
 
-class MakefileAMFile(object):
-  """Class that defines a Makefile.am file.
+class LibraryMakefileAMFile(object):
+  """Class that defines a library Makefile.am file.
 
   Attributes:
     libraries: a list of strings containing the library names.
   """
 
   def __init__(self, path):
-    """Initializes a Makefile.am file.
+    """Initializes a library Makefile.am file.
 
     Args:
       path: a string containing the path.
     """
-    super(MakefileAMFile, self).__init__()
+    super(LibraryMakefileAMFile, self).__init__()
     self._path = path
 
     self.libraries = []
 
-  def ReadLocalLibraries(self, project_configuration):
-    """Reads the local libraries from the Makefile.am file.
+  def ReadLibraries(self, project_configuration):
+    """Reads the libraries from the Makefile.am file.
 
     Args:
       project_configuration: the project configuration (instance of
                              ProjectConfiguration).
 
     Returns:
-      A boolean to indicate the local libraries were read from the file.
+      A boolean to indicate the libraries were read from the file.
+    """
+    library_libadd = b'{0:s}_la_LIBADD'.format(
+        project_configuration.library_name)
+
+    in_libadd = False
+    with open(self._path, 'rb') as file_object:
+      for line in file_object.readlines():
+        line = line.strip()
+
+        if in_libadd:
+          if line.endswith(b'\\'):
+            line = line[:-1].strip()
+
+          if not line:
+            in_subdirs = False
+
+          elif line.startswith(b'@') and line.endswith(b'_LIBADD@'):
+            self.libraries.append(line[1:-8].lower())
+
+        elif line.startswith(library_libadd):
+          in_libadd = True
+
+    self.libraries = sorted(self.libraries)
+
+    return True
+
+
+class MainMakefileAMFile(object):
+  """Class that defines a main Makefile.am file.
+
+  Attributes:
+    libraries: a list of strings containing the library names.
+  """
+
+  def __init__(self, path):
+    """Initializes a main Makefile.am file.
+
+    Args:
+      path: a string containing the path.
+    """
+    super(MainMakefileAMFile, self).__init__()
+    self._path = path
+
+    self.libraries = []
+
+  def ReadLibraries(self, project_configuration):
+    """Reads the libraries from the Makefile.am file.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+
+    Returns:
+      A boolean to indicate the libraries were read from the file.
     """
     in_subdirs = False
     with open(self._path, 'rb') as file_object:
@@ -312,8 +366,8 @@ class MakefileAMFile(object):
           if not line:
             in_subdirs = False
 
-          elif line.startswith(b'lib') and not line.startswith(
-              project_configuration.library_name):
+          elif (line.startswith(b'lib') and
+                line != project_configuration.library_name):
             self.libraries.append(line)
 
         elif line.startswith(b'SUBDIRS'):
@@ -464,14 +518,15 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     makefile_am_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
-        u'Makefile.am')
+        project_configuration.library_name, u'Makefile.am')
 
-    makefile_am_file = MakefileAMFile(makefile_am_path)
-    makefile_am_file.ReadLocalLibraries(project_configuration)
+    makefile_am_file = LibraryMakefileAMFile(makefile_am_path)
+    makefile_am_file.ReadLibraries(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings()
-    # TODO: fill pc_libs_private
-    template_mappings[u'pc_libs_private'] = u''
+    template_mappings[u'pc_libs_private'] = u' '.join([
+        u'@ax_{0:s}_pc_libs_private@'.format(library)
+        for library in makefile_am_file.libraries])
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
@@ -479,7 +534,11 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      output_filename = directory_entry
+      if directory_entry == u'libyal.pc.in':
+        output_filename = u'{0:s}.pc.in'.format(
+            project_configuration.library_name)
+      else:
+        output_filename = directory_entry
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
@@ -497,6 +556,9 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       output_writer: an output writer object (instance of OutputWriter).
     """
     # TODO: add support for libcstring/libcstring_types.h
+    # TODO: add support for libcthreads/libcthreads_types.h
+    # TODO: types.h alingment of debug types?
+    # TODO: do not generate libclocale/libclocale_types.h
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -543,20 +605,23 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           project_configuration.library_name)):
         continue
 
-      if (directory_entry.endswith(u'_codepage.h') and
-          not os.path.exists(codepage_header_file)):
+      if (directory_entry.endswith(u'_codepage.h') and (
+          not os.path.exists(codepage_header_file) or
+          project_configuration.library_name == u'libclocale')):
         continue
 
       if ((directory_entry.endswith(u'_libcerror.h') or
            directory_entry.endswith(u'_error.c') or
-           directory_entry.endswith(u'_error.h')) and
-          not os.path.exists(error_header_file)):
+           directory_entry.endswith(u'_error.h')) and (
+          not os.path.exists(error_header_file) or
+          project_configuration.library_name == u'libcerror')):
         continue
 
       if ((directory_entry.endswith(u'_libcnotify.h') or
            directory_entry.endswith(u'_notify.c') or
-           directory_entry.endswith(u'_notify.h')) and
-          not os.path.exists(notify_header_file)):
+           directory_entry.endswith(u'_notify.h')) and (
+          not os.path.exists(notify_header_file) or
+          project_configuration.library_name == u'libcnotify')):
         continue
 
       template_filename = os.path.join(
@@ -584,7 +649,10 @@ class LibraryManPageGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
-    # TODO: add support for libcstring.h
+    # TODO: add support for libcstring.h - macros
+    # TODO: add support for libcerror.h - no wchar_t support
+    # TODO: add support for libcthreads.h - callback functions
+    # TODO: add support for libclocale.h - libclocale_codepage
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -756,8 +824,8 @@ class ScriptFileGenerator(SourceFileGenerator):
         self._projects_directory, project_configuration.library_name,
         u'Makefile.am')
 
-    makefile_am_file = MakefileAMFile(makefile_am_path)
-    makefile_am_file.ReadLocalLibraries(project_configuration)
+    makefile_am_file = MainMakefileAMFile(makefile_am_path)
+    makefile_am_file.ReadLibraries(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings()
     template_mappings[u'local_libs_ps1'] = u','.join(
