@@ -12,11 +12,11 @@ To retrieve the source from the git repository make sure to install:
 * autopoint or gettextize
 * libtoolize
 * pkg-config
-${git_build_dependencies}
+${build_dependencies}
 
 To download and prepare the source for building run:
 ```
-git clone ${git_url}
+git clone ${project_git_url}
 cd ${project_name}/
 ./synclibs.sh
 ./autogen.sh
@@ -34,7 +34,7 @@ sudo port install autoconf automake gettext libtool pkgconfig
 ### Microsoft Visual Studio
 Since Microsoft Visual Studio does not come with a Unix shell or equivalent you'll need to use the Windows PowerShell scripts instead:
 ```
-git clone ${git_url}
+git clone ${project_git_url}
 cd ${project_name}\
 .\synclibs.ps1
 .\autogen.ps1

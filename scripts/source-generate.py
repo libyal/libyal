@@ -5,6 +5,7 @@
 from __future__ import print_function
 import abc
 import argparse
+import datetime
 import json
 import os
 import string
@@ -23,8 +24,9 @@ class ProjectConfiguration(object):
   def __init__(self):
     """Initializes a project configuation object."""
     super(ProjectConfiguration, self).__init__()
+    self.project_name = None
     self.project_authors = None
-    self.project_copyright = None
+    self.project_year_of_creation = None
 
     self.library_name = None
     self.library_description = None
@@ -57,35 +59,49 @@ class ProjectConfiguration(object):
     config_parser = configparser.RawConfigParser()
     config_parser.read([filename])
 
+    self.project_name = self._GetConfigValue(
+        config_parser, u'project', u'name')
     self.project_authors = self._GetConfigValue(
-        config_parser, u'Project', u'authors')
-    self.project_copyright = self._GetConfigValue(
-        config_parser, u'Project', u'copyright')
+        config_parser, u'project', u'authors')
+    self.project_year_of_creation = self._GetConfigValue(
+        config_parser, u'project', u'year_of_creation')
 
-    self.library_name = self._GetConfigValue(
-        config_parser, u'Library', u'name')
+    self.project_year_of_creation = int(self.project_year_of_creation, 10)
+
     self.library_description = self._GetConfigValue(
-        config_parser, u'Library', u'description')
+        config_parser, u'library', u'description')
 
     library_features = self._GetConfigValue(
-        config_parser, u'Library', u'features')
+        config_parser, u'library', u'features')
 
     self.library_supports_codepage = u'codepage' in library_features
     self.library_supports_notify = u'notify' in library_features
 
-    self.python_module_name = u'py{0:s}'.format(self.library_name[3:])
+    self.library_name = self.project_name
+    self.python_module_name = u'py{0:s}'.format(self.project_name[3:])
 
   def GetTemplateMappings(self):
     """Retrieves the template mappings.
 
     Returns:
       A dictionary containing the string template mappings.
+
+    Raises:
+      ValueError: if the year of creation value is out of bounds.
     """
-    # TODO: determine current year for copyright and rename attribute
-    # to year_of_creation or equiv.
+    date = datetime.date.today()
+    if self.project_year_of_creation > date.year:
+      raise ValueError(u'Year of creation value out of bounds.')
+
+    if self.project_year_of_creation == date.year:
+      project_copyright = u'{0:d}'.format(self.project_year_of_creation)
+    else:
+      project_copyright = u'{0:d}-{1:d}'.format(
+          self.project_year_of_creation, date.year)
+
     template_mappings = {
         u'authors': u', '.join(self.project_authors),
-        u'copyright': self.project_copyright,
+        u'copyright': project_copyright,
 
         u'library_name': self.library_name,
         u'library_name_upper_case': self.library_name.upper(),
@@ -790,19 +806,14 @@ def Main():
 
   # TODO: generate more source files.
   # configure.ac
-  # common
   # include headers
-  # pyyal files
   # yal.net files
   source_files = [
       (u'common', CommonSourceFileGenerator),
+      (u'libyal', LibrarySourceFileGenerator),
+      (u'pyyal', PythonModuleSourceFileGenerator),
+      (u'scripts', ScriptFileGenerator),
   ]
-  if options.experimental:
-    source_files.extend([
-        (u'libyal', LibrarySourceFileGenerator),
-        (u'pyyal', PythonModuleSourceFileGenerator),
-        (u'scripts', ScriptFileGenerator),
-    ])
 
   for page_name, page_generator_class in source_files:
     template_directory = os.path.join(
@@ -818,9 +829,6 @@ def Main():
     source_file.Generate(project_configuration, output_writer)
 
   # TODO: add support for Unicode templates.
-
-  if not options.experimental:
-    return True
 
   source_files = [
       (u'libyal.3', LibraryManPageGenerator),

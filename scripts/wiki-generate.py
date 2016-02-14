@@ -30,16 +30,16 @@ class ProjectConfiguration(object):
     self.project_name = None
     self.project_status = None
     self.project_description = None
+    self.project_documentation_url = None
+    self.project_downloads_url = None
+    self.project_git_url = None
+    self.project_build_dependencies = None
 
     # Functionality the project offsers.
     self.supports_debug_output = False
     self.supports_tests = False
     self.supports_tools = False
     self.supports_python = False
-
-    # Source distribution methods the project offsers.
-    self.supports_source_package = False
-    self.supports_git = False
 
     # Compilers the project supports.
     self.supports_cygwin = False
@@ -54,13 +54,6 @@ class ProjectConfiguration(object):
     # Other.
     self.supports_dokan = False
     self.supports_fuse = False
-
-    self.documentation_url = None
-
-    self.source_package_url = None
-
-    self.git_url = None
-    self.git_build_dependencies = None
 
     self.development_main_object = None
     self.development_main_object_filename = None
@@ -136,32 +129,31 @@ class ProjectConfiguration(object):
     config_parser = configparser.RawConfigParser()
     config_parser.read([filename])
 
-    self.project_name = self._GetConfigValue(config_parser, u'Project', u'name')
+    self.project_name = self._GetConfigValue(
+        config_parser, u'project', u'name')
     self.project_status = self._GetConfigValue(
-        config_parser, u'Project', u'status')
+        config_parser, u'project', u'status')
 
     try:
-      self.documentation_url = self._GetConfigValue(
-          config_parser, u'documentation', u'url')
+      self.project_documentation_url = self._GetConfigValue(
+          config_parser, u'project', u'documentation_url')
     except configparser.NoOptionError:
       pass
 
-    self.source_package_url = self._GetConfigValue(
-        config_parser, u'source_package', u'url')
+    self.project_downloads_url = self._GetConfigValue(
+        config_parser, u'project', u'downloads_url')
+    self.project_git_url = self._GetConfigValue(
+        config_parser, u'project', u'git_url')
+    self.project_build_dependencies = self._GetConfigValue(
+        config_parser, u'project', u'build_dependencies')
 
-    self.git_url = self._GetConfigValue(config_parser, u'git', u'url')
-    self.git_build_dependencies = self._GetConfigValue(
-        config_parser, u'git', u'build_dependencies')
-
-    features = self._GetConfigValue(config_parser, u'Project', u'features')
+    features = self._GetConfigValue(
+        config_parser, u'project', u'features')
 
     self.supports_debug_output = u'debug_output' in features
     self.supports_tests = u'tests' in features
     self.supports_tools = u'tools' in features
     self.supports_python = u'python' in features
-
-    self.supports_source_package = u'source_package' in features
-    self.supports_git = u'git' in features
 
     self.supports_cygwin = u'cygwin' in features
     self.supports_gcc = u'gcc' in features
@@ -380,9 +372,9 @@ class ProjectConfiguration(object):
 
     project_status = u''
 
-    documentation = u''
+    build_dependencies = u''
 
-    git_build_dependencies = u''
+    documentation = u''
 
     development_main_object_pre_open_python = u''
     development_main_object_post_open_python = u''
@@ -430,14 +422,13 @@ class ProjectConfiguration(object):
     if self.project_status:
       project_status += u'-{0:s}'.format(self.project_status)
 
-    if self.documentation_url:
+    if self.project_documentation_url:
       documentation = u'* [Documentation]({0:s})\n'.format(
-          self.documentation_url)
+          self.project_documentation_url)
 
-    if self.supports_git:
-      if self.git_build_dependencies:
-        for dependency in self.git_build_dependencies:
-          git_build_dependencies += u'* {0:s}\n'.format(dependency)
+    if self.project_build_dependencies:
+      for dependency in self.project_build_dependencies:
+        build_dependencies += u'* {0:s}\n'.format(dependency)
 
     if self.supports_tests and self.tests_profiles:
       for profile in self.tests_profiles:
@@ -555,14 +546,13 @@ class ProjectConfiguration(object):
             u'These DLLs can be found in the same directory as '
             u'{0:s}.dll.\n').format(self.project_name)
 
-      if self.supports_git:
-        msvscpp_build_git = (
-            u'\n'
-            u'Note that if you want to build {0:s} from source checked out of '
-            u'git with Visual Studio make sure the autotools are able to make '
-            u'a distribution package of {0:s} before trying to build it.\n'
-            u'You can create distribution package by running: '
-            u'"make dist".\n').format(self.project_name)
+      msvscpp_build_git = (
+          u'\n'
+          u'Note that if you want to build {0:s} from source checked out of '
+          u'git with Visual Studio make sure the autotools are able to make '
+          u'a distribution package of {0:s} before trying to build it.\n'
+          u'You can create distribution package by running: '
+          u'"make dist".\n').format(self.project_name)
 
       if self.supports_dokan:
         msvscpp_mount_tool += (
@@ -691,17 +681,16 @@ class ProjectConfiguration(object):
         u'project_name_upper_case': self.project_name.upper(),
         u'project_status': project_status,
         u'project_description': self.project_description,
+        u'project_git_url': self.project_git_url,
+        u'project_downloads_url': self.project_downloads_url,
+
+        u'build_dependencies': build_dependencies,
 
         u'python_bindings_name': python_bindings_name,
         u'mount_tool_name': mount_tool_name,
         u'tools_name': tools_name,
 
         u'documentation': documentation,
-
-        u'source_package_url': self.source_package_url,
-
-        u'git_url': self.git_url,
-        u'git_build_dependencies': git_build_dependencies,
 
         u'development_prefix': development_prefix,
         u'development_main_object': self.development_main_object,
@@ -844,17 +833,10 @@ class BuildingPageGenerator(WikiPageGenerator):
     template_mappings = project_configuration.GetTemplateMappings()
     self._GenerateSection(u'introduction.txt', template_mappings, output_writer)
 
-    if (project_configuration.supports_source_package or
-        project_configuration.supports_git):
-      self._GenerateSection(u'source.txt', template_mappings, output_writer)
-
-      if project_configuration.supports_source_package:
-        self._GenerateSection(
-            u'source_package.txt', template_mappings, output_writer)
-
-      if project_configuration.supports_git:
-        self._GenerateSection(
-            u'source_git.txt', template_mappings, output_writer)
+    self._GenerateSection(u'source.txt', template_mappings, output_writer)
+    self._GenerateSection(
+        u'source_package.txt', template_mappings, output_writer)
+    self._GenerateSection(u'source_git.txt', template_mappings, output_writer)
 
     if project_configuration.supports_gcc:
       self._GenerateSection(u'gcc.txt', template_mappings, output_writer)
