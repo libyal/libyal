@@ -557,8 +557,11 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     """
     # TODO: add support for libcstring/libcstring_types.h
     # TODO: add support for libcthreads/libcthreads_types.h
+    # TODO: add support for libcnotify/libcnotify_types.h - no types
+    # TODO: add support for libuna/libuna_types.h
     # TODO: types.h alingment of debug types?
     # TODO: do not generate libclocale/libclocale_types.h
+    # TODO: do not generate libuna/libuna_libcstring.h
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -650,9 +653,9 @@ class LibraryManPageGenerator(SourceFileGenerator):
       output_writer: an output writer object (instance of OutputWriter).
     """
     # TODO: add support for libcstring.h - macros
-    # TODO: add support for libcerror.h - no wchar_t support
     # TODO: add support for libcthreads.h - callback functions
     # TODO: add support for libclocale.h - libclocale_codepage
+    # TODO: add support for libcsystem.h - additional types
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -675,6 +678,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
+    have_wide_character_type_functions = False
     for section_name in include_header_file.section_names:
       section_template_mappings = {
           u'section_name': section_name,
@@ -712,6 +716,8 @@ class LibraryManPageGenerator(SourceFileGenerator):
             output_filename, access_mode='ab')
 
       if wide_character_type_functions:
+        have_wide_character_type_functions = True
+
         section_template_mappings = {
             u'section_name': (
                 u'Available when compiled with wide character string support:')
@@ -757,6 +763,25 @@ class LibraryManPageGenerator(SourceFileGenerator):
 
       # TODO: add support for debug output functions.
 
+    template_filename = os.path.join(
+        self._template_directory, u'description.txt')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if have_wide_character_type_functions:
+      template_filename = os.path.join(self._template_directory, u'notes.txt')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if have_wide_character_type_functions:
+      template_filename = os.path.join(
+          self._template_directory, u'notes_wchar.txt')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     template_filename = os.path.join(self._template_directory, u'footer.txt')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
@@ -777,6 +802,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     python_module_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
         project_configuration.python_module_name)
+
+    # TODO: handle white space in pyyal/pyyal_file_object_io_handle.c e.g.
+    # for pycreg
+    # TODO: selectively generate some files e.g. for pycaes
 
     if not os.path.exists(python_module_path):
       return
@@ -840,6 +869,54 @@ class ScriptFileGenerator(SourceFileGenerator):
         continue
 
       output_filename = directory_entry
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
+
+class TestsSourceFileGenerator(SourceFileGenerator):
+  """Class that generates the tests source files."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates tests source files.
+
+    Args:
+      project_configuration: the project configuration (instance of
+                             ProjectConfiguration).
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    tests_path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        project_configuration.tests_name)
+
+    if not os.path.exists(tests_path):
+      return
+
+    # TODO: handle non-template files differently.
+
+    template_mappings = project_configuration.GetTemplateMappings()
+
+    for directory_entry in os.listdir(self._template_directory):
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      if directory_entry.startswith(u'yal_test_'):
+        output_filename = u'{0:s}_{1:s}'.format(
+            self.library_name_suffix, directory_entry[3:])
+
+      elif directory_entry.startswith(u'pyyal_test_'):
+        output_filename = u'py{0:s}_{1:s}'.format(
+            self.python_module_name, directory_entry[5:])
+
+      # TODO: handle "test_pyyal_"
+      else:
+        output_filename = directory_entry
+
+      output_filename = os.path.join(u'tests', output_filename)
+      if not os.path.exists(output_filename):
+        continue
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
@@ -989,6 +1066,7 @@ def Main():
   # configure.ac
   # include headers
   # yal.net files
+
   source_files = [
       (u'common', CommonSourceFileGenerator),
       (u'libyal', LibrarySourceFileGenerator),
@@ -999,6 +1077,7 @@ def Main():
   if options.experimental:
     source_files.extend([
         (u'config', ConfigurationFileGenerator),
+        (u'tests', TestsSourceFileGenerator),
     ])
 
   for page_name, page_generator_class in source_files:

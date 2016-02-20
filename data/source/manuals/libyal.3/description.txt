@@ -1,0 +1,11 @@
+.Sh DESCRIPTION
+The
+.Fn ${library_name}_get_version
+function is used to retrieve the library version.
+.Sh RETURN VALUES
+Most of the functions return NULL or \-1 on error, dependent on the return type.
+For the actual return values see "${library_name}.h".
+.Sh ENVIRONMENT
+None
+.Sh FILES
+None
