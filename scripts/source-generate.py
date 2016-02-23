@@ -184,6 +184,9 @@ class LibraryIncludeHeaderFile(object):
     Returns:
       A boolean to indicate the functions were read from the file.
     """
+    define_deprecated = b'{0:s}_DEPRECATED'.format(
+        project_configuration.library_name.upper())
+
     define_extern = b'{0:s}_EXTERN'.format(
         project_configuration.library_name.upper())
 
@@ -200,6 +203,7 @@ class LibraryIncludeHeaderFile(object):
     have_bfio = False
     have_debug_output = False
     have_wide_character_type = False
+    in_define_deprecated = False
     in_define_extern = False
     in_section = False
     section_name = None
@@ -218,9 +222,12 @@ class LibraryIncludeHeaderFile(object):
             function_prototype.AddArgument(argument)
 
             if line.endswith(u' );'):
-              self.functions_per_section[section_name].append(
-                  function_prototype)
+              if not in_define_deprecated:
+                self.functions_per_section[section_name].append(
+                    function_prototype)
+
               function_prototype = None
+              in_define_deprecated = False
               in_define_extern = False
 
           else:
@@ -246,6 +253,9 @@ class LibraryIncludeHeaderFile(object):
             self.section_names.append(section_name)
             self.functions_per_section[section_name] = []
             in_section = False
+
+        elif line.startswith(define_deprecated):
+          in_define_deprecated = True
 
         elif line.startswith(define_extern):
           in_define_extern = True
@@ -680,6 +690,12 @@ class LibraryManPageGenerator(SourceFileGenerator):
 
     have_wide_character_type_functions = False
     for section_name in include_header_file.section_names:
+      functions_per_section = include_header_file.functions_per_section.get(
+          section_name, [])
+
+      if not functions_per_section:
+        continue
+
       section_template_mappings = {
           u'section_name': section_name,
       }
@@ -692,8 +708,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
       debug_output_functions = []
       functions = []
       wide_character_type_functions = []
-      for function_prototype in include_header_file.functions_per_section.get(
-          section_name, []):
+      for function_prototype in functions_per_section:
         if function_prototype.have_bfio:
           bfio_functions.append(function_prototype)
         elif function_prototype.have_debug_output:
