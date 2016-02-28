@@ -666,6 +666,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
     # TODO: add support for libcthreads.h - callback functions
     # TODO: add support for libclocale.h - libclocale_codepage
     # TODO: add support for libcsystem.h - additional types
+    # TODO: add support for libsigscan.h - not detecting wchar
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
