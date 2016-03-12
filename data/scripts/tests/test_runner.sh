@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to run an executable for testing.
 #
-# Version: 20160124
+# Version: 20160312
 #
 # When CHECK_WITH_VALGRIND is set to a non-empty value the executable
 # is run with valgrind, otherwise it is run without.
@@ -63,9 +63,7 @@ then
 
 	if test $? -eq 0;
 	then
-		DIRNAME=`dirname ${EXECUTABLE}`;
-		BASENAME=`basename ${EXECUTABLE}`;
-		EXECUTABLE="${DIRNAME}/.libs/${BASENAME}";
+		EXECUTABLE=`readlink -f ${EXECUTABLE}`;
 
 		if ! test -x ${EXECUTABLE};
 		then

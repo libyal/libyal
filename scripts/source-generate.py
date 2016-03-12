@@ -572,6 +572,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     # TODO: types.h alingment of debug types?
     # TODO: do not generate libclocale/libclocale_types.h
     # TODO: do not generate libuna/libuna_libcstring.h
+    # TODO: libsmraw/libsmraw_codepage.h alingment of definitions
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -667,6 +668,8 @@ class LibraryManPageGenerator(SourceFileGenerator):
     # TODO: add support for libclocale.h - libclocale_codepage
     # TODO: add support for libcsystem.h - additional types
     # TODO: add support for libsigscan.h - not detecting wchar
+    # TODO: add support for libfvalue.h - spurious , for callback functions
+    # TODO: add support for libsmraw.h - not detecting wchar
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -822,6 +825,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     # TODO: handle white space in pyyal/pyyal_file_object_io_handle.c e.g.
     # for pycreg
     # TODO: selectively generate some files e.g. for pycaes
+    # TODO: do not generate pysmraw/pysmraw_codepage.h
 
     if not os.path.exists(python_module_path):
       return
