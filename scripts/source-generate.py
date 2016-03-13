@@ -111,11 +111,49 @@ class ProjectConfiguration(object):
     return template_mappings
 
 
+class FunctionArgument(object):
+  """Class that defines a function argument."""
+
+  def __init__(self, argument_string):
+    """Initializes a function argument.
+
+    Args:
+      argument_string: a string containing the function argument.
+    """
+    super(FunctionArgument, self).__init__()
+    self._strings = [argument_string]
+
+  def AddArgumentString(self, argument_string):
+    """Adds an argument string to the function argument.
+
+    Args:
+      argument_string: a string containing the function argument.
+    """
+    self._strings.append(argument_string)
+
+  def CopyToString(self):
+    """Copies the function argument to a string.
+
+    Returns:
+      A string containing the function argument.
+    """
+    number_of_strings = len(self._strings)
+
+    argument_string = u''
+    if number_of_strings == 1:
+      argument_string = self._strings[0]
+
+    elif number_of_strings > 1:
+      argument_string = u'{0:s}{1:s}'.format(
+          self._strings[0], u', '.join(self._strings[1:]))
+
+    return argument_string
+
+
 class FunctionPrototype(object):
   """Class that defines a function prototype.
 
   Attributes:
-    arguments: a list of strings containing the arguments.
     have_bfio: a boolean value to indicate the function prototype is defined
                if BFIO is defined.
     have_debug_output: a boolean value to indicate the function prototype
@@ -135,7 +173,7 @@ class FunctionPrototype(object):
       return_type: a string containing the return type.
     """
     super(FunctionPrototype, self).__init__()
-    self.arguments = []
+    self._arguments = []
     self.have_bfio = False
     self.have_debug_output = False
     self.have_wide_character_type = False
@@ -146,9 +184,31 @@ class FunctionPrototype(object):
     """Adds an argument to the function prototype.
 
     Args:
-      argument: a string containing the argument.
+      argument: a function argument object (instance of FunctionArgument).
     """
-    self.arguments.append(argument)
+    self._arguments.append(argument)
+
+  def AddArgumentString(self, argument_string):
+    """Adds an argument string to the function prototype.
+
+    Args:
+      argument_string: a string containing the function argument.
+    """
+    function_argument = FunctionArgument(argument_string)
+    self._arguments.append(function_argument)
+
+  def CopyToString(self):
+    """Copies the function prototype to a string.
+
+    Returns:
+      A string containing the function prototype.
+    """
+    argument_strings = []
+    for function_argument in self._arguments:
+      argument_string = function_argument.CopyToString()
+      argument_strings.append(argument_string)
+
+    return u', '.join(argument_strings)
 
 
 class LibraryIncludeHeaderFile(object):
@@ -199,6 +259,7 @@ class LibraryIncludeHeaderFile(object):
         b'#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )').format(
             project_configuration.library_name.upper())
 
+    function_argument = None
     function_prototype = None
     have_bfio = False
     have_debug_output = False
@@ -214,14 +275,30 @@ class LibraryIncludeHeaderFile(object):
           line = line.decode(u'ascii')
 
           if function_prototype:
-            # Get the part of the line before the ','.
-            argument, _, _ = line.partition(u',')
+            # Check if we have a callback function argument.
+            if line.endswith(u'('):
+              argument_string = u'{0:s} '.format(line)
+              function_argument = FunctionArgument(argument_string)
 
-            if argument.endswith(u' );'):
-              argument = argument[:-3]
-            function_prototype.AddArgument(argument)
+            else:
+              if line.endswith(u' );'):
+                argument_string = line[:-3]
 
-            if line.endswith(u' );'):
+              else:
+                # Get the part of the line before the ','.
+                argument_string, _, _ = line.partition(u',')
+
+              if not function_argument:
+                function_prototype.AddArgumentString(argument_string)
+
+              else:
+                function_argument.AddArgumentString(argument_string)
+
+            if function_argument and line.endswith(u' ),'):
+              function_prototype.AddArgument(function_argument)
+              function_argument = None
+
+            elif line.endswith(u' );'):
               if not in_define_deprecated:
                 self.functions_per_section[section_name].append(
                     function_prototype)
@@ -664,11 +741,9 @@ class LibraryManPageGenerator(SourceFileGenerator):
       output_writer: an output writer object (instance of OutputWriter).
     """
     # TODO: add support for libcstring.h - macros
-    # TODO: add support for libcthreads.h - callback functions
     # TODO: add support for libclocale.h - libclocale_codepage
     # TODO: add support for libcsystem.h - additional types
     # TODO: add support for libsigscan.h - not detecting wchar
-    # TODO: add support for libfvalue.h - spurious , for callback functions
     # TODO: add support for libsmraw.h - not detecting wchar
 
     include_header_path = os.path.join(
@@ -723,8 +798,9 @@ class LibraryManPageGenerator(SourceFileGenerator):
           functions.append(function_prototype)
 
       for function_prototype in functions:
+        function_arguments_string = function_prototype.CopyToString()
         function_template_mappings = {
-            u'function_arguments': u', '.join(function_prototype.arguments),
+            u'function_arguments': function_arguments_string,
             u'function_name': function_prototype.name,
             u'function_return_type': function_prototype.return_type,
         }
@@ -747,8 +823,9 @@ class LibraryManPageGenerator(SourceFileGenerator):
             output_filename, access_mode='ab')
 
         for function_prototype in wide_character_type_functions:
+          function_arguments_string = function_prototype.CopyToString()
           function_template_mappings = {
-              u'function_arguments': u', '.join(function_prototype.arguments),
+              u'function_arguments': function_arguments_string,
               u'function_name': function_prototype.name,
               u'function_return_type': function_prototype.return_type,
           }
@@ -769,8 +846,9 @@ class LibraryManPageGenerator(SourceFileGenerator):
             output_filename, access_mode='ab')
 
         for function_prototype in bfio_functions:
+          function_arguments_string = function_prototype.CopyToString()
           function_template_mappings = {
-              u'function_arguments': u', '.join(function_prototype.arguments),
+              u'function_arguments': function_arguments_string,
               u'function_name': function_prototype.name,
               u'function_return_type': function_prototype.return_type,
           }
