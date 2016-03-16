@@ -11,6 +11,14 @@ import re
 import sys
 import time
 
+# pylint: disable=import-error
+
+# pylint: disable=wrong-import-order
+try:
+  import ConfigParser as configparser
+except ImportError:
+  import configparser
+
 # pylint: disable=no-name-in-module
 if sys.version_info[0] < 3:
   # Keep urllib2 here since we this code should be able to be used
@@ -20,12 +28,6 @@ if sys.version_info[0] < 3:
 else:
   import urllib.error as urllib_error
   from urllib.request import urlopen
-
-# pylint: disable=wrong-import-order
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
 
 
 class Project(object):
@@ -422,6 +424,11 @@ class StdoutWriter(object):
 
 
 def Main():
+  """The main program function.
+
+  Returns:
+    A boolean containing True if successful or False if not.
+  """
   argument_parser = argparse.ArgumentParser(description=(
       u'Generates an overview of open github issues of the libyal libraries.'))
 

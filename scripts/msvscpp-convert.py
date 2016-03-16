@@ -29,12 +29,10 @@ import sys
 import uuid
 
 
-# pylint: disable=logging-format-interpolation
-
 class VSConfiguration(object):
   """Class to represent a Visual Studio configurations."""
 
-  def __init__(self, name='', platform=''):
+  def __init__(self, name=u'', platform=u''):
     """Initializes a Visual Studio configuration.
 
     Args:
@@ -76,7 +74,7 @@ class VSConfigurations(object):
     if configuration.platform not in self.platforms:
       self.platforms.append(configuration.platform)
 
-    identifier = '{0:s}|{1:s}'.format(
+    identifier = u'{0:s}|{1:s}'.format(
         configuration.name, configuration.platform)
 
     self._configurations[identifier] = configuration
@@ -87,9 +85,9 @@ class VSConfigurations(object):
     Args:
       output_version: the output Visual Studio version.
     """
-    if 'x64' not in self.platforms:
+    if u'x64' not in self.platforms:
       for configuration in self._configurations.values():
-        if configuration.platform != 'x64':
+        if configuration.platform != u'x64':
           x64_configuration = configuration.CopyToX64()
 
           self.Append(x64_configuration)
@@ -106,7 +104,7 @@ class VSConfigurations(object):
     Returns:
       The configuration (instance of VSConfiguration).
     """
-    identifier = '{0:s}|{1:s}'.format(name, platform)
+    identifier = u'{0:s}|{1:s}'.format(name, platform)
     return self._configurations[identifier]
 
   def GetSorted(self, reverse=False):
@@ -137,185 +135,185 @@ class VSProjectConfiguration(VSConfiguration):
 
     # Note that name and platform are inherited from VSConfiguration.
     self.additional_dependencies = []
-    self.basic_runtime_checks = ''
-    self.character_set = ''
-    self.compile_as = ''
-    self.data_execution_prevention = ''
-    self.debug_information_format = ''
-    self.detect_64bit_portability_problems = ''
-    self.enable_comdat_folding = ''
-    self.enable_function_level_linking = ''
-    self.enable_intrinsic_functions = ''
-    self.fixed_base_address = ''
-    self.generate_debug_information = ''
-    self.import_library = ''
-    self.include_directories = ''
-    self.librarian_ignore_defaults = ''
-    self.librarian_output_file = ''
-    self.library_directories = ''
-    self.link_incremental = ''
-    self.linker_output_directory = ''
-    self.linker_output_file = ''
+    self.basic_runtime_checks = u''
+    self.character_set = u''
+    self.compile_as = u''
+    self.data_execution_prevention = u''
+    self.debug_information_format = u''
+    self.detect_64bit_portability_problems = u''
+    self.enable_comdat_folding = u''
+    self.enable_function_level_linking = u''
+    self.enable_intrinsic_functions = u''
+    self.fixed_base_address = u''
+    self.generate_debug_information = u''
+    self.import_library = u''
+    self.include_directories = u''
+    self.librarian_ignore_defaults = u''
+    self.librarian_output_file = u''
+    self.library_directories = u''
+    self.link_incremental = u''
+    self.linker_output_directory = u''
+    self.linker_output_file = u''
     self.linker_values_set = False
-    self.managed_extensions = ''
-    self.module_definition_file = ''
-    self.name = ''
-    self.optimize_references = ''
-    self.optimization = ''
-    self.output_type = ''
-    self.platform = ''
-    self.platform_toolset = ''
-    self.precompiled_header = ''
-    self.preprocessor_definitions = ''
-    self.randomized_base_address = ''
-    self.runtime_library = ''
-    self.smaller_type_check = ''
-    self.sub_system = ''
-    self.target_machine = ''
-    self.warning_as_error = ''
-    self.warning_level = ''
-    self.whole_program_optimization = ''
+    self.managed_extensions = u''
+    self.module_definition_file = u''
+    self.name = u''
+    self.optimize_references = u''
+    self.optimization = u''
+    self.output_type = u''
+    self.platform = u''
+    self.platform_toolset = u''
+    self.precompiled_header = u''
+    self.preprocessor_definitions = u''
+    self.randomized_base_address = u''
+    self.runtime_library = u''
+    self.smaller_type_check = u''
+    self.sub_system = u''
+    self.target_machine = u''
+    self.warning_as_error = u''
+    self.warning_level = u''
+    self.whole_program_optimization = u''
 
   @property
   def basic_runtime_checks_string(self):
     basic_runtime_checks = int(self.basic_runtime_checks, 10)
     if basic_runtime_checks == 0:
-      return 'Default'
+      return u'Default'
     elif basic_runtime_checks == 3:
-      return 'EnableFastChecks'
-    return ''
+      return u'EnableFastChecks'
+    return u''
 
   @property
   def character_set_string(self):
     character_set = int(self.character_set, 10)
     if character_set == 1:
-      return 'Unicode'
-    return ''
+      return u'Unicode'
+    return u''
 
   @property
   def compile_as_string(self):
     compile_as = int(self.compile_as, 10)
     if compile_as == 1:
-      return 'CompileAsC'
+      return u'CompileAsC'
     elif compile_as == 2:
-      return 'CompileAsCpp'
-    return ''
+      return u'CompileAsCpp'
+    return u''
 
   @property
   def data_execution_prevention_string(self):
     data_execution_prevention = int(self.data_execution_prevention, 10)
     if data_execution_prevention == 2:
-      return 'true'
-    return ''
+      return u'true'
+    return u''
 
   @property
   def debug_information_format_string(self):
     debug_information_format = int(self.debug_information_format, 10)
     if debug_information_format == 3:
-      return 'ProgramDatabase'
-    return ''
+      return u'ProgramDatabase'
+    return u''
 
   @property
   def enable_comdat_folding_string(self):
     enable_comdat_folding = int(self.enable_comdat_folding, 10)
     if enable_comdat_folding == 2:
-      return 'true'
-    return ''
+      return u'true'
+    return u''
 
   @property
   def link_incremental_string(self):
     link_incremental = int(self.link_incremental, 10)
     if link_incremental == 1:
-      return 'false'
-    return ''
+      return u'false'
+    return u''
 
   @property
   def optimize_references_string(self):
     optimize_references = int(self.optimize_references, 10)
     if optimize_references == 2:
-      return 'true'
-    return ''
+      return u'true'
+    return u''
 
   @property
   def optimization_string(self):
     optimization = int(self.optimization, 10)
     if optimization == 0:
-      return 'Disabled'
+      return u'Disabled'
     elif optimization == 2:
-      return 'MaxSpeed'
-    return ''
+      return u'MaxSpeed'
+    return u''
 
   @property
   def output_type_string(self):
     output_type = int(self.output_type, 10)
     if output_type == 1:
-      return 'Application'
+      return u'Application'
     elif output_type == 2:
-      return 'DynamicLibrary'
+      return u'DynamicLibrary'
     elif output_type == 4:
-      return 'StaticLibrary'
-    return ''
+      return u'StaticLibrary'
+    return u''
 
   @property
   def precompiled_header_string(self):
     _ = int(self.precompiled_header, 10)
     # TODO: do something with precompiled_header.
-    return ''
+    return u''
 
   @property
   def randomized_base_address_string(self):
     randomized_base_address = int(self.randomized_base_address, 10)
     if randomized_base_address == 1:
-      return 'false'
+      return u'false'
     elif randomized_base_address == 2:
-      return 'true'
-    return ''
+      return u'true'
+    return u''
 
   @property
   def runtime_librarian_string(self):
     runtime_library = int(self.runtime_library, 10)
     if runtime_library == 2:
-      return 'MultiThreadedDLL'
+      return u'MultiThreadedDLL'
     if runtime_library == 3:
-      return 'MultiThreadedDebugDLL'
-    return ''
+      return u'MultiThreadedDebugDLL'
+    return u''
 
   @property
   def sub_system_string(self):
     sub_system = int(self.sub_system, 10)
     if sub_system == 0:
-      return 'NotSet'
+      return u'NotSet'
     elif sub_system == 1:
-      return 'Console'
-    return ''
+      return u'Console'
+    return u''
 
   @property
   def target_machine_string(self):
     target_machine = int(self.target_machine, 10)
     if target_machine == 1:
-      return 'MachineX86'
+      return u'MachineX86'
     # TODO: assuming here that 2 is x64.
     elif target_machine == 2:
-      return 'MachineX64'
-    return ''
+      return u'MachineX64'
+    return u''
 
   @property
   def warning_level_string(self):
     warning_level = int(self.warning_level, 10)
     if warning_level == 3:
-      return 'Level3'
+      return u'Level3'
     elif warning_level == 4:
-      return 'Level4'
-    return ''
+      return u'Level4'
+    return u''
 
   @property
   def whole_program_optimization_string(self):
     whole_program_optimization = int(self.whole_program_optimization, 10)
     if whole_program_optimization == 0:
-      return 'false'
+      return u'false'
     elif whole_program_optimization == 1:
-      return 'true'
-    return ''
+      return u'true'
+    return u''
 
   def CopyToX64(self):
     """Copies the Visual Studio project configuration to an x64 equivalent."""
@@ -349,15 +347,15 @@ class VSProjectConfiguration(VSConfiguration):
     copy.optimize_references = self.optimize_references
     copy.optimization = self.optimization
     copy.output_type = self.output_type
-    copy.platform = 'x64'
-    copy.platform_toolset = ''
+    copy.platform = u'x64'
+    copy.platform_toolset = u''
     copy.precompiled_header = self.precompiled_header
     copy.preprocessor_definitions = self.preprocessor_definitions
     copy.randomized_base_address = self.randomized_base_address
     copy.runtime_library = self.runtime_library
     copy.smaller_type_check = self.smaller_type_check
     copy.sub_system = self.sub_system
-    copy.target_machine = '2'
+    copy.target_machine = u'2'
     copy.warning_as_error = self.warning_as_error
     copy.warning_level = self.warning_level
     copy.whole_program_optimization = self.whole_program_optimization
@@ -372,10 +370,10 @@ class VSProjectConfiguration(VSConfiguration):
     """
     platform_toolset = self.platform_toolset
     if not platform_toolset:
-      if output_version == 2010 and self.platform == 'x64':
-        platform_toolset = 'Windows7.1SDK'
+      if output_version == 2010 and self.platform == u'x64':
+        platform_toolset = u'Windows7.1SDK'
       elif output_version == 2012:
-        platform_toolset = 'v110'
+        platform_toolset = u'v110'
     return platform_toolset
 
 
@@ -386,12 +384,12 @@ class VSProjectInformation(object):
     """Initializes Visual Studio project information."""
     self.configurations = VSConfigurations()
     self.dependencies = []
-    self.guid = ''
+    self.guid = u''
     self.header_files = []
-    self.keyword = ''
-    self.name = ''
+    self.keyword = u''
+    self.name = u''
     self.resource_files = []
-    self.root_name_space = ''
+    self.root_name_space = u''
     self.source_files = []
     self.third_party_dependencies = []
 
@@ -404,7 +402,7 @@ class VSSolutionConfiguration(VSConfiguration):
     copy = VSSolutionConfiguration()
 
     copy.name = self.name
-    copy.platform = 'x64'
+    copy.platform = u'x64'
 
     return copy
 
@@ -499,7 +497,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
       A configuration (instance of VSProjectConfiguration) or None if
       no configuration was found.
     """
-    if not line.startswith('<Configuration'):
+    if not line.startswith(u'<Configuration'):
       return None
 
     project_configuration = VSProjectConfiguration()
@@ -512,11 +510,11 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     while line:
       line = self._ReadLine()
 
-      if line.startswith('</Configuration>'):
+      if line.startswith(u'</Configuration>'):
         break
 
       elif found_tool:
-        if line.startswith('/>'):
+        if line.startswith(u'/>'):
           found_tool = False
           found_tool_compiler = False
           found_tool_librarian = False
@@ -524,234 +522,234 @@ class VS2008ProjectFileReader(VSProjectFileReader):
 
         elif found_tool_compiler:
           # Parse the compiler specific configuration.
-          if line.startswith('Optimization='):
-            values = re.findall('Optimization="([^"]*)"', line)
+          if line.startswith(u'Optimization='):
+            values = re.findall(u'Optimization="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.optimization = values[0]
 
-          elif line.startswith('EnableIntrinsicFunctions='):
+          elif line.startswith(u'EnableIntrinsicFunctions='):
             values = re.findall(
-                'EnableIntrinsicFunctions="([^"]*)"', line)
+                u'EnableIntrinsicFunctions="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.enable_intrinsic_functions = values[0]
 
-          elif line.startswith('AdditionalIncludeDirectories='):
+          elif line.startswith(u'AdditionalIncludeDirectories='):
             values = re.findall(
-                'AdditionalIncludeDirectories="([^"]*)"', line)
+                u'AdditionalIncludeDirectories="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.include_directories = values[0]
 
-          elif line.startswith('PreprocessorDefinitions='):
+          elif line.startswith(u'PreprocessorDefinitions='):
             values = re.findall(
-                'PreprocessorDefinitions="([^"]*)"', line)
+                u'PreprocessorDefinitions="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.preprocessor_definitions = values[0]
 
-          elif line.startswith('BasicRuntimeChecks='):
-            values = re.findall('BasicRuntimeChecks="([^"]*)"', line)
+          elif line.startswith(u'BasicRuntimeChecks='):
+            values = re.findall(u'BasicRuntimeChecks="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.basic_runtime_checks = values[0]
 
-          elif line.startswith('SmallerTypeCheck='):
-            values = re.findall('SmallerTypeCheck="([^"]*)"', line)
+          elif line.startswith(u'SmallerTypeCheck='):
+            values = re.findall(u'SmallerTypeCheck="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.smaller_type_check = values[0]
 
-          elif line.startswith('RuntimeLibrary='):
-            values = re.findall('RuntimeLibrary="([^"]*)"', line)
+          elif line.startswith(u'RuntimeLibrary='):
+            values = re.findall(u'RuntimeLibrary="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.runtime_library = values[0]
 
-          elif line.startswith('EnableFunctionLevelLinking='):
-            values = re.findall('EnableFunctionLevelLinking="([^"]*)"', line)
+          elif line.startswith(u'EnableFunctionLevelLinking='):
+            values = re.findall(u'EnableFunctionLevelLinking="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.enable_function_level_linking = values[0]
 
-          elif line.startswith('UsePrecompiledHeader='):
-            values = re.findall('UsePrecompiledHeader="([^"]*)"', line)
+          elif line.startswith(u'UsePrecompiledHeader='):
+            values = re.findall(u'UsePrecompiledHeader="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.precompiled_header = values[0]
 
-          elif line.startswith('WarningLevel='):
-            values = re.findall('WarningLevel="([^"]*)"', line)
+          elif line.startswith(u'WarningLevel='):
+            values = re.findall(u'WarningLevel="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.warning_level = values[0]
 
-          elif line.startswith('Detect64BitPortabilityProblems='):
+          elif line.startswith(u'Detect64BitPortabilityProblems='):
             values = re.findall(
-                'Detect64BitPortabilityProblems="([^"]*)"', line)
+                u'Detect64BitPortabilityProblems="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.detect_64bit_portability_problems = (
                   values[0])
 
-          elif line.startswith('WarnAsError='):
-            values = re.findall('WarnAsError="([^"]*)"', line)
+          elif line.startswith(u'WarnAsError='):
+            values = re.findall(u'WarnAsError="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.warning_as_error = values[0]
 
-          elif line.startswith('DebugInformationFormat='):
+          elif line.startswith(u'DebugInformationFormat='):
             values = re.findall(
-                'DebugInformationFormat="([^"]*)"', line)
+                u'DebugInformationFormat="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.debug_information_format = values[0]
 
-          elif line.startswith('CompileAs='):
-            values = re.findall('CompileAs="([^"]*)"', line)
+          elif line.startswith(u'CompileAs='):
+            values = re.findall(u'CompileAs="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.compile_as = values[0]
 
         elif found_tool_librarian:
           # Parse the libararian specific configuration.
-          if line.startswith('OutputFile='):
-            values = re.findall('OutputFile="([^"]*)"', line)
+          if line.startswith(u'OutputFile='):
+            values = re.findall(u'OutputFile="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.librarian_output_file = values[0]
 
-          elif line.startswith('IgnoreAllDefaultLibraries='):
+          elif line.startswith(u'IgnoreAllDefaultLibraries='):
             values = re.findall(
-                'IgnoreAllDefaultLibraries="([^"]*)"', line)
+                u'IgnoreAllDefaultLibraries="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.librarian_ignore_defaults = values[0]
 
         elif found_tool_linker:
           # Parse the linker specific configuration.
-          if line.startswith('OutputDirectory='):
+          if line.startswith(u'OutputDirectory='):
             project_configuration.linker_values_set = True
-            values = re.findall('OutputDirectory="([^"]*)"', line)
+            values = re.findall(u'OutputDirectory="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.linker_output_directory = values[0]
 
-          elif line.startswith('OutputFile='):
+          elif line.startswith(u'OutputFile='):
             project_configuration.linker_values_set = True
-            values = re.findall('OutputFile="([^"]*)"', line)
+            values = re.findall(u'OutputFile="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.linker_output_file = values[0]
 
-          elif line.startswith('AdditionalDependencies='):
+          elif line.startswith(u'AdditionalDependencies='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'AdditionalDependencies="([^"]*)"', line)
+                u'AdditionalDependencies="([^"]*)"', line)
             if len(values) == 1:
-              values = values[0].split(' ')
+              values = values[0].split(u' ')
               project_configuration.additional_dependencies = values
 
-          elif line.startswith('LinkIncremental='):
+          elif line.startswith(u'LinkIncremental='):
             project_configuration.linker_values_set = True
-            values = re.findall('LinkIncremental="([^"]*)"', line)
+            values = re.findall(u'LinkIncremental="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.link_incremental = values[0]
 
-          elif line.startswith('ModuleDefinitionFile='):
+          elif line.startswith(u'ModuleDefinitionFile='):
             project_configuration.linker_values_set = True
-            values = re.findall('ModuleDefinitionFile="([^"]*)"', line)
+            values = re.findall(u'ModuleDefinitionFile="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.module_definition_file = values[0]
 
-          elif line.startswith('AdditionalLibraryDirectories='):
+          elif line.startswith(u'AdditionalLibraryDirectories='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'AdditionalLibraryDirectories="([^"]*)"', line)
+                u'AdditionalLibraryDirectories="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.library_directories = values[0]
 
-          elif line.startswith('GenerateDebugInformation='):
+          elif line.startswith(u'GenerateDebugInformation='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'GenerateDebugInformation="([^"]*)"', line)
+                u'GenerateDebugInformation="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.generate_debug_information = values[0]
 
-          elif line.startswith('SubSystem='):
+          elif line.startswith(u'SubSystem='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'SubSystem="([^"]*)"', line)
+                u'SubSystem="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.sub_system = values[0]
 
-          elif line.startswith('OptimizeReferences='):
+          elif line.startswith(u'OptimizeReferences='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'OptimizeReferences="([^"]*)"', line)
+                u'OptimizeReferences="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.optimize_references = values[0]
 
-          elif line.startswith('RandomizedBaseAddress='):
+          elif line.startswith(u'RandomizedBaseAddress='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'RandomizedBaseAddress="([^"]*)"', line)
+                u'RandomizedBaseAddress="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.randomized_base_address = values[0]
 
-          elif line.startswith('FixedBaseAddress='):
+          elif line.startswith(u'FixedBaseAddress='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'FixedBaseAddress="([^"]*)"', line)
+                u'FixedBaseAddress="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.fixed_base_address = values[0]
 
-          elif line.startswith('EnableCOMDATFolding='):
+          elif line.startswith(u'EnableCOMDATFolding='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'EnableCOMDATFolding="([^"]*)"', line)
+                u'EnableCOMDATFolding="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.enable_comdat_folding = values[0]
 
-          elif line.startswith('DataExecutionPrevention='):
+          elif line.startswith(u'DataExecutionPrevention='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'DataExecutionPrevention="([^"]*)"', line)
+                u'DataExecutionPrevention="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.data_execution_prevention = values[0]
 
-          elif line.startswith('ImportLibrary='):
+          elif line.startswith(u'ImportLibrary='):
             project_configuration.linker_values_set = True
             values = re.findall(
-                'ImportLibrary="([^"]*)"', line)
+                u'ImportLibrary="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.import_library = values[0]
 
-          elif line.startswith('TargetMachine='):
+          elif line.startswith(u'TargetMachine='):
             project_configuration.linker_values_set = True
-            values = re.findall('TargetMachine="([^"]*)"', line)
+            values = re.findall(u'TargetMachine="([^"]*)"', line)
             if len(values) == 1:
               project_configuration.target_machine = values[0]
 
-        elif line.startswith('Name="VCCLCompilerTool"'):
+        elif line.startswith(u'Name="VCCLCompilerTool"'):
           found_tool_compiler = True
 
-        elif line.startswith('Name="VCLibrarianTool"'):
+        elif line.startswith(u'Name="VCLibrarianTool"'):
           found_tool_librarian = True
 
-        elif line.startswith('Name="VCLinkerTool"'):
+        elif line.startswith(u'Name="VCLinkerTool"'):
           found_tool_linker = True
 
-      elif line.startswith('<Tool'):
+      elif line.startswith(u'<Tool'):
         found_tool = True
 
-      elif line.startswith('Name='):
+      elif line.startswith(u'Name='):
         # For more than 1 match findall will return a list with a tuple.
-        values = re.findall('Name="([^|]*)[|]([^"]*)"', line)[0]
+        values = re.findall(u'Name="([^|]*)[|]([^"]*)"', line)[0]
         if len(values) == 2:
           project_configuration.name = values[0]
           project_configuration.platform = values[1]
 
-      elif line.startswith('ConfigurationType='):
-        values = re.findall('ConfigurationType="([^"]*)"', line)
+      elif line.startswith(u'ConfigurationType='):
+        values = re.findall(u'ConfigurationType="([^"]*)"', line)
         if len(values) == 1:
           project_configuration.output_type = values[0]
 
-      elif line.startswith('CharacterSet='):
-        values = re.findall('CharacterSet="([^"]*)"', line)
+      elif line.startswith(u'CharacterSet='):
+        values = re.findall(u'CharacterSet="([^"]*)"', line)
         if len(values) == 1:
           project_configuration.character_set = values[0]
 
-      elif line.startswith('ManagedExtensions='):
-        values = re.findall('ManagedExtensions="([^"]*)"', line)
+      elif line.startswith(u'ManagedExtensions='):
+        values = re.findall(u'ManagedExtensions="([^"]*)"', line)
         if len(values) == 1:
           project_configuration.managed_extensions = values[0]
 
-      elif line.startswith('WholeProgramOptimization='):
-        values = re.findall('WholeProgramOptimization="([^"]*)"', line)
+      elif line.startswith(u'WholeProgramOptimization='):
+        values = re.findall(u'WholeProgramOptimization="([^"]*)"', line)
         if len(values) == 1:
           project_configuration.whole_program_optimization = values[0]
 
@@ -760,11 +758,11 @@ class VS2008ProjectFileReader(VSProjectFileReader):
 
     # Add the target machine when not defined.
     if not project_configuration.target_machine:
-      if project_configuration.platform == 'Win32':
-        project_configuration.target_machine = '1'
+      if project_configuration.platform == u'Win32':
+        project_configuration.target_machine = u'1'
       # TODO: assuming here that 2 is x64.
-      elif project_configuration.platform == 'x64':
-        project_configuration.target_machine = '2'
+      elif project_configuration.platform == u'x64':
+        project_configuration.target_machine = u'2'
 
     return project_configuration
 
@@ -780,7 +778,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     line = self._ReadLine()
 
     while line:
-      result = line.startswith('<Configurations>')
+      result = line.startswith(u'<Configurations>')
       if result:
         break
       line = self._ReadLine()
@@ -789,10 +787,10 @@ class VS2008ProjectFileReader(VSProjectFileReader):
       while line:
         line = self._ReadLine()
 
-        if line.startswith('</Configurations>'):
+        if line.startswith(u'</Configurations>'):
           break
 
-        elif line.startswith('<Configuration'):
+        elif line.startswith(u'<Configuration'):
           project_configuration = self._ReadConfiguration(line)
 
           if project_configuration:
@@ -810,7 +808,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     line = self._ReadLine()
 
     while line:
-      result = line.startswith('<Files>')
+      result = line.startswith(u'<Files>')
       if result:
         break
       line = self._ReadLine()
@@ -824,48 +822,48 @@ class VS2008ProjectFileReader(VSProjectFileReader):
       while line:
         line = self._ReadLine()
 
-        if line.startswith('</Files>'):
+        if line.startswith(u'</Files>'):
           break
 
         elif found_filter:
-          if line.startswith('</Filter>'):
+          if line.startswith(u'</Filter>'):
             found_filter = False
             found_filter_source_files = False
             found_filter_header_files = False
             found_filter_resource_files = False
 
           elif found_filter_source_files:
-            if line.startswith('RelativePath='):
-              values = re.findall('RelativePath="([^"]*)"', line)
+            if line.startswith(u'RelativePath='):
+              values = re.findall(u'RelativePath="([^"]*)"', line)
 
               if len(values) == 1:
                 project_information.source_files.append(values[0])
 
           elif found_filter_header_files:
-            if line.startswith('RelativePath='):
-              values = re.findall('RelativePath="([^"]*)"', line)
+            if line.startswith(u'RelativePath='):
+              values = re.findall(u'RelativePath="([^"]*)"', line)
 
               if len(values) == 1:
                 project_information.header_files.append(values[0])
 
           elif found_filter_resource_files:
-            if line.startswith('RelativePath='):
-              values = re.findall('RelativePath="([^"]*)"', line)
+            if line.startswith(u'RelativePath='):
+              values = re.findall(u'RelativePath="([^"]*)"', line)
 
               if len(values) == 1:
                 project_information.resource_files.append(values[0])
 
-          elif line.startswith('Name="Source Files"'):
+          elif line.startswith(u'Name="Source Files"'):
             found_filter_source_files = True
 
-          elif line.startswith('Name="Header Files"'):
+          elif line.startswith(u'Name="Header Files"'):
             found_filter_header_files = True
 
-          elif line.startswith('Name="Resource Files"'):
+          elif line.startswith(u'Name="Resource Files"'):
 
             found_filter_resource_files = True
 
-        elif line.startswith('<Filter'):
+        elif line.startswith(u'<Filter'):
           found_filter = True
 
   def _ReadProjectInformation(self, project_information):
@@ -877,26 +875,26 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     """
     line = self._ReadLine()
     while line:
-      if line.startswith('>'):
+      if line.startswith(u'>'):
         break
 
-      elif line.startswith('Name='):
-        values = re.findall('Name="([^"]*)"', line)
+      elif line.startswith(u'Name='):
+        values = re.findall(u'Name="([^"]*)"', line)
         if len(values) == 1:
           project_information.name = values[0]
 
-      elif line.startswith('ProjectGUID='):
-        values = re.findall('ProjectGUID="{([^}]*)}"', line)
+      elif line.startswith(u'ProjectGUID='):
+        values = re.findall(u'ProjectGUID="{([^}]*)}"', line)
         if len(values) == 1:
           project_information.guid = values[0]
 
-      elif line.startswith('RootNamespace='):
-        values = re.findall('RootNamespace="([^"]*)"', line)
+      elif line.startswith(u'RootNamespace='):
+        values = re.findall(u'RootNamespace="([^"]*)"', line)
         if len(values) == 1:
           project_information.root_name_space = values[0]
 
-      elif line.startswith('Keyword='):
-        values = re.findall('Keyword="([^"]*)"', line)
+      elif line.startswith(u'Keyword='):
+        values = re.findall(u'Keyword="([^"]*)"', line)
         if len(values) == 1:
           project_information.keyword = values[0]
 
@@ -913,7 +911,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     if not line:
       return False
 
-    if not line.startswith('<?xml version="1.0"'):
+    if not line.startswith(u'<?xml version="1.0"'):
       return False
 
     # TODO check encoding?
@@ -923,7 +921,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     if not line:
       return False
 
-    if not line.startswith('<VisualStudioProject'):
+    if not line.startswith(u'<VisualStudioProject'):
       return False
 
     line = self._ReadLine()
@@ -931,7 +929,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     if not line:
       return False
 
-    if not line.startswith('ProjectType="Visual C++"'):
+    if not line.startswith(u'ProjectType="Visual C++"'):
       return False
 
     line = self._ReadLine()
@@ -939,7 +937,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     if not line:
       return False
 
-    if not line.startswith('Version="9,00"'):
+    if not line.startswith(u'Version="9,00"'):
       return False
 
     return True
@@ -998,6 +996,7 @@ class VSProjectFileWriter(object):
 
   def WriteLine(self, line):
     """Writes a line."""
+    # TODO: handle encoding properly.
     self._file.write('{0:s}\r\n'.format(line))
 
   def WriteLines(self, lines):
@@ -4169,6 +4168,11 @@ class LibyalSourceVSSolution(VSSolution):
 
 
 def Main():
+  """The main program function.
+
+  Returns:
+    A boolean containing True if successful or False if not.
+  """
   output_formats = frozenset(['2008', '2010', '2012', '2013'])
 
   argument_parser = argparse.ArgumentParser(description=(

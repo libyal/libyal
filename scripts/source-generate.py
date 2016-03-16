@@ -24,14 +24,17 @@ class ProjectConfiguration(object):
   def __init__(self):
     """Initializes a project configuation object."""
     super(ProjectConfiguration, self).__init__()
-    self.project_name = None
     self.project_authors = None
+    self.project_name = None
     self.project_year_of_creation = None
 
-    self.library_name = None
     self.library_description = None
+    self.library_name = None
+    self.library_name_suffix = None
 
     self.python_module_name = None
+
+    self.tools_name = None
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
@@ -322,7 +325,8 @@ class LibraryIncludeHeaderFile(object):
             function_prototype = FunctionPrototype(name, return_type)
             function_prototype.have_bfio = have_bfio
             function_prototype.have_debug_output = have_debug_output
-            function_prototype.have_wide_character_type = have_wide_character_type
+            function_prototype.have_wide_character_type = (
+                have_wide_character_type)
 
         elif in_section:
           if line.startswith(b'* '):
@@ -399,10 +403,7 @@ class LibraryMakefileAMFile(object):
           if line.endswith(b'\\'):
             line = line[:-1].strip()
 
-          if not line:
-            in_subdirs = False
-
-          elif line.startswith(b'@') and line.endswith(b'_LIBADD@'):
+          if line.startswith(b'@') and line.endswith(b'_LIBADD@'):
             self.libraries.append(line[1:-8].lower())
 
         elif line.startswith(library_libadd):
@@ -704,15 +705,15 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       if ((directory_entry.endswith(u'_libcerror.h') or
            directory_entry.endswith(u'_error.c') or
            directory_entry.endswith(u'_error.h')) and (
-          not os.path.exists(error_header_file) or
-          project_configuration.library_name == u'libcerror')):
+               not os.path.exists(error_header_file) or
+               project_configuration.library_name == u'libcerror')):
         continue
 
       if ((directory_entry.endswith(u'_libcnotify.h') or
            directory_entry.endswith(u'_notify.c') or
            directory_entry.endswith(u'_notify.h')) and (
-          not os.path.exists(notify_header_file) or
-          project_configuration.library_name == u'libcnotify')):
+               not os.path.exists(notify_header_file) or
+               project_configuration.library_name == u'libcnotify')):
         continue
 
       template_filename = os.path.join(
@@ -817,7 +818,8 @@ class LibraryManPageGenerator(SourceFileGenerator):
             u'section_name': (
                 u'Available when compiled with wide character string support:')
         }
-        template_filename = os.path.join(self._template_directory, u'section.txt')
+        template_filename = os.path.join(
+            self._template_directory, u'section.txt')
         self._GenerateSection(
             template_filename, section_template_mappings, output_writer,
             output_filename, access_mode='ab')
@@ -840,7 +842,8 @@ class LibraryManPageGenerator(SourceFileGenerator):
             u'section_name': (
                 u'Available when compiled with libbfio support:')
         }
-        template_filename = os.path.join(self._template_directory, u'section.txt')
+        template_filename = os.path.join(
+            self._template_directory, u'section.txt')
         self._GenerateSection(
             template_filename, section_template_mappings, output_writer,
             output_filename, access_mode='ab')
@@ -1070,6 +1073,7 @@ class FileWriter(object):
       output_directory: string containing the path of the output directory.
     """
     super(FileWriter, self).__init__()
+    self._file_object = None
     self._output_directory = output_directory
 
   def WriteFile(self, file_path, file_data, access_mode='wb'):
@@ -1092,6 +1096,7 @@ class StdoutWriter(object):
     """Initialize the output writer."""
     super(StdoutWriter, self).__init__()
 
+  # pylint: disable=unused-argument
   def WriteFile(self, file_path, file_data, access_mode='wb'):
     """Writes the data to stdout (without the default trailing newline).
 
@@ -1108,6 +1113,11 @@ class StdoutWriter(object):
 
 
 def Main():
+  """The main program function.
+
+  Returns:
+    A boolean containing True if successful or False if not.
+  """
   argument_parser = argparse.ArgumentParser(description=(
       u'Generates source files of the libyal libraries.'))
 

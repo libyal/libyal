@@ -1227,6 +1227,11 @@ class StdoutWriter(object):
 
 
 def Main():
+  """The main program function.
+
+  Returns:
+    A boolean containing True if successful or False if not.
+  """
   argument_parser = argparse.ArgumentParser(description=(
       u'Generates wiki pages of the libyal libraries.'))
 

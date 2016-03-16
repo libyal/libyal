@@ -472,7 +472,8 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       (u'libcaes', u'libhmac', ),
       (u'libagdb', u'libcreg', u'libesedb', u'libevt', u'libevtx', u'libexe',
        u'liblnk', u'libmdmp', u'libmsiecf', u'libnk2', u'libnsfdb',
-       u'libolecf', u'libpff', u'libregf', u'libscca', u'libswf', u'libwtcdb', ),
+       u'libolecf', u'libpff', u'libregf', u'libscca', u'libswf',
+       u'libwtcdb', ),
       (u'libmapidb', u'libwrc', ),
       (u'libfsclfs', u'libfsext', u'libfshfs', u'libfsntfs', u'libfsrefs', ),
       (u'libbde', u'libfvde', u'libluksde', u'libvshadow', u'libvslvm',
@@ -667,7 +668,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         m4_script_file = M4ScriptFile(m4_script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(path))
+        logging.info(u'Reading: {0:s}'.format(m4_script_file))
         if m4_script_file.ReadVersion():
           version = m4_script_file.version
         if not version:
@@ -698,7 +699,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     py_script_glob = os.path.join(self._data_directory, u'scripts', u'*.py')
     versions_per_py_script = {}
     for path in glob.glob(py_script_glob):
-      py_script_file = PyScriptFile(path)
+      py_script_file = ScriptFile(path)
 
       version = None
       logging.info(u'Reading: {0:s}'.format(path))
@@ -717,10 +718,10 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         if not os.path.exists(py_script_path):
           continue
 
-        py_script_file = PyScriptFile(py_script_path)
+        py_script_file = ScriptFile(py_script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(path))
+        logging.info(u'Reading: {0:s}'.format(py_script_file))
         if py_script_file.ReadVersion():
           version = py_script_file.version
         if not version:
@@ -773,7 +774,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         script_file = ScriptFile(script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(path))
+        logging.info(u'Reading: {0:s}'.format(script_file))
         if script_file.ReadVersion():
           version = script_file.version
         if not version:
@@ -855,7 +856,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
           u'table_header.txt', template_mappings, output_writer)
 
       for version, project_names in sorted(
-            projects_per_version.items(), reverse=True):
+          projects_per_version.items(), reverse=True):
         project_names = self._FormatProjectNames(project_names)
 
         template_mappings = {
@@ -877,7 +878,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
           u'table_header.txt', template_mappings, output_writer)
 
       for version, project_names in sorted(
-            projects_per_version.items(), reverse=True):
+          projects_per_version.items(), reverse=True):
         project_names = self._FormatProjectNames(project_names)
 
         template_mappings = {
@@ -899,7 +900,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
           u'table_header.txt', template_mappings, output_writer)
 
       for version, project_names in sorted(
-            projects_per_version.items(), reverse=True):
+          projects_per_version.items(), reverse=True):
         project_names = self._FormatProjectNames(project_names)
 
         template_mappings = {
@@ -926,7 +927,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
             u'table_header.txt', template_mappings, output_writer)
 
         for version, project_names in sorted(
-              projects_per_version.items(), reverse=True):
+            projects_per_version.items(), reverse=True):
           project_names = self._FormatProjectNames(project_names)
 
           template_mappings = {
@@ -1001,6 +1002,11 @@ class StdoutWriter(object):
 
 
 def Main():
+  """The main program function.
+
+  Returns:
+    A boolean containing True if successful or False if not.
+  """
   argument_parser = argparse.ArgumentParser(description=(
       u'Generates an overview of the libyal libraries.'))
 
