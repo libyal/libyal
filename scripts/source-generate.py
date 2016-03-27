@@ -650,7 +650,8 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     # TODO: types.h alingment of debug types?
     # TODO: do not generate libclocale/libclocale_types.h
     # TODO: do not generate libuna/libuna_libcstring.h
-    # TODO: libsmraw/libsmraw_codepage.h alingment of definitions
+    # TODO: libsmraw/libsmraw_codepage.h alignment of definitions
+    # TODO: libfvalue/libfvalue_codepage.h different
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,

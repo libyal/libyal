@@ -31,7 +31,7 @@ class ProjectConfiguration(object):
     self.project_status = None
     self.project_description = None
     self.project_documentation_url = None
-    self.project_downloads_url = None
+    self.project_download_url = None
     self.project_git_url = None
     self.project_build_dependencies = None
 
@@ -140,8 +140,8 @@ class ProjectConfiguration(object):
     except configparser.NoOptionError:
       pass
 
-    self.project_downloads_url = self._GetConfigValue(
-        config_parser, u'project', u'downloads_url')
+    self.project_download_url = self._GetConfigValue(
+        config_parser, u'project', u'download_url')
     self.project_git_url = self._GetConfigValue(
         config_parser, u'project', u'git_url')
     self.project_build_dependencies = self._GetConfigValue(
@@ -682,7 +682,7 @@ class ProjectConfiguration(object):
         u'project_status': project_status,
         u'project_description': self.project_description,
         u'project_git_url': self.project_git_url,
-        u'project_downloads_url': self.project_downloads_url,
+        u'project_download_url': self.project_download_url,
 
         u'build_dependencies': build_dependencies,
 
