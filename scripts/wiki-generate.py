@@ -106,7 +106,7 @@ class ProjectConfiguration(object):
     self.mount_tool_supported_backends = None
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
-    """Retrieves a value from the config parser.
+    """Retrieves a configuration value from the config parser.
 
     Args:
       config_parser: the configuration parser (instance of ConfigParser).
@@ -117,6 +117,23 @@ class ProjectConfiguration(object):
       An object containing the value.
     """
     return json.loads(config_parser.get(section_name, value_name))
+
+  def _GetOptionalConfigValue(
+      self, config_parser, section_name, value_name, default_value=None):
+    """Retrieves an optional configuration value from the config parser.
+
+    Args:
+      config_parser: the configuration parser (instance of ConfigParser).
+      section_name: the name of the section that contains the value.
+      value_name: the name of the value.
+
+    Returns:
+      An object containing the value or the default vlaue if not available.
+    """
+    try:
+      return self._GetConfigValue(config_parser, section_name, value_name)
+    except configparser.NoOptionError:
+      return default_value
 
   def ReadFromFile(self, filename):
     """Reads the configuration from file.
@@ -134,11 +151,8 @@ class ProjectConfiguration(object):
     self.project_status = self._GetConfigValue(
         config_parser, u'project', u'status')
 
-    try:
-      self.project_documentation_url = self._GetConfigValue(
-          config_parser, u'project', u'documentation_url')
-    except configparser.NoOptionError:
-      pass
+    self.project_documentation_url = self._GetOptionalConfigValue(
+        config_parser, u'project', u'documentation_url')
 
     self.project_download_url = self._GetConfigValue(
         config_parser, u'project', u'download_url')
@@ -151,30 +165,18 @@ class ProjectConfiguration(object):
         config_parser, u'project', u'features')
 
     self.supports_debug_output = u'debug_output' in features
-    self.supports_tests = u'tests' in features
-    self.supports_tools = u'tools' in features
     self.supports_python = u'python' in features
-
-    self.supports_cygwin = u'cygwin' in features
-    self.supports_gcc = u'gcc' in features
-    self.supports_msvscpp = u'msvscpp' in features
-    self.supports_mingw = u'mingw' in features
-
-    self.supports_dpkg = u'dpkg' in features
-    self.supports_rpm = u'rpm' in features
 
     self.supports_dokan = u'dokan' in features
     self.supports_fuse = u'fuse' in features
 
     if config_parser.has_section(u'development'):
-      try:
-        features = self._GetConfigValue(
-            config_parser, u'development', u'features')
+      features = self._GetOptionalConfigValue(
+          config_parser, u'development', u'features')
 
+      if features:
         self.development_glob = u'glob' in features
         self.development_pytsk3 = u'pytsk3' in features
-      except configparser.NoOptionError:
-        pass
 
       self.development_main_object = self._GetConfigValue(
           config_parser, u'development', u'main_object')
@@ -182,38 +184,24 @@ class ProjectConfiguration(object):
       self.development_main_object_filename = self._GetConfigValue(
           config_parser, u'development', u'main_object_filename')
 
-      try:
-        self.development_main_object_size = self._GetConfigValue(
-            config_parser, u'development', u'main_object_size')
-      except configparser.NoOptionError:
-        pass
+      self.development_main_object_size = self._GetOptionalConfigValue(
+          config_parser, u'development', u'main_object_size')
 
-      try:
-        self.development_main_object_pre_open_python = self._GetConfigValue(
-            config_parser, u'development', u'main_object_pre_open_python')
-      except configparser.NoOptionError:
-        pass
+      self.development_main_object_pre_open_python = (
+          self._GetOptionalConfigValue(
+              config_parser, u'development', u'main_object_pre_open_python'))
 
-      try:
-        self.development_main_object_post_open_python = self._GetConfigValue(
-            config_parser, u'development', u'main_object_post_open_python')
-      except configparser.NoOptionError:
-        pass
+      self.development_main_object_post_open_python = (
+          self._GetOptionalConfigValue(
+              config_parser, u'development', u'main_object_post_open_python'))
 
-      try:
-        self.development_main_object_post_open_file_object_python = (
-            self._GetConfigValue(
-                config_parser, u'development',
-                u'main_object_post_open_file_object_python'))
-      except configparser.NoOptionError:
-        pass
-
-    if self.supports_tests and not config_parser.has_section(u'tests'):
-      raise ConfigError((
-          u'Support for tests enabled but no corresponding section: '
-          u'tests is missing.'))
+      self.development_main_object_post_open_file_object_python = (
+          self._GetOptionalConfigValue(
+              config_parser, u'development',
+              u'main_object_post_open_file_object_python'))
 
     if config_parser.has_section(u'tests'):
+      self.supports_tests = True
       tests_features = self._GetConfigValue(
           config_parser, u'tests', u'features')
 
@@ -222,35 +210,24 @@ class ProjectConfiguration(object):
       if u'profiles' in tests_features:
         self.tests_profiles = self._GetConfigValue(
             config_parser, u'tests', u'profiles')
-        self.tests_example_filename1 = self._GetConfigValue(
+        self.tests_example_filename1 = self._GetOptionalConfigValue(
             config_parser, u'tests', u'example_filename1')
-        self.tests_example_filename2 = self._GetConfigValue(
+        self.tests_example_filename2 = self._GetOptionalConfigValue(
             config_parser, u'tests', u'example_filename2')
 
     if config_parser.has_section(u'troubleshooting'):
-      try:
-        self.troubleshooting_example = self._GetConfigValue(
-            config_parser, u'troubleshooting', u'example')
-      except configparser.NoOptionError:
-        pass
-
-    if self.supports_tools and not config_parser.has_section(u'tools'):
-      raise ConfigError((
-          u'Support for tools enabled but no corresponding section: '
-          u'tools is missing.'))
+      self.troubleshooting_example = self._GetOptionalConfigValue(
+          config_parser, u'troubleshooting', u'example')
 
     if config_parser.has_section(u'tools'):
+      self.supports_tools = True
       self.tools_directory = self._GetConfigValue(
           config_parser, u'tools', u'directory')
       self.tools_names = self._GetConfigValue(
           config_parser, u'tools', u'names')
 
-    if self.supports_cygwin and not config_parser.has_section(u'cygwin'):
-      raise ConfigError((
-          u'Support for Cygwin enabled but no corresponding section: '
-          u'cygwin is missing.'))
-
     if config_parser.has_section(u'cygwin'):
+      self.supports_cygwin = True
       self.cygwin_build_dependencies = self._GetConfigValue(
           config_parser, u'cygwin', u'build_dependencies')
       self.cygwin_dll_dependencies = self._GetConfigValue(
@@ -258,23 +235,15 @@ class ProjectConfiguration(object):
       self.cygwin_dll_filename = self._GetConfigValue(
           config_parser, u'cygwin', u'dll_filename')
 
-    if self.supports_gcc and not config_parser.has_section(u'gcc'):
-      raise ConfigError((
-          u'Support for GCC enabled but no corresponding section: '
-          u'gcc is missing.'))
-
     if config_parser.has_section(u'gcc'):
+      self.supports_gcc = True
       self.gcc_build_dependencies = self._GetConfigValue(
           config_parser, u'gcc', u'build_dependencies')
       self.gcc_static_build_dependencies = self._GetConfigValue(
           config_parser, u'gcc', u'static_build_dependencies')
 
-    if self.supports_mingw and not config_parser.has_section(u'mingw'):
-      raise ConfigError((
-          u'Support for MinGW enabled but no corresponding section: '
-          u'mingw is missing.'))
-
     if config_parser.has_section(u'mingw'):
+      self.supports_mingw = True
       self.mingw_build_dependencies = self._GetConfigValue(
           config_parser, u'mingw', u'build_dependencies')
       self.mingw_dll_dependencies = self._GetConfigValue(
@@ -282,32 +251,20 @@ class ProjectConfiguration(object):
       self.mingw_dll_filename = self._GetConfigValue(
           config_parser, u'mingw', u'dll_filename')
 
-    if self.supports_msvscpp and not config_parser.has_section(u'msvscpp'):
-      raise ConfigError((
-          u'Support for Visual Studio enabled but no corresponding section: '
-          u'msvscpp is missing.'))
-
     if config_parser.has_section(u'msvscpp'):
+      self.supports_msvscpp = True
       self.msvscpp_build_dependencies = self._GetConfigValue(
           config_parser, u'msvscpp', u'build_dependencies')
       self.msvscpp_dll_dependencies = self._GetConfigValue(
           config_parser, u'msvscpp', u'dll_dependencies')
 
-    if self.supports_dpkg and not config_parser.has_section(u'dpkg'):
-      raise ConfigError((
-          u'Support for dpkg enabled but no corresponding section: '
-          u'dpkg is missing.'))
-
     if config_parser.has_section(u'dpkg'):
+      self.supports_dpkg = True
       self.dpkg_build_dependencies = self._GetConfigValue(
           config_parser, u'dpkg', u'build_dependencies')
 
-    if self.supports_rpm and not config_parser.has_section(u'rpm'):
-      raise ConfigError((
-          u'Support for rpm enabled but no corresponding section: '
-          u'rpm is missing.'))
-
     if config_parser.has_section(u'rpm'):
+      self.supports_rpm = True
       self.rpm_build_dependencies = self._GetConfigValue(
           config_parser, u'rpm', u'build_dependencies')
 
@@ -318,11 +275,8 @@ class ProjectConfiguration(object):
           u'section: mount_tool is missing.'))
 
     if config_parser.has_section(u'mount_tool'):
-      try:
-        self.mount_tool_additional_arguments = self._GetConfigValue(
-            config_parser, u'mount_tool', u'additional_arguments')
-      except configparser.NoOptionError:
-        pass
+      self.mount_tool_additional_arguments = self._GetOptionalConfigValue(
+          config_parser, u'mount_tool', u'additional_arguments')
 
       self.mount_tool_missing_backend_error = self._GetConfigValue(
           config_parser, u'mount_tool', u'missing_backend_error')
@@ -341,11 +295,8 @@ class ProjectConfiguration(object):
 
       # If the long source description is not set it will default to
       # source description.
-      try:
-        self.mount_tool_source_description_long = self._GetConfigValue(
-            config_parser, u'mount_tool', u'source_description_long')
-      except configparser.NoOptionError:
-        pass
+      self.mount_tool_source_description_long = self._GetOptionalConfigValue(
+          config_parser, u'mount_tool', u'source_description_long')
 
       self.mount_tool_source_type = self._GetConfigValue(
           config_parser, u'mount_tool', u'source_type')
@@ -1093,6 +1044,7 @@ class TestingPageGenerator(WikiPageGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
+    # TODO: implement testing page without input files.
     template_mappings = project_configuration.GetTemplateMappings()
     if project_configuration.supports_tests:
       self._GenerateSection(u'tests.txt', template_mappings, output_writer)

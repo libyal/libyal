@@ -31,6 +31,7 @@ class ProjectConfiguration(object):
     self.library_description = None
     self.library_name = None
     self.library_name_suffix = None
+    self.library_public_types = None
 
     self.python_module_name = None
 
@@ -48,6 +49,23 @@ class ProjectConfiguration(object):
       An object containing the value.
     """
     return json.loads(config_parser.get(section_name, value_name))
+
+  def _GetOptionalConfigValue(
+      self, config_parser, section_name, value_name, default_value=None):
+    """Retrieves an optional configuration value from the config parser.
+
+    Args:
+      config_parser: the configuration parser (instance of ConfigParser).
+      section_name: the name of the section that contains the value.
+      value_name: the name of the value.
+
+    Returns:
+      An object containing the value or the default vlaue if not available.
+    """
+    try:
+      return self._GetConfigValue(config_parser, section_name, value_name)
+    except configparser.NoOptionError:
+      return default_value
 
   def ReadFromFile(self, filename):
     """Reads the configuration from file.
@@ -71,9 +89,11 @@ class ProjectConfiguration(object):
 
     self.library_description = self._GetConfigValue(
         config_parser, u'library', u'description')
-
     self.library_name = self.project_name
     self.library_name_suffix = self.project_name[3:]
+    self.library_public_types = self._GetOptionalConfigValue(
+        config_parser, u'library', u'public_types', default_value=[])
+
     self.python_module_name = u'py{0:s}'.format(self.library_name_suffix)
     self.tools_name = u'{0:s}tools'.format(self.library_name_suffix)
 
@@ -1003,8 +1023,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       return
 
     # TODO: handle non-template files differently.
+    # TODO: generate test_api_functions.sh based on library public_functions?
 
     template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings[u'library_public_types'] = u' '.join(
+        project_configuration.library_public_types)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
