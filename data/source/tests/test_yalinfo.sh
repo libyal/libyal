@@ -55,14 +55,8 @@ fi
 
 source $${TEST_RUNNER};
 
-OLDIFS=$${IFS};
-IFS="
-";
-
 run_test_on_input_directory "$${TEST_PROFILE}" "$${TEST_DESCRIPTION}" "with_stdout_reference" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_DIRECTORY}" "$${INPUT_GLOB}";
 RESULT=$$?;
-
-IFS=$${OLDIFS};
 
 exit $${RESULT};
 

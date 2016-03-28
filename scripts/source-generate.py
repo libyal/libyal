@@ -935,7 +935,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     # TODO: handle white space in pyyal/pyyal_file_object_io_handle.c e.g.
     # for pycreg
     # TODO: selectively generate some files e.g. for pycaes
-    # TODO: do not generate pysmraw/pysmraw_codepage.h
     # TODO: generate pyX-python2/Makefile.am and pyX-python3/Makefile.am
 
     if not os.path.exists(python_module_path):
@@ -964,6 +963,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           project_configuration.python_module_name, directory_entry[6:])
       output_filename = os.path.join(
           project_configuration.python_module_name, output_filename)
+      if not os.path.exists(output_filename):
+        continue
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
@@ -1036,7 +1037,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      if directory_entry.startswith(u'yal_test_'):
+      if directory_entry == u'yal_test_libyal.h':
+        output_filename = u'{0:s}_test_{1:s}.h'.format(
+            project_configuration.library_name_suffix,
+            project_configuration.library_name)
+
+      elif directory_entry.startswith(u'yal_test_'):
         output_filename = u'{0:s}_{1:s}'.format(
             project_configuration.library_name_suffix, directory_entry[4:])
 
