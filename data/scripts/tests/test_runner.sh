@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20160328
+# Version: 20160329
 #
 # When CHECK_WITH_GDB is set to a non-empty value the test executable
 # is run with gdb, otherwise it is run without.
@@ -23,7 +23,7 @@ assert_availability_binary()
 	local BINARY=$1;
 
 	which ${BINARY} > /dev/null 2>&1;
-	if test $? -ne 0;
+	if test $? -ne ${EXIT_SUCCESS};
 	then
 		echo "Missing binary: ${BINARY}";
 		echo "";
@@ -72,13 +72,16 @@ find_binary_executable()
 {
 	local TEST_EXECUTABLE=$1;
 
-	file -bi ${TEST_EXECUTABLE} | sed 's/;.*$//' | grep "text/x-shellscript" > /dev/null 2>&1;
+	TEST_EXECUTABLE=`readlink -f ${TEST_EXECUTABLE}`;
 
-	echo ${TEST_EXECUTABLE} | grep 'tools' > /dev/null 2>&1;
+	file -bi ${TEST_EXECUTABLE} | sed 's/;.*$//' | grep "application/x-executable" > /dev/null 2>&1;
 
-	if test $? -eq 0;
+	if test $? -ne ${EXIT_SUCCESS};
 	then
-		TEST_EXECUTABLE=`readlink -f ${TEST_EXECUTABLE}`;
+		local TEST_EXECUTABLE_BASENAME=`basename ${TEST_EXECUTABLE}`;
+		local TEST_EXECUTABLE_DIRNAME=`dirname ${TEST_EXECUTABLE}`;
+
+		TEST_EXECUTABLE="${TEST_EXECUTABLE_DIRNAME}/.libs/${TEST_EXECUTABLE_BASENAME}";
 
 		if ! test -x ${TEST_EXECUTABLE};
 		then
@@ -89,14 +92,14 @@ find_binary_executable()
 
 		file -bi ${TEST_EXECUTABLE} | sed 's/;.*$//' | grep "application/x-executable" > /dev/null 2>&1;
 
-		if test $? -ne 0;
+		if test $? -ne ${EXIT_SUCCESS};
 		then
 			echo "Invalid test executable: ${TEST_EXECUTABLE}";
 
 			exit ${EXIT_FAILURE};
 		fi
 	fi
-	return ${TEST_EXECUTABLE};
+	echo ${TEST_EXECUTABLE};
 }
 
 # Searches for the path to the binary variant of the library.
@@ -110,42 +113,23 @@ find_binary_executable()
 find_binary_library_path()
 {
 	local TEST_EXECUTABLE=$1;
+	local LIBRARY_NAME="${TEST_EXECUTABLE}";
 
-	# TODO: improve.
-	if test $? -eq 0;
+	echo ${LIBRARY_NAME} | grep 'tools' > /dev/null 2>&1;
+
+	if test $? -eq ${EXIT_SUCCESS};
 	then
-		LIBRARY=`dirname ${TEST_EXECUTABLE} | sed 's?.*/\(.*\)tools$?lib\1?'`;
+		LIBRARY_NAME=`dirname ${LIBRARY_NAME}`;
+		LIBRARY_NAME=`dirname ${LIBRARY_NAME}`;
+		LIBRARY_NAME=`basename ${LIBRARY_NAME} | sed 's/\(.*\)tools$/lib\1/'`;
 	else
-		LIBRARY=`basename ${TEST_EXECUTABLE} | sed 's/^\(.*\)_test_.*$/lib\1/'`;
+		LIBRARY_NAME=`basename ${LIBRARY_NAME} | sed 's/^\(.*\)_test_.*$/lib\1/'`;
 	fi
-	return ${LIBRARY};
-}
+	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
+	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
+	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
 
-# Determines the test input files.
-#
-# Arguments:
-#   a string containing the path of the test input directory
-#   a string containing the path of the test set input directory
-#   a string containing the input glob
-#
-# Returns:
-#   a string containing the test input files
-#
-get_test_input_files()
-{
-	local INPUT_DIRECTORY=$1;
-	local TEST_SET_INPUT_DIRECTORY=$2;
-	local INPUT_GLOB=$3;
-
-	local INPUT_FILES="";
-
-	if test -f "${TEST_SET_INPUT_DIRECTORY}/files";
-	then
-		INPUT_FILES=`cat ${TEST_SET_INPUT_DIRECTORY}/files | sed "s?^?${INPUT_DIRECTORY}/?"`;
-	else
-		INPUT_FILES=`ls ${INPUT_DIRECTORY}/${INPUT_GLOB}`;
-	fi
-	echo "${INPUT_FILES}";
+	echo "${TEST_EXECUTABLE}/${LIBRARY_NAME}/.libs";
 }
 
 # Determines the test option file.
@@ -164,7 +148,7 @@ get_testion_option_file()
 	local INPUT_FILE=$2;
 	local OPTION_SET=$3;
 
-	local INPUT_NAME=`basename ${INPUT_FILE}`;
+	local INPUT_NAME=`basename "${INPUT_FILE}"`;
 	local OPTION_FILE="${TEST_SET_DIRECTORY}/${INPUT_NAME}.${OPTION_SET}";
 
 	echo "${OPTION_FILE}";
@@ -256,13 +240,12 @@ read_option_file()
 	local INPUT_FILE=$2;
 	local OPTION_SET=$3;
 
-	local OPTION_FILE=$(get_testion_option_file ${TEST_SET_DIRECTORY} ${INPUT_FILE} ${OPTION_SET});
+	local OPTION_FILE=$(get_testion_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
 
 	local OPTIONS=()
 	local OPTIONS_STRING=`cat "${OPTION_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
-	IFS=" " read -a OPTIONS <<< ${OPTIONS_STRING};
 
-	return ${OPTIONS[*]};
+	echo "${OPTIONS_STRING}";
 }
 
 # Runs the test with optional arguments.
@@ -288,27 +271,28 @@ run_test_with_arguments()
 
 	if ! test -z ${CHECK_WITH_GDB};
 	then
-		LIBRARY=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
+		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
+		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 
-		LD_LIBRARY_PATH="../${LIBRARY}/.libs/" gdb -ex r --args "${TEST_EXECUTABLE}" ${ARGUMENTS[*]};
+		# TODO: add Mac OS X support.
+		LD_LIBRARY_PATH="${LIBRARY_PATH}" gdb -ex r --args "${TEST_EXECUTABLE}" ${ARGUMENTS[*]};
 		RESULT=$?;
 
 	elif ! test -z ${CHECK_WITH_VALGRIND};
 	then
-		VALGRIND_LOG="valgrind.log-$$";
+		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
+		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
+		local VALGRIND_LOG="valgrind.log-$$";
 
-		LIBRARY=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
-
-		LD_LIBRARY_PATH="../${LIBRARY}/.libs/" valgrind --tool=memcheck --leak-check=full --track-origins=yes --show-reachable=yes --log-file=${VALGRIND_LOG} "${TEST_EXECUTABLE}" ${ARGUMENTS[*]};
+		# TODO: add Mac OS X support.
+		LD_LIBRARY_PATH="${LIBRARY_PATH}" valgrind --tool=memcheck --leak-check=full --track-origins=yes --show-reachable=yes --log-file=${VALGRIND_LOG} "${TEST_EXECUTABLE}" ${ARGUMENTS[*]};
 		RESULT=$?;
 
-		if test ${RESULT} -eq 0;
+		if test ${RESULT} -eq ${EXIT_SUCCESS};
 		then
 			grep "All heap blocks were freed -- no leaks are possible" ${VALGRIND_LOG} > /dev/null 2>&1;
 
-			if test $? -ne 0;
+			if test $? -ne ${EXIT_SUCCESS};
 			then
 				echo "Memory leakage detected.";
 
@@ -358,14 +342,14 @@ run_test_on_input_file()
 	shift 6;
 	local ARGUMENTS=$@;
 
-	local INPUT_NAME=`basename ${INPUT_FILE}`;
+	local INPUT_NAME=`basename "${INPUT_FILE}"`;
 	local OPTIONS=();
 	local TEST_OUTPUT="${INPUT_NAME}";
 
 	if ! test -z "${OPTION_SET}";
 	then
-		read_option_file ${TEST_SET_DIRECTORY} ${INPUT_FILE} ${OPTION_SET};
-		OPTIONS=$?;
+		OPTIONS_STRING=$(read_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
+		IFS=" " read -a OPTIONS <<< "${OPTIONS_STRING}";
 
 		TEST_OUTPUT="${INPUT_NAME}-${OPTION_SET}";
 	fi
@@ -378,27 +362,28 @@ run_test_on_input_file()
 
 	if ! test -z ${CHECK_WITH_GDB};
 	then
-		LIBRARY=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
+		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
+		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 
-		LD_LIBRARY_PATH="../${LIBRARY}/.libs/" gdb -ex r --args "${TEST_EXECUTABLE}" ${ARGUMENTS[*]} ${OPTIONS[*]} "${INPUT_FILE}";
+		# TODO: add Mac OS X support.
+		LD_LIBRARY_PATH="${LIBRARY_PATH}" gdb -ex r --args "${TEST_EXECUTABLE}" ${ARGUMENTS[*]} ${OPTIONS[*]} "${INPUT_FILE}";
 		RESULT=$?;
 
 	elif ! test -z ${CHECK_WITH_VALGRIND};
 	then
-		VALGRIND_LOG="${TMPDIR}/valgrind.log";
+		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
+		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
+		local VALGRIND_LOG="${TMPDIR}/valgrind.log";
 
-		LIBRARY=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
-
-		LD_LIBRARY_PATH="../${LIBRARY}/.libs/" valgrind --tool=memcheck --leak-check=full --track-origins=yes --show-reachable=yes --log-file=${VALGRIND_LOG} "${TEST_EXECUTABLE}" ${ARGUMENTS[*]} ${OPTIONS[*]} "${INPUT_FILE}";
+		# TODO: add Mac OS X support.
+		LD_LIBRARY_PATH="${LIBRARY_PATH}" valgrind --tool=memcheck --leak-check=full --track-origins=yes --show-reachable=yes --log-file=${VALGRIND_LOG} "${TEST_EXECUTABLE}" ${ARGUMENTS[*]} ${OPTIONS[*]} "${INPUT_FILE}";
 		RESULT=$?;
 
-		if test ${RESULT} -eq 0;
+		if test ${RESULT} -eq ${EXIT_SUCCESS};
 		then
 			grep "All heap blocks were freed -- no leaks are possible" ${VALGRIND_LOG} > /dev/null 2>&1;
 
-			if test $? -ne 0;
+			if test $? -ne ${EXIT_SUCCESS};
 			then
 				echo "Memory leakage detected.";
 
@@ -409,14 +394,23 @@ run_test_on_input_file()
 		fi
 		rm -f ${VALGRIND_LOG};
 
-	elif test "${TEST_MODE}" = "with_stdout_reference";
+	elif test "${TEST_MODE}" = "with_callback";
 	then
-		local TEST_RESULTS="${TMPDIR}/${TEST_OUTPUT}.log";
-
-		${TEST_EXECUTABLE} ${ARGUMENTS[*]} ${OPTIONS[*]} ${INPUT_FILE} | sed '1,2d' > ${TEST_RESULTS};
+		test_callback "${TMPDIR}" "${TEST_SET_DIRECTORY}" "${TEST_OUTPUT}" "${TEST_EXECUTABLE}" "${TEST_INPUT}" ${ARGUMENTS[*]} ${OPTIONS[*]};
 		RESULT=$?;
 
-		local STORED_TEST_RESULTS="${TEST_SET_DIRECTORY}/${TEST_OUTPUT}.log.gz";
+	elif test "${TEST_MODE}" = "with_stdout_reference";
+	then
+		TEST_EXECUTABLE=`readlink -f ${TEST_EXECUTABLE}`;
+
+		local INPUT_FILE_FULL_PATH=`readlink -f "${INPUT_FILE}"`;
+		local TEST_LOG="${TEST_OUTPUT}.log";
+
+		(cd ${TMPDIR} && ${TEST_EXECUTABLE} ${ARGUMENTS[*]} ${OPTIONS[*]} "${INPUT_FILE_FULL_PATH}" | sed '1,2d' > "${TEST_LOG}");
+		RESULT=$?;
+
+		local TEST_RESULTS="${TMPDIR}/${TEST_LOG}";
+		local STORED_TEST_RESULTS="${TEST_SET_DIRECTORY}/${TEST_LOG}.gz";
 
 		if test -f "${STORED_TEST_RESULTS}";
 		then
@@ -431,7 +425,7 @@ run_test_on_input_file()
 		fi
 
 	else
-		${TEST_EXECUTABLE} ${ARGUMENTS[*]} ${OPTIONS[*]} ${INPUT_FILE} 2> /dev/null;
+		${TEST_EXECUTABLE} ${ARGUMENTS[*]} ${OPTIONS[*]} "${INPUT_FILE}" 2> /dev/null;
 		RESULT=$?;
 	fi
 
@@ -463,10 +457,14 @@ run_test_on_input_file()
 #   a string containing the name of the test profile
 #   a string containing the description of the test
 #   a string containing the test mode, supported tests modes are:
-#     default: the test executable should be be run
+#     default: the test executable should be be run without any test
+#              conditions.
+#     with_callback: the test executable should be run and the callback
+#                    function should be called afterwards. The name of the
+#                    callback function is "test_callback".
 #     with_stdout_reference: the test executable should be run and its output
 #                            to stdout, except for the first 2 lines, should
-#                            be compared to a reference file, if available
+#                            be compared to a reference file, if available.
 #     Note the globals override the test mode.
 #   a string containing the name of the option set
 #   a string containing the path of the test executable
@@ -509,7 +507,7 @@ run_test_on_input_directory()
 		assert_availability_binary valgrind;
 	fi
 
-	if ! test "${TEST_MODE}" = "default" && ! test "${TEST_MODE}" = "with_stdout_reference";
+	if ! test "${TEST_MODE}" = "default" && test "${TEST_MODE}" != "with_callback" && ! test "${TEST_MODE}" = "with_stdout_reference";
 	then
 		echo "Unsupported test mode: ${TEST_MODE}";
 		echo "";
@@ -533,7 +531,7 @@ run_test_on_input_directory()
 	fi
 	local RESULT=`ls ${TEST_INPUT_DIRECTORY}/* | tr ' ' '\n' | wc -l`;
 
-	if test ${RESULT} -eq 0;
+	if test ${RESULT} -eq ${EXIT_SUCCESS};
 	then
 		echo "No files or directories found in the test input directory: ${TEST_INPUT_DIRECTORY}";
 
@@ -545,10 +543,6 @@ run_test_on_input_directory()
 	local IGNORE_LIST=$(read_ignore_list "${TEST_PROFILE_DIRECTORY}");
 
 	local RESULT=${EXIT_SUCCESS};
-	local OLDIFS=${IFS};
-
-	IFS="
-	";
 
 	for TEST_SET_INPUT_DIRECTORY in ${TEST_INPUT_DIRECTORY}/*;
 	do
@@ -563,9 +557,15 @@ run_test_on_input_directory()
 
 		local TEST_SET_DIRECTORY=$(get_test_set_directory "${TEST_PROFILE_DIRECTORY}" "${TEST_SET_INPUT_DIRECTORY}");
 
-		local INPUT_FILES=$(get_test_input_files "${TEST_SET_INPUT_DIRECTORY}" "${TEST_SET_DIRECTORY}" "${INPUT_GLOB}");
+		local INPUT_FILES="";
+		if test -f "${TEST_SET_DIRECTORY}/files";
+		then
+			INPUT_FILES=`cat ${TEST_SET_DIRECTORY}/files | sed "s?^?${TEST_SET_INPUT_DIRECTORY}/?"`;
+		else
+			INPUT_FILES="${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}";
+		fi
 
-		for INPUT_FILE in ${INPUT_FILES};
+		ls -1 ${INPUT_FILES} | while read -r INPUT_FILE;
 		do
 			local TESTED_WITH_OPTIONS=0;
 
@@ -603,8 +603,6 @@ run_test_on_input_directory()
 			break;
 		fi
 	done
-
-	IFS=${OLDIFS};
 
 	return ${RESULT};
 }

@@ -1026,6 +1026,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: handle get_version header include order?
     # TODO: handle non-template files differently.
     # TODO: generate test_api_functions.sh based on library public_functions?
+    # TODO: yal_test_open_close.c handle file, handle, volume
 
     template_mappings = project_configuration.GetTemplateMappings()
     template_mappings[u'library_public_types'] = u' '.join(
