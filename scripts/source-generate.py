@@ -103,6 +103,7 @@ class ProjectConfiguration(object):
         u'library_name': self.library_name,
         u'library_name_upper_case': self.library_name.upper(),
         u'library_name_suffix': self.library_name_suffix,
+        u'library_name_suffix_upper_case': self.library_name_suffix.upper(),
         u'library_description': self.library_description,
 
         u'python_module_name': self.python_module_name,
@@ -717,6 +718,12 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
                project_configuration.library_name == u'libcnotify')):
         continue
 
+      # TODO: improve generation of _types.h file
+      if (directory_entry.endswith(u'_types.h') and
+          project_configuration.library_name in (
+              u'libcerror')):
+        continue
+
       template_filename = os.path.join(
           self._template_directory, directory_entry)
       if not os.path.isfile(template_filename):
@@ -908,6 +915,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     # for pycreg
     # TODO: selectively generate some files e.g. for pycaes
     # TODO: do not generate pysmraw/pysmraw_codepage.h
+    # TODO: generate pyX-python2/Makefile.am and pyX-python3/Makefile.am
 
     if not os.path.exists(python_module_path):
       return

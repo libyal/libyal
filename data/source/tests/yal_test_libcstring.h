@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LNK_TEST_LIBCSTRING_H )
-#define _LNK_TEST_LIBCSTRING_H
+#if !defined( _${library_name_suffix_upper_case}_TEST_LIBCSTRING_H )
+#define _${library_name_suffix_upper_case}_TEST_LIBCSTRING_H
 
 #include <common.h>
 
@@ -45,7 +45,7 @@
 
 #include <libcstring.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBCSTRING ) */
 
-#endif
+#endif /* !defined( _${library_name_suffix_upper_case}_TEST_LIBCSTRING_H ) */
 

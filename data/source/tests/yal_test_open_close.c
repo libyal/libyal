@@ -326,7 +326,7 @@ int main( int argc, char * const argv[] )
 	}
 	source = argv[ optind ];
 
-#if defined( HAVE_DEBUG_OUTPUT ) && defined( LNK_TEST_OPEN_CLOSE_VERBOSE )
+#if defined( HAVE_DEBUG_OUTPUT ) && defined( ${library_name_suffix_upper_case}_TEST_OPEN_CLOSE_VERBOSE )
 	${library_name}_notify_set_verbose(
 	 1 );
 	${library_name}_notify_set_stream(

@@ -20,8 +20,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LNK_TEST_LIBCSYSTEM_H )
-#define _LNK_TEST_LIBCSYSTEM_H
+#if !defined( _${library_name_suffix_upper_case}_TEST_LIBCSYSTEM_H )
+#define _${library_name_suffix_upper_case}_TEST_LIBCSYSTEM_H
 
 /* Define HAVE_LOCAL_LIBCSYSTEM for local use of libcsystem
  */
@@ -48,7 +48,7 @@
 
 #include <libcsystem.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBCSYSTEM ) */
 
-#endif
+#endif /* !defined( _${library_name_suffix_upper_case}_TEST_LIBCSYSTEM_H ) */
 

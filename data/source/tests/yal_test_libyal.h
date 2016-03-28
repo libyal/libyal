@@ -1,5 +1,5 @@
 /*
- * The internal liblnk header
+ * The internal ${library_name} header
  *
  * Copyright (C) ${copyright}, ${authors}
  *
@@ -19,19 +19,19 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LNK_TEST_LIBLNK_H )
-#define _LNK_TEST_LIBLNK_H
+#if !defined( _${library_name_suffix_upper_case}_TEST_${library_name_upper_case}_H )
+#define _${library_name_suffix_upper_case}_TEST_${library_name_upper_case}_H
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled set LIBLNK_DLL_IMPORT
- * before including liblnk.h
+/* If Cygwin libtool DLL support is enabled set ${library_name_upper_case}_DLL_IMPORT
+ * before including ${library_name}.h
  */
 #if defined( _WIN32 ) && defined( DLL_EXPORT )
-#define LIBLNK_DLL_IMPORT
+#define ${library_name_upper_case}_DLL_IMPORT
 #endif
 
-#include <liblnk.h>
+#include <${library_name}.h>
 
-#endif
+#endif /* !defined( _${library_name_suffix_upper_case}_TEST_${library_name_upper_case}_H ) */
 
