@@ -6,11 +6,6 @@
 # When CHECK_WITH_GDB is set to a non-empty value the test executable
 # is run with gdb, otherwise it is run without.
 #
-# When CHECK_WITH_REFERENCE_FILE is set to a non-empty value the output
-# of the test executable is compared to a previously stored reference file
-# if available, otherwise the output is stored as the reference file.
-# The first 2 lines of the output are ignored.
-#
 # When CHECK_WITH_VALGRIND is set to a non-empty value the test executable
 # is run with valgrind, otherwise it is run without.
 
@@ -18,12 +13,12 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-# Checks the availability of a binary.
+# Checks the availability of a binary and exits if not available.
 #
 # Arguments:
 #   a string containing the name of the binary
 #
-check_availability_binary()
+assert_availability_binary()
 {
 	local BINARY=$1;
 
@@ -224,7 +219,7 @@ get_test_set_directory()
 	echo "${TEST_SET_DIRECTORY}";
 }
 
-# Reads the test profile ignore file if it exists
+# Reads the test profile ignore file if it exists.
 #
 # Arguments:
 #   a string containing the path of the test profile directory
@@ -245,7 +240,7 @@ read_ignore_list()
 	echo ${IGNORE_LIST};
 }
 
-# Reads the test set option file
+# Reads the test set option file.
 #
 # Arguments:
 #   a string containing the path of the test set directory
@@ -270,7 +265,7 @@ read_option_file()
 	return ${OPTIONS[*]};
 }
 
-# Runs the test
+# Runs the test with optional arguments.
 #
 # Globals:
 #   CHECK_WITH_GDB
@@ -331,16 +326,19 @@ run_test_with_arguments()
 	return ${RESULT};
 }
 
-# Runs the test on the input file
+# Runs the test on the input file.
+#
+# Note that this function is not intended to be directly invoked
+# from outside the test runner script.
 #
 # Globals:
 #   CHECK_WITH_GDB
-#   CHECK_WITH_REFERENCE_FILE
 #   CHECK_WITH_VALGRIND
 #
 # Arguments:
 #   a string containing the path of the test set directory
 #   a string containing the description of the test
+#   a string containing the test mode
 #   a string containing the name of the option set
 #   a string containing the path of the test executable
 #   a string containing the path of the test input file
@@ -353,10 +351,11 @@ run_test_on_input_file()
 {
 	local TEST_SET_DIRECTORY=$1;
 	local TEST_DESCRIPTION=$2;
-	local OPTION_SET=$3;
-	local TEST_EXECUTABLE=$4;
-	local INPUT_FILE=$5;
-	shift 5;
+	local TEST_MODE=$3;
+	local OPTION_SET=$4;
+	local TEST_EXECUTABLE=$5;
+	local INPUT_FILE=$6;
+	shift 6;
 	local ARGUMENTS=$@;
 
 	local INPUT_NAME=`basename ${INPUT_FILE}`;
@@ -385,26 +384,6 @@ run_test_on_input_file()
 		LD_LIBRARY_PATH="../${LIBRARY}/.libs/" gdb -ex r --args "${TEST_EXECUTABLE}" ${ARGUMENTS[*]} ${OPTIONS[*]} "${INPUT_FILE}";
 		RESULT=$?;
 
-	elif ! test -z ${CHECK_WITH_REFERENCE_FILE};
-	then
-		local TEST_RESULTS="${TMPDIR}/${TEST_OUTPUT}.log";
-
-		${TEST_EXECUTABLE} ${ARGUMENTS[*]} ${OPTIONS[*]} ${INPUT_FILE} | sed '1,2d' > ${TEST_RESULTS};
-		RESULT=$?;
-
-		local STORED_TEST_RESULTS="${TEST_SET_DIRECTORY}/${TEST_OUTPUT}.log.gz";
-
-		if test -f "${STORED_TEST_RESULTS}";
-		then
-			zcat ${STORED_TEST_RESULTS} | diff ${TEST_RESULTS} -;
-
-			RESULT=$?;
-		else
-			gzip ${TEST_RESULTS};
-
-			mv "${TEST_RESULTS}.gz" ${TEST_SET_DIRECTORY};
-		fi
-
 	elif ! test -z ${CHECK_WITH_VALGRIND};
 	then
 		VALGRIND_LOG="${TMPDIR}/valgrind.log";
@@ -429,6 +408,27 @@ run_test_on_input_file()
 			fi
 		fi
 		rm -f ${VALGRIND_LOG};
+
+	elif test "${TEST_MODE}" = "with_stdout_reference";
+	then
+		local TEST_RESULTS="${TMPDIR}/${TEST_OUTPUT}.log";
+
+		${TEST_EXECUTABLE} ${ARGUMENTS[*]} ${OPTIONS[*]} ${INPUT_FILE} | sed '1,2d' > ${TEST_RESULTS};
+		RESULT=$?;
+
+		local STORED_TEST_RESULTS="${TEST_SET_DIRECTORY}/${TEST_OUTPUT}.log.gz";
+
+		if test -f "${STORED_TEST_RESULTS}";
+		then
+			# Using zcat here since zdiff has issues on Mac OS X.
+			# Note that zcat on Mac OS X requires the input from stdin.
+			zcat < "${STORED_TEST_RESULTS}" | diff "${TEST_RESULTS}" -;
+			RESULT=$?;
+		else
+			gzip "${TEST_RESULTS}";
+
+			mv "${TEST_RESULTS}.gz" ${TEST_SET_DIRECTORY};
+		fi
 
 	else
 		${TEST_EXECUTABLE} ${ARGUMENTS[*]} ${OPTIONS[*]} ${INPUT_FILE} 2> /dev/null;
@@ -457,12 +457,17 @@ run_test_on_input_file()
 #
 # Globals:
 #   CHECK_WITH_GDB
-#   CHECK_WITH_REFERENCE_FILE
 #   CHECK_WITH_VALGRIND
 #
 # Arguments:
 #   a string containing the name of the test profile
 #   a string containing the description of the test
+#   a string containing the test mode, supported tests modes are:
+#     default: the test executable should be be run
+#     with_stdout_reference: the test executable should be run and its output
+#                            to stdout, except for the first 2 lines, should
+#                            be compared to a reference file, if available
+#     Note the globals override the test mode.
 #   a string containing the name of the option set
 #   a string containing the path of the test executable
 #   a string containing the path of the test input directory
@@ -476,31 +481,40 @@ run_test_on_input_directory()
 {
 	local TEST_PROFILE=$1;
 	local TEST_DESCRIPTION=$2;
-	local OPTION_SETS=$3;
-	local TEST_EXECUTABLE=$4;
-	local TEST_INPUT_DIRECTORY=$5;
-	local INPUT_GLOB=$6;
-	shift 6;
+	local TEST_MODE=$3;
+	local OPTION_SETS=$4;
+	local TEST_EXECUTABLE=$5;
+	local TEST_INPUT_DIRECTORY=$6;
+	local INPUT_GLOB=$7;
+	shift 7;
 	local ARGUMENTS=$@;
 
-	check_availability_binary cat;
-	check_availability_binary diff;
-	check_availability_binary file;
-	check_availability_binary gzip;
-	check_availability_binary ls;
-	check_availability_binary readlink;
-	check_availability_binary sed;
-	check_availability_binary tr;
-	check_availability_binary wc;
-	check_availability_binary zcat;
+	assert_availability_binary cat;
+	assert_availability_binary diff;
+	assert_availability_binary file;
+	assert_availability_binary gzip;
+	assert_availability_binary ls;
+	assert_availability_binary readlink;
+	assert_availability_binary sed;
+	assert_availability_binary tr;
+	assert_availability_binary wc;
+	assert_availability_binary zcat;
 
 	if ! test -z ${CHECK_WITH_GDB};
 	then
-		check_availability_binary gdb;
+		assert_availability_binary gdb;
 
 	elif ! test -z ${CHECK_WITH_VALGRIND};
 	then
-		check_availability_binary valgrind;
+		assert_availability_binary valgrind;
+	fi
+
+	if ! test "${TEST_MODE}" = "default" && ! test "${TEST_MODE}" = "with_stdout_reference";
+	then
+		echo "Unsupported test mode: ${TEST_MODE}";
+		echo "";
+
+		return ${EXIT_FAILURE};
 	fi
 
 	if ! test -x ${TEST_EXECUTABLE};
@@ -530,6 +544,12 @@ run_test_on_input_directory()
 
 	local IGNORE_LIST=$(read_ignore_list "${TEST_PROFILE_DIRECTORY}");
 
+	local RESULT=${EXIT_SUCCESS};
+	local OLDIFS=${IFS};
+
+	IFS="
+	";
+
 	for TEST_SET_INPUT_DIRECTORY in ${TEST_INPUT_DIRECTORY}/*;
 	do
 		if ! test -d "${TEST_SET_INPUT_DIRECTORY}";
@@ -558,23 +578,34 @@ run_test_on_input_directory()
 					continue
 				fi
 
-				if ! run_test_on_input_file "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${OPTION_SET}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[*]};
+				run_test_on_input_file "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "${OPTION_SET}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[*]};
+				RESULT=$?;
+
+				if test ${RESULT} -ne ${EXIT_SUCCESS};
 				then
-					return ${EXIT_FAILURE};
+					break;
 				fi
 				TESTED_WITH_OPTIONS=1;
 			done
 
-			if test ${TESTED_WITH_OPTIONS} -eq 0;
+			if test ${RESULT} -eq ${EXIT_SUCCESS} && test ${TESTED_WITH_OPTIONS} -eq 0;
 			then
-				if ! run_test_on_input_file "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[*]};
-				then
-					return ${EXIT_FAILURE};
-				fi
+				run_test_on_input_file "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[*]};
+				RESULT=$?;
+			fi
+			if test ${RESULT} -ne ${EXIT_SUCCESS};
+			then
+				break;
 			fi
 		done
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			break;
+		fi
 	done
 
-	return ${EXIT_SUCCESS};
+	IFS=${OLDIFS};
+
+	return ${RESULT};
 }
 

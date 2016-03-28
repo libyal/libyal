@@ -664,12 +664,8 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
-    # TODO: add support for libcstring/libcstring_types.h
-    # TODO: add support for libcthreads/libcthreads_types.h
-    # TODO: add support for libcnotify/libcnotify_types.h - no types
     # TODO: add support for libuna/libuna_types.h
     # TODO: types.h alingment of debug types?
-    # TODO: do not generate libclocale/libclocale_types.h
     # TODO: do not generate libuna/libuna_libcstring.h
     # TODO: libsmraw/libsmraw_codepage.h alignment of definitions
     # TODO: libfvalue/libfvalue_codepage.h different
@@ -693,6 +689,9 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
             project_configuration.library_name))
     notify_header_file = os.path.join(
         library_path, u'{0:s}_notify.h'.format(
+            project_configuration.library_name))
+    types_header_file = os.path.join(
+        library_path, u'{0:s}_types.h'.format(
             project_configuration.library_name))
 
     library_debug_type_definitions = []
@@ -739,9 +738,10 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
         continue
 
       # TODO: improve generation of _types.h file
-      if (directory_entry.endswith(u'_types.h') and
-          project_configuration.library_name in (
-              u'libcerror')):
+      if (directory_entry.endswith(u'_types.h') and (
+              not os.path.exists(types_header_file) or
+              project_configuration.library_name in (
+                  u'libcerror', u'libcstring', u'libcthreads'))):
         continue
 
       template_filename = os.path.join(
@@ -769,6 +769,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
+    # TODO: add support for libcthreads.h - messed up
     # TODO: add support for libcstring.h - macros
     # TODO: add support for libclocale.h - libclocale_codepage
     # TODO: add support for libcsystem.h - additional types
@@ -1016,12 +1017,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_writer: an output writer object (instance of OutputWriter).
     """
     tests_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        project_configuration.tests_name)
+        self._projects_directory, project_configuration.library_name, u'tests')
 
     if not os.path.exists(tests_path):
       return
 
+    # TODO: handle get_version header include order?
     # TODO: handle non-template files differently.
     # TODO: generate test_api_functions.sh based on library public_functions?
 
@@ -1037,13 +1038,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       if directory_entry.startswith(u'yal_test_'):
         output_filename = u'{0:s}_{1:s}'.format(
-            self.library_name_suffix, directory_entry[3:])
+            project_configuration.library_name_suffix, directory_entry[4:])
 
       elif directory_entry.startswith(u'pyyal_test_'):
         output_filename = u'py{0:s}_{1:s}'.format(
-            self.python_module_name, directory_entry[5:])
+            project_configuration.python_module_name, directory_entry[6:])
 
-      # TODO: handle "test_pyyal_"
+      elif (directory_entry.startswith(u'test_yal') and
+            directory_entry.endswith(u'.sh')):
+        output_filename = u'test_{0:s}{1:s}'.format(
+            project_configuration.library_name_suffix, directory_entry[8:])
+
+      # TODO: handle "test_pyyal_*.sh"
       else:
         output_filename = directory_entry
 
@@ -1212,12 +1218,12 @@ def Main():
       (u'libyal', LibrarySourceFileGenerator),
       (u'pyyal', PythonModuleSourceFileGenerator),
       (u'scripts', ScriptFileGenerator),
+      (u'tests', TestsSourceFileGenerator),
       (u'yaltools', ToolsSourceFileGenerator),
   ]
   if options.experimental:
     source_files.extend([
         (u'config', ConfigurationFileGenerator),
-        (u'tests', TestsSourceFileGenerator),
     ])
 
   for page_name, page_generator_class in source_files:

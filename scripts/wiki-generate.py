@@ -33,7 +33,6 @@ class ProjectConfiguration(object):
     self.project_documentation_url = None
     self.project_download_url = None
     self.project_git_url = None
-    self.project_build_dependencies = None
 
     # Functionality the project offsers.
     self.supports_debug_output = False
@@ -54,6 +53,8 @@ class ProjectConfiguration(object):
     # Other.
     self.supports_dokan = False
     self.supports_fuse = False
+
+    self.library_build_dependencies = None
 
     self.development_main_object = None
     self.development_main_object_filename = None
@@ -158,8 +159,6 @@ class ProjectConfiguration(object):
         config_parser, u'project', u'download_url')
     self.project_git_url = self._GetConfigValue(
         config_parser, u'project', u'git_url')
-    self.project_build_dependencies = self._GetConfigValue(
-        config_parser, u'project', u'build_dependencies')
 
     features = self._GetConfigValue(
         config_parser, u'project', u'features')
@@ -169,6 +168,9 @@ class ProjectConfiguration(object):
 
     self.supports_dokan = u'dokan' in features
     self.supports_fuse = u'fuse' in features
+
+    self.library_build_dependencies = self._GetConfigValue(
+        config_parser, u'library', u'build_dependencies')
 
     if config_parser.has_section(u'development'):
       features = self._GetOptionalConfigValue(
@@ -377,8 +379,8 @@ class ProjectConfiguration(object):
       documentation = u'* [Documentation]({0:s})\n'.format(
           self.project_documentation_url)
 
-    if self.project_build_dependencies:
-      for dependency in self.project_build_dependencies:
+    if self.library_build_dependencies:
+      for dependency in self.library_build_dependencies:
         build_dependencies += u'* {0:s}\n'.format(dependency)
 
     if self.supports_tests and self.tests_profiles:
