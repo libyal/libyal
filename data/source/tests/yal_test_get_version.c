@@ -28,16 +28,19 @@
 
 #include "${library_name_suffix}_test_${library_name}.h"
 #include "${library_name_suffix}_test_libcstring.h"
+#include "${library_name_suffix}_test_unused.h"
 
 /* The main program
  */
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-int wmain( int argc, wchar_t * const argv[] )
+int wmain( int argc, wchar_t * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
 #else
-int main( int argc, char * const argv[] )
+int main( int argc, char * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
 	const char *version_string = NULL;
+
+	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
 	if( argc != 1 )
 	{

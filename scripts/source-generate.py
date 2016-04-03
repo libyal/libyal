@@ -1027,6 +1027,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: handle non-template files differently.
     # TODO: generate test_api_functions.sh based on library public_functions?
     # TODO: yal_test_open_close.c handle file, handle, volume
+    # TODO: set x-bit for .sh scripts
 
     template_mappings = project_configuration.GetTemplateMappings()
     template_mappings[u'library_public_types'] = u' '.join(
