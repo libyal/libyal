@@ -1,7 +1,7 @@
 #!/bin/bash
 # Python module functions testing script
 #
-# Version: 20160403
+# Version: 20160407
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -11,8 +11,8 @@ TEST_PREFIX=`dirname $${PWD}`;
 TEST_PREFIX=`basename $${TEST_PREFIX} | sed 's/^lib\([^-]*\)/\1/'`;
 
 TEST_PROFILE="py$${TEST_PREFIX}";
-TEST_FUNCTIONS="get_version";
-TEST_FUNCTIONS_WITH_INPUT="open_close seek read";
+TEST_FUNCTIONS="";
+TEST_FUNCTIONS_WITH_INPUT="open_close";
 OPTION_SETS="";
 
 TEST_TOOL_DIRECTORY=".";
@@ -86,6 +86,8 @@ then
 fi
 
 source $${TEST_RUNNER};
+
+RESULT=$${EXIT_IGNORE};
 
 for TEST_FUNCTION in $${TEST_FUNCTIONS};
 do
