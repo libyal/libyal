@@ -386,6 +386,9 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
     """
     self._GenerateSection(u'introduction.txt', {}, output_writer)
 
+    # TODO: add support for test scripts
+    # TODO: add support for source generated files
+
     projects_per_category = {}
     for project in projects:
       if project.category not in projects_per_category:
@@ -668,7 +671,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         m4_script_file = M4ScriptFile(m4_script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(m4_script_file))
+        logging.info(u'Reading: {0:s}'.format(m4_script_path))
         if m4_script_file.ReadVersion():
           version = m4_script_file.version
         if not version:
@@ -721,7 +724,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         py_script_file = ScriptFile(py_script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(py_script_file))
+        logging.info(u'Reading: {0:s}'.format(py_script_path))
         if py_script_file.ReadVersion():
           version = py_script_file.version
         if not version:
@@ -774,7 +777,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         script_file = ScriptFile(script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(script_file))
+        logging.info(u'Reading: {0:s}'.format(script_path))
         if script_file.ReadVersion():
           version = script_file.version
         if not version:

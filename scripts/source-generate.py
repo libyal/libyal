@@ -331,6 +331,10 @@ class LibraryIncludeHeaderFile(object):
               in_define_deprecated = False
               in_define_extern = False
 
+          elif line.endswith(u';'):
+            # The line contains a variable definition.
+            in_define_extern = False
+
           else:
             # Get the part of the line before the library name.
             return_type, _, _ = line.partition(
@@ -754,6 +758,9 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       output_filename = os.path.join(
           project_configuration.library_name, output_filename)
 
+      if not os.path.exists(output_filename):
+        continue
+
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
@@ -771,10 +778,10 @@ class LibraryManPageGenerator(SourceFileGenerator):
     """
     # TODO: add support for libcthreads.h - messed up
     # TODO: add support for libcstring.h - macros
-    # TODO: add support for libclocale.h - libclocale_codepage
     # TODO: add support for libcsystem.h - additional types
     # TODO: add support for libsigscan.h - not detecting wchar
     # TODO: add support for libsmraw.h - not detecting wchar
+    # TODO: warn about [a-z]), in include header
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,

@@ -1,5 +1,5 @@
 /*
- * The internal ${library_name} header
+ * The libfwnt header wrapper
  *
  * Copyright (C) ${copyright}, ${authors}
  *
@@ -19,19 +19,34 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_suffix_upper_case}_TEST_${library_name_upper_case}_H )
-#define _${library_name_suffix_upper_case}_TEST_${library_name_upper_case}_H
+#if !defined( _${library_name_upper_case}_LIBFWNT_H )
+#define _${library_name_upper_case}_LIBFWNT_H
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled and do not want to create static
- * executables set ${library_name_upper_case}_DLL_IMPORT before including ${library_name}.h
+/* Define HAVE_LOCAL_LIBFWNT for local use of libfwnt
  */
-#if defined( _WIN32 ) && defined( DLL_EXPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
-#define ${library_name_upper_case}_DLL_IMPORT
+#if defined( HAVE_LOCAL_LIBFWNT )
+
+#include <libfwnt_definitions.h>
+#include <libfwnt_lznt1.h>
+#include <libfwnt_lzxpress.h>
+#include <libfwnt_security_descriptor.h>
+#include <libfwnt_security_identifier.h>
+#include <libfwnt_types.h>
+
+#else
+
+/* If libtool DLL support is enabled set LIBFWNT_DLL_IMPORT
+ * before including libfwnt.h
+ */
+#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#define LIBFWNT_DLL_IMPORT
 #endif
 
-#include <${library_name}.h>
+#include <libfwnt.h>
 
-#endif /* !defined( _${library_name_suffix_upper_case}_TEST_${library_name_upper_case}_H ) */
+#endif /* defined( HAVE_LOCAL_LIBFWNT ) */
+
+#endif /* !defined( _${library_name_upper_case}_LIBFWNT_H ) */
 
