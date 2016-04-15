@@ -850,15 +850,17 @@ class LibraryManPageGenerator(SourceFileGenerator):
       if wide_character_type_functions:
         have_wide_character_type_functions = True
 
-        section_template_mappings = {
-            u'section_name': (
-                u'Available when compiled with wide character string support:')
-        }
-        template_filename = os.path.join(
-            self._template_directory, u'section.txt')
-        self._GenerateSection(
-            template_filename, section_template_mappings, output_writer,
-            output_filename, access_mode='ab')
+        # Ignore adding the wide string support section header in some cases.
+        if project_configuration.library_name != u'libcsplit':
+          section_template_mappings = {
+              u'section_name': (
+                  u'Available when compiled with wide character string support:')
+          }
+          template_filename = os.path.join(
+              self._template_directory, u'section.txt')
+          self._GenerateSection(
+              template_filename, section_template_mappings, output_writer,
+              output_filename, access_mode='ab')
 
         for function_prototype in wide_character_type_functions:
           function_arguments_string = function_prototype.CopyToString()
@@ -1036,11 +1038,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: yal_test_open_close.c handle file, handle, volume
     # TODO: set x-bit for .sh scripts
 
+    library_header = u'yal_test_{0:s}.h'.format(
+        project_configuration.library_name)
+
     template_mappings = project_configuration.GetTemplateMappings()
     template_mappings[u'library_public_types'] = u' '.join(
         project_configuration.library_public_types)
 
     for directory_entry in os.listdir(self._template_directory):
+      # Ignore yal_test_library.h in favor of yal_test_libyal.h
+      if directory_entry == library_header:
+        continue
+
       template_filename = os.path.join(
           self._template_directory, directory_entry)
       if not os.path.isfile(template_filename):
@@ -1091,6 +1100,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         self._projects_directory, project_configuration.library_name,
         project_configuration.tools_name)
 
+    library_header = u'yaltools_{0:s}.h'.format(
+        project_configuration.library_name)
+
     if not os.path.exists(tools_path):
       return
 
@@ -1099,7 +1111,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     # TODO: add support for ouput.[ch]
 
     for directory_entry in os.listdir(self._template_directory):
-      if not directory_entry.startswith(u'yaltools_'):
+      # Ignore yaltools_library.h in favor of yaltools_libyal.h
+      if directory_entry == library_header:
         continue
 
       template_filename = os.path.join(
@@ -1107,10 +1120,18 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
+      if directory_entry == u'yaltools_libyal.h':
+        output_filename = u'{0:s}tools_{1:s}.h'.format(
+            project_configuration.library_name_suffix,
+            project_configuration.library_name)
+
       output_filename = u'{0:s}_{1:s}'.format(
           project_configuration.tools_name, directory_entry[9:])
       output_filename = os.path.join(
           project_configuration.tools_name, output_filename)
+
+      if not os.path.exists(output_filename):
+        continue
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)

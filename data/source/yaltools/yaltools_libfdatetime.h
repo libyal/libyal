@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_LIBFDATETIME_H )
-#define _${library_name_upper_case}_LIBFDATETIME_H
+#if !defined( _${tools_name_upper_case}_LIBFDATETIME_H )
+#define _${tools_name_upper_case}_LIBFDATETIME_H
 
 #include <common.h>
 
@@ -30,9 +30,9 @@
 
 #include <libfdatetime_date_time_values.h>
 #include <libfdatetime_definitions.h>
+#include <libfdatetime_error.h>
 #include <libfdatetime_fat_date_time.h>
 #include <libfdatetime_filetime.h>
-#include <libfdatetime_floatingtime.h>
 #include <libfdatetime_nsf_timedate.h>
 #include <libfdatetime_posix_time.h>
 #include <libfdatetime_systemtime.h>
@@ -51,5 +51,5 @@
 
 #endif /* defined( HAVE_LOCAL_LIBFDATETIME ) */
 
-#endif /* !defined( _${library_name_upper_case}_LIBFDATETIME_H ) */
+#endif /* !defined( _${tools_name_upper_case}_LIBFDATETIME_H ) */
 

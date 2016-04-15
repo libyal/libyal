@@ -17,8 +17,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_LIBUNA_H )
-#define _${library_name_upper_case}_LIBUNA_H
+#if !defined( _${tools_name_upper_case}_LIBUNA_H )
+#define _${tools_name_upper_case}_LIBUNA_H
 
 #include <common.h>
 
@@ -30,6 +30,7 @@
 #include <libuna_base32_stream.h>
 #include <libuna_base64_stream.h>
 #include <libuna_byte_stream.h>
+#include <libuna_error.h>
 #include <libuna_unicode_character.h>
 #include <libuna_url_stream.h>
 #include <libuna_utf16_stream.h>
@@ -54,5 +55,5 @@
 
 #endif /* defined( HAVE_LOCAL_LIBUNA ) */
 
-#endif /* !defined( _${library_name_upper_case}_LIBUNA_H ) */
+#endif /* !defined( _${tools_name_upper_case}_LIBUNA_H ) */
 
