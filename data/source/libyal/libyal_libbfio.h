@@ -48,6 +48,10 @@
 
 #include <libbfio.h>
 
+#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( LIBBFIO_HAVE_MULTI_THREAD_SUPPORT )
+#error Multi-threading support requires libbfio with multi-threading support
+#endif
+
 #endif /* defined( HAVE_LOCAL_LIBBFIO ) */
 
 #endif /* !defined( _${library_name_upper_case}_LIBBFIO_H ) */
