@@ -1073,7 +1073,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         output_filename = u'test_{0:s}{1:s}'.format(
             project_configuration.library_name_suffix, directory_entry[8:])
 
-      # TODO: handle "test_pyyal_*.sh"
+      elif (directory_entry.startswith(u'test_pyyal') and
+            directory_entry.endswith(u'.sh')):
+        output_filename = u'test_py{0:s}{1:s}'.format(
+            project_configuration.library_name_suffix, directory_entry[10:])
+
       else:
         output_filename = directory_entry
 
