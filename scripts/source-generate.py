@@ -7,6 +7,7 @@ import abc
 import argparse
 import datetime
 import json
+import logging
 import os
 import string
 import sys
@@ -561,7 +562,13 @@ class SourceFileGenerator(object):
       access_mode: optional string containing the output file access mode.
     """
     template_string = self._ReadTemplateFile(template_filename)
-    output_data = template_string.substitute(template_mappings)
+    try:
+      output_data = template_string.substitute(template_mappings)
+    except ValueError as exception:
+      logging.error(u'Unable to format template: {0:s}'.format(
+          template_filename))
+      return
+
     output_writer.WriteFile(
         output_filename, output_data, access_mode=access_mode)
 
@@ -1065,7 +1072,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             project_configuration.library_name_suffix, directory_entry[4:])
 
       elif directory_entry.startswith(u'pyyal_test_'):
-        output_filename = u'py{0:s}_{1:s}'.format(
+        output_filename = u'{0:s}_{1:s}'.format(
             project_configuration.python_module_name, directory_entry[6:])
 
       elif (directory_entry.startswith(u'test_yal') and
@@ -1075,8 +1082,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       elif (directory_entry.startswith(u'test_pyyal') and
             directory_entry.endswith(u'.sh')):
-        output_filename = u'test_py{0:s}{1:s}'.format(
-            project_configuration.library_name_suffix, directory_entry[10:])
+        output_filename = u'test_{0:s}{1:s}'.format(
+            project_configuration.python_module_name, directory_entry[10:])
 
       else:
         output_filename = directory_entry

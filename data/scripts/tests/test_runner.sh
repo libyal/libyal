@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20160420
+# Version: 20160422
 #
 # When CHECK_WITH_GDB is set to a non-empty value the test executable
 # is run with gdb, otherwise it is run without.
@@ -77,10 +77,13 @@ find_binary_executable()
 
 	TEST_EXECUTABLE=`readlink -f ${TEST_EXECUTABLE}`;
 
-	local EXECUTABLE_TYPE=`file -bi ${TEST_EXECUTABLE} | sed 's/;.*$//'`;
+	# Note that the behavior of `file -bi` is not helpful on Mac OS X.
+	local EXECUTABLE_TYPE=`file -b ${TEST_EXECUTABLE}`;
 
 	# Check if the test executable is a libtool shell script.
-	echo "${EXECUTABLE_TYPE}" | grep "text/x-shellscript" > /dev/null 2>&1;
+	# Linux: POSIX shell script, ASCII text executable, with very long lines
+	# Mac OS X: POSIX shell script text executable
+	echo "${EXECUTABLE_TYPE}" | grep "POSIX shell script" > /dev/null 2>&1;
 	RESULT=$?;
 
 	if test ${RESULT} -eq ${EXIT_SUCCESS};
@@ -92,9 +95,12 @@ find_binary_executable()
 
 		if test -x ${TEST_EXECUTABLE};
 		then
-			EXECUTABLE_TYPE=`file -bi ${TEST_EXECUTABLE} | sed 's/;.*$//'`;
+			# Note that the behavior of `file -bi` is not helpful on Mac OS X.
+			EXECUTABLE_TYPE=`file -b ${TEST_EXECUTABLE}`;
 
-			echo "${EXECUTABLE_TYPE}" | grep "application/x-executable" > /dev/null 2>&1;
+			# Linux: ELF 64-bit LSB executable, x86-64, ...
+			# Mac OS X: Mach-O 64-bit executable x86_64
+			echo "${EXECUTABLE_TYPE}" | grep "executable" > /dev/null 2>&1;
 			RESULT=$?;
 
 			if test ${RESULT} -ne ${EXIT_SUCCESS};
@@ -337,12 +343,15 @@ run_test_with_arguments()
 
 		return ${EXIT_FAILURE};
 	fi
-	local EXECUTABLE_TYPE=`file -bi ${TEST_EXECUTABLE} | sed 's/;.*$//'`;
-
 	local PLATFORM=`uname -s`;
 
+	# Note that the behavior of `file -bi` is not helpful on Mac OS X.
+	local EXECUTABLE_TYPE=`file -b ${TEST_EXECUTABLE}`;
+
 	# Check if the test executable is a Python script.
-	echo "${EXECUTABLE_TYPE}" | grep "text/x-python" > /dev/null 2>&1;
+	# Linux: Python script, ASCII text executable
+	# Mac OS X: a python script text executable
+	echo "${EXECUTABLE_TYPE}" | grep -i "python script" > /dev/null 2>&1;
 	local IS_PYTHON_SCRIPT=$?;
 
 	if test ${IS_PYTHON_SCRIPT} -eq 0;
@@ -516,12 +525,15 @@ run_test_with_input_and_arguments()
 
 		return ${EXIT_FAILURE};
 	fi
-	local EXECUTABLE_TYPE=`file -bi ${TEST_EXECUTABLE} | sed 's/;.*$//'`;
-
 	local PLATFORM=`uname -s`;
 
+	# Note that the behavior of `file -bi` is not helpful on Mac OS X.
+	local EXECUTABLE_TYPE=`file -b ${TEST_EXECUTABLE}`;
+
 	# Check if the test executable is a Python script.
-	echo "${EXECUTABLE_TYPE}" | grep "text/x-python" > /dev/null 2>&1;
+	# Linux: Python script, ASCII text executable
+	# Mac OS X: a python script text executable
+	echo "${EXECUTABLE_TYPE}" | grep -i "python script" > /dev/null 2>&1;
 	local IS_PYTHON_SCRIPT=$?;
 
 	if test ${IS_PYTHON_SCRIPT} -eq 0;
