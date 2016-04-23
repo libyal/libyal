@@ -76,7 +76,7 @@ int ${python_module_name}_file_object_io_handle_initialize(
 		return( -1 );
 	}
 	*file_object_io_handle = (${python_module_name}_file_object_io_handle_t *) PyMem_Malloc(
-	                                                            sizeof( ${python_module_name}_file_object_io_handle_t ) );
+	                                                            ${alignment_padding}sizeof( ${python_module_name}_file_object_io_handle_t ) );
 
 	if( *file_object_io_handle == NULL )
 	{
@@ -130,7 +130,7 @@ int ${python_module_name}_file_object_initialize(
      libcerror_error_t **error )
 {
 	${python_module_name}_file_object_io_handle_t *file_object_io_handle = NULL;
-	static char *function                                = "${python_module_name}_file_object_initialize";
+	static char *function                                ${alignment_padding}= "${python_module_name}_file_object_initialize";
 
 	if( handle == NULL )
 	{

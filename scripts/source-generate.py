@@ -788,6 +788,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
     # TODO: add support for libcsystem.h - additional types
     # TODO: add support for libsigscan.h - not detecting wchar
     # TODO: add support for libsmraw.h - not detecting wchar
+    #       (multiple function in single define?)
     # TODO: warn about [a-z]), in include header
 
     include_header_path = os.path.join(
@@ -948,9 +949,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         self._projects_directory, project_configuration.library_name,
         project_configuration.python_module_name)
 
-    # TODO: handle white space in pyyal/pyyal_file_object_io_handle.c e.g.
-    # for pycreg
-    # TODO: selectively generate some files e.g. for pycaes
     # TODO: generate pyX-python2/Makefile.am and pyX-python3/Makefile.am
 
     if not os.path.exists(python_module_path):
@@ -961,6 +959,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             project_configuration.python_module_name))
 
     template_mappings = project_configuration.GetTemplateMappings()
+
+    # Used to align source in pyyal/pyyal_file_object_io_handle.c
+    alignment_padding = len(project_configuration.library_name) - 6
+    template_mappings[u'alignment_padding'] = u' ' * alignment_padding
 
     for directory_entry in os.listdir(self._template_directory):
       if not directory_entry.startswith(u'pyyal_'):
