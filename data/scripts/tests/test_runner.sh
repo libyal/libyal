@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20160422
+# Version: 20160423
 #
 # When CHECK_WITH_GDB is set to a non-empty value the test executable
 # is run with gdb, otherwise it is run without.
@@ -135,7 +135,7 @@ find_binary_library_path()
 		LIBRARY_NAME=`dirname ${LIBRARY_NAME}`;
 		LIBRARY_NAME=`basename ${LIBRARY_NAME} | sed 's/\(.*\)tools$/lib\1/'`;
 	else
-		LIBRARY_NAME=`basename ${LIBRARY_NAME} | sed 's/^\(py\|\)\([^_]*\)_test_.*$/lib\2/'`;
+		LIBRARY_NAME=`basename ${LIBRARY_NAME} | sed 's/^py//' | sed 's/^\([^_]*\)_test_.*$/lib\1/'`;
 	fi
 	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
 	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
@@ -164,18 +164,9 @@ find_binary_library_path()
 find_binary_python_module_path()
 {
 	local TEST_EXECUTABLE=$1;
-	local PYTHON_MODULE_NAME="${TEST_EXECUTABLE}";
 
-	echo ${PYTHON_MODULE_NAME} | grep 'tools' > /dev/null 2>&1;
+	local PYTHON_MODULE_NAME=`basename ${TEST_EXECUTABLE} | sed 's/^py\(.*\)_test_.*$/py\1/'`;
 
-	if test $? -eq ${EXIT_SUCCESS};
-	then
-		PYTHON_MODULE_NAME=`dirname ${PYTHON_MODULE_NAME}`;
-		PYTHON_MODULE_NAME=`dirname ${PYTHON_MODULE_NAME}`;
-		PYTHON_MODULE_NAME=`basename ${PYTHON_MODULE_NAME} | sed 's/\(.*\)tools$/py\1/'`;
-	else
-		PYTHON_MODULE_NAME=`basename ${PYTHON_MODULE_NAME} | sed 's/^\(py\|\)\(.*\)_test_.*$/py\2/'`;
-	fi
 	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
 	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
 	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
@@ -464,15 +455,28 @@ run_test_with_arguments()
 
 			return ${EXIT_FAILURE};
 		fi
+		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
 
-		if ! test -z ${CHECK_WITH_STDERR};
+		if test "${PLATFORM}" = "Darwin";
 		then
-			PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-			RESULT=$?;
+			if ! test -z ${CHECK_WITH_STDERR};
+			then
+				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			else
+				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} 2> /dev/null;
+				RESULT=$?;
+			fi
 		else
-			PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} 2> /dev/null;
-			RESULT=$?;
+			if ! test -z ${CHECK_WITH_STDERR};
+			then
+				LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			else
+				LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} 2> /dev/null;
+				RESULT=$?;
+			fi
 		fi
 	else
 		if ! test -x "${TEST_EXECUTABLE}";
@@ -646,15 +650,28 @@ run_test_with_input_and_arguments()
 
 			return ${EXIT_FAILURE};
 		fi
+		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
 
-		if ! test -z ${CHECK_WITH_STDERR};
+		if test "${PLATFORM}" = "Darwin";
 		then
-			PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-			RESULT=$?;
+			if ! test -z ${CHECK_WITH_STDERR};
+			then
+				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			else
+				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}" 2> /dev/null;
+				RESULT=$?;
+			fi
 		else
-			PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}" 2> /dev/null;
-			RESULT=$?;
+			if ! test -z ${CHECK_WITH_STDERR};
+			then
+				LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			else
+				LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}" 2> /dev/null;
+				RESULT=$?;
+			fi
 		fi
 	else
 		if ! test -x "${TEST_EXECUTABLE}";

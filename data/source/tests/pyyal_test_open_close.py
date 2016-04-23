@@ -48,10 +48,10 @@ def ${python_module_name}_test_single_open_close_file(filename, mode):
 
   result = True
   try:
-    lnk_file = ${python_module_name}.file()
+    ${library_name_suffix}_file = ${python_module_name}.file()
 
-    lnk_file.open(filename, mode)
-    lnk_file.close()
+    ${library_name_suffix}_file.open(filename, mode)
+    ${library_name_suffix}_file.close()
 
   except TypeError as exception:
     expected_message = (
@@ -91,12 +91,12 @@ def ${python_module_name}_test_multi_open_close_file(filename, mode):
 
   result = True
   try:
-    lnk_file = ${python_module_name}.file()
+    ${library_name_suffix}_file = ${python_module_name}.file()
 
-    lnk_file.open(filename, mode)
-    lnk_file.close()
-    lnk_file.open(filename, mode)
-    lnk_file.close()
+    ${library_name_suffix}_file.open(filename, mode)
+    ${library_name_suffix}_file.close()
+    ${library_name_suffix}_file.open(filename, mode)
+    ${library_name_suffix}_file.close()
 
   except Exception as exception:
     print(str(exception))
@@ -116,10 +116,10 @@ def ${python_module_name}_test_single_open_close_file_object(filename, mode):
   result = True
   try:
     file_object = open(filename, "rb")
-    lnk_file = ${python_module_name}.file()
+    ${library_name_suffix}_file = ${python_module_name}.file()
 
-    lnk_file.open_file_object(file_object, mode)
-    lnk_file.close()
+    ${library_name_suffix}_file.open_file_object(file_object, mode)
+    ${library_name_suffix}_file.close()
 
   except Exception as exception:
     print(str(exception))
@@ -141,11 +141,11 @@ def ${python_module_name}_test_single_open_close_file_object_with_dereference(
   result = True
   try:
     file_object = open(filename, "rb")
-    lnk_file = ${python_module_name}.file()
+    ${library_name_suffix}_file = ${python_module_name}.file()
 
-    lnk_file.open_file_object(file_object, mode)
+    ${library_name_suffix}_file.open_file_object(file_object, mode)
     del file_object
-    lnk_file.close()
+    ${library_name_suffix}_file.close()
 
   except Exception as exception:
     print(str(exception))
@@ -165,12 +165,12 @@ def ${python_module_name}_test_multi_open_close_file_object(filename, mode):
   result = True
   try:
     file_object = open(filename, "rb")
-    lnk_file = ${python_module_name}.file()
+    ${library_name_suffix}_file = ${python_module_name}.file()
 
-    lnk_file.open_file_object(file_object, mode)
-    lnk_file.close()
-    lnk_file.open_file_object(file_object, mode)
-    lnk_file.close()
+    ${library_name_suffix}_file.open_file_object(file_object, mode)
+    ${library_name_suffix}_file.close()
+    ${library_name_suffix}_file.open_file_object(file_object, mode)
+    ${library_name_suffix}_file.close()
 
   except Exception as exception:
     print(str(exception))

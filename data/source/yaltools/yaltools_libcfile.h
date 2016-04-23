@@ -30,6 +30,7 @@
 
 #include <libcfile_definitions.h>
 #include <libcfile_file.h>
+#include <libcfile_support.h>
 #include <libcfile_types.h>
 
 #else

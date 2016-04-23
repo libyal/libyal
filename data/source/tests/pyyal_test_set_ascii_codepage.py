@@ -37,14 +37,14 @@ def main():
       "iso-8859-11", "iso-8859-13", "iso-8859-14", "iso-8859-15",
       "iso-8859-16", "koi8_r", "koi8_u"]
 
-  lnk_file = ${python_module_name}.file()
+  ${library_name_suffix}_file = ${python_module_name}.file()
 
   result = True
   for codepage in supported_codepages:
     print("Testing setting supported ASCII codepage of: {0:s}:\t".format(
         codepage)),
     try:
-      lnk_file.ascii_codepage = codepage
+      ${library_name_suffix}_file.ascii_codepage = codepage
       result = True
     except:
       result = False
@@ -57,7 +57,7 @@ def main():
     print("Testing setting supported ASCII codepage of: {0:s}:\t".format(
         codepage)),
     try:
-      lnk_file.set_ascii_codepage(codepage)
+      ${library_name_suffix}_file.set_ascii_codepage(codepage)
       result = True
     except:
       result = False
@@ -73,7 +73,7 @@ def main():
 
       result = False
       try:
-        lnk_file.ascii_codepage = codepage
+        ${library_name_suffix}_file.ascii_codepage = codepage
       except RuntimeError as exception:
         expected_message = (
             "{0:s}: unable to determine ASCII codepage.").format(
@@ -94,7 +94,7 @@ def main():
 
       result = False
       try:
-        lnk_file.set_ascii_codepage(codepage)
+        ${library_name_suffix}_file.set_ascii_codepage(codepage)
       except RuntimeError as exception:
         expected_message = (
             "{0:s}: unable to determine ASCII codepage.").format(
