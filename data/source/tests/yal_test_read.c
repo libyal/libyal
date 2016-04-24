@@ -1008,18 +1008,25 @@ int ${library_name_suffix}_test_read_multi_thread(
 	 "File size: %" PRIu64 " bytes\n",
 	 file_size );
 
-	result = ${library_name_suffix}_test_read_from_file_multi_thread(
-	          file,
-	          file_size,
-	          ${library_name_suffix_upper_case}_TEST_READ_NUMBER_OF_THREADS );
-
-	if( result == -1 )
+	if( file_size == 0 )
 	{
-		fprintf(
-		 stderr,
-		 "Unable to read from file in multiple threads.\n" );
+		result = 1;
+	}
+	else
+	{
+		result = ${library_name_suffix}_test_read_from_file_multi_thread(
+		          file,
+		          file_size,
+		          ${library_name_suffix_upper_case}_TEST_READ_NUMBER_OF_THREADS );
 
-		goto on_error;
+		if( result == -1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to read from file in multiple threads.\n" );
+
+			goto on_error;
+		}
 	}
 	if( ${library_name}_file_close(
 	     file,

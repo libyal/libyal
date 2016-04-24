@@ -152,7 +152,7 @@ def ${python_module_name}_test_read(${library_name_suffix}_file):
 
   # Test: offset: 0 size: <media_size>
   # Expected result: offset: 0 size: <media_size>
-  read_offset = media_size
+  read_offset = 0
   read_size = media_size
 
   if not ${python_module_name}_test_seek_offset_and_read_buffer(
