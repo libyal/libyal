@@ -146,14 +146,14 @@ def ${python_module_name}_test_read_buffer_at_offset(
 
 def ${python_module_name}_test_read(${library_name_suffix}_file):
   """Tests the read function."""
-  media_size = ${library_name_suffix}_file.media_size
+  file_size = ${library_name_suffix}_file.size
 
   # Case 0: test full read
 
-  # Test: offset: 0 size: <media_size>
-  # Expected result: offset: 0 size: <media_size>
+  # Test: offset: 0 size: <file_size>
+  # Expected result: offset: 0 size: <file_size>
   read_offset = 0
-  read_size = media_size
+  read_size = file_size
 
   if not ${python_module_name}_test_seek_offset_and_read_buffer(
       ${library_name_suffix}_file, read_offset, os.SEEK_SET, read_size,
@@ -167,10 +167,10 @@ def ${python_module_name}_test_read(${library_name_suffix}_file):
 
   # Case 1: test buffer at offset read
 
-  # Test: offset: <media_size / 7> size: <media_size / 2>
-  # Expected result: offset: <media_size / 7> size: <media_size / 2>
-  read_offset, _ = divmod(media_size, 7)
-  read_size, _ = divmod(media_size, 2)
+  # Test: offset: <file_size / 7> size: <file_size / 2>
+  # Expected result: offset: <file_size / 7> size: <file_size / 2>
+  read_offset, _ = divmod(file_size, 7)
+  read_size, _ = divmod(file_size, 2)
 
   if not ${python_module_name}_test_seek_offset_and_read_buffer(
       ${library_name_suffix}_file, read_offset, os.SEEK_SET, read_size,
@@ -184,10 +184,10 @@ def ${python_module_name}_test_read(${library_name_suffix}_file):
 
   # Case 2: test read beyond media size
 
-  if media_size < 1024:
-    # Test: offset: <media_size - 1024> size: 4096
+  if file_size < 1024:
+    # Test: offset: <file_size - 1024> size: 4096
     # Expected result: offset: -1 size: <undetermined>
-    read_offset = media_size - 1024
+    read_offset = file_size - 1024
     read_size = 4096
 
     if not ${python_module_name}_test_seek_offset_and_read_buffer(
@@ -199,9 +199,9 @@ def ${python_module_name}_test_read(${library_name_suffix}_file):
       return False
 
   else:
-    # Test: offset: <media_size - 1024> size: 4096
-    # Expected result: offset: <media_size - 1024> size: 1024
-    read_offset = media_size - 1024
+    # Test: offset: <file_size - 1024> size: 4096
+    # Expected result: offset: <file_size - 1024> size: 1024
+    read_offset = file_size - 1024
     read_size = 4096
 
     if not ${python_module_name}_test_seek_offset_and_read_buffer(
@@ -216,10 +216,10 @@ def ${python_module_name}_test_read(${library_name_suffix}_file):
 
   # Case 3: test buffer at offset read
 
-  # Test: offset: <media_size / 7> size: <media_size / 2>
-  # Expected result: offset: < ( media_size / 7 ) + ( media_size / 2 ) > size: <media_size / 2>
-  read_offset, _ = divmod(media_size, 7)
-  read_size, _ = divmod(media_size, 2)
+  # Test: offset: <file_size / 7> size: <file_size / 2>
+  # Expected result: offset: < ( file_size / 7 ) + ( file_size / 2 ) > size: <file_size / 2>
+  read_offset, _ = divmod(file_size, 7)
+  read_size, _ = divmod(file_size, 2)
 
   if not ${python_module_name}_test_read_buffer_at_offset(
       ${library_name_suffix}_file, read_offset, read_size,

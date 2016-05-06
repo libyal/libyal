@@ -703,7 +703,6 @@ int ${library_name_suffix}_test_read_callback_function(
 	size_t read_size         = ${library_name_suffix_upper_case}_TEST_READ_BUFFER_SIZE;
 	ssize_t read_count       = 0;
 	int number_of_iterations = 3;
-	int result               = 0;
 
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( arguments )
 
@@ -779,7 +778,7 @@ on_error:
  */
 int ${library_name_suffix}_test_read_from_file_multi_thread(
      ${library_name}_file_t *file,
-     size64_t media_size,
+     size64_t file_size,
      int number_of_threads )
 {
 	libcerror_error_t *error               = NULL;
@@ -823,13 +822,13 @@ int ${library_name_suffix}_test_read_from_file_multi_thread(
 
 		expected_offset = (off64_t) number_of_iterations * ${library_name_suffix_upper_case}_TEST_READ_BUFFER_SIZE;
 
-		if( (size64_t) expected_offset > media_size )
+		if( (size64_t) expected_offset > file_size )
 		{
-			expected_offset = media_size;
+			expected_offset = file_size;
 
-			number_of_iterations = media_size / ${library_name_suffix_upper_case}_TEST_READ_BUFFER_SIZE;
+			number_of_iterations = file_size / ${library_name_suffix_upper_case}_TEST_READ_BUFFER_SIZE;
 
-			if( ( media_size % ${library_name_suffix_upper_case}_TEST_READ_BUFFER_SIZE ) != 0 )
+			if( ( file_size % ${library_name_suffix_upper_case}_TEST_READ_BUFFER_SIZE ) != 0 )
 			{
 				number_of_iterations += 1;
 			}
@@ -1076,7 +1075,6 @@ int main( int argc, char * const argv[] )
 	libcerror_error_t *error              = NULL;
 	libcstring_system_character_t *source = NULL;
 	libcstring_system_integer_t option    = 0;
-	int result                            = 0;
 
 	while( ( option = libcsystem_getopt(
 	                   argc,

@@ -73,7 +73,7 @@ def ${python_module_name}_test_seek_offset(
 
 def ${python_module_name}_test_seek(${library_name_suffix}_file):
   """Tests the seek function."""
-  media_size = ${library_name_suffix}_file.media_size
+  file_size = ${library_name_suffix}_file.size
 
   # Test: SEEK_SET offset: 0
   # Expected result: 0
@@ -83,25 +83,25 @@ def ${python_module_name}_test_seek(${library_name_suffix}_file):
       ${library_name_suffix}_file, seek_offset, os.SEEK_SET, seek_offset):
     return False
 
-  # Test: SEEK_SET offset: <media_size>
-  # Expected result: <media_size>
-  seek_offset = media_size
+  # Test: SEEK_SET offset: <file_size>
+  # Expected result: <file_size>
+  seek_offset = file_size
 
   if not ${python_module_name}_test_seek_offset(
       ${library_name_suffix}_file, seek_offset, os.SEEK_SET, seek_offset):
     return False
 
-  # Test: SEEK_SET offset: <media_size / 5>
-  # Expected result: <media_size / 5>
-  seek_offset, _ = divmod(media_size, 5)
+  # Test: SEEK_SET offset: <file_size / 5>
+  # Expected result: <file_size / 5>
+  seek_offset, _ = divmod(file_size, 5)
 
   if not ${python_module_name}_test_seek_offset(
       ${library_name_suffix}_file, seek_offset, os.SEEK_SET, seek_offset):
     return False
 
-  # Test: SEEK_SET offset: <media_size + 987>
-  # Expected result: <media_size + 987>
-  seek_offset = media_size + 987
+  # Test: SEEK_SET offset: <file_size + 987>
+  # Expected result: <file_size + 987>
+  seek_offset = file_size + 987
 
   if not ${python_module_name}_test_seek_offset(
       ${library_name_suffix}_file, seek_offset, os.SEEK_SET, seek_offset):
@@ -116,82 +116,82 @@ def ${python_module_name}_test_seek(${library_name_suffix}_file):
     return False
 
   # Test: SEEK_CUR offset: 0
-  # Expected result: <media_size + 987>
+  # Expected result: <file_size + 987>
   seek_offset = 0
 
   if not ${python_module_name}_test_seek_offset(
-      ${library_name_suffix}_file, seek_offset, os.SEEK_CUR, media_size + 987):
+      ${library_name_suffix}_file, seek_offset, os.SEEK_CUR, file_size + 987):
     return False
 
-  # Test: SEEK_CUR offset: <-1 * (media_size + 987)>
+  # Test: SEEK_CUR offset: <-1 * (file_size + 987)>
   # Expected result: 0
-  seek_offset = -1 * (media_size + 987)
+  seek_offset = -1 * (file_size + 987)
 
   if not ${python_module_name}_test_seek_offset(
       ${library_name_suffix}_file, seek_offset, os.SEEK_CUR, 0):
     return False
 
-  # Test: SEEK_CUR offset: <media_size / 3>
-  # Expected result: <media_size / 3>
-  seek_offset, _ = divmod(media_size, 3)
+  # Test: SEEK_CUR offset: <file_size / 3>
+  # Expected result: <file_size / 3>
+  seek_offset, _ = divmod(file_size, 3)
 
   if not ${python_module_name}_test_seek_offset(
       ${library_name_suffix}_file, seek_offset, os.SEEK_CUR, seek_offset):
     return False
 
-  if media_size == 0:
-    # Test: SEEK_CUR offset: <-2 * (media_size / 3)>
+  if file_size == 0:
+    # Test: SEEK_CUR offset: <-2 * (file_size / 3)>
     # Expected result: 0
-    seek_offset, _ = divmod(media_size, 3)
+    seek_offset, _ = divmod(file_size, 3)
 
     if not ${python_module_name}_test_seek_offset(
         ${library_name_suffix}_file, -2 * seek_offset, os.SEEK_CUR, 0):
       return False
 
   else:
-    # Test: SEEK_CUR offset: <-2 * (media_size / 3)>
+    # Test: SEEK_CUR offset: <-2 * (file_size / 3)>
     # Expected result: -1
-    seek_offset, _ = divmod(media_size, 3)
+    seek_offset, _ = divmod(file_size, 3)
 
     if not ${python_module_name}_test_seek_offset(
         ${library_name_suffix}_file, -2 * seek_offset, os.SEEK_CUR, -1):
       return False
 
   # Test: SEEK_END offset: 0
-  # Expected result: <media_size>
+  # Expected result: <file_size>
   seek_offset = 0
 
   if not ${python_module_name}_test_seek_offset(
-      ${library_name_suffix}_file, seek_offset, os.SEEK_END, media_size):
+      ${library_name_suffix}_file, seek_offset, os.SEEK_END, file_size):
     return False
 
-  # Test: SEEK_END offset: <-1 * media_size>
+  # Test: SEEK_END offset: <-1 * file_size>
   # Expected result: 0
-  seek_offset = -1 * media_size
+  seek_offset = -1 * file_size
 
   if not ${python_module_name}_test_seek_offset(
       ${library_name_suffix}_file, seek_offset, os.SEEK_END, 0):
     return False
 
-  # Test: SEEK_END offset: <-1 * (media_size / 4)>
-  # Expected result: <media_size - (media_size / 4)>
-  seek_offset, _ = divmod(media_size, 4)
+  # Test: SEEK_END offset: <-1 * (file_size / 4)>
+  # Expected result: <file_size - (file_size / 4)>
+  seek_offset, _ = divmod(file_size, 4)
 
   if not ${python_module_name}_test_seek_offset(
-      ${library_name_suffix}_file, -1 * seek_offset, os.SEEK_END, media_size - seek_offset):
+      ${library_name_suffix}_file, -1 * seek_offset, os.SEEK_END, file_size - seek_offset):
     return False
 
   # Test: SEEK_END offset: 542
-  # Expected result: <media_size + 542>
+  # Expected result: <file_size + 542>
   seek_offset = 542
 
   if not ${python_module_name}_test_seek_offset(
-      ${library_name_suffix}_file, seek_offset, os.SEEK_END, media_size + 542):
+      ${library_name_suffix}_file, seek_offset, os.SEEK_END, file_size + 542):
     return False
 
-  # Test: SEEK_END offset: <-1 * (media_size + 542)>
+  # Test: SEEK_END offset: <-1 * (file_size + 542)>
   # Expected result: -1
-  seek_offset = -1 * (media_size + 542)
+  seek_offset = -1 * (file_size + 542)
 
   if not ${python_module_name}_test_seek_offset(
       ${library_name_suffix}_file, seek_offset, os.SEEK_END, -1):
