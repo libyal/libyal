@@ -407,12 +407,7 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
       projects = projects_per_category[category]
       for project in projects_per_category[category]:
         appveyor_build_status = u''
-        if project.appveyor_identifier:
-          appveyor_build_status = (
-              u'[![Build status]'
-              u'(https://ci.appveyor.com/api/projects/status/{0:s}?svg=true)]'
-              u'(https://ci.appveyor.com/project/joachimmetz/{1:s})').format(
-                  project.appveyor_identifier, project.name)
+        travis_build_status = u''
 
         if project.documentation_only:
           project_description = (
@@ -420,9 +415,15 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
               u'(https://github.com/libyal/{1:s}/blob/master/documentation) '
               u'only**)').format(project.description, project.name)
 
-          travis_build_status = u''
         else:
           project_description = project.description
+
+          if project.appveyor_identifier:
+            appveyor_build_status = (
+                u'[![Build status]'
+                u'(https://ci.appveyor.com/api/projects/status/{0:s}?svg=true)]'
+                u'(https://ci.appveyor.com/project/joachimmetz/{1:s})').format(
+                    project.appveyor_identifier, project.name)
 
           travis_build_status = (
               u'[![Build status]'
