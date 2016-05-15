@@ -1,7 +1,7 @@
 /*
  * The libfguid header wrapper
  *
- * Copyright (C) ${copyright}, ${authors}
+ * Copyright (C) ${copyright}, ${tools_authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *

@@ -34,9 +34,13 @@ class ProjectConfiguration(object):
     self.library_name_suffix = None
     self.library_public_types = None
 
+    self.python_module_authors = None
     self.python_module_name = None
 
+    self.tools_authors = None
     self.tools_name = None
+
+    self.tests_authors = None
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
@@ -95,11 +99,23 @@ class ProjectConfiguration(object):
     self.library_public_types = self._GetOptionalConfigValue(
         config_parser, u'library', u'public_types', default_value=[])
 
+    self.python_module_authors = self._GetOptionalConfigValue(
+        config_parser, u'python_module', u'authors',
+        default_value=self.project_authors)
     self.python_module_name = u'py{0:s}'.format(self.library_name_suffix)
+
+    self.tools_authors = self._GetOptionalConfigValue(
+        config_parser, u'tools', u'authors', default_value=self.project_authors)
     self.tools_name = u'{0:s}tools'.format(self.library_name_suffix)
 
-  def GetTemplateMappings(self):
+    self.tests_authors = self._GetOptionalConfigValue(
+        config_parser, u'tests', u'authors', default_value=self.project_authors)
+
+  def GetTemplateMappings(self, authors_separator=u', '):
     """Retrieves the template mappings.
+
+    Args:
+      authors_separator: optional string containing the authors separator.
 
     Returns:
       A dictionary containing the string template mappings.
@@ -117,8 +133,13 @@ class ProjectConfiguration(object):
       project_copyright = u'{0:d}-{1:d}'.format(
           self.project_year_of_creation, date.year)
 
+    authors = authors_separator.join(self.project_authors)
+    python_module_authors = authors_separator.join(self.python_module_authors)
+    tools_authors = authors_separator.join(self.tools_authors)
+    tests_authors = authors_separator.join(self.tests_authors)
+
     template_mappings = {
-        u'authors': u', '.join(self.project_authors),
+        u'authors': authors,
         u'copyright': project_copyright,
 
         u'library_name': self.library_name,
@@ -127,11 +148,15 @@ class ProjectConfiguration(object):
         u'library_name_suffix_upper_case': self.library_name_suffix.upper(),
         u'library_description': self.library_description,
 
+        u'python_module_authors': python_module_authors,
         u'python_module_name': self.python_module_name,
         u'python_module_name_upper_case': self.python_module_name.upper(),
 
+        u'tools_authors': tools_authors,
         u'tools_name': self.tools_name,
         u'tools_name_upper_case': self.tools_name.upper(),
+
+        u'tests_authors': tests_authors,
     }
     return template_mappings
 
@@ -609,7 +634,10 @@ class CommonSourceFileGenerator(SourceFileGenerator):
                              ProjectConfiguration).
       output_writer: an output writer object (instance of OutputWriter).
     """
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = project_configuration.GetTemplateMappings(
+        authors_separator=u',\n *                          ')
+    template_mappings[u'authors'] = u'Joachim Metz <joachim.metz@gmail.com>'
+
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
           self._template_directory, directory_entry)
@@ -715,7 +743,8 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           u'typedef intptr_t {0:s}_{1:s}_t;'.format(
               project_configuration.library_name, type_name))
 
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = project_configuration.GetTemplateMappings(
+        authors_separator=u',\n *                          ')
     template_mappings[u'library_debug_type_definitions'] = u'\n'.join(
         library_debug_type_definitions)
     template_mappings[u'library_type_definitions'] = u'\n'.join(
@@ -958,7 +987,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         python_module_path, u'{0:s}_codepage.h'.format(
             project_configuration.python_module_name))
 
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = project_configuration.GetTemplateMappings(
+        authors_separator=u',\n *                          ')
 
     # Used to align source in pyyal/pyyal_file_object_io_handle.c
     alignment_padding = len(project_configuration.library_name) - 6
@@ -1119,7 +1149,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not os.path.exists(tools_path):
       return
 
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = project_configuration.GetTemplateMappings(
+        authors_separator=u',\n *                          ')
 
     # TODO: add support for ouput.[ch]
 

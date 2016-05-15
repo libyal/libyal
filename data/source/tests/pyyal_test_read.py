@@ -2,7 +2,7 @@
 #
 # Python-bindings read testing program
 #
-# Copyright (C) ${copyright}, ${authors}
+# Copyright (C) ${copyright}, ${tests_authors}
 #
 # Refer to AUTHORS for acknowledgements.
 #

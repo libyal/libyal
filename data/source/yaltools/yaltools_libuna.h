@@ -1,7 +1,7 @@
 /*
  * The libuna header wrapper
  *
- * Copyright (C) ${copyright}, ${authors}
+ * Copyright (C) ${copyright}, ${tools_authors}
  *
  * This software is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by

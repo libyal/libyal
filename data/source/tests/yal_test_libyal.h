@@ -1,7 +1,7 @@
 /*
  * The internal ${library_name} header
  *
- * Copyright (C) ${copyright}, ${authors}
+ * Copyright (C) ${copyright}, ${tests_authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *

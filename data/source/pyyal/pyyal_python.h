@@ -1,7 +1,7 @@
 /*
  * The python header wrapper
  *
- * Copyright (C) ${copyright}, ${authors}
+ * Copyright (C) ${copyright}, ${python_module_authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *

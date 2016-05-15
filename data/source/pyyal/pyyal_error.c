@@ -1,7 +1,7 @@
 /*
  * Error functions
  *
- * Copyright (C) ${copyright}, ${authors}
+ * Copyright (C) ${copyright}, ${python_module_authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *

@@ -2,7 +2,7 @@
  * Library for system independent implementation of functionality
  * for programs
  *
- * Copyright (C) ${copyright}, ${authors}
+ * Copyright (C) ${copyright}, ${tools_authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *
