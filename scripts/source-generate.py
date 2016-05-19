@@ -36,6 +36,7 @@ class ProjectConfiguration(object):
 
     self.python_module_authors = None
     self.python_module_name = None
+    self.python_module_year_of_creation = None
 
     self.tools_authors = None
     self.tools_name = None
@@ -69,7 +70,7 @@ class ProjectConfiguration(object):
     """
     try:
       return self._GetConfigValue(config_parser, section_name, value_name)
-    except configparser.NoOptionError:
+    except (configparser.NoOptionError, configparser.NoSectionError):
       return default_value
 
   def ReadFromFile(self, filename):
@@ -103,6 +104,12 @@ class ProjectConfiguration(object):
         config_parser, u'python_module', u'authors',
         default_value=self.project_authors)
     self.python_module_name = u'py{0:s}'.format(self.library_name_suffix)
+    self.python_module_year_of_creation = self._GetOptionalConfigValue(
+        config_parser, u'python_module', u'year_of_creation',
+        default_value=self.project_year_of_creation)
+
+    self.python_module_year_of_creation = int(
+        self.python_module_year_of_creation, 10)
 
     self.tools_authors = self._GetOptionalConfigValue(
         config_parser, u'tools', u'authors', default_value=self.project_authors)
@@ -133,6 +140,13 @@ class ProjectConfiguration(object):
       project_copyright = u'{0:d}-{1:d}'.format(
           self.project_year_of_creation, date.year)
 
+    if self.python_module_year_of_creation == date.year:
+      python_module_copyright = u'{0:d}'.format(
+          self.python_module_year_of_creation)
+    else:
+      python_module_copyright = u'{0:d}-{1:d}'.format(
+          self.python_module_year_of_creation, date.year)
+
     authors = authors_separator.join(self.project_authors)
     python_module_authors = authors_separator.join(self.python_module_authors)
     tools_authors = authors_separator.join(self.tools_authors)
@@ -151,6 +165,7 @@ class ProjectConfiguration(object):
         u'python_module_authors': python_module_authors,
         u'python_module_name': self.python_module_name,
         u'python_module_name_upper_case': self.python_module_name.upper(),
+        u'python_module_copyright': python_module_copyright,
 
         u'tools_authors': tools_authors,
         u'tools_name': self.tools_name,

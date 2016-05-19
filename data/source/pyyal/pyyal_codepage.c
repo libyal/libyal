@@ -1,7 +1,7 @@
 /*
  * Codepage functions
  *
- * Copyright (C) ${copyright}, ${python_module_authors}
+ * Copyright (C) ${python_module_copyright}, ${python_module_authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *

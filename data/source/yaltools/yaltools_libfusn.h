@@ -37,7 +37,7 @@
 /* If libtool DLL support is enabled set LIBFUSN_DLL_IMPORT
  * before including libfusn.h
  */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBFUSN_DLL_IMPORT
 #endif
 
