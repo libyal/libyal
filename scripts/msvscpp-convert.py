@@ -3729,6 +3729,8 @@ class LibyalSourceVSSolution(VSSolution):
 
           if dependency_name:
             if dependency_name == 'libcrypto':
+              preprocessor_definitions.append('HAVE_WINCRYPT')
+
               self._ConfigureLibcrypto(
                   project_information, release_project_configuration,
                   debug_project_configuration)
@@ -3787,6 +3789,8 @@ class LibyalSourceVSSolution(VSSolution):
 
           if dependency_name:
             if dependency_name == 'libcrypto':
+              preprocessor_definitions.append('HAVE_WINCRYPT')
+
               self._ConfigureLibcrypto(
                   project_information, release_project_configuration,
                   debug_project_configuration)
