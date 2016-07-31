@@ -91,8 +91,6 @@ class ProjectConfiguration(object):
     self.project_year_of_creation = self._GetConfigValue(
         config_parser, u'project', u'year_of_creation')
 
-    self.project_year_of_creation = int(self.project_year_of_creation, 10)
-
     self.library_description = self._GetConfigValue(
         config_parser, u'library', u'description')
     self.library_name = self.project_name
@@ -108,15 +106,16 @@ class ProjectConfiguration(object):
         config_parser, u'python_module', u'year_of_creation',
         default_value=self.project_year_of_creation)
 
-    self.python_module_year_of_creation = int(
-        self.python_module_year_of_creation, 10)
-
     self.tools_authors = self._GetOptionalConfigValue(
         config_parser, u'tools', u'authors', default_value=self.project_authors)
     self.tools_name = u'{0:s}tools'.format(self.library_name_suffix)
 
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, u'tests', u'authors', default_value=self.project_authors)
+
+    self.project_year_of_creation = int(self.project_year_of_creation, 10)
+    self.python_module_year_of_creation = int(
+        self.python_module_year_of_creation, 10)
 
   def GetTemplateMappings(self, authors_separator=u', '):
     """Retrieves the template mappings.
