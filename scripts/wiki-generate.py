@@ -617,7 +617,7 @@ class ProjectConfiguration(object):
 
     if self.supports_python:
       building_table_of_contents += (
-          u'* [Using setup.py](Building#using-setup.py)\n')
+          u'* [Using setup.py](Building#using-setuppy)\n')
 
     if self.development_main_object_pre_open_python:
       development_main_object_pre_open_python = u'{0:s}\n'.format(
