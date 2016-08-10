@@ -1,7 +1,7 @@
 ## Git
 **Note that the git repository holds the development version of the source code.**
 
-**If you are not developing it is recommended that you download a source package instead.**
+**If you are not developing it is recommended that you download a source distribution package instead.**
 
 To retrieve the source from the git repository make sure to install:
 

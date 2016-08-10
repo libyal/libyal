@@ -4,7 +4,7 @@ To retrieve the source distribution package go to the [downloads](${project_down
 ${project_name}${project_status}-<version>.tar.gz
 ```
 
-To extract the source package run:
+To extract the source distribution package run:
 ```
 tar xfv ${project_name}${project_status}-<version>.tar.gz
 ```

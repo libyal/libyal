@@ -808,7 +808,7 @@ class BuildingPageGenerator(WikiPageGenerator):
 
     self._GenerateSection(u'source.txt', template_mappings, output_writer)
     self._GenerateSection(
-        u'source_package.txt', template_mappings, output_writer)
+        u'source_distribution_package.txt', template_mappings, output_writer)
     self._GenerateSection(u'source_git.txt', template_mappings, output_writer)
 
     if project_configuration.supports_gcc:
