@@ -540,7 +540,8 @@ class ProjectConfiguration(object):
         dpkg_build_dependencies.append(u'libfuse-dev')
 
       if self.supports_python:
-        dpkg_build_dependencies.append(u'python-dev')
+        dpkg_build_dependencies.append(u'python-all-dev')
+        dpkg_build_dependencies.append(u'python3-all-dev')
 
       dpkg_build_dependencies = ' '.join(dpkg_build_dependencies)
 
@@ -552,6 +553,9 @@ class ProjectConfiguration(object):
       if self.supports_python:
         dpkg_filenames += (
             u'\n{0:s}-python_<version>-1_<arch>.deb').format(
+                self.project_name)
+        dpkg_filenames += (
+            u'\n{0:s}-python3_<version>-1_<arch>.deb').format(
                 self.project_name)
 
       if self.supports_tools:
@@ -574,6 +578,7 @@ class ProjectConfiguration(object):
 
       if self.supports_python:
         rpm_build_dependencies.append(u'python-devel')
+        rpm_build_dependencies.append(u'python3-devel')
 
       rpm_build_dependencies = ' '.join(rpm_build_dependencies)
 
