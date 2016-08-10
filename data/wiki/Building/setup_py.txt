@@ -1,0 +1,7 @@
+# Using setup.py
+setup.py can be used to create a Python-binding only build.
+
+```
+python setup.py
+```
+

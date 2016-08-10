@@ -396,7 +396,9 @@ class ProjectConfiguration(object):
           u'\n').format(self.project_name)
 
     if self.supports_gcc:
-      building_table_of_contents += u'* Using GNU Compiler Collection (GCC)\n'
+      building_table_of_contents += (
+          u'* [Using GNU Compiler Collection (GCC)]'
+          u'(Building#using-gnu-compiler-collection-gcc)\n')
 
       if self.gcc_build_dependencies:
         gcc_build_dependencies = (
@@ -416,7 +418,7 @@ class ProjectConfiguration(object):
             u'* fuse (optional, can be disabled by --with-libfuse=no)\n')
 
       if self.supports_cygwin:
-        building_table_of_contents += '  * Using Cygwin\n'
+        building_table_of_contents += '  * [Using Cygwin](Building#cygwin)\n'
 
         if self.cygwin_build_dependencies:
           for dependency in self.cygwin_build_dependencies:
@@ -451,7 +453,8 @@ class ProjectConfiguration(object):
 
     if self.supports_mingw:
       building_table_of_contents += (
-          u'* Using Minimalist GNU for Windows (MinGW)\n')
+          u'* [Using Minimalist GNU for Windows (MinGW)]'
+          u'(Building#using-minimalist-gnu-for-windows-mingw)\n')
 
       if self.mingw_build_dependencies:
         for dependency in self.mingw_build_dependencies:
@@ -475,7 +478,9 @@ class ProjectConfiguration(object):
             u'\n')
 
     if self.supports_msvscpp:
-      building_table_of_contents += u'* Using Microsoft Visual Studio\n'
+      building_table_of_contents += (
+          u'* [Using Microsoft Visual Studio]'
+          u'(Building#using-microsoft-visual-studio)\n')
 
       if self.msvscpp_build_dependencies:
         msvscpp_build_dependencies = (
@@ -522,7 +527,9 @@ class ProjectConfiguration(object):
         u'Or directly packaged with different package managers:\n\n')
 
     if self.supports_dpkg:
-      building_table_of_contents += u'* Using Debian package tools (DEB)\n'
+      building_table_of_contents += (
+          u'* [Using Debian package tools (DEB)]'
+          u'(Building#using-debian-package-tools-deb)\n')
 
       if self.dpkg_build_dependencies is None:
         dpkg_build_dependencies = []
@@ -535,8 +542,7 @@ class ProjectConfiguration(object):
       if self.supports_python:
         dpkg_build_dependencies.append(u'python-dev')
 
-      if dpkg_build_dependencies:
-        dpkg_build_dependencies = ' '.join(dpkg_build_dependencies)
+      dpkg_build_dependencies = ' '.join(dpkg_build_dependencies)
 
       dpkg_filenames += (
           u'{0:s}_<version>-1_<arch>.deb\n'
@@ -554,7 +560,9 @@ class ProjectConfiguration(object):
                 self.project_name)
 
     if self.supports_rpm:
-      building_table_of_contents += u'* Using RedHat package tools (RPM)\n'
+      building_table_of_contents += (
+          u'* [Using RedHat package tools (RPM)]'
+          u'(Building#using-redhat-package-tools-rpm)\n')
 
       if self.rpm_build_dependencies is None:
         rpm_build_dependencies = []
@@ -567,8 +575,7 @@ class ProjectConfiguration(object):
       if self.supports_python:
         rpm_build_dependencies.append(u'python-devel')
 
-      if rpm_build_dependencies:
-        rpm_build_dependencies = ' '.join(rpm_build_dependencies)
+      rpm_build_dependencies = ' '.join(rpm_build_dependencies)
 
       if self.project_status:
         rpm_rename_source_package += (
@@ -584,6 +591,9 @@ class ProjectConfiguration(object):
         rpm_filenames += (
             u'~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>'
             u'.rpm\n').format(self.project_name)
+        rpm_filenames += (
+            u'~/rpmbuild/RPMS/<arch>/{0:s}-python3-<version>-1.<arch>'
+            u'.rpm\n').format(self.project_name)
 
       if self.supports_tools:
         rpm_filenames += (
@@ -594,10 +604,15 @@ class ProjectConfiguration(object):
           u'~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm').format(
               self.project_name)
 
-    building_table_of_contents += u'* Using Mac OS X pkgbuild\n'
+    building_table_of_contents += (
+        u'* [Using Mac OS X pkgbuild](Building#using-mac-os-x-pkgbuild)\n')
 
     if self.supports_python:
       macosx_pkg_configure_options = ' --enable-python --with-pyprefix'
+
+    if self.supports_python:
+      building_table_of_contents += (
+          u'* [Using setup.py](Building#using-setup.py)\n')
 
     if self.development_main_object_pre_open_python:
       development_main_object_pre_open_python = u'{0:s}\n'.format(
@@ -860,6 +875,9 @@ class BuildingPageGenerator(WikiPageGenerator):
       self._GenerateSection(u'rpm.txt', template_mappings, output_writer)
 
     self._GenerateSection(u'macosx_pkg.txt', template_mappings, output_writer)
+
+    if project_configuration.supports_python:
+      self._GenerateSection(u'setup_py.txt', template_mappings, output_writer)
 
   def HasContent(self, unused_project_configuration):
     """Determines if the generator will generate content.

@@ -1,2 +1,5 @@
+# Read first
+GitHub will offer you the download options "Source code (zip)" and "Source code (tar.gz)". These are copies of the source, as-is, in the git repository and not suited for distribution. Instead it is highly recommend to use the provided source distribution package, created by `make dist`, which contains all the necessary dependencies.
+
 # Introduction
 ${building_table_of_contents}

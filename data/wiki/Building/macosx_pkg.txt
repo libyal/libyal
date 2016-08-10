@@ -1,9 +1,9 @@
-# Mac OS X package
+# Using Mac OS X pkgbuild
 pkgbuild can be used to create a Mac OS X package.
 
 The following instructions show how to build ${project_name}.pkg and ${project_name}.dmg from the command line.
 
-First build ${project_name} with Python-bindings:
+First build ${project_name}:
 ```
 ./configure --prefix=/usr${macosx_pkg_configure_options}
 make
@@ -17,7 +17,7 @@ make install DESTDIR=$$PWD/tmp
 This will make sure that library paths in the dylib file is set correctly for distribution.
 This is not the case when you use:
 ```
-./configure --prefix=$$PWD/tmp
+./configure --prefix=$$PWD/tmp${macosx_pkg_configure_options}
 ```
 
 You can check the library paths in the dylib by running:
