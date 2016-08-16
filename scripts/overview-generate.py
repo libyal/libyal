@@ -407,6 +407,7 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
       projects = projects_per_category[category]
       for project in projects_per_category[category]:
         appveyor_build_status = u''
+        codecov_status = u''
         travis_build_status = u''
 
         if project.documentation_only:
