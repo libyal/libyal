@@ -425,6 +425,11 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
                 u'(https://ci.appveyor.com/project/joachimmetz/{1:s})').format(
                     project.appveyor_identifier, project.name)
 
+          codecov_status = (
+              u'[![codecov](https://codecov.io/gh/libyal/{0:s}/branch/master/'
+              u'graph/badge.svg)](https://codecov.io/gh/libyal/{0:s})').format(
+                  project.name)
+
           travis_build_status = (
               u'[![Build status]'
               u'(https://travis-ci.org/libyal/{0:s}.svg?branch=master)]'
@@ -437,6 +442,7 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
         template_mappings = {
             u'appveyor_build_status': appveyor_build_status,
+            u'codecov_status': codecov_status,
             u'project_description': project_description,
             u'project_name': project.name,
             u'travis_build_status': travis_build_status

@@ -1,1 +1,1 @@
-[${project_name}](https://github.com/libyal/${project_name}/wiki/) | ${project_description} | ${travis_build_status} | ${appveyor_build_status}
+[${project_name}](https://github.com/libyal/${project_name}/wiki/) | ${project_description} | ${travis_build_status} | ${appveyor_build_status} | ${codecov_status}
