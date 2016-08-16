@@ -439,6 +439,7 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
         # TODO: solve this in a more elegant way.
         if project.name == u'libtableau':
+          codecov_status = u''
           travis_build_status = u''
 
         template_mappings = {
