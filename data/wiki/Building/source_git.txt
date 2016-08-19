@@ -24,6 +24,12 @@ cd ${project_name}/
 
 The source from the git repository will not work without synchronizing the library dependencies "./synclibs.sh" and having the autotools generate the necessary files "./autogen.sh".
 
+### Debian/Ubuntu
+On Debian based Linux distributions such as Ubuntu install the following packages:
+```
+sudo apt install autoconf automake autopoint libtool pkg-config
+```
+
 ### Mac OS X
 On Mac OS X the XCode command line tools no longer provide the autotools you can obtain them e.g. via [MacPorts](https://www.macports.org/).
 Install the following packages:
