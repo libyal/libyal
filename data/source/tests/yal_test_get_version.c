@@ -20,7 +20,6 @@
  */
 
 #include <common.h>
-#include <file_stream.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
@@ -28,6 +27,7 @@
 
 #include "${library_name_suffix}_test_libcstring.h"
 #include "${library_name_suffix}_test_${library_name}.h"
+#include "${library_name_suffix}_test_macros.h"
 #include "${library_name_suffix}_test_unused.h"
 
 /* Tests retrieving the library version
@@ -46,11 +46,15 @@ int ${library_name_suffix}_test_get_version(
 	          ${library_name_upper_case}_VERSION_STRING,
 	          9 );
 
-	if( result != 0 )
-	{
-		return( 0 );
-	}
+	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL(
+	 "result",
+	 result,
+	 0 );
+
 	return( 1 );
+
+on_error:
+	return( 0 );
 }
 
 /* The main program
@@ -68,10 +72,13 @@ int main(
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
-	if( ${library_name_suffix}_test_get_version() != 1 )
-	{
-		return( EXIT_FAILURE );
-	}
+	${library_name_suffix_upper_case}_TEST_RUN(
+	 "${library_name}_get_version",
+	 ${library_name_suffix}_test_get_version() )
+
 	return( EXIT_SUCCESS );
+
+on_error:
+	return( EXIT_FAILURE );
 }
 
