@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_suffix_upper_case}_TEST_MALLOC_H )
-#define _${library_name_suffix_upper_case}_TEST_MALLOC_H
+#if !defined( _${library_name_suffix_upper_case}_TEST_MEMORY_H )
+#define _${library_name_suffix_upper_case}_TEST_MEMORY_H
 
 #include <common.h>
 
@@ -28,19 +28,21 @@
 extern "C" {
 #endif
 
-#if defined( HAVE_GNU_DL_DLSYM ) && !defined( WINAPI )
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ )
 
-#define HAVE_${library_name_suffix_upper_case}_TEST_MALLOC		1
+#define HAVE_${library_name_suffix_upper_case}_TEST_MEMORY		1
 
 extern int ${library_name_suffix}_test_malloc_attempts_before_fail;
 
+extern int ${library_name_suffix}_test_memset_attempts_before_fail;
+
 extern int ${library_name_suffix}_test_realloc_attempts_before_fail;
 
-#endif /* defined( HAVE_GNU_DL_DLSYM ) && !defined( WINAPI ) */
+#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _${library_name_suffix_upper_case}_TEST_MALLOC_H ) */
+#endif /* !defined( _${library_name_suffix_upper_case}_TEST_MEMORY_H ) */
 
