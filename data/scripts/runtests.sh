@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Script that runs the tests
 #
 # Version: 20160824

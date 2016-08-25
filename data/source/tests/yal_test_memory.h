@@ -34,6 +34,8 @@ extern "C" {
 
 extern int ${library_name_suffix}_test_malloc_attempts_before_fail;
 
+extern int ${library_name_suffix}_test_memcpy_attempts_before_fail;
+
 extern int ${library_name_suffix}_test_memset_attempts_before_fail;
 
 extern int ${library_name_suffix}_test_realloc_attempts_before_fail;
