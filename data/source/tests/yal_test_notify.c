@@ -1,5 +1,5 @@
 /*
- * Library error functions test program
+ * Library notification functions test program
  *
  * Copyright (C) ${copyright}, ${tests_authors}
  *
@@ -30,78 +30,60 @@
 #include "${library_name_suffix}_test_macros.h"
 #include "${library_name_suffix}_test_unused.h"
 
-/* Tests the ${library_name}_error_free function
+/* Tests the ${library_name}_notify_set_verbose function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_error_free(
+int ${library_name_suffix}_test_notify_set_verbose(
      void )
 {
 	/* Test invocation of function only
 	 */
-	${library_name}_error_free(
-	 NULL );
-
-	return( 1 );
-}
-
-/* Tests the ${library_name}_error_fprint function
- * Returns 1 if successful or 0 if not
- */
-int ${library_name_suffix}_test_error_fprint(
-     void )
-{
-	/* Test invocation of function only
-	 */
-	${library_name}_error_fprint(
-	 NULL,
-	 NULL );
-
-	return( 1 );
-}
-
-/* Tests the ${library_name}_error_sprint function
- * Returns 1 if successful or 0 if not
- */
-int ${library_name_suffix}_test_error_sprint(
-     void )
-{
-	/* Test invocation of function only
-	 */
-	${library_name}_error_sprint(
-	 NULL,
-	 NULL,
+	${library_name}_notify_set_verbose(
 	 0 );
 
 	return( 1 );
 }
 
-/* Tests the ${library_name}_error_backtrace_fprint function
+/* Tests the ${library_name}_notify_set_stream function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_error_backtrace_fprint(
+int ${library_name_suffix}_test_notify_set_stream(
      void )
 {
 	/* Test invocation of function only
 	 */
-	${library_name}_error_backtrace_fprint(
+	${library_name}_notify_set_stream(
 	 NULL,
 	 NULL );
 
 	return( 1 );
 }
 
-/* Tests the ${library_name}_error_backtrace_sprint function
+/* Tests the ${library_name}_notify_stream_open function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_error_backtrace_sprint(
+int ${library_name_suffix}_test_notify_stream_open(
      void )
 {
 	/* Test invocation of function only
 	 */
-	${library_name}_error_backtrace_sprint(
+	${library_name}_notify_stream_open(
 	 NULL,
-	 NULL,
-	 0 );
+	 NULL );
+
+	return( 1 );
+}
+
+/* Tests the ${library_name}_notify_stream_close function
+ * Returns 1 if successful or 0 if not
+ */
+int ${library_name_suffix}_test_notify_stream_close(
+     void )
+{
+	/* Test invocation of function only
+	 */
+	${library_name}_notify_stream_close(
+	 NULL );
 
 	return( 1 );
 }
@@ -122,24 +104,20 @@ int main(
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
 	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library_name}_error_free",
-	 ${library_name_suffix}_test_error_free() )
+	 "${library_name}_notify_set_verbose",
+	 ${library_name_suffix}_test_notify_set_verbose() )
 
 	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library_name}_error_fprint",
-	 ${library_name_suffix}_test_error_fprint() )
+	 "${library_name}_notify_set_stream",
+	 ${library_name_suffix}_test_notify_set_stream() )
 
 	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library_name}_error_sprint",
-	 ${library_name_suffix}_test_error_sprint() )
+	 "${library_name}_notify_stream_open",
+	 ${library_name_suffix}_test_notify_stream_open() )
 
 	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library_name}_error_backtrace_fprint",
-	 ${library_name_suffix}_test_error_backtrace_fprint() )
-
-	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library_name}_error_backtrace_sprint",
-	 ${library_name_suffix}_test_error_backtrace_sprint() )
+	 "${library_name}_notify_stream_close",
+	 ${library_name_suffix}_test_notify_stream_close() )
 
 	return( EXIT_SUCCESS );
 

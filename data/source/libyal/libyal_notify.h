@@ -1,5 +1,5 @@
 /*
- * Notification function
+ * Notification functions
  *
  * Copyright (C) ${copyright}, ${authors}
  *
