@@ -46,7 +46,7 @@ int ${library_name_suffix}_test_get_version(
 	          ${library_name_upper_case}_VERSION_STRING,
 	          9 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL(
+	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
