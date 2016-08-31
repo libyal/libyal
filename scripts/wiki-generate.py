@@ -1072,15 +1072,18 @@ class TestingPageGenerator(WikiPageGenerator):
       self._GenerateSection(u'tests.txt', template_mappings, output_writer)
 
       if project_configuration.tests_profiles:
-        self._GenerateSection(
-            u'tests_files.txt', template_mappings, output_writer)
+        if (project_configuration.tests_example_filename1 and
+            project_configuration.tests_example_filename2):
+          self._GenerateSection(
+              u'tests_files.txt', template_mappings, output_writer)
+
         self._GenerateSection(
             u'tests_profiles.txt', template_mappings, output_writer)
 
-      if (project_configuration.tests_example_filename1 and
-          project_configuration.tests_example_filename2):
-        self._GenerateSection(
-            u'tests_profiles_examples.txt', template_mappings, output_writer)
+        if (project_configuration.tests_example_filename1 and
+            project_configuration.tests_example_filename2):
+          self._GenerateSection(
+              u'tests_profiles_files.txt', template_mappings, output_writer)
 
       if project_configuration.tests_supports_valgrind:
         self._GenerateSection(
