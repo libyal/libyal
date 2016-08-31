@@ -25,7 +25,7 @@ class ProjectConfiguration(object):
   """Class that defines a project configuration."""
 
   def __init__(self):
-    """Initializes a project configuation object."""
+    """Initializes a project configuation."""
     super(ProjectConfiguration, self).__init__()
     self.project_name = None
     self.project_status = None
@@ -110,12 +110,12 @@ class ProjectConfiguration(object):
     """Retrieves a configuration value from the config parser.
 
     Args:
-      config_parser: the configuration parser (instance of ConfigParser).
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
+      config_parser (ConfigParser): configuration parser.
+      section_name (str): name of the section that contains the value.
+      value_name (str): name of the value.
 
     Returns:
-      An object containing the value.
+      object: value.
     """
     return json.loads(config_parser.get(section_name, value_name))
 
@@ -124,12 +124,12 @@ class ProjectConfiguration(object):
     """Retrieves an optional configuration value from the config parser.
 
     Args:
-      config_parser: the configuration parser (instance of ConfigParser).
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
+      config_parser (ConfigParser): configuration parser.
+      section_name (str): name of the section that contains the value.
+      value_name (str): name of the value.
 
     Returns:
-      An object containing the value or the default vlaue if not available.
+      object: value or default value if not available.
     """
     try:
       return self._GetConfigValue(config_parser, section_name, value_name)
@@ -140,7 +140,7 @@ class ProjectConfiguration(object):
     """Reads the configuration from file.
 
     Args:
-      filename: a string containing the filename.
+      filename (str): path of the configuration file.
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
@@ -319,7 +319,7 @@ class ProjectConfiguration(object):
     """Retrieves the template mappings.
 
     Returns:
-      A dictionary containing the string template mappings.
+      dict[str, str]: template mappings.
     """
     building_table_of_contents = u''
 
@@ -731,11 +731,10 @@ class WikiPageGenerator(object):
   """Class that generates wiki pages."""
 
   def __init__(self, template_directory):
-    """Initialize a wiki page generator.
+    """Initializes a wiki page generator.
 
     Args:
-      template_directory: a string containing the path of the template
-                          directory.
+      template_directory (str): path of the template directory.
     """
     super(WikiPageGenerator, self).__init__()
     self._template_directory = template_directory
@@ -745,10 +744,10 @@ class WikiPageGenerator(object):
     """Generates a section from template filename.
 
     Args:
-      template_filename: a string containing the name of the template file.
-      template_mpppings: a dictionary containing the template mappings, where
-                         the key maps to the name of a template variable.
-      output_writer: an output writer object (instance of OutputWriter).
+      template_filename (str): path of the template file.
+      template_mpppings (dict[str, str]): the template mappings, where
+          the key maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
     """
     template_string = self._ReadTemplateFile(template_filename)
     output_data = template_string.substitute(template_mappings)
@@ -758,10 +757,10 @@ class WikiPageGenerator(object):
     """Reads a template string from file.
 
     Args:
-      filename: the name of the file containing the template string.
+      filename (str): path of the file containing the template string.
 
     Returns:
-      A template string (instance of string.Template).
+      string.Template: template string.
     """
     path = os.path.join(self._template_directory, filename)
     file_object = open(path, 'rb')
@@ -774,9 +773,8 @@ class WikiPageGenerator(object):
     """Generates a wiki page.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
 
   @abc.abstractmethod
@@ -784,11 +782,10 @@ class WikiPageGenerator(object):
     """Determines if the generator will generate content.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      Boolean value to indicate the generator will generate content.
+      bool: True if the generator will generate content.
     """
 
 
@@ -1080,6 +1077,11 @@ class TestingPageGenerator(WikiPageGenerator):
         self._GenerateSection(
             u'tests_profiles.txt', template_mappings, output_writer)
 
+      if (project_configuration.tests_example_filename1 and
+          project_configuration.tests_example_filename2):
+        self._GenerateSection(
+            u'tests_profiles_examples.txt', template_mappings, output_writer)
+
       if project_configuration.tests_supports_valgrind:
         self._GenerateSection(
             u'tests_valgrind.txt', template_mappings, output_writer)
@@ -1144,7 +1146,7 @@ class FileWriter(object):
   """Class that defines a file output writer."""
 
   def __init__(self, name):
-    """Initialize the output writer.
+    """Initializes an output writer.
 
     Args:
       name: the name of the output.
@@ -1179,7 +1181,7 @@ class StdoutWriter(object):
   """Class that defines a stdout output writer."""
 
   def __init__(self):
-    """Initialize the output writer."""
+    """Initializes an output writer."""
     super(StdoutWriter, self).__init__()
 
   def Open(self):

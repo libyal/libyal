@@ -29,14 +29,14 @@ Configuration Properties -> General -> Platform Toolset
 
 Into "Windows7.1SDK"
 
-If you've Cygwin installed on your Visual Studio build machine you can try
-running one of the following scripts to add the x64 settings for you:
+If you've Python installed on your Visual Studio build machine you can try
+running [msvscpp-convert](https://github.com/libyal/libyal/wiki/msvscpp-convert)
+to convert the Visual Studio 2008 solution files to 2010 format and add the x64
+settings for you.
+
 ```
-sh msvscpp/scripts/vs2008_x64.sh
+msvscpp-convert.py --to 2010 msvscpp\libcstring.sln
 ```
 
-Make sure to convert the solution first from 2008 to 2010.
-```
-sh msvscpp/scripts/vs2010_x64.sh
-```
-
+This will create a subdirectory named vs2010 which contains the Visual Studio
+2010 solution files.

@@ -25,14 +25,3 @@ tests/input/.${project_name}/basic/files
 Every line of the files-file specifies the filename in the test set to include in the test.
 Files not defined in the files-file are ignored by the test.
 
-E.g. if the basic test set sub directory contains the files:
-```
-${tests_example_filename1}
-${tests_example_filename2}
-```
-
-and only the first file needs to be tested, the files-file can then be defined as:
-```
-${tests_example_filename1}
-```
-
