@@ -4144,17 +4144,8 @@ class LibyalSourceVSSolution(VSSolution):
 
     makefile_am_lines.extend([
         '',
-        'SCRIPT_FILES = \\',
-        '\tscripts/vs2008_x64.sh \\',
-        '\tscripts/vs2008_x64_sln.sed \\',
-        '\tscripts/vs2008_x64_vcproj.sed \\',
-        '\tscripts/vs2010_x64.sh \\',
-        '\tscripts/vs2010_x64_sln.sed \\',
-        '\tscripts/vs2010_x64_vcxproj.sed',
-        '',
         'EXTRA_DIST = \\',
-        '\t$(MSVSCPP_FILES) \\',
-        '\t$(SCRIPT_FILES)',
+        '\t$(MSVSCPP_FILES)',
         '',
         'MAINTAINERCLEANFILES = \\',
         '\tMakefile.in',

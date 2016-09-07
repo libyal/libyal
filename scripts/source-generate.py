@@ -9,6 +9,7 @@ import datetime
 import json
 import logging
 import os
+import stat
 import string
 import sys
 import time
@@ -47,12 +48,12 @@ class ProjectConfiguration(object):
     """Retrieves a value from the config parser.
 
     Args:
-      config_parser: the configuration parser (instance of ConfigParser).
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
+      config_parser (ConfigParser): configuration parser.
+      section_name (str): name of the section that contains the value.
+      value_name (name): name of the value.
 
     Returns:
-      An object containing the value.
+      object: value.
     """
     return json.loads(config_parser.get(section_name, value_name))
 
@@ -61,12 +62,13 @@ class ProjectConfiguration(object):
     """Retrieves an optional configuration value from the config parser.
 
     Args:
-      config_parser: the configuration parser (instance of ConfigParser).
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
+      config_parser (ConfigParser): configuration parser.
+      section_name (str): name of the section that contains the value.
+      value_name (name): name of the value.
+      default_value (Optional[object]): default value.
 
     Returns:
-      An object containing the value or the default vlaue if not available.
+      object: value or default value if not available.
     """
     try:
       return self._GetConfigValue(config_parser, section_name, value_name)
@@ -77,7 +79,7 @@ class ProjectConfiguration(object):
     """Reads the configuration from file.
 
     Args:
-      filename: a string containing the filename.
+      filename (str): path of the configuration file.
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
@@ -121,10 +123,10 @@ class ProjectConfiguration(object):
     """Retrieves the template mappings.
 
     Args:
-      authors_separator: optional string containing the authors separator.
+      authors_separator (Optional[str]): authors separator.
 
     Returns:
-      A dictionary containing the string template mappings.
+      dict[str, str]: string template mappings.
 
     Raises:
       ValueError: if the year of creation value is out of bounds.
@@ -182,7 +184,7 @@ class FunctionArgument(object):
     """Initializes a function argument.
 
     Args:
-      argument_string: a string containing the function argument.
+      argument_string (str): function argument.
     """
     super(FunctionArgument, self).__init__()
     self._strings = [argument_string]
@@ -191,7 +193,7 @@ class FunctionArgument(object):
     """Adds an argument string to the function argument.
 
     Args:
-      argument_string: a string containing the function argument.
+      argument_string (str): function argument.
     """
     self._strings.append(argument_string)
 
@@ -199,7 +201,7 @@ class FunctionArgument(object):
     """Copies the function argument to a string.
 
     Returns:
-      A string containing the function argument.
+      str: function argument.
     """
     number_of_strings = len(self._strings)
 
@@ -1087,20 +1089,47 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     # TODO: handle get_version header include order?
     # TODO: handle non-template files differently.
-    # TODO: generate test_api_functions.sh based on library public_functions?
     # TODO: yal_test_open_close.c handle file, handle, volume
-    # TODO: set x-bit for .sh scripts
 
     library_header = u'yal_test_{0:s}.h'.format(
         project_configuration.library_name)
+
+    test_api_functions = []
+    for function_name in (u'get_version', u'error'):
+      if (function_name == u'error' and
+          project_configuration.library_name == u'libcerror'):
+        continue
+
+      output_filename = u'{0:s}_test_{1:s}'.format(
+          project_configuration.library_name_suffix, function_name)
+      output_filename = os.path.join(u'tests', output_filename)
+      if os.path.exists(output_filename):
+        test_api_functions.append(function_name)
+
+    test_api_functions_with_input = []
+    for function_name in (u'open_close', u'seek', u'read'):
+      output_filename = u'{0:s}_test_{1:s}'.format(
+          project_configuration.library_name_suffix, function_name)
+      output_filename = os.path.join(u'tests', output_filename)
+      if os.path.exists(output_filename):
+        test_api_functions_with_input.append(function_name)
 
     template_mappings = project_configuration.GetTemplateMappings()
     template_mappings[u'library_public_types'] = u' '.join(
         project_configuration.library_public_types)
 
+    template_mappings[u'test_api_functions'] = u' '.join(test_api_functions)
+    template_mappings[u'test_api_functions_with_input'] = u' '.join(
+        test_api_functions_with_input)
+
     for directory_entry in os.listdir(self._template_directory):
       # Ignore yal_test_library.h in favor of yal_test_libyal.h
       if directory_entry == library_header:
+        continue
+
+      # For libcerror skip generating yal_test_error.c.
+      if (directory_entry == u'yal_test_error.c' and
+          project_configuration.library_name == u'libcerror'):
         continue
 
       template_filename = os.path.join(
@@ -1140,6 +1169,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
+
+      if output_filename.endswith(u'.sh'):
+        # Set x-bit for .sh scripts.
+        stat_info = os.stat(output_filename)
+        os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
 
 class ToolsSourceFileGenerator(SourceFileGenerator):
