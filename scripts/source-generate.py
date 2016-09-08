@@ -752,9 +752,14 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     library_debug_type_definitions = []
     library_type_definitions = []
     for type_name in include_header_file.types:
+      if len(type_name) <= 4:
+        alignment = u'\t\t'
+      else:
+        alignment = u'\t'
+
       library_debug_type_definitions.append(
-          u'typedef struct {0:s}_{1:s} {{}}\t{0:s}_{1:s}_t;'.format(
-              project_configuration.library_name, type_name))
+          u'typedef struct {0:s}_{1:s} {{}}{2:s}{0:s}_{1:s}_t;'.format(
+              project_configuration.library_name, type_name, alignment))
       library_type_definitions.append(
           u'typedef intptr_t {0:s}_{1:s}_t;'.format(
               project_configuration.library_name, type_name))
