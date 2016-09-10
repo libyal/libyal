@@ -749,13 +749,14 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
         library_path, u'{0:s}_types.h'.format(
             project_configuration.library_name))
 
+    longest_type_name = max(include_header_file.types, key=len)
+
     library_debug_type_definitions = []
     library_type_definitions = []
     for type_name in include_header_file.types:
-      if len(type_name) <= 4:
-        alignment = u'\t\t'
-      else:
-        alignment = u'\t'
+      alignment_length = len(longest_type_name) - len(type_name)
+      alignment_length, alignment_remainder = divmod(alignment_length, 4)
+      alignment = u'\t' * (1 + alignment_length)
 
       library_debug_type_definitions.append(
           u'typedef struct {0:s}_{1:s} {{}}{2:s}{0:s}_{1:s}_t;'.format(
@@ -1078,13 +1079,38 @@ class ScriptFileGenerator(SourceFileGenerator):
 class TestsSourceFileGenerator(SourceFileGenerator):
   """Class that generates the tests source files."""
 
+  def _SortIncludeHeaders(self, project_configuration, output_filename):
+    """Sorts the include headers.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = [line for line in file_object.readlines()]
+
+    include_header_start = b'#include "{0:s}_test_'.format(
+        project_configuration.library_name_suffix)
+
+    include_headers = []
+    in_include_headers = False
+
+    with open(output_filename, 'wb') as file_object:
+      for line in text_file.split(b'\n'):
+        if line.startswith(include_header_start):
+          include_headers.append(line)
+
+        elif in_include_headers:
+          file_object.writelines(sorted(include_headers))
+
+        else:
+          file_object.write(line)
+
   def Generate(self, project_configuration, output_writer):
     """Generates tests source files.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     tests_path = os.path.join(
         self._projects_directory, project_configuration.library_name, u'tests')
@@ -1092,7 +1118,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if not os.path.exists(tests_path):
       return
 
-    # TODO: handle get_version header include order?
     # TODO: handle non-template files differently.
     # TODO: yal_test_open_close.c handle file, handle, volume
 
@@ -1126,6 +1151,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     template_mappings[u'test_api_functions'] = u' '.join(test_api_functions)
     template_mappings[u'test_api_functions_with_input'] = u' '.join(
         test_api_functions_with_input)
+
+    template_mappings[u'alignment_padding'] = (
+        u' ' * len(project_configuration.library_name_suffix))
 
     for directory_entry in os.listdir(self._template_directory):
       # Ignore yal_test_library.h in favor of yal_test_libyal.h
@@ -1175,7 +1203,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-      if output_filename.endswith(u'.sh'):
+      if output_filename.endswith(u'.c'):
+        self._SortIncludeHeaders(output_filename)
+
+      elif output_filename.endswith(u'.sh'):
         # Set x-bit for .sh scripts.
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)

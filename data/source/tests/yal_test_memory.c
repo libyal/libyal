@@ -55,8 +55,8 @@ void *malloc(
 	if( ${library_name_suffix}_test_real_malloc == NULL )
 	{
 		${library_name_suffix}_test_real_malloc = dlsym(
-		                           RTLD_NEXT,
-		                           "malloc" );
+		                     ${alignment_padding}RTLD_NEXT,
+		                     ${alignment_padding}"malloc" );
 	}
 	if( ${library_name_suffix}_test_malloc_attempts_before_fail == 0 )
 	{
@@ -86,8 +86,8 @@ void *memcpy(
 	if( ${library_name_suffix}_test_real_memcpy == NULL )
 	{
 		${library_name_suffix}_test_real_memcpy = dlsym(
-		                           RTLD_NEXT,
-		                           "memcpy" );
+		                     ${alignment_padding}RTLD_NEXT,
+		                     ${alignment_padding}"memcpy" );
 	}
 	if( ${library_name_suffix}_test_memcpy_attempts_before_fail == 0 )
 	{
@@ -119,8 +119,8 @@ void *memset(
 	if( ${library_name_suffix}_test_real_memset == NULL )
 	{
 		${library_name_suffix}_test_real_memset = dlsym(
-		                           RTLD_NEXT,
-		                           "memset" );
+		                     ${alignment_padding}RTLD_NEXT,
+		                     ${alignment_padding}"memset" );
 	}
 	if( ${library_name_suffix}_test_memset_attempts_before_fail == 0 )
 	{
@@ -151,8 +151,8 @@ void *realloc(
 	if( ${library_name_suffix}_test_real_realloc == NULL )
 	{
 		${library_name_suffix}_test_real_realloc = dlsym(
-		                            RTLD_NEXT,
-		                            "realloc" );
+		                      ${alignment_padding}RTLD_NEXT,
+		                      ${alignment_padding}"realloc" );
 	}
 	if( ${library_name_suffix}_test_realloc_attempts_before_fail == 0 )
 	{
