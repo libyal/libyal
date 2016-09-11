@@ -621,6 +621,9 @@ class ProjectConfiguration(object):
       building_table_of_contents += (
           u'* [Using setup.py](Building#using-setuppy)\n')
 
+    development_table_of_contents += (
+      u'* [C/C++ development](C-development)\n')
+
     if self.supports_python:
         development_table_of_contents += (
           u'* [Python development](Python-development)\n')
@@ -910,8 +913,6 @@ class DevelopmentPageGenerator(WikiPageGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    # TODO: add support for c_cpp_also_see.txt, c_cpp_main_object.txt, c_cpp.txt
-
     template_mappings = project_configuration.GetTemplateMappings()
     self._GenerateSection(u'main.txt', template_mappings, output_writer)
 
@@ -925,6 +926,44 @@ class DevelopmentPageGenerator(WikiPageGenerator):
       bool: True if the generator will generate content.
     """
     return project_configuration.supports_python
+
+
+class CDevelopmentPageGenerator(WikiPageGenerator):
+  """Class that generates the "C/C++ development" wiki page."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates a wiki page.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
+    """
+    # TODO: add support for also_see.txt, main_object.txt
+
+    template_mappings = project_configuration.GetTemplateMappings()
+    self._GenerateSection(u'main.txt', template_mappings, output_writer)
+
+    if project_configuration.development_main_object:
+      if project_configuration.development_glob:
+        self._GenerateSection(
+            u'main_object_with_glob.txt', template_mappings, output_writer)
+
+      else:
+        self._GenerateSection(
+            u'main_object.txt', template_mappings, output_writer)
+
+    self._GenerateSection(u'also_see.txt', template_mappings, output_writer)
+
+  def HasContent(self, unused_project_configuration):
+    """Determines if the generator will generate content.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      bool: True if the generator will generate content.
+    """
+    return True
 
 
 class PythonDevelopmentPageGenerator(WikiPageGenerator):
@@ -1296,6 +1335,7 @@ def Main():
       (u'Development', DevelopmentPageGenerator),
       (u'Home', HomePageGenerator),
       (u'Mounting', MountingPageGenerator),
+      (u'C development', CDevelopmentPageGenerator),
       (u'Python development', PythonDevelopmentPageGenerator),
       (u'Testing', TestingPageGenerator),
       (u'Troubleshooting', TroubleshootingPageGenerator),

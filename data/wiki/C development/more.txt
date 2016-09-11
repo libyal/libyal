@@ -1,0 +1,12 @@
+### Get local path
+
+**TODO describe**
+
+${project_name}_${development_main_object}_get_utf8_local_path
+
+Internally ${project_name} uses both ASCII and Unicode (UTF-16 little-endian) strings, as stored in the LNK file.
+ASCII strings in a LNK file contain an extended ASCII string using the codepage of the system it was created on.
+The ${project_name}_set_ascii_codepage function allows to set the required codepage for reading and writing. The default codepage is Windows 1252.
+
+Unsupported extended characters are replaced to the Unicode replacement character (U+fffd).
+
