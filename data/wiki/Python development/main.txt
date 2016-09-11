@@ -1,0 +1,14 @@
+${project_name} comes with Python-bindings (${python_bindings_name}).
+
+Below are examples how use ${python_bindings_name}.
+To build ${python_bindings_name} see [Building](Building).
+
+# Examples
+
+## Get version
+```
+import ${python_bindings_name}
+
+${python_bindings_name}.get_version()
+```
+

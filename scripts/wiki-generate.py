@@ -329,6 +329,8 @@ class ProjectConfiguration(object):
 
     documentation = u''
 
+    development_table_of_contents = u''
+
     development_main_object_pre_open_python = u''
     development_main_object_post_open_python = u''
     development_main_object_post_open_file_object_python = u''
@@ -619,6 +621,10 @@ class ProjectConfiguration(object):
       building_table_of_contents += (
           u'* [Using setup.py](Building#using-setuppy)\n')
 
+    if self.supports_python:
+        development_table_of_contents += (
+          u'* [Python development](Python-development)\n')
+
     if self.development_main_object_pre_open_python:
       development_main_object_pre_open_python = u'{0:s}\n'.format(
           self.development_main_object_pre_open_python)
@@ -664,6 +670,8 @@ class ProjectConfiguration(object):
         u'tools_name': tools_name,
 
         u'documentation': documentation,
+
+        u'development_table_of_contents': development_table_of_contents,
 
         u'development_prefix': development_prefix,
         u'development_main_object': self.development_main_object,
@@ -796,9 +804,8 @@ class BuildingPageGenerator(WikiPageGenerator):
     """Generates a wiki page.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     template_mappings = project_configuration.GetTemplateMappings()
     self._GenerateSection(u'introduction.txt', template_mappings, output_writer)
@@ -885,11 +892,10 @@ class BuildingPageGenerator(WikiPageGenerator):
     """Determines if the generator will generate content.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      Boolean value to indicate the generator will generate content.
+      bool: True if the generator will generate content.
     """
     return True
 
@@ -901,54 +907,69 @@ class DevelopmentPageGenerator(WikiPageGenerator):
     """Generates a wiki page.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     # TODO: add support for c_cpp_also_see.txt, c_cpp_main_object.txt, c_cpp.txt
 
     template_mappings = project_configuration.GetTemplateMappings()
-    if project_configuration.supports_python:
-      self._GenerateSection(u'python.txt', template_mappings, output_writer)
-
-      if project_configuration.development_main_object:
-        if project_configuration.development_glob:
-          self._GenerateSection(
-              u'python_main_object_with_glob.txt', template_mappings,
-              output_writer)
-
-        else:
-          self._GenerateSection(
-              u'python_main_object.txt', template_mappings, output_writer)
-
-      if project_configuration.development_pytsk3:
-        if project_configuration.development_glob:
-          self._GenerateSection(
-              u'python_pytsk3_with_glob.txt', template_mappings,
-              output_writer)
-
-        else:
-          self._GenerateSection(
-              u'python_pytsk3.txt', template_mappings, output_writer)
-
-      # TODO: move main object out of this template and create on demand.
-      self._GenerateSection(
-          u'python_also_see.txt', template_mappings, output_writer)
+    self._GenerateSection(u'main.txt', template_mappings, output_writer)
 
   def HasContent(self, project_configuration):
     """Determines if the generator will generate content.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      Boolean value to indicate the generator will generate content.
+      bool: True if the generator will generate content.
     """
-    if project_configuration.supports_python:
-      return True
+    return project_configuration.supports_python
 
-    return False
+
+class PythonDevelopmentPageGenerator(WikiPageGenerator):
+  """Class that generates the "Python development" wiki page."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates a wiki page.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
+    """
+    template_mappings = project_configuration.GetTemplateMappings()
+    self._GenerateSection(u'main.txt', template_mappings, output_writer)
+
+    if project_configuration.development_main_object:
+      if project_configuration.development_glob:
+        self._GenerateSection(
+            u'main_object_with_glob.txt', template_mappings, output_writer)
+
+      else:
+        self._GenerateSection(
+            u'main_object.txt', template_mappings, output_writer)
+
+    if project_configuration.development_pytsk3:
+      if project_configuration.development_glob:
+        self._GenerateSection(
+            u'pytsk3_with_glob.txt', template_mappings, output_writer)
+
+      else:
+        self._GenerateSection(u'pytsk3.txt', template_mappings, output_writer)
+
+    # TODO: move main object out of this template and create on demand.
+    self._GenerateSection(u'also_see.txt', template_mappings, output_writer)
+
+  def HasContent(self, project_configuration):
+    """Determines if the generator will generate content.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      bool: True if the generator will generate content.
+    """
+    return project_configuration.supports_python
 
 
 class HomePageGenerator(WikiPageGenerator):
@@ -958,9 +979,8 @@ class HomePageGenerator(WikiPageGenerator):
     """Generates a wiki page.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     template_mappings = project_configuration.GetTemplateMappings()
     self._GenerateSection(u'introduction.txt', template_mappings, output_writer)
@@ -969,11 +989,10 @@ class HomePageGenerator(WikiPageGenerator):
     """Determines if the generator will generate content.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      Boolean value to indicate the generator will generate content.
+      bool: True if the generator will generate content.
     """
     return True
 
@@ -985,9 +1004,8 @@ class MountingPageGenerator(WikiPageGenerator):
     """Generates a wiki page.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     template_mappings = project_configuration.GetTemplateMappings()
     if (project_configuration.supports_dokan or
@@ -1042,11 +1060,10 @@ class MountingPageGenerator(WikiPageGenerator):
     """Determines if the generator will generate content.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      Boolean value to indicate the generator will generate content.
+      bool: True if the generator will generate content.
     """
     if (project_configuration.supports_dokan or
         project_configuration.supports_fuse):
@@ -1062,9 +1079,8 @@ class TestingPageGenerator(WikiPageGenerator):
     """Generates a wiki page.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     # TODO: implement testing page without input files.
     template_mappings = project_configuration.GetTemplateMappings()
@@ -1093,11 +1109,10 @@ class TestingPageGenerator(WikiPageGenerator):
     """Determines if the generator will generate content.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      Boolean value to indicate the generator will generate content.
+      bool: True if the generator will generate content.
     """
     if project_configuration.supports_tests:
       return True
@@ -1112,9 +1127,8 @@ class TroubleshootingPageGenerator(WikiPageGenerator):
     """Generates a wiki page.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     template_mappings = project_configuration.GetTemplateMappings()
     self._GenerateSection(
@@ -1136,11 +1150,10 @@ class TroubleshootingPageGenerator(WikiPageGenerator):
     """Determines if the generator will generate content.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      Boolean value to indicate the generator will generate content.
+      bool: True if the generator will generate content.
     """
     return True
 
@@ -1152,7 +1165,7 @@ class FileWriter(object):
     """Initializes an output writer.
 
     Args:
-      name: the name of the output.
+      name (str): name of the output.
     """
     super(FileWriter, self).__init__()
     self._file_object = None
@@ -1162,7 +1175,7 @@ class FileWriter(object):
     """Opens the output writer object.
 
     Returns:
-      A boolean containing True if successful or False if not.
+      bool: True if successful or False if not.
     """
     self._file_object = open(self._name, 'wb')
     return True
@@ -1175,7 +1188,7 @@ class FileWriter(object):
     """Writes the data to file.
 
     Args:
-      data: the data to write.
+      data (bytes): data to write.
     """
     self._file_object.write(data)
 
@@ -1191,7 +1204,7 @@ class StdoutWriter(object):
     """Opens the output writer object.
 
     Returns:
-      A boolean containing True if successful or False if not.
+      bool: True if successful or False if not.
     """
     return True
 
@@ -1203,7 +1216,7 @@ class StdoutWriter(object):
     """Writes the data to stdout (without the default trailing newline).
 
     Args:
-      data: the data to write.
+      data (bytes): data to write.
     """
     print(data, end=u'')
 
@@ -1212,7 +1225,7 @@ def Main():
   """The main program function.
 
   Returns:
-    A boolean containing True if successful or False if not.
+    bool: True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
       u'Generates wiki pages of the libyal libraries.'))
@@ -1283,6 +1296,7 @@ def Main():
       (u'Development', DevelopmentPageGenerator),
       (u'Home', HomePageGenerator),
       (u'Mounting', MountingPageGenerator),
+      (u'Python development', PythonDevelopmentPageGenerator),
       (u'Testing', TestingPageGenerator),
       (u'Troubleshooting', TroubleshootingPageGenerator),
   ]

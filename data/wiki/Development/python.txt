@@ -1,9 +1,0 @@
-# Python development
-
-## Get version
-```
-import ${python_bindings_name}
-
-${python_bindings_name}.get_version()
-```
-
