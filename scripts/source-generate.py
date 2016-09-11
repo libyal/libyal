@@ -220,23 +220,22 @@ class FunctionPrototype(object):
   """Class that defines a function prototype.
 
   Attributes:
-    have_bfio: a boolean value to indicate the function prototype is defined
-               if BFIO is defined.
-    have_debug_output: a boolean value to indicate the function prototype
-                       is defined if debug output is defined.
-    have_wide_character_type: a boolean value to indicate the function
-                              prototype is defined if the wide character
-                              type is defined.
-    name: a string containing the name.
-    return_type: a string containing the return type.
+    have_bfio (bool): True if the function prototype is defined if BFIO is
+        defined.
+    have_debug_output (bool): True if the function prototype is defined if
+        debug output is defined.
+    have_wide_character_type (bool): True if the function prototype is
+        defined if the wide character type is defined.
+    name (str): name.
+    return_type (str): return type.
   """
 
   def __init__(self, name, return_type):
     """Initializes a function prototype.
 
     Args:
-      name: a string containing the name.
-      return_type: a string containing the return type.
+      name (str): name.
+      return_type (str): return type.
     """
     super(FunctionPrototype, self).__init__()
     self._arguments = []
@@ -250,7 +249,7 @@ class FunctionPrototype(object):
     """Adds an argument to the function prototype.
 
     Args:
-      argument: a function argument object (instance of FunctionArgument).
+      argument (FunctionArgument): function argument.
     """
     self._arguments.append(argument)
 
@@ -258,7 +257,7 @@ class FunctionPrototype(object):
     """Adds an argument string to the function prototype.
 
     Args:
-      argument_string: a string containing the function argument.
+      argument_string (str): function argument.
     """
     function_argument = FunctionArgument(argument_string)
     self._arguments.append(function_argument)
@@ -267,7 +266,7 @@ class FunctionPrototype(object):
     """Copies the function prototype to a string.
 
     Returns:
-      A string containing the function prototype.
+      str: function prototype.
     """
     argument_strings = []
     for function_argument in self._arguments:
@@ -281,17 +280,17 @@ class LibraryIncludeHeaderFile(object):
   """Class that defines a library include header file.
 
   Attributes:
-    functions_per_sections: a dictionary of a list of function prototype objects
-                            (instances of FunctionPrototype) per section.
-    name: a string containing the name.
-    section_names: a list of strings containing the section names.
+    functions_per_sections (dict[str, list[FunctionPrototype]]): function
+        prototypes per section.
+    name (str): name.
+    section_names (list[str]): section names.
   """
 
   def __init__(self, path):
     """Initializes a library include header file.
 
     Args:
-      path: a string containing the path.
+      path (str): path library include header file.
     """
     super(LibraryIncludeHeaderFile, self).__init__()
     self._path = path
@@ -304,11 +303,10 @@ class LibraryIncludeHeaderFile(object):
     """Reads the functions from the include header file.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      A boolean to indicate the functions were read from the file.
+      bool: True if the functions were read from the file.
     """
     define_deprecated = b'{0:s}_DEPRECATED'.format(
         project_configuration.library_name.upper())
@@ -434,14 +432,14 @@ class LibraryMakefileAMFile(object):
   """Class that defines a library Makefile.am file.
 
   Attributes:
-    libraries: a list of strings containing the library names.
+    libraries (list[str]): library names.
   """
 
   def __init__(self, path):
     """Initializes a library Makefile.am file.
 
     Args:
-      path: a string containing the path.
+      path (str): path of the Makefile.am file.
     """
     super(LibraryMakefileAMFile, self).__init__()
     self._path = path
@@ -452,11 +450,10 @@ class LibraryMakefileAMFile(object):
     """Reads the libraries from the Makefile.am file.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      A boolean to indicate the libraries were read from the file.
+      bool: True if the libraries were read from the file.
     """
     library_libadd = b'{0:s}_la_LIBADD'.format(
         project_configuration.library_name)
@@ -485,14 +482,14 @@ class MainMakefileAMFile(object):
   """Class that defines a main Makefile.am file.
 
   Attributes:
-    libraries: a list of strings containing the library names.
+    libraries (list[str]): library names.
   """
 
   def __init__(self, path):
     """Initializes a main Makefile.am file.
 
     Args:
-      path: a string containing the path.
+      path (str): path of the Makefile.am file.
     """
     super(MainMakefileAMFile, self).__init__()
     self._path = path
@@ -503,11 +500,10 @@ class MainMakefileAMFile(object):
     """Reads the libraries from the Makefile.am file.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      A boolean to indicate the libraries were read from the file.
+      bool: True if the libraries were read from the file.
     """
     in_subdirs = False
     with open(self._path, 'rb') as file_object:
@@ -537,14 +533,14 @@ class TypesIncludeHeaderFile(object):
   """Class that defines a types include header file.
 
   Attributes:
-    types: a list of strings containing the section names.
+    types (list[str]): section names.
   """
 
   def __init__(self, path):
     """Initializes a types include header file.
 
     Args:
-      path: a string containing the path.
+      path (str): path of the include header file.
     """
     super(TypesIncludeHeaderFile, self).__init__()
     self._path = path
@@ -555,11 +551,10 @@ class TypesIncludeHeaderFile(object):
     """Reads the types from the include header file.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
+      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      A boolean to indicate the types were read from the file.
+      bool: True if the types were read from the file.
     """
     typedef = b'typedef intptr_t {0:s}_'.format(
         project_configuration.library_name)
@@ -580,10 +575,8 @@ class SourceFileGenerator(object):
     """Initialize the source file generator.
 
     Args:
-      projects_directory: a string containing the path of the projects
-                          directory.
-      template_directory: a string containing the path of the template
-                          directory.
+      projects_directory (str): path of the projects directory.
+      template_directory (str): path of the template directory.
     """
     super(SourceFileGenerator, self).__init__()
     self._projects_directory = projects_directory
@@ -595,12 +588,12 @@ class SourceFileGenerator(object):
     """Generates a section from template filename.
 
     Args:
-      template_filename: a string containing the name of the template file.
-      template_mpppings: a dictionary containing the template mappings, where
-                         the key maps to the name of a template variable.
-      output_writer: an output writer object (instance of OutputWriter).
-      output_filename: string containing the name of the output file.
-      access_mode: optional string containing the output file access mode.
+      template_filename (str): name of the template file.
+      template_mpppings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): name of the output file.
+      access_mode (Optional[str]): output file access mode.
     """
     template_string = self._ReadTemplateFile(template_filename)
     try:
@@ -617,11 +610,10 @@ class SourceFileGenerator(object):
     """Reads a template string from file.
 
     Args:
-      filename: string containing the name of the file containing
-                the template string.
+      filename (str): name of the file containing the template string.
 
     Returns:
-      A template string (instance of string.Template).
+      string.Template: template string.
     """
     file_object = open(filename, 'rb')
     file_data = file_object.read()
@@ -633,9 +625,8 @@ class SourceFileGenerator(object):
     """Generates the source file.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
 
 
@@ -646,9 +637,8 @@ class CommonSourceFileGenerator(SourceFileGenerator):
     """Generates common source files.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     template_mappings = project_configuration.GetTemplateMappings(
         authors_separator=u',\n *                          ')
@@ -673,9 +663,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """Generates configuration files.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     # TODO: generate spec file, what about Python versus non-Python?
     # TODO: generate dpkg files, what about Python versus non-Python?
@@ -715,9 +704,8 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     """Generates library source files.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     # TODO: add support for libuna/libuna_types.h
     # TODO: types.h alingment of debug types?
@@ -749,13 +737,25 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
         library_path, u'{0:s}_types.h'.format(
             project_configuration.library_name))
 
-    longest_type_name = max(include_header_file.types, key=len)
+    if include_header_file.types:
+      longest_type_name = max(include_header_file.types, key=len)
+      longest_library_debug_type_prefix = (
+          u'typedef struct {0:s}_{1:s} {{}}').format(
+              project_configuration.library_name, longest_type_name)
 
     library_debug_type_definitions = []
     library_type_definitions = []
     for type_name in include_header_file.types:
-      alignment_length = len(longest_type_name) - len(type_name)
-      alignment_length, alignment_remainder = divmod(alignment_length, 4)
+      library_debug_type_prefix = u'typedef struct {0:s}_{1:s} {{}}'.format(
+          project_configuration.library_name, type_name)
+
+      alignment_length = (
+          len(longest_library_debug_type_prefix) -
+          len(library_debug_type_prefix))
+      alignment_length, alignment_remainder = divmod(alignment_length, 8)
+      if alignment_remainder > 0:
+          alignment_length += 1
+
       alignment = u'\t' * (1 + alignment_length)
 
       library_debug_type_definitions.append(
@@ -830,9 +830,8 @@ class LibraryManPageGenerator(SourceFileGenerator):
     """Generates a library man page file (libyal.3).
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     # TODO: add support for libcthreads.h - messed up
     # TODO: add support for libcstring.h - macros
@@ -992,9 +991,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     """Generates Python module source files.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     python_module_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -1047,9 +1045,8 @@ class ScriptFileGenerator(SourceFileGenerator):
     """Generates script files.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     makefile_am_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -1095,12 +1092,15 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     in_include_headers = False
 
     with open(output_filename, 'wb') as file_object:
-      for line in text_file.split(b'\n'):
+      for line in lines:
         if line.startswith(include_header_start):
           include_headers.append(line)
+          in_include_headers = True
 
         elif in_include_headers:
           file_object.writelines(sorted(include_headers))
+          file_object.write(line)
+          in_include_headers = False
 
         else:
           file_object.write(line)
@@ -1204,7 +1204,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
       if output_filename.endswith(u'.c'):
-        self._SortIncludeHeaders(output_filename)
+        self._SortIncludeHeaders(project_configuration, output_filename)
 
       elif output_filename.endswith(u'.sh'):
         # Set x-bit for .sh scripts.
@@ -1219,9 +1219,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """Generates tools source files.
 
     Args:
-      project_configuration: the project configuration (instance of
-                             ProjectConfiguration).
-      output_writer: an output writer object (instance of OutputWriter).
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
     """
     tools_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
