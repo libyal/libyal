@@ -1,8 +1,12 @@
+**TODO: work in progress**
+
 # Return values
 
-Most of the functions return 1 if successful or -1 on error.
+Most of the API functions return 1 if successful or -1 on error.
+
 The close function is an exception since it returns 0 if successful or -1 on error.
-More details about the return values can be found in [${project_name}.h](https://github.com/libyal/${project_name}/blob/master/include/${project_name}.h.in)
+
+More details about the return values for each API function can be found in [${project_name}.h](https://github.com/libyal/${project_name}/blob/master/include/${project_name}.h.in)
 
 # Examples
 
