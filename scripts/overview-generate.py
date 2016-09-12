@@ -497,10 +497,10 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     """Formats the project names.
 
     Args:
-      project_names: a list of strings containing the project names.
+      project_names (list[str]): project names.
 
     Returns:
-      A string containing the formatted project names.
+      str: formatted project names.
     """
     lines = []
     for project_group in self._PROJECT_GROUPS:
@@ -522,14 +522,14 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     """Retrieves the versions per configuration file.
 
     Args:
-      projects: a list of project objects (instances of Project).
+      projects list[Project]: projects.
 
     Returns:
-      A dictionary containing the configuration files, their versions and the
-      the names of the project that use the specific version. In the form:
-      { configuration_name: {
-          configuration_version: [ project_name, ... ], ... },
-          ... }
+      dict[str, object]: configuration files, their versions and the the names
+          of the project that use the specific version. In the form:
+          { configuration_name: {
+              configuration_version: [ project_name, ... ], ... },
+              ... }
     """
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
@@ -579,13 +579,15 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     """Retrieves the versions per library.
 
     Args:
-      projects: a list of project objects (instances of Project).
-      category: a string containing the category.
+      projects list[Project]: projects.
+      category (str): category.
 
     Returns:
-      A dictionary containing the libraries, their versions and the
-      the names of the project that use the specific version. In the form:
-      { library_name: { libraray_version: [ project_name, ... ], ... }, ... }
+      dict[str, object]: libraries, their versions and the the names of the
+          project that use the specific version. In the form:
+          { library_name: {
+              library_version: [ project_name, ... ], ... },
+              ... }
     """
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
@@ -640,16 +642,18 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     return versions_per_library
 
-  def _GetVersionsPerM4Scripts(self, projects):
+  def _GetVersionsPerM4Script(self, projects):
     """Retrieves the versions per m4 script.
 
     Args:
-      projects: a list of project objects (instances of Project).
+      projects list[Project]: projects.
 
     Returns:
-      A dictionary containing the m4 scripts, their versions and the
-      the names of the project that use the specific version. In the form:
-      { m4_script_name: { m4_script_version: [ project_name, ... ], ... }, ... }
+      dict[str, object]: m4 scripts, their versions and the the names of the
+          project that use the specific version. In the form:
+          { m4_script_name: {
+              m4_script_version: [ project_name, ... ], ... },
+              ... }
     """
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
@@ -693,16 +697,18 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     return versions_per_m4_script
 
-  def _GetVersionsPerPyScripts(self, projects):
+  def _GetVersionsPerPyScript(self, projects):
     """Retrieves the versions per py script.
 
     Args:
-      projects: a list of project objects (instances of Project).
+      projects list[Project]: projects.
 
     Returns:
-      A dictionary containing the py scripts, their versions and the
-      the names of the project that use the specific version. In the form:
-      { py_script_name: { py_script_version: [ project_name, ... ], ... }, ... }
+      dict[str, object]: py scripts, their versions and the the names of the
+          project that use the specific version. In the form:
+          { py_script_name: {
+              py_script_version: [ project_name, ... ], ... },
+              ... }
     """
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
@@ -746,16 +752,18 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     return versions_per_py_script
 
-  def _GetVersionsPerScripts(self, projects):
+  def _GetVersionsPerScript(self, projects):
     """Retrieves the versions per script.
 
     Args:
-      projects: a list of project objects (instances of Project).
+      projects list[Project]: projects.
 
     Returns:
-      A dictionary containing the scripts, their versions and the
-      the names of the project that use the specific version. In the form:
-      { script_name: { script_version: [ project_name, ... ], ... }, ... }
+      dict[str, object]: scripts, their versions and the the names of the
+          project that use the specific version. In the form:
+          { script_name: {
+              script_version: [ project_name, ... ], ... },
+              ... }
     """
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
@@ -799,18 +807,88 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     return versions_per_script
 
+  def _GetVersionsPerTestScript(self, projects):
+    """Retrieves the versions per test script.
+
+    Args:
+      projects list[Project]: projects.
+
+    Returns:
+      dict[str, object]: scripts, their versions and the the names of the
+          project that use the specific version. In the form:
+          { script_name: {
+              script_version: [ project_name, ... ], ... },
+              ... }
+    """
+    projects_path = os.path.dirname(self._data_directory)
+    projects_path = os.path.dirname(projects_path)
+
+    # TODO: determine if Python glob supports "*.{ps1,sh}".
+    versions_per_script = {}
+    for extension in (u'ps1', 'sh'):
+      extension_glob = u'*.{0:s}'.format(extension)
+      script_glob = os.path.join(
+          self._data_directory, u'source', u'tests', extension_glob)
+      for path in glob.glob(script_glob):
+        script_file = ScriptFile(path)
+
+        version = None
+        logging.info(u'Reading: {0:s}'.format(path))
+        if script_file.ReadVersion():
+          version = script_file.version
+        if not version:
+          version = u'missing'
+
+        # TODO: handle yal and pyyal place holders.
+        if script_file.name in (
+           u'test_pyyal_set_ascii_codepage.sh',
+           u'test_yalexport.sh',
+           u'test_yalinfo.sh'):
+            continue
+
+        versions_per_script[script_file.name] = {version: []}
+
+    for project in projects:
+      project_test_scripts_path = os.path.join(
+          projects_path, project.name, u'tests')
+
+      for script in versions_per_script.keys():
+        # TODO: handle yal and pyyal place holders.
+
+        script_path = os.path.join(project_test_scripts_path, script)
+        if not os.path.exists(script_path):
+          continue
+
+        script_file = ScriptFile(script_path)
+
+        version = None
+        logging.info(u'Reading: {0:s}'.format(script_path))
+        if script_file.ReadVersion():
+          version = script_file.version
+        if not version:
+          version = u'missing'
+
+        projects_per_version = versions_per_script[script]
+        if version not in projects_per_version:
+          projects_per_version[version] = []
+
+        projects_per_version[version].append(project.name)
+
+    return versions_per_script
+
   def Generate(self, projects, output_writer):
     """Generates a wiki page.
 
     Args:
-      projects: a list of project objects (instances of Project).
-      output_writer: an output writer object (instance of OutputWriter).
+      projects list[Project]: projects.
+      output_writer (OutputWriter): output writer.
     """
     self._GenerateSection(u'introduction.txt', {}, output_writer)
 
     versions_per_configuration = self._GetVersionsPerConfigurationFile(projects)
-    versions_per_m4_script = self._GetVersionsPerM4Scripts(projects)
-    versions_per_script = self._GetVersionsPerScripts(projects)
+    versions_per_m4_script = self._GetVersionsPerM4Script(projects)
+    versions_per_script = self._GetVersionsPerScript(projects)
+    versions_per_test_script = self._GetVersionsPerTestScript(projects)
 
     projects_per_category = {}
     for project in projects:
@@ -850,6 +928,12 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       for project in projects_per_category[category]:
         table_of_contents.append(u'  * [{0:s}](Status#{0:s})'.format(
             project.name))
+
+    table_of_contents.append(u'* [Test scripts](Status#test-scripts)')
+    for script in sorted(versions_per_test_script.keys()):
+      script_reference = script.lower().replace(u'.', u'')
+      table_of_contents.append(u'  * [{0:s}](Status#{1:s})'.format(
+          script, script_reference))
 
     table_of_contents.append(u'')
     output_data = u'\n'.join(table_of_contents).encode(u'utf-8')
@@ -948,15 +1032,34 @@ class StatusWikiPageGenerator(WikiPageGenerator):
           self._GenerateSection(
               u'table_entry.txt', template_mappings, output_writer)
 
+    for script, projects_per_version in sorted(
+        versions_per_test_script.items()):
+      template_mappings = {
+          u'title': script,
+      }
+      self._GenerateSection(
+          u'table_header.txt', template_mappings, output_writer)
+
+      for version, project_names in sorted(
+          projects_per_version.items(), reverse=True):
+        project_names = self._FormatProjectNames(project_names)
+
+        template_mappings = {
+            u'project_names': project_names,
+            u'version': version,
+        }
+        self._GenerateSection(
+            u'table_entry.txt', template_mappings, output_writer)
+
 
 class FileWriter(object):
   """Class that defines a file output writer."""
 
   def __init__(self, name):
-    """Initialize the output writer.
+    """Initialize an output writer.
 
     Args:
-      name: the name of the output.
+      name (str): path of the output file.
     """
     super(FileWriter, self).__init__()
     self._file_object = None
@@ -966,7 +1069,7 @@ class FileWriter(object):
     """Opens the output writer object.
 
     Returns:
-      A boolean containing True if successful or False if not.
+      bool: True if successful or False if not.
     """
     self._file_object = open(self._name, 'wb')
     return True
@@ -979,7 +1082,7 @@ class FileWriter(object):
     """Writes the data to file.
 
     Args:
-      data: the data to write.
+      data (bytes): data to write.
     """
     self._file_object.write(data)
 
@@ -988,14 +1091,14 @@ class StdoutWriter(object):
   """Class that defines a stdout output writer."""
 
   def __init__(self):
-    """Initialize the output writer."""
+    """Initialize an output writer."""
     super(StdoutWriter, self).__init__()
 
   def Open(self):
     """Opens the output writer object.
 
     Returns:
-      A boolean containing True if successful or False if not.
+      bool: True if successful or False if not.
     """
     return True
 
@@ -1007,7 +1110,7 @@ class StdoutWriter(object):
     """Writes the data to stdout (without the default trailing newline).
 
     Args:
-      data: the data to write.
+      data (bytes): data to write.
     """
     print(data, end=u'')
 
@@ -1016,7 +1119,7 @@ def Main():
   """The main program function.
 
   Returns:
-    A boolean containing True if successful or False if not.
+    bool: True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
       u'Generates an overview of the libyal libraries.'))

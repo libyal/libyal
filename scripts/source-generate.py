@@ -753,7 +753,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           len(longest_library_debug_type_prefix) -
           len(library_debug_type_prefix))
       alignment_length, alignment_remainder = divmod(alignment_length, 8)
-      if alignment_remainder > 0:
+      if alignment_remainder >= 8:
           alignment_length += 1
 
       alignment = u'\t' * (1 + alignment_length)
