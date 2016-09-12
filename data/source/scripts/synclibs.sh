@@ -1,10 +1,10 @@
 #!/bin/sh
 # Script that synchronizes the local library dependencies
 #
-# Version: 20160320
+# Version: 20160912
 
 GIT_URL_PREFIX="https://github.com/libyal";
-LOCAL_LIBS="${local_libs_sh}";
+LOCAL_LIBS="${local_libs}";
 
 OLDIFS=$$IFS;
 IFS=" ";

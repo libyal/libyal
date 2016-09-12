@@ -22,20 +22,19 @@ class Project(object):
   """Class that defines a project.
 
   Attributes:
-    appveyor_identifier: a string containing the AppVeyor identifier.
-    category: a string containing the category.
-    description: a string containing the description.
-    display_name: a string containing the display name.
-    documentation_only: a boolean indicating if the project only contains
-                        documentation.
-    name: a string containing the name.
+    appveyor_identifier (str): AppVeyor identifier.
+    category (str): category.
+    description (str): description.
+    display_name (str): display name.
+    documentation_only (bool): True if the project only contains documentation.
+    name (str): name.
   """
 
   def __init__(self, name):
-    """Initializes a project object.
+    """Initializes a project.
 
     Args:
-      name: a string containing the name.
+      name (str): name.
     """
     super(Project, self).__init__()
     self.appveyor_identifier = None
@@ -60,11 +59,11 @@ class ProjectsReader(object):
     """Retrieves a value from the config parser.
 
     Args:
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
+      section_name (str): name of the section that contains the value.
+      value_name (str): name of the value.
 
     Returns:
-      An object containing the value.
+      object: value.
     """
     return json.loads(self._config_parser.get(section_name, value_name))
 
@@ -72,10 +71,10 @@ class ProjectsReader(object):
     """Reads the projects from file.
 
     Args:
-      filename: a string containing the filename.
+      filename (str): path of the projects file.
 
     Returns:
-      A list of project objects (instances of Project).
+      list[Project]: project.
     """
     self._config_parser.read([filename])
 
@@ -113,15 +112,15 @@ class ConfigureAcFile(object):
   """Class that defines a configure.ac file.
 
   Attributes:
-    name: a string containing the name.
-    version: a string containing the version.
+    name (str): name.
+    version (str): version.
   """
 
   def __init__(self, path):
     """Initializes a configure.ac file.
 
     Args:
-      path: a string containing the path.
+      path (str): path of the configure.ac file.
     """
     super(ConfigureAcFile, self).__init__()
     self._path = path
@@ -133,7 +132,7 @@ class ConfigureAcFile(object):
     """Reads the version from the configure.ac file.
 
     Returns:
-      A boolean to indicate the version was read from the file.
+      bool: True if the version was read from the file.
     """
     with open(self._path, 'rb') as file_object:
       line_count = 0
@@ -160,15 +159,15 @@ class DefinitionsHeaderFile(object):
   """Class that defines a definitions header file.
 
   Attributes:
-    name: a string containing the name.
-    version: a string containing the version.
+    name (str): name.
+    version (str): version.
   """
 
   def __init__(self, path):
     """Initializes a definitions header file.
 
     Args:
-      path: a string containing the path.
+      path (str): path of the definitions header file.
     """
     super(DefinitionsHeaderFile, self).__init__()
     self._path = path
@@ -180,7 +179,7 @@ class DefinitionsHeaderFile(object):
     """Reads the version from the definitions header file.
 
     Returns:
-      A boolean to indicate the version was read from the file.
+      bool: True if the version was read from the file.
     """
     library_name, _, _ = self.name.partition(u'_')
     version_line = b'#define {0:s}_VERSION'.format(library_name.upper())
@@ -204,15 +203,15 @@ class M4ScriptFile(object):
   """Class that defines a m4 script file.
 
   Attributes:
-    name: a string containing the name.
-    version: a string containing the version.
+    name (str): name.
+    version (str): version.
   """
 
   def __init__(self, path):
     """Initializes a m4 script file.
 
     Args:
-      path: a string containing the path.
+      path (str): path of the m4 script file.
     """
     super(M4ScriptFile, self).__init__()
     self._path = path
@@ -224,7 +223,7 @@ class M4ScriptFile(object):
     """Reads the version from the m4 script file.
 
     Returns:
-      A boolean to indicate the version was read from the file.
+      bool: True if the version was read from the file.
     """
     with open(self._path, 'rb') as file_object:
       for line in file_object.readlines():
@@ -243,15 +242,15 @@ class ScriptFile(object):
   """Class that defines a script or configuration file.
 
   Attributes:
-    name: a string containing the name.
-    version: a string containing the version.
+    name (str): name.
+    version (str): version.
   """
 
   def __init__(self, path):
-    """Initializes a script file.
+    """Initializes a script or configuration file.
 
     Args:
-      path: a string containing the path.
+      path (str): path of the script or configuration file.
     """
     super(ScriptFile, self).__init__()
     self._path = path
@@ -260,10 +259,10 @@ class ScriptFile(object):
     self.version = None
 
   def ReadVersion(self):
-    """Reads the version from the script file.
+    """Reads the version from the script or configuration file.
 
     Returns:
-      A boolean to indicate the version was read from the file.
+      bool: True if the version was read from the file.
     """
     with open(self._path, 'rb') as file_object:
       for line in file_object.readlines():

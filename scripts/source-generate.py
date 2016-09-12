@@ -1056,10 +1056,7 @@ class ScriptFileGenerator(SourceFileGenerator):
     makefile_am_file.ReadLibraries(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings()
-    template_mappings[u'local_libs_ps1'] = u','.join(
-        [u'"{0:s}"'.format(library) for library in makefile_am_file.libraries])
-    template_mappings[u'local_libs_sh'] = u' '.join(
-        makefile_am_file.libraries)
+    template_mappings[u'local_libs'] = u' '.join(makefile_am_file.libraries)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
@@ -1378,6 +1375,7 @@ def Main():
 
   source_files = [
       (u'common', CommonSourceFileGenerator),
+      (u'config', ConfigurationFileGenerator),
       (u'libyal', LibrarySourceFileGenerator),
       (u'pyyal', PythonModuleSourceFileGenerator),
       (u'scripts', ScriptFileGenerator),
@@ -1386,7 +1384,7 @@ def Main():
   ]
   if options.experimental:
     source_files.extend([
-        (u'config', ConfigurationFileGenerator),
+        (u'bogus', None),
     ])
 
   for page_name, page_generator_class in source_files:

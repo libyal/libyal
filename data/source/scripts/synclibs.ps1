@@ -1,9 +1,9 @@
 # Script that synchronizes the local library dependencies
 #
-# Version: 20160318
+# Version: 20160912
 
 $$GitUrlPrefix = "https://github.com/libyal"
-$$LocalLibs = @(${local_libs_ps1})
+$$LocalLibs = "${local_libs}" -split " "
 
 foreach ($${LocalLib} in $${LocalLibs})
 {
