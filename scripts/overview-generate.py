@@ -1032,6 +1032,9 @@ class StatusWikiPageGenerator(WikiPageGenerator):
           self._GenerateSection(
               u'table_entry.txt', template_mappings, output_writer)
 
+    template_mappings = {u'category_title': u'Test scripts'}
+    self._GenerateSection(u'category.txt', template_mappings, output_writer)
+
     for script, projects_per_version in sorted(
         versions_per_test_script.items()):
       template_mappings = {
