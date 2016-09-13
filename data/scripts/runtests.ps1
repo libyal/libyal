@@ -1,6 +1,6 @@
 # Script that runs the tests
 #
-# Version: 20160911
+# Version: 20160913
 
 $ExitSuccess = 0
 $ExitFailure = 1
@@ -46,6 +46,10 @@ Try
 			${InTests} = $TRUE
 		}
 	}
+}
+Catch
+{
+	${LastExitCode} = ${ExitFailure}
 }
 Finally
 {

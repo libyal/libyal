@@ -749,6 +749,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       library_debug_type_prefix = u'typedef struct {0:s}_{1:s} {{}}'.format(
           project_configuration.library_name, type_name)
 
+      # TODO: fix alignment of libcdatetime/libcdatetime_types.h
       alignment_length = (
           len(longest_library_debug_type_prefix) -
           len(library_debug_type_prefix))
@@ -1073,6 +1074,10 @@ class ScriptFileGenerator(SourceFileGenerator):
 class TestsSourceFileGenerator(SourceFileGenerator):
   """Class that generates the tests source files."""
 
+  _API_FUNCTION_NAMES = (
+      u'get_version', u'get_codepage', 'get_decimal_point', u'error',
+      u'notify', u'print', u'stream')
+
   def _SortIncludeHeaders(self, project_configuration, output_filename):
     """Sorts the include headers.
 
@@ -1122,7 +1127,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         project_configuration.library_name)
 
     test_api_functions = []
-    for function_name in (u'get_version', u'error'):
+    for function_name in self._API_FUNCTION_NAMES:
       if (function_name == u'error' and
           project_configuration.library_name == u'libcerror'):
         continue
