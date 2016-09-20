@@ -1,7 +1,7 @@
 #!/bin/bash
 # Library API type testing script
 #
-# Version: 20160327
+# Version: 20160918
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -9,11 +9,15 @@ EXIT_IGNORE=77;
 
 TEST_PREFIX=`dirname $${PWD}`;
 TEST_PREFIX=`basename $${TEST_PREFIX} | sed 's/^lib\([^-]*\).*$$/\1/'`;
-TEST_TYPES="${library_public_types}";
 
 TEST_PROFILE="lib$${TEST_PREFIX}";
+TEST_TYPES="${test_api_types}";
+TEST_TYPES_WITH_INPUT="${test_api_types_with_input}";
+OPTION_SETS="";
 
 TEST_TOOL_DIRECTORY=".";
+INPUT_DIRECTORY="input";
+INPUT_GLOB="*";
 
 test_api_type()
 {
@@ -43,6 +47,28 @@ test_api_type()
 	return $${RESULT};
 }
 
+test_api_type_with_input()
+{
+	local TEST_PROFILE=$$1;
+	local TEST_TYPE=$$2;
+	local OPTION_SETS=$$3;
+	local INPUT_DIRECTORY=$$4;
+	local INPUT_GLOB=$$5;
+
+	local TEST_TOOL="$${TEST_PREFIX}_test_$${TEST_TYPE}";
+	local TEST_EXECUTABLE="$${TEST_TOOL_DIRECTORY}/$${TEST_TOOL}";
+
+	if ! test -x "$${TEST_EXECUTABLE}";
+	then
+		TEST_EXECUTABLE="$${TEST_TOOL_DIRECTORY}/$${TEST_TOOL}.exe";
+	fi
+
+	run_test_on_input_directory "$${TEST_PROFILE}" "$${TEST_TYPE}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_DIRECTORY}" "$${INPUT_GLOB}";
+	local RESULT=$$?;
+
+	return $${RESULT};
+}
+
 if ! test -z $${SKIP_LIBRARY_TESTS};
 then
 	exit $${EXIT_IGNORE};
@@ -64,9 +90,27 @@ fi
 
 source $${TEST_RUNNER};
 
+RESULT=$${EXIT_IGNORE};
+
 for TEST_TYPE in $${TEST_TYPES};
 do
 	test_api_type "$${TEST_TYPE}";
+	RESULT=$$?;
+
+	if test $${RESULT} -ne $${EXIT_SUCCESS};
+	then
+		break;
+	fi
+done
+
+if test $${RESULT} -ne $${EXIT_SUCCESS} && test $${RESULT} -ne $${EXIT_IGNORE};
+then
+	exit $${RESULT};
+fi
+
+for TEST_TYPE in $${TEST_TYPES_WITH_INPUT};
+do
+	test_api_type_with_input "$${TEST_PROFILE}" "$${TEST_TYPE}" "$${OPTION_SETS}" "$${INPUT_DIRECTORY}" "$${INPUT_GLOB}";
 	RESULT=$$?;
 
 	if test $${RESULT} -ne $${EXIT_SUCCESS};

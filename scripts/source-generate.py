@@ -589,7 +589,7 @@ class SourceFileGenerator(object):
 
     Args:
       template_filename (str): name of the template file.
-      template_mpppings (dict[str, str]): template mappings, where the key
+      template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       output_writer (OutputWriter): output writer.
       output_filename (str): name of the output file.
@@ -677,9 +677,15 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     makefile_am_file.ReadLibraries(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings()
-    template_mappings[u'pc_libs_private'] = u' '.join([
-        u'@ax_{0:s}_pc_libs_private@'.format(library)
-        for library in makefile_am_file.libraries])
+    pc_libs_private = []
+    for library in makefile_am_file.libraries:
+      if library == u'libdl':
+        continue
+
+      pc_lib_private = u'@ax_{0:s}_pc_libs_private@'.format(library)
+      pc_libs_private.append(pc_lib_private)
+
+    template_mappings[u'pc_libs_private'] = u' '.join(pc_libs_private)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
@@ -1078,6 +1084,29 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       u'get_version', u'get_codepage', 'get_decimal_point', u'error',
       u'notify', u'print', u'stream')
 
+  def _GenerateAPITypeTests(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates an API type tests source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_filename = os.path.join(
+        self._template_directory, u'yal_test_type', u'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(
+        self._template_directory, u'yal_test_type', u'main.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
   def _SortIncludeHeaders(self, project_configuration, output_filename):
     """Sorts the include headers.
 
@@ -1147,8 +1176,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         test_api_functions_with_input.append(function_name)
 
     template_mappings = project_configuration.GetTemplateMappings()
-    template_mappings[u'library_public_types'] = u' '.join(
+    template_mappings[u'test_api_types'] = u' '.join(
         project_configuration.library_public_types)
+    template_mappings[u'test_api_types_with_input'] = u''
 
     template_mappings[u'test_api_functions'] = u' '.join(test_api_functions)
     template_mappings[u'test_api_functions_with_input'] = u' '.join(
@@ -1198,8 +1228,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       else:
         output_filename = directory_entry
 
+      if (output_filename.startswith(u'test_api_types.') and
+          project_configuration.library_public_types):
+        force_create = True
+      else:
+        force_create = False
+
       output_filename = os.path.join(u'tests', output_filename)
-      if not os.path.exists(output_filename):
+      if not force_create and not os.path.exists(output_filename):
         continue
 
       self._GenerateSection(
@@ -1212,6 +1248,22 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         # Set x-bit for .sh scripts.
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
+
+    # TODO: detect if library type takes input.
+
+    for library_type in project_configuration.library_public_types:
+      output_filename = u'{0:s}_test_{1:s}.c'.format(
+          project_configuration.library_name_suffix, library_type)
+      output_filename = os.path.join(u'tests', output_filename)
+
+      if os.path.exists(output_filename):
+        continue
+
+      template_mappings[u'library_type'] = library_type
+
+      self._GenerateAPITypeTests(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
 
 
 class ToolsSourceFileGenerator(SourceFileGenerator):
