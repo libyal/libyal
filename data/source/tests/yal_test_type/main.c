@@ -14,11 +14,11 @@ int main(
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
 	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library}_${library_type}_initialize",
+	 "${library_name}_${library_type}_initialize",
 	 ${library_name_suffix}_test_${library_type}_initialize() )
 
 	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library}_${library_type}_free",
+	 "${library_name}_${library_type}_free",
 	 ${library_name_suffix}_test_${library_type}_free() )
 
 	return( EXIT_SUCCESS );

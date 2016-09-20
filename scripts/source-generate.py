@@ -1084,6 +1084,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       u'get_version', u'get_codepage', 'get_decimal_point', u'error',
       u'notify', u'print', u'stream')
 
+  _API_FUNCTION_WITH_INPUT_NAMES = (
+      u'open_close', u'seek', u'read')
+
   def _GenerateAPITypeTests(
       self, project_configuration, template_mappings, output_writer,
       output_filename):
@@ -1161,15 +1164,15 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           project_configuration.library_name == u'libcerror'):
         continue
 
-      output_filename = u'{0:s}_test_{1:s}'.format(
+      output_filename = u'{0:s}_test_{1:s}.c'.format(
           project_configuration.library_name_suffix, function_name)
       output_filename = os.path.join(u'tests', output_filename)
       if os.path.exists(output_filename):
         test_api_functions.append(function_name)
 
     test_api_functions_with_input = []
-    for function_name in (u'open_close', u'seek', u'read'):
-      output_filename = u'{0:s}_test_{1:s}'.format(
+    for function_name in self._API_FUNCTION_WITH_INPUT_NAMES:
+      output_filename = u'{0:s}_test_{1:s}.c'.format(
           project_configuration.library_name_suffix, function_name)
       output_filename = os.path.join(u'tests', output_filename)
       if os.path.exists(output_filename):
