@@ -668,6 +668,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     # TODO: generate spec file, what about Python versus non-Python?
     # TODO: generate dpkg files, what about Python versus non-Python?
+    # TODO: appveyor.yml
+    #   - cmd: git clone https://github.com/joachimmetz/dokan.git && move dokan ..\
 
     makefile_am_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -1087,6 +1089,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   _API_FUNCTION_WITH_INPUT_NAMES = (
       u'open_close', u'seek', u'read')
 
+  _PYTHON_FUNCTION_NAMES = (
+      u'get_version')
+
+  _PYTHON_FUNCTION_WITH_INPUT_NAMES = (
+      u'open_close', u'seek', u'read')
+
   def _GenerateAPITypeTests(
       self, project_configuration, template_mappings, output_writer,
       output_filename):
@@ -1178,14 +1186,36 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if os.path.exists(output_filename):
         test_api_functions_with_input.append(function_name)
 
+    test_python_functions = []
+    for function_name in self._PYTHON_FUNCTION_NAMES:
+      output_filename = u'{0:s}_test_{1:s}.py'.format(
+          project_configuration.python_module_name, function_name)
+      output_filename = os.path.join(u'tests', output_filename)
+      if os.path.exists(output_filename):
+        test_python_functions.append(function_name)
+
+    test_python_functions_with_input = []
+    for function_name in self._PYTHON_FUNCTION_WITH_INPUT_NAMES:
+      output_filename = u'{0:s}_test_{1:s}.py'.format(
+          project_configuration.python_module_name, function_name)
+      output_filename = os.path.join(u'tests', output_filename)
+      if os.path.exists(output_filename):
+        test_python_functions_with_input.append(function_name)
+
     template_mappings = project_configuration.GetTemplateMappings()
-    template_mappings[u'test_api_types'] = u' '.join(
-        project_configuration.library_public_types)
-    template_mappings[u'test_api_types_with_input'] = u''
 
     template_mappings[u'test_api_functions'] = u' '.join(test_api_functions)
     template_mappings[u'test_api_functions_with_input'] = u' '.join(
         test_api_functions_with_input)
+
+    template_mappings[u'test_python_functions'] = u' '.join(
+        test_python_functions)
+    template_mappings[u'test_python_functions_with_input'] = u' '.join(
+        test_python_functions_with_input)
+
+    template_mappings[u'test_api_types'] = u' '.join(
+        project_configuration.library_public_types)
+    template_mappings[u'test_api_types_with_input'] = u''
 
     template_mappings[u'alignment_padding'] = (
         u' ' * len(project_configuration.library_name_suffix))
