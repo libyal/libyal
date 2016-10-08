@@ -6,7 +6,7 @@ int wmain(
      wchar_t * const argv[] )
 #else
 int main(
-     int argc ,
+     int argc,
      char * const argv[] )
 #endif
 {
@@ -45,7 +45,7 @@ int main(
 	 NULL );
 #endif
 
-	${test_to_run}
+${test_to_run}
 
 #if !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 )
 	if( source != NULL )
@@ -92,7 +92,7 @@ int main(
 	         "error",
 	         error );
 
-		${tests_to_run_with_input}
+${tests_to_run_with_input}
 
 		/* Clean up
 		 */

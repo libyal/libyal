@@ -13,7 +13,7 @@ int main(
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
-	${test_to_run}
+${test_to_run}
 
 	return( EXIT_SUCCESS );
 

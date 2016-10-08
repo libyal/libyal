@@ -7,8 +7,8 @@ int ${library_name_suffix}_test_${library_type}_open(
 	char narrow_source[ 256 ];
 
 	libcerror_error_t *error = NULL;
-	${library_name}_${library_type}_t *${library_type} = NULL;
-	int result = 0;
+	${library_name}_${library_type}_t *${library_type}      = NULL;
+	int result               = 0;
 
 	/* Initialize test
 	 */
@@ -121,8 +121,8 @@ int ${library_name_suffix}_test_${library_type}_open_wide(
 	wchar_t wide_source[ 256 ];
 
 	libcerror_error_t *error = NULL;
-	${library_name}_${library_type}_t *${library_type} = NULL;
-	int result = 0;
+	${library_name}_${library_type}_t *${library_type}      = NULL;
+	int result               = 0;
 
 	/* Initialize test
 	 */
