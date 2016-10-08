@@ -123,23 +123,23 @@ int main(
 
 	${library_name_suffix_upper_case}_TEST_RUN(
 	 "${library_name}_error_free",
-	 ${library_name_suffix}_test_error_free() )
+	 ${library_name_suffix}_test_error_free );
 
 	${library_name_suffix_upper_case}_TEST_RUN(
 	 "${library_name}_error_fprint",
-	 ${library_name_suffix}_test_error_fprint() )
+	 ${library_name_suffix}_test_error_fprint );
 
 	${library_name_suffix_upper_case}_TEST_RUN(
 	 "${library_name}_error_sprint",
-	 ${library_name_suffix}_test_error_sprint() )
+	 ${library_name_suffix}_test_error_sprint );
 
 	${library_name_suffix_upper_case}_TEST_RUN(
 	 "${library_name}_error_backtrace_fprint",
-	 ${library_name_suffix}_test_error_backtrace_fprint() )
+	 ${library_name_suffix}_test_error_backtrace_fprint );
 
 	${library_name_suffix_upper_case}_TEST_RUN(
 	 "${library_name}_error_backtrace_sprint",
-	 ${library_name_suffix}_test_error_backtrace_sprint() )
+	 ${library_name_suffix}_test_error_backtrace_sprint );
 
 	return( EXIT_SUCCESS );
 

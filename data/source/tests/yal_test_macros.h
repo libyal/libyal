@@ -121,7 +121,7 @@
 	}
 
 #define ${library_name_suffix_upper_case}_TEST_RUN( name, function ) \
-	if( function != 1 ) \
+	if( function() != 1 ) \
 	{ \
 		fprintf( stdout, "Unable to run test: %s\n", name ); \
 		goto on_error; \
@@ -137,6 +137,9 @@
 	}
 
 #endif /* !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 ) */
+
+#define ${library_name_suffix_upper_case}_TEST_FPRINT_ERROR( error ) \
+	libcerror_error_backtrace_fprint( error, stdout );
 
 #endif /* !defined( _${library_name_suffix_upper_case}_TEST_MACROS_H ) */
 

@@ -1,14 +1,25 @@
-${project_name} comes with Python-bindings (${python_bindings_name}).
+${project_name} comes with Python-bindings named ${python_bindings_name}.
 
 Below are examples how use ${python_bindings_name}.
+They assume you have a working version of ${python_bindings_name} on your system.
 To build ${python_bindings_name} see [Building](Building).
 
-# Examples
+# Import
 
-## Get version
+To be able to use ${python_bindings_name} in your Python scripts add the following import:
+
 ```
 import ${python_bindings_name}
+```
 
+# Get version
+
+The get_version() module function can be used to retrieve the version of the ${python_bindings_name}.
+
+```
 ${python_bindings_name}.get_version()
 ```
+
+This will return a textual string (Unicode) that contains the ${project_name} version.
+Since ${python_bindings_name} is a wrapper around ${project_name} it does not have a separate version.
 
