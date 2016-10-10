@@ -1,5 +1,5 @@
 /*
- * Library ${library_type} type testing program
+ * Library support functions test program
  *
  * Copyright (C) ${copyright}, ${tests_authors}
  *

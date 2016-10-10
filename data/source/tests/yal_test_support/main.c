@@ -12,7 +12,11 @@ int main(
 {
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
-${test_to_run}
+
+	${library_name_suffix_upper_case}_TEST_RUN(
+	 "${library_name}_get_version",
+	 ${library_name_suffix}_test_get_version );
+
 	return( EXIT_SUCCESS );
 
 on_error:

@@ -44,9 +44,7 @@ int main(
 	 stderr,
 	 NULL );
 #endif
-
 ${test_to_run}
-
 #if !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 )
 	if( source != NULL )
 	{
@@ -91,9 +89,7 @@ ${test_to_run}
 	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	         "error",
 	         error );
-
 ${tests_to_run_with_input}
-
 		/* Clean up
 		 */
 		result = ${library_name_suffix}_test_${library_type}_close_source(

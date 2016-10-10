@@ -105,19 +105,19 @@ int main(
 
 	${library_name_suffix_upper_case}_TEST_RUN(
 	 "${library_name}_notify_set_verbose",
-	 ${library_name_suffix}_test_notify_set_verbose() )
+	 ${library_name_suffix}_test_notify_set_verbose )
 
 	${library_name_suffix_upper_case}_TEST_RUN(
 	 "${library_name}_notify_set_stream",
-	 ${library_name_suffix}_test_notify_set_stream() )
+	 ${library_name_suffix}_test_notify_set_stream )
 
 	${library_name_suffix_upper_case}_TEST_RUN(
 	 "${library_name}_notify_stream_open",
-	 ${library_name_suffix}_test_notify_stream_open() )
+	 ${library_name_suffix}_test_notify_stream_open )
 
 	${library_name_suffix_upper_case}_TEST_RUN(
 	 "${library_name}_notify_stream_close",
-	 ${library_name_suffix}_test_notify_stream_close() )
+	 ${library_name_suffix}_test_notify_stream_close )
 
 	return( EXIT_SUCCESS );
 
