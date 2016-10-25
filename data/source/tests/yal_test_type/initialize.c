@@ -95,6 +95,13 @@ int ${library_name_suffix}_test_${library_type}_initialize(
 	if( ${library_name_suffix}_test_malloc_attempts_before_fail != -1 )
 	{
 		${library_name_suffix}_test_malloc_attempts_before_fail = -1;
+
+		if( ${library_type} != NULL )
+		{
+			${library_name}_${library_type}_free(
+			 &${library_type},
+			 NULL );
+		}
 	}
 	else
 	{
@@ -125,6 +132,13 @@ int ${library_name_suffix}_test_${library_type}_initialize(
 	if( ${library_name_suffix}_test_memset_attempts_before_fail != -1 )
 	{
 		${library_name_suffix}_test_memset_attempts_before_fail = -1;
+
+		if( ${library_type} != NULL )
+		{
+			${library_name}_${library_type}_free(
+			 &${library_type},
+			 NULL );
+		}
 	}
 	else
 	{

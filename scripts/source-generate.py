@@ -1214,6 +1214,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
+    if (library_type == u'error' and
+        project_configuration.library_name == u'libcerror'):
+      return
+
     template_mappings[u'library_type'] = library_type
 
     function_name = u'{0:s}_{1:s}_open'.format(
@@ -1263,14 +1267,26 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       tests_to_run.append(test_to_run)
 
     if type_with_input:
-      for function_name in include_header_file.functions_per_name.keys():
-        name_prefix = u'{0:s}_{1:s}_get_number_of_'.format(
-            project_configuration.library_name, library_type)
-        name_prefix_length = len(name_prefix)
+      name_prefix = u'{0:s}_{1:s}_'.format(
+          project_configuration.library_name, library_type)
+      name_prefix_length = len(name_prefix)
 
-        if function_name.startswith(name_prefix):
+      get_number_of_prefix = u'{0:s}_{1:s}_get_number_of_'.format(
+          project_configuration.library_name, library_type)
+      get_number_of_prefix_prefix_length = len(get_number_of_prefix_prefix)
+
+      for function_name in include_header_file.functions_per_name.keys():
+        if not function_name.startswith(name_prefix):
+          continue
+
+        type_function = function_name[name_prefix_length:]
+        if function_name in (u'open', u'get_ascii_codepage'):
+          continue
+
+        if function_name.startswith(get_number_of_prefix_prefix):
           template_filename = u'get_number_of_value.c'
-          template_mappings[u'value_name'] = function_name[name_prefix_length:]
+          template_mappings[u'value_name'] = function_name[
+              get_number_of_prefix_prefix_length:]
         else:
           continue
 
