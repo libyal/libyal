@@ -1273,7 +1273,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       get_number_of_prefix = u'{0:s}_{1:s}_get_number_of_'.format(
           project_configuration.library_name, library_type)
-      get_number_of_prefix_prefix_length = len(get_number_of_prefix_prefix)
+      get_number_of_prefix_length = len(get_number_of_prefix)
 
       for function_name in include_header_file.functions_per_name.keys():
         if not function_name.startswith(name_prefix):
@@ -1283,10 +1283,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         if function_name in (u'open', u'get_ascii_codepage'):
           continue
 
-        if function_name.startswith(get_number_of_prefix_prefix):
+        if function_name.startswith(get_number_of_prefix):
           template_filename = u'get_number_of_value.c'
           template_mappings[u'value_name'] = function_name[
-              get_number_of_prefix_prefix_length:]
+              get_number_of_prefix_length:]
         else:
           continue
 
