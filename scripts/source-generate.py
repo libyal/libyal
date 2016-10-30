@@ -713,6 +713,47 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
 
+class IncludeSourceFileGenerator(SourceFileGenerator):
+  """Class that generates the include source files."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates include source files.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
+    """
+    template_mappings = project_configuration.GetTemplateMappings(
+        authors_separator=u',\n *                          ')
+
+    for directory_entry in os.listdir(self._template_directory):
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      output_filename = os.path.join(u'include', directory_entry)
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
+    template_directory = os.path.join(self._template_directory, u'libyal')
+    for directory_entry in os.listdir(template_directory):
+      template_filename = os.path.join(template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      output_filename = os.path.join(
+          u'include', project_configuration.library_name, directory_entry)
+
+      if not os.path.exists(output_filename) and not directory_entry in (
+          u'definitions.h.in', u'extern.h', u'features.h.in', u'types.h.in'):
+        continue
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
+
 class LibrarySourceFileGenerator(SourceFileGenerator):
   """Class that generates the library source files."""
 
@@ -790,7 +831,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
         library_type_definitions)
 
     for directory_entry in os.listdir(self._template_directory):
-      if not directory_entry.startswith(u'libyal_'):
+      if not directory_entry.startswith(u'libyal'):
         continue
 
       if directory_entry.endswith(u'_{0:s}.h'.format(
@@ -828,12 +869,14 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      output_filename = u'{0:s}_{1:s}'.format(
-          project_configuration.library_name, directory_entry[7:])
+      output_filename = u'{0:s}{1:s}'.format(
+          project_configuration.library_name, directory_entry[6:])
       output_filename = os.path.join(
           project_configuration.library_name, output_filename)
 
-      if not os.path.exists(output_filename):
+      if not os.path.exists(output_filename) and not directory_entry in (
+          u'libyal.c', u'libyal_extern.h', u'libyal.rc.in', u'libyal_support.c',
+          u'libyal_support.h', u'libyal_unused.h'):
         continue
 
       self._GenerateSection(
@@ -1723,6 +1766,7 @@ def Main():
     projects_directory = os.path.dirname(libyal_directory)
 
   # TODO: generate more source files.
+  # AUTHORS, NEWS
   # configure.ac
   # include headers
   # yal.net files
@@ -1730,6 +1774,7 @@ def Main():
   source_files = [
       (u'common', CommonSourceFileGenerator),
       (u'config', ConfigurationFileGenerator),
+      (u'include', IncludeSourceFileGenerator),
       (u'libyal', LibrarySourceFileGenerator),
       (u'pyyal', PythonModuleSourceFileGenerator),
       (u'scripts', ScriptFileGenerator),
@@ -1755,6 +1800,8 @@ def Main():
     source_file.Generate(project_configuration, output_writer)
 
   # TODO: add support for Unicode templates.
+
+  # TODO: generate manuals/Makefile.am
 
   source_files = [
       (u'libyal.3', LibraryManPageGenerator),
