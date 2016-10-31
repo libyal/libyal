@@ -22,29 +22,3 @@
 #if !defined( _${library_name_upper_case}_FEATURES_H )
 #define _${library_name_upper_case}_FEATURES_H
 
-/* The ${library_name} type support features
- */
-#if defined( HAVE_WIDE_CHARACTER_TYPE ) || @HAVE_WIDE_CHARACTER_TYPE@
-#define ${library_name_upper_case}_HAVE_WIDE_CHARACTER_TYPE	1
-#endif
-
-#if defined( WINAPI ) || @HAVE_MULTI_THREAD_SUPPORT@
-#define ${library_name_upper_case}_HAVE_MULTI_THREAD_SUPPORT	1
-#endif
-
-#if defined( HAVE_LIBBFIO ) || ( !defined( WINAPI ) && @HAVE_LIBBFIO@ )
-#define ${library_name_upper_case}_HAVE_BFIO			1
-#endif
-
-#if !defined( ${library_name_upper_case}_DEPRECATED )
-#if defined( __GNUC__ ) && __GNUC__ >= 3
-#define ${library_name_upper_case}_DEPRECATED	__attribute__ ((__deprecated__))
-#elif defined( _MSC_VER )
-#define ${library_name_upper_case}_DEPRECATED	__declspec(deprecated)
-#else
-#define ${library_name_upper_case}_DEPRECATED
-#endif
-#endif
-
-#endif /* !defined( _${library_name_upper_case}_FEATURES_H ) */
-

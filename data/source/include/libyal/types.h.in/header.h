@@ -199,13 +199,3 @@ typedef int64_t off64_t;
 
 #endif
 
-/* The following type definitions hide internal data structures
- */
-typedef intptr_t ${library_name}_file_t;
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* !defined( _${library_name_upper_case}_TYPES_H ) */
-
