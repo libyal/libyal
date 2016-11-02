@@ -4003,7 +4003,7 @@ class LibyalSourceVSSolution(VSSolution):
 
       if (not directory_entry.startswith('lib') and
           not directory_entry.startswith('py') and
-          not directory_entry == 'tests' and
+          directory_entry not in ('src', 'tests') and
           not directory_entry.endswith('.net') and
           not directory_entry.endswith('tools')):
         continue
@@ -4020,7 +4020,8 @@ class LibyalSourceVSSolution(VSSolution):
         logging.warning(u'No such file: {0:s}.'.format(makefile_am_path))
         continue
 
-      if directory_entry == 'tests' or directory_entry.endswith('tools'):
+      if (directory_entry in ('src', 'tests') or
+          directory_entry.endswith('tools')):
         project_names = self._ReadMakefilePrograms(makefile_am_path)
       else:
         project_names = [directory_entry]
