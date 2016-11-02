@@ -2,12 +2,7 @@ include_HEADERS = \
 	${library_name}.h
 
 pkginclude_HEADERS = \
-	${library_name}/codepage.h \
-	${library_name}/definitions.h \
-	${library_name}/error.h \
-	${library_name}/extern.h \
-	${library_name}/features.h \
-	${library_name}/types.h
+${pkginclude_headers}
 
 EXTRA_DIST = \
 	${library_name}.h.in \

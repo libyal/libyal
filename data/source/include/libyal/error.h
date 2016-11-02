@@ -32,14 +32,14 @@ typedef intptr_t ${library_name}_error_t;
  */
 enum ${library_name_upper_case}_ERROR_DOMAINS
 {
-	${library_name_upper_case}_ERROR_DOMAIN_ARGUMENTS			= (int) 'a',
-	${library_name_upper_case}_ERROR_DOMAIN_CONVERSION			= (int) 'c',
+	${library_name_upper_case}_ERROR_DOMAIN_ARGUMENTS		= (int) 'a',
+	${library_name_upper_case}_ERROR_DOMAIN_CONVERSION		= (int) 'c',
 	${library_name_upper_case}_ERROR_DOMAIN_COMPRESSION		= (int) 'C',
-	${library_name_upper_case}_ERROR_DOMAIN_IO				= (int) 'I',
+	${library_name_upper_case}_ERROR_DOMAIN_IO			= (int) 'I',
 	${library_name_upper_case}_ERROR_DOMAIN_INPUT			= (int) 'i',
 	${library_name_upper_case}_ERROR_DOMAIN_MEMORY			= (int) 'm',
 	${library_name_upper_case}_ERROR_DOMAIN_OUTPUT			= (int) 'o',
-	${library_name_upper_case}_ERROR_DOMAIN_RUNTIME			= (int) 'r',
+	${library_name_upper_case}_ERROR_DOMAIN_RUNTIME			= (int) 'r'
 };
 
 /* The argument error codes
@@ -47,7 +47,7 @@ enum ${library_name_upper_case}_ERROR_DOMAINS
  */
 enum ${library_name_upper_case}_ARGUMENT_ERROR
 {
-	${library_name_upper_case}_ARGUMENT_ERROR_GENERIC			= 0,
+	${library_name_upper_case}_ARGUMENT_ERROR_GENERIC		= 0,
 
 	/* The argument contains an invalid value
 	 */
@@ -68,11 +68,11 @@ enum ${library_name_upper_case}_ARGUMENT_ERROR
 
 	/* The argument contains a value that is too small
 	 */
-	${library_name_upper_case}_ARGUMENT_ERROR_VALUE_TOO_SMALL		= 5,
+	${library_name_upper_case}_ARGUMENT_ERROR_VALUE_TOO_SMALL	= 5,
 
 	/* The argument contains a value that is too large
 	 */
-	${library_name_upper_case}_ARGUMENT_ERROR_VALUE_TOO_LARGE		= 6,
+	${library_name_upper_case}_ARGUMENT_ERROR_VALUE_TOO_LARGE	= 6,
 
 	/* The argument contains a value that is out of bounds
 	 */
@@ -96,11 +96,11 @@ enum ${library_name_upper_case}_CONVERSION_ERROR
 
 	/* The conversion failed on the input
 	 */
-	${library_name_upper_case}_CONVERSION_ERROR_INPUT_FAILED		= 1,
+	${library_name_upper_case}_CONVERSION_ERROR_INPUT_FAILED	= 1,
 
 	/* The conversion failed on the output
 	 */
-	${library_name_upper_case}_CONVERSION_ERROR_OUTPUT_FAILED		= 2
+	${library_name_upper_case}_CONVERSION_ERROR_OUTPUT_FAILED	= 2
 };
 
 /* The compression error codes
@@ -132,7 +132,7 @@ enum ${library_name_upper_case}_IO_ERROR
 
 	/* The close failed
 	 */
-	${library_name_upper_case}_IO_ERROR_CLOSE_FAILED			= 2,
+	${library_name_upper_case}_IO_ERROR_CLOSE_FAILED		= 2,
 
 	/* The seek failed
 	 */
@@ -144,11 +144,11 @@ enum ${library_name_upper_case}_IO_ERROR
 
 	/* The write failed
 	 */
-	${library_name_upper_case}_IO_ERROR_WRITE_FAILED			= 5,
+	${library_name_upper_case}_IO_ERROR_WRITE_FAILED		= 5,
 
 	/* Access denied
 	 */
-	${library_name_upper_case}_IO_ERROR_ACCESS_DENIED			= 6,
+	${library_name_upper_case}_IO_ERROR_ACCESS_DENIED		= 6,
 
 	/* The resource is invalid i.e. a missing file
 	 */
@@ -156,11 +156,11 @@ enum ${library_name_upper_case}_IO_ERROR
 
 	/* The ioctl failed
 	 */
-	${library_name_upper_case}_IO_ERROR_IOCTL_FAILED			= 8,
+	${library_name_upper_case}_IO_ERROR_IOCTL_FAILED		= 8,
 
 	/* The unlink failed
 	 */
-	${library_name_upper_case}_IO_ERROR_UNLINK_FAILED			= 9
+	${library_name_upper_case}_IO_ERROR_UNLINK_FAILED		= 9
 };
 
 /* The input error codes
@@ -176,11 +176,11 @@ enum ${library_name_upper_case}_INPUT_ERROR
 
 	/* The input contains an unsupported signature
 	 */
-	${library_name_upper_case}_INPUT_ERROR_SIGNATURE_MISMATCH		= 2,
+	${library_name_upper_case}_INPUT_ERROR_SIGNATURE_MISMATCH	= 2,
 
 	/* A checksum in the input did not match
 	 */
-	${library_name_upper_case}_INPUT_ERROR_CHECKSUM_MISMATCH		= 3,
+	${library_name_upper_case}_INPUT_ERROR_CHECKSUM_MISMATCH	= 3,
 
 	/* A value in the input did not match a previously
 	 * read value or calculated value
@@ -205,7 +205,18 @@ enum ${library_name_upper_case}_MEMORY_ERROR
 
 	/* The memory failed to be set
 	 */
-	${library_name_upper_case}_MEMORY_ERROR_SET_FAILED			= 3
+	${library_name_upper_case}_MEMORY_ERROR_SET_FAILED		= 3
+};
+
+/* The output error codes
+ */
+enum ${library_name_upper_case}_OUTPUT_ERROR
+{
+	${library_name_upper_case}_OUTPUT_ERROR_GENERIC			= 0,
+
+	/* There is insuficient space to write the output
+	 */
+	${library_name_upper_case}_OUTPUT_ERROR_INSUFFICIENT_SPACE	= 1
 };
 
 /* The runtime error codes
@@ -213,7 +224,7 @@ enum ${library_name_upper_case}_MEMORY_ERROR
  */
 enum ${library_name_upper_case}_RUNTIME_ERROR
 {
-	${library_name_upper_case}_RUNTIME_ERROR_GENERIC			= 0,
+	${library_name_upper_case}_RUNTIME_ERROR_GENERIC		= 0,
 
 	/* The value is missing
 	 */
@@ -221,11 +232,11 @@ enum ${library_name_upper_case}_RUNTIME_ERROR
 
 	/* The value was already set
 	 */
-	${library_name_upper_case}_RUNTIME_ERROR_VALUE_ALREADY_SET		= 2,
+	${library_name_upper_case}_RUNTIME_ERROR_VALUE_ALREADY_SET	= 2,
 
 	/* The creation and/or initialization of an internal structure failed
 	 */
-	${library_name_upper_case}_RUNTIME_ERROR_INITIALIZE_FAILED		= 3,
+	${library_name_upper_case}_RUNTIME_ERROR_INITIALIZE_FAILED	= 3,
 
 	/* The resize of an internal structure failed
 	 */
@@ -233,7 +244,7 @@ enum ${library_name_upper_case}_RUNTIME_ERROR
 
 	/* The free and/or finalization of an internal structure failed
 	 */
-	${library_name_upper_case}_RUNTIME_ERROR_FINALIZE_FAILED		= 5,
+	${library_name_upper_case}_RUNTIME_ERROR_FINALIZE_FAILED	= 5,
 
 	/* The value could not be determined
 	 */
@@ -269,22 +280,11 @@ enum ${library_name_upper_case}_RUNTIME_ERROR
 
 	/* The value is unsupported
 	 */
-	${library_name_upper_case}_RUNTIME_ERROR_UNSUPPORTED_VALUE		= 14,
+	${library_name_upper_case}_RUNTIME_ERROR_UNSUPPORTED_VALUE	= 14,
 
 	/* An abort was requested
 	 */
-	${library_name_upper_case}_RUNTIME_ERROR_ABORT_REQUESTED		= 15
-};
-
-/* The output error codes
- */
-enum ${library_name_upper_case}_OUTPUT_ERROR
-{
-	${library_name_upper_case}_OUTPUT_ERROR_GENERIC			= 0,
-
-	/* There is insuficient space to write the output
-	 */
-	${library_name_upper_case}_OUTPUT_ERROR_INSUFFICIENT_SPACE		= 1
+	${library_name_upper_case}_RUNTIME_ERROR_ABORT_REQUESTED	= 15
 };
 
 #endif /* !defined( _${library_name_upper_case}_ERROR_H ) */

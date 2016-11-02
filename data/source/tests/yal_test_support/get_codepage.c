@@ -1,4 +1,4 @@
-/* Tests the ${library_name_get_codepage function
+/* Tests the ${library_name}_get_codepage function
  * Returns 1 if successful or 0 if not
  */
 int ${library_name_suffix}_test_get_codepage(
@@ -8,7 +8,7 @@ int ${library_name_suffix}_test_get_codepage(
 	int codepage             = 0;
 	int result               = 0;
 
-	result = ${library_name_get_codepage(
+	result = ${library_name}_get_codepage(
 	          &codepage,
 	          &error );
 
@@ -23,7 +23,7 @@ int ${library_name_suffix}_test_get_codepage(
 
 	/* Test error cases
 	 */
-	result = ${library_name_get_codepage(
+	result = ${library_name}_get_codepage(
 	          NULL,
 	          &error );
 

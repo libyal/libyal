@@ -61,7 +61,10 @@ int main(
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
-		/* TODO add test for ${library_name}_check_file_signature_wide */
+		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
+		 "${library_name}_check_file_signature_wide",
+		 ${library_name_suffix}_test_check_file_signature_wide,
+		 source );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 

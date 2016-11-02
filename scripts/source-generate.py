@@ -790,7 +790,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
         self._template_directory, u'libyal', u'types.h.in')
 
     library_type_definitions = []
-    for type_name in project_configuration.library_public_types:
+    for type_name in sorted(project_configuration.library_public_types):
       library_type_definition = u'typedef intptr_t {0:s}_{1:s}_t;'.format(
           project_configuration.library_name, type_name)
       library_type_definitions.append(library_type_definition)
@@ -813,6 +813,42 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+  def _VerticalAlignEqualSigns(self, project_configuration, output_filename):
+    """Vertically aligns the equal signs.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = [line for line in file_object.readlines()]
+
+    alignment_offset = 0
+    for line in lines:
+      if u'=' not in line:
+        continue
+
+      formatted_line = line.replace(u'\t', ' ' * 8)
+      equal_sign_offset = formatted_line.rfind(u'=')
+      alignment_offset = max(alignment_offset, equal_sign_offset - 1)
+
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        if u'=' in line:
+          prefix, _, suffix = line.rpartition(u'=')
+          prefix = prefix.rstrip()
+          formatted_prefix = prefix.replace(u'\t', ' ' * 8)
+
+          alignment_size = (alignment_offset - len(formatted_prefix))
+          alignment_size, remainder = divmod(alignment_size, 8)
+          if remainder > 4:
+            alignment_size += 1
+
+          alignment = u'\t' * alignment_size
+
+          line = u'{0:s}{1:s}={2:s}'.format(prefix, alignment, suffix)
+
+        file_object.write(line)
+
   def Generate(self, project_configuration, output_writer):
     """Generates include source files.
 
@@ -820,22 +856,39 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    include_header_path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
+
+    include_header_file = LibraryIncludeHeaderFile(include_header_path)
+    include_header_file.ReadFunctions(project_configuration)
+
+    pkginclude_headers = [
+        u'\t{0:s}/definitions.h \\'.format(project_configuration.library_name),
+        u'\t{0:s}/error.h \\'.format(project_configuration.library_name),
+        u'\t{0:s}/extern.h \\'.format(project_configuration.library_name),
+        u'\t{0:s}/features.h \\'.format(project_configuration.library_name),
+        u'\t{0:s}/types.h'.format(project_configuration.library_name)]
+
+    function_name = u'{0:s}_get_codepage'.format(
+        project_configuration.library_name)
+    if function_name in include_header_file.functions_per_name:
+      pkginclude_header = u'\t{0:s}/codepage.h \\'.format(
+          project_configuration.library_name)
+      pkginclude_headers.append(pkginclude_header)
+
+    pkginclude_headers = sorted(pkginclude_headers)
+
     template_mappings = project_configuration.GetTemplateMappings(
         authors_separator=u',\n *                          ')
+    template_mappings[u'pkginclude_headers'] = u'\n'.join(pkginclude_headers)
 
-    # TODO: conditional include/Makefile.am for libcstring
-    for directory_entry in os.listdir(self._template_directory):
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
-      if not os.path.isfile(template_filename):
-        continue
+    template_filename = os.path.join(self._template_directory, u'Makefile.am')
 
-      output_filename = os.path.join(u'include', directory_entry)
+    output_filename = os.path.join(u'include', u'Makefile.am')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
 
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
-
-    # TODO: fix aliment for error.h and codepage.h
     output_directory = os.path.join(
         u'include', project_configuration.library_name)
     template_directory = os.path.join(self._template_directory, u'libyal')
@@ -845,19 +898,15 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
         continue
 
       output_filename = os.path.join(output_directory, directory_entry)
-      if not os.path.exists(output_filename) and not directory_entry in (
-          u'definitions.h.in', u'extern.h'):
+      if (directory_entry not in (u'definitions.h.in', u'extern.h') and
+          not os.path.exists(output_filename)):
         continue
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-    include_header_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
-
-    include_header_file = LibraryIncludeHeaderFile(include_header_path)
-    include_header_file.ReadFunctions(project_configuration)
+      if directory_entry in (u'codepage.h', u'error.h'):
+        self._VerticalAlignEqualSigns(project_configuration, output_filename)
 
     output_filename = os.path.join(output_directory, u'features.h.in')
     self._GenerateFeaturesHeader(
@@ -1018,6 +1067,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
     # TODO: add support for libsmraw.h - not detecting wchar
     #       (multiple function in single define?)
     # TODO: warn about [a-z]), in include header
+    # TODO: fix libbde_volume_read_startup_key_wide ending up in wrong section
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -1278,42 +1328,58 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
+    template_directory = os.path.join(
+        self._template_directory, u'yal_test_support')
+
     function_name = u'{0:s}_get_codepage'.format(
         project_configuration.library_name)
     codepage_support = function_name in include_header_file.functions_per_name
 
-    template_filename = os.path.join(
-        self._template_directory, u'yal_test_support', u'header.c')
+    template_filename = os.path.join(template_directory, u'header.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    template_filename = os.path.join(
-        self._template_directory, u'yal_test_support', u'includes.c')
+    # TODO: add support for volume, handle, etc.
+    function_name = u'{0:s}_check_file_signature'.format(
+        project_configuration.library_name)
+    has_check_signature = (
+        function_name in include_header_file.functions_per_name)
+
+    if has_check_signature:
+      template_filename = os.path.join(
+          template_directory, u'includes_with_input.c')
+    else:
+      template_filename = os.path.join(template_directory, u'includes.c')
+
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: handle includes based on API functions.
-
-    for support_function in (u'get_version', ):
+    for support_function in (
+        u'get_version', u'get_access_flags_read', u'get_codepage',
+        u'set_codepage'):
       function_name = u'{0:s}_{1:s}'.format(
           project_configuration.library_name, support_function)
       if function_name not in include_header_file.functions_per_name:
         continue
 
       template_filename = u'{0:s}.c'.format(support_function)
-      template_filename = os.path.join(
-          self._template_directory, u'yal_test_support', template_filename)
+      template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    # TODO: add support for get access flags.
-    # TODO: add support for get/set codepage.
-    # TODO: add support for signature functions.
+    if has_check_signature:
+      template_filename = os.path.join(template_directory, u'check_signature.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
-    template_filename = os.path.join(
-        self._template_directory, u'yal_test_support', u'main.c')
+    if has_check_signature:
+      template_filename = os.path.join(template_directory, u'main_with_input.c')
+    else:
+      template_filename = os.path.join(template_directory, u'main.c')
+
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -1412,6 +1478,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if test_to_run:
         tests_to_run.append(test_to_run)
 
+    # TODO: fix libbfio having no open wide.
     if type_with_input:
       for type_function in (u'open', u'get_ascii_codepage'):
         test_to_run = self._GenerateAPITypeTestWithInput(
@@ -1441,6 +1508,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           continue
 
         type_function = function_name[name_prefix_length:]
+        # TODO: fix open still being generated.
         if function_name in (u'open', u'get_ascii_codepage'):
           continue
 
@@ -1718,6 +1786,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_filename = u'{0:s}_test_{1:s}.c'.format(
           project_configuration.library_name_suffix, library_type)
       output_filename = os.path.join(u'tests', output_filename)
+
+      if os.path.exists(output_filename):
+        continue
 
       self._GenerateAPITypeTests(
           project_configuration, template_mappings, library_type,
