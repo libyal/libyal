@@ -824,28 +824,37 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
 
     alignment_offset = 0
     for line in lines:
-      if u'=' not in line:
+      if u'\t' not in line.lstrip(u'\t'):
         continue
 
-      formatted_line = line.replace(u'\t', ' ' * 8)
-      equal_sign_offset = formatted_line.rfind(u'=')
-      alignment_offset = max(alignment_offset, equal_sign_offset - 1)
+      prefix, _, suffix = line.rpartition(u'\t')
+      prefix = prefix.rstrip(u'\t')
+      formatted_prefix = prefix.replace(u'\t', ' ' * 8)
+
+      equal_sign_offset = len(formatted_prefix) + 8
+      equal_sign_offset, _ = divmod(equal_sign_offset, 8)
+      equal_sign_offset *= 8
+
+      if alignment_offset == 0:
+        alignment_offset = equal_sign_offset
+      else:
+        alignment_offset = max(alignment_offset, equal_sign_offset)
 
     with open(output_filename, 'wb') as file_object:
       for line in lines:
-        if u'=' in line:
-          prefix, _, suffix = line.rpartition(u'=')
-          prefix = prefix.rstrip()
+        if u'\t' in line.lstrip(u'\t'):
+          prefix, _, suffix = line.rpartition(u'\t')
+          prefix = prefix.rstrip(u'\t')
           formatted_prefix = prefix.replace(u'\t', ' ' * 8)
 
-          alignment_size = (alignment_offset - len(formatted_prefix))
+          alignment_size = alignment_offset - len(formatted_prefix)
           alignment_size, remainder = divmod(alignment_size, 8)
-          if remainder > 4:
+          if remainder > 0:
             alignment_size += 1
 
           alignment = u'\t' * alignment_size
 
-          line = u'{0:s}{1:s}={2:s}'.format(prefix, alignment, suffix)
+          line = u'{0:s}{1:s}{2:s}'.format(prefix, alignment, suffix)
 
         file_object.write(line)
 

@@ -22,3 +22,5 @@
 #if !defined( _${library_name_upper_case}_FEATURES_H )
 #define _${library_name_upper_case}_FEATURES_H
 
+/* The ${library_name} type support features
+ */
