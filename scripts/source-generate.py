@@ -981,19 +981,9 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       library_debug_type_prefix = u'typedef struct {0:s}_{1:s} {{}}'.format(
           project_configuration.library_name, type_name)
 
-      # TODO: fix alignment of libcdatetime/libcdatetime_types.h
-      alignment_length = (
-          len(longest_library_debug_type_prefix) -
-          len(library_debug_type_prefix))
-      alignment_length, alignment_remainder = divmod(alignment_length, 8)
-      if alignment_remainder >= 8:
-          alignment_length += 1
-
-      alignment = u'\t' * (1 + alignment_length)
-
       library_debug_type_definition = (
-          u'typedef struct {0:s}_{1:s} {{}}{2:s}{0:s}_{1:s}_t;').format(
-              project_configuration.library_name, type_name, alignment)
+          u'typedef struct {0:s}_{1:s} {{}}\t{0:s}_{1:s}_t;').format(
+              project_configuration.library_name, type_name)
       library_debug_type_definitions.append(library_debug_type_definition)
 
       library_type_definition = u'typedef intptr_t {0:s}_{1:s}_t;'.format(
@@ -1059,7 +1049,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-      if directory_entry == u'libyal_codepage.h':
+      if directory_entry in (u'libyal_codepage.h', u'libyal_types.h'):
         self._VerticalAlignEqualSigns(project_configuration, output_filename)
 
 
