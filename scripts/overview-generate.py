@@ -27,6 +27,7 @@ class Project(object):
     description (str): description.
     display_name (str): display name.
     documentation_only (bool): True if the project only contains documentation.
+    group (int): group.
     name (str): name.
   """
 
@@ -42,6 +43,7 @@ class Project(object):
     self.description = None
     self.display_name = name
     self.documentation_only = False
+    self.group = None
     self.name = name
 
 
@@ -100,6 +102,11 @@ class ProjectsReader(object):
       try:
         project.documentation_only = self._GetConfigValue(
             project_name, u'documentation_only')
+      except configparser.NoOptionError:
+        pass
+
+      try:
+        project.group = self._GetConfigValue(project_name, u'group')
       except configparser.NoOptionError:
         pass
 
@@ -470,42 +477,20 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 class StatusWikiPageGenerator(WikiPageGenerator):
   """Class that generates the "Status" wiki page."""
 
-  _PROJECT_GROUPS = (
-      (u'libcstring', u'libcerror', u'libcthreads', ),
-      (u'libcdata', u'libcdatetime', u'libclocale', u'libcnotify',
-       u'libcsplit', ),
-      (u'libuna', ),
-      (u'libcdirectory', u'libcfile', u'libcpath', u'libcsystem'),
-      (u'libbfio', u'libsigscan', ),
-      (u'libfcache', u'libfdata', u'libfdatetime', u'libfguid', u'libfmapi',
-       u'libfole', u'libftxf', u'libftxr', u'libfusn', u'libfvalue',
-       u'libfwevt', u'libfwnt', u'libfwps', u'libfwsi', ),
-      (u'libcaes', u'libhmac', ),
-      (u'libagdb', u'libcreg', u'libesedb', u'libevt', u'libevtx', u'libexe',
-       u'liblnk', u'libmdmp', u'libmsiecf', u'libnk2', u'libnsfdb',
-       u'libolecf', u'libpff', u'libregf', u'libscca', u'libswf',
-       u'libwtcdb', ),
-      (u'libmapidb', u'libwrc', ),
-      (u'libfsclfs', u'libfsext', u'libfshfs', u'libfsntfs', u'libfsrefs', ),
-      (u'libbde', u'libfvde', u'libluksde', u'libvshadow', u'libvslvm',
-       u'libvsmbr', ),
-      (u'libewf', u'libhibr', u'libodraw', u'libphdi', u'libqcow', u'libsmdev',
-       u'libsmraw', u'libvhdi', u'libvmdk', ),
-  )
-
-  def _FormatProjectNames(self, project_names):
+  def _FormatProjectNames(self, project_groups, project_names):
     """Formats the project names.
 
     Args:
+      project_groups (dict[str, list[str]]): project names per project group.
       project_names (list[str]): project names.
 
     Returns:
       str: formatted project names.
     """
     lines = []
-    for project_group in self._PROJECT_GROUPS:
+    for _, project_group in sorted(project_groups.items()):
       line = []
-      for project in project_group:
+      for project in sorted(project_group):
         if project in project_names:
           line.append(project)
           project_names.pop(project_names.index(project))
@@ -830,6 +815,9 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       script_glob = os.path.join(
           self._data_directory, u'source', u'tests', extension_glob)
       for path in glob.glob(script_glob):
+        if path.endswith(u'test_yalinfo.ps1'):
+          continue
+
         script_file = ScriptFile(path)
 
         version = None
@@ -942,6 +930,18 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     template_mappings = {u'category_title': u'Configurations'}
     self._GenerateSection(u'category.txt', template_mappings, output_writer)
 
+    project_groups = {}
+    for project in projects:
+      if project.group is None:
+        continue
+
+      project_group = project_groups.get(project.group, None)
+      if not project_group:
+        project_group = set()
+        project_groups[project.group] = project_group
+
+      project_group.add(project.name)
+
     for configuration, projects_per_version in sorted(
         versions_per_configuration.items()):
       template_mappings = {
@@ -952,7 +952,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
       for version, project_names in sorted(
           projects_per_version.items(), reverse=True):
-        project_names = self._FormatProjectNames(project_names)
+        project_names = self._FormatProjectNames(project_groups, project_names)
 
         template_mappings = {
             u'project_names': project_names,
@@ -974,7 +974,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
       for version, project_names in sorted(
           projects_per_version.items(), reverse=True):
-        project_names = self._FormatProjectNames(project_names)
+        project_names = self._FormatProjectNames(project_groups, project_names)
 
         template_mappings = {
             u'project_names': project_names,
@@ -996,7 +996,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
       for version, project_names in sorted(
           projects_per_version.items(), reverse=True):
-        project_names = self._FormatProjectNames(project_names)
+        project_names = self._FormatProjectNames(project_groups, project_names)
 
         template_mappings = {
             u'project_names': project_names,
@@ -1023,7 +1023,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
         for version, project_names in sorted(
             projects_per_version.items(), reverse=True):
-          project_names = self._FormatProjectNames(project_names)
+          project_names = self._FormatProjectNames(project_groups, project_names)
 
           template_mappings = {
               u'project_names': project_names,
@@ -1045,7 +1045,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
       for version, project_names in sorted(
           projects_per_version.items(), reverse=True):
-        project_names = self._FormatProjectNames(project_names)
+        project_names = self._FormatProjectNames(project_groups, project_names)
 
         template_mappings = {
             u'project_names': project_names,
