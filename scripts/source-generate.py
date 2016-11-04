@@ -637,6 +637,51 @@ class SourceFileGenerator(object):
     file_object.close()
     return string.Template(file_data)
 
+  def _VerticalAlignEqualSigns(self, project_configuration, output_filename):
+    """Vertically aligns the equal signs.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = [line for line in file_object.readlines()]
+
+    alignment_offset = 0
+    for line in lines:
+      if u'\t' not in line.lstrip(u'\t'):
+        continue
+
+      prefix, _, suffix = line.rpartition(u'\t')
+      prefix = prefix.rstrip(u'\t')
+      formatted_prefix = prefix.replace(u'\t', ' ' * 8)
+
+      equal_sign_offset = len(formatted_prefix) + 8
+      equal_sign_offset, _ = divmod(equal_sign_offset, 8)
+      equal_sign_offset *= 8
+
+      if alignment_offset == 0:
+        alignment_offset = equal_sign_offset
+      else:
+        alignment_offset = max(alignment_offset, equal_sign_offset)
+
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        if u'\t' in line.lstrip(u'\t'):
+          prefix, _, suffix = line.rpartition(u'\t')
+          prefix = prefix.rstrip(u'\t')
+          formatted_prefix = prefix.replace(u'\t', ' ' * 8)
+
+          alignment_size = alignment_offset - len(formatted_prefix)
+          alignment_size, remainder = divmod(alignment_size, 8)
+          if remainder > 0:
+            alignment_size += 1
+
+          alignment = u'\t' * alignment_size
+
+          line = u'{0:s}{1:s}{2:s}'.format(prefix, alignment, suffix)
+
+        file_object.write(line)
+
   @abc.abstractmethod
   def Generate(self, project_configuration, output_writer):
     """Generates the source file.
@@ -813,51 +858,6 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-  def _VerticalAlignEqualSigns(self, project_configuration, output_filename):
-    """Vertically aligns the equal signs.
-
-    Args:
-      output_filename (str): path of the output file.
-    """
-    with open(output_filename, 'rb') as file_object:
-      lines = [line for line in file_object.readlines()]
-
-    alignment_offset = 0
-    for line in lines:
-      if u'\t' not in line.lstrip(u'\t'):
-        continue
-
-      prefix, _, suffix = line.rpartition(u'\t')
-      prefix = prefix.rstrip(u'\t')
-      formatted_prefix = prefix.replace(u'\t', ' ' * 8)
-
-      equal_sign_offset = len(formatted_prefix) + 8
-      equal_sign_offset, _ = divmod(equal_sign_offset, 8)
-      equal_sign_offset *= 8
-
-      if alignment_offset == 0:
-        alignment_offset = equal_sign_offset
-      else:
-        alignment_offset = max(alignment_offset, equal_sign_offset)
-
-    with open(output_filename, 'wb') as file_object:
-      for line in lines:
-        if u'\t' in line.lstrip(u'\t'):
-          prefix, _, suffix = line.rpartition(u'\t')
-          prefix = prefix.rstrip(u'\t')
-          formatted_prefix = prefix.replace(u'\t', ' ' * 8)
-
-          alignment_size = alignment_offset - len(formatted_prefix)
-          alignment_size, remainder = divmod(alignment_size, 8)
-          if remainder > 0:
-            alignment_size += 1
-
-          alignment = u'\t' * alignment_size
-
-          line = u'{0:s}{1:s}{2:s}'.format(prefix, alignment, suffix)
-
-        file_object.write(line)
-
   def Generate(self, project_configuration, output_writer):
     """Generates include source files.
 
@@ -1015,27 +1015,27 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           project_configuration.library_name)):
         continue
 
-      if (directory_entry.endswith(u'_codepage.h') and (
+      if (directory_entry == u'libyal_codepage.h' and (
           not os.path.exists(codepage_header_file) or
           project_configuration.library_name == u'libclocale')):
         continue
 
-      if ((directory_entry.endswith(u'_libcerror.h') or
-           directory_entry.endswith(u'_error.c') or
-           directory_entry.endswith(u'_error.h')) and (
+      if ((directory_entry == u'libyal_libcerror.h' or
+           directory_entry == u'libyal_error.c' or
+           directory_entry == u'libyal_error.h') and (
                not os.path.exists(error_header_file) or
                project_configuration.library_name == u'libcerror')):
         continue
 
-      if ((directory_entry.endswith(u'_libcnotify.h') or
-           directory_entry.endswith(u'_notify.c') or
-           directory_entry.endswith(u'_notify.h')) and (
+      if ((directory_entry == u'libyal_libcnotify.h' or
+           directory_entry == u'libyal_notify.c' or
+           directory_entry == u'libyal_notify.h') and (
                not os.path.exists(notify_header_file) or
                project_configuration.library_name == u'libcnotify')):
         continue
 
       # TODO: improve generation of _types.h file
-      if (directory_entry.endswith(u'_types.h') and (
+      if (directory_entry == u'libyal_types.h' and (
               not os.path.exists(types_header_file) or
               project_configuration.library_name in (
                   u'libcerror', u'libcstring', u'libcthreads'))):
@@ -1058,6 +1058,9 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
+
+      if directory_entry == u'libyal_codepage.h':
+        self._VerticalAlignEqualSigns(project_configuration, output_filename)
 
 
 class LibraryManPageGenerator(SourceFileGenerator):
