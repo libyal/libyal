@@ -943,6 +943,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     # TODO: do not generate libuna/libuna_libcstring.h
     # TODO: libsmraw/libsmraw_codepage.h alignment of definitions
     # TODO: libfvalue/libfvalue_codepage.h different
+    # TODO: libfvde/libfvde.rc.in fix multi authors
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
