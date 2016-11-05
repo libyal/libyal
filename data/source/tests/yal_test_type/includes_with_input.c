@@ -20,7 +20,7 @@
 #endif
 
 /* Define to make ${library_name_suffix}_test_${library_type} generate verbose output
-#define ${library_name_suffix_upper_case}_TEST_FILE_VERBOSE
+#define ${library_name_suffix_upper_case}_TEST_${library_type_upper_case}_VERBOSE
  */
 
 /* Retrieves source as a narrow string
