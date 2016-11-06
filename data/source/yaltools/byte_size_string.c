@@ -20,33 +20,35 @@
  */
 
 #include <common.h>
+#include <narrow_string.h>
+#include <system_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #include "byte_size_string.h"
 #include "${tools_name}_libcerror.h"
 #include "${tools_name}_libclocale.h"
 #include "${tools_name}_libcnotify.h"
-#include "${tools_name}_libcstring.h"
 
 /* Creates a human readable byte size string
  * Returns 1 if successful or -1 on error
  */
 int byte_size_string_create(
-     libcstring_system_character_t *byte_size_string,
+     system_character_t *byte_size_string,
      size_t byte_size_string_length,
      uint64_t size,
      int units,
      libcerror_error_t **error )
 {
-	const libcstring_system_character_t *factor_string = NULL;
-	const libcstring_system_character_t *units_string  = NULL;
-	static char *function                              = "byte_size_string_create";
-	ssize_t print_count                                = 0;
-	uint64_t factored_size                             = 0;
-	uint64_t last_factored_size                        = 0;
-	int8_t factor                                      = 0;
-	int8_t remainder                                   = -1;
-	int decimal_point                                  = 0;
+	const system_character_t *factor_string = NULL;
+	const system_character_t *units_string  = NULL;
+	static char *function                   = "byte_size_string_create";
+	ssize_t print_count                     = 0;
+	uint64_t factored_size                  = 0;
+	uint64_t last_factored_size             = 0;
+	int8_t factor                           = 0;
+	int8_t remainder                        = -1;
+	int decimal_point                       = 0;
 
 	if( byte_size_string == NULL )
 	{
@@ -75,11 +77,11 @@ int byte_size_string_create(
 	if( ( size < 1024 )
 	 || ( units == BYTE_SIZE_STRING_UNIT_MEGABYTE ) )
 	{
-		units_string = _LIBCSTRING_SYSTEM_STRING( "B" );
+		units_string = _SYSTEM_STRING( "B" );
 	}
 	else if( units == BYTE_SIZE_STRING_UNIT_MEBIBYTE )
 	{
-		units_string = _LIBCSTRING_SYSTEM_STRING( "iB" );
+		units_string = _SYSTEM_STRING( "iB" );
 	}
 	factored_size = size;
 
@@ -112,31 +114,31 @@ int byte_size_string_create(
 	switch( factor )
 	{
 		case 0:
-			factor_string = _LIBCSTRING_SYSTEM_STRING( "" );
+			factor_string = _SYSTEM_STRING( "" );
 			break;
 		case 1:
-			factor_string = _LIBCSTRING_SYSTEM_STRING( "K" );
+			factor_string = _SYSTEM_STRING( "K" );
 			break;
 		case 2:
-			factor_string = _LIBCSTRING_SYSTEM_STRING( "M" );
+			factor_string = _SYSTEM_STRING( "M" );
 			break;
 		case 3:
-			factor_string = _LIBCSTRING_SYSTEM_STRING( "G" );
+			factor_string = _SYSTEM_STRING( "G" );
 			break;
 		case 4:
-			factor_string = _LIBCSTRING_SYSTEM_STRING( "T" );
+			factor_string = _SYSTEM_STRING( "T" );
 			break;
 		case 5:
-			factor_string = _LIBCSTRING_SYSTEM_STRING( "P" );
+			factor_string = _SYSTEM_STRING( "P" );
 			break;
 		case 6:
-			factor_string = _LIBCSTRING_SYSTEM_STRING( "E" );
+			factor_string = _SYSTEM_STRING( "E" );
 			break;
 		case 7:
-			factor_string = _LIBCSTRING_SYSTEM_STRING( "Z" );
+			factor_string = _SYSTEM_STRING( "Z" );
 			break;
 		case 8:
-			factor_string = _LIBCSTRING_SYSTEM_STRING( "Y" );
+			factor_string = _SYSTEM_STRING( "Y" );
 			break;
 	}
 	if( remainder > 9 )
@@ -158,28 +160,28 @@ int byte_size_string_create(
 
 			return( -1 );
 		}
-		print_count = libcstring_system_string_sprintf(
+		print_count = system_string_sprintf(
 		               byte_size_string,
 		               byte_size_string_length,
-		               _LIBCSTRING_SYSTEM_STRING( "%" ) _LIBCSTRING_SYSTEM_STRING( PRIu64 )
-		               _LIBCSTRING_SYSTEM_STRING( "%" ) _LIBCSTRING_SYSTEM_STRING( PRIc_LIBCSTRING_SYSTEM )
-		               _LIBCSTRING_SYSTEM_STRING( "%" ) _LIBCSTRING_SYSTEM_STRING( PRIu8 )
-		               _LIBCSTRING_SYSTEM_STRING( " %" ) _LIBCSTRING_SYSTEM_STRING( PRIs_LIBCSTRING_SYSTEM )
-		               _LIBCSTRING_SYSTEM_STRING( "%" ) _LIBCSTRING_SYSTEM_STRING( PRIs_LIBCSTRING_SYSTEM ),
+		               _SYSTEM_STRING( "%" ) _SYSTEM_STRING( PRIu64 )
+		               _SYSTEM_STRING( "%" ) _SYSTEM_STRING( PRIc_SYSTEM )
+		               _SYSTEM_STRING( "%" ) _SYSTEM_STRING( PRIu8 )
+		               _SYSTEM_STRING( " %" ) _SYSTEM_STRING( PRIs_SYSTEM )
+		               _SYSTEM_STRING( "%" ) _SYSTEM_STRING( PRIs_SYSTEM ),
 		               factored_size,
-		               (libcstring_system_character_t) decimal_point,
+		               (system_character_t) decimal_point,
 		               remainder,
 		               factor_string,
 		               units_string );
 	}
 	else
 	{
-		print_count = libcstring_system_string_sprintf(
+		print_count = system_string_sprintf(
 		               byte_size_string,
 		               byte_size_string_length,
-		               _LIBCSTRING_SYSTEM_STRING( "%" ) _LIBCSTRING_SYSTEM_STRING( PRIu64 )
-		               _LIBCSTRING_SYSTEM_STRING( " %" ) _LIBCSTRING_SYSTEM_STRING( PRIs_LIBCSTRING_SYSTEM )
-		               _LIBCSTRING_SYSTEM_STRING( "%" ) _LIBCSTRING_SYSTEM_STRING( PRIs_LIBCSTRING_SYSTEM ),
+		               _SYSTEM_STRING( "%" ) _SYSTEM_STRING( PRIu64 )
+		               _SYSTEM_STRING( " %" ) _SYSTEM_STRING( PRIs_SYSTEM )
+		               _SYSTEM_STRING( "%" ) _SYSTEM_STRING( PRIs_SYSTEM ),
 		               factored_size,
 		               factor_string,
 		               units_string );
@@ -203,7 +205,7 @@ int byte_size_string_create(
  * Returns 1 if successful or -1 on error
  */
 int byte_size_string_convert(
-     const libcstring_system_character_t *byte_size_string,
+     const system_character_t *byte_size_string,
      size_t byte_size_string_length,
      uint64_t *size,
      libcerror_error_t **error )
@@ -253,33 +255,33 @@ int byte_size_string_convert(
 	}
 	while( byte_size_string_iterator < byte_size_string_length )
 	{
-		if( ( byte_size_string[ byte_size_string_iterator ] < (libcstring_system_character_t) '0' )
-		 || ( byte_size_string[ byte_size_string_iterator ] > (libcstring_system_character_t) '9' ) )
+		if( ( byte_size_string[ byte_size_string_iterator ] < (system_character_t) '0' )
+		 || ( byte_size_string[ byte_size_string_iterator ] > (system_character_t) '9' ) )
 		{
 			break;
 		}
 		byte_size *= 10;
-		byte_size += ( byte_size_string[ byte_size_string_iterator ] - (libcstring_system_character_t) '0' );
+		byte_size += ( byte_size_string[ byte_size_string_iterator ] - (system_character_t) '0' );
 
 		byte_size_string_iterator++;
 	}
-	if( byte_size_string[ byte_size_string_iterator ] == (libcstring_system_character_t) decimal_point )
+	if( byte_size_string[ byte_size_string_iterator ] == (system_character_t) decimal_point )
 	{
 		byte_size_string_iterator++;
 
-		if( ( byte_size_string[ byte_size_string_iterator ] >= (libcstring_system_character_t) '0' )
-		 && ( byte_size_string[ byte_size_string_iterator ] <= (libcstring_system_character_t) '9' ) )
+		if( ( byte_size_string[ byte_size_string_iterator ] >= (system_character_t) '0' )
+		 && ( byte_size_string[ byte_size_string_iterator ] <= (system_character_t) '9' ) )
 		{
-			remainder = (int8_t) ( byte_size_string[ byte_size_string_iterator ] - (libcstring_system_character_t) '0' );
+			remainder = (int8_t) ( byte_size_string[ byte_size_string_iterator ] - (system_character_t) '0' );
 
 			byte_size_string_iterator++;
 		}
 		remainder *= 10;
 
-		if( ( byte_size_string[ byte_size_string_iterator ] >= (libcstring_system_character_t) '0' )
-		 && ( byte_size_string[ byte_size_string_iterator ] <= (libcstring_system_character_t) '9' ) )
+		if( ( byte_size_string[ byte_size_string_iterator ] >= (system_character_t) '0' )
+		 && ( byte_size_string[ byte_size_string_iterator ] <= (system_character_t) '9' ) )
 		{
-			remainder += (int8_t) ( byte_size_string[ byte_size_string_iterator ] - (libcstring_system_character_t) '0' );
+			remainder += (int8_t) ( byte_size_string[ byte_size_string_iterator ] - (system_character_t) '0' );
 
 			byte_size_string_iterator++;
 		}
@@ -287,15 +289,15 @@ int byte_size_string_convert(
 		 */
 		while( byte_size_string_iterator < byte_size_string_length )
 		{
-			if( ( byte_size_string[ byte_size_string_iterator ] < (libcstring_system_character_t) '0' )
-			 || ( byte_size_string[ byte_size_string_iterator ] > (libcstring_system_character_t) '9' ) )
+			if( ( byte_size_string[ byte_size_string_iterator ] < (system_character_t) '0' )
+			 || ( byte_size_string[ byte_size_string_iterator ] > (system_character_t) '9' ) )
 			{
 				break;
 			}
 			byte_size_string_iterator++;
 		}
 	}
-	if( byte_size_string[ byte_size_string_iterator ] == (libcstring_system_character_t) ' ' )
+	if( byte_size_string[ byte_size_string_iterator ] == (system_character_t) ' ' )
 	{
 		byte_size_string_iterator++;
 	}
@@ -353,14 +355,14 @@ int byte_size_string_convert(
 	{
 		units = BYTE_SIZE_STRING_UNIT_MEBIBYTE;
 	}
-	else if( ( byte_size_string[ byte_size_string_iterator ] == (libcstring_system_character_t) 'i' )
-	      && ( byte_size_string[ byte_size_string_iterator + 1 ] == (libcstring_system_character_t) 'B' ) )
+	else if( ( byte_size_string[ byte_size_string_iterator ] == (system_character_t) 'i' )
+	      && ( byte_size_string[ byte_size_string_iterator + 1 ] == (system_character_t) 'B' ) )
 	{
 		units = BYTE_SIZE_STRING_UNIT_MEBIBYTE;
 
 		byte_size_string_iterator += 2;
 	}
-	else if( byte_size_string[ byte_size_string_iterator ] == (libcstring_system_character_t) 'B' )
+	else if( byte_size_string[ byte_size_string_iterator ] == (system_character_t) 'B' )
 	{
 		units = BYTE_SIZE_STRING_UNIT_MEGABYTE;
 
@@ -402,9 +404,9 @@ int byte_size_string_convert(
 #endif
 #if defined( HAVE_VERBOSE_OUTPUT )
 	if( ( byte_size_string[ byte_size_string_iterator ] != 0 )
-	 && ( byte_size_string[ byte_size_string_iterator ] != (libcstring_system_character_t) ' ' )
-	 && ( byte_size_string[ byte_size_string_iterator ] != (libcstring_system_character_t) '\n' )
-	 && ( byte_size_string[ byte_size_string_iterator ] != (libcstring_system_character_t) '\r' ) )
+	 && ( byte_size_string[ byte_size_string_iterator ] != (system_character_t) ' ' )
+	 && ( byte_size_string[ byte_size_string_iterator ] != (system_character_t) '\n' )
+	 && ( byte_size_string[ byte_size_string_iterator ] != (system_character_t) '\r' ) )
 	{
 		libcnotify_printf(
 		 "%s: trailing data in byte size string.\n",

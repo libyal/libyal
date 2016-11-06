@@ -772,7 +772,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateFeaturesHeader(
       self, project_configuration, template_mappings, include_header_file,
-      output_writer, output_filename):
+      makefile_am_file, output_writer, output_filename):
     """Generates a features header file.
 
     Args:
@@ -781,6 +781,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
           maps to the name of a template variable.
       include_header_file (LibraryIncludeHeaderFile): library include header
           file.
+      makefile_am_file (MainMakefileAMFile): project main Makefile.am file.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
@@ -791,16 +792,14 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    # TODO: fix for libcstring.
+    # TODO: skip for libcaes.
     template_filename = os.path.join(
         template_directory, u'wide_character_type.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: improve this check.
-    if project_configuration.library_name not in (
-          u'libcerror', u'libcstring', u'libcthreads'):
+    if u'libcthreads' in makefile_am_file.libraries:
       template_filename = os.path.join(template_directory, u'multi_thread.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -847,11 +846,11 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    # TODO: add libcstring public types support.
-    template_filename = os.path.join(template_directory, u'public_types.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    if library_type_definitions:
+      template_filename = os.path.join(template_directory, u'public_types.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     template_filename = os.path.join(template_directory, u'footer.h')
     self._GenerateSection(
@@ -871,6 +870,13 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
 
     include_header_file = LibraryIncludeHeaderFile(include_header_path)
     include_header_file.ReadFunctions(project_configuration)
+
+    makefile_am_path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        u'Makefile.am')
+
+    makefile_am_file = MainMakefileAMFile(makefile_am_path)
+    makefile_am_file.ReadLibraries(project_configuration)
 
     pkginclude_headers = [
         u'\t{0:s}/definitions.h \\'.format(project_configuration.library_name),
@@ -920,7 +926,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
     output_filename = os.path.join(output_directory, u'features.h.in')
     self._GenerateFeaturesHeader(
         project_configuration, template_mappings, include_header_file,
-        output_writer, output_filename)
+        makefile_am_file, output_writer, output_filename)
 
     output_filename = os.path.join(output_directory, u'types.h.in')
     self._GenerateTypesHeader(

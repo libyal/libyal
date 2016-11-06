@@ -9,7 +9,7 @@ int ${library_name_suffix}_test_get_version(
 
 	version_string = ${library_name}_get_version();
 
-	result = libcstring_narrow_string_compare(
+	result = narrow_string_compare(
 	          version_string,
 	          ${library_name_upper_case}_VERSION_STRING,
 	          9 );
