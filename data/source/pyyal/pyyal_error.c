@@ -21,6 +21,7 @@
 
 #include <common.h>
 #include <memory.h>
+#include <narrow_string.h>
 #include <types.h>
 
 #if defined( HAVE_STDARG_H ) || defined( WINAPI )
@@ -33,7 +34,6 @@
 
 #include "${python_module_name}_error.h"
 #include "${python_module_name}_libcerror.h"
-#include "${python_module_name}_libcstring.h"
 #include "${python_module_name}_python.h"
 
 #if defined( HAVE_STDARG_H ) || defined( WINAPI )
@@ -113,7 +113,7 @@ void VARARGS(
 
 		return;
 	}
-	error_string_length = libcstring_narrow_string_length(
+	error_string_length = narrow_string_length(
 	                       error_string );
 
 	if( ( error_string_length >= 1 )
@@ -253,7 +253,7 @@ void VARARGS(
 
 		return;
 	}
-	error_string_length = libcstring_narrow_string_length(
+	error_string_length = narrow_string_length(
 	                       error_string );
 
 	if( ( error_string_length >= 1 )

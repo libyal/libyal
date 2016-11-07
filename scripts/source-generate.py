@@ -286,7 +286,9 @@ class LibraryIncludeHeaderFile(object):
         prototypes per name.
     functions_per_section (dict[str, list[FunctionPrototype]]): function
         prototypes per section.
-    have_bfio (bool): True if include header support libbfio.
+    have_bfio (bool): True if the include header supports libbfio.
+    have_wide_character_type (bool): True if the include header supports
+        the wide character type.
     name (str): name.
     section_names (list[str]): section names.
   """
@@ -302,6 +304,7 @@ class LibraryIncludeHeaderFile(object):
     self.functions_per_name = collections.OrderedDict()
     self.functions_per_section = {}
     self.have_bfio = False
+    self.have_wide_character_type = False
     self.name = os.path.basename(path)
     self.section_names = []
 
@@ -317,6 +320,7 @@ class LibraryIncludeHeaderFile(object):
     self.functions_per_name = collections.OrderedDict()
     self.functions_per_section = {}
     self.have_bfio = False
+    self.have_wide_character_type = False
     self.section_names = []
 
     define_deprecated = b'{0:s}_DEPRECATED'.format(
@@ -409,6 +413,8 @@ class LibraryIncludeHeaderFile(object):
 
             if have_bfio:
               self.have_bfio = True
+            if have_wide_character_type:
+              self.have_wide_character_type = True
 
         elif in_section:
           if line.startswith(b'* '):
@@ -792,13 +798,14 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    # TODO: skip for libcaes.
-    template_filename = os.path.join(
-        template_directory, u'wide_character_type.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    if include_header_file.have_wide_character_type:
+      template_filename = os.path.join(
+          template_directory, u'wide_character_type.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
+    # TODO: improve detection if include is needed.
     if u'libcthreads' in makefile_am_file.libraries:
       template_filename = os.path.join(template_directory, u'multi_thread.h')
       self._GenerateSection(
@@ -946,7 +953,6 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     """
     # TODO: add support for libuna/libuna_types.h
     # TODO: types.h alingment of debug types?
-    # TODO: do not generate libuna/libuna_libcstring.h
     # TODO: libsmraw/libsmraw_codepage.h alignment of definitions
     # TODO: libfvalue/libfvalue_codepage.h different
     # TODO: libfvde/libfvde.rc.in fix multi authors
@@ -1034,7 +1040,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       if (directory_entry == u'libyal_types.h' and (
               not os.path.exists(types_header_file) or
               project_configuration.library_name in (
-                  u'libcerror', u'libcstring', u'libcthreads'))):
+                  u'libcerror', u'libcthreads'))):
         continue
 
       template_filename = os.path.join(
@@ -1070,7 +1076,6 @@ class LibraryManPageGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
     """
     # TODO: add support for libcthreads.h - messed up
-    # TODO: add support for libcstring.h - macros
     # TODO: add support for libcsystem.h - additional types
     # TODO: add support for libsigscan.h - not detecting wchar
     # TODO: add support for libsmraw.h - not detecting wchar
@@ -1450,11 +1455,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
+    # TODO: libfmapi do not generate error type tests
     if (library_type == u'error' and
         project_configuration.library_name == u'libcerror'):
       return
 
     template_mappings[u'library_type'] = library_type
+    template_mappings[u'library_type_upper_case'] = library_type.upper()
 
     function_name = u'{0:s}_{1:s}_open'.format(
         project_configuration.library_name, library_type)
@@ -1814,9 +1821,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    tools_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        project_configuration.tools_name)
+    tools_name = u'{0:s}tools'.format(
+        project_configuration.library_name_suffix)
+
+    tools_path = os.path.join(self._projects_directory, tools_name)
 
     library_header = u'yaltools_{0:s}.h'.format(
         project_configuration.library_name)
@@ -1844,10 +1852,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
             project_configuration.library_name_suffix,
             project_configuration.library_name)
 
-      output_filename = u'{0:s}_{1:s}'.format(
-          project_configuration.tools_name, directory_entry[9:])
-      output_filename = os.path.join(
-          project_configuration.tools_name, output_filename)
+      output_filename = u'{0:s}_{1:s}'.format(tools_name, directory_entry[9:])
+      output_filename = os.path.join(tools_name, output_filename)
 
       if not os.path.exists(output_filename):
         continue

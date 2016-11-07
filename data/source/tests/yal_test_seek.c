@@ -21,13 +21,14 @@
 
 #include <common.h>
 #include <file_stream.h>
+#include <system_string.h>
+#include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
 #endif
 
 #include "${library_name_suffix}_test_libcerror.h"
-#include "${library_name_suffix}_test_libcstring.h"
 #include "${library_name_suffix}_test_libcsystem.h"
 #include "${library_name_suffix}_test_${library_name}.h"
 #include "${library_name_suffix}_test_unused.h"
@@ -451,7 +452,7 @@ int ${library_name_suffix}_test_seek_file(
  * Returns 1 if successful, 0 if not or -1 on error
  */
 int ${library_name_suffix}_test_seek(
-     libcstring_system_character_t *source,
+     system_character_t *source,
      libcerror_error_t **error )
 {
 	${library_name}_file_t *file = NULL;
@@ -468,7 +469,7 @@ int ${library_name_suffix}_test_seek(
 
 		goto on_error;
 	}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( ${library_name}_file_open_wide(
 	     file,
 	     source,
@@ -550,7 +551,7 @@ on_error:
  * Returns 1 if successful, 0 if not or -1 on error
  */
 int ${library_name_suffix}_test_seek_no_open(
-     libcstring_system_character_t *source ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
+     system_character_t *source ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
      libcerror_error_t **error )
 {
 	${library_name}_file_t *file  = NULL;
@@ -635,29 +636,29 @@ on_error:
 
 /* The main program
  */
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain( int argc, wchar_t * const argv[] )
 #else
 int main( int argc, char * const argv[] )
 #endif
 {
-	libcerror_error_t *error              = NULL;
-	libcstring_system_character_t *source = NULL;
-	libcstring_system_integer_t option    = 0;
-	int result                            = 0;
+	libcerror_error_t *error   = NULL;
+	system_character_t *source = NULL;
+	system_integer_t option    = 0;
+	int result                 = 0;
 
 	while( ( option = libcsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _SYSTEM_STRING( "" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
-			case (libcstring_system_integer_t) '?':
+			case (system_integer_t) '?':
 			default:
 				fprintf(
 				 stderr,
-				 "Invalid argument: %" PRIs_LIBCSTRING_SYSTEM ".\n",
+				 "Invalid argument: %" PRIs_SYSTEM ".\n",
 				 argv[ optind - 1 ] );
 
 				return( EXIT_FAILURE );

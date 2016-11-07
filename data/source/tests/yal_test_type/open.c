@@ -2,7 +2,7 @@
  * Returns 1 if successful or 0 if not
  */
 int ${library_name_suffix}_test_${library_type}_open(
-     const libcstring_system_character_t *source )
+     const system_character_t *source )
 {
 	char narrow_source[ 256 ];
 
@@ -116,7 +116,7 @@ on_error:
  * Returns 1 if successful or 0 if not
  */
 int ${library_name_suffix}_test_${library_type}_open_wide(
-     const libcstring_system_character_t *source )
+     const system_character_t *source )
 {
 	wchar_t wide_source[ 256 ];
 

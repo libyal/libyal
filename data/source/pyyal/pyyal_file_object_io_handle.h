@@ -27,7 +27,6 @@
 
 #include "${python_module_name}_libbfio.h"
 #include "${python_module_name}_libcerror.h"
-#include "${python_module_name}_libcstring.h"
 #include "${python_module_name}_python.h"
 
 #if defined( __cplusplus )

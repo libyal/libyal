@@ -8,7 +8,6 @@ if HAVE_PYTHON3
 AM_CFLAGS = \
 	-I$$(top_srcdir)/include \
 	-I$$(top_srcdir)/common \
-	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
@@ -28,7 +27,6 @@ BUILT_SOURCES = \
 	${python_module_name}_libbfio.h \
 	${python_module_name}_libcerror.h \
 	${python_module_name}_libclocale.h \
-	${python_module_name}_libcstring.h \
 	${python_module_name}_${library_name}.h \
 	${python_module_name}_python.h \
 	${python_module_name}_unused.h
@@ -38,7 +36,6 @@ pyexec_LTLIBRARIES = ${python_module_name}.la
 nodist_${python_module_name}_la_SOURCES = $$(BUILT_SOURCES)
 
 ${python_module_name}_la_LIBADD = \
-	@LIBCSTRING_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	../${library_name}/${library_name}.la \
 	@LIBCDATA_LIBADD@ \
