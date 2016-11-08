@@ -1,5 +1,5 @@
 /*
- * The internal libuna header
+ * The internal ${library_name} header
  *
  * Copyright (C) ${copyright}, ${tools_authors}
  *
@@ -19,19 +19,19 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${tools_name_upper_case}_LIBUNA_H )
-#define _${tools_name_upper_case}_LIBUNA_H
+#if !defined( _${tools_name_upper_case}_{library_name_upper_case}_H )
+#define _${tools_name_upper_case}_{library_name_upper_case}_H
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled set LIBUNA_DLL_IMPORT
- * before including libuna.h
+/* If Cygwin libtool DLL support is enabled set {library_name_upper_case}_DLL_IMPORT
+ * before including ${library_name}.h
  */
-#if defined( _WIN32 ) && defined( DLL_EXPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
-#define LIBUNA_DLL_IMPORT
+#if defined( _WIN32 ) && defined( DLL_EXPORT )
+#define {library_name_upper_case}_DLL_IMPORT
 #endif
 
-#include <libuna.h>
+#include <${library_name}.h>
 
-#endif /* !defined( _${tools_name_upper_case}_LIBUNA_H ) */
+#endif /* !defined( _${tools_name_upper_case}_{library_name_upper_case}_H ) */
 
