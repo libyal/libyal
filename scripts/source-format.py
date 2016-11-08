@@ -10,6 +10,7 @@ class Variable(object):
   """Class that defines a C variable."""
 
   _TYPE_SORT_RANKING = [
+      'FILE',
       'size64_t',
       'size32_t',
       'size_t',
@@ -24,6 +25,8 @@ class Variable(object):
       'int32_t',
       'int16_t',
       'uint8_t',
+      'double',
+      'float',
       'int',
       'char']
  
@@ -102,50 +105,79 @@ def CompareVariableDeclarations(
   return first_variable.Compare(second_variable)
 
 
-def VerticalAlignEqualSigns(lines):
+def VerticalAlignEqualSigns(lines, alignment_offset=None):
   """Vertically aligns the equal signs.
 
   Args:
     lines (list[str]): C variable declarations.
+    alignment_offset (Optional[int]): aligment offset, where None indicates
+        the function should determine the alingment offset based on the equal
+        signs.
 
   Returns:
-    list[str]: C variable declarations with aligned equal signs.
+    tuple: contains:
+      list[str]: C variable declarations with aligned equal signs.
+      int: aligment offset.
   """
+  if alignment_offset is None:
+    for line in lines:
+      if '=' not in line:
+        continue
+
+      prefix, _, suffix = line.rpartition(u'=')
+      prefix = prefix.rstrip()
+      formatted_prefix = prefix.replace(u'\t', ' ' * 8)
+
+      equal_sign_offset = len(formatted_prefix) + 1
+
+      if alignment_offset is None:
+        alignment_offset = equal_sign_offset
+      else:
+        alignment_offset = max(alignment_offset, equal_sign_offset)
+
   aligned_lines = []
-
-  alignment_offset = 0
   for line in lines:
-    prefix, _, suffix = line.rpartition(u'=')
-    prefix = prefix.rstrip()
-    formatted_prefix = prefix.replace(u'\t', ' ' * 8)
+    if '=' in line:
+      prefix, _, suffix = line.rpartition(u'=')
+      prefix = prefix.rstrip()
+      formatted_prefix = prefix.replace(u'\t', ' ' * 8)
 
-    equal_sign_offset = len(formatted_prefix) + 1
+      alignment_size = alignment_offset - len(formatted_prefix)
+      alignment = u' ' * alignment_size
 
-    if alignment_offset == 0:
-      alignment_offset = equal_sign_offset
-    else:
-      alignment_offset = max(alignment_offset, equal_sign_offset)
-
-  for line in lines:
-    prefix, _, suffix = line.rpartition(u'=')
-    prefix = prefix.rstrip()
-    formatted_prefix = prefix.replace(u'\t', ' ' * 8)
-
-    alignment_size = alignment_offset - len(formatted_prefix)
-    alignment = u' ' * alignment_size
-
-    line = u'{0:s}{1:s}={2:s}'.format(prefix, alignment, suffix)
+      line = u'{0:s}{1:s}={2:s}'.format(prefix, alignment, suffix)
 
     aligned_lines.append(line)
 
-  return aligned_lines
+  return aligned_lines, alignment_offset
 
 
 if __name__ == '__main__':
   # TODO: handle conditional declarations (#if ...)
 
-  lines = sys.stdin.readlines()
-  lines.sort(CompareVariableDeclarations)
-  lines = VerticalAlignEqualSigns(lines)
+  lines = []
+  alignment_offset = None
+  declaration_lines = []
+  for line in sys.stdin.readlines():
+    if not line.startswith('#'):
+      declaration_lines.append(line)
+      continue
+
+    declaration_lines.sort(CompareVariableDeclarations)
+    declaration_lines, alignment_offset = VerticalAlignEqualSigns(
+        declaration_lines, alignment_offset=alignment_offset)
+
+    lines.extend(declaration_lines)
+    lines.append(line)
+    declaration_lines = []
+
+  if declaration_lines:
+    declaration_lines.sort(CompareVariableDeclarations)
+    declaration_lines, alignment_offset = VerticalAlignEqualSigns(
+        declaration_lines, alignment_offset=alignment_offset)
+
+    lines.extend(declaration_lines)
+    declaration_lines = []
+
   print(''.join(lines), end='')
   
