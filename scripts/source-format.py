@@ -155,11 +155,14 @@ def VerticalAlignEqualSigns(lines, alignment_offset=None):
 if __name__ == '__main__':
   # TODO: handle conditional declarations (#if ...)
 
+  # TODO: handle if largest declaration is not in first block
+  # * determine aligment offset first for all lines
+
   lines = []
   alignment_offset = None
   declaration_lines = []
   for line in sys.stdin.readlines():
-    if not line.startswith('#'):
+    if line.strip() and not line.startswith('#'):
       declaration_lines.append(line)
       continue
 
