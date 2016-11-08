@@ -546,7 +546,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         configuration_file = ScriptFile(configuration_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(path))
+        logging.info(u'Reading: {0:s}'.format(configuration_path))
         if configuration_file.ReadVersion():
           version = configuration_file.version
         if not version:
