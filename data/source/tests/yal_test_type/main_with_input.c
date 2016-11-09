@@ -68,7 +68,14 @@ ${test_to_run}
 
 #endif /* defined( ${library_name_upper_case}_HAVE_BFIO ) */
 
-		/* TODO add test for ${library_name}_${library_type}_close */
+		${library_name_suffix_upper_case}_TEST_RUN(
+		 "${library_name}_${library_type}_close",
+		 ${library_name_suffix}_test_${library_type}_close );
+
+		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
+		 "${library_name}_${library_type}_open_close",
+		 ${library_name_suffix}_test_${library_type}_open_close,
+		 source );
 
 		/* Initialize test
 		 */

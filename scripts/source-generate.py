@@ -113,6 +113,8 @@ class ProjectConfiguration(object):
     self.tools_authors = self._GetOptionalConfigValue(
         config_parser, u'tools', u'authors', default_value=self.project_authors)
     self.tools_name = u'{0:s}tools'.format(self.library_name_suffix)
+    self.tools_names = self._GetOptionalConfigValue(
+        config_parser, u'tools', u'names', default_value=[])
 
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, u'tests', u'authors', default_value=self.project_authors)
@@ -602,8 +604,34 @@ class SourceFileGenerator(object):
       template_directory (str): path of the template directory.
     """
     super(SourceFileGenerator, self).__init__()
+    self._library_include_header_file = None
+    self._library_include_header_path = None
     self._projects_directory = projects_directory
     self._template_directory = template_directory
+
+  def _GetLibraryIncludeHeaderFile(self, project_configuration):
+    """Retrieves the library include header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      LibraryIncludeHeaderFile: library include header file or None if
+          the library include header file cannot be found.
+    """
+    if not self._library_include_header_file:
+      self._library_include_header_path = u'{0:s}.h.in'.format(
+          project_configuration.library_name)
+      self._library_include_header_path = os.path.join(
+          self._projects_directory, project_configuration.library_name,
+          u'include', self._library_include_header_path)
+
+      if os.path.exists(self._library_include_header_path):
+        self._library_include_header_file = LibraryIncludeHeaderFile(
+            self._library_include_header_path)
+        self._library_include_header_file.ReadFunctions(project_configuration)
+
+    return self._library_include_header_file
 
   def _GenerateSection(
       self, template_filename, template_mappings, output_writer,
@@ -877,18 +905,14 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    include_header_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
+    include_header_file = self._GetLibraryIncludeHeaderFile(
+        project_configuration)
 
-    if not os.path.exists(include_header_path):
+    if not include_header_file:
       logging.warning(
           u'Missing: {0:s} skipping generation of include source files.'.format(
-              include_header_path))
+              self._library_include_header_path))
       return
-
-    include_header_file = LibraryIncludeHeaderFile(include_header_path)
-    include_header_file.ReadFunctions(project_configuration)
 
     makefile_am_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -936,10 +960,13 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
           not os.path.exists(output_filename)):
         continue
 
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+      # Do not overwrite defintions.h.in when it exist.
+      if (directory_entry != u'definitions.h.in' and
+          os.path.exists(output_filename)):
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename)
 
-      if directory_entry in (u'codepage.h', u'error.h'):
+      if directory_entry in (u'codepage.h', u'definitions.h.in', u'error.h'):
         self._VerticalAlignEqualSigns(project_configuration, output_filename)
 
     output_filename = os.path.join(output_directory, u'features.h.in')
@@ -1101,22 +1128,18 @@ class LibraryManPageGenerator(SourceFileGenerator):
     # TODO: warn about [a-z]), in include header
     # TODO: fix libbde_volume_read_startup_key_wide ending up in wrong section
 
-    include_header_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
+    include_header_file = self._GetLibraryIncludeHeaderFile(
+        project_configuration)
 
-    if not os.path.exists(include_header_path):
+    if not include_header_file:
       logging.warning(
           u'Missing: {0:s} skipping generation of library man page.'.format(
-              include_header_path))
+              self._library_include_header_path))
       return
 
     # TODO: improve method of determining main include header has changed.
-    stat_object = os.stat(include_header_path)
+    stat_object = os.stat(self._library_include_header_path)
     modification_time = time.gmtime(stat_object.st_mtime)
-
-    include_header_file = LibraryIncludeHeaderFile(include_header_path)
-    include_header_file.ReadFunctions(project_configuration)
 
     output_filename = u'{0:s}.3'.format(project_configuration.library_name)
     output_filename = os.path.join(u'manuals', output_filename)
@@ -1339,13 +1362,6 @@ class ScriptFileGenerator(SourceFileGenerator):
 class TestsSourceFileGenerator(SourceFileGenerator):
   """Class that generates the tests source files."""
 
-  _API_FUNCTION_NAMES = (
-      u'get_codepage', 'get_decimal_point', u'error',
-      u'notify', u'print', u'stream', u'support')
-
-  _API_FUNCTION_WITH_INPUT_NAMES = (
-      u'open_close', u'seek', u'read')
-
   _PYTHON_FUNCTION_NAMES = (
       u'get_version', )
 
@@ -1354,7 +1370,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateAPISupportTests(
       self, project_configuration, template_mappings, include_header_file,
-      output_writer, output_filename):
+      output_writer):
     """Generates an API type tests source file.
 
     Args:
@@ -1364,10 +1380,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       include_header_file (LibraryIncludeHeaderFile): library include header
           file.
       output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
     template_directory = os.path.join(
         self._template_directory, u'yal_test_support')
+
+    output_filename = u'{0:s}_test_support.c'.format(
+        project_configuration.library_name_suffix)
+    output_filename = os.path.join(u'tests', output_filename)
 
     function_name = u'{0:s}_get_codepage'.format(
         project_configuration.library_name)
@@ -1466,7 +1485,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateAPITypeTests(
       self, project_configuration, template_mappings, library_type,
-      include_header_file, output_writer, output_filename):
+      include_header_file, output_writer):
     """Generates an API type tests source file.
 
     Args:
@@ -1477,8 +1496,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       include_header_file (LibraryIncludeHeaderFile): library include header
           file.
       output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
+    output_filename = u'{0:s}_test_{1:s}.c'.format(
+        project_configuration.library_name_suffix, library_type)
+    output_filename = os.path.join(u'tests', output_filename)
+
+    if os.path.exists(output_filename):
+      return
+
     # TODO: libfmapi do not generate error type tests
     if (library_type == u'error' and
         project_configuration.library_name == u'libcerror'):
@@ -1524,8 +1549,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         test_to_run = self._GenerateAPITypeTestWithInput(
             project_configuration, template_mappings, library_type, type_function,
             include_header_file, output_writer, output_filename)
-        if test_to_run:
-          tests_to_run_with_input.append(test_to_run)
 
     test_to_run = self._GenerateAPITypeTest(
         project_configuration, template_mappings, library_type,
@@ -1549,7 +1572,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
         type_function = function_name[name_prefix_length:]
         # TODO: fix open still being generated.
-        if function_name in (u'open', u'get_ascii_codepage'):
+        if type_function in (u'open', u'get_ascii_codepage'):
           continue
 
         if function_name.startswith(get_number_of_prefix):
@@ -1583,6 +1606,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     # TODO: create generic test for get_number_of_X API functions.
     # TODO: generate run test macros.
+
+    if not tests_to_run:
+      tests_to_run = u'\t\t/* TODO: add tests */\n\n'
+
+    if not tests_to_run_with_input:
+      tests_to_run_with_input = u'\t\t/* TODO: add tests */\n\n'
 
     template_mappings[u'test_to_run'] = u''.join(tests_to_run)
     template_mappings[u'tests_to_run_with_input'] = u''.join(
@@ -1642,6 +1671,132 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             project_configuration.library_name, library_type,
             type_function, project_configuration.library_name_suffix)
 
+  def _GenerateMakefileAM(
+      self, project_configuration, template_mappings, test_api_functions,
+      test_api_functions_with_input, test_api_types, test_api_types_with_input,
+      output_writer):
+    """Generates a tests Makefile.am file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      test_api_functions (list[str]): names of API function to test.
+      test_api_functions_with_input (list[str]): names of API function to test
+          with input data.
+      test_api_types (list[str]): names of API type to test.
+      test_api_types_with_input (list[str]): names of API type to test with
+          input data.
+      output_writer (OutputWriter): output writer.
+    """
+    tests = []
+    tests.extend(test_api_functions)
+    tests.extend(test_api_functions_with_input)
+    tests.extend(test_api_types)
+    tests.extend(test_api_types_with_input)
+    tests = sorted(tests)
+
+    template_directory = os.path.join(
+        self._template_directory, u'Makefile.am')
+    output_filename = os.path.join(u'tests', u'Makefile.am')
+
+    test_scripts = []
+    if test_api_functions or test_api_functions_with_input:
+      test_script = u'test_api_functions.sh'
+      test_scripts.append(test_script)
+
+    if test_api_types or test_api_types_with_input:
+      test_script = u'test_api_types.sh'
+      test_scripts.append(test_script)
+
+    tool_name = u'{0:s}info'.format(
+        project_configuration.library_name_suffix)
+    if tool_name in project_configuration.tools_names:
+      test_script = u'test_{0:s}.sh'.format(tool_name)
+      test_scripts.append(test_script)
+
+    tool_name = u'{0:s}export'.format(
+        project_configuration.library_name_suffix)
+    if tool_name in project_configuration.tools_names:
+      test_script = u'test_{0:s}.sh'.format(tool_name)
+      test_scripts.append(test_script)
+
+    python_scripts = []
+    python_test_scripts = [u'test_python_functions.sh']
+
+    check_scripts = [u'test_runner.sh']
+    check_scripts.extend(test_scripts)
+    check_scripts.extend(python_scripts)
+    check_scripts.extend(python_test_scripts)
+    check_scripts = sorted(check_scripts)
+
+    if project_configuration.python_module_name:
+      test_script = u'$(TESTS_{0:s})'.format(
+          project_configuration.python_module_name.upper())
+      test_scripts.append(test_script)
+
+    check_programs = []
+    for test in tests:
+      check_program = u'{0:s}_test_{1:s}'.format(
+          project_configuration.library_name_suffix, test)
+      check_programs.append(check_program)
+
+    template_mappings[u'tests'] = u' \\\n'.join(
+        [u'\t{0:s}'.format(script) for script in test_scripts])
+    template_mappings[u'check_scripts'] = u' \\\n'.join(
+        [u'\t{0:s}'.format(script) for script in check_scripts])
+    template_mappings[u'check_programs'] = u' \\\n'.join(
+        [u'\t{0:s}'.format(program) for program in check_programs])
+
+    if test_api_types_with_input:
+      template_filename = u'header_with_input.am'
+    else:
+      template_filename = u'header.am'
+
+    template_filename = os.path.join(template_directory, template_filename)
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    if project_configuration.python_module_name:
+      template_filename = os.path.join(template_directory, u'python.am')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, u'body.am')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    for test in tests:
+      if test in test_api_functions:
+        template_filename = u'yal_test_function.am'
+        template_mappings[u'library_function'] = test
+
+      elif test in test_api_functions_with_input:
+        template_filename = u'yal_test_function_with_input.am'
+        template_mappings[u'library_function'] = test
+
+      elif test in test_api_types:
+        template_filename = u'yal_test_type.am'
+        template_mappings[u'library_type'] = test
+
+      elif test in test_api_types_with_input:
+        template_filename = u'yal_test_type_with_input.am'
+        template_mappings[u'library_type'] = test
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, u'footer.am')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    self._SortSources(output_filename)
+
   def _SortIncludeHeaders(self, project_configuration, output_filename):
     """Sorts the include headers.
 
@@ -1671,6 +1826,37 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         else:
           file_object.write(line)
 
+  def _SortSources(self, output_filename):
+    """Sorts the sources.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = [line for line in file_object.readlines()]
+
+    sources = None
+    in_sources = False
+
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        stripped_line = line.rstrip()
+        if stripped_line.endswith(u'_SOURCES = \\'):
+          file_object.write(line)
+          sources = []
+          in_sources = True
+
+        elif in_sources:
+          if stripped_line:
+            sources.append(line)
+          else:
+            file_object.writelines(sorted(sources))
+            file_object.write(line)
+            in_sources = False
+
+        else:
+          file_object.write(line)
+
   def Generate(self, project_configuration, output_writer):
     """Generates tests source files.
 
@@ -1687,31 +1873,68 @@ class TestsSourceFileGenerator(SourceFileGenerator):
               tests_path))
       return
 
+    include_header_file = self._GetLibraryIncludeHeaderFile(
+        project_configuration)
+
+    if not include_header_file:
+      logging.warning(
+          u'Missing: {0:s} skipping generation of include source files.'.format(
+              self._library_include_header_path))
+      return
+
+    test_api_functions = []
+    test_api_functions_with_input = []
+    test_api_types = []
+    test_api_types_with_input = []
+
+    function_name = u'{0:s}_check_file_signature'.format(
+        project_configuration.library_name)
+
+    if function_name in include_header_file.functions_per_name:
+      test_api_functions_with_input.append(u'support')
+    else:
+      test_api_functions.append(u'support')
+
+    for section_name, functions in (
+        include_header_file.functions_per_section.items()):
+
+      section_name = section_name.replace(u' ', u'_')
+      section_name = section_name.lower()
+      section_name, _, _ = section_name.rpartition(u'_functions')
+
+      function_name = u'{0:s}_{1:s}_'.format(
+          project_configuration.library_name, section_name)
+
+      function_prototype = functions[0]
+      if not function_prototype.name.startswith(function_name):
+        # Ignore the section header is just informative.
+        continue
+
+      if (section_name == u'error' and
+          project_configuration.library_name != u'libcerror'):
+        test_api_functions.append(section_name)
+        continue
+
+      function_name = u'{0:s}_{1:s}_free'.format(
+          project_configuration.library_name, section_name)
+
+      if function_name not in include_header_file.functions_per_name:
+        test_api_functions.append(section_name)
+        continue
+
+      function_name = u'{0:s}_{1:s}_open'.format(
+          project_configuration.library_name, section_name)
+
+      if function_name in include_header_file.functions_per_name:
+        test_api_types_with_input.append(section_name)
+      else:
+        test_api_types.append(section_name)
+
     # TODO: handle non-template files differently.
     # TODO: yal_test_open_close.c handle file, handle, volume
 
     library_header = u'yal_test_{0:s}.h'.format(
         project_configuration.library_name)
-
-    test_api_functions = []
-    for function_name in self._API_FUNCTION_NAMES:
-      if (function_name == u'error' and
-          project_configuration.library_name == u'libcerror'):
-        continue
-
-      output_filename = u'{0:s}_test_{1:s}.c'.format(
-          project_configuration.library_name_suffix, function_name)
-      output_filename = os.path.join(u'tests', output_filename)
-      if os.path.exists(output_filename):
-        test_api_functions.append(function_name)
-
-    test_api_functions_with_input = []
-    for function_name in self._API_FUNCTION_WITH_INPUT_NAMES:
-      output_filename = u'{0:s}_test_{1:s}.c'.format(
-          project_configuration.library_name_suffix, function_name)
-      output_filename = os.path.join(u'tests', output_filename)
-      if os.path.exists(output_filename):
-        test_api_functions_with_input.append(function_name)
 
     test_python_functions = []
     for function_name in self._PYTHON_FUNCTION_NAMES:
@@ -1740,9 +1963,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     template_mappings[u'test_python_functions_with_input'] = u' '.join(
         test_python_functions_with_input)
 
-    template_mappings[u'test_api_types'] = u' '.join(
-        project_configuration.library_public_types)
-    template_mappings[u'test_api_types_with_input'] = u''
+    # TODO: deprecate project_configuration.library_public_types ?
+    template_mappings[u'test_api_types'] = u' '.join(test_api_types)
+    template_mappings[u'test_api_types_with_input'] = u' '.join(
+        test_api_types_with_input)
 
     template_mappings[u'alignment_padding'] = (
         u' ' * len(project_configuration.library_name_suffix))
@@ -1788,9 +2012,19 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       else:
         output_filename = directory_entry
 
-      if (output_filename.startswith(u'test_api_types.') and
-          project_configuration.library_public_types):
-        force_create = True
+      if directory_entry in (
+          u'test_api_functions.ps1', u'test_api_functions.sh'):
+        force_create = bool(test_api_functions or test_api_functions_with_input)
+
+      elif directory_entry in (u'test_api_types.ps1', u'test_api_types.sh'):
+        force_create = bool(test_api_types or test_api_types_with_input)
+
+      elif directory_entry == 'yal_test_error.c':
+        force_create = u'error' in test_api_functions
+
+      elif directory_entry == 'yal_test_notify.c':
+        force_create = u'notify' in test_api_functions
+
       else:
         force_create = False
 
@@ -1809,33 +2043,29 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
-    # TODO: detect if library type takes input.
-
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
         u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
 
-    include_header_file = LibraryIncludeHeaderFile(include_header_path)
-    include_header_file.ReadFunctions(project_configuration)
+    include_header_file = self._GetLibraryIncludeHeaderFile(
+        project_configuration)
 
-    output_filename = u'{0:s}_test_support.c'.format(
-        project_configuration.library_name_suffix)
-    output_filename = os.path.join(u'tests', output_filename)
     self._GenerateAPISupportTests(
         project_configuration, template_mappings, include_header_file,
-        output_writer, output_filename)
+        output_writer)
 
-    for library_type in project_configuration.library_public_types:
-      output_filename = u'{0:s}_test_{1:s}.c'.format(
-          project_configuration.library_name_suffix, library_type)
-      output_filename = os.path.join(u'tests', output_filename)
+    test_types = list(test_api_types)
+    test_types.extend(test_api_types_with_input)
 
-      if os.path.exists(output_filename):
-        continue
-
+    for library_type in sorted(test_types):
       self._GenerateAPITypeTests(
           project_configuration, template_mappings, library_type,
-          include_header_file, output_writer, output_filename)
+          include_header_file, output_writer)
+
+    self._GenerateMakefileAM(
+        project_configuration, template_mappings, test_api_functions,
+        test_api_functions_with_input, test_api_types,
+        test_api_types_with_input, output_writer)
 
 
 class ToolsSourceFileGenerator(SourceFileGenerator):
