@@ -743,6 +743,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         self._projects_directory, project_configuration.library_name,
         project_configuration.library_name, u'Makefile.am')
 
+    if not os.path.exists(makefile_am_path):
+      logging.warning(
+          u'Missing: {0:s} skipping generation of configuration files.'.format(
+              makefile_am_path))
+      return
+
     makefile_am_file = LibraryMakefileAMFile(makefile_am_path)
     makefile_am_file.ReadLibraries(project_configuration)
 
@@ -875,6 +881,12 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
         self._projects_directory, project_configuration.library_name,
         u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
 
+    if not os.path.exists(include_header_path):
+      logging.warning(
+          u'Missing: {0:s} skipping generation of include source files.'.format(
+              include_header_path))
+      return
+
     include_header_file = LibraryIncludeHeaderFile(include_header_path)
     include_header_file.ReadFunctions(project_configuration)
 
@@ -960,6 +972,12 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
         u'include', project_configuration.library_name, u'types.h.in')
+
+    if not os.path.exists(include_header_path):
+      logging.warning(
+          u'Missing: {0:s} skipping generation of library source files.'.format(
+              include_header_path))
+      return
 
     include_header_file = TypesIncludeHeaderFile(include_header_path)
     include_header_file.ReadTypes(project_configuration)
@@ -1086,6 +1104,12 @@ class LibraryManPageGenerator(SourceFileGenerator):
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
         u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
+
+    if not os.path.exists(include_header_path):
+      logging.warning(
+          u'Missing: {0:s} skipping generation of library man page.'.format(
+              include_header_path))
+      return
 
     # TODO: improve method of determining main include header has changed.
     stat_object = os.stat(include_header_path)
@@ -1658,6 +1682,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         self._projects_directory, project_configuration.library_name, u'tests')
 
     if not os.path.exists(tests_path):
+      logging.warning(
+          u'Missing: {0:s} skipping generation of test source files.'.format(
+              tests_path))
       return
 
     # TODO: handle non-template files differently.
