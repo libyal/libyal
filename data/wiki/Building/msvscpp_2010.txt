@@ -35,7 +35,7 @@ to convert the Visual Studio 2008 solution files to 2010 format and add the x64
 settings for you.
 
 ```
-msvscpp-convert.py --to 2010 msvscpp\libcstring.sln
+msvscpp-convert.py --to 2010 msvscpp\${project_name}.sln
 ```
 
 This will create a subdirectory named vs2010 which contains the Visual Studio
