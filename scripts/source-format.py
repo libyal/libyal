@@ -24,10 +24,11 @@ class Variable(object):
       'int64_t',
       'int32_t',
       'int16_t',
-      'uint8_t',
+      'int8_t',
       'double',
       'float',
       'int',
+      'wchar_t',
       'char']
  
   def __init__(self, declaration):
@@ -105,7 +106,35 @@ def CompareVariableDeclarations(
   return first_variable.Compare(second_variable)
 
 
-def VerticalAlignEqualSigns(lines, alignment_offset=None):
+def VerticalAlignEqualSignsDetermineOffset(lines):
+  """Determines the alignment offset to vertically align the equal signs.
+
+  Args:
+    lines (list[str]): C variable declarations.
+
+  Returns:
+    int: aligment offset or None if no equal sign was found.
+  """
+  alignment_offset = None
+  for line in lines:
+    if '=' not in line:
+      continue
+
+    prefix, _, suffix = line.rpartition(u'=')
+    prefix = prefix.rstrip()
+    formatted_prefix = prefix.replace(u'\t', ' ' * 8)
+
+    equal_sign_offset = len(formatted_prefix) + 1
+
+    if alignment_offset is None:
+      alignment_offset = equal_sign_offset
+    else:
+      alignment_offset = max(alignment_offset, equal_sign_offset)
+
+  return alignment_offset
+
+
+def VerticalAlignEqualSigns(lines, alignment_offset):
   """Vertically aligns the equal signs.
 
   Args:
@@ -115,26 +144,8 @@ def VerticalAlignEqualSigns(lines, alignment_offset=None):
         signs.
 
   Returns:
-    tuple: contains:
-      list[str]: C variable declarations with aligned equal signs.
-      int: aligment offset.
+    list[str]: C variable declarations with aligned equal signs.
   """
-  if alignment_offset is None:
-    for line in lines:
-      if '=' not in line:
-        continue
-
-      prefix, _, suffix = line.rpartition(u'=')
-      prefix = prefix.rstrip()
-      formatted_prefix = prefix.replace(u'\t', ' ' * 8)
-
-      equal_sign_offset = len(formatted_prefix) + 1
-
-      if alignment_offset is None:
-        alignment_offset = equal_sign_offset
-      else:
-        alignment_offset = max(alignment_offset, equal_sign_offset)
-
   aligned_lines = []
   for line in lines:
     if '=' in line:
@@ -149,38 +160,48 @@ def VerticalAlignEqualSigns(lines, alignment_offset=None):
 
     aligned_lines.append(line)
 
-  return aligned_lines, alignment_offset
+  return aligned_lines
 
 
-if __name__ == '__main__':
-  # TODO: handle conditional declarations (#if ...)
+def FormatSource(lines):
+  """Formats lines of C source.
 
-  # TODO: handle if largest declaration is not in first block
-  # * determine aligment offset first for all lines
+  Args:
+    lines (list[str]): lines of C source.
 
-  lines = []
-  alignment_offset = None
+  Returns:
+    list[str]: formatted lines of C source.
+  """
+  alignment_offset = VerticalAlignEqualSignsDetermineOffset(lines)
+
+  formatted_lines = []
   declaration_lines = []
-  for line in sys.stdin.readlines():
+  for line in lines:
     if line.strip() and not line.startswith('#'):
       declaration_lines.append(line)
       continue
 
     declaration_lines.sort(CompareVariableDeclarations)
-    declaration_lines, alignment_offset = VerticalAlignEqualSigns(
-        declaration_lines, alignment_offset=alignment_offset)
+    declaration_lines = VerticalAlignEqualSigns(
+        declaration_lines, alignment_offset)
 
-    lines.extend(declaration_lines)
-    lines.append(line)
+    formatted_lines.extend(declaration_lines)
+    formatted_lines.append(line)
     declaration_lines = []
 
   if declaration_lines:
     declaration_lines.sort(CompareVariableDeclarations)
-    declaration_lines, alignment_offset = VerticalAlignEqualSigns(
-        declaration_lines, alignment_offset=alignment_offset)
+    declaration_lines = VerticalAlignEqualSigns(
+        declaration_lines, alignment_offset)
 
-    lines.extend(declaration_lines)
+    formatted_lines.extend(declaration_lines)
     declaration_lines = []
+
+  return formatted_lines
+
+
+if __name__ == '__main__':
+  lines = FormatSource(sys.stdin.readlines())
 
   print(''.join(lines), end='')
   
