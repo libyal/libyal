@@ -12,7 +12,7 @@ int main(
 {
 	libcerror_error_t *error   = NULL;
 	system_character_t *source = NULL;
-	${library_name}_${library_type}_t *${library_type}        = NULL;
+	${library_name}_${type_name}_t *${type_name}        = NULL;
 	system_integer_t option    = 0;
 	int result                 = 0;
 
@@ -37,7 +37,7 @@ int main(
 	{
 		source = argv[ optind ];
 	}
-#if defined( HAVE_DEBUG_OUTPUT ) && defined( ${library_name_suffix_upper_case}_TEST_${library_type_upper_case}_VERBOSE )
+#if defined( HAVE_DEBUG_OUTPUT ) && defined( ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_VERBOSE )
 	${library_name}_notify_set_verbose(
 	 1 );
 	${library_name}_notify_set_stream(
@@ -49,38 +49,38 @@ ${test_to_run}
 	if( source != NULL )
 	{
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
-		 "${library_name}_${library_type}_open",
-		 ${library_name_suffix}_test_${library_type}_open,
+		 "${library_name}_${type_name}_open",
+		 ${library_name_suffix}_test_${type_name}_open,
 		 source );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
-		 "${library_name}_${library_type}_open_wide",
-		 ${library_name_suffix}_test_${library_type}_open_wide,
+		 "${library_name}_${type_name}_open_wide",
+		 ${library_name_suffix}_test_${type_name}_open_wide,
 		 source );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 #if defined( ${library_name_upper_case}_HAVE_BFIO )
 
-		/* TODO add test for ${library_name}_${library_type}_open_file_io_handle */
+		/* TODO add test for ${library_name}_${type_name}_open_file_io_handle */
 
 #endif /* defined( ${library_name_upper_case}_HAVE_BFIO ) */
 
 		${library_name_suffix_upper_case}_TEST_RUN(
-		 "${library_name}_${library_type}_close",
-		 ${library_name_suffix}_test_${library_type}_close );
+		 "${library_name}_${type_name}_close",
+		 ${library_name_suffix}_test_${type_name}_close );
 
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
-		 "${library_name}_${library_type}_open_close",
-		 ${library_name_suffix}_test_${library_type}_open_close,
+		 "${library_name}_${type_name}_open_close",
+		 ${library_name_suffix}_test_${type_name}_open_close,
 		 source );
 
 		/* Initialize test
 		 */
-		result = ${library_name_suffix}_test_${library_type}_open_source(
-		          &${library_type},
+		result = ${library_name_suffix}_test_${type_name}_open_source(
+		          &${type_name},
 		          source,
 		          &error );
 
@@ -90,8 +90,8 @@ ${test_to_run}
 		 1 );
 
 	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-	         "${library_type}",
-	         ${library_type} );
+	         "${type_name}",
+	         ${type_name} );
 
 	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	         "error",
@@ -99,8 +99,8 @@ ${test_to_run}
 ${tests_to_run_with_input}
 		/* Clean up
 		 */
-		result = ${library_name_suffix}_test_${library_type}_close_source(
-		          &${library_type},
+		result = ${library_name_suffix}_test_${type_name}_close_source(
+		          &${type_name},
 		          &error );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -109,8 +109,8 @@ ${tests_to_run_with_input}
 		 0 );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	         "${library_type}",
-	         ${library_type} );
+	         "${type_name}",
+	         ${type_name} );
 
 	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	         "error",
@@ -126,10 +126,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( ${library_type} != NULL )
+	if( ${type_name} != NULL )
 	{
-		${library_name_suffix}_test_${library_type}_close_source(
-		 &${library_type},
+		${library_name_suffix}_test_${type_name}_close_source(
+		 &${type_name},
 		 NULL );
 	}
 	return( EXIT_FAILURE );

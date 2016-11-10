@@ -1,7 +1,7 @@
-/* Tests the ${library_name}_${library_type}_free function
+/* Tests the ${library_name}_${type_name}_free function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_${library_type}_free(
+int ${library_name_suffix}_test_${type_name}_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -9,7 +9,7 @@ int ${library_name_suffix}_test_${library_type}_free(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${library_type}_free(
+	result = ${library_name}_${type_name}_free(
 	          NULL,
 	          &error );
 

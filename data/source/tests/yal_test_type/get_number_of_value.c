@@ -1,15 +1,15 @@
-/* Tests the ${library_name}_${library_type}_get_number_of_${value_name} functions
+/* Tests the ${library_name}_${type_name}_get_number_of_${value_name} functions
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_${library_type}_get_number_of_${value_name}(
-     ${library_name}_${library_type}_t *${library_type} )
+int ${library_name_suffix}_test_${type_name}_get_number_of_${value_name}(
+     ${library_name}_${type_name}_t *${type_name} )
 {
 	libcerror_error_t *error = NULL;
 	int number_of_${value_name}    = 0;
 	int result               = 0;
 
-	result = ${library_name}_${library_type}_get_number_of_${value_name}(
-	          ${library_type},
+	result = ${library_name}_${type_name}_get_number_of_${value_name}(
+	          ${type_name},
 	          &number_of_${value_name},
 	          &error );
 
@@ -24,7 +24,7 @@ int ${library_name_suffix}_test_${library_type}_get_number_of_${value_name}(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${library_type}_get_number_of_${value_name}(
+	result = ${library_name}_${type_name}_get_number_of_${value_name}(
 	          NULL,
 	          &number_of_${value_name},
 	          &error );
@@ -41,8 +41,8 @@ int ${library_name_suffix}_test_${library_type}_get_number_of_${value_name}(
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${library_type}_get_number_of_${value_name}(
-	          ${library_type},
+	result = ${library_name}_${type_name}_get_number_of_${value_name}(
+	          ${type_name},
 	          NULL,
 	          &error );
 

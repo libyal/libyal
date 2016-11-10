@@ -21,20 +21,20 @@
 #error Unsupported size of wchar_t
 #endif
 
-/* Define to make ${library_name_suffix}_test_${library_type} generate verbose output
-#define ${library_name_suffix_upper_case}_TEST_${library_type_upper_case}_VERBOSE
+/* Define to make ${library_name_suffix}_test_${type_name} generate verbose output
+#define ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_VERBOSE
  */
 
 /* Retrieves source as a narrow string
  * Returns 1 if successful or -1 on error
  */
-int ${library_name_suffix}_test_${library_type}_get_narrow_source(
+int ${library_name_suffix}_test_${type_name}_get_narrow_source(
      const system_character_t *source,
      char *narrow_string,
      size_t narrow_string_size,
      libcerror_error_t **error )
 {
-	static char *function     = "${library_name_suffix}_test_${library_type}_get_narrow_source";
+	static char *function     = "${library_name_suffix}_test_${type_name}_get_narrow_source";
 	size_t narrow_source_size = 0;
 	size_t source_length      = 0;
 
@@ -228,13 +228,13 @@ int ${library_name_suffix}_test_${library_type}_get_narrow_source(
 /* Retrieves source as a wide string
  * Returns 1 if successful or -1 on error
  */
-int ${library_name_suffix}_test_${library_type}_get_wide_source(
+int ${library_name_suffix}_test_${type_name}_get_wide_source(
      const system_character_t *source,
      wchar_t *wide_string,
      size_t wide_string_size,
      libcerror_error_t **error )
 {
-	static char *function   = "${library_name_suffix}_test_${library_type}_get_wide_source";
+	static char *function   = "${library_name_suffix}_test_${type_name}_get_wide_source";
 	size_t wide_source_size = 0;
 	size_t source_length    = 0;
 
@@ -425,24 +425,24 @@ int ${library_name_suffix}_test_${library_type}_get_wide_source(
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
-/* Creates and opens a source ${library_type}
+/* Creates and opens a source ${type_name}
  * Returns 1 if successful or -1 on error
  */
-int ${library_name_suffix}_test_${library_type}_open_source(
-     ${library_name}_${library_type}_t **${library_type},
+int ${library_name_suffix}_test_${type_name}_open_source(
+     ${library_name}_${type_name}_t **${type_name},
      const system_character_t *source,
      libcerror_error_t **error )
 {
-	static char *function = "${library_name_suffix}_test_${library_type}_open_source";
+	static char *function = "${library_name_suffix}_test_${type_name}_open_source";
 	int result            = 0;
 
-	if( ${library_type} == NULL )
+	if( ${type_name} == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ${library_type}.",
+		 "%s: invalid ${type_name}.",
 		 function );
 
 		return( -1 );
@@ -458,28 +458,28 @@ int ${library_name_suffix}_test_${library_type}_open_source(
 
 		return( -1 );
 	}
-	if( ${library_name}_${library_type}_initialize(
-	     ${library_type},
+	if( ${library_name}_${type_name}_initialize(
+	     ${type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize ${library_type}.",
+		 "%s: unable to initialize ${type_name}.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_${library_type}_open_wide(
-	          *${library_type},
+	result = ${library_name}_${type_name}_open_wide(
+	          *${type_name},
 	          source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          error );
 #else
-	result = ${library_name}_${library_type}_open(
-	          *${library_type},
+	result = ${library_name}_${type_name}_open(
+	          *${type_name},
 	          source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          error );
@@ -490,7 +490,7 @@ int ${library_name_suffix}_test_${library_type}_open_source(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open ${library_type}.",
+		 "%s: unable to open ${type_name}.",
 		 function );
 
 		goto on_error;
@@ -498,58 +498,58 @@ int ${library_name_suffix}_test_${library_type}_open_source(
 	return( 1 );
 
 on_error:
-	if( *${library_type} != NULL )
+	if( *${type_name} != NULL )
 	{
-		${library_name}_${library_type}_free(
-		 ${library_type},
+		${library_name}_${type_name}_free(
+		 ${type_name},
 		 NULL );
 	}
 	return( -1 );
 }
 
-/* Closes and frees a source ${library_type}
+/* Closes and frees a source ${type_name}
  * Returns 1 if successful or -1 on error
  */
-int ${library_name_suffix}_test_${library_type}_close_source(
-     ${library_name}_${library_type}_t **${library_type},
+int ${library_name_suffix}_test_${type_name}_close_source(
+     ${library_name}_${type_name}_t **${type_name},
      libcerror_error_t **error )
 {
-	static char *function = "${library_name_suffix}_test_${library_type}_close_source";
+	static char *function = "${library_name_suffix}_test_${type_name}_close_source";
 	int result            = 0;
 
-	if( ${library_type} == NULL )
+	if( ${type_name} == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ${library_type}.",
+		 "%s: invalid ${type_name}.",
 		 function );
 
 		return( -1 );
 	}
-	if( ${library_name}_${library_type}_close(
-	     *${library_type},
+	if( ${library_name}_${type_name}_close(
+	     *${type_name},
 	     error ) != 0 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_CLOSE_FAILED,
-		 "%s: unable to close ${library_type}.",
+		 "%s: unable to close ${type_name}.",
 		 function );
 
 		result = -1;
 	}
-	if( ${library_name}_${library_type}_free(
-	     ${library_type},
+	if( ${library_name}_${type_name}_free(
+	     ${type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free ${library_type}.",
+		 "%s: unable to free ${type_name}.",
 		 function );
 
 		result = -1;

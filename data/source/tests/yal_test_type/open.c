@@ -1,18 +1,18 @@
-/* Tests the ${library_name}_${library_type}_open function
+/* Tests the ${library_name}_${type_name}_open function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_${library_type}_open(
+int ${library_name_suffix}_test_${type_name}_open(
      const system_character_t *source )
 {
 	char narrow_source[ 256 ];
 
 	libcerror_error_t *error = NULL;
-	${library_name}_${library_type}_t *${library_type}      = NULL;
+	${library_name}_${type_name}_t *${type_name}      = NULL;
 	int result               = 0;
 
 	/* Initialize test
 	 */
-	result = ${library_name_suffix}_test_${library_type}_get_narrow_source(
+	result = ${library_name_suffix}_test_${type_name}_get_narrow_source(
 	          source,
 	          narrow_source,
 	          256,
@@ -27,8 +27,8 @@ int ${library_name_suffix}_test_${library_type}_open(
          "error",
          error );
 
-	result = ${library_name}_${library_type}_initialize(
-	          &${library_type},
+	result = ${library_name}_${type_name}_initialize(
+	          &${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -37,8 +37,8 @@ int ${library_name_suffix}_test_${library_type}_open(
 	 1 );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "${library_type}",
-         ${library_type} );
+         "${type_name}",
+         ${type_name} );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
          "error",
@@ -46,8 +46,8 @@ int ${library_name_suffix}_test_${library_type}_open(
 
 	/* Test open
 	 */
-	result = ${library_name}_${library_type}_open(
-	          ${library_type},
+	result = ${library_name}_${type_name}_open(
+	          ${type_name},
 	          narrow_source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
@@ -63,8 +63,8 @@ int ${library_name_suffix}_test_${library_type}_open(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${library_type}_open(
-	          ${library_type},
+	result = ${library_name}_${type_name}_open(
+	          ${type_name},
 	          narrow_source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
@@ -83,8 +83,8 @@ int ${library_name_suffix}_test_${library_type}_open(
 
 	/* Clean up
 	 */
-	result = ${library_name}_${library_type}_free(
-	          &${library_type},
+	result = ${library_name}_${type_name}_free(
+	          &${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -93,8 +93,8 @@ int ${library_name_suffix}_test_${library_type}_open(
 	 1 );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "${library_type}",
-         ${library_type} );
+         "${type_name}",
+         ${type_name} );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
          "error",
@@ -108,10 +108,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( ${library_type} != NULL )
+	if( ${type_name} != NULL )
 	{
-		${library_name}_${library_type}_free(
-		 &${library_type},
+		${library_name}_${type_name}_free(
+		 &${type_name},
 		 NULL );
 	}
 	return( 0 );
@@ -119,21 +119,21 @@ on_error:
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
-/* Tests the ${library_name}_${library_type}_open_wide function
+/* Tests the ${library_name}_${type_name}_open_wide function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_${library_type}_open_wide(
+int ${library_name_suffix}_test_${type_name}_open_wide(
      const system_character_t *source )
 {
 	wchar_t wide_source[ 256 ];
 
 	libcerror_error_t *error = NULL;
-	${library_name}_${library_type}_t *${library_type}      = NULL;
+	${library_name}_${type_name}_t *${type_name}      = NULL;
 	int result               = 0;
 
 	/* Initialize test
 	 */
-	result = ${library_name_suffix}_test_${library_type}_get_wide_source(
+	result = ${library_name_suffix}_test_${type_name}_get_wide_source(
 	          source,
 	          wide_source,
 	          256,
@@ -148,8 +148,8 @@ int ${library_name_suffix}_test_${library_type}_open_wide(
          "error",
          error );
 
-	result = ${library_name}_${library_type}_initialize(
-	          &${library_type},
+	result = ${library_name}_${type_name}_initialize(
+	          &${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -158,8 +158,8 @@ int ${library_name_suffix}_test_${library_type}_open_wide(
 	 1 );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "${library_type}",
-         ${library_type} );
+         "${type_name}",
+         ${type_name} );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
          "error",
@@ -167,8 +167,8 @@ int ${library_name_suffix}_test_${library_type}_open_wide(
 
 	/* Test open
 	 */
-	result = ${library_name}_${library_type}_open_wide(
-	          ${library_type},
+	result = ${library_name}_${type_name}_open_wide(
+	          ${type_name},
 	          wide_source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
@@ -184,8 +184,8 @@ int ${library_name_suffix}_test_${library_type}_open_wide(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${library_type}_open_wide(
-	          ${library_type},
+	result = ${library_name}_${type_name}_open_wide(
+	          ${type_name},
 	          wide_source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
@@ -204,8 +204,8 @@ int ${library_name_suffix}_test_${library_type}_open_wide(
 
 	/* Clean up
 	 */
-	result = ${library_name}_${library_type}_free(
-	          &${library_type},
+	result = ${library_name}_${type_name}_free(
+	          &${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -214,8 +214,8 @@ int ${library_name_suffix}_test_${library_type}_open_wide(
 	 1 );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "${library_type}",
-         ${library_type} );
+         "${type_name}",
+         ${type_name} );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
          "error",
@@ -229,10 +229,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( ${library_type} != NULL )
+	if( ${type_name} != NULL )
 	{
-		${library_name}_${library_type}_free(
-		 &${library_type},
+		${library_name}_${type_name}_free(
+		 &${type_name},
 		 NULL );
 	}
 	return( 0 );
@@ -240,10 +240,10 @@ on_error:
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
-/* Tests the ${library_name}_${library_type}_close function
+/* Tests the ${library_name}_${type_name}_close function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_${library_type}_close(
+int ${library_name_suffix}_test_${type_name}_close(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -251,7 +251,7 @@ int ${library_name_suffix}_test_${library_type}_close(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${library_type}_close(
+	result = ${library_name}_${type_name}_close(
 	          NULL,
 	          &error );
 
@@ -278,20 +278,20 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the ${library_name}_${library_type}_open and ${library_name}_${library_type}_close functions
+/* Tests the ${library_name}_${type_name}_open and ${library_name}_${type_name}_close functions
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_${library_type}_open_close(
+int ${library_name_suffix}_test_${type_name}_open_close(
      const system_character_t *source )
 {
 	libcerror_error_t *error = NULL;
-	${library_name}_${library_type}_t *${library_type}      = NULL;
+	${library_name}_${type_name}_t *${type_name}      = NULL;
 	int result               = 0;
 
 	/* Initialize test
 	 */
-	result = ${library_name}_${library_type}_initialize(
-	          &${library_type},
+	result = ${library_name}_${type_name}_initialize(
+	          &${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -300,8 +300,8 @@ int ${library_name_suffix}_test_${library_type}_open_close(
 	 1 );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "${library_type}",
-         ${library_type} );
+         "${type_name}",
+         ${type_name} );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
          "error",
@@ -310,14 +310,14 @@ int ${library_name_suffix}_test_${library_type}_open_close(
 	/* Test open and close
 	 */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_${library_type}_open_wide(
-	          ${library_type},
+	result = ${library_name}_${type_name}_open_wide(
+	          ${type_name},
 	          source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
 #else
-	result = ${library_name}_${library_type}_open(
-	          ${library_type},
+	result = ${library_name}_${type_name}_open(
+	          ${type_name},
 	          source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
@@ -332,8 +332,8 @@ int ${library_name_suffix}_test_${library_type}_open_close(
          "error",
          error );
 
-	result = ${library_name}_${library_type}_close(
-	          ${library_type},
+	result = ${library_name}_${type_name}_close(
+	          ${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -348,14 +348,14 @@ int ${library_name_suffix}_test_${library_type}_open_close(
 	/* Test open and close a second time to validate clean up on close
 	 */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_${library_type}_open_wide(
-	          ${library_type},
+	result = ${library_name}_${type_name}_open_wide(
+	          ${type_name},
 	          source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
 #else
-	result = ${library_name}_${library_type}_open(
-	          ${library_type},
+	result = ${library_name}_${type_name}_open(
+	          ${type_name},
 	          source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
@@ -370,8 +370,8 @@ int ${library_name_suffix}_test_${library_type}_open_close(
          "error",
          error );
 
-	result = ${library_name}_${library_type}_close(
-	          ${library_type},
+	result = ${library_name}_${type_name}_close(
+	          ${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -385,8 +385,8 @@ int ${library_name_suffix}_test_${library_type}_open_close(
 
 	/* Clean up
 	 */
-	result = ${library_name}_${library_type}_free(
-	          &${library_type},
+	result = ${library_name}_${type_name}_free(
+	          &${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -395,8 +395,8 @@ int ${library_name_suffix}_test_${library_type}_open_close(
 	 1 );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "${library_type}",
-         ${library_type} );
+         "${type_name}",
+         ${type_name} );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
          "error",
@@ -410,10 +410,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( ${library_type} != NULL )
+	if( ${type_name} != NULL )
 	{
-		${library_name}_${library_type}_free(
-		 &${library_type},
+		${library_name}_${type_name}_free(
+		 &${type_name},
 		 NULL );
 	}
 	return( 0 );

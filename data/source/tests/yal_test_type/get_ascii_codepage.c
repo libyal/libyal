@@ -1,15 +1,15 @@
-/* Tests the ${library_name}_${library_type}_get_ascii_codepage functions
+/* Tests the ${library_name}_${type_name}_get_ascii_codepage functions
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_${library_type}_get_ascii_codepage(
-     ${library_name}_${library_type}_t *${library_type} )
+int ${library_name_suffix}_test_${type_name}_get_ascii_codepage(
+     ${library_name}_${type_name}_t *${type_name} )
 {
 	libcerror_error_t *error = NULL;
 	int codepage             = 0;
 	int result               = 0;
 
-	result = ${library_name}_${library_type}_get_ascii_codepage(
-	          ${library_type},
+	result = ${library_name}_${type_name}_get_ascii_codepage(
+	          ${type_name},
 	          &codepage,
 	          &error );
 
@@ -24,7 +24,7 @@ int ${library_name_suffix}_test_${library_type}_get_ascii_codepage(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${library_type}_get_ascii_codepage(
+	result = ${library_name}_${type_name}_get_ascii_codepage(
 	          NULL,
 	          &codepage,
 	          &error );
@@ -41,8 +41,8 @@ int ${library_name_suffix}_test_${library_type}_get_ascii_codepage(
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${library_type}_get_ascii_codepage(
-	          ${library_type},
+	result = ${library_name}_${type_name}_get_ascii_codepage(
+	          ${type_name},
 	          NULL,
 	          &error );
 
