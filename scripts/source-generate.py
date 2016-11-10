@@ -653,9 +653,10 @@ class SourceFileGenerator(object):
     template_string = self._ReadTemplateFile(template_filename)
     try:
       output_data = template_string.substitute(template_mappings)
-    except ValueError as exception:
-      logging.error(u'Unable to format template: {0:s}'.format(
-          template_filename))
+    except (KeyError, ValueError) as exception:
+      logging.error(
+          u'Unable to format template: {0:s} with error: {1:s}'.format(
+              template_filename, exception))
       return
 
     output_writer.WriteFile(

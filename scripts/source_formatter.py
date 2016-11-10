@@ -177,7 +177,11 @@ class SourceFormatter(object):
     formatted_lines = []
     declaration_lines = []
     for line in lines:
-      if line.strip() and not line.startswith(b'#'):
+      striped_line = line.strip()
+      if striped_line and not (
+          striped_line.startswith(b'#') or
+          striped_line.startswith(u'/*') or
+          striped_line.startswith(b'*/')):
         declaration_lines.append(line)
         continue
 
