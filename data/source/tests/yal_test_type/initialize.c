@@ -8,7 +8,7 @@ int ${library_name_suffix}_test_${library_type}_initialize(
 	${library_name}_${library_type}_t *${library_type}      = NULL;
 	int result               = 0;
 
-	/* Test ${library_name}_${library_type}_initialize
+	/* Test ${library_type} initialization
 	 */
 	result = ${library_name}_${library_type}_initialize(
 	          &${library_type},

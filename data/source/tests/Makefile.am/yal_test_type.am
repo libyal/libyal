@@ -1,0 +1,11 @@
+${library_name_suffix}_test_${library_type}_SOURCES = \
+	${library_name_suffix}_test_${library_type}.c \
+	${library_name_suffix}_test_libcerror.h \
+	${library_name_suffix}_test_${library_name}.h \
+	${library_name_suffix}_test_memory.c ${library_name_suffix}_test_memory.h \
+	${library_name_suffix}_test_unused.h
+
+${library_name_suffix}_test_${library_type}_LDADD = \
+	../${library_name}/${library_name}.la \
+	@LIBCERROR_LIBADD@
+

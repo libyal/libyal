@@ -20,6 +20,8 @@ try:
 except ImportError:
   import configparser  # pylint: disable=import-error
 
+import source_formatter
+
 
 class ProjectConfiguration(object):
   """Class that defines a project configuration."""
@@ -604,9 +606,11 @@ class SourceFileGenerator(object):
       template_directory (str): path of the template directory.
     """
     super(SourceFileGenerator, self).__init__()
+    self._has_python_module = None
     self._library_include_header_file = None
     self._library_include_header_path = None
     self._projects_directory = projects_directory
+    self._python_module_path = None
     self._template_directory = template_directory
 
   def _GetLibraryIncludeHeaderFile(self, project_configuration):
@@ -657,6 +661,24 @@ class SourceFileGenerator(object):
     output_writer.WriteFile(
         output_filename, output_data, access_mode=access_mode)
 
+  def _HasPythonModule(self, project_configuration):
+    """Determines if the project has a Python module.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      bool: True if the python module path exits.
+    """
+    if not self._python_module_path:
+      self._python_module_path = os.path.join(
+          self._projects_directory, project_configuration.library_name,
+          project_configuration.python_module_name)
+
+      self._has_python_module = os.path.exists(self._python_module_path)
+
+    return self._has_python_module
+
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.
 
@@ -682,12 +704,12 @@ class SourceFileGenerator(object):
 
     alignment_offset = 0
     for line in lines:
-      if u'\t' not in line.lstrip(u'\t'):
+      if b'\t' not in line.lstrip(b'\t'):
         continue
 
-      prefix, _, suffix = line.rpartition(u'\t')
-      prefix = prefix.rstrip(u'\t')
-      formatted_prefix = prefix.replace(u'\t', ' ' * 8)
+      prefix, _, suffix = line.rpartition(b'\t')
+      prefix = prefix.rstrip(b'\t')
+      formatted_prefix = prefix.replace(b'\t', ' ' * 8)
 
       equal_sign_offset = len(formatted_prefix) + 8
       equal_sign_offset, _ = divmod(equal_sign_offset, 8)
@@ -700,19 +722,19 @@ class SourceFileGenerator(object):
 
     with open(output_filename, 'wb') as file_object:
       for line in lines:
-        if u'\t' in line.lstrip(u'\t'):
-          prefix, _, suffix = line.rpartition(u'\t')
-          prefix = prefix.rstrip(u'\t')
-          formatted_prefix = prefix.replace(u'\t', ' ' * 8)
+        if b'\t' in line.lstrip(b'\t'):
+          prefix, _, suffix = line.rpartition(b'\t')
+          prefix = prefix.rstrip(b'\t')
+          formatted_prefix = prefix.replace(b'\t', ' ' * 8)
 
           alignment_size = alignment_offset - len(formatted_prefix)
           alignment_size, remainder = divmod(alignment_size, 8)
           if remainder > 0:
             alignment_size += 1
 
-          alignment = u'\t' * alignment_size
+          alignment = b'\t' * alignment_size
 
-          line = u'{0:s}{1:s}{2:s}'.format(prefix, alignment, suffix)
+          line = b'{0:s}{1:s}{2:s}'.format(prefix, alignment, suffix)
 
         file_object.write(line)
 
@@ -1283,17 +1305,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    python_module_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        project_configuration.python_module_name)
+    if not self._HasPythonModule(project_configuration):
+      return
 
     # TODO: generate pyX-python2/Makefile.am and pyX-python3/Makefile.am
 
-    if not os.path.exists(python_module_path):
-      return
-
     codepage_header_file = os.path.join(
-        python_module_path, u'{0:s}_codepage.h'.format(
+        self._python_module_path, u'{0:s}_codepage.h'.format(
             project_configuration.python_module_name))
 
     template_mappings = project_configuration.GetTemplateMappings(
@@ -1629,6 +1647,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     self._SortIncludeHeaders(project_configuration, output_filename)
+    self._SortVariableDeclarations(output_filename)
 
   def _GenerateAPITypeTestWithInput(
       self, project_configuration, template_mappings, library_type,
@@ -1742,11 +1761,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       check_programs.append(check_program)
 
     template_mappings[u'tests'] = u' \\\n'.join(
-        [u'\t{0:s}'.format(script) for script in test_scripts])
+        [u'\t{0:s}'.format(filename) for filename in test_scripts])
     template_mappings[u'check_scripts'] = u' \\\n'.join(
-        [u'\t{0:s}'.format(script) for script in check_scripts])
+        [u'\t{0:s}'.format(filename) for filename in check_scripts])
     template_mappings[u'check_programs'] = u' \\\n'.join(
-        [u'\t{0:s}'.format(program) for program in check_programs])
+        [u'\t{0:s}'.format(filename) for filename in check_programs])
 
     if test_api_types_with_input:
       template_filename = u'header_with_input.am'
@@ -1757,7 +1776,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    if project_configuration.python_module_name:
+    if self._HasPythonModule(project_configuration):
       template_filename = os.path.join(template_directory, u'python.am')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -1801,6 +1820,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     """Sorts the include headers.
 
     Args:
+      project_configuration (ProjectConfiguration): project configuration.
       output_filename (str): path of the output file.
     """
     with open(output_filename, 'rb') as file_object:
@@ -1841,21 +1861,64 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     with open(output_filename, 'wb') as file_object:
       for line in lines:
         stripped_line = line.rstrip()
-        if stripped_line.endswith(u'_SOURCES = \\'):
+        if stripped_line.endswith(b'_SOURCES = \\'):
           file_object.write(line)
           sources = []
           in_sources = True
 
         elif in_sources:
           if stripped_line:
-            sources.append(line)
+            if stripped_line.endswith(b' \\'):
+              stripped_line = stripped_line[:-2]
+            sources.append(stripped_line)
+
           else:
-            file_object.writelines(sorted(sources))
+            sorted_lines = b' \\\n'.join(
+                [b'\t{0:s}'.format(filename) for filename in sorted(sources)])
+
+            file_object.writelines(sorted_lines)
             file_object.write(line)
             in_sources = False
 
         else:
           file_object.write(line)
+
+  def _SortVariableDeclarations(self, output_filename):
+    """Sorts the variable declarations.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = [line for line in file_object.readlines()]
+
+    formatter = source_formatter.SourceFormatter()
+    variable_declarations = None
+    in_variable_declarations = False
+
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        stripped_line = line.rstrip()
+        if stripped_line == b'{':
+          file_object.write(line)
+          variable_declarations = []
+          in_variable_declarations = True
+
+        elif in_variable_declarations:
+          if b'(' not in stripped_line:
+            variable_declarations.append(line)
+
+          else:
+            sorted_lines = formatter.FormatSource(variable_declarations)
+
+            file_object.writelines(sorted_lines)
+            file_object.write(line)
+            in_variable_declarations = False
+
+        else:
+          file_object.write(line)
+
+    lines = formatter.FormatSource(lines)
 
   def Generate(self, project_configuration, output_writer):
     """Generates tests source files.
