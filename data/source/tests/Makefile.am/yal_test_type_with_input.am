@@ -16,6 +16,6 @@ ${library_name_suffix}_test_${library_type}_LDADD = \
 	@LIBCDATA_LIBADD@ \
 	../${library_name}/${library_name}.la \
 	@LIBCTHREADS_LIBADD@ \
-        @LIBCERROR_LIBADD@ \
+	@LIBCERROR_LIBADD@ \
 	@PTHREAD_LIBADD@
 

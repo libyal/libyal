@@ -2082,6 +2082,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
+      is_script = (
+          directory_entry.endswith(u'.ps1') or directory_entry.endswith(u'.sh'))
+
       if directory_entry == u'yal_test_libyal.h':
         output_filename = u'{0:s}_test_{1:s}.h'.format(
             project_configuration.library_name_suffix,
@@ -2095,13 +2098,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         output_filename = u'{0:s}_{1:s}'.format(
             project_configuration.python_module_name, directory_entry[6:])
 
-      elif (directory_entry.startswith(u'test_yal') and
-            directory_entry.endswith(u'.sh')):
+      elif directory_entry.startswith(u'test_yal') and is_script:
         output_filename = u'test_{0:s}{1:s}'.format(
             project_configuration.library_name_suffix, directory_entry[8:])
 
-      elif (directory_entry.startswith(u'test_pyyal') and
-            directory_entry.endswith(u'.sh')):
+      elif directory_entry.startswith(u'test_pyyal') and is_script:
         output_filename = u'test_{0:s}{1:s}'.format(
             project_configuration.python_module_name, directory_entry[10:])
 
@@ -2131,6 +2132,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       output_filename = os.path.join(u'tests', output_filename)
       if not force_create and not os.path.exists(output_filename):
+        continue
+
+      if (directory_entry in (u'syncwinflexbison.ps1', u'synczlib.ps1') and
+          not os.path.exists(output_filename)):
         continue
 
       self._GenerateSection(
