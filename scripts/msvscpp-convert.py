@@ -36,10 +36,8 @@ class VSConfiguration(object):
     """Initializes a Visual Studio configuration.
 
     Args:
-      name: optional string containing the name. The default is an empty
-            string.
-      platform: optional string containing the name. The default is an empty
-               string.
+      name (Optional[str]): configuration name.
+      platform (Optional[str]): configuration platform.
     """
     self.name = name
     self.platform = platform
@@ -66,7 +64,7 @@ class VSConfigurations(object):
     """Appends a configuration.
 
     Args:
-      configuration: the configuration (instance of VSConfiguration).
+      configuration (VSConfiguration): configuration.
     """
     if configuration.name not in self.names:
       self.names.append(configuration.name)
@@ -83,7 +81,7 @@ class VSConfigurations(object):
     """Extends the configurations with the x64 platform.
 
     Args:
-      output_version: the output Visual Studio version.
+      output_version (str): output Visual Studio version.
     """
     if u'x64' not in self.platforms:
       for configuration in self._configurations.values():
@@ -98,11 +96,11 @@ class VSConfigurations(object):
     The identifier is formatted as: name|platform.
 
     Args:
-      name: the configuration name.
-      platform: the configuration platform.
+      name (str): configuration name.
+      platform (Optional[str]): configuration platform.
 
     Returns:
-      The configuration (instance of VSConfiguration).
+      VSConfiguration: configuration.
     """
     identifier = u'{0:s}|{1:s}'.format(name, platform)
     return self._configurations[identifier]
@@ -114,12 +112,11 @@ class VSConfigurations(object):
     secondly alphabetacally by platform.
 
     Args:
-      reverse: optional boolean to indicate the name sort order should be
-               reversed, which is False by default. The platform sort
-               order does not change.
+      reverse (Optional[bool]): True if the name sort order should be
+          reversed. The platform sort order is not affected.
 
     Yields:
-      The configuration (instance of VSConfiguration).
+      VSConfiguration: configuration.
     """
     for name in sorted(self.names, reverse=reverse):
       for platform in sorted(self.platforms):
@@ -366,7 +363,7 @@ class VSProjectConfiguration(VSConfiguration):
     """Retrieves the platform toolset.
 
     Args:
-      output_version: the output Visual Studio version.
+      output_version (str): output Visual Studio version.
     """
     platform_toolset = self.platform_toolset
     if not platform_toolset:
@@ -414,9 +411,9 @@ class VSSolutionProject(object):
     """Initializes a Visual Studio project.
 
     Args:
-      name: the project name.
-      filename: the project filename without extension.
-      guid: the project identifier (GUID).
+      name (str): project name.
+      filename (str): name of the project file without extension.
+      guid (str): project identifier (GUID).
     """
     self.name = name
     self.filename = filename
@@ -444,7 +441,7 @@ class FileReader(object):
     """Opens the file.
 
     Args:
-      filename: the filename of the file.
+      filename (str): path of the file.
     """
     # For reading these files we don't care about the actual end of lines.
     self._file = open(filename, 'r')
@@ -457,13 +454,12 @@ class FileReader(object):
     """Reads a line.
 
     Args:
-      look_ahead: optional boolean value to indicate the line
-                  should be considered read (False) or not (True).
-                  The default is to consider the line read.
+      look_ahead (Optional[bool]): indicated if the line should be considered
+          read (False) or not (True).
 
     Returns:
-      The line stripped of leading and trailing white space
-      or None if no input is available.
+      str: line stripped of leading and trailing white space or None if no
+          input is available.
     """
     if self._line != None:
       line = self._line
@@ -491,11 +487,11 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     """Reads a configuration.
 
     Args:
-      line: the line that contains the start of the configuration section.
+      line (str): line that contains the start of the configuration section.
 
     Returns:
-      A configuration (instance of VSProjectConfiguration) or None if
-      no configuration was found.
+      VSProjectConfiguration: configuration or None if no configuration was
+          found.
     """
     if not line.startswith(u'<Configuration'):
       return None
@@ -770,8 +766,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     """Reads the configurations.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
+      project_information (VSProjectInformation): project information.
     """
     # Find the start of the configurations section.
     result = False
@@ -800,8 +795,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     """Reads the files.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
+      project_information (VSProjectInformation): project information.
     """
     # Find the start of the files section.
     result = False
@@ -870,8 +864,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     """Reads project information.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
+      project_information (VSProjectInformation): project information.
     """
     line = self._ReadLine()
     while line:
@@ -904,7 +897,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     """Reads a file header.
 
     Returns:
-      True if successful or false otherwise.
+      bool: True if successful or false otherwise.
     """
     line = self._ReadLine()
 
@@ -946,8 +939,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
     """Reads the project.
 
     Returns:
-      Project information (instance of VSProjectInformation) if successful
-      or None otherwise.
+      VSProjectInformation: project information if successful or None otherwise.
     """
     project_information = VSProjectInformation()
 
@@ -985,7 +977,7 @@ class VSProjectFileWriter(object):
     """Opens the project file.
 
     Args:
-      filename: the filename of the project file.
+      filename (str): path of the file.
     """
     # Using binary mode to make sure to write Windows/DOS end of lines.
     self._file = open(filename, 'wb')
@@ -1029,7 +1021,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes the project configurations.
 
     Args:
-      project_configurations: the configurations (instance of VSConfigurations).
+      project_configurations (VSConfigurations): configurations.
     """
     return
 
@@ -1037,8 +1029,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes the project information.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
+      project_information (VSProjectInformation): project information.
     """
     self.WriteLines([
         '<VisualStudioProject',
@@ -1078,8 +1069,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes the project configuration.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     self.WriteLine('\t\t<Configuration')
 
@@ -1313,7 +1303,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes the configurations.
 
     Args:
-      project_configurations: the configurations (instance of VSConfigurations).
+      project_configurations (VSConfigurations): configurations.
     """
     self.WriteLine('\t<Configurations>')
 
@@ -1330,7 +1320,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes the source files.
 
     Args:
-      source_files: a list of strings of the source filenames.
+      source_files (list[str]): source filenames.
     """
     self.WriteLines([
         '\t\t<Filter',
@@ -1354,7 +1344,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes the header files.
 
     Args:
-      header_files: a list of strings of the header filenames.
+      header_files (list[str]): header filenames.
     """
     self.WriteLines([
         '\t\t<Filter',
@@ -1378,7 +1368,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes the resource files.
 
     Args:
-      resource_files: a list of strings of the resource filenames.
+      resource_files (list[str]): resource filenames.
     """
     self.WriteLines([
         '\t\t<Filter',
@@ -1403,9 +1393,9 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes the files.
 
     Args:
-      source_files: a list of strings of the source filenames.
-      header_files: a list of strings of the header filenames.
-      resource_files: a list of strings of the resource filenames.
+      source_files (list[str]): source filenames.
+      header_files (list[str]): header filenames.
+      resource_files (list[str]): resource filenames.
     """
     self.WriteLine('\t<Files>')
 
@@ -1424,10 +1414,9 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
     """Writes the dependencies.
 
     Args:
-      dependencies: a list of the GUID of the dependencies.
-      solution_projects_by_guid: a dictionary of the projects (instances of
-                                 VSSolutionProject) with their GUID in lower
-                                 case as the key.
+      dependencies (list[str]): GUIDs of the dependencies.
+      solution_projects_by_guid (dict[str, VSSolutionProject]): projects
+          per lower case GUID.
     """
     return
 
@@ -1459,7 +1448,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the project configurations.
 
     Args:
-      project_configurations: the configurations (instance of VSConfigurations).
+      project_configurations (VSConfigurations): configurations.
     """
     self.WriteLine('  <ItemGroup Label="ProjectConfigurations">')
 
@@ -1481,8 +1470,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the project information.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
+      project_information (VSProjectInformation): project information.
     """
     self.WriteLine('  <PropertyGroup Label="Globals">')
 
@@ -1502,8 +1490,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the configuration property group.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     self.WriteLine((
         '  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'=='
@@ -1538,8 +1525,8 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the OutDir and IntDir conditions.
 
     Args:
-      configuration_name: the name of the configuration.
-      project_configurations: the configurations (instance of VSConfigurations).
+      configuration_name (str): name of the configuration.
+      project_configurations (VSConfigurations): configurations.
     """
     for configuration_platform in sorted(project_configurations.platforms):
       project_configuration = project_configurations.GetByIdentifier(
@@ -1564,7 +1551,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the OutDir and IntDir property groups.
 
     Args:
-      project_configurations: the configurations (instance of VSConfigurations).
+      project_configurations (VSConfigurations): configurations.
     """
     self.WriteLines([
         '  <PropertyGroup>',
@@ -1593,8 +1580,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the CLCompile section.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     include_directories = re.sub(
         r'&quot;', r'', project_configuration.include_directories)
@@ -1701,8 +1687,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the librarian section.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     librarian_output_file = re.sub(
         r'[$][(]OutDir[)]\\', r'$(OutDir)',
@@ -1734,8 +1719,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the linker section.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     self.WriteLine('    <Link>')
 
@@ -1861,8 +1845,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the item definition group.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     self.WriteLine((
         '  <ItemDefinitionGroup Condition="\'$(Configuration)|'
@@ -1886,7 +1869,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the configurations.
 
     Args:
-      project_configurations: the configurations (instance of VSConfigurations).
+      project_configurations (VSConfigurations): configurations.
     """
     self.WriteLine(
         '  <Import Project="$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />')
@@ -1924,7 +1907,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the source files.
 
     Args:
-      source_files: a list of strings of the source filenames.
+      source_files (list[str]): source filenames.
     """
     if len(source_files) > 0:
       self.WriteLine('  <ItemGroup>')
@@ -1938,7 +1921,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the header files.
 
     Args:
-      header_files: a list of strings of the header filenames.
+      header_files (list[str]): header filenames.
     """
     if len(header_files) > 0:
       self.WriteLine('  <ItemGroup>')
@@ -1952,7 +1935,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the resource files.
 
     Args:
-      resource_files: a list of strings of the resource filenames.
+      resource_files (list[str]): resource filenames.
     """
     if len(resource_files) > 0:
       self.WriteLine('  <ItemGroup>')
@@ -1967,9 +1950,9 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the files.
 
     Args:
-      source_files: a list of strings of the source filenames.
-      header_files: a list of strings of the header filenames.
-      resource_files: a list of strings of the resource filenames.
+      source_files (list[str]): source filenames.
+      header_files (list[str]): header filenames.
+      resource_files (list[str]): resource filenames.
     """
     self._WriteSourceFiles(source_files)
     self._WriteHeaderFiles(header_files)
@@ -1979,10 +1962,9 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     """Writes the dependencies.
 
     Args:
-      dependencies: a list of the GUID of the dependencies.
-      solution_projects_by_guid: a dictionary of the projects (instances of
-                                 VSSolutionProject) with their GUID in lower
-                                 case as the key.
+      dependencies (list[str]): GUIDs of the dependencies.
+      solution_projects_by_guid (dict[str, VSSolutionProject]): projects
+          per lower case GUID.
     """
     if len(dependencies) > 0:
       self.WriteLine('  <ItemGroup>')
@@ -2038,8 +2020,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     """Writes the configuration property group.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     self.WriteLine((
         '  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'=='
@@ -2074,8 +2055,8 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     """Writes the OutDir and IntDir conditions.
 
     Args:
-      configuration_name: the name of the configuration.
-      project_configurations: the configurations (instance of VSConfigurations).
+      configuration_name (str): name of the configuration.
+      project_configurations (VSConfigurations): configurations.
     """
     for configuration_platform in sorted(project_configurations.platforms):
       project_configuration = project_configurations.GetByIdentifier(
@@ -2097,7 +2078,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     """Writes the OutDir and IntDir property groups.
 
     Args:
-      project_configurations: the configurations (instance of VSConfigurations).
+      project_configurations (VSConfigurations): configurations.
     """
     self.WriteLines([
         '  <PropertyGroup>',
@@ -2126,8 +2107,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     """Writes the CLCompile section.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     include_directories = re.sub(
         r'&quot;', r'', project_configuration.include_directories)
@@ -2224,8 +2204,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     """Writes the librarian section.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     librarian_output_file = re.sub(
         r'[$][(]OutDir[)]\\', r'$(OutDir)',
@@ -2255,8 +2234,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     """Writes the linker section.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     self.WriteLine('    <Link>')
 
@@ -2378,8 +2356,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     """Writes the item definition group.
 
     Args:
-      project_configuration: the configuration (instance of
-                             VSProjectConfiguration).
+      project_configuration (VSProjectConfiguration): configuration.
     """
     self.WriteLine((
         '  <ItemDefinitionGroup Condition="\'$(Configuration)|'
@@ -2419,17 +2396,17 @@ class VSSolutionFileReader(FileReader):
     """Checks the format version.
 
     Args:
-      line: the line containing the Visual Studio format version.
+      line (bytes): line containing the Visual Studio format version.
 
     Returns:
-      True if successful or false otherwise.
+      bool: True if successful or false otherwise.
     """
 
   def ReadHeader(self):
     """Reads a file header.
 
     Returns:
-      True if successful or false otherwise.
+      bool: True if successful or false otherwise.
     """
     line = self._ReadLine()
 
@@ -2462,7 +2439,7 @@ class VSSolutionFileReader(FileReader):
     """Reads a project.
 
     Returns:
-      A project (instance of VSSolutionProject) if successful or None otherwise.
+      VSSolutionProject: project if successful or None otherwise.
     """
     line = self._ReadLine(look_ahead=True)
 
@@ -2524,8 +2501,7 @@ class VSSolutionFileReader(FileReader):
     """Reads the projects.
 
     Returns:
-      A list containing the projects (instances of VSSolutionProject).
-      The list is used to preserve the order of projects.
+      list[VSSolutionProject]: projects in preserved order.
     """
     solution_projects = []
     solution_project = self.ReadProject()
@@ -2540,7 +2516,7 @@ class VSSolutionFileReader(FileReader):
     """Reads the configurations.
 
     Returns:
-      The configurations (instance of VSConfigurations).
+      VSConfigurations: configurations.
     """
     solution_configurations = VSConfigurations()
 
@@ -2591,10 +2567,10 @@ class VS2008SolutionFileReader(VSSolutionFileReader):
     """Checks the format version.
 
     Args:
-      line: the line containing the Visual Studio format version.
+      line (bytes): line containing the Visual Studio format version.
 
     Returns:
-      True if successful or false otherwise.
+      bool: True if successful or false otherwise.
     """
     return line.endswith(' 10.00')
 
@@ -2606,10 +2582,10 @@ class VS2010SolutionFileReader(object):
     """Checks the format version.
 
     Args:
-      line: the line containing the Visual Studio format version.
+      line (bytes): line containing the Visual Studio format version.
 
     Returns:
-      True if successful or false otherwise.
+      bool: True if successful or false otherwise.
     """
     return line.endswith(' 11.00')
 
@@ -2636,7 +2612,7 @@ class VSSolutionFileWriter(object):
     """Opens the solution file.
 
     Args:
-      filename: the filename of the solution file.
+      filename (str): path of the solution file.
     """
     # Using binary mode to make sure to write Windows/DOS end of lines.
     self._file = open(filename, 'wb')
@@ -2654,7 +2630,7 @@ class VSSolutionFileWriter(object):
     """Writes a project section.
 
     Args:
-      solution_project: the project (instance of VSSolutionProject).
+      solution_project (VSSolutionProject): project.
     """
 
   def WriteLine(self, line):
@@ -2670,8 +2646,7 @@ class VSSolutionFileWriter(object):
     """Writes the projects.
 
     Args:
-      solution_projects: a list containing the projects (instances of
-                         VSSolutionProject).
+      solution_projects (list[VSSolutionProject]): projects.
     """
     for solution_project in solution_projects:
       self.WriteProject(solution_project)
@@ -2691,7 +2666,7 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
     """Writes a project section.
 
     Args:
-      solution_project: the project (instance of VSSolutionProject).
+      solution_project (VSSolutionProject): project.
     """
     solution_project_filename = '{0:s}.vcproj'.format(
         solution_project.filename)
@@ -2718,10 +2693,8 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
     """Writes the configurations.
 
     Args:
-      solution_configurations: the configurations (instance of
-                               VSConfigurations).
-      solution_projects: a list containing the projects (instances of
-                         VSSolutionProject).
+      solution_configurations (VSConfigurations): configurations.
+      solution_projects (list[VSSolutionProject]): projects.
     """
     self.WriteLine('Global')
 
@@ -2782,7 +2755,7 @@ class VS2010SolutionFileWriter(VSSolutionFileWriter):
     """Writes a project section.
 
     Args:
-      solution_project: the project (instance of VSSolutionProject).
+      solution_project (VSSolutionProject): project.
     """
     solution_project_filename = '{0:s}.vcxproj'.format(
         solution_project.filename)
@@ -2799,10 +2772,8 @@ class VS2010SolutionFileWriter(VSSolutionFileWriter):
     """Writes the configurations.
 
     Args:
-      solution_configurations: the configurations (instance of
-                               VSConfigurations).
-      solution_projects: a list containing the projects (instances of
-                         VSSolutionProject).
+      solution_configurations (VSConfigurations): configurations.
+      solution_projects (list[VSSolutionProject]): projects.
     """
     self.WriteLine('Global')
 
@@ -2862,7 +2833,7 @@ class VS2012SolutionFileWriter(VS2010SolutionFileWriter):
     """Writes a project section.
 
     Args:
-      solution_project: the project (instance of VSSolutionProject).
+      solution_project (VSSolutionProject): project.
     """
     solution_project_filename = '{0:s}.vcxproj'.format(
         solution_project.filename)
@@ -2903,16 +2874,15 @@ class VSSolution(object):
     """Converts a Visual Studio project.
 
     Args:
-      input_version: the input version of the Visual Studio.
-      input_directory: the path of the input directory.
-      output_version: the output version of the Visual Studio.
-      solution_project: the project (instance of VSSolutionProject).
-      solution_projects_by_guid: a dictionary of the projects (instances of
-                                 VSSolutionProject) with their GUID in lower
-                                 case as the key.
+      input_version (str): input version of the Visual Studio solution.
+      input_directory (str): path of the input directory.
+      output_version (str): output Visual Studio version.
+      solution_project (VSSolutionProject): project.
+      solution_projects_by_guid (dict[str, VSSolutionProject]): projects
+          per lower case GUID.
 
     Returns:
-      True if the conversion successful or False if not.
+      bool: True if the conversion successful or False if not.
     """
     if not solution_project:
       return False
@@ -2965,13 +2935,11 @@ class VSSolution(object):
     """Writes a Visual Studio project file.
 
     Args:
-      output_version: the output version of the Visual Studio.
-      solution_project: the project (instance of VSSolutionProject).
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      solution_projects_by_guid: a dictionary of the projects (instances of
-                                 VSSolutionProject) with their GUID in lower
-                                 case as the key.
+      output_version (str): output Visual Studio version.
+      solution_project (VSSolutionProject): project.
+      project_information (VSProjectInformation): project information.
+      solution_projects_by_guid (dict[str, VSSolutionProject]): projects
+          per lower case GUID.
     """
     output_directory = 'vs{0:s}'.format(output_version)
     output_project_filename = output_directory
@@ -3020,11 +2988,9 @@ class VSSolution(object):
 
     Args:
       solution_filename: the Visual Studio solution filename.
-      output_version: the output version of the Visual Studio.
-      solution_projects: a list containing the projects (instances of
-                         VSSolutionProject).
-      solution_configurations: the configurations (instance of
-                               VSConfigurations).
+      output_version (str): output Visual Studio version.
+      solution_projects (list[VSSolutionProject]): projects.
+      solution_configurations (VSConfigurations): configurations.
     """
     output_directory = 'vs{0:s}'.format(output_version)
     os.mkdir(output_directory)
@@ -3053,11 +3019,11 @@ class VSSolution(object):
     """Converts a Visual Studio solution.
 
     Args:
-      input_sln_path: the path of the Visual Studio solution file.
-      output_version: the output version of the Visual Studio.
+      input_sln_path (str): path of the Visual Studio solution file.
+      output_version (str): output Visual Studio version.
 
     Returns:
-      True if the conversion successful or False if not.
+      bool: True if the conversion successful or False if not.
     """
     if not os.path.exists(input_sln_path):
       return False
@@ -3167,12 +3133,11 @@ class LibyalSourceVSSolution(VSSolution):
     """Configures the project as the bzip2 DLL.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      release_project_configuration: the release project configuration (instance
-                                     of LibyalReleaseVSProjectConfiguration).
-      debug_project_configuration: the debug project configuration (instance
-                                   of LibyalReleaseVSProjectConfiguration).
+      project_information (VSProjectInformation): project information.
+      release_project_configuration (LibyalReleaseVSProjectConfiguration):
+          release project configuration.
+      debug_project_configuration (LibyalReleaseVSProjectConfiguration):
+          debug project configuration.
     """
     project_information.source_files = sorted([
         '..\\..\\..\\bzip2\\blocksort.c',
@@ -3218,12 +3183,11 @@ class LibyalSourceVSSolution(VSSolution):
     """Configures the project as a DLL.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      release_project_configuration: the release project configuration (instance
-                                     of LibyalReleaseVSProjectConfiguration).
-      debug_project_configuration: the debug project configuration (instance
-                                   of LibyalReleaseVSProjectConfiguration).
+      project_information (VSProjectInformation): project information.
+      release_project_configuration (LibyalReleaseVSProjectConfiguration):
+          release project configuration.
+      debug_project_configuration (LibyalReleaseVSProjectConfiguration):
+          debug project configuration.
     """
     if project_information.name.startswith('py'):
       dll_extension = 'pyd'
@@ -3268,12 +3232,11 @@ class LibyalSourceVSSolution(VSSolution):
     """Configures the project as the dokan DLL.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      release_project_configuration: the release project configuration (instance
-                                     of LibyalReleaseVSProjectConfiguration).
-      debug_project_configuration: the debug project configuration (instance
-                                   of LibyalReleaseVSProjectConfiguration).
+      project_information (VSProjectInformation): project information.
+      release_project_configuration (LibyalReleaseVSProjectConfiguration):
+          release project configuration.
+      debug_project_configuration (LibyalReleaseVSProjectConfiguration):
+          debug project configuration.
     """
     project_information.source_files = sorted([
         '..\\..\\..\\dokan\\dokan\\access.c',
@@ -3339,12 +3302,11 @@ class LibyalSourceVSSolution(VSSolution):
     """Configures the project as an EXE.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      release_project_configuration: the release project configuration (instance
-                                     of LibyalReleaseVSProjectConfiguration).
-      debug_project_configuration: the debug project configuration (instance
-                                   of LibyalReleaseVSProjectConfiguration).
+      project_information (VSProjectInformation): project information.
+      release_project_configuration (LibyalReleaseVSProjectConfiguration):
+          release project configuration.
+      debug_project_configuration (LibyalReleaseVSProjectConfiguration):
+          debug project configuration.
     """
     project_information.keyword = 'Win32Proj'
 
@@ -3383,12 +3345,11 @@ class LibyalSourceVSSolution(VSSolution):
     """Configures the project as a local library.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      release_project_configuration: the release project configuration (instance
-                                     of LibyalReleaseVSProjectConfiguration).
-      debug_project_configuration: the debug project configuration (instance
-                                   of LibyalReleaseVSProjectConfiguration).
+      project_information (VSProjectInformation): project information.
+      release_project_configuration (LibyalReleaseVSProjectConfiguration):
+          release project configuration.
+      debug_project_configuration (LibyalReleaseVSProjectConfiguration):
+          debug project configuration.
     """
     lib_filename = '$(OutDir)\\$(ProjectName).lib'
 
@@ -3406,12 +3367,11 @@ class LibyalSourceVSSolution(VSSolution):
     """Configures the project as the zlib DLL.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      release_project_configuration: the release project configuration (instance
-                                     of LibyalReleaseVSProjectConfiguration).
-      debug_project_configuration: the debug project configuration (instance
-                                   of LibyalReleaseVSProjectConfiguration).
+      project_information (VSProjectInformation): project information.
+      release_project_configuration (LibyalReleaseVSProjectConfiguration):
+          release project configuration.
+      debug_project_configuration (LibyalReleaseVSProjectConfiguration):
+          debug project configuration.
     """
     project_information.source_files = sorted([
         '..\\..\\..\\zlib\\adler32.c',
@@ -3477,12 +3437,11 @@ class LibyalSourceVSSolution(VSSolution):
     """Configures the project for the Windows libcrypto equivalent.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      release_project_configuration: the release project configuration (instance
-                                     of LibyalReleaseVSProjectConfiguration).
-      debug_project_configuration: the debug project configuration (instance
-                                   of LibyalReleaseVSProjectConfiguration).
+      project_information (VSProjectInformation): project information.
+      release_project_configuration (LibyalReleaseVSProjectConfiguration):
+          release project configuration.
+      debug_project_configuration (LibyalReleaseVSProjectConfiguration):
+          debug project configuration.
     """
     dependency = 'advapi32.lib'
 
@@ -3498,12 +3457,11 @@ class LibyalSourceVSSolution(VSSolution):
     """Configures the project for the Windows libuuid equivalent.
 
     Args:
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      release_project_configuration: the release project configuration (instance
-                                     of LibyalReleaseVSProjectConfiguration).
-      debug_project_configuration: the debug project configuration (instance
-                                   of LibyalReleaseVSProjectConfiguration).
+      project_information (VSProjectInformation): project information.
+      release_project_configuration (LibyalReleaseVSProjectConfiguration):
+          release project configuration.
+      debug_project_configuration (LibyalReleaseVSProjectConfiguration):
+          debug project configuration.
     """
     dependency = 'rpcrt4.lib'
 
@@ -3518,15 +3476,12 @@ class LibyalSourceVSSolution(VSSolution):
     """Creates the project files for third party dependencies.
 
     Args:
-      solution_projects: a list containing the projects (instances of
-                         VSSolutionProject).
-      projects_by_guid: a dictionary of the projects (instances of
-                        VSProjectInformation) with their GUID in lower case
-                        as the key.
-      project_guids_by_name: a dictionary of the project GUIDs in lower case
-                             with their name as the key. This dictionary is
-                             use as a lookup table to preserve the existing
-                             GUIDs.
+      solution_projects (list[VSSolutionProject]): projects.
+      projects_by_guid (dict[str, VSProjectInformation]): projects per lower
+          case GUID.
+      project_guids_by_name (dict[str, VSProjectInformation]): lower case
+          project GUID per name. This dictionary is use as a lookup table
+          to preserve the existing GUIDs.
     """
     third_party_dependencies = []
     for project_information in projects_by_guid.itervalues():
@@ -3589,14 +3544,13 @@ class LibyalSourceVSSolution(VSSolution):
     """Reads the Makefile.am.
 
     Args:
-      makefile_am_path: the path of the Makefile.am file.
-      solution_name: the name of the solution.
-      project_information: the project information (instance of
-                           VSProjectInformation).
-      release_project_configuration: the release project configuration (instance
-                                     of LibyalReleaseVSProjectConfiguration).
-      debug_project_configuration: the debug project configuration (instance
-                                   of LibyalReleaseVSProjectConfiguration).
+      makefile_am_path (str): path of the Makefile.am file.
+      solution_name (str): name of the solution.
+      project_information (VSProjectInformation): project information.
+      release_project_configuration (LibyalReleaseVSProjectConfiguration):
+          release project configuration.
+      debug_project_configuration (LibyalReleaseVSProjectConfiguration):
+          debug project configuration.
     """
     project_name = project_information.name
 
@@ -3907,10 +3861,10 @@ class LibyalSourceVSSolution(VSSolution):
     """Reads the programs section in the Makefile.am.
 
     Args:
-      makefile_am_path: the path of the Makefile.am file.
+      makefile_am_path (str): path of the Makefile.am file.
 
     Returns:
-      A list containing the binary program names.
+      list[str]: binary program names.
     """
     file_object = open(makefile_am_path, 'r')
 
@@ -3942,11 +3896,11 @@ class LibyalSourceVSSolution(VSSolution):
     """Converts a Visual Studio solution.
 
     Args:
-      input_directory: the path of the input directory.
-      output_version: the output version of the Visual Studio.
+      input_directory (str): path of the input directory.
+      output_version (str): output Visual Studio version.
 
     Returns:
-      True if the conversion successful or False if not.
+      bool: True if the conversion successful or False if not.
     """
     configure_ac_path = os.path.join(input_directory, 'configure.ac')
     if not os.path.exists(configure_ac_path):
@@ -4170,7 +4124,7 @@ def Main():
   """The main program function.
 
   Returns:
-    A boolean containing True if successful or False if not.
+    bool: True if successful or False if not.
   """
   output_formats = frozenset(['2008', '2010', '2012', '2013'])
 
