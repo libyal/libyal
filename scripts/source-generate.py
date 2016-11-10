@@ -1715,6 +1715,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     tests.extend(test_api_types_with_input)
     tests = sorted(tests)
 
+    has_python_module = self._HasPythonModule(project_configuration)
+
     template_directory = os.path.join(
         self._template_directory, u'Makefile.am')
     output_filename = os.path.join(u'tests', u'Makefile.am')
@@ -1745,11 +1747,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     check_scripts = [u'test_runner.sh']
     check_scripts.extend(test_scripts)
-    check_scripts.extend(python_scripts)
-    check_scripts.extend(python_test_scripts)
+    if has_python_module:
+      check_scripts.extend(python_scripts)
+      check_scripts.extend(python_test_scripts)
     check_scripts = sorted(check_scripts)
 
-    if project_configuration.python_module_name:
+    if has_python_module:
       test_script = u'$(TESTS_{0:s})'.format(
           project_configuration.python_module_name.upper())
       test_scripts.append(test_script)
@@ -1776,7 +1779,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    if self._HasPythonModule(project_configuration):
+    if has_python_module:
       template_filename = os.path.join(template_directory, u'python.am')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -1860,7 +1863,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     with open(output_filename, 'wb') as file_object:
       for line in lines:
-        stripped_line = line.rstrip()
+        stripped_line = line.strip()
         if stripped_line.endswith(b'_SOURCES = \\'):
           file_object.write(line)
           sources = []
@@ -1877,6 +1880,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
                 [b'\t{0:s}'.format(filename) for filename in sorted(sources)])
 
             file_object.writelines(sorted_lines)
+            file_object.write(b'\n')
             file_object.write(line)
             in_sources = False
 

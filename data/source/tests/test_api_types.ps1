@@ -1,6 +1,6 @@
 # Library API type testing script
 #
-# Version: 20161107
+# Version: 20161110
 
 $$ExitSuccess = 0
 $$ExitFailure = 1
@@ -11,7 +11,7 @@ $$TestPrefix = Split-Path -path $${TestPrefix} -leaf
 $$TestPrefix = $${TestPrefix}.Substring(3)
 
 $$TestTypes = "${test_api_types}"
-$$TestTypes = $${TestTypes} -split " "
+$$TestTypesWithInput = "${test_api_types_with_input}"
 
 $$TestToolDirectory = "..\msvscpp\Release"
 
@@ -55,7 +55,17 @@ If (-Not (Test-Path $${TestToolDirectory}))
 
 $$Result = $${ExitIgnore}
 
-Foreach ($${TestType} in $${TestTypes})
+Foreach ($${TestType} in $${TestTypes} -split " ")
+{
+	$$Result = TestAPIType $${TestType}
+
+	If ($${Result} -ne $${ExitSuccess})
+	{
+		Break
+	}
+}
+
+Foreach ($${TestType} in $${TestTypesWithInput} -split " ")
 {
 	$$Result = TestAPIType $${TestType}
 

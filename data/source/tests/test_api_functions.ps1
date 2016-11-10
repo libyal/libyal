@@ -1,6 +1,6 @@
 # Library API functions testing script
 #
-# Version: 20161107
+# Version: 20161110
 
 $$ExitSuccess = 0
 $$ExitFailure = 1
@@ -11,7 +11,7 @@ $$TestPrefix = Split-Path -path $${TestPrefix} -leaf
 $$TestPrefix = $${TestPrefix}.Substring(3)
 
 $$TestFunctions = "${test_api_functions}"
-$$TestFunctions = $${TestFunctions} -split " "
+$$TestFunctionsWithInput = "${test_api_functions_with_input}"
 
 $$TestToolDirectory = "..\msvscpp\Release"
 
@@ -55,7 +55,17 @@ If (-Not (Test-Path $${TestToolDirectory}))
 
 $$Result = $${ExitIgnore}
 
-Foreach ($${TestFunction} in $${TestFunctions})
+Foreach ($${TestFunction} in $${TestFunctions} -split " ")
+{
+	$$Result = TestAPIFunction $${TestFunction}
+
+	If ($${Result} -ne $${ExitSuccess})
+	{
+		Break
+	}
+}
+
+Foreach ($${TestFunction} in $${TestFunctionsWithInput} -split " ")
 {
 	$$Result = TestAPIFunction $${TestFunction}
 
