@@ -45,6 +45,7 @@ class ProjectConfiguration(object):
 
     self.tools_authors = None
     self.tools_name = None
+    self.tools_names = None
 
     self.tests_authors = None
 
@@ -1017,7 +1018,6 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     # TODO: types.h alingment of debug types?
     # TODO: libsmraw/libsmraw_codepage.h alignment of definitions
     # TODO: libfvalue/libfvalue_codepage.h different
-    # TODO: libfvde/libfvde.rc.in fix multi authors
 
     include_header_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -1077,6 +1077,8 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     template_mappings[u'library_type_definitions'] = u'\n'.join(
         library_type_definitions)
 
+    authors_template_mapping = template_mappings[u'authors']
+
     for directory_entry in os.listdir(self._template_directory):
       if not directory_entry.startswith(u'libyal'):
         continue
@@ -1125,6 +1127,12 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           u'libyal.c', u'libyal_extern.h', u'libyal.rc.in', u'libyal_support.c',
           u'libyal_support.h', u'libyal_unused.h'):
         continue
+
+      if directory_entry == u'libyal.rc.in':
+        template_mappings[u'authors'] = u', '.join(
+            project_configuration.project_authors)
+      else:
+        template_mappings[u'authors'] = authors_template_mapping
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
@@ -1415,17 +1423,24 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    # TODO: add support for volume, handle, etc.
-    function_name = u'{0:s}_check_file_signature'.format(
-        project_configuration.library_name)
-    has_check_signature = (
-        function_name in include_header_file.functions_per_name)
+    has_check_signature = False
+    signature_type = None
+    for signature_type in (u'file', u'volume'):
+      function_name = u'{0:s}_check_{1:s}_signature'.format(
+          project_configuration.library_name, signature_type)
+      has_check_signature = (
+          function_name in include_header_file.functions_per_name)
+      if has_check_signature:
+        break
 
     if has_check_signature:
       template_filename = os.path.join(
           template_directory, u'includes_with_input.c')
     else:
       template_filename = os.path.join(template_directory, u'includes.c')
+
+    if signature_type:
+      template_mappings[u'signature_type'] = signature_type
 
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
@@ -1445,6 +1460,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    # TODO: add support for volume, handle, etc.
     if has_check_signature:
       template_filename = os.path.join(template_directory, u'check_signature.c')
       self._GenerateSection(
@@ -1966,15 +1982,27 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     for section_name, functions in (
         include_header_file.functions_per_section.items()):
 
+      if not functions:
+        continue
+
+      function_name = None
+      for function_prototype in functions:
+        if function_prototype.name.endswith(u'_free'):
+          function_name = function_prototype.name
+          _, _, function_name = function_name.rpartition(
+              project_configuration.library_name)
+          function_name, _, _ = function_name.rpartition(u'_free')
+          break
+
       section_name = section_name.replace(u' ', u'_')
       section_name = section_name.lower()
       section_name, _, _ = section_name.rpartition(u'_functions')
 
-      function_name = u'{0:s}_{1:s}_'.format(
+      function_name_prefix = u'{0:s}_{1:s}_'.format(
           project_configuration.library_name, section_name)
 
       function_prototype = functions[0]
-      if not function_prototype.name.startswith(function_name):
+      if not function_prototype.name.startswith(function_name_prefix):
         # Ignore the section header is just informative.
         continue
 
@@ -2086,6 +2114,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       elif directory_entry in (u'test_api_types.ps1', u'test_api_types.sh'):
         force_create = bool(test_api_types or test_api_types_with_input)
+
+      elif directory_entry in (u'test_yalinfo.ps1', u'test_yalinfo.sh'):
+        tool_name = u'{0:s}info'.format(
+            project_configuration.library_name_suffix)
+        force_create = tool_name in project_configuration.tools_names
 
       elif directory_entry == 'yal_test_error.c':
         force_create = u'error' in test_api_functions

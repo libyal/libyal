@@ -55,22 +55,22 @@ int main(
 	if( source != NULL )
 	{
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
-		 "${library_name}_check_file_signature",
-		 ${library_name_suffix}_test_check_file_signature,
+		 "${library_name}_check_${signature_type}_signature",
+		 ${library_name_suffix}_test_check_${signature_type}_signature,
 		 source );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
-		 "${library_name}_check_file_signature_wide",
-		 ${library_name_suffix}_test_check_file_signature_wide,
+		 "${library_name}_check_${signature_type}_signature_wide",
+		 ${library_name_suffix}_test_check_${signature_type}_signature_wide,
 		 source );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 #if defined( LIB${library_name_suffix_upper_case}_HAVE_BFIO )
 
-		/* TODO add test for ${library_name}_file_open_file_io_handle */
+		/* TODO add test for ${library_name}_check_${signature_type}_file_io_handle */
 
 #endif /* defined( LIB${library_name_suffix_upper_case}_HAVE_BFIO ) */
 	}

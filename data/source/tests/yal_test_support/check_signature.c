@@ -1,7 +1,7 @@
-/* Tests the ${library_name}_check_file_signature function
+/* Tests the ${library_name}_check_${signature_type}_signature function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_check_file_signature(
+int ${library_name_suffix}_test_check_${signature_type}_signature(
      const system_character_t *source )
 {
 	char narrow_source[ 256 ];
@@ -26,9 +26,9 @@ int ${library_name_suffix}_test_check_file_signature(
          "error",
          error );
 
-	/* Test check file signature
+	/* Test check ${signature_type} signature
 	 */
-	result = ${library_name}_check_file_signature(
+	result = ${library_name}_check_${signature_type}_signature(
 	          narrow_source,
 	          &error );
 
@@ -43,7 +43,7 @@ int ${library_name_suffix}_test_check_file_signature(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_check_file_signature(
+	result = ${library_name}_check_${signature_type}_signature(
 	          NULL,
 	          &error );
 
@@ -72,10 +72,10 @@ on_error:
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
-/* Tests the ${library_name}_check_file_signature_wide function
+/* Tests the ${library_name}_check_${signature_type}_signature_wide function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_check_file_signature_wide(
+int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
      const system_character_t *source )
 {
 	wchar_t wide_source[ 256 ];
@@ -100,9 +100,9 @@ int ${library_name_suffix}_test_check_file_signature_wide(
          "error",
          error );
 
-	/* Test check file signature
+	/* Test check ${signature_type} signature
 	 */
-	result = ${library_name}_check_file_signature_wide(
+	result = ${library_name}_check_${signature_type}_signature_wide(
 	          wide_source,
 	          &error );
 
@@ -117,7 +117,7 @@ int ${library_name_suffix}_test_check_file_signature_wide(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_check_file_signature_wide(
+	result = ${library_name}_check_${signature_type}_signature_wide(
 	          NULL,
 	          &error );
 
