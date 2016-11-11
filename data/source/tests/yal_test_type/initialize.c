@@ -8,6 +8,12 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	${library_name}_${type_name}_t *${type_name} = NULL;
 	int result                                   = 0;
 
+#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+	int number_of_malloc_fail_tests              = 1;
+	int number_of_memset_fail_tests              = 1;
+	int test_number                              = 0;
+#endif
+
 	/* Test regular cases
 	 */
 	result = ${library_name}_${type_name}_initialize(
@@ -84,79 +90,89 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 
 #if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
 
-	/* Test ${library_name}_${type_name}_initialize with malloc failing
-	 */
-	${library_name_suffix}_test_malloc_attempts_before_fail = 0;
-
-	result = ${library_name}_${type_name}_initialize(
-	          &${type_name},
-	          &error );
-
-	if( ${library_name_suffix}_test_malloc_attempts_before_fail != -1 )
+	for( test_number = 0;
+	     test_number < number_of_malloc_fail_tests;
+	     test_number++ )
 	{
-		${library_name_suffix}_test_malloc_attempts_before_fail = -1;
+		/* Test ${library_name}_${type_name}_initialize with malloc failing
+		 */
+		${library_name_suffix}_test_malloc_attempts_before_fail = test_number;
 
-		if( ${type_name} != NULL )
+		result = ${library_name}_${type_name}_initialize(
+		          &${type_name},
+		          &error );
+
+		if( ${library_name_suffix}_test_malloc_attempts_before_fail != -1 )
 		{
-			${library_name}_${type_name}_free(
-			 &${type_name},
-			 NULL );
+			${library_name_suffix}_test_malloc_attempts_before_fail = -1;
+
+			if( ${type_name} != NULL )
+			{
+				${library_name}_${type_name}_free(
+				 &${type_name},
+				 NULL );
+			}
+		}
+		else
+		{
+			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			 "result",
+			 result,
+			 -1 );
+
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			 "${type_name}",
+			 ${type_name} );
+
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			 "error",
+			 error );
+
+			libcerror_error_free(
+			 &error );
 		}
 	}
-	else
+	for( test_number = 0;
+	     test_number < number_of_memset_fail_tests;
+	     test_number++ )
 	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
+		/* Test ${library_name}_${type_name}_initialize with memset failing
+		 */
+		${library_name_suffix}_test_memset_attempts_before_fail = test_number;
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-		 "${type_name}",
-		 ${type_name} );
+		result = ${library_name}_${type_name}_initialize(
+		          &${type_name},
+		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
-
-		libcerror_error_free(
-		 &error );
-	}
-	/* Test ${library_name}_${type_name}_initialize with memset failing
-	 */
-	${library_name_suffix}_test_memset_attempts_before_fail = 0;
-
-	result = ${library_name}_${type_name}_initialize(
-	          &${type_name},
-	          &error );
-
-	if( ${library_name_suffix}_test_memset_attempts_before_fail != -1 )
-	{
-		${library_name_suffix}_test_memset_attempts_before_fail = -1;
-
-		if( ${type_name} != NULL )
+		if( ${library_name_suffix}_test_memset_attempts_before_fail != -1 )
 		{
-			${library_name}_${type_name}_free(
-			 &${type_name},
-			 NULL );
+			${library_name_suffix}_test_memset_attempts_before_fail = -1;
+
+			if( ${type_name} != NULL )
+			{
+				${library_name}_${type_name}_free(
+				 &${type_name},
+				 NULL );
+			}
 		}
-	}
-	else
-	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
+		else
+		{
+			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			 "result",
+			 result,
+			 -1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-		 "${type_name}",
-		 ${type_name} );
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			 "${type_name}",
+			 ${type_name} );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			 "error",
+			 error );
 
-		libcerror_error_free(
-		 &error );
+			libcerror_error_free(
+			 &error );
+		}
 	}
 #endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
 

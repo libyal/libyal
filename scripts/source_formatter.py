@@ -125,7 +125,8 @@ class SourceFormatter(object):
     """
     aligned_lines = []
     for line in lines:
-      if b'=' in line:
+      striped_line = line.strip()
+      if b'=' in striped_line and not striped_line.endswith(b' = {'):
         prefix, _, suffix = line.rpartition(b'=')
         prefix = prefix.rstrip()
         formatted_prefix = prefix.replace(b'\t', ' ' * 8)
@@ -150,7 +151,8 @@ class SourceFormatter(object):
     """
     alignment_offset = None
     for line in lines:
-      if b'=' not in line:
+      striped_line = line.strip()
+      if b'=' not in striped_line or striped_line.endswith(b' = {'):
         continue
 
       prefix, _, suffix = line.rpartition(b'=')
@@ -177,14 +179,26 @@ class SourceFormatter(object):
     """
     alignment_offset = self.VerticalAlignEqualSignsDetermineOffset(lines)
 
+    in_declaration_block = False
     formatted_lines = []
     declaration_lines = []
     for line in lines:
       striped_line = line.strip()
-      if striped_line and not (
-          striped_line.startswith(b'#') or
-          striped_line.startswith(u'/*') or
-          striped_line.startswith(b'*/')):
+      if in_declaration_block:
+        if striped_line.endswith(b'};'):
+          in_declaration_block = False
+        formatted_lines.append(line)
+        continue
+
+      if striped_line.endswith(b' = {'):
+        in_declaration_block = True
+        formatted_lines.append(line)
+        continue
+
+      if (striped_line and
+          not striped_line.startswith(b'#') and
+          not striped_line.startswith(b'/*') and
+          not striped_line.startswith(b'*/')):
         declaration_lines.append(line)
         continue
 

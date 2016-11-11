@@ -861,14 +861,17 @@ class TypesIncludeHeaderFile(object):
 class SourceFileGenerator(object):
   """Class that generates source files."""
 
-  def __init__(self, projects_directory, template_directory):
+  def __init__(
+      self, projects_directory, template_directory, experimental=False):
     """Initialize the source file generator.
 
     Args:
       projects_directory (str): path of the projects directory.
       template_directory (str): path of the template directory.
+      experimental (bool): True if experimental features should be enabled.
     """
     super(SourceFileGenerator, self).__init__()
+    self._experimental = experimental
     self._has_python_module = None
     self._library_include_header_file = None
     self._library_include_header_path = None
@@ -1804,13 +1807,24 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       test_scripts.append(test_script)
 
     python_scripts = []
-    python_test_scripts = [u'test_python_functions.sh']
+    python_test_scripts = [
+        u'test_python_functions.sh',
+        u'test_{0:s}_set_ascii_codepage.sh'.format(
+            project_configuration.python_module_name)]
 
     check_scripts = [u'test_runner.sh']
     check_scripts.extend(test_scripts)
     if has_python_module:
       check_scripts.extend(python_scripts)
       check_scripts.extend(python_test_scripts)
+      check_scripts.extend([
+          u'{0:s}_test_get_version.py'.format(
+              project_configuration.python_module_name),
+          u'{0:s}_test_open_close.py'.format(
+              project_configuration.python_module_name),
+          u'{0:s}_test_set_ascii_codepage.py'.format(
+              project_configuration.python_module_name)])
+
     check_scripts = sorted(check_scripts)
 
     if has_python_module:
@@ -1824,6 +1838,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           project_configuration.library_name_suffix, test)
       check_programs.append(check_program)
 
+    template_mappings[u'python_tests'] = u' \\\n'.join(
+        [u'\t{0:s}'.format(filename) for filename in python_test_scripts])
     template_mappings[u'tests'] = u' \\\n'.join(
         [u'\t{0:s}'.format(filename) for filename in test_scripts])
     template_mappings[u'check_scripts'] = u' \\\n'.join(
@@ -1940,7 +1956,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         project_configuration.library_name_suffix, type_name)
     output_filename = os.path.join(u'tests', output_filename)
 
-    if os.path.exists(output_filename):
+    if os.path.exists(output_filename) and not self._experimental:
       return
 
     # TODO: libfmapi do not generate error type tests
@@ -2030,6 +2046,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           tests_to_run_with_args.append((function_name, test_function_name))
         function_names.remove(function_name)
 
+        # TODO: remove open, open_wide, close, open_file_io_handle, open_read?
+
     function_name, test_function_name = self._GenerateTypeTest(
         project_configuration, template_mappings, type_name,
         u'set_ascii_codepage', header_file, output_writer,
@@ -2086,6 +2104,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             u'\t "{0:s}",'.format(function_name),
             u'\t {0:s} );'.format(test_function_name)])
 
+    template_mapping.append(u'')
     template_mappings[u'test_to_run'] = u'\n'.join(template_mapping)
 
     template_mapping = []
@@ -2103,6 +2122,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             u'\t\t {0:s},'.format(test_function_name),
             u'\t\t {0:s} );'.format(type_name)])
 
+    template_mapping.append(u'')
     template_mappings[u'tests_to_run_with_args'] = u'\n'.join(template_mapping)
 
     if with_input:
@@ -2277,7 +2297,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           in_variable_declarations = True
 
         elif in_variable_declarations:
-          if b'(' not in stripped_line:
+          if (b'(' not in stripped_line or
+              stripped_line.startswith(b'#if defined(')):
             variable_declarations.append(line)
 
           else:
@@ -2331,6 +2352,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     api_types, api_types_with_input = (
         include_header_file.GetAPITypeTestGroups(project_configuration))
 
+    # TODO: handle internal functions
     types = self._GetLibraryTypes(project_configuration, makefile_am_file)
 
     public_functions = set(api_functions).union(set(api_functions_with_input))
@@ -2508,10 +2530,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    tools_name = u'{0:s}tools'.format(
-        project_configuration.library_name_suffix)
-
-    tools_path = os.path.join(self._projects_directory, tools_name)
+    tools_name = u'{0:s}tools'.format(project_configuration.library_name_suffix)
+    tools_path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        tools_name)
 
     library_header = u'yaltools_{0:s}.h'.format(
         project_configuration.library_name)
@@ -2662,7 +2684,7 @@ def Main():
   # include headers
   # yal.net files
 
-  source_files = [
+  SOURCE_GENERATORS = [
       (u'common', CommonSourceFileGenerator),
       (u'config', ConfigurationFileGenerator),
       (u'include', IncludeSourceFileGenerator),
@@ -2672,16 +2694,14 @@ def Main():
       (u'tests', TestsSourceFileGenerator),
       (u'yaltools', ToolsSourceFileGenerator),
   ]
-  if options.experimental:
-    source_files.extend([
-        (u'bogus', None),
-    ])
 
-  for page_name, page_generator_class in source_files:
-    template_directory = os.path.join(
-        libyal_directory, u'data', u'source', page_name)
-    source_file = page_generator_class(
-        projects_directory, template_directory)
+  sources_directory = os.path.join(
+      libyal_directory, u'data', u'source')
+  for source_category, source_generator_class in SOURCE_GENERATORS:
+    template_directory = os.path.join(sources_directory, source_category,)
+    source_file = source_generator_class(
+        projects_directory, template_directory,
+        experimental=options.experimental)
 
     if options.output_directory:
       output_writer = FileWriter(options.output_directory)
@@ -2698,11 +2718,13 @@ def Main():
       (u'libyal.3', LibraryManPageGenerator),
   ]
 
-  for page_name, page_generator_class in source_files:
-    template_directory = os.path.join(
-        libyal_directory, u'data', u'source', u'manuals', page_name)
-    source_file = page_generator_class(
-        projects_directory, template_directory)
+  manuals_directory = os.path.join(
+      libyal_directory, u'data', u'source', u'manuals')
+  for source_category, source_generator_class in source_files:
+    template_directory = os.path.join(manuals_directory, source_category)
+    source_file = source_generator_class(
+        projects_directory, template_directory,
+        experimental=options.experimental)
 
     if options.output_directory:
       output_writer = FileWriter(options.output_directory)

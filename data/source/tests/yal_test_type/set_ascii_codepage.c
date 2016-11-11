@@ -40,11 +40,11 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
 		${library_name_upper_case}_CODEPAGE_KOI8_R,
 		${library_name_upper_case}_CODEPAGE_KOI8_U };
 
-	libcerror_error_t *error = NULL;
-	${library_name}_${type_name}_t *${type_name}      = NULL;
-	int codepage             = 0;
-	int index                = 0;
-	int result               = 0;
+	libcerror_error_t *error                     = NULL;
+	${library_name}_${type_name}_t *${type_name} = NULL;
+	int codepage                                 = 0;
+	int index                                    = 0;
+	int result                                   = 0;
 
 	/* Initialize test
 	 */

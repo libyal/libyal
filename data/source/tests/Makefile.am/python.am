@@ -1,5 +1,5 @@
 if HAVE_PYTHON_TESTS
 TESTS_${python_module_name_upper_case} = \
-	test_python_functions.sh
+${python_tests}
 endif
 
