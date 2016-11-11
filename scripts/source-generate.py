@@ -231,6 +231,8 @@ class FunctionPrototype(object):
         defined.
     have_debug_output (bool): True if the function prototype is defined if
         debug output is defined.
+    have_extern (bool): True if the function prototype is defined as
+        externally available (API).
     have_wide_character_type (bool): True if the function prototype is
         defined if the wide character type is defined.
     name (str): name.
@@ -248,6 +250,7 @@ class FunctionPrototype(object):
     self._arguments = []
     self.have_bfio = False
     self.have_debug_output = False
+    self.have_extern = False
     self.have_wide_character_type = False
     self.name = name
     self.return_type = return_type
@@ -466,17 +469,17 @@ class LibraryIncludeHeaderFile(object):
     function_argument = None
     function_prototype = None
     have_bfio = False
+    have_extern = False
     have_debug_output = False
     have_wide_character_type = False
     in_define_deprecated = False
-    in_define_extern = False
     in_section = False
     section_name = None
     with open(self._path, 'rb') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
-        if in_define_extern:
+        if have_extern:
           line = line.decode(u'ascii')
 
           if function_prototype:
@@ -513,11 +516,11 @@ class LibraryIncludeHeaderFile(object):
 
               function_prototype = None
               in_define_deprecated = False
-              in_define_extern = False
+              have_extern = False
 
           elif line.endswith(u';'):
             # The line contains a variable definition.
-            in_define_extern = False
+            have_extern = False
 
           else:
             # Get the part of the line before the library name.
@@ -533,6 +536,7 @@ class LibraryIncludeHeaderFile(object):
 
             function_prototype = FunctionPrototype(name, return_type)
             function_prototype.have_bfio = have_bfio
+            function_prototype.have_extern = have_extern
             function_prototype.have_debug_output = have_debug_output
             function_prototype.have_wide_character_type = (
                 have_wide_character_type)
@@ -549,30 +553,30 @@ class LibraryIncludeHeaderFile(object):
             self.functions_per_section[section_name] = []
             in_section = False
 
-        elif line.startswith(define_deprecated):
-          in_define_deprecated = True
-
-        elif line.startswith(define_extern):
-          in_define_extern = True
-
         elif line == (
             b'/* -------------------------------------------------------------'
             b'------------'):
           in_section = True
 
-        elif line.startswith(b'#endif'):
-          have_bfio = False
-          have_debug_output = False
-          have_wide_character_type = False
-
-        elif line.startswith(define_have_debug_output):
-          have_debug_output = True
+        elif line.startswith(define_deprecated):
+          in_define_deprecated = True
 
         elif line.startswith(define_have_bfio):
           have_bfio = True
 
+        elif line.startswith(define_extern):
+          have_extern = True
+
+        elif line.startswith(define_have_debug_output):
+          have_debug_output = True
+
         elif line.startswith(define_have_wide_character_type):
           have_wide_character_type = True
+
+        elif line.startswith(b'#endif'):
+          have_bfio = False
+          have_debug_output = False
+          have_wide_character_type = False
 
 
 class LibraryHeaderFile(object):
@@ -605,6 +609,9 @@ class LibraryHeaderFile(object):
     self.functions_per_name = collections.OrderedDict()
     self.types = []
 
+    define_extern = b'{0:s}_EXTERN'.format(
+        project_configuration.library_name.upper())
+
     define_have_bfio = b'#if defined( {0:s}_HAVE_BFIO )'.format(
         project_configuration.library_name.upper())
 
@@ -616,6 +623,7 @@ class LibraryHeaderFile(object):
     function_argument = None
     function_prototype = None
     have_bfio = False
+    have_extern = False
     have_debug_output = False
     have_wide_character_type = False
     in_function_prototype = False
@@ -655,6 +663,7 @@ class LibraryHeaderFile(object):
 
             function_prototype = None
             in_function_prototype = False
+            have_extern = False
 
         elif line.endswith(b'('):
           # Get the part of the line before the library name.
@@ -670,25 +679,29 @@ class LibraryHeaderFile(object):
 
           function_prototype = FunctionPrototype(name, return_type)
           function_prototype.have_bfio = have_bfio
+          function_prototype.have_extern = have_extern
           function_prototype.have_debug_output = have_debug_output
           function_prototype.have_wide_character_type = (
               have_wide_character_type)
 
           in_function_prototype = True
 
-        elif line.startswith(b'#endif'):
-          have_bfio = False
-          have_debug_output = False
-          have_wide_character_type = False
+        elif line.startswith(define_have_bfio):
+          have_bfio = True
+
+        elif line.startswith(define_extern):
+          have_extern = True
 
         elif line.startswith(define_have_debug_output):
           have_debug_output = True
 
-        elif line.startswith(define_have_bfio):
-          have_bfio = True
-
         elif line.startswith(define_have_wide_character_type):
           have_wide_character_type = True
+
+        elif line.startswith(b'#endif'):
+          have_bfio = False
+          have_debug_output = False
+          have_wide_character_type = False
 
         elif line.startswith(b'typedef struct '):
           type_name = line.split(b' ')[2]
@@ -1884,68 +1897,29 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_filename (str): path of the output file.
 
     Returns:
-      str: call of test to run or None.
+      tuple[str, str]: names of the library type function and its corresponding
+          test function. The test function name is None if no test was generated.
     """
     function_name = u'{0:s}_{1:s}_{2:s}'.format(
         project_configuration.library_name, type_name, type_function)
     if function_name not in header_file.functions_per_name:
-      return
+      return function_name, None
 
     template_filename = u'{0:s}.c'.format(type_function)
     template_filename = os.path.join(
         self._template_directory, u'yal_test_type', template_filename)
+    if not os.path.exists(template_filename):
+      return function_name, None
+
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    return (
-        u'\n'
-        u'\t{0:s}_TEST_RUN(\n'
-        u'\t "{1:s}_{2:s}_{3:s}",\n'
-        u'\t {4:s}_test_{2:s}_{3:s} );\n').format(
-            project_configuration.library_name_suffix.upper(),
-            project_configuration.library_name, type_name,
-            type_function, project_configuration.library_name_suffix)
+    test_function_name = u'{0:s}_test_{1:s}_{2:s}'.format(
+        project_configuration.library_name_suffix, type_name,
+        type_function)
 
-  def _GenerateTypeTestWithArgs(
-      self, project_configuration, template_mappings, type_name,
-      type_function, header_file, output_writer, output_filename):
-    """Generates a type test with arguments within the type tests source file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      type_name (str): name of type.
-      type_function (str): type function.
-      header_file (LibraryHeaderFile): library header file.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
-
-    Returns:
-      str: call of test to run or None.
-    """
-    function_name = u'{0:s}_{1:s}_{2:s}'.format(
-        project_configuration.library_name, type_name, type_function)
-    if function_name not in header_file.functions_per_name:
-      return
-
-    template_filename = u'{0:s}.c'.format(type_function)
-    template_filename = os.path.join(
-        self._template_directory, u'yal_test_type', template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    return (
-        u'\n'
-        u'\t\t{0:s}_TEST_RUN_WITH_ARGS(\n'
-        u'\t\t "{1:s}_{2:s}_{3:s}",\n'
-        u'\t\t {4:s}_test_{2:s}_{3:s},\n'
-        u'\t\t {2:s} );\n').format(
-            project_configuration.library_name_suffix.upper(),
-            project_configuration.library_name, type_name,
-            type_function, project_configuration.library_name_suffix)
+    return function_name, test_function_name
 
   def _GenerateTypeTests(
       self, project_configuration, template_mappings, type_name, output_writer,
@@ -1993,11 +1967,19 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       logging.warning(u'Skipping: {0:s}'.format(header_file_path))
       return
 
+    function_names = list(header_file.functions_per_name.keys())
+    tests_to_run = []
+    tests_to_run_with_args = []
+
+    function_name = u'{0:s}_{1:s}_initialize'.format(
+        project_configuration.library_name, type_name)
+    function_prototype = header_file.functions_per_name.get(function_name, None)
+
+    initialize_is_internal = (
+        function_prototype and not function_prototype.have_extern)
+
     template_mappings[u'type_name'] = type_name
     template_mappings[u'type_name_upper_case'] = type_name.upper()
-
-    function_name = u'{0:s}_{1:s}_open'.format(
-        project_configuration.library_name, type_name)
 
     template_filename = os.path.join(template_directory, u'header.c')
     self._GenerateSection(
@@ -2013,91 +1995,74 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if is_internal:
+    if is_internal or initialize_is_internal:
       template_filename = os.path.join(
-          template_directory, u'internal_type_includes.c')
+          template_directory, u'includes_internal.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
       template_filename = os.path.join(
-          template_directory, u'internal_type_start.c')
+          template_directory, u'define_internal_start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
-
-    tests_to_run = []
-    tests_to_run_with_input = []
 
     for type_function in (u'initialize', u'free'):
-      test_to_run = self._GenerateTypeTest(
+      function_name, test_function_name = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, type_function,
           header_file, output_writer, output_filename)
-      if test_to_run:
-        tests_to_run.append(test_to_run)
+      if test_function_name:
+        tests_to_run.append((function_name, test_function_name))
+        function_names.remove(function_name)
 
     # TODO: fix libbfio having no open wide.
     if with_input:
       for type_function in (u'open', u'get_ascii_codepage'):
-        test_to_run = self._GenerateTypeTestWithArgs(
+        function_name, test_function_name = self._GenerateTypeTest(
             project_configuration, template_mappings, type_name, type_function,
             header_file, output_writer, output_filename)
 
-    test_to_run = self._GenerateTypeTest(
+      if test_function_name:
+        # The open, close and open-close functions are defined in the template
+        # so no need to add them to tests_to_run or tests_to_run_with_args.
+        if type_function != u'open':
+          tests_to_run_with_args.append((function_name, test_function_name))
+        function_names.remove(function_name)
+
+    function_name, test_function_name = self._GenerateTypeTest(
         project_configuration, template_mappings, type_name,
         u'set_ascii_codepage', header_file, output_writer,
         output_filename)
-    if test_to_run:
-      tests_to_run.append(test_to_run)
+    if test_function_name:
+      tests_to_run.append((function_name, test_function_name))
+      function_names.remove(function_name)
 
-    if with_input:
-      name_prefix = u'{0:s}_{1:s}_'.format(
-          project_configuration.library_name, type_name)
-      name_prefix_length = len(name_prefix)
+    function_name_prefix = u'{0:s}_{1:s}_'.format(
+        project_configuration.library_name, type_name)
+    function_name_prefix_length = len(function_name_prefix)
 
-      get_number_of_prefix = u'{0:s}_{1:s}_get_number_of_'.format(
-          project_configuration.library_name, type_name)
-      get_number_of_prefix_length = len(get_number_of_prefix)
+    for function_name in function_names:
+      if not function_name.startswith(function_name_prefix):
+        continue
 
-      for function_name in header_file.functions_per_name.keys():
-        if not function_name.startswith(name_prefix):
-          continue
+      type_function = function_name[function_name_prefix_length:]
+      test_function_name = None
 
-        type_function = function_name[name_prefix_length:]
-        # TODO: fix open still being generated.
-        if type_function in (u'open', u'get_ascii_codepage'):
-          continue
+      template_filename = os.path.join(template_directory, template_filename)
+      if os.path.exists(template_filename):
+        _, test_function_name = self._GenerateTypeTest(
+            project_configuration, template_mappings, type_name, type_function,
+            header_file, output_writer, output_filename)
 
-        if function_name.startswith(get_number_of_prefix):
-          template_filename = u'get_number_of_value.c'
-          template_mappings[u'value_name'] = function_name[
-              get_number_of_prefix_length:]
-        else:
-          continue
+      if with_input:
+        tests_to_run_with_args.append((function_name, test_function_name))
+      else:
+        tests_to_run.append((function_name, test_function_name))
 
-        template_filename = os.path.join(template_directory, template_filename)
-        if not os.path.exists(template_filename):
-          continue
-
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
-
-        test_to_run = (
-            u'\n'
-            u'\t\t{0:s}_TEST_RUN_WITH_ARGS(\n'
-            u'\t\t "{1:s}_{2:s}_{3:s}",\n'
-            u'\t\t {4:s}_test_{2:s}_{3:s},\n'
-            u'\t\t {2:s} );\n').format(
-                project_configuration.library_name_suffix.upper(),
-                project_configuration.library_name, type_name,
-                type_function, project_configuration.library_name_suffix)
-              
-        tests_to_run_with_input.append(test_to_run)
-
-    if is_internal:
+    if is_internal or initialize_is_internal:
       template_filename = os.path.join(
-          template_directory, u'internal_type_end.c')
+          template_directory, u'define_internal_end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -2105,21 +2070,40 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: create generic test for get_number_of_X API functions.
     # TODO: generate run test macros.
 
-    if not tests_to_run:
-      tests_to_run = u'\t\t/* TODO: add tests */\n\n'
-    else:
-      # Remove leading empty line.
-      tests_to_run[0] = tests_to_run[0][1:]
+    library_name_suffix = project_configuration.library_name_suffix.upper()
 
-    if not tests_to_run_with_input:
-      tests_to_run_with_input = u'\t\t/* TODO: add tests */\n\n'
-    else:
-      # Remove leading empty line.
-      tests_to_run_with_input[0] = tests_to_run_with_input[0][1:]
+    template_mapping = []
+    for function_name, test_function_name in tests_to_run:
+      if template_mapping:
+        template_mapping.append(u'')
 
-    template_mappings[u'test_to_run'] = u''.join(tests_to_run)
-    template_mappings[u'tests_to_run_with_input'] = u''.join(
-        tests_to_run_with_input)
+      if not test_function_name:
+        template_mapping.append(
+            u'\t/* TODO: add tests for {0:s} */'.format(function_name))
+      else:
+        template_mapping.extend([
+            u'\t{0:s}_TEST_RUN('.format(library_name_suffix),
+            u'\t "{0:s}",'.format(function_name),
+            u'\t {0:s} );'.format(test_function_name)])
+
+    template_mappings[u'test_to_run'] = u'\n'.join(template_mapping)
+
+    template_mapping = []
+    for function_name, test_function_name in tests_to_run_with_args:
+      if template_mapping:
+        template_mapping.append(u'')
+
+      if not test_function_name:
+        template_mapping.append(
+            u'\t\t/* TODO: add tests for {0:s} */'.format(function_name))
+      else:
+        template_mapping.extend([
+            u'\t\t{0:s}_TEST_RUN_WITH_ARGS('.format(library_name_suffix),
+            u'\t\t "{0:s}",'.format(function_name),
+            u'\t\t {0:s},'.format(test_function_name),
+            u'\t\t {0:s} );'.format(type_name)])
+
+    template_mappings[u'tests_to_run_with_args'] = u'\n'.join(template_mapping)
 
     if with_input:
       template_filename = u'main_start_with_input.c'
@@ -2133,7 +2117,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if is_internal:
       template_filename = os.path.join(
-          template_directory, u'internal_type_start.c')
+          template_directory, u'define_internal_start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -2150,7 +2134,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if is_internal:
       template_filename = os.path.join(
-          template_directory, u'internal_type_end.c')
+          template_directory, u'define_internal_end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')

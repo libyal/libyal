@@ -78,8 +78,11 @@ class Variable(object):
     if self.type_sort_ranking > variable.type_sort_ranking:
       return 1
 
-    # If no specific sort ranking use alphabetically ordering.
-    variable_type_sort_ranking = cmp(self.type, variable.type)
+    # If no specific sort ranking use alphabetically ordering without
+    # the trailing '_t'.
+    self_type, _, _ = self.type.rpartition(b'_t')
+    variable_type, _, _ = variable.type.rpartition(b'_t')
+    variable_type_sort_ranking = cmp(self_type, variable_type)
     if variable_type_sort_ranking != 0:
       return variable_type_sort_ranking
 

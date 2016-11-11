@@ -4,11 +4,11 @@
 int ${library_name_suffix}_test_${type_name}_initialize(
      void )
 {
-	libcerror_error_t *error = NULL;
-	${library_name}_${type_name}_t *${type_name}      = NULL;
-	int result               = 0;
+	libcerror_error_t *error                     = NULL;
+	${library_name}_${type_name}_t *${type_name} = NULL;
+	int result                                   = 0;
 
-	/* Test ${type_name} initialization
+	/* Test regular cases
 	 */
 	result = ${library_name}_${type_name}_initialize(
 	          &${type_name},

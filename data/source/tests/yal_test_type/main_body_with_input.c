@@ -51,7 +51,8 @@ ${test_to_run}
 	         "error",
 	         error );
 
-${tests_to_run_with_input}
+${tests_to_run_with_args}
+
 		/* Clean up
 		 */
 		result = ${library_name_suffix}_test_${type_name}_close_source(
