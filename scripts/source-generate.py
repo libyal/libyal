@@ -714,6 +714,7 @@ class LibraryMakefileAMFile(object):
   """Class that defines a library Makefile.am file.
 
   Attributes:
+    cppflags (list[str]): C preprocess flags.
     libraries (list[str]): library names.
     sources (list[str]): source and header file paths.
   """
@@ -727,6 +728,7 @@ class LibraryMakefileAMFile(object):
     super(LibraryMakefileAMFile, self).__init__()
     self._path = path
 
+    self.cppflags = []
     self.libraries = []
     self.sources = []
 
@@ -736,44 +738,49 @@ class LibraryMakefileAMFile(object):
     Args:
       project_configuration (ProjectConfiguration): project configuration.
     """
+    self.cppflags = []
+    self.libraries = []
+    self.sources = []
+
     library_sources = b'{0:s}_la_SOURCES'.format(
         project_configuration.library_name)
 
     library_libadd = b'{0:s}_la_LIBADD'.format(
         project_configuration.library_name)
 
-    in_libadd = False
-    in_sources = False
+    in_section = None
     with open(self._path, 'rb') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
-        if in_libadd:
+        if in_section:
+          if not line:
+            in_section = None
+            continue
+
           if line.endswith(b'\\'):
             line = line[:-1].strip()
 
-          if not line:
-            in_libadd = False
+          if (in_section == u'cppflags' and line.startswith(b'@') and
+              line.endswith(b'_CPPFLAGS@')):
+              self.cppflags.append(line[1:-10].lower())
 
-          elif line.startswith(b'@') and line.endswith(b'_LIBADD@'):
-            self.libraries.append(line[1:-8].lower())
+          elif (in_section == u'libadd' and line.startswith(b'@') and
+                line.endswith(b'_LIBADD@')):
+              self.libraries.append(line[1:-8].lower())
 
-        elif in_sources:
-          if line.endswith(b'\\'):
-            line = line[:-1].strip()
-
-          if not line:
-            in_sources = False
-
-          else:
+          elif in_section == u'sources':
             sources = line.split(b' ')
             self.sources.extend(sources)
 
+        elif line == b'AM_CPPFLAGS = \\':
+          in_section = u'cppflags'
+
         elif line.startswith(library_libadd):
-          in_libadd = True
+          in_section = u'libadd'
 
         elif line.startswith(library_sources):
-          in_sources = True
+          in_section = u'sources'
 
     self.libraries = sorted(self.libraries)
 
@@ -1757,13 +1764,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._SortIncludeHeaders(project_configuration, output_filename)
 
   def _GenerateMakefileAM(
-      self, project_configuration, template_mappings, api_functions,
-      api_functions_with_input, api_types, api_types_with_input,
+      self, project_configuration, template_mappings, makefile_am_file,
+      api_functions, api_functions_with_input, api_types, api_types_with_input,
       internal_types, output_writer):
     """Generates a tests Makefile.am file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
+      makefile_am_file (LibraryMakefileAMFile): library Makefile.am file.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       api_functions (list[str]): names of API functions to test.
@@ -1838,6 +1846,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           project_configuration.library_name_suffix, test)
       check_programs.append(check_program)
 
+    cppflags = list(makefile_am_file.cppflags)
+    if api_functions_with_input or api_types_with_input:
+      cppflags.append(u'libcsystem')
+
+    template_mappings[u'cppflags'] = u' \\\n'.join(
+        [u'\t@{0:s}_CPPFLAGS@'.format(name.upper()) for name in cppflags])
     template_mappings[u'python_tests'] = u' \\\n'.join(
         [u'\t{0:s}'.format(filename) for filename in python_test_scripts])
     template_mappings[u'tests'] = u' \\\n'.join(
@@ -1847,13 +1861,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     template_mappings[u'check_programs'] = u' \\\n'.join(
         [u'\t{0:s}'.format(filename) for filename in check_programs])
 
-    # TODO: copy from library Makefile.am
-    if api_types_with_input:
-      template_filename = u'header_with_input.am'
-    else:
-      template_filename = u'header.am'
-
-    template_filename = os.path.join(template_directory, template_filename)
+    template_filename = os.path.join(template_directory, u'header.am')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
@@ -2515,9 +2523,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           is_internal=True)
 
     self._GenerateMakefileAM(
-        project_configuration, template_mappings, api_functions,
-        api_functions_with_input, api_types, api_types_with_input,
-        internal_types, output_writer)
+        project_configuration, template_mappings, makefile_am_file,
+        api_functions, api_functions_with_input, api_types,
+        api_types_with_input, internal_types, output_writer)
 
 
 class ToolsSourceFileGenerator(SourceFileGenerator):

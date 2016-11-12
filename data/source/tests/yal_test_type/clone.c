@@ -31,7 +31,7 @@ int ${library_name_suffix}_test_${type_name}_clone(
 	/* Test regular cases
 	 */
 	result = ${library_name}_${type_name}_clone(
-	          &destiniation_${type_name},
+	          &destination_${type_name},
 	          source_${type_name},
 	          &error );
 
@@ -66,7 +66,7 @@ int ${library_name_suffix}_test_${type_name}_clone(
          error );
 
 	result = ${library_name}_${type_name}_clone(
-	          &destiniation_${type_name},
+	          &destination_${type_name},
 	          NULL,
 	          &error );
 
@@ -132,13 +132,13 @@ on_error:
 	if( destination_${type_name} != NULL )
 	{
 		${library_name}_${type_name}_free(
-		 &destination_&${type_name},
+		 &destination_${type_name},
 		 NULL );
 	}
 	if( source_${type_name} != NULL )
 	{
 		${library_name}_${type_name}_free(
-		 &source_&${type_name},
+		 &source_${type_name},
 		 NULL );
 	}
 	return( 0 );
