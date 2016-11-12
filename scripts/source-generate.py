@@ -1982,25 +1982,20 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       is_internal (Optional[bool]): True if the type is an internal type.
       with_input (Optional[bool]): True if the type is to be tested with
           input data.
+
+    Returns:
+      bool: True if successful or False if not.
     """
     output_filename = u'{0:s}_test_{1:s}.c'.format(
         project_configuration.library_name_suffix, type_name)
     output_filename = os.path.join(u'tests', output_filename)
 
     if os.path.exists(output_filename) and not self._experimental:
-      return
-
-    # TODO: libfmapi do not generate error type tests
-    if (type_name == u'error' and
-        project_configuration.library_name == u'libcerror'):
-      return
+      return False
 
     library_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
         project_configuration.library_name)
-
-    template_directory = os.path.join(
-        self._template_directory, u'yal_test_type')
 
     header_file_path = u'{0:s}_{1:s}.h'.format(
        project_configuration.library_name, type_name)
@@ -2012,7 +2007,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       header_file.Read(project_configuration)
     except IOError:
       logging.warning(u'Skipping: {0:s}'.format(header_file_path))
-      return
+      return False
+
+    template_directory = os.path.join(
+        self._template_directory, u'yal_test_type')
 
     function_names = list(header_file.functions_per_name.keys())
     tests_to_run = []
@@ -2171,6 +2169,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
+
+    return True
 
   def _GenerateTypeTestsMainTestsToRun(
       self, project_configuration, template_mappings, type_name, tests_to_run,
@@ -2606,19 +2606,30 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         project_configuration, template_mappings, include_header_file,
         output_writer)
 
-    for type_name in api_types:
-      self._GenerateTypeTests(
-          project_configuration, template_mappings, type_name, output_writer)
+    for type_name in list(api_types):
+      # TODO: libfmapi do not generate error type tests
+      if (type_name == u'error' and
+          project_configuration.library_name == u'libcerror'):
+        continue
 
-    for type_name in api_types_with_input:
-      self._GenerateTypeTests(
+      result = self._GenerateTypeTests(
+          project_configuration, template_mappings, type_name, output_writer)
+      if not result:
+        api_types.remove(type_name)
+
+    for type_name in list(api_types_with_input):
+      result = self._GenerateTypeTests(
           project_configuration, template_mappings, type_name, output_writer,
           with_input=True)
+      if not result:
+        api_types_with_input.remove(type_name)
 
-    for type_name in internal_types:
-      self._GenerateTypeTests(
+    for type_name in list(internal_types):
+      result = self._GenerateTypeTests(
           project_configuration, template_mappings, type_name, output_writer,
           is_internal=True)
+      if not result:
+        internal_types.remove(type_name)
 
     self._GenerateMakefileAM(
         project_configuration, template_mappings, makefile_am_file,
