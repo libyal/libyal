@@ -587,7 +587,6 @@ class LibraryHeaderFile(object):
   Attributes:
     functions_per_name (dict[str, list[FunctionPrototype]]): function
         prototypes per name.
-    have_bfio (bool): True if the include header supports libbfio.
     types (list[str]): type names.
   """
 
@@ -601,7 +600,6 @@ class LibraryHeaderFile(object):
     self._path = path
 
     self.functions_per_name = collections.OrderedDict()
-    self.have_bfio = False
     self.types = []
 
   def Read(self, project_configuration):
@@ -611,13 +609,9 @@ class LibraryHeaderFile(object):
       project_configuration (ProjectConfiguration): project configuration.
     """
     self.functions_per_name = collections.OrderedDict()
-    self.have_bfio = False
     self.types = []
 
     define_extern = b'{0:s}_EXTERN'.format(
-        project_configuration.library_name.upper())
-
-    define_have_bfio = b'#if defined( {0:s}_HAVE_BFIO )'.format(
         project_configuration.library_name.upper())
 
     define_have_debug_output = b'#if defined( HAVE_DEBUG_OUTPUT )'
@@ -627,7 +621,6 @@ class LibraryHeaderFile(object):
 
     function_argument = None
     function_prototype = None
-    have_bfio = False
     have_extern = False
     have_debug_output = False
     have_wide_character_type = False
@@ -683,19 +676,12 @@ class LibraryHeaderFile(object):
           name, _, _ = line.partition(u'(')
 
           function_prototype = FunctionPrototype(name, return_type)
-          function_prototype.have_bfio = have_bfio
           function_prototype.have_extern = have_extern
           function_prototype.have_debug_output = have_debug_output
           function_prototype.have_wide_character_type = (
               have_wide_character_type)
 
-          if have_bfio:
-            self.have_bfio = True
-
           in_function_prototype = True
-
-        elif line.startswith(define_have_bfio):
-          have_bfio = True
 
         elif line.startswith(define_extern):
           have_extern = True
@@ -707,7 +693,6 @@ class LibraryHeaderFile(object):
           have_wide_character_type = True
 
         elif line.startswith(b'#endif'):
-          have_bfio = False
           have_debug_output = False
           have_wide_character_type = False
 
@@ -1739,6 +1724,16 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       type_name (str): name of type.
       output_writer (OutputWriter): output writer.
     """
+    FUNCTION_TYPE_CLOSE = u'close'
+    FUNCTION_TYPE_GET_BYTES_VALUE = u'get_bytes_value'
+    FUNCTION_TYPE_GET_FILETIME_VALUE = u'get_filetime_value'
+    FUNCTION_TYPE_GET_GUID_VALUE = u'get_guid_value'
+    FUNCTION_TYPE_GET_INTEGER_VALUE = u'get_integer_value'
+    FUNCTION_TYPE_GET_STRING_VALUE = u'get_string_value'
+    FUNCTION_TYPE_OPEN = u'open'
+    FUNCTION_TYPE_SET_STRING_VALUE = u'set_string_value'
+    FUNCTION_TYPE_UTILITY = u'utility'
+
     output_filename = u'{0:s}_{1:s}.c'.format(
         project_configuration.python_module_name, type_name)
     output_filename = os.path.join(
@@ -1759,9 +1754,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     function_name_prefix_length = len(function_name_prefix)
 
     api_function_names = []
+    codepage_support = False
     datetime_support = False
     guid_support = False
     integer_support = False
+
     python_type_object_methods = []
 
     for function_name, function_prototype in iter(
@@ -1775,84 +1772,160 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       # TODO: determine
       function_arguments = u''
-      function_description = u''
+      function_description = [u'']
       function_return_value = u'None'
       function_type = None
 
-      if type_function == u'get_ascii_codepage':
+      if type_function == u'close':
+        function_return_value = u'None'
+        function_description = [u'Closes a {0:s}.'.format(type_name)]
+        function_type = FUNCTION_TYPE_CLOSE
+
+      elif type_function == u'get_ascii_codepage':
         function_return_value = u'String'
+        function_description = [
+            (u'Returns the codepage for ASCII strings used in '
+             u'the {0:s}.').format(type_name)]
+        function_type = FUNCTION_TYPE_GET_STRING_VALUE
+
+        codepage_support = True
+
+      elif type_function.startswith(u'copy_'):
+        type_function = u'get_{0:s}'.format(type_function[5:])
+        value_name = type_function[4:].replace(u'_', u' ')
+
+        function_return_value = u'Byte string or None'
+        function_description = [u'Returns the {0:s}.'.format(value_name)]
+        function_type = FUNCTION_TYPE_GET_BYTES_VALUE
 
       elif type_function.startswith(u'get_utf8_'):
-        function_return_value = u'Unicode string or None'
-        function_type = u'get_string_value'
+        if type_function.endswith(u'_size'):
+          continue
 
-      elif type_function.startswith(u'get_utf16_'):
-        continue
+        type_function = u''.join([type_function[:4], type_function[9:]])
+        value_name = type_function[4:].replace(u'_', u' ')
+
+        function_return_value = u'Unicode string or None'
+        function_description = [u'Returns the {0:s}.'.format(value_name)]
+        function_type = FUNCTION_TYPE_GET_STRING_VALUE
 
       elif type_function.startswith(u'get_'):
         for function_argument in function_prototype.arguments:
-          if function_argument == u'uint64_t *filetime,':
+          function_argument_string = function_argument.CopyToString()
+          if function_argument_string == u'uint64_t *filetime':
             function_return_value = u'Datetime'
-            function_type = u'get_filetime_value'
+            function_type = FUNCTION_TYPE_GET_FILETIME_VALUE
 
             datetime_support = True
             integer_support = True
 
-          elif function_argument == u'uint8_t *guid_data':
+          elif function_argument_string == u'uint8_t *guid_data':
             function_return_value = u'Unicode string or None'
-            function_type = u'get_guid_value'
+            function_type = FUNCTION_TYPE_GET_GUID_VALUE
 
             guid_support = True
 
-          elif (function_argument.startswith(u'uint32_t *') or 
-              function_argument.startswith(u'uint64_t *')):
+          elif (function_argument_string.startswith(u'uint32_t *') or 
+              function_argument_string.startswith(u'uint64_t *')):
             function_return_value = u'Integer'
-            function_type = u'get_integer_value'
+            function_type = FUNCTION_TYPE_GET_INTEGER_VALUE
 
             integer_support = True
 
-      python_function_name = u'{0:s}_{1:s}_{2:s},'.format(
+        value_name = type_function[4:].replace(u'_', u' ')
+        function_description = [u'Returns the {0:s}.'.format(value_name)]
+
+      elif type_function == u'open':
+        function_arguments = u'filename, mode=\'r\''
+        function_return_value = u'None'
+        function_description = [u'Opens a {0:s}.'.format(type_name)]
+        function_type = FUNCTION_TYPE_OPEN
+
+      elif type_function == u'open_file_io_handle':
+        type_function = u'open_file_object'
+        function_arguments = u'file_object, mode=\'r\''
+        function_return_value = u'None'
+        function_description = [
+            u'Opens a {0:s} using a file-like object.'.format(type_name)]
+        function_type = FUNCTION_TYPE_OPEN
+
+      elif type_function == u'set_ascii_codepage':
+        function_arguments = u'codepage'
+        function_return_value = u'None'
+        function_description = [
+            (u'Sets the codepage for ASCII strings used in the '
+             u'{0:s}.').format(type_name),
+            (u'Expects the codepage to be a string containing a Python '
+             u'codec definition.')]
+        function_type = FUNCTION_TYPE_SET_STRING_VALUE
+
+      elif type_function == u'signal_abort':
+        function_return_value = u'None'
+        function_description = [
+            u'Signals the {0:s} to abort the current activity.'.format(
+                type_name)]
+        function_type = FUNCTION_TYPE_UTILITY
+
+      if not function_type:
+        continue
+
+      python_function_name = u'{0:s}_{1:s}_{2:s}'.format(
           project_configuration.python_module_name, type_name, type_function)
 
       python_type_object_methods.extend([
           u'',
-          u'\t{{ "{0:s}"'.format(function_name),
-          u'\t   (PyCFunction) {0:s},'.format(python_function_name)])
+          u'\t{{ "{0:s}",'.format(type_function),
+          u'\t  (PyCFunction) {0:s},'.format(python_function_name)])
 
       if type_function.startswith(u'get_') or type_function in (
-          u'signal_abort', ):
-        python_type_object_methods.append(u'\t   METH_NOARGS,')
+          u'close', u'signal_abort'):
+        python_type_object_methods.append(u'\t  METH_NOARGS,')
       else:
-        python_type_object_methods.append(u'\t   METH_VARARGS | METH_KEYWORDS,')
+        python_type_object_methods.append(u'\t  METH_VARARGS | METH_KEYWORDS,')
 
       python_type_object_methods.extend([
-            u'\t   "{0:s}({1:s}) -> {2:s}\n"'.format(
-                function_name, function_arguments, function_return_value),
-            u'\t   "\n"',
-            u'\t   "{0:s}." }},'.format(function_description)])
+            u'\t  "{0:s}({1:s}) -> {2:s}\\n"'.format(
+                type_function, function_arguments, function_return_value),
+            u'\t  "\\n"'])
 
-      if function_type == u'get_filetime_value':
-        function_description = (
-            u'{0:s} as a 64-bit integer containing a FILETIME value').format(
-                function_description)
+      for index, line in enumerate(function_description):
+        if index < len(function_description) - 1:
+          python_type_object_methods.append(u'\t  "{0:s}\\n"'.format(line))
+        else:
+          python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
 
+      if function_type == FUNCTION_TYPE_GET_FILETIME_VALUE:
         python_type_object_methods.extend([
             u'',
-            u'\t{{ "{0:s}_as_integer"'.format(function_name),
-            u'\t   (PyCFunction) {0:s}_as_integer,'.format(python_function_name),
-            u'\t   METH_NOARGS,',
-            u'\t   "{0:s}_as_integer({1:s}) -> Integer\n"'.format(
-                function_name, function_arguments),
-            u'\t   "\n"',
-            u'\t   "{0:s}." }},'.format(function_description)])
+            u'\t{{ "{0:s}_as_integer",'.format(type_function),
+            u'\t  (PyCFunction) {0:s}_as_integer,'.format(python_function_name),
+            u'\t  METH_NOARGS,',
+            u'\t  "{0:s}_as_integer({1:s}) -> Integer\\n"'.format(
+                type_function, function_arguments),
+            u'\t  "\\n"'])
+
+        function_description[0] = (
+            u'{0:s} as a 64-bit integer containing a FILETIME value.').format(
+                function_description[0][:-1])
+
+        for index, line in enumerate(function_description):
+          if index < len(function_description) - 1:
+            python_type_object_methods.append(u'\t  "{0:s}\\n"'.format(line))
+          else:
+            python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
+
+    python_type_object_methods.extend([
+        u'',
+        u'\t/* Sentinel */',
+        u'\t{ NULL, NULL, 0, NULL }'])
 
     function_name = u'{0:s}_{1:s}_open'.format(
         project_configuration.library_name, type_name)
     open_support = function_name in api_function_names
 
-    function_name = u'{0:s}_{1:s}_get_ascii_codepage'.format(
+    function_name = u'{0:s}_{1:s}_open_file_io_handle'.format(
         project_configuration.library_name, type_name)
-    codepage_support = function_name in api_function_names
+    bfio_support = function_name in api_function_names
 
     template_directory = os.path.join(self._template_directory, u'pyyal_type')
 
@@ -1866,15 +1939,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         project_configuration.library_name, type_name, u'error', u'libcerror',
         u'python', u'unused']
 
-    if open_support and header_file.have_bfio:
+    if bfio_support:
       python_module_include_names.extend([u'file_object_io_handle', 'libbfio'])
-
-    function_name = u'{0:s}_{1:s}_get_ascii_codepage'.format(
-        project_configuration.library_name, type_name)
     if codepage_support:
       # TODO: make #include <narrow_string.h> include conditionally
-      python_module_include_names.extend([u'codepage', 'libclocal'])
-
+      python_module_include_names.extend([u'codepage', 'libclocale'])
     if datetime_support:
       python_module_include_names.append(u'datetime')
     if guid_support:
@@ -1884,7 +1953,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     python_module_includes = []
     for include_name in sorted(python_module_include_names):
-      include = u'#include "{0:s}_{1:s}.h'.format(
+      include = u'#include "{0:s}_{1:s}.h"'.format(
           project_configuration.python_module_name, include_name)
       python_module_includes.append(include)
 
@@ -1896,18 +1965,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if open_support and header_file.have_bfio:
+    if bfio_support:
       template_filename = os.path.join(template_directory, u'have_bfio.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
-
-    # TODO: generate object methods
-
-    python_type_object_methods.extend([
-        u'',
-        u'\t/* Sentinel */',
-        u'\t{ NULL, NULL, 0, NULL }'])
 
     template_mappings[u'python_type_object_methods'] = u'\n'.join(
         python_type_object_methods)
@@ -1924,7 +1986,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
-
 
     template_filename = os.path.join(template_directory, u'type_object.c')
     self._GenerateSection(
@@ -1958,29 +2019,39 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       elif type_function.startswith(u'get_utf8_'):
-        template_mappings[u'value_description'] = u''
-        template_mappings[u'value_name'] = type_function[9:]
+        if type_function.endswith(u'_size'):
+          continue
+
+        value_name = type_function[9:]
+        template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
+        template_mappings[u'value_name'] = value_name
 
         template_filename = u'get_string_value.c'
 
       elif type_function.startswith(u'get_'):
-        template_mappings[u'value_description'] = u''
-        template_mappings[u'value_name'] = type_function[4:]
+        if type_function.endswith(u'_data_size'):
+          continue
+
+        value_name = type_function[4:]
+        template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
+        template_mappings[u'value_name'] = value_name
 
         function_prototype = header_file.functions_per_name.get(
             function_name, None)
 
         for function_argument in function_prototype.arguments:
-          if function_argument == u'uint64_t *filetime,':
+          function_argument_string = function_argument.CopyToString()
+          if function_argument_string == u'uint64_t *filetime':
             template_filename = u'get_filetime_value.c'
             break
 
-          elif function_argument == u'uint8_t *guid_data,':
+          elif function_argument_string == u'uint8_t *guid_data':
             template_filename = u'get_guid_value.c'
             break
 
-          elif function_argument.startswith(u'uint32_t *'):
+          elif function_argument_string.startswith(u'uint32_t *'):
             template_filename = u'get_32bit_integer_value.c'
+            break
 
           # TODO: add uint64_t support.
 

@@ -10,7 +10,7 @@ PyObject *${python_module_name}_file_get_${value_name}(
 	const char *errors       = NULL;
 	static char *function    = "${python_module_name}_file_get_${value_name}";
 	char *utf8_string        = NULL;
-	size_t $utf8_string_size = 0;
+	size_t utf8_string_size  = 0;
 	int result               = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
