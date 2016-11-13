@@ -5,8 +5,8 @@ PyObject *${python_module_name}_${type_name}_get_ascii_codepage(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error    = NULL;
 	PyObject *string_object     = NULL;
+	libcerror_error_t *error    = NULL;
 	const char *codepage_string = NULL;
 	static char *function       = "${python_module_name}_${type_name}_get_ascii_codepage";
 	int ascii_codepage          = 0;

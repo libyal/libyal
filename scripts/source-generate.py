@@ -1097,7 +1097,7 @@ class SourceFileGenerator(object):
 
     lines = formatter.FormatSource(lines)
 
-  def _VerticalAlignEqualSigns(self, project_configuration, output_filename):
+  def _VerticalAlignEqualSigns(self, output_filename):
     """Vertically aligns the equal signs.
 
     Args:
@@ -1388,7 +1388,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer, output_filename)
 
       if directory_entry in (u'codepage.h', u'definitions.h.in', u'error.h'):
-        self._VerticalAlignEqualSigns(project_configuration, output_filename)
+        self._VerticalAlignEqualSigns(output_filename)
 
     output_filename = os.path.join(output_directory, u'features.h.in')
     self._GenerateFeaturesHeader(
@@ -1535,7 +1535,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
       if directory_entry in (u'libyal_codepage.h', u'libyal_types.h'):
-        self._VerticalAlignEqualSigns(project_configuration, output_filename)
+        self._VerticalAlignEqualSigns(output_filename)
 
 
 class LibraryManPageGenerator(SourceFileGenerator):
@@ -1760,6 +1760,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     integer_support = False
 
     python_type_object_methods = []
+    python_type_objecy_get_set_definitions = []
 
     for function_name, function_prototype in iter(
         header_file.functions_per_name.items()):
@@ -1770,18 +1771,24 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       type_function = function_name[function_name_prefix_length:]
 
-      # TODO: determine
+      attribute_description = u''
       function_arguments = u''
       function_description = [u'']
       function_return_value = u'None'
       function_type = None
 
+      # TODO: add support for glob functions
+      # TODO: add support for has, is functions
+      # TODO: add support for seek, read, write functions
       if type_function == u'close':
         function_return_value = u'None'
         function_description = [u'Closes a {0:s}.'.format(type_name)]
         function_type = FUNCTION_TYPE_CLOSE
 
       elif type_function == u'get_ascii_codepage':
+        attribute_description = (
+            u'The codepage used for ASCII strings in the {0:s}.').format(
+                type_name)
         function_return_value = u'String'
         function_description = [
             (u'Returns the codepage for ASCII strings used in '
@@ -1794,6 +1801,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         type_function = u'get_{0:s}'.format(type_function[5:])
         value_name = type_function[4:].replace(u'_', u' ')
 
+        attribute_description = u'The {0:s}.'.format(value_name)
         function_return_value = u'Byte string or None'
         function_description = [u'Returns the {0:s}.'.format(value_name)]
         function_type = FUNCTION_TYPE_GET_BYTES_VALUE
@@ -1805,6 +1813,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         type_function = u''.join([type_function[:4], type_function[9:]])
         value_name = type_function[4:].replace(u'_', u' ')
 
+        attribute_description = u'The {0:s}.'.format(value_name)
         function_return_value = u'Unicode string or None'
         function_description = [u'Returns the {0:s}.'.format(value_name)]
         function_type = FUNCTION_TYPE_GET_STRING_VALUE
@@ -1813,7 +1822,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         for function_argument in function_prototype.arguments:
           function_argument_string = function_argument.CopyToString()
           if function_argument_string == u'uint64_t *filetime':
-            function_return_value = u'Datetime'
+            function_return_value = u'Datetime or None'
             function_type = FUNCTION_TYPE_GET_FILETIME_VALUE
 
             datetime_support = True
@@ -1827,12 +1836,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
           elif (function_argument_string.startswith(u'uint32_t *') or 
               function_argument_string.startswith(u'uint64_t *')):
-            function_return_value = u'Integer'
+            function_return_value = u'Integer or None'
             function_type = FUNCTION_TYPE_GET_INTEGER_VALUE
 
             integer_support = True
 
         value_name = type_function[4:].replace(u'_', u' ')
+        attribute_description = u'The {0:s}.'.format(value_name)
         function_description = [u'Returns the {0:s}.'.format(value_name)]
 
       elif type_function == u'open':
@@ -1900,7 +1910,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             u'\t{{ "{0:s}_as_integer",'.format(type_function),
             u'\t  (PyCFunction) {0:s}_as_integer,'.format(python_function_name),
             u'\t  METH_NOARGS,',
-            u'\t  "{0:s}_as_integer({1:s}) -> Integer\\n"'.format(
+            u'\t  "{0:s}_as_integer({1:s}) -> Integer or None\\n"'.format(
                 type_function, function_arguments),
             u'\t  "\\n"'])
 
@@ -1914,10 +1924,32 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           else:
             python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
 
+      if type_function == u'get_ascii_codepage':
+        python_type_objecy_get_set_definitions.extend([
+            u'',
+            u'\t{{ "{0:s}",'.format(type_function[4:]),
+            u'\t  (getter) {0:s},'.format(python_function_name),
+            u'\t  (setter) pylnk_file_set_ascii_codepage_setter,',
+            u'\t  "{0:s}",'.format(attribute_description),
+            u'\t  NULL },'])
+
+      elif type_function.startswith(u'get_'):
+        python_type_objecy_get_set_definitions.extend([
+            u'',
+            u'\t{{ "{0:s}",'.format(type_function[4:]),
+            u'\t  (getter) {0:s},'.format(python_function_name),
+            u'\t  (setter) 0,',
+            u'\t  "{0:s}",'.format(attribute_description),
+            u'\t  NULL },'])
+
     python_type_object_methods.extend([
         u'',
         u'\t/* Sentinel */',
         u'\t{ NULL, NULL, 0, NULL }'])
+
+    python_type_objecy_get_set_definitions.extend([
+        u'\t/* Sentinel */',
+        u'\t{ NULL, NULL, NULL, NULL, NULL }'])
 
     function_name = u'{0:s}_{1:s}_open'.format(
         project_configuration.library_name, type_name)
@@ -1980,9 +2012,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: generate object get set definitions
+    template_mappings[u'python_type_objecy_get_set_definitions'] = u'\n'.join(
+        python_type_objecy_get_set_definitions)
+
     template_filename = os.path.join(
-        template_directory, u'object_get_set_definitions.c')
+        template_directory, u'type_object_get_set_definitions.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2012,6 +2046,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       template_filename = None
       if type_function in self._SUPPORTED_TYPE_FUNCTIONS:
         template_filename = u'{0:s}.c'.format(type_function)
+
+      elif type_function.startswith(u'copy_'):
+        value_name = type_function[5:]
+        template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
+        template_mappings[u'value_name'] = value_name
+
+        template_filename = u'get_binary_data_value.c'
 
       # Ignore functions that will be generated elsewhere.
       elif (type_function.startswith(u'get_utf16_') or
@@ -2067,6 +2108,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
+    self._VerticalAlignFunctionArguments(output_filename)
 
   def _GetTemplateMappings(self, project_configuration):
     """Retrieves the template mappings.
@@ -2087,6 +2129,53 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     template_mappings[u'alignment_padding'] = u' ' * alignment_padding
 
     return template_mappings
+
+  def _VerticalAlignFunctionArguments(self, output_filename):
+    """Vertically aligns function arguments.
+
+    Note this is a very basic approach that should suffice for the Python
+    module source files.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = [line for line in file_object.readlines()]
+
+    alignment_number_of_spaces = 0
+    alignment_number_of_tabs = 0
+    in_function_call = False
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        if not line.startswith(b'\t'):
+          file_object.write(line)
+          continue
+
+        stripped_line = line.rstrip()
+
+        if in_function_call:
+          if stripped_line.endswith(b')') or stripped_line.endswith(b');'):
+            in_function_call = False
+
+          stripped_line = line.lstrip()
+          line = b'{0:s}{1:s}{2:s}'.format(
+              b'\t' * alignment_number_of_tabs,
+              b' ' * alignment_number_of_spaces,
+              stripped_line)
+
+        elif stripped_line.endswith(b'('):
+          in_function_call = True
+          stripped_line = line.lstrip()
+
+          alignment_number_of_spaces = stripped_line.rfind(b' ')
+          if alignment_number_of_spaces == -1:
+            alignment_number_of_spaces = 1
+          else:
+            alignment_number_of_spaces += 2
+
+          alignment_number_of_tabs = len(line) - len(stripped_line)
+
+        file_object.write(line)
 
   def Generate(self, project_configuration, output_writer):
     """Generates Python module source files.

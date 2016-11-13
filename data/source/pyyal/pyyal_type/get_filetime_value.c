@@ -5,8 +5,8 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error   = NULL;
 	PyObject *date_time_object = NULL;
+	libcerror_error_t *error   = NULL;
 	static char *function      = "${python_module_name}_${type_name}_get_${value_name}";
 	uint64_t filetime          = 0;
 	int result                 = 0;
@@ -31,7 +31,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		${python_module_name}_error_raise(
 		 error,
@@ -43,6 +43,13 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 		 &error );
 
 		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
 	}
 	date_time_object = ${python_module_name}_datetime_new_from_filetime(
 	                    filetime );
@@ -57,8 +64,8 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error = NULL;
 	PyObject *integer_object = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function    = "${python_module_name}_${type_name}_get_${value_name}_as_integer";
 	uint64_t filetime        = 0;
 	int result               = 0;
@@ -83,7 +90,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		${python_module_name}_error_raise(
 		 error,
@@ -95,6 +102,13 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
 		 &error );
 
 		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
 	}
 	integer_object = ${python_module_name}_integer_unsigned_new_from_64bit(
 	                  (uint64_t) filetime );

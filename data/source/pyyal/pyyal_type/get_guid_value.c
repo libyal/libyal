@@ -7,8 +7,8 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 {
 	uint8_t guid_data[ 16 ];
 
-	libcerror_error_t *error = NULL;
 	PyObject *string_object  = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function    = "${python_module_name}_${type_name}_get_${value_name}";
 	int result               = 0;
 

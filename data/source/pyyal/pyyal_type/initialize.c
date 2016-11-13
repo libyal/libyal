@@ -4,8 +4,8 @@
 int ${python_module_name}_${type_name}_init(
      ${python_module_name}_${type_name}_t *${python_module_name}_${type_name} )
 {
-	static char *function    = "${python_module_name}_${type_name}_init";
 	libcerror_error_t *error = NULL;
+	static char *function    = "${python_module_name}_${type_name}_init";
 
 	if( ${python_module_name}_${type_name} == NULL )
 	{

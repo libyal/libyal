@@ -161,10 +161,10 @@ int ${python_module_name}_${type_name}_set_ascii_codepage_setter(
 		}
 #if PY_MAJOR_VERSION >= 3
 		codepage_string = PyBytes_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #else
 		codepage_string = PyString_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #endif
 		if( codepage_string == NULL )
 		{
@@ -184,17 +184,17 @@ int ${python_module_name}_${type_name}_set_ascii_codepage_setter(
 
 #if PY_MAJOR_VERSION >= 3
 	result = PyObject_IsInstance(
-		  string_object,
-		  (PyObject *) &PyBytes_Type );
+	          string_object,
+	          (PyObject *) &PyBytes_Type );
 #else
 	result = PyObject_IsInstance(
-		  string_object,
-		  (PyObject *) &PyString_Type );
+	          string_object,
+	          (PyObject *) &PyString_Type );
 #endif
 	if( result == -1 )
 	{
 		${python_module_name}_error_fetch_and_raise(
-	         PyExc_RuntimeError,
+		 PyExc_RuntimeError,
 		 "%s: unable to determine if string object is of type string.",
 		 function );
 
@@ -214,8 +214,8 @@ int ${python_module_name}_${type_name}_set_ascii_codepage_setter(
 			return( -1 );
 		}
 		result = ${python_module_name}_${type_name}_set_ascii_codepage_from_string(
-			  ${python_module_name}_${type_name},
-			  codepage_string );
+		          ${python_module_name}_${type_name},
+		          codepage_string );
 
 		if( result != 1 )
 		{

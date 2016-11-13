@@ -8,9 +8,9 @@ PyObject *${python_module_name}_${type_name}_open(
 {
 	PyObject *string_object      = NULL;
 	libcerror_error_t *error     = NULL;
+	const char *filename_narrow  = NULL;
 	static char *function        = "${python_module_name}_${type_name}_open";
 	static char *keyword_list[]  = { "filename", "mode", NULL };
-	const char *filename_narrow  = NULL;
 	char *mode                   = NULL;
 	int result                   = 0;
 
@@ -65,8 +65,8 @@ PyObject *${python_module_name}_${type_name}_open(
 	{
 		${python_module_name}_error_fetch_and_raise(
 	         PyExc_RuntimeError,
-		 "%s: unable to determine if string object is of type unicode.",
-		 function );
+	         "%s: unable to determine if string object is of type unicode.",
+	         function );
 
 		return( NULL );
 	}
@@ -81,7 +81,7 @@ PyObject *${python_module_name}_${type_name}_open(
 
 		result = ${library_name}_${type_name}_open_wide(
 		          ${python_module_name}_${type_name}->${type_name},
-	                  filename_wide,
+		          filename_wide,
 		          ${library_name_upper_case}_OPEN_READ,
 		          &error );
 
@@ -101,16 +101,16 @@ PyObject *${python_module_name}_${type_name}_open(
 		}
 #if PY_MAJOR_VERSION >= 3
 		filename_narrow = PyBytes_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #else
 		filename_narrow = PyString_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
 		result = ${library_name}_${type_name}_open(
 		          ${python_module_name}_${type_name}->${type_name},
-	                  filename_narrow,
+		          filename_narrow,
 		          ${library_name_upper_case}_OPEN_READ,
 		          &error );
 
@@ -151,7 +151,7 @@ PyObject *${python_module_name}_${type_name}_open(
 	if( result == -1 )
 	{
 		${python_module_name}_error_fetch_and_raise(
-	         PyExc_RuntimeError,
+		 PyExc_RuntimeError,
 		 "%s: unable to determine if string object is of type string.",
 		 function );
 
@@ -163,16 +163,16 @@ PyObject *${python_module_name}_${type_name}_open(
 
 #if PY_MAJOR_VERSION >= 3
 		filename_narrow = PyBytes_AsString(
-				   string_object );
+		                   string_object );
 #else
 		filename_narrow = PyString_AsString(
-				   string_object );
+		                   string_object );
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
 		result = ${library_name}_${type_name}_open(
 		          ${python_module_name}_${type_name}->${type_name},
-	                  filename_narrow,
+		          filename_narrow,
 		          ${library_name_upper_case}_OPEN_READ,
 		          &error );
 

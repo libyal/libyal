@@ -3,8 +3,8 @@
 void ${python_module_name}_${type_name}_free(
       ${python_module_name}_${type_name}_t *${python_module_name}_${type_name} )
 {
-	libcerror_error_t *error    = NULL;
 	struct _typeobject *ob_type = NULL;
+	libcerror_error_t *error    = NULL;
 	static char *function       = "${python_module_name}_${type_name}_free";
 	int result                  = 0;
 
