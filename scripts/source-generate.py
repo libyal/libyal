@@ -288,6 +288,218 @@ class FunctionPrototype(object):
     return u', '.join(argument_strings)
 
 
+class PythonTypeObjectFunctionPrototype(object):
+  """Class that defines a Python type object function prototype.
+
+  Attributes:
+    name (str): name.
+    return_type (str): return type.
+  """
+  FUNCTION_TYPE_CLOSE = u'close'
+  FUNCTION_TYPE_GET = u'get'
+  FUNCTION_TYPE_OPEN = u'open'
+  FUNCTION_TYPE_SET = u'set'
+  FUNCTION_TYPE_UTILITY = u'utility'
+
+  RETURN_TYPE_BYTES = u'bytes'
+  RETURN_TYPE_FILETIME = u'filetime'
+  RETURN_TYPE_INTEGER = u'integer'
+  RETURN_TYPE_GUID = u'guid'
+  RETURN_TYPE_NONE = u'none'
+  RETURN_TYPE_STRING = u'string'
+
+  def __init__(self, python_module_name, type_name, type_function):
+    """Initializes a Python type object function prototype.
+
+    Args:
+      python_module_name (str): python module name.
+      type_name (str): type name.
+      type_function (str): type function.
+    """
+    if type_function == u'open_file_io_handle':
+      type_function = u'open_file_object'
+
+    super(PythonTypeObjectFunctionPrototype, self).__init__()
+    self._arguments = None
+    self._function_type = None
+    self._name = None
+    self._python_module_name = python_module_name
+    self._type_function = type_function
+    self._type_name = type_name
+    self._value_name = None
+    self.return_type = self.RETURN_TYPE_NONE
+
+  def _GetValueName(self):
+    """Retrieve the value name.
+
+    Returns:
+      str: value name or None.
+    """
+    if self._value_name is None:
+      if self.function_type == self.FUNCTION_TYPE_GET:
+        if self._type_function.startswith(u'copy_'):
+          value_name = self._type_function[5:]
+
+        elif self._type_function.startswith(u'get_utf8_'):
+          value_name = self._type_function[9:]
+
+        elif self._type_function.startswith(u'get_'):
+          value_name = self._type_function[4:]
+
+        if value_name:
+          self._value_name = value_name.replace(u'_', u' ')
+
+    return self._value_name
+
+  @property
+  def arguments(self):
+    """str: arguments."""
+    if self._arguments is None:
+      self._arguments = u''
+      if self.function_type == self.FUNCTION_TYPE_OPEN:
+        if self._type_function == u'open_file_object':
+          self._arguments = u'file_object, mode=\'r\''
+        else:
+          self._arguments = u'filename, mode=\'r\''
+
+      elif self.function_type == self.FUNCTION_TYPE_SET:
+        if self._type_function == u'set_ascii_codepage':
+          self._arguments = u'codepage'
+
+    return self._arguments
+
+  @property
+  def function_type(self):
+    """str: function type."""
+    if self._function_type is None:
+      if self._type_function == u'close':
+        self._function_type = self.FUNCTION_TYPE_CLOSE
+
+      elif (self._type_function.startswith(u'copy_') or
+          self._type_function.startswith(u'get_')):
+        self._function_type = self.FUNCTION_TYPE_GET
+
+      elif (self._type_function == u'open' or
+          self._type_function.startswith(u'open_')):
+        self._function_type = self.FUNCTION_TYPE_OPEN
+
+      elif self._type_function.startswith(u'set_'):
+        self._function_type = self.FUNCTION_TYPE_SET
+
+      elif self._type_function == u'signal_abort':
+        self._function_type = self.FUNCTION_TYPE_UTILITY
+
+    return self._function_type
+
+  @property
+  def name(self):
+    """str: name."""
+    if self._name is None:
+      self._name = u'{0:s}_{1:s}_{2:s}'.format(
+          self._python_module_name, self._type_name, self.type_function)
+
+    return self._name
+
+  @property
+  def type_function(self):
+    """str: type function."""
+    if self._type_function.startswith(u'copy_'):
+      return u'get_{0:s}'.format(self._type_function[5:])
+
+    if self._type_function.startswith(u'get_utf8_'):
+      return u''.join([self._type_function[:4], self._type_function[9:]])
+
+    return self._type_function
+
+  def GetAttributeDescription(self):
+    """Retrieves the fuction as attribute description.
+
+    Returns:
+      str: function as attribut description.
+    """
+    description = u''
+    if self.function_type == self.FUNCTION_TYPE_GET:
+      if self._type_function == u'get_ascii_codepage':
+        description = (
+            u'The codepage used for ASCII strings in the {0:s}.').format(
+                self._type_name)
+
+      else:
+        value_name = self._GetValueName()
+        if value_name:
+          description = u'The {0:s}.'.format(value_name)
+
+    return description
+
+  def GetDescription(self):
+    """Retrieves the description.
+
+    Returns:
+      list[str]: lines of the description.
+    """
+    description = [u'']
+    if self.function_type == self.FUNCTION_TYPE_CLOSE:
+      description = [u'Closes a {0:s}.'.format(self._type_name)]
+
+    elif self.function_type == self.FUNCTION_TYPE_GET:
+      if self._type_function == u'get_ascii_codepage':
+        description = [(
+            u'Returns the codepage for ASCII strings used in '
+            u'the {0:s}.').format(self._type_name)]
+
+      else:
+        value_name = self._GetValueName()
+        if value_name:
+          description = [u'Returns the {0:s}.'.format(self._value_name)]
+
+    elif self.function_type == self.FUNCTION_TYPE_OPEN:
+      if self._type_function == u'open_file_object':
+        description = [(
+            u'Opens a {0:s} using a file-like object.').format(self._type_name)]
+      else:
+        description = [u'Opens a {0:s}.'.format(self._type_name)]
+
+    elif self.function_type == self.FUNCTION_TYPE_SET:
+      if self._type_function == u'set_ascii_codepage':
+        description = [
+            (u'Sets the codepage for ASCII strings used in the '
+             u'{0:s}.').format(self._type_name),
+            (u'Expects the codepage to be a string containing a Python '
+             u'codec definition.')]
+
+    elif self.function_type == self.FUNCTION_TYPE_UTILITY:
+      if self._type_function == u'signal_abort':
+        description = [
+            u'Signals the {0:s} to abort the current activity.'.format(
+                self._type_name)]
+
+    return description
+
+  def GetReturnTypeDescription(self):
+    """Retrieves the return type description.
+
+    Returns:
+      str: return type description.
+    """
+    if self.return_type == self.RETURN_TYPE_BYTES:
+      return u'Binary string or None'
+
+    if self.return_type == self.RETURN_TYPE_FILETIME:
+      return u'Datetime or None'
+
+    if self.return_type == self.RETURN_TYPE_INTEGER:
+      return u'Integer or None'
+
+    if self.return_type in (
+        self.RETURN_TYPE_GUID, self.RETURN_TYPE_STRING):
+      return u'Unicode string or None'
+
+    if self.return_type == self.RETURN_TYPE_NONE:
+      return u'None'
+
+    return self.return_type
+
+
 class LibraryIncludeHeaderFile(object):
   """Class that defines a library include header file.
 
@@ -1713,9 +1925,21 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       u'set_ascii_codepage',
       u'signal_abort'])
 
+  def _GenerateTypeHeaderFile(
+      self, project_configuration, template_mappings, type_name, output_writer):
+    """Generates a type header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      output_writer (OutputWriter): output writer.
+    """
+
   def _GenerateTypeSourceFile(
       self, project_configuration, template_mappings, type_name, output_writer):
-    """Generates a type source file.
+    """Generates a Python type source file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
@@ -1753,15 +1977,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         project_configuration.library_name, type_name)
     function_name_prefix_length = len(function_name_prefix)
 
-    api_function_names = []
     codepage_support = False
     datetime_support = False
     guid_support = False
     integer_support = False
 
-    python_type_object_methods = []
-    python_type_objecy_get_set_definitions = []
-
+    api_function_names = []
+    python_function_prototypes = []
     for function_name, function_prototype in iter(
         header_file.functions_per_name.items()):
       if not function_prototype.have_extern:
@@ -1770,186 +1992,68 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       api_function_names.append(function_name)
 
       type_function = function_name[function_name_prefix_length:]
+      if type_function in (u'open_wide', ):
+        continue
 
-      attribute_description = u''
-      function_arguments = u''
-      function_description = [u'']
-      function_return_value = u'None'
-      function_type = None
+      elif (type_function.startswith(u'get_utf8_') and
+          type_function.endswith(u'_size')):
+        continue
+
+      elif type_function.startswith(u'get_utf16_'):
+        continue
+
+      elif (type_function.startswith(u'get_') and
+          type_function.endswith(u'_data_size')):
+        continue
+
+      python_function_prototype = PythonTypeObjectFunctionPrototype(
+          project_configuration.python_module_name, type_name, type_function)
 
       # TODO: add support for glob functions
       # TODO: add support for has, is functions
       # TODO: add support for seek, read, write functions
-      if type_function == u'close':
-        function_return_value = u'None'
-        function_description = [u'Closes a {0:s}.'.format(type_name)]
-        function_type = FUNCTION_TYPE_CLOSE
 
-      elif type_function == u'get_ascii_codepage':
-        attribute_description = (
-            u'The codepage used for ASCII strings in the {0:s}.').format(
-                type_name)
-        function_return_value = u'String'
-        function_description = [
-            (u'Returns the codepage for ASCII strings used in '
-             u'the {0:s}.').format(type_name)]
-        function_type = FUNCTION_TYPE_GET_STRING_VALUE
-
+      if type_function == u'get_ascii_codepage':
         codepage_support = True
 
-      elif type_function.startswith(u'copy_'):
-        type_function = u'get_{0:s}'.format(type_function[5:])
-        value_name = type_function[4:].replace(u'_', u' ')
+        # TODO: replace this by RETURN_TYPE_STRING.
+        python_function_prototype.return_type = u'String'
 
-        attribute_description = u'The {0:s}.'.format(value_name)
-        function_return_value = u'Byte string or None'
-        function_description = [u'Returns the {0:s}.'.format(value_name)]
-        function_type = FUNCTION_TYPE_GET_BYTES_VALUE
+      elif type_function.startswith(u'copy_'):
+        python_function_prototype.return_type = (
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_BYTES)
 
       elif type_function.startswith(u'get_utf8_'):
-        if type_function.endswith(u'_size'):
-          continue
-
-        type_function = u''.join([type_function[:4], type_function[9:]])
-        value_name = type_function[4:].replace(u'_', u' ')
-
-        attribute_description = u'The {0:s}.'.format(value_name)
-        function_return_value = u'Unicode string or None'
-        function_description = [u'Returns the {0:s}.'.format(value_name)]
-        function_type = FUNCTION_TYPE_GET_STRING_VALUE
+        python_function_prototype.return_type = (
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING)
 
       elif type_function.startswith(u'get_'):
         for function_argument in function_prototype.arguments:
           function_argument_string = function_argument.CopyToString()
           if function_argument_string == u'uint64_t *filetime':
-            function_return_value = u'Datetime or None'
-            function_type = FUNCTION_TYPE_GET_FILETIME_VALUE
-
             datetime_support = True
             integer_support = True
 
-          elif function_argument_string == u'uint8_t *guid_data':
-            function_return_value = u'Unicode string or None'
-            function_type = FUNCTION_TYPE_GET_GUID_VALUE
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME)
 
+          elif function_argument_string == u'uint8_t *guid_data':
             guid_support = True
+
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_GUID)
 
           elif (function_argument_string.startswith(u'uint32_t *') or 
               function_argument_string.startswith(u'uint64_t *')):
-            function_return_value = u'Integer or None'
-            function_type = FUNCTION_TYPE_GET_INTEGER_VALUE
-
             integer_support = True
 
-        value_name = type_function[4:].replace(u'_', u' ')
-        attribute_description = u'The {0:s}.'.format(value_name)
-        function_description = [u'Returns the {0:s}.'.format(value_name)]
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_INTEGER)
 
-      elif type_function == u'open':
-        function_arguments = u'filename, mode=\'r\''
-        function_return_value = u'None'
-        function_description = [u'Opens a {0:s}.'.format(type_name)]
-        function_type = FUNCTION_TYPE_OPEN
-
-      elif type_function == u'open_file_io_handle':
-        type_function = u'open_file_object'
-        function_arguments = u'file_object, mode=\'r\''
-        function_return_value = u'None'
-        function_description = [
-            u'Opens a {0:s} using a file-like object.'.format(type_name)]
-        function_type = FUNCTION_TYPE_OPEN
-
-      elif type_function == u'set_ascii_codepage':
-        function_arguments = u'codepage'
-        function_return_value = u'None'
-        function_description = [
-            (u'Sets the codepage for ASCII strings used in the '
-             u'{0:s}.').format(type_name),
-            (u'Expects the codepage to be a string containing a Python '
-             u'codec definition.')]
-        function_type = FUNCTION_TYPE_SET_STRING_VALUE
-
-      elif type_function == u'signal_abort':
-        function_return_value = u'None'
-        function_description = [
-            u'Signals the {0:s} to abort the current activity.'.format(
-                type_name)]
-        function_type = FUNCTION_TYPE_UTILITY
-
-      if not function_type:
+      if not python_function_prototype.function_type:
         continue
 
-      python_function_name = u'{0:s}_{1:s}_{2:s}'.format(
-          project_configuration.python_module_name, type_name, type_function)
-
-      python_type_object_methods.extend([
-          u'',
-          u'\t{{ "{0:s}",'.format(type_function),
-          u'\t  (PyCFunction) {0:s},'.format(python_function_name)])
-
-      if type_function.startswith(u'get_') or type_function in (
-          u'close', u'signal_abort'):
-        python_type_object_methods.append(u'\t  METH_NOARGS,')
-      else:
-        python_type_object_methods.append(u'\t  METH_VARARGS | METH_KEYWORDS,')
-
-      python_type_object_methods.extend([
-            u'\t  "{0:s}({1:s}) -> {2:s}\\n"'.format(
-                type_function, function_arguments, function_return_value),
-            u'\t  "\\n"'])
-
-      for index, line in enumerate(function_description):
-        if index < len(function_description) - 1:
-          python_type_object_methods.append(u'\t  "{0:s}\\n"'.format(line))
-        else:
-          python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
-
-      if function_type == FUNCTION_TYPE_GET_FILETIME_VALUE:
-        python_type_object_methods.extend([
-            u'',
-            u'\t{{ "{0:s}_as_integer",'.format(type_function),
-            u'\t  (PyCFunction) {0:s}_as_integer,'.format(python_function_name),
-            u'\t  METH_NOARGS,',
-            u'\t  "{0:s}_as_integer({1:s}) -> Integer or None\\n"'.format(
-                type_function, function_arguments),
-            u'\t  "\\n"'])
-
-        function_description[0] = (
-            u'{0:s} as a 64-bit integer containing a FILETIME value.').format(
-                function_description[0][:-1])
-
-        for index, line in enumerate(function_description):
-          if index < len(function_description) - 1:
-            python_type_object_methods.append(u'\t  "{0:s}\\n"'.format(line))
-          else:
-            python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
-
-      if type_function == u'get_ascii_codepage':
-        python_type_objecy_get_set_definitions.extend([
-            u'',
-            u'\t{{ "{0:s}",'.format(type_function[4:]),
-            u'\t  (getter) {0:s},'.format(python_function_name),
-            u'\t  (setter) pylnk_file_set_ascii_codepage_setter,',
-            u'\t  "{0:s}",'.format(attribute_description),
-            u'\t  NULL },'])
-
-      elif type_function.startswith(u'get_'):
-        python_type_objecy_get_set_definitions.extend([
-            u'',
-            u'\t{{ "{0:s}",'.format(type_function[4:]),
-            u'\t  (getter) {0:s},'.format(python_function_name),
-            u'\t  (setter) 0,',
-            u'\t  "{0:s}",'.format(attribute_description),
-            u'\t  NULL },'])
-
-    python_type_object_methods.extend([
-        u'',
-        u'\t/* Sentinel */',
-        u'\t{ NULL, NULL, 0, NULL }'])
-
-    python_type_objecy_get_set_definitions.extend([
-        u'\t/* Sentinel */',
-        u'\t{ NULL, NULL, NULL, NULL, NULL }'])
+      python_function_prototypes.append(python_function_prototype)
 
     function_name = u'{0:s}_{1:s}_open'.format(
         project_configuration.library_name, type_name)
@@ -2003,23 +2107,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_mappings[u'python_type_object_methods'] = u'\n'.join(
-        python_type_object_methods)
+    self._GenerateTypeSourceFileTypeObjectMethods(
+        project_configuration, template_mappings, type_name,
+        python_function_prototypes, output_writer, output_filename)
 
-    template_filename = os.path.join(
-        template_directory, u'type_object_methods.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_mappings[u'python_type_objecy_get_set_definitions'] = u'\n'.join(
-        python_type_objecy_get_set_definitions)
-
-    template_filename = os.path.join(
-        template_directory, u'type_object_get_set_definitions.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    self._GenerateTypeSourceFileTypeObjectGetSetDefinitions(
+        project_configuration, template_mappings, type_name,
+        python_function_prototypes, output_writer, output_filename)
 
     template_filename = os.path.join(template_directory, u'type_object.c')
     self._GenerateSection(
@@ -2037,6 +2131,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    # TODO: replace by python_function_prototypes
     for function_name in api_function_names:
       if not function_name.startswith(function_name_prefix):
         continue
@@ -2109,6 +2204,141 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
     self._VerticalAlignFunctionArguments(output_filename)
+
+  def _GenerateTypeSourceFileTypeObjectMethods(
+      self, project_configuration, template_mappings, type_name,
+      python_function_prototypes, output_writer, output_filename):
+    """Generates the type object methods for a Python type source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      python_function_prototypes (list[PythonTypeObjectFunctionPrototype]):
+          Python function prototypes.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, u'pyyal_type')
+
+    python_type_object_methods = []
+    python_type_object_get_set_definitions = []
+    for python_function_prototype in python_function_prototypes:
+      if not python_function_prototype.arguments:
+        arguments_flags = u'METH_NOARGS'
+      else:
+        arguments_flags = u'METH_VARARGS | METH_KEYWORDS'
+
+      return_type = python_function_prototype.GetReturnTypeDescription()
+      python_type_object_methods.extend([
+          u'',
+          u'\t{{ "{0:s}",'.format(python_function_prototype.type_function),
+          u'\t  (PyCFunction) {0:s},'.format(python_function_prototype.name),
+          u'\t  {0:s},'.format(arguments_flags),
+          u'\t  "{0:s}({1:s}) -> {2:s}\\n"'.format(
+              python_function_prototype.type_function,
+              python_function_prototype.arguments, return_type),
+          u'\t  "\\n"'])
+
+      description = python_function_prototype.GetDescription()
+      for index, line in enumerate(description):
+        if index < len(description) - 1:
+          python_type_object_methods.append(u'\t  "{0:s}\\n"'.format(line))
+        else:
+          python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
+
+      if python_function_prototype.return_type == (
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
+        python_type_object_methods.extend([
+            u'',
+            u'\t{{ "{0:s}_as_integer",'.format(
+                python_function_prototype.type_function),
+            u'\t  (PyCFunction) {0:s}_as_integer,'.format(
+                python_function_prototype.name),
+            u'\t  METH_NOARGS,',
+            u'\t  "{0:s}_as_integer({1:s}) -> Integer or None\\n"'.format(
+                python_function_prototype.type_function,
+                python_function_prototype.arguments),
+            u'\t  "\\n"'])
+
+        description[0] = (
+            u'{0:s} as a 64-bit integer containing a FILETIME value.').format(
+                description[0][:-1])
+
+        for index, line in enumerate(description):
+          if index < len(description) - 1:
+            python_type_object_methods.append(u'\t  "{0:s}\\n"'.format(line))
+          else:
+            python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
+
+    python_type_object_methods.extend([
+        u'',
+        u'\t/* Sentinel */',
+        u'\t{ NULL, NULL, 0, NULL }'])
+
+    template_mappings[u'python_type_object_methods'] = u'\n'.join(
+        python_type_object_methods)
+
+    template_filename = os.path.join(
+        template_directory, u'type_object_methods.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+  def _GenerateTypeSourceFileTypeObjectGetSetDefinitions(
+      self, project_configuration, template_mappings, type_name,
+      python_function_prototypes, output_writer, output_filename):
+    """Generates the type object definitions for a Python type source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      python_function_prototypes (list[PythonTypeObjectFunctionPrototype]):
+          Python function prototypes.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, u'pyyal_type')
+
+    python_type_object_get_set_definitions = []
+    for python_function_prototype in python_function_prototypes:
+      if python_function_prototype.function_type != (
+          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
+        continue
+
+      type_function = python_function_prototype.type_function
+      if type_function != u'get_ascii_codepage':
+        setter_function = u'0'
+      else:
+        setter_function = (
+            u'{0:s}_{1:s}_set_ascii_codepage_setter').format(
+                project_configuration.python_module_name, type_name)
+
+      description = python_function_prototype.GetAttributeDescription()
+      python_type_object_get_set_definitions.extend([
+          u'',
+          u'\t{{ "{0:s}",'.format(type_function[4:]),
+          u'\t  (getter) {0:s},'.format(python_function_prototype.name),
+          u'\t  (setter) {0:s},'.format(setter_function),
+          u'\t  "{0:s}",'.format(description),
+          u'\t  NULL },'])
+
+    python_type_object_get_set_definitions.extend([
+        u'',
+        u'\t/* Sentinel */',
+        u'\t{ NULL, NULL, NULL, NULL, NULL }'])
+
+    template_mappings[u'python_type_object_get_set_definitions'] = u'\n'.join(
+        python_type_object_get_set_definitions)
+
+    template_filename = os.path.join(
+        template_directory, u'type_object_get_set_definitions.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
 
   def _GetTemplateMappings(self, project_configuration):
     """Retrieves the template mappings.
