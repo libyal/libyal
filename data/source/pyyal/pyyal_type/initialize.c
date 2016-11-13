@@ -1,0 +1,39 @@
+/* Intializes a ${type_name} object
+ * Returns 0 if successful or -1 on error
+ */
+int ${python_module_name}_${type_name}_init(
+     ${python_module_name}_${type_name}_t *${python_module_name}_${type_name} )
+{
+	static char *function    = "${python_module_name}_${type_name}_init";
+	libcerror_error_t *error = NULL;
+
+	if( ${python_module_name}_${type_name} == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid ${type_name}.",
+		 function );
+
+		return( -1 );
+	}
+	${python_module_name}_${type_name}->${type_name}           = NULL;
+	${python_module_name}_${type_name}->${type_name}_io_handle = NULL;
+
+	if( ${library_name}_${type_name}_initialize(
+	     &( ${python_module_name}_${type_name}->${type_name} ),
+	     &error ) != 1 )
+	{
+		${python_module_name}_error_raise(
+		 error,
+		 PyExc_MemoryError,
+		 "%s: unable to initialize ${type_name}.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( -1 );
+	}
+	return( 0 );
+}
+

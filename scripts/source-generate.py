@@ -133,7 +133,8 @@ class ProjectConfiguration(object):
       authors_separator (Optional[str]): authors separator.
 
     Returns:
-      dict[str, str]: string template mappings.
+      dict[str, str]: string template mappings, where the key maps to the name
+          of a template variable.
 
     Raises:
       ValueError: if the year of creation value is out of bounds.
@@ -227,6 +228,7 @@ class FunctionPrototype(object):
   """Class that defines a function prototype.
 
   Attributes:
+    arguments (list[FunctionArgument]): function arguments.
     have_bfio (bool): True if the function prototype is defined if BFIO is
         defined.
     have_debug_output (bool): True if the function prototype is defined if
@@ -247,7 +249,7 @@ class FunctionPrototype(object):
       return_type (str): return type.
     """
     super(FunctionPrototype, self).__init__()
-    self._arguments = []
+    self.arguments = []
     self.have_bfio = False
     self.have_debug_output = False
     self.have_extern = False
@@ -261,7 +263,7 @@ class FunctionPrototype(object):
     Args:
       argument (FunctionArgument): function argument.
     """
-    self._arguments.append(argument)
+    self.arguments.append(argument)
 
   def AddArgumentString(self, argument_string):
     """Adds an argument string to the function prototype.
@@ -270,7 +272,7 @@ class FunctionPrototype(object):
       argument_string (str): function argument.
     """
     function_argument = FunctionArgument(argument_string)
-    self._arguments.append(function_argument)
+    self.arguments.append(function_argument)
 
   def CopyToString(self):
     """Copies the function prototype to a string.
@@ -279,7 +281,7 @@ class FunctionPrototype(object):
       str: function prototype.
     """
     argument_strings = []
-    for function_argument in self._arguments:
+    for function_argument in self.arguments:
       argument_string = function_argument.CopyToString()
       argument_strings.append(argument_string)
 
@@ -585,6 +587,7 @@ class LibraryHeaderFile(object):
   Attributes:
     functions_per_name (dict[str, list[FunctionPrototype]]): function
         prototypes per name.
+    have_bfio (bool): True if the include header supports libbfio.
     types (list[str]): type names.
   """
 
@@ -598,6 +601,7 @@ class LibraryHeaderFile(object):
     self._path = path
 
     self.functions_per_name = collections.OrderedDict()
+    self.have_bfio = False
     self.types = []
 
   def Read(self, project_configuration):
@@ -607,6 +611,7 @@ class LibraryHeaderFile(object):
       project_configuration (ProjectConfiguration): project configuration.
     """
     self.functions_per_name = collections.OrderedDict()
+    self.have_bfio = False
     self.types = []
 
     define_extern = b'{0:s}_EXTERN'.format(
@@ -683,6 +688,9 @@ class LibraryHeaderFile(object):
           function_prototype.have_debug_output = have_debug_output
           function_prototype.have_wide_character_type = (
               have_wide_character_type)
+
+          if have_bfio:
+            self.have_bfio = True
 
           in_function_prototype = True
 
@@ -880,13 +888,41 @@ class SourceFileGenerator(object):
     super(SourceFileGenerator, self).__init__()
     self._experimental = experimental
     self._has_python_module = None
+    self._has_tests = None
     self._library_include_header_file = None
     self._library_include_header_path = None
     self._library_makefile_am_file = None
     self._library_makefile_am_path = None
+    self._library_path = None
     self._projects_directory = projects_directory
     self._python_module_path = None
     self._template_directory = template_directory
+    self._tests_path = None
+
+  def _GenerateSection(
+      self, template_filename, template_mappings, output_writer,
+      output_filename, access_mode='wb'):
+    """Generates a section from template filename.
+
+    Args:
+      template_filename (str): name of the template file.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): name of the output file.
+      access_mode (Optional[str]): output file access mode.
+    """
+    template_string = self._ReadTemplateFile(template_filename)
+    try:
+      output_data = template_string.substitute(template_mappings)
+    except (KeyError, ValueError) as exception:
+      logging.error(
+          u'Unable to format template: {0:s} with error: {1:s}'.format(
+              template_filename, exception))
+      return
+
+    output_writer.WriteFile(
+        output_filename, output_data, access_mode=access_mode)
 
   def _GetLibraryIncludeHeaderFile(self, project_configuration):
     """Retrieves the library include header file.
@@ -934,30 +970,29 @@ class SourceFileGenerator(object):
 
     return self._library_makefile_am_file
 
-  def _GenerateSection(
-      self, template_filename, template_mappings, output_writer,
-      output_filename, access_mode='wb'):
-    """Generates a section from template filename.
+  def _GetTypeLibraryHeaderFile(self, project_configuration, type_name):
+    """Retrieves a type specific library include header file.
 
     Args:
-      template_filename (str): name of the template file.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): name of the output file.
-      access_mode (Optional[str]): output file access mode.
-    """
-    template_string = self._ReadTemplateFile(template_filename)
-    try:
-      output_data = template_string.substitute(template_mappings)
-    except (KeyError, ValueError) as exception:
-      logging.error(
-          u'Unable to format template: {0:s} with error: {1:s}'.format(
-              template_filename, exception))
-      return
+      project_configuration (ProjectConfiguration): project configuration.
+      type_name (str): name of the type.
 
-    output_writer.WriteFile(
-        output_filename, output_data, access_mode=access_mode)
+    Returns:
+      LibraryHeaderFile: library header file or None if the library header file
+          cannot be found.
+    """
+    if not self._library_path:
+      self._library_path = os.path.join(
+          self._projects_directory, project_configuration.library_name,
+          project_configuration.library_name)
+
+    # TODO: cache header files.
+    header_file_path = u'{0:s}_{1:s}.h'.format(
+       project_configuration.library_name, type_name)
+    header_file_path = os.path.join(self._library_path, header_file_path)
+    header_file = LibraryHeaderFile(header_file_path)
+
+    return header_file
 
   def _HasPythonModule(self, project_configuration):
     """Determines if the project has a Python module.
@@ -977,6 +1012,24 @@ class SourceFileGenerator(object):
 
     return self._has_python_module
 
+  def _HasTests(self, project_configuration):
+    """Determines if the project has tests.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      bool: True if the tests path exits.
+    """
+    if not self._tests_path:
+      self._tests_path = os.path.join(
+          self._projects_directory, project_configuration.library_name,
+          u'tests')
+
+      self._has_tests = os.path.exists(self._tests_path)
+
+    return self._has_tests
+
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.
 
@@ -990,6 +1043,74 @@ class SourceFileGenerator(object):
     file_data = file_object.read()
     file_object.close()
     return string.Template(file_data)
+
+  def _SortIncludeHeaders(self, project_configuration, output_filename):
+    """Sorts the include headers within a source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = [line for line in file_object.readlines()]
+
+    include_header_start = b'#include "{0:s}_test_'.format(
+        project_configuration.library_name_suffix)
+
+    include_headers = []
+    in_include_headers = False
+
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        if line.startswith(include_header_start):
+          include_headers.append(line)
+          in_include_headers = True
+
+        elif in_include_headers:
+          file_object.writelines(sorted(include_headers))
+          file_object.write(line)
+          in_include_headers = False
+
+        else:
+          file_object.write(line)
+
+  def _SortVariableDeclarations(self, output_filename):
+    """Sorts the variable declarations within a source file.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = [line for line in file_object.readlines()]
+
+    formatter = source_formatter.SourceFormatter()
+    variable_declarations = None
+    in_variable_declarations = False
+
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        stripped_line = line.rstrip()
+        if stripped_line == b'{':
+          file_object.write(line)
+          variable_declarations = []
+          in_variable_declarations = True
+
+        elif in_variable_declarations:
+          if (b'(' not in stripped_line or
+              stripped_line.startswith(b'#if defined(')):
+            variable_declarations.append(line)
+
+          else:
+            sorted_lines = formatter.FormatSource(variable_declarations)
+
+            file_object.writelines(sorted_lines)
+            file_object.write(line)
+            in_variable_declarations = False
+
+        else:
+          file_object.write(line)
+
+    lines = formatter.FormatSource(lines)
 
   def _VerticalAlignEqualSigns(self, project_configuration, output_filename):
     """Vertically aligns the equal signs.
@@ -1598,6 +1719,304 @@ class LibraryManPageGenerator(SourceFileGenerator):
 class PythonModuleSourceFileGenerator(SourceFileGenerator):
   """Class that generates the Python module source files."""
 
+  _SUPPORTED_TYPE_FUNCTIONS = frozenset([
+      u'close',
+      u'free',
+      u'get_ascii_codepage',
+      u'initialize',
+      u'open',
+      u'set_ascii_codepage',
+      u'signal_abort'])
+
+  def _GenerateTypeSourceFile(
+      self, project_configuration, template_mappings, type_name, output_writer):
+    """Generates a type source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      output_writer (OutputWriter): output writer.
+    """
+    output_filename = u'{0:s}_{1:s}.c'.format(
+        project_configuration.python_module_name, type_name)
+    output_filename = os.path.join(
+        project_configuration.python_module_name, output_filename)
+
+    header_file = self._GetTypeLibraryHeaderFile(
+        project_configuration, type_name)
+
+    # TODO: handle types in non-matching header files.
+    try:
+      header_file.Read(project_configuration)
+    except IOError:
+      logging.warning(u'Skipping: {0:s}'.format(header_file_path))
+      return
+
+    function_name_prefix = u'{0:s}_{1:s}_'.format(
+        project_configuration.library_name, type_name)
+    function_name_prefix_length = len(function_name_prefix)
+
+    api_function_names = []
+    datetime_support = False
+    guid_support = False
+    integer_support = False
+    python_type_object_methods = []
+
+    for function_name, function_prototype in iter(
+        header_file.functions_per_name.items()):
+      if not function_prototype.have_extern:
+        continue
+
+      api_function_names.append(function_name)
+
+      type_function = function_name[function_name_prefix_length:]
+
+      # TODO: determine
+      function_arguments = u''
+      function_description = u''
+      function_return_value = u'None'
+      function_type = None
+
+      if type_function == u'get_ascii_codepage':
+        function_return_value = u'String'
+
+      elif type_function.startswith(u'get_utf8_'):
+        function_return_value = u'Unicode string or None'
+        function_type = u'get_string_value'
+
+      elif type_function.startswith(u'get_utf16_'):
+        continue
+
+      elif type_function.startswith(u'get_'):
+        for function_argument in function_prototype.arguments:
+          if function_argument == u'uint64_t *filetime,':
+            function_return_value = u'Datetime'
+            function_type = u'get_filetime_value'
+
+            datetime_support = True
+            integer_support = True
+
+          elif function_argument == u'uint8_t *guid_data':
+            function_return_value = u'Unicode string or None'
+            function_type = u'get_guid_value'
+
+            guid_support = True
+
+          elif (function_argument.startswith(u'uint32_t *') or 
+              function_argument.startswith(u'uint64_t *')):
+            function_return_value = u'Integer'
+            function_type = u'get_integer_value'
+
+            integer_support = True
+
+      python_function_name = u'{0:s}_{1:s}_{2:s},'.format(
+          project_configuration.python_module_name, type_name, type_function)
+
+      python_type_object_methods.extend([
+          u'',
+          u'\t{{ "{0:s}"'.format(function_name),
+          u'\t   (PyCFunction) {0:s},'.format(python_function_name)])
+
+      if type_function.startswith(u'get_') or type_function in (
+          u'signal_abort', ):
+        python_type_object_methods.append(u'\t   METH_NOARGS,')
+      else:
+        python_type_object_methods.append(u'\t   METH_VARARGS | METH_KEYWORDS,')
+
+      python_type_object_methods.extend([
+            u'\t   "{0:s}({1:s}) -> {2:s}\n"'.format(
+                function_name, function_arguments, function_return_value),
+            u'\t   "\n"',
+            u'\t   "{0:s}." }},'.format(function_description)])
+
+      if function_type == u'get_filetime_value':
+        function_description = (
+            u'{0:s} as a 64-bit integer containing a FILETIME value').format(
+                function_description)
+
+        python_type_object_methods.extend([
+            u'',
+            u'\t{{ "{0:s}_as_integer"'.format(function_name),
+            u'\t   (PyCFunction) {0:s}_as_integer,'.format(python_function_name),
+            u'\t   METH_NOARGS,',
+            u'\t   "{0:s}_as_integer({1:s}) -> Integer\n"'.format(
+                function_name, function_arguments),
+            u'\t   "\n"',
+            u'\t   "{0:s}." }},'.format(function_description)])
+
+    function_name = u'{0:s}_{1:s}_open'.format(
+        project_configuration.library_name, type_name)
+    open_support = function_name in api_function_names
+
+    function_name = u'{0:s}_{1:s}_get_ascii_codepage'.format(
+        project_configuration.library_name, type_name)
+    codepage_support = function_name in api_function_names
+
+    template_directory = os.path.join(self._template_directory, u'pyyal_type')
+
+    template_mappings[u'type_name'] = type_name
+
+    template_filename = os.path.join(template_directory, u'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    python_module_include_names = [
+        project_configuration.library_name, type_name, u'error', u'libcerror',
+        u'python', u'unused']
+
+    if open_support and header_file.have_bfio:
+      python_module_include_names.extend([u'file_object_io_handle', 'libbfio'])
+
+    function_name = u'{0:s}_{1:s}_get_ascii_codepage'.format(
+        project_configuration.library_name, type_name)
+    if codepage_support:
+      # TODO: make #include <narrow_string.h> include conditionally
+      python_module_include_names.extend([u'codepage', 'libclocal'])
+
+    if datetime_support:
+      python_module_include_names.append(u'datetime')
+    if guid_support:
+      python_module_include_names.append(u'guid')
+    if integer_support:
+      python_module_include_names.append(u'integer')
+
+    python_module_includes = []
+    for include_name in sorted(python_module_include_names):
+      include = u'#include "{0:s}_{1:s}.h'.format(
+          project_configuration.python_module_name, include_name)
+      python_module_includes.append(include)
+
+    template_mappings[u'python_module_includes'] = u'\n'.join(
+        python_module_includes)
+
+    template_filename = os.path.join(template_directory, u'includes.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if open_support and header_file.have_bfio:
+      template_filename = os.path.join(template_directory, u'have_bfio.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: generate object methods
+
+    python_type_object_methods.extend([
+        u'',
+        u'\t/* Sentinel */',
+        u'\t{ NULL, NULL, 0, NULL }'])
+
+    template_mappings[u'python_type_object_methods'] = u'\n'.join(
+        python_type_object_methods)
+
+    template_filename = os.path.join(
+        template_directory, u'type_object_methods.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: generate object get set definitions
+    template_filename = os.path.join(
+        template_directory, u'object_get_set_definitions.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+
+    template_filename = os.path.join(template_directory, u'type_object.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, u'new.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if open_support:
+      template_filename = os.path.join(template_directory, u'new_open.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    for function_name in api_function_names:
+      if not function_name.startswith(function_name_prefix):
+        continue
+
+      type_function = function_name[function_name_prefix_length:]
+
+      template_filename = None
+      if type_function in self._SUPPORTED_TYPE_FUNCTIONS:
+        template_filename = u'{0:s}.c'.format(type_function)
+
+      # Ignore functions that will be generated elsewhere.
+      elif (type_function.startswith(u'get_utf16_') or
+          type_function.startswith(u'open_')):
+        continue
+
+      elif type_function.startswith(u'get_utf8_'):
+        template_mappings[u'value_description'] = u''
+        template_mappings[u'value_name'] = type_function[9:]
+
+        template_filename = u'get_string_value.c'
+
+      elif type_function.startswith(u'get_'):
+        template_mappings[u'value_description'] = u''
+        template_mappings[u'value_name'] = type_function[4:]
+
+        function_prototype = header_file.functions_per_name.get(
+            function_name, None)
+
+        for function_argument in function_prototype.arguments:
+          if function_argument == u'uint64_t *filetime,':
+            template_filename = u'get_filetime_value.c'
+            break
+
+          elif function_argument == u'uint8_t *guid_data,':
+            template_filename = u'get_guid_value.c'
+            break
+
+          elif function_argument.startswith(u'uint32_t *'):
+            template_filename = u'get_32bit_integer_value.c'
+
+          # TODO: add uint64_t support.
+
+      if not template_filename:
+        logging.warning(u'Skipping unsupported type function: {0:s}'.format(
+            function_name))
+        continue
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    self._SortIncludeHeaders(project_configuration, output_filename)
+    self._SortVariableDeclarations(output_filename)
+
+  def _GetTemplateMappings(self, project_configuration):
+    """Retrieves the template mappings.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      dict[str, str]: string template mappings, where the key maps to the name
+          of a template variable.
+    """
+    template_mappings = project_configuration.GetTemplateMappings(
+        authors_separator=u',\n *                          ')
+
+    # TODO: have source formatter take care of the alignment.
+    # Used to align source in pyyal/pyyal_file_object_io_handle.c
+    alignment_padding = len(project_configuration.library_name) - 6
+    template_mappings[u'alignment_padding'] = u' ' * alignment_padding
+
+    return template_mappings
+
   def Generate(self, project_configuration, output_writer):
     """Generates Python module source files.
 
@@ -1605,28 +2024,27 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: generate pyX-python2/Makefile.am and pyX-python3/Makefile.am
+
     if not self._HasPythonModule(project_configuration):
       return
 
-    # TODO: generate pyX-python2/Makefile.am and pyX-python3/Makefile.am
+    include_header_file = self._GetLibraryIncludeHeaderFile(
+        project_configuration)
 
-    codepage_header_file = os.path.join(
-        self._python_module_path, u'{0:s}_codepage.h'.format(
-            project_configuration.python_module_name))
+    if not include_header_file:
+      logging.warning(
+          u'Missing: {0:s} skipping generation of include source files.'.format(
+              self._library_include_header_path))
+      return
 
-    template_mappings = project_configuration.GetTemplateMappings(
-        authors_separator=u',\n *                          ')
+    api_types, api_types_with_input = (
+        include_header_file.GetAPITypeTestGroups(project_configuration))
 
-    # Used to align source in pyyal/pyyal_file_object_io_handle.c
-    alignment_padding = len(project_configuration.library_name) - 6
-    template_mappings[u'alignment_padding'] = u' ' * alignment_padding
+    template_mappings = self._GetTemplateMappings(project_configuration)
 
     for directory_entry in os.listdir(self._template_directory):
       if not directory_entry.startswith(u'pyyal_'):
-        continue
-
-      if (directory_entry.endswith(u'_codepage.h') and
-          not os.path.exists(codepage_header_file)):
         continue
 
       template_filename = os.path.join(
@@ -1634,15 +2052,25 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
+      force_create = False
+
       output_filename = u'{0:s}_{1:s}'.format(
           project_configuration.python_module_name, directory_entry[6:])
       output_filename = os.path.join(
           project_configuration.python_module_name, output_filename)
-      if not os.path.exists(output_filename):
+      if not force_create and not os.path.exists(output_filename):
         continue
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
+
+      if directory_entry == u'pyyal_file_object_io_handle.c':
+        self._SortVariableDeclarations(output_filename)
+
+    api_types.extend(api_types_with_input)
+    for type_name in list(api_types):
+      self._GenerateTypeSourceFile(
+          project_configuration, template_mappings, type_name, output_writer)
 
 
 class ScriptFileGenerator(SourceFileGenerator):
@@ -1993,14 +2421,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if os.path.exists(output_filename) and not self._experimental:
       return False
 
-    library_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        project_configuration.library_name)
-
-    header_file_path = u'{0:s}_{1:s}.h'.format(
-       project_configuration.library_name, type_name)
-    header_file_path = os.path.join(library_path, header_file_path)
-    header_file = LibraryHeaderFile(header_file_path)
+    header_file = self._GetTypeLibraryHeaderFile(
+        project_configuration, type_name)
 
     # TODO: handle types in non-matching header files.
     try:
@@ -2015,10 +2437,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     function_names = list(header_file.functions_per_name.keys())
     tests_to_run = []
     tests_to_run_with_args = []
-
-    function_name = u'{0:s}_{1:s}_initialize'.format(
-        project_configuration.library_name, type_name)
-    function_prototype = header_file.functions_per_name.get(function_name, None)
 
     template_mappings[u'type_name'] = type_name
     template_mappings[u'type_name_upper_case'] = type_name.upper()
@@ -2037,6 +2455,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    function_name = u'{0:s}_{1:s}_initialize'.format(
+        project_configuration.library_name, type_name)
+    function_prototype = header_file.functions_per_name.get(function_name, None)
+
+    have_extern = True
     initialize_is_internal = (
         function_prototype and not function_prototype.have_extern)
 
@@ -2047,7 +2470,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    have_extern = True
     for type_function in (u'initialize', u'free'):
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, type_function,
@@ -2313,35 +2735,49 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     return types
 
-  def _SortIncludeHeaders(self, project_configuration, output_filename):
-    """Sorts the include headers.
+  def _GetTemplateMappings(
+      self, project_configuration, api_functions, api_functions_with_input,
+      api_types, api_types_with_input, internal_types, python_functions,
+      python_functions_with_input):
+    """Retrieves the template mappings.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
-      output_filename (str): path of the output file.
+      api_functions (list[str]): names of API functions to test.
+      api_functions_with_input (list[str]): names of API functions to test
+          with input data.
+      api_types (list[str]): names of API types to test.
+      api_types_with_input (list[str]): names of API types to test with
+          input data.
+      internal_types (list[str]): names of internal types to test.
+      python_functions (list[str]): names of Python functions to test.
+      python_functions_with_input (list[str]): names of Python functions to
+          test with input data.
+
+    Returns:
+      dict[str, str]: string template mappings, where the key maps to the name
+          of a template variable.
     """
-    with open(output_filename, 'rb') as file_object:
-      lines = [line for line in file_object.readlines()]
+    template_mappings = project_configuration.GetTemplateMappings()
 
-    include_header_start = b'#include "{0:s}_test_'.format(
-        project_configuration.library_name_suffix)
+    template_mappings[u'test_api_functions'] = u' '.join(sorted(api_functions))
+    template_mappings[u'test_api_functions_with_input'] = u' '.join(
+        sorted(api_functions_with_input))
 
-    include_headers = []
-    in_include_headers = False
+    test_api_types = set(api_types).union(set(internal_types))
+    template_mappings[u'test_api_types'] = u' '.join(sorted(test_api_types))
+    template_mappings[u'test_api_types_with_input'] = u' '.join(
+        sorted(api_types_with_input))
 
-    with open(output_filename, 'wb') as file_object:
-      for line in lines:
-        if line.startswith(include_header_start):
-          include_headers.append(line)
-          in_include_headers = True
+    template_mappings[u'test_python_functions'] = u' '.join(
+        sorted(python_functions))
+    template_mappings[u'test_python_functions_with_input'] = u' '.join(
+        sorted(python_functions_with_input))
 
-        elif in_include_headers:
-          file_object.writelines(sorted(include_headers))
-          file_object.write(line)
-          in_include_headers = False
+    template_mappings[u'alignment_padding'] = (
+        u' ' * len(project_configuration.library_name_suffix))
 
-        else:
-          file_object.write(line)
+    return template_mappings
 
   def _SortSources(self, output_filename):
     """Sorts the sources.
@@ -2381,44 +2817,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         else:
           file_object.write(line)
 
-  def _SortVariableDeclarations(self, output_filename):
-    """Sorts the variable declarations.
-
-    Args:
-      output_filename (str): path of the output file.
-    """
-    with open(output_filename, 'rb') as file_object:
-      lines = [line for line in file_object.readlines()]
-
-    formatter = source_formatter.SourceFormatter()
-    variable_declarations = None
-    in_variable_declarations = False
-
-    with open(output_filename, 'wb') as file_object:
-      for line in lines:
-        stripped_line = line.rstrip()
-        if stripped_line == b'{':
-          file_object.write(line)
-          variable_declarations = []
-          in_variable_declarations = True
-
-        elif in_variable_declarations:
-          if (b'(' not in stripped_line or
-              stripped_line.startswith(b'#if defined(')):
-            variable_declarations.append(line)
-
-          else:
-            sorted_lines = formatter.FormatSource(variable_declarations)
-
-            file_object.writelines(sorted_lines)
-            file_object.write(line)
-            in_variable_declarations = False
-
-        else:
-          file_object.write(line)
-
-    lines = formatter.FormatSource(lines)
-
   def Generate(self, project_configuration, output_writer):
     """Generates tests source files.
 
@@ -2426,13 +2824,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    tests_path = os.path.join(
-        self._projects_directory, project_configuration.library_name, u'tests')
+    # TODO: deprecate project_configuration.library_public_types ?
 
-    if not os.path.exists(tests_path):
-      logging.warning(
-          u'Missing: {0:s} skipping generation of test source files.'.format(
-              tests_path))
+    if not self._HasTests(project_configuration):
       return
 
     include_header_file = self._GetLibraryIncludeHeaderFile(
@@ -2498,27 +2892,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if os.path.exists(output_filename):
         test_python_functions_with_input.append(function_name)
 
-    template_mappings = project_configuration.GetTemplateMappings()
-
-    template_mappings[u'test_api_functions'] = u' '.join(
-        sorted(api_functions))
-    template_mappings[u'test_api_functions_with_input'] = u' '.join(
-        sorted(api_functions_with_input))
-
-    template_mappings[u'test_python_functions'] = u' '.join(
-        sorted(test_python_functions))
-    template_mappings[u'test_python_functions_with_input'] = u' '.join(
-        sorted(test_python_functions_with_input))
-
-    # TODO: deprecate project_configuration.library_public_types ?
-    test_api_types = set(api_types).union(set(internal_types))
-    template_mappings[u'test_api_types'] = u' '.join(
-        sorted(test_api_types))
-    template_mappings[u'test_api_types_with_input'] = u' '.join(
-        sorted(api_types_with_input))
-
-    template_mappings[u'alignment_padding'] = (
-        u' ' * len(project_configuration.library_name_suffix))
+    template_mappings = self._GetTemplateMappings(
+        project_configuration, api_functions, api_functions_with_input,
+        api_types, api_types_with_input, internal_types, test_python_functions,
+        test_python_functions_with_input)
 
     for directory_entry in os.listdir(self._template_directory):
       # Ignore yal_test_library.h in favor of yal_test_libyal.h
@@ -2597,10 +2974,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         # Set x-bit for .sh scripts.
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
-
-    include_header_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        u'include', u'{0:s}.h.in'.format(project_configuration.library_name))
 
     self._GenerateAPISupportTests(
         project_configuration, template_mappings, include_header_file,
