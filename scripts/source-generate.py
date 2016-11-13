@@ -2607,7 +2607,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         output_writer)
 
     for type_name in list(api_types):
-      # TODO: libfmapi do not generate error type tests
       if (type_name == u'error' and
           project_configuration.library_name == u'libcerror'):
         continue
