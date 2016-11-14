@@ -2522,18 +2522,29 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           value_name = python_function_prototype.GetValueName()
 
           if not python_function_prototype.arguments:
-            template_filename = u'get_{0:s}_value.c'.format(
-                python_function_prototype.return_type)
+            if value_name.startswith(u'number_of_recovered_'):
+              value_name = value_name[20:]
+              template_filename = u'get_number_of_recovered_{0:s}_value.c'.format(
+                  python_function_prototype.return_type)
 
-          # TODO: handle number_of_recovered_
-          elif value_name.startswith(u'recovered_'):
-            value_name = value_name[10:]
-            template_filename = u'get_recovered_{0:s}_value_by_index.c'.format(
-                python_function_prototype.return_type)
+            else:
+              template_filename = u'get_{0:s}_value.c'.format(
+                  python_function_prototype.return_type)
 
           else:
-            template_filename = u'get_{0:s}_value_by_index.c'.format(
-                python_function_prototype.return_type)
+            if type_function.endswith(u'_by_name'):
+              template_filename = u'get_{0:s}_value_by_name.c'.format(
+                  python_function_prototype.return_type)
+
+            else:
+              if value_name.startswith(u'recovered_'):
+                value_name = value_name[10:]
+                template_filename = u'get_recovered_{0:s}_value_by_index.c'.format(
+                    python_function_prototype.return_type)
+
+              else:
+                template_filename = u'get_{0:s}_value_by_index.c'.format(
+                    python_function_prototype.return_type)
 
           template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
           template_mappings[u'value_name'] = value_name
@@ -2982,7 +2993,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    # TODO: generate pyX-python2/Makefile.am and pyX-python3/Makefile.am
+    # TODO: handle get_X_by_utf8_name
+    # TODO: generate pyyal/Makefile.am
+    # TODO: generate pyyal-python2/Makefile.am
+    # TODO: generate pyyal-python3/Makefile.am
+    # TODO: align assiment statements =
 
     if not self._HasPythonModule(project_configuration):
       return
