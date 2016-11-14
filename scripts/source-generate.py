@@ -321,8 +321,11 @@ class PythonTypeObjectFunctionPrototype(object):
   FUNCTION_TYPE_GET = u'get'
   FUNCTION_TYPE_INITIALIZE = u'initialize'
   FUNCTION_TYPE_OPEN = u'open'
+  FUNCTION_TYPE_READ = u'read'
+  FUNCTION_TYPE_SEEK = u'seek'
   FUNCTION_TYPE_SET = u'set'
   FUNCTION_TYPE_UTILITY = u'utility'
+  FUNCTION_TYPE_WRITE = u'write'
 
   RETURN_TYPE_BINARY_DATA = u'binary_data'
   RETURN_TYPE_FILETIME = u'filetime'
@@ -384,11 +387,20 @@ class PythonTypeObjectFunctionPrototype(object):
           self._type_function.startswith(u'open_')):
         self._function_type = self.FUNCTION_TYPE_OPEN
 
+      elif self._type_function.startswith(u'read_'):
+        self._function_type = self.FUNCTION_TYPE_READ
+
+      elif self._type_function.startswith(u'seek_'):
+        self._function_type = self.FUNCTION_TYPE_SEEK
+
       elif self._type_function.startswith(u'set_'):
         self._function_type = self.FUNCTION_TYPE_SET
 
       elif self._type_function == u'signal_abort':
         self._function_type = self.FUNCTION_TYPE_UTILITY
+
+      # elif self._type_function.startswith(u'write_'):
+      #   self._function_type = self.FUNCTION_TYPE_WRITE
 
     return self._function_type
 
@@ -409,6 +421,10 @@ class PythonTypeObjectFunctionPrototype(object):
 
     if self._type_function.startswith(u'get_utf8_'):
       return u''.join([self._type_function[:4], self._type_function[9:]])
+
+    # TODO: make more generic.
+    if self._type_function == u'set_parent_file':
+      return u'set_parent'
 
     return self._type_function
 
@@ -451,6 +467,9 @@ class PythonTypeObjectFunctionPrototype(object):
             u'Retrieves the codepage for ASCII strings used in '
             u'the {0:s}.').format(self._type_name)]
 
+      elif self._type_function == u'get_offset':
+        description = [u'Retrieves the current offset within the data.']
+
       else:
         value_name = self.GetValueName()
         if value_name:
@@ -464,6 +483,17 @@ class PythonTypeObjectFunctionPrototype(object):
       else:
         description = [u'Opens a {0:s}.'.format(self._type_name)]
 
+    elif self.function_type == self.FUNCTION_TYPE_READ:
+      if self._type_function == u'read_buffer':
+        description = [u'Reads a buffer of data.']
+
+      elif self._type_function == u'read_buffer_at_offset':
+        description = [u'Reads a buffer of data at a specific offset.']
+
+    elif self.function_type == self.FUNCTION_TYPE_SEEK:
+      if self._type_function == u'seek_offset':
+        description = [u'Seeks an offset within the data.']
+
     elif self.function_type == self.FUNCTION_TYPE_SET:
       if self._type_function == u'set_ascii_codepage':
         description = [
@@ -471,6 +501,9 @@ class PythonTypeObjectFunctionPrototype(object):
              u'{0:s}.').format(self._type_name),
             (u'Expects the codepage to be a string containing a Python '
              u'codec definition.')]
+
+      elif self._type_function == u'set_parent':
+        description = [u'Sets the parent file.']
 
     elif self.function_type == self.FUNCTION_TYPE_UTILITY:
       if self._type_function == u'signal_abort':
@@ -528,6 +561,10 @@ class PythonTypeObjectFunctionPrototype(object):
           self._value_name = self._type_function[9:]
 
         elif self._type_function.startswith(u'get_'):
+          self._value_name = self._type_function[4:]
+
+      elif self.function_type == self.FUNCTION_TYPE_SET:
+        if self._type_function.startswith(u'set_'):
           self._value_name = self._type_function[4:]
 
     return self._value_name
@@ -2325,7 +2362,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      # TODO: make open wiht file object object generated conditionally?
+      # TODO: make open with file object object generated conditionally?
       # if u'open_file_object' in python_function_prototypes:
 
     template_filename = os.path.join(template_directory, u'init.h')
@@ -2344,37 +2381,35 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if type_function in (u'free', u'initialize'):
         continue
 
+      if python_function_prototype.function_type in (
+          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
+          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET,
+          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
+        value_name = python_function_prototype.GetValueName()
+      else:
+        value_name = None
+
       template_filename = u'{0:s}.h'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
-        if python_function_prototype.function_type in (
-            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
-            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
-          value_name = python_function_prototype.GetValueName()
-        else:
-          value_name = None
+        if (python_function_prototype.arguments and
+            python_function_prototype.function_type == (
+            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET) and
+            not type_function.endswith(u'_by_name') and
+            not type_function.endswith(u'_by_path')):
+          template_filename = u'get_{0:s}_value_by_index.h'.format(
+              python_function_prototype.return_type)
 
-        if python_function_prototype.return_type in (
+        elif python_function_prototype.arguments:
+          template_filename = u'type_object_function_with_args.h'
+
+        elif python_function_prototype.return_type in (
             PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
             PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
           template_filename = u'get_datetime_value.h'
 
-        elif python_function_prototype.arguments:
-          if python_function_prototype.return_type in (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT,
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
-            template_filename = u'get_{0:s}_value_by_index.h'.format(
-                python_function_prototype.return_type)
-
-          else:
-            template_filename = u'type_object_function_with_args.h'
-
         else:
           template_filename = u'type_object_function.h'
-
-        if value_name:
-          template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
-          template_mappings[u'value_name'] = value_name
 
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
@@ -2386,6 +2421,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       template_mappings[u'type_function'] = type_function
       template_mappings[u'type_function_upper_case'] = type_function.upper()
+
+      if value_name:
+        template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
+        template_mappings[u'value_name'] = value_name
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -2547,7 +2586,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
 
-      if type_function in (u'free', u'initialize', u'open_file_object'):
+      if type_function in (u'free', u'initialize'):
         continue
 
       template_filename = u'{0:s}.c'.format(type_function)
@@ -2584,6 +2623,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               template_filename = u'get_{0:s}_value_by_name.c'.format(
                   python_function_prototype.return_type)
 
+            elif type_function.endswith(u'_by_path'):
+              template_filename = u'get_{0:s}_value_by_path.c'.format(
+                  python_function_prototype.return_type)
+
             else:
               if value_name.startswith(u'recovered_'):
                 value_name = value_name[10:]
@@ -2596,6 +2639,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
           template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
           template_mappings[u'value_name'] = value_name
+
+        elif python_function_prototype.function_type == (
+            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
+
+          value_name = python_function_prototype.GetValueName()
 
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
@@ -2663,9 +2711,40 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         else:
           python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
 
-      if python_function_prototype.return_type in (
+      if (type_function == u'get_offset' and
+          u'read_buffer' in python_function_prototypes and
+          u'seek_offset' in python_function_prototypes):
+
+        python_type_object_methods.extend([
+            u'',
+            u'\t{ "read",',
+            u'\t  (PyCFunction) {0:s}_{1:s}_read_buffer,'.format(
+                project_configuration.python_module_name, type_name),
+            u'\t  METH_VARARGS | METH_KEYWORDS,',
+            u'\t  "read(size) -> String\\n"',
+            u'\t  "\\n"',
+            u'\t  "Reads a buffer of data." },',
+            u'',
+            u'\t{ "seek",',
+            u'\t  (PyCFunction) {0:s}_{1:s}_seek_offset,'.format(
+                project_configuration.python_module_name, type_name),
+            u'\t  METH_VARARGS | METH_KEYWORDS,',
+            u'\t  "seek(offset, whence) -> None\\n"',
+            u'\t  "\\n"',
+            u'\t  "Seeks an offset within the data." },',
+            u'',
+            u'\t{ "tell",',
+            u'\t  (PyCFunction) {0:s}_{1:s}_get_offset,'.format(
+                project_configuration.python_module_name, type_name),
+            u'\t  METH_NOARGS,',
+            u'\t  "tell() -> Integer\\n"',
+            u'\t  "\\n"',
+            u'\t  "Retrieves the current offset within the data." },'])
+
+      elif python_function_prototype.return_type in (
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
+
         python_type_object_methods.extend([
             u'',
             u'\t{{ "{0:s}_as_integer",'.format(type_function),
@@ -2679,12 +2758,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
         if python_function_prototype.return_type == (
             PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
+
           description[0] = (
               u'{0:s} as a 64-bit integer containing a FILETIME value.').format(
                   description[0][:-1])
 
         elif python_function_prototype.return_type == (
             PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
+
           description[0] = (
               u'{0:s} as a 32-bit integer containing a POSIX timestamp '
               u'value.').format(description[0][:-1])
@@ -2741,6 +2822,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if python_function_prototype.function_type not in (
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
+        continue
+
+      if (type_function == u'get_offset' and
+          u'read_buffer' in python_function_prototypes and
+          u'seek_offset' in python_function_prototypes):
         continue
 
       if type_function != u'get_ascii_codepage':
@@ -2956,8 +3042,25 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       elif type_function == u'open_file_io_handle':
         python_function_prototype.arguments = u'file_object, mode=\'r\''
 
+      elif type_function == u'read_buffer':
+        python_function_prototype.return_type = (
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_BINARY_DATA)
+        python_function_prototype.arguments = u'size'
+
+      elif type_function == u'read_buffer_at_offset':
+        python_function_prototype.return_type = (
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_BINARY_DATA)
+        python_function_prototype.arguments = u'size, offset'
+
+      elif type_function == u'seek_offset':
+        python_function_prototype.arguments = u'offset, whence'
+
       elif type_function == u'set_ascii_codepage':
         python_function_prototype.arguments = u'codepage'
+
+      # TODO: make more generic.
+      elif type_function == u'set_parent_file':
+        python_function_prototype.arguments = u'parent_file'
 
       if not python_function_prototype.function_type:
         logging.warning(u'Skipping unsupported type function: {0:s}'.format(
