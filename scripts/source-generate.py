@@ -2589,6 +2589,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if type_function in (u'free', u'initialize'):
         continue
 
+      if python_function_prototype.function_type in (
+          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
+          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET,
+          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
+        value_name = python_function_prototype.GetValueName()
+      else:
+        value_name = None
+
       template_filename = u'{0:s}.c'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
@@ -2599,14 +2607,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename = u'copy_{0:s}_value.c'.format(
               python_function_prototype.return_type)
 
-          value_name = python_function_prototype.GetValueName()
-          template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
-          template_mappings[u'value_name'] = value_name
-
         if python_function_prototype.function_type == (
             PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
-
-          value_name = python_function_prototype.GetValueName()
 
           if not python_function_prototype.arguments:
             if value_name.startswith(u'number_of_recovered_'):
@@ -2637,14 +2639,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 template_filename = u'get_{0:s}_value_by_index.c'.format(
                     python_function_prototype.return_type)
 
-          template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
-          template_mappings[u'value_name'] = value_name
-
-        elif python_function_prototype.function_type == (
-            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
-
-          value_name = python_function_prototype.GetValueName()
-
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
 
@@ -2652,6 +2646,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         logging.warning(u'Template missing for type function: {0:s}'.format(
             type_function))
         continue
+
+      if value_name:
+        template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
+        template_mappings[u'value_name'] = value_name
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
