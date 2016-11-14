@@ -333,6 +333,8 @@ class PythonTypeObjectFunctionPrototype(object):
   RETURN_TYPE_OBJECT = u'object'
   RETURN_TYPE_OFF64 = u'off64'
   RETURN_TYPE_POSIX_TIME = u'posix_time'
+  RETURN_TYPE_SIZE32 = u'size32'
+  RETURN_TYPE_SIZE64 = u'size64'
   RETURN_TYPE_STRING = u'string'
   RETURN_TYPE_UINT16 = u'uint16'
   RETURN_TYPE_UINT32 = u'uint32'
@@ -496,6 +498,7 @@ class PythonTypeObjectFunctionPrototype(object):
 
     if self.return_type in (
         self.RETURN_TYPE_INT, self.RETURN_TYPE_INT32, self.RETURN_TYPE_OFF64,
+        self.RETURN_TYPE_SIZE32, self.RETURN_TYPE_SIZE64,
         self.RETURN_TYPE_UINT16, self.RETURN_TYPE_UINT32,
         self.RETURN_TYPE_UINT64):
       return u'Integer or None'
@@ -576,11 +579,12 @@ class DefinitionsIncludeHeaderFile(object):
 
           elif not line.startswith(b'{'):
             definition, _, value = line.partition(b'=')
-            definition = definition.strip()
-            value = value.strip()
 
-            if value.endswith(b','):
-              value = value[:-1]
+            definition = definition.strip()
+            definition = definition.rstrip(b',')
+
+            value = value.strip()
+            value = value.rstrip(b',')
 
             enum_declaration.constants[definition] = value
 
@@ -2082,6 +2086,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
+    self._SortIncludeHeaders(project_configuration, output_filename)
+
   def _GenerateDefinitionsSourceFile(
       self, project_configuration, template_mappings, definitions_name,
       enum_declaration, output_writer):
@@ -2138,6 +2144,60 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    self._SortIncludeHeaders(project_configuration, output_filename)
+    self._SortVariableDeclarations(output_filename)
+    self._VerticalAlignFunctionArguments(output_filename)
+
+  def _GenerateSequenceTypeHeaderFile(
+      self, project_configuration, template_mappings, type_name, output_writer):
+    """Generates a Python sequence type object header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      output_writer (OutputWriter): output writer.
+    """
+    output_filename = u'{0:s}_{1:s}s.h'.format(
+        project_configuration.python_module_name, type_name)
+    output_filename = os.path.join(
+        project_configuration.python_module_name, output_filename)
+
+    template_directory = os.path.join(
+        self._template_directory, u'pyyal_sequence_type')
+
+    template_filename = os.path.join(
+        template_directory, u'pyyal_sequence_type.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    self._SortIncludeHeaders(project_configuration, output_filename)
+
+  def _GenerateSequenceTypeSourceFile(
+      self, project_configuration, template_mappings, type_name, output_writer):
+    """Generates a Python sequence type object source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      output_writer (OutputWriter): output writer.
+    """
+    output_filename = u'{0:s}_{1:s}s.c'.format(
+        project_configuration.python_module_name, type_name)
+    output_filename = os.path.join(
+        project_configuration.python_module_name, output_filename)
+
+    template_directory = os.path.join(
+        self._template_directory, u'pyyal_sequence_type')
+
+    template_filename = os.path.join(
+        template_directory, u'pyyal_sequence_type.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
 
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
@@ -2243,8 +2303,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
             PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
           value_name = python_function_prototype.GetValueName()
-          template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
-          template_mappings[u'value_name'] = value_name
+        else:
+          value_name = None
 
         if python_function_prototype.return_type in (
             PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
@@ -2253,18 +2313,20 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
         elif python_function_prototype.arguments:
           if python_function_prototype.return_type in (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
-            template_filename = u'get_object_value_by_index.h'
-
-          elif python_function_prototype.return_type in (
+              PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT,
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
-            template_filename = u'get_string_value_by_index.h'
+            template_filename = u'get_{0:s}_value_by_index.h'.format(
+                python_function_prototype.return_type)
 
           else:
             template_filename = u'type_object_function_with_args.h'
 
         else:
           template_filename = u'type_object_function.h'
+
+        if value_name:
+          template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
+          template_mappings[u'value_name'] = value_name
 
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
@@ -2286,6 +2348,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    self._SortIncludeHeaders(project_configuration, output_filename)
 
   def _GenerateTypeSourceFile(
       self, project_configuration, template_mappings, type_name,
@@ -2329,6 +2393,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         guid_support = True
 
       elif python_function_prototype.return_type in (
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_SIZE64,
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_OFF64,
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT64):
         integer_support = True
@@ -2343,12 +2408,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         project_configuration.library_name, type_name, u'error', u'libcerror',
         u'python', u'unused']
 
+    # TODO: include header of sub types
     # TODO: include header of sequence types
 
     if bfio_support:
       python_module_include_names.extend([u'file_object_io_handle', 'libbfio'])
     if codepage_support:
-      # TODO: make #include <narrow_string.h> include conditionally
       python_module_include_names.extend([u'codepage', 'libclocale'])
     if datetime_support:
       python_module_include_names.append(u'datetime')
@@ -2366,7 +2431,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     template_mappings[u'python_module_includes'] = u'\n'.join(
         python_module_includes)
 
-    template_filename = os.path.join(template_directory, u'includes.c')
+    if codepage_support:
+      template_filename = u'includes_with_codepage.c'
+    else:
+      template_filename = u'includes.c'
+
+    template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2449,14 +2519,22 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         if python_function_prototype.function_type == (
             PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
 
+          value_name = python_function_prototype.GetValueName()
+
           if not python_function_prototype.arguments:
             template_filename = u'get_{0:s}_value.c'.format(
                 python_function_prototype.return_type)
+
+          # TODO: handle number_of_recovered_
+          elif value_name.startswith(u'recovered_'):
+            value_name = value_name[10:]
+            template_filename = u'get_recovered_{0:s}_value_by_index.c'.format(
+                python_function_prototype.return_type)
+
           else:
             template_filename = u'get_{0:s}_value_by_index.c'.format(
                 python_function_prototype.return_type)
 
-          value_name = python_function_prototype.GetValueName()
           template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
           template_mappings[u'value_name'] = value_name
 
@@ -2776,6 +2854,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             python_function_prototype.return_type = (
                 PythonTypeObjectFunctionPrototype.RETURN_TYPE_OFF64)
 
+          elif function_argument_string.startswith(u'size32_t *'):
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_SIZE32)
+
+          elif function_argument_string.startswith(u'size64_t *'):
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_SIZE64)
+
           elif function_argument_string.startswith(u'uint16_t *'):
             python_function_prototype.return_type = (
                 PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT16)
@@ -2896,7 +2982,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    # TODO: generate definition bindings
     # TODO: generate pyX-python2/Makefile.am and pyX-python3/Makefile.am
 
     if not self._HasPythonModule(project_configuration):
@@ -2940,6 +3025,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       api_types, api_types_with_input = (
           include_header_file.GetAPITypeTestGroups(project_configuration))
 
+      sequence_types = []
+
       api_types.extend(api_types_with_input)
       for type_name in list(api_types):
         template_mappings[u'type_name'] = type_name
@@ -2949,6 +3036,25 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         python_function_prototypes = self._GetPythonTypeObjectFunctionPrototypes(
             project_configuration, type_name)
 
+        for type_function, python_function_prototype in iter(
+            python_function_prototypes.items()):
+
+          if python_function_prototype.function_type != (
+              PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
+            continue
+
+          if not python_function_prototype.arguments:
+            continue
+
+          if python_function_prototype.return_type in (
+              PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT,
+              PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
+
+            # TODO: check if base type of sequence type exists.
+            sequence_type = type_function[4:]
+            if not sequence_type.startswith(u'recovered_'):
+              sequence_types.append(type_function[4:])
+
         self._GenerateTypeSourceFile(
             project_configuration, template_mappings, type_name,
             python_function_prototypes, output_writer)
@@ -2956,6 +3062,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         self._GenerateTypeHeaderFile(
             project_configuration, template_mappings, type_name,
             python_function_prototypes, output_writer)
+
+      for type_name in list(sequence_types):
+        template_mappings[u'type_name'] = type_name
+        template_mappings[u'type_name_upper_case'] = type_name.upper()
+        template_mappings[u'type_description'] = type_name.replace(u'_', u' ')
+
+        self._GenerateSequenceTypeSourceFile(
+            project_configuration, template_mappings, type_name, output_writer)
+
+        self._GenerateSequenceTypeHeaderFile(
+            project_configuration, template_mappings, type_name, output_writer)
 
     include_header_file = self._GetDefinitionsIncludeHeaderFile(
         project_configuration)
@@ -2975,6 +3092,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         if not definitions_name.startswith(definitions_name_prefix):
           continue
 
+        # TODO: skip flags definitions
         definitions_name = definitions_name[definitions_name_prefix_length:]
         if definitions_name == u'access_flags':
           continue
@@ -3347,7 +3465,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     try:
       header_file.Read(project_configuration)
     except IOError:
-      logging.warning(u'Skipping: {0:s}'.format(header_file_path))
+      logging.warning(u'Skipping: {0:s}'.format(header_file.path))
       return False
 
     template_directory = os.path.join(

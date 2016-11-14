@@ -2,6 +2,7 @@
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_new(
+           PyTypeObject *type_object,
            ${library_name}_${type_name}_t *${type_name},
            PyObject *parent_object )
 {
@@ -19,7 +20,7 @@ PyObject *${python_module_name}_${type_name}_new(
 	}
 	${python_module_name}_${type_name} = PyObject_New(
 	                                      struct ${python_module_name}_${type_name},
-	                                      &${python_module_name}_${type_name}_type_object );
+	                                      type_object );
 
 	if( ${python_module_name}_${type_name} == NULL )
 	{
