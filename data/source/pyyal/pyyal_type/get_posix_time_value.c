@@ -8,7 +8,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	PyObject *date_time_object = NULL;
 	libcerror_error_t *error   = NULL;
 	static char *function      = "${python_module_name}_${type_name}_get_${value_name}";
-	uint64_t filetime          = 0;
+	uint32_t posix_time        = 0;
 	int result                 = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
@@ -26,7 +26,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 	result = ${library_name}_${type_name}_get_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
-	          &filetime,
+	          &posix_time,
 	          &error );
 
 	Py_END_ALLOW_THREADS
@@ -51,8 +51,8 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 		return( Py_None );
 	}
-	date_time_object = ${python_module_name}_datetime_new_from_filetime(
-	                    filetime );
+	date_time_object = ${python_module_name}_datetime_new_from_posix_time(
+	                    posix_time );
 
 	return( date_time_object );
 }
@@ -67,7 +67,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
 	PyObject *integer_object = NULL;
 	libcerror_error_t *error = NULL;
 	static char *function    = "${python_module_name}_${type_name}_get_${value_name}_as_integer";
-	uint64_t filetime        = 0;
+	uint32_t posix_time      = 0;
 	int result               = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
@@ -85,7 +85,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
 
 	result = ${library_name}_${type_name}_get_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
-	          &filetime,
+	          &posix_time,
 	          &error );
 
 	Py_END_ALLOW_THREADS
@@ -110,9 +110,8 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
 
 		return( Py_None );
 	}
-	integer_object = ${python_module_name}_integer_unsigned_new_from_64bit(
-	                  (uint64_t) filetime );
+	integer_object = ${python_module_name}_integer_signed_new_from_64bit(
+	                  (int32_t) posix_time );
 
 	return( integer_object );
 }
-

@@ -40,7 +40,7 @@ PyTypeObject ${python_module_name}_${type_name}_type_object = {
 	/* tp_flags */
 	Py_TPFLAGS_DEFAULT,
 	/* tp_doc */
-	"${python_module_name} ${type_name} object (wraps ${library_name}_${type_name}_t)",
+	"${python_module_name} ${type_description} object (wraps ${library_name}_${type_name}_t)",
 	/* tp_traverse */
 	0,
 	/* tp_clear */

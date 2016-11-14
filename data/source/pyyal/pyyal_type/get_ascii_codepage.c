@@ -1,4 +1,4 @@
-/* Retrieves the codepage used for ASCII strings in the ${type_name}
+/* Retrieves the codepage used for ASCII strings in the ${type_description}
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_ascii_codepage(
@@ -18,7 +18,7 @@ PyObject *${python_module_name}_${type_name}_get_ascii_codepage(
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${type_name}.",
+		 "%s: invalid ${type_description}.",
 		 function );
 
 		return( NULL );

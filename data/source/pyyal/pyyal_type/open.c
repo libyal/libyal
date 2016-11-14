@@ -1,4 +1,4 @@
-/* Opens a ${type_name}
+/* Opens a ${type_description}
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_open(
@@ -24,7 +24,7 @@ PyObject *${python_module_name}_${type_name}_open(
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${type_name}.",
+		 "%s: invalid ${type_description}.",
 		 function );
 
 		return( NULL );
@@ -124,7 +124,7 @@ PyObject *${python_module_name}_${type_name}_open(
 			${python_module_name}_error_raise(
 			 error,
 			 PyExc_IOError,
-			 "%s: unable to open ${type_name}.",
+			 "%s: unable to open ${type_description}.",
 			 function );
 
 			libcerror_error_free(
@@ -183,7 +183,7 @@ PyObject *${python_module_name}_${type_name}_open(
 			${python_module_name}_error_raise(
 			 error,
 			 PyExc_IOError,
-			 "%s: unable to open ${type_name}.",
+			 "%s: unable to open ${type_description}.",
 			 function );
 
 			libcerror_error_free(
@@ -204,7 +204,7 @@ PyObject *${python_module_name}_${type_name}_open(
 	return( NULL );
 }
 
-/* Opens a ${type_name} using a file-like object
+/* Opens a ${type_description} using a file-like object
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_open_file_object(
@@ -223,7 +223,7 @@ PyObject *${python_module_name}_${type_name}_open_file_object(
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${type_name}.",
+		 "%s: invalid ${type_description}.",
 		 function );
 
 		return( NULL );
@@ -280,7 +280,7 @@ PyObject *${python_module_name}_${type_name}_open_file_object(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to open ${type_name}.",
+		 "%s: unable to open ${type_description}.",
 		 function );
 
 		libcerror_error_free(

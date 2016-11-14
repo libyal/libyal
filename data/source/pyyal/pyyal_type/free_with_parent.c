@@ -11,7 +11,7 @@ void ${python_module_name}_${type_name}_free(
 	if( ${python_module_name}_${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_ValueError,
+		 PyExc_TypeError,
 		 "%s: invalid ${type_description}.",
 		 function );
 
@@ -20,7 +20,7 @@ void ${python_module_name}_${type_name}_free(
 	if( ${python_module_name}_${type_name}->${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_ValueError,
+		 PyExc_TypeError,
 		 "%s: invalid ${type_description} - missing ${library_name} ${type_description}.",
 		 function );
 
@@ -59,12 +59,17 @@ void ${python_module_name}_${type_name}_free(
 	{
 		${python_module_name}_error_raise(
 		 error,
-		 PyExc_MemoryError,
+		 PyExc_IOError,
 		 "%s: unable to free ${library_name} ${type_description}.",
 		 function );
 
 		libcerror_error_free(
 		 &error );
+	}
+	if( ${python_module_name}_${type_name}->parent_object != NULL )
+	{
+		Py_DecRef(
+		 (PyObject *) ${python_module_name}_${type_name}->parent_object );
 	}
 	ob_type->tp_free(
 	 (PyObject*) ${python_module_name}_${type_name} );

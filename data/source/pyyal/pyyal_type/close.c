@@ -1,4 +1,4 @@
-/* Closes a ${type_name}
+/* Closes a ${type_description}
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_close(
@@ -15,7 +15,7 @@ PyObject *${python_module_name}_${type_name}_close(
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${type_name}.",
+		 "%s: invalid ${type_description}.",
 		 function );
 
 		return( NULL );
@@ -33,7 +33,7 @@ PyObject *${python_module_name}_${type_name}_close(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to close ${type_name}.",
+		 "%s: unable to close ${type_description}.",
 		 function );
 
 		libcerror_error_free(

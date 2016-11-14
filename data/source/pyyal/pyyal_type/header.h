@@ -22,14 +22,3 @@
 #if !defined( _${python_module_name_upper_case}_${type_name_upper_case}_H )
 #define _${python_module_name_upper_case}_${type_name_upper_case}_H
 
-#include <common.h>
-#include <types.h>
-
-#include "${python_module_name}_libbfio.h"
-#include "${python_module_name}_${library_name}.h"
-#include "${python_module_name}_python.h"
-
-#if defined( __cplusplus )
-extern "C" {
-#endif
-

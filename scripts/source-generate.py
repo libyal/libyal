@@ -322,12 +322,17 @@ class PythonTypeObjectFunctionPrototype(object):
   FUNCTION_TYPE_SET = u'set'
   FUNCTION_TYPE_UTILITY = u'utility'
 
-  RETURN_TYPE_BYTES = u'bytes'
+  RETURN_TYPE_BINARY_DATA = u'binary_data'
   RETURN_TYPE_FILETIME = u'filetime'
-  RETURN_TYPE_INTEGER = u'integer'
   RETURN_TYPE_GUID = u'guid'
   RETURN_TYPE_NONE = u'none'
+  RETURN_TYPE_INT = u'int'
+  RETURN_TYPE_OFF64 = u'off64'
+  RETURN_TYPE_POSIX_TIME = u'posix_time'
   RETURN_TYPE_STRING = u'string'
+  RETURN_TYPE_UINT16 = u'uint16'
+  RETURN_TYPE_UINT32 = u'uint32'
+  RETURN_TYPE_UINT64 = u'uint64'
 
   def __init__(self, python_module_name, type_name, type_function):
     """Initializes a Python type object function prototype.
@@ -488,13 +493,16 @@ class PythonTypeObjectFunctionPrototype(object):
     Returns:
       str: return type description.
     """
-    if self.return_type == self.RETURN_TYPE_BYTES:
+    if self.return_type == self.RETURN_TYPE_BINARY_DATA:
       return u'Binary string or None'
 
-    if self.return_type == self.RETURN_TYPE_FILETIME:
+    if self.return_type in (
+        self.RETURN_TYPE_FILETIME, self.RETURN_TYPE_POSIX_TIME):
       return u'Datetime or None'
 
-    if self.return_type == self.RETURN_TYPE_INTEGER:
+    if self.return_type in (
+        self.RETURN_TYPE_INT, self.RETURN_TYPE_OFF64, self.RETURN_TYPE_UINT16,
+        self.RETURN_TYPE_UINT32, self.RETURN_TYPE_UINT64):
       return u'Integer or None'
 
     if self.return_type in (
@@ -2159,13 +2167,35 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
+    open_support = u'open' in python_function_prototypes
+    with_parent = (
+        u'initialize' not in python_function_prototypes and
+        u'free' in python_function_prototypes)
+
     template_directory = os.path.join(self._template_directory, u'pyyal_type')
 
     template_filename = os.path.join(template_directory, u'header.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    template_filename = os.path.join(template_directory, u'typedef.h')
+    if open_support:
+      template_filename = u'includes_with_input.h'
+    else:
+      template_filename = u'includes.h'
+
+    template_filename = os.path.join(template_directory, template_filename)
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if open_support:
+      template_filename = u'typedef_with_input.h'
+    elif with_parent:
+      template_filename = u'typedef_with_parent.h'
+    else:
+      template_filename = u'typedef.h'
+
+    template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2173,12 +2203,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     python_type_prefix = u'{0:s}_{1:s}'.format(
         project_configuration.python_module_name, type_name)
 
-    template_filename = os.path.join(template_directory, u'new.h')
+    if open_support:
+      template_filename = u'new_with_input.h'
+    elif with_parent:
+      template_filename = u'new_with_parent.h'
+    else:
+      template_filename = u'new.h'
+
+    template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if u'open' in python_function_prototypes:
+    if open_support:
       template_filename = os.path.join(template_directory, u'new_open.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -2187,17 +2224,31 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       # TODO: make open wiht file object object generated conditionally?
       # if u'open_file_object' in python_function_prototypes:
 
+    template_filename = os.path.join(template_directory, u'init.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, u'free.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
+
+      if type_function in (u'free', u'initialize'):
+        continue
 
       template_filename = u'{0:s}.h'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
         template_filename = None
 
-        if python_function_prototype.return_type == (
-            PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
-          template_filename = u'get_filetime_value.h'
+        if python_function_prototype.return_type in (
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
+          template_filename = u'get_datetime_value.h'
 
         elif python_function_prototype.arguments:
           template_filename = u'type_object_function_with_args.h'
@@ -2250,10 +2301,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     guid_support = False
     integer_support = False
     open_support = u'open' in python_function_prototypes
+    with_parent = (
+        u'initialize' not in python_function_prototypes and
+        u'free' in python_function_prototypes)
 
     for python_function_prototype in python_function_prototypes.values():
-      if python_function_prototype.return_type == (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
+      if python_function_prototype.return_type in (
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
         datetime_support = True
         integer_support = True
 
@@ -2261,8 +2316,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_GUID):
         guid_support = True
 
-      elif python_function_prototype.return_type == (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_INTEGER):
+      elif python_function_prototype.return_type in (
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_OFF64,
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT32,
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT64):
         integer_support = True
 
     template_directory = os.path.join(self._template_directory, u'pyyal_type')
@@ -2320,7 +2377,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'new.c')
+    if with_parent:
+      template_filename = u'new_with_parent.c'
+    else:
+      template_filename = u'new.c'
+
+    template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2331,10 +2393,30 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    if with_parent:
+      template_filename = u'init_with_parent.c'
+    else:
+      template_filename = u'init.c'
+
+    template_filename = os.path.join(template_directory, template_filename)
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if with_parent:
+      template_filename = u'free_with_parent.c'
+    else:
+      template_filename = u'free.c'
+
+    template_filename = os.path.join(template_directory, template_filename)
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
 
-      if type_function == u'open_file_object':
+      if type_function in (u'free', u'initialize', u'open_file_object'):
         continue
 
       template_filename = u'{0:s}.c'.format(type_function)
@@ -2345,36 +2427,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         if python_function_prototype.function_type == (
             PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
 
+          template_filename = u'get_{0:s}_value.c'.format(
+              python_function_prototype.return_type)
+
           value_name = python_function_prototype.GetValueName()
           template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
           template_mappings[u'value_name'] = value_name
-
-          if python_function_prototype.return_type == (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_BYTES):
-
-            template_filename = u'get_binary_data_value.c'
-
-          elif python_function_prototype.return_type == (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
-
-            template_filename = u'get_filetime_value.c'
-
-          elif python_function_prototype.return_type == (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_GUID):
-
-            template_filename = u'get_guid_value.c'
-
-          elif python_function_prototype.return_type == (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_INTEGER):
-
-            template_filename = u'get_32bit_integer_value.c'
-
-          # TODO: add uint64_t support.
-
-          elif python_function_prototype.return_type == (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
-
-            template_filename = u'get_string_value.c'
 
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
@@ -2438,8 +2496,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         else:
           python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
 
-      if python_function_prototype.return_type == (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
+      if python_function_prototype.return_type in (
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
         python_type_object_methods.extend([
             u'',
             u'\t{{ "{0:s}_as_integer",'.format(type_function),
@@ -2451,9 +2510,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 python_function_prototype.arguments),
             u'\t  "\\n"'])
 
-        description[0] = (
-            u'{0:s} as a 64-bit integer containing a FILETIME value.').format(
-                description[0][:-1])
+        if python_function_prototype.return_type == (
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
+          description[0] = (
+              u'{0:s} as a 64-bit integer containing a FILETIME value.').format(
+                  description[0][:-1])
+
+        elif python_function_prototype.return_type == (
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
+          description[0] = (
+              u'{0:s} as a 32-bit integer containing a POSIX timestamp '
+              u'value.').format(description[0][:-1])
 
         for index, line in enumerate(description):
           if index < len(description) - 1:
@@ -2553,6 +2620,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       logging.warning(u'Skipping: {0:s}'.format(header_file.path))
       return
 
+    library_type = u'{0:s}_{1:s}_t *'.format(
+        project_configuration.library_name, type_name)
+
     function_name_prefix = u'{0:s}_{1:s}_'.format(
         project_configuration.library_name, type_name)
     function_name_prefix_length = len(function_name_prefix)
@@ -2587,6 +2657,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       python_function_prototype = PythonTypeObjectFunctionPrototype(
           project_configuration.python_module_name, type_name, type_function)
 
+      function_arguments = []
       # TODO: add support for glob functions
       # TODO: add support for has, is functions
       # TODO: add support for seek, read, write functions
@@ -2597,27 +2668,65 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       elif type_function.startswith(u'copy_'):
         python_function_prototype.return_type = (
-            PythonTypeObjectFunctionPrototype.RETURN_TYPE_BYTES)
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_BINARY_DATA)
 
       elif type_function.startswith(u'get_utf8_'):
         python_function_prototype.return_type = (
             PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING)
 
+        for function_argument in function_prototype.arguments:
+          function_argument_string = function_argument.CopyToString()
+          if (function_argument_string.startswith(library_type) or
+              function_argument_string.startswith(u'libcerror_error_t **')):
+            continue
+
+          if (function_argument_string != u'uint8_t *utf8_string' and
+              function_argument_string != u'size_t utf8_string_size'):
+            function_arguments.append(function_argument_string)
+
       elif type_function.startswith(u'get_'):
         for function_argument in function_prototype.arguments:
           function_argument_string = function_argument.CopyToString()
+          if (function_argument_string.startswith(library_type) or
+              function_argument_string.startswith(u'libcerror_error_t **')):
+            continue
+
           if function_argument_string == u'uint64_t *filetime':
             python_function_prototype.return_type = (
                 PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME)
+
+          elif function_argument_string == u'uint32_t *posix_time':
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME)
 
           elif function_argument_string == u'uint8_t *guid_data':
             python_function_prototype.return_type = (
                 PythonTypeObjectFunctionPrototype.RETURN_TYPE_GUID)
 
-          elif (function_argument_string.startswith(u'uint32_t *') or 
-              function_argument_string.startswith(u'uint64_t *')):
+          elif function_argument_string.startswith(u'int *'):
             python_function_prototype.return_type = (
-                PythonTypeObjectFunctionPrototype.RETURN_TYPE_INTEGER)
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_INT)
+
+          elif function_argument_string.startswith(u'off64_t *'):
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_OFF64)
+
+          elif function_argument_string.startswith(u'uint16_t *'):
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT16)
+
+          elif function_argument_string.startswith(u'uint32_t *'):
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT32)
+
+          elif function_argument_string.startswith(u'uint64_t *'):
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT64)
+
+          else:
+            function_arguments.append(function_argument_string)
+
+      # TODO: add support for get _by_index functions
 
       if not python_function_prototype.function_type:
         logging.warning(u'Skipping unsupported type function: {0:s}'.format(
@@ -2751,6 +2860,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       for type_name in list(api_types):
         template_mappings[u'type_name'] = type_name
         template_mappings[u'type_name_upper_case'] = type_name.upper()
+        template_mappings[u'type_description'] = type_name.replace(u'_', u' ')
 
         python_function_prototypes = self._GetPythonTypeObjectFunctionPrototypes(
             project_configuration, type_name)
@@ -3039,11 +3149,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename = u'yal_test_type.am'
         template_mappings[u'type_name'] = test
         template_mappings[u'type_name_upper_case'] = test.upper()
+        template_mappings[u'type_description'] = test.replace(u'_', u' ')
 
       elif test in api_types_with_input:
         template_filename = u'yal_test_type_with_input.am'
         template_mappings[u'type_name'] = test
         template_mappings[u'type_name_upper_case'] = test.upper()
+        template_mappings[u'type_description'] = test.replace(u'_', u' ')
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -3163,6 +3275,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     template_mappings[u'type_name'] = type_name
     template_mappings[u'type_name_upper_case'] = type_name.upper()
+    template_mappings[u'type_description'] = type_name.replace(u'_', u' ')
 
     template_filename = os.path.join(template_directory, u'header.c')
     self._GenerateSection(

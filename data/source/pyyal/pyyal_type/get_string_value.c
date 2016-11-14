@@ -1,33 +1,33 @@
 /* Retrieves the ${value_description}
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_file_get_${value_name}(
-           ${python_module_name}_file_t *${python_module_name}_file,
+PyObject *${python_module_name}_${type_name}_get_${value_name}(
+           ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
 	PyObject *string_object  = NULL;
 	libcerror_error_t *error = NULL;
 	const char *errors       = NULL;
-	static char *function    = "${python_module_name}_file_get_${value_name}";
+	static char *function    = "${python_module_name}_${type_name}_get_${value_name}";
 	char *utf8_string        = NULL;
 	size_t utf8_string_size  = 0;
 	int result               = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
-	if( ${python_module_name}_file == NULL )
+	if( ${python_module_name}_${type_name} == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid file.",
+		 "%s: invalid ${type_description}.",
 		 function );
 
 		return( NULL );
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_file_get_utf8_${value_name}_size(
-	          ${python_module_name}_file->file,
+	result = ${library_name}_${type_name}_get_utf8_${value_name}_size(
+	          ${python_module_name}_${type_name}->${type_name},
 	          &utf8_string_size,
 	          &error );
 
@@ -68,8 +68,8 @@ PyObject *${python_module_name}_file_get_${value_name}(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_file_get_utf8_${value_name}(
-	          ${python_module_name}_file->file,
+	result = ${library_name}_${type_name}_get_utf8_${value_name}(
+	          ${python_module_name}_${type_name}->${type_name},
 	          (uint8_t *) utf8_string,
 	          utf8_string_size,
 	          &error );

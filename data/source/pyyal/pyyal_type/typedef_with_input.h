@@ -14,9 +14,9 @@ struct ${python_module_name}_${type_name}
 	 */
 	${library_name}_${type_name}_t *${type_name};
 
-	/* The parent object
+	/* The libbfio file IO handle
 	 */
-	PyObject *parent_object;
+	libbfio_handle_t *file_io_handle;
 };
 
 extern PyMethodDef ${python_module_name}_${type_name}_object_methods[];

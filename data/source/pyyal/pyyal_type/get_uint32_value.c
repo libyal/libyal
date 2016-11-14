@@ -1,12 +1,14 @@
-/* Signals the ${type_description} to abort the current activity
+/* Retrieves the ${value_description}
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_${type_name}_signal_abort(
+PyObject *${python_module_name}_${type_name}_get_${value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
+	PyObject *integer_object = NULL;
 	libcerror_error_t *error = NULL;
-	static char *function    = "${python_module_name}_${type_name}_signal_abort";
+	static char *function    = "${python_module_name}_${type_name}_get_${value_name}";
+	uint32_t value_32bit     = 0;
 	int result               = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
@@ -14,7 +16,7 @@ PyObject *${python_module_name}_${type_name}_signal_abort(
 	if( ${python_module_name}_${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_ValueError,
+		 PyExc_TypeError,
 		 "%s: invalid ${type_description}.",
 		 function );
 
@@ -22,18 +24,19 @@ PyObject *${python_module_name}_${type_name}_signal_abort(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_signal_abort(
+	result = ${library_name}_${type_name}_get_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
+	          &value_32bit,
 	          &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to signal abort.",
+		 "%s: unable to retrieve ${value_description}.",
 		 function );
 
 		libcerror_error_free(
@@ -41,9 +44,16 @@ PyObject *${python_module_name}_${type_name}_signal_abort(
 
 		return( NULL );
 	}
-	Py_IncRef(
-	 Py_None );
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
 
-	return( Py_None );
+		return( Py_None );
+	}
+	integer_object = ${python_module_name}_integer_unsigned_new_from_64bit(
+	                  (uint64_t) value_32bit );
+
+	return( integer_object );
 }
 

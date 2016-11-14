@@ -1,4 +1,4 @@
-/* Sets the codepage used for ASCII strings in the ${type_name}
+/* Sets the codepage used for ASCII strings in the ${type_description}
  * Returns 1 if successful or -1 on error
  */
 int ${python_module_name}_${type_name}_set_ascii_codepage_from_string(
@@ -16,7 +16,7 @@ int ${python_module_name}_${type_name}_set_ascii_codepage_from_string(
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${type_name}.",
+		 "%s: invalid ${type_description}.",
 		 function );
 
 		return( -1 );
@@ -78,7 +78,7 @@ int ${python_module_name}_${type_name}_set_ascii_codepage_from_string(
 	return( 1 );
 }
 
-/* Sets the codepage used for ASCII strings in the ${type_name}
+/* Sets the codepage used for ASCII strings in the ${type_description}
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_set_ascii_codepage(
@@ -113,7 +113,7 @@ PyObject *${python_module_name}_${type_name}_set_ascii_codepage(
 	return( Py_None );
 }
 
-/* Sets the codepage used for ASCII strings in the ${type_name}
+/* Sets the codepage used for ASCII strings in the ${type_description}
  * Returns a Python object if successful or NULL on error
  */
 int ${python_module_name}_${type_name}_set_ascii_codepage_setter(

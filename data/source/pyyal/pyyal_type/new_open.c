@@ -1,4 +1,4 @@
-/* Creates a new ${type_name} object and opens it
+/* Creates a new ${type_description} object and opens it
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_new_open(
@@ -20,7 +20,7 @@ PyObject *${python_module_name}_${type_name}_new_open(
 	return( ${python_module_name}_${type_name} );
 }
 
-/* Creates a new ${type_name} object and opens it using a file-like object
+/* Creates a new ${type_description} object and opens it using a file-like object
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_new_open_file_object(
