@@ -185,6 +185,25 @@ class ProjectConfiguration(object):
     return template_mappings
 
 
+class EnumDeclaration(object):
+  """Class that defines an enumeration type declaration.
+
+  Attributes:
+    name (str): name.
+    constants (dict[str, str]): constant values per name.
+  """
+
+  def __init__(self, name):
+    """Initializes an enumeration type declaration.
+
+    Args:
+      name (str): name.
+    """
+    super(EnumDeclaration, self).__init__()
+    self.constants = collections.OrderedDict()
+    self.name = name
+
+
 class FunctionArgument(object):
   """Class that defines a function argument."""
 
@@ -507,6 +526,188 @@ class PythonTypeObjectFunctionPrototype(object):
     return self._value_name
 
 
+class DefinitionsIncludeHeaderFile(object):
+  """Class that defines a definitions include header file.
+
+  Attributes:
+    enum_declarations (list[EnumDeclaration]): enumeration type declarations.
+  """
+
+  def __init__(self, path):
+    """Initializes a definitions include header file.
+
+    Args:
+      path (str): path of the include header file.
+    """
+    super(DefinitionsIncludeHeaderFile, self).__init__()
+    self._path = path
+
+    self.definitions = []
+
+  def Read(self, project_configuration):
+    """Reads the include header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+    """
+    self.enum_declarations = []
+
+    enum_prefix = b'enum '.format(
+        project_configuration.library_name.upper())
+    enum_prefix_length = len(enum_prefix)
+
+    in_enum = False
+    enum_declaration = None
+
+    with open(self._path, 'rb') as file_object:
+      for line in file_object.readlines():
+        line = line.strip()
+
+        if in_enum:
+          if line.startswith(b'};'):
+            in_enum = False
+
+            self.enum_declarations.append(enum_declaration)
+            enum_declaration = None
+
+          elif not line.startswith(b'{'):
+            definition, _, value = line.partition(b'=')
+            definition = definition.strip()
+            value = value.strip()
+
+            if value.endswith(b','):
+              value = value[:-1]
+
+            enum_declaration.constants[definition] = value
+
+        if line.startswith(enum_prefix):
+          in_enum = True
+          enum_declaration = EnumDeclaration(line[enum_prefix_length:])
+
+
+class LibraryHeaderFile(object):
+  """Class that defines a library header file.
+
+  Attributes:
+    functions_per_name (dict[str, list[FunctionPrototype]]): function
+        prototypes per name.
+    path (str): path of the header file.
+    types (list[str]): type names.
+  """
+
+  def __init__(self, path):
+    """Initializes a library header file.
+
+    Args:
+      path (str): path of the header file.
+    """
+    super(LibraryHeaderFile, self).__init__()
+    self.functions_per_name = collections.OrderedDict()
+    self.path = path
+    self.types = []
+
+  def Read(self, project_configuration):
+    """Reads the header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+    """
+    self.functions_per_name = collections.OrderedDict()
+    self.types = []
+
+    define_extern = b'{0:s}_EXTERN'.format(
+        project_configuration.library_name.upper())
+
+    define_have_debug_output = b'#if defined( HAVE_DEBUG_OUTPUT )'
+
+    define_have_wide_character_type = (
+        b'#if defined( HAVE_WIDE_CHARACTER_TYPE )')
+
+    function_argument = None
+    function_prototype = None
+    have_extern = False
+    have_debug_output = False
+    have_wide_character_type = False
+    in_function_prototype = False
+
+    with open(self.path, 'rb') as file_object:
+      for line in file_object.readlines():
+        line = line.strip()
+
+        if in_function_prototype:
+          line = line.decode(u'ascii')
+
+          # Check if we have a callback function argument.
+          if line.endswith(u'('):
+            argument_string = u'{0:s} '.format(line)
+            function_argument = FunctionArgument(argument_string)
+
+          else:
+            if line.endswith(u' );'):
+              argument_string = line[:-3]
+
+            else:
+              # Get the part of the line before the ','.
+              argument_string, _, _ = line.partition(u',')
+
+            if not function_argument:
+              function_prototype.AddArgumentString(argument_string)
+
+            else:
+              function_argument.AddArgumentString(argument_string)
+
+          if function_argument and line.endswith(u' ),'):
+            function_prototype.AddArgument(function_argument)
+            function_argument = None
+
+          elif line.endswith(u' );'):
+            self.functions_per_name[function_prototype.name] = (
+                function_prototype)
+
+            function_prototype = None
+            in_function_prototype = False
+            have_extern = False
+
+        elif line.endswith(b'('):
+          # Get the part of the line before the library name.
+          return_type, _, _ = line.partition(
+              project_configuration.library_name)
+
+          # Get the part of the line after the return type.
+          line = line[len(return_type):]
+          return_type = return_type.strip()
+
+          # Get the part of the remainder of the line before the '('.
+          name, _, _ = line.partition(u'(')
+
+          function_prototype = FunctionPrototype(name, return_type)
+          function_prototype.have_extern = have_extern
+          function_prototype.have_debug_output = have_debug_output
+          function_prototype.have_wide_character_type = (
+              have_wide_character_type)
+
+          in_function_prototype = True
+
+        elif line.startswith(define_extern):
+          have_extern = True
+
+        elif line.startswith(define_have_debug_output):
+          have_debug_output = True
+
+        elif line.startswith(define_have_wide_character_type):
+          have_wide_character_type = True
+
+        elif line.startswith(b'#endif'):
+          have_debug_output = False
+          have_wide_character_type = False
+
+        elif line.startswith(b'typedef struct '):
+          type_name = line.split(b' ')[2]
+          self.types.append(type_name)
+
+    self.types = sorted(self.types)
+
+
 class LibraryIncludeHeaderFile(object):
   """Class that defines a library include header file.
 
@@ -800,128 +1001,6 @@ class LibraryIncludeHeaderFile(object):
           have_wide_character_type = False
 
 
-class LibraryHeaderFile(object):
-  """Class that defines a library header file.
-
-  Attributes:
-    functions_per_name (dict[str, list[FunctionPrototype]]): function
-        prototypes per name.
-    path (str): path of the header file.
-    types (list[str]): type names.
-  """
-
-  def __init__(self, path):
-    """Initializes a library header file.
-
-    Args:
-      path (str): path of the header file.
-    """
-    super(LibraryHeaderFile, self).__init__()
-    self.functions_per_name = collections.OrderedDict()
-    self.path = path
-    self.types = []
-
-  def Read(self, project_configuration):
-    """Reads the header file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-    """
-    self.functions_per_name = collections.OrderedDict()
-    self.types = []
-
-    define_extern = b'{0:s}_EXTERN'.format(
-        project_configuration.library_name.upper())
-
-    define_have_debug_output = b'#if defined( HAVE_DEBUG_OUTPUT )'
-
-    define_have_wide_character_type = (
-        b'#if defined( HAVE_WIDE_CHARACTER_TYPE )')
-
-    function_argument = None
-    function_prototype = None
-    have_extern = False
-    have_debug_output = False
-    have_wide_character_type = False
-    in_function_prototype = False
-    with open(self.path, 'rb') as file_object:
-      for line in file_object.readlines():
-        line = line.strip()
-
-        if in_function_prototype:
-          line = line.decode(u'ascii')
-
-          # Check if we have a callback function argument.
-          if line.endswith(u'('):
-            argument_string = u'{0:s} '.format(line)
-            function_argument = FunctionArgument(argument_string)
-
-          else:
-            if line.endswith(u' );'):
-              argument_string = line[:-3]
-
-            else:
-              # Get the part of the line before the ','.
-              argument_string, _, _ = line.partition(u',')
-
-            if not function_argument:
-              function_prototype.AddArgumentString(argument_string)
-
-            else:
-              function_argument.AddArgumentString(argument_string)
-
-          if function_argument and line.endswith(u' ),'):
-            function_prototype.AddArgument(function_argument)
-            function_argument = None
-
-          elif line.endswith(u' );'):
-            self.functions_per_name[function_prototype.name] = (
-                function_prototype)
-
-            function_prototype = None
-            in_function_prototype = False
-            have_extern = False
-
-        elif line.endswith(b'('):
-          # Get the part of the line before the library name.
-          return_type, _, _ = line.partition(
-              project_configuration.library_name)
-
-          # Get the part of the line after the return type.
-          line = line[len(return_type):]
-          return_type = return_type.strip()
-
-          # Get the part of the remainder of the line before the '('.
-          name, _, _ = line.partition(u'(')
-
-          function_prototype = FunctionPrototype(name, return_type)
-          function_prototype.have_extern = have_extern
-          function_prototype.have_debug_output = have_debug_output
-          function_prototype.have_wide_character_type = (
-              have_wide_character_type)
-
-          in_function_prototype = True
-
-        elif line.startswith(define_extern):
-          have_extern = True
-
-        elif line.startswith(define_have_debug_output):
-          have_debug_output = True
-
-        elif line.startswith(define_have_wide_character_type):
-          have_wide_character_type = True
-
-        elif line.startswith(b'#endif'):
-          have_debug_output = False
-          have_wide_character_type = False
-
-        elif line.startswith(b'typedef struct '):
-          type_name = line.split(b' ')[2]
-          self.types.append(type_name)
-
-    self.types = sorted(self.types)
-
-
 class LibraryMakefileAMFile(object):
   """Class that defines a library Makefile.am file.
 
@@ -1047,7 +1126,7 @@ class TypesIncludeHeaderFile(object):
   """Class that defines a types include header file.
 
   Attributes:
-    types (list[str]): section names.
+    types (list[str]): type names.
   """
 
   def __init__(self, path):
@@ -1067,14 +1146,17 @@ class TypesIncludeHeaderFile(object):
     Args:
       project_configuration (ProjectConfiguration): project configuration.
     """
-    typedef = b'typedef intptr_t {0:s}_'.format(
+    self.types = []
+
+    typedef_prefix = b'typedef intptr_t {0:s}_'.format(
         project_configuration.library_name)
+    typedef_prefix_length = len(typedef_prefix)
 
     with open(self._path, 'rb') as file_object:
       for line in file_object.readlines():
         line = line.strip()
-        if line.startswith(typedef) and line.endswith(b'_t;'):
-          self.types.append(line[len(typedef):-3])
+        if line.startswith(typedef_prefix) and line.endswith(b'_t;'):
+          self.types.append(line[typedef_prefix_length:-3])
 
 
 class SourceFileGenerator(object):
@@ -1090,6 +1172,8 @@ class SourceFileGenerator(object):
       experimental (bool): True if experimental features should be enabled.
     """
     super(SourceFileGenerator, self).__init__()
+    self._definitions_include_header_file = None
+    self._definitions_include_header_path = None
     self._experimental = experimental
     self._has_python_module = None
     self._has_tests = None
@@ -1102,6 +1186,8 @@ class SourceFileGenerator(object):
     self._python_module_path = None
     self._template_directory = template_directory
     self._tests_path = None
+    self._types_include_header_file = None
+    self._types_include_header_path = None
 
   def _GenerateSection(
       self, template_filename, template_mappings, output_writer,
@@ -1127,6 +1213,28 @@ class SourceFileGenerator(object):
 
     output_writer.WriteFile(
         output_filename, output_data, access_mode=access_mode)
+
+  def _GetDefinitionsIncludeHeaderFile(self, project_configuration):
+    """Retrieves the definitions include header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      DefinitionsIncludeHeaderFile: definitions include header file or None if
+          the definitions include header file cannot be found.
+    """
+    if not self._definitions_include_header_file:
+      self._definitions_include_header_path = os.path.join(
+          self._projects_directory, project_configuration.library_name,
+          u'include', project_configuration.library_name, u'definitions.h.in')
+
+      if os.path.exists(self._definitions_include_header_path):
+        self._definitions_include_header_file = DefinitionsIncludeHeaderFile(
+            self._definitions_include_header_path)
+        self._definitions_include_header_file.Read(project_configuration)
+
+    return self._definitions_include_header_file
 
   def _GetLibraryIncludeHeaderFile(self, project_configuration):
     """Retrieves the library include header file.
@@ -1197,6 +1305,28 @@ class SourceFileGenerator(object):
     header_file = LibraryHeaderFile(header_file_path)
 
     return header_file
+
+  def _GetTypesIncludeHeaderFile(self, project_configuration):
+    """Retrieves the types include header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      TypesIncludeHeaderFile: types include header file or None if
+          the types include header file cannot be found.
+    """
+    if not self._types_include_header_file:
+      self._types_include_header_path = os.path.join(
+          self._projects_directory, project_configuration.library_name,
+          u'include', project_configuration.library_name, u'types.h.in')
+
+      if os.path.exists(self._types_include_header_path):
+        self._types_include_header_file = TypesIncludeHeaderFile(
+            self._types_include_header_path)
+        self._types_include_header_file.Read(project_configuration)
+
+    return self._types_include_header_file
 
   def _HasPythonModule(self, project_configuration):
     """Determines if the project has a Python module.
@@ -1635,18 +1765,13 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
     # TODO: libsmraw/libsmraw_codepage.h alignment of definitions
     # TODO: libfvalue/libfvalue_codepage.h different
 
-    include_header_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        u'include', project_configuration.library_name, u'types.h.in')
+    include_header_file = self._GetTypesIncludeHeaderFile(project_configuration)
 
-    if not os.path.exists(include_header_path):
+    if not include_header_file:
       logging.warning(
           u'Missing: {0:s} skipping generation of library source files.'.format(
-              include_header_path))
+              self._types_include_header_path))
       return
-
-    include_header_file = TypesIncludeHeaderFile(include_header_path)
-    include_header_file.Read(project_configuration)
 
     library_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -1923,10 +2048,101 @@ class LibraryManPageGenerator(SourceFileGenerator):
 class PythonModuleSourceFileGenerator(SourceFileGenerator):
   """Class that generates the Python module source files."""
 
+  def _GenerateDefinitionsHeaderFile(
+      self, project_configuration, template_mappings, definitions_name,
+      enum_declaration, output_writer):
+    """Generates a Python definitions object header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      definitions_name (str): name of definitions.
+      enum_declaration (EnumDeclaration): enumeration type declaration.
+      output_writer (OutputWriter): output writer.
+    """
+    output_filename = u'{0:s}_{1:s}.h'.format(
+        project_configuration.python_module_name, definitions_name)
+    output_filename = os.path.join(
+        project_configuration.python_module_name, output_filename)
+
+    template_directory = os.path.join(
+        self._template_directory, u'pyyal_definitions')
+
+    template_mappings[u'definitions_name'] = definitions_name
+    template_mappings[u'definitions_name_upper_case'] = definitions_name.upper()
+    template_mappings[u'definitions_description'] = definitions_name.replace(
+        u'_', u' ')
+
+    template_filename = os.path.join(template_directory, u'pyyal_definitions.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+  def _GenerateDefinitionsSourceFile(
+      self, project_configuration, template_mappings, definitions_name,
+      enum_declaration, output_writer):
+    """Generates a Python definitions object source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      definitions_name (str): name of definitions.
+      enum_declaration (EnumDeclaration): enumeration type declaration.
+      output_writer (OutputWriter): output writer.
+    """
+    output_filename = u'{0:s}_{1:s}.c'.format(
+        project_configuration.python_module_name, definitions_name)
+    output_filename = os.path.join(
+        project_configuration.python_module_name, output_filename)
+
+    template_directory = os.path.join(
+        self._template_directory, u'pyyal_definitions')
+
+    template_mappings[u'definitions_name'] = definitions_name
+    template_mappings[u'definitions_name_upper_case'] = definitions_name.upper()
+    template_mappings[u'definitions_description'] = definitions_name.replace(
+        u'_', u' ')
+
+    template_mappings[u'definition_name'] = definitions_name[:-1]
+    template_mappings[u'definition_name_upper_case'] = (
+        definitions_name[:-1].upper())
+
+    template_filename = os.path.join(template_directory, u'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    constant_name_prefix = u'{0:s}_{1:s}_'.format(
+        project_configuration.library_name, definitions_name[:-1])
+    constant_name_prefix_length = len(constant_name_prefix)
+
+    for constant_name in enum_declaration.constants.keys():
+      constant_name = constant_name.lower()
+      if not constant_name.startswith(constant_name_prefix):
+        continue
+
+      constant_name = constant_name[constant_name_prefix_length:]
+      template_mappings[u'constant_name'] = constant_name
+      template_mappings[u'constant_name_upper_case'] = constant_name.upper()
+
+      template_filename = os.path.join(template_directory, u'constant.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, u'footer.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    self._SortIncludeHeaders(project_configuration, output_filename)
+    self._SortVariableDeclarations(output_filename)
+    self._VerticalAlignFunctionArguments(output_filename)
+
   def _GenerateTypeHeaderFile(
       self, project_configuration, template_mappings, type_name,
       python_function_prototypes, output_writer):
-    """Generates a type header file.
+    """Generates a Python type object header file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
@@ -2011,7 +2227,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
   def _GenerateTypeSourceFile(
       self, project_configuration, template_mappings, type_name,
       python_function_prototypes, output_writer):
-    """Generates a Python type source file.
+    """Generates a Python type object source file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
@@ -2493,18 +2709,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     if not self._HasPythonModule(project_configuration):
       return
 
-    include_header_file = self._GetLibraryIncludeHeaderFile(
-        project_configuration)
-
-    if not include_header_file:
-      logging.warning(
-          u'Missing: {0:s} skipping generation of include source files.'.format(
-              self._library_include_header_path))
-      return
-
-    api_types, api_types_with_input = (
-        include_header_file.GetAPITypeTestGroups(project_configuration))
-
     template_mappings = self._GetTemplateMappings(project_configuration)
 
     for directory_entry in os.listdir(self._template_directory):
@@ -2531,21 +2735,63 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if directory_entry == u'pyyal_file_object_io_handle.c':
         self._SortVariableDeclarations(output_filename)
 
-    api_types.extend(api_types_with_input)
-    for type_name in list(api_types):
-      template_mappings[u'type_name'] = type_name
-      template_mappings[u'type_name_upper_case'] = type_name.upper()
+    include_header_file = self._GetLibraryIncludeHeaderFile(
+        project_configuration)
 
-      python_function_prototypes = self._GetPythonTypeObjectFunctionPrototypes(
-          project_configuration, type_name)
+    if not include_header_file:
+      logging.warning((
+          u'Missing: {0:s} skipping generation of Python type object '
+          u'source and header files.').format(
+              self._library_include_header_path))
+    else:
+      api_types, api_types_with_input = (
+          include_header_file.GetAPITypeTestGroups(project_configuration))
 
-      self._GenerateTypeSourceFile(
-          project_configuration, template_mappings, type_name,
-          python_function_prototypes, output_writer)
+      api_types.extend(api_types_with_input)
+      for type_name in list(api_types):
+        template_mappings[u'type_name'] = type_name
+        template_mappings[u'type_name_upper_case'] = type_name.upper()
 
-      self._GenerateTypeHeaderFile(
-          project_configuration, template_mappings, type_name,
-          python_function_prototypes, output_writer)
+        python_function_prototypes = self._GetPythonTypeObjectFunctionPrototypes(
+            project_configuration, type_name)
+
+        self._GenerateTypeSourceFile(
+            project_configuration, template_mappings, type_name,
+            python_function_prototypes, output_writer)
+
+        self._GenerateTypeHeaderFile(
+            project_configuration, template_mappings, type_name,
+            python_function_prototypes, output_writer)
+
+    include_header_file = self._GetDefinitionsIncludeHeaderFile(
+        project_configuration)
+
+    if not include_header_file:
+      logging.warning((
+          u'Missing: {0:s} skipping generation of Python definitions object '
+          u'source and header files.').format(
+              self._definitions_include_header_path))
+    else:
+      definitions_name_prefix = u'{0:s}_'.format(
+          project_configuration.library_name)
+      definitions_name_prefix_length = len(definitions_name_prefix)
+
+      for enum_declaration in include_header_file.enum_declarations:
+        definitions_name = enum_declaration.name.lower()
+        if not definitions_name.startswith(definitions_name_prefix):
+          continue
+
+        definitions_name = definitions_name[definitions_name_prefix_length:]
+        if definitions_name == u'access_flags':
+          continue
+
+        self._GenerateDefinitionsSourceFile(
+            project_configuration, template_mappings, definitions_name,
+            enum_declaration, output_writer)
+
+        self._GenerateDefinitionsHeaderFile(
+            project_configuration, template_mappings, definitions_name,
+            enum_declaration, output_writer)
 
 
 class ScriptFileGenerator(SourceFileGenerator):
