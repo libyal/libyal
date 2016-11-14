@@ -115,3 +115,4 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
 
 	return( integer_object );
 }
+

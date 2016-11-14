@@ -51,8 +51,8 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 		return( Py_None );
 	}
-	integer_object = ${python_module_name}_integer_unsigned_new_from_64bit(
-	                  (uint64_t) value_32bit );
+	integer_object = PyLong_FromUnsignedLong(
+	                  (unsigned long) value_32bit );
 
 	return( integer_object );
 }

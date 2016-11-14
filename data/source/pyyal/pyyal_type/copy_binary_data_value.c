@@ -67,7 +67,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_${value_name}(
+	result = ${library_name}_${type_name}_copy_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
 	          (uint8_t *) data,
 	          data_size,
@@ -80,7 +80,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve ${value_description}.",
+		 "%s: unable to copy ${value_description}.",
 		 function );
 
 		libcerror_error_free(

@@ -8,7 +8,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	PyObject *integer_object = NULL;
 	libcerror_error_t *error = NULL;
 	static char *function    = "${python_module_name}_${type_name}_get_${value_name}";
-	off64_t offset           = 0;
+	uint32_t value_32bit     = 0;
 	int result               = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
@@ -26,7 +26,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 	result = ${library_name}_${type_name}_get_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
-	          &offset,
+	          &value_32bit,
 	          &error );
 
 	Py_END_ALLOW_THREADS
@@ -51,8 +51,13 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 		return( Py_None );
 	}
-	integer_object = ${python_module_name}_integer_signed_new_from_64bit(
-	                  (int64_t) offset );
-
+#if PY_MAJOR_VERSION >= 3
+	integer_object = PyLong_FromLong(
+	                  (long) value_32bit );
+#else
+	integer_object = PyInt_FromLong(
+	                  (long) value_32bit );
+#endif
 	return( integer_object );
 }
+
