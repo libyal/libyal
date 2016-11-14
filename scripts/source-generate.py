@@ -1454,8 +1454,54 @@ class SourceFileGenerator(object):
 
     lines = formatter.FormatSource(lines)
 
-  def _VerticalAlignEqualSigns(self, output_filename):
-    """Vertically aligns the equal signs.
+  def _VerticalAlignAssignmentStatements(self, output_filename):
+    """Vertically aligns assignment statements.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = [line for line in file_object.readlines()]
+
+    assigment_statements = []
+    in_assigment_statements_block = False
+
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        if b' = ' in line:
+          if not in_assigment_statements_block:
+            in_assigment_statements_block = True
+
+          assigment_statements.append(line)
+          continue
+
+        if in_assigment_statements_block:
+          if len(assigment_statements) == 1:
+            file_object.write(assigment_statements[0])
+
+          else:
+            alignment_offset = 0
+            for assigment_statement in assigment_statements:
+              prefix, _, _ = assigment_statement.rpartition(b'=')
+              prefix = prefix.rstrip()
+              alignment_offset = max(alignment_offset, len(prefix) + 1)
+
+            for assigment_statement in assigment_statements:
+              prefix, _, suffix = assigment_statement.rpartition(b'=')
+              prefix = prefix.rstrip()
+              alignment_length = alignment_offset - len(prefix)
+
+              assigment_statement_line = b'{0:s}{1:s}={2:s}'.format(
+                  prefix, b' ' * alignment_length, suffix)
+              file_object.write(assigment_statement_line)
+
+          in_assigment_statements_block = False
+          assigment_statements = []
+
+        file_object.write(line)
+
+  def _VerticalAlignTabs(self, output_filename):
+    """Vertically aligns tabs.
 
     Args:
       output_filename (str): path of the output file.
@@ -1745,7 +1791,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer, output_filename)
 
       if directory_entry in (u'codepage.h', u'definitions.h.in', u'error.h'):
-        self._VerticalAlignEqualSigns(output_filename)
+        self._VerticalAlignTabs(output_filename)
 
     output_filename = os.path.join(output_directory, u'features.h.in')
     self._GenerateFeaturesHeader(
@@ -1887,7 +1933,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
       if directory_entry in (u'libyal_codepage.h', u'libyal_types.h'):
-        self._VerticalAlignEqualSigns(output_filename)
+        self._VerticalAlignTabs(output_filename)
 
 
 class LibraryManPageGenerator(SourceFileGenerator):
@@ -2199,9 +2245,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
+    # TODO: combine vertical align functions.
     self._SortIncludeHeaders(project_configuration, output_filename)
-    self._SortVariableDeclarations(output_filename)
+    self._VerticalAlignAssignmentStatements(output_filename)
     self._VerticalAlignFunctionArguments(output_filename)
+    self._SortVariableDeclarations(output_filename)
 
   def _GenerateTypeHeaderFile(
       self, project_configuration, template_mappings, type_name,
@@ -2561,9 +2609,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    # TODO: combine vertical align functions.
     self._SortIncludeHeaders(project_configuration, output_filename)
-    self._SortVariableDeclarations(output_filename)
+    self._VerticalAlignAssignmentStatements(output_filename)
     self._VerticalAlignFunctionArguments(output_filename)
+    self._SortVariableDeclarations(output_filename)
 
   def _GenerateTypeSourceFileTypeObjectMethods(
       self, project_configuration, template_mappings, type_name,
