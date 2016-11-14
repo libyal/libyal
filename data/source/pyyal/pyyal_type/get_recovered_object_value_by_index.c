@@ -23,7 +23,7 @@ PyObject *${python_module_name}_${type_name}_get_recovered_${value_name}_by_inde
 	Py_BEGIN_ALLOW_THREADS
 
 	result = ${library_name}_${type_name}_get_recovered_${value_name}(
-	          ${python_module_name}_${type_name}->${type_name},
+	          ( (${python_module_name}_${type_name}_t *) ${python_module_name}_${type_name} )->${type_name},
 	          ${value_name}_index,
 	          &${value_name},
 	          &error );
@@ -145,8 +145,8 @@ PyObject *${python_module_name}_${type_name}_get_recovered_${value_name}s(
 		return( NULL );
 	}
 	sequence_object = ${python_module_name}_${value_name}s_new(
-	                   ${python_module_name}_${type_name},
-	                   &${python_module_name}_${type_name}_get_${value_name}_by_index,
+	                   (PyObject *) ${python_module_name}_${type_name},
+	                   &${python_module_name}_${type_name}_get_recovered_${value_name}_by_index,
 	                   number_of_${value_name}s );
 
 	if( sequence_object == NULL )
@@ -161,5 +161,4 @@ PyObject *${python_module_name}_${type_name}_get_recovered_${value_name}s(
 	}
 	return( sequence_object );
 }
-
 

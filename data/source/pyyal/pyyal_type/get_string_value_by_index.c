@@ -2,7 +2,7 @@
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
-           ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
+           PyObject *${python_module_name}_${type_name},
            int ${value_name}_index )
 {
 	libcerror_error_t *error = NULL;
@@ -25,7 +25,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
 	Py_BEGIN_ALLOW_THREADS
 
 	result = ${library_name}_${type_name}_get_utf8_${value_name}_size(
-	          ${python_module_name}_${type_name}->${type_name},
+	          ( (${python_module_name}_${type_name}_t *) ${python_module_name}_${type_name} )->${type_name},
 	          ${value_name}_index,
 	          &utf8_string_size,
 	          &error );
@@ -69,7 +69,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
 	Py_BEGIN_ALLOW_THREADS
 
 	result = ${library_name}_${type_name}_get_utf8_${value_name}(
-		  ${python_module_name}_${type_name}->${type_name},
+		  ( (${python_module_name}_${type_name}_t *) ${python_module_name}_${type_name} )->${type_name},
 		  ${value_name}_index,
 		  utf8_string,
 		  utf8_string_size,
@@ -144,7 +144,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 		return( NULL );
 	}
 	string_object = ${python_module_name}_${type_name}_get_${value_name}_by_index(
-	                 ${python_module_name}_${type_name},
+	                 (PyObject *) ${python_module_name}_${type_name},
 	                 ${value_name}_index );
 
 	return( string_object );
@@ -197,7 +197,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}s(
 		return( NULL );
 	}
 	sequence_object = ${python_module_name}_${value_name}s_new(
-	                   ${python_module_name}_${type_name},
+	                   (PyObject *) ${python_module_name}_${type_name},
 	                   &${python_module_name}_${type_name}_get_${value_name}_by_index,
 	                   number_of_${value_name}s );
 
