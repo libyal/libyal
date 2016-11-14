@@ -1954,7 +1954,54 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: generate function definitions.
+    python_type_prefix = u'{0:s}_{1:s}'.format(
+        project_configuration.python_module_name, type_name)
+
+    template_filename = os.path.join(template_directory, u'new.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if u'open' in python_function_prototypes:
+      template_filename = os.path.join(template_directory, u'new_open.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      # TODO: make open wiht file object object generated conditionally?
+      # if u'open_file_object' in python_function_prototypes:
+
+    for type_function, python_function_prototype in iter(
+        python_function_prototypes.items()):
+
+      template_filename = u'{0:s}.h'.format(type_function)
+      template_filename = os.path.join(template_directory, template_filename)
+      if not os.path.exists(template_filename):
+        template_filename = None
+
+        if python_function_prototype.return_type == (
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
+          template_filename = u'get_filetime_value.h'
+
+        elif python_function_prototype.arguments:
+          template_filename = u'type_object_function_with_args.h'
+
+        else:
+          template_filename = u'type_object_function.h'
+
+        if template_filename:
+          template_filename = os.path.join(template_directory, template_filename)
+
+      if not template_filename or not os.path.exists(template_filename):
+        continue
+
+      template_mappings[u'type_function'] = type_function
+      template_mappings[u'type_function_upper_case'] = type_function.upper()
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     template_filename = os.path.join(template_directory, u'footer.h')
     self._GenerateSection(
@@ -2113,8 +2160,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
             template_filename = u'get_string_value.c'
 
-      if template_filename:
-        template_filename = os.path.join(template_directory, template_filename)
+        if template_filename:
+          template_filename = os.path.join(template_directory, template_filename)
 
       if not template_filename or not os.path.exists(template_filename):
         continue
@@ -2440,6 +2487,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: generate definition bindings
     # TODO: generate pyX-python2/Makefile.am and pyX-python3/Makefile.am
 
     if not self._HasPythonModule(project_configuration):
