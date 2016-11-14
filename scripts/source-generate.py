@@ -419,7 +419,8 @@ class PythonTypeObjectFunctionPrototype(object):
     if self._type_function.startswith(u'copy_'):
       return u'get_{0:s}'.format(self._type_function[5:])
 
-    if self._type_function.startswith(u'get_utf8_'):
+    if (self._type_function.startswith(u'get_utf8_') or
+        self._type_function.startswith(u'set_utf8_')):
       return u''.join([self._type_function[:4], self._type_function[9:]])
 
     # TODO: make more generic.
@@ -505,6 +506,12 @@ class PythonTypeObjectFunctionPrototype(object):
       elif self._type_function == u'set_parent':
         description = [u'Sets the parent file.']
 
+      else:
+        value_name = self.GetValueName()
+        if value_name:
+          value_name = value_name.replace(u'_', u' ')
+          description = [u'Sets the {0:s}.'.format(value_name)]
+
     elif self.function_type == self.FUNCTION_TYPE_UTILITY:
       if self._type_function == u'signal_abort':
         description = [
@@ -564,7 +571,10 @@ class PythonTypeObjectFunctionPrototype(object):
           self._value_name = self._type_function[4:]
 
       elif self.function_type == self.FUNCTION_TYPE_SET:
-        if self._type_function.startswith(u'set_'):
+        if self._type_function.startswith(u'set_utf8_'):
+          self._value_name = self._type_function[9:]
+
+        elif self._type_function.startswith(u'set_'):
           self._value_name = self._type_function[4:]
 
     return self._value_name
@@ -2392,24 +2402,26 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       template_filename = u'{0:s}.h'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
-        if (python_function_prototype.arguments and
-            python_function_prototype.function_type == (
-            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET) and
-            not type_function.endswith(u'_by_name') and
-            not type_function.endswith(u'_by_path')):
-          template_filename = u'get_{0:s}_value_by_index.h'.format(
-              python_function_prototype.return_type)
+        template_filename = None
+        if python_function_prototype.function_type == (
+            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
 
-        elif python_function_prototype.arguments:
-          template_filename = u'type_object_function_with_args.h'
+          if (python_function_prototype.arguments and
+              not type_function.endswith(u'_by_name') and
+              not type_function.endswith(u'_by_path')):
+            template_filename = u'get_{0:s}_value_by_index.h'.format(
+                python_function_prototype.return_type)
 
-        elif python_function_prototype.return_type in (
-            PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
-            PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
-          template_filename = u'get_datetime_value.h'
+          elif python_function_prototype.return_type in (
+              PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
+              PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
+            template_filename = u'get_datetime_value.h'
 
-        else:
-          template_filename = u'type_object_function.h'
+        if not template_filename:
+          if python_function_prototype.arguments:
+            template_filename = u'type_object_function_with_args.h'
+          else:
+            template_filename = u'type_object_function.h'
 
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
@@ -2607,7 +2619,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename = u'copy_{0:s}_value.c'.format(
               python_function_prototype.return_type)
 
-        if python_function_prototype.function_type == (
+        elif python_function_prototype.function_type == (
             PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
 
           if not python_function_prototype.arguments:
@@ -2638,6 +2650,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               else:
                 template_filename = u'get_{0:s}_value_by_index.c'.format(
                     python_function_prototype.return_type)
+
+        elif python_function_prototype.function_type == (
+            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
+
+          # TODO: make more generic.
+          if type_function == u'set_password':
+            template_filename = u'set_{0:s}_value.c'.format(u'string')
 
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
@@ -2921,7 +2940,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           type_function.endswith(u'_size')):
         continue
 
-      elif type_function.startswith(u'get_utf16_'):
+      elif (type_function.startswith(u'get_utf16_') or
+            type_function.startswith(u'set_utf16_')):
         continue
 
       elif (type_function.startswith(u'get_') and
@@ -3059,6 +3079,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       # TODO: make more generic.
       elif type_function == u'set_parent_file':
         python_function_prototype.arguments = u'parent_file'
+
+      elif type_function == u'set_password':
+        python_function_prototype.arguments = u'password'
 
       if not python_function_prototype.function_type:
         logging.warning(u'Skipping unsupported type function: {0:s}'.format(
