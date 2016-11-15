@@ -3819,14 +3819,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     for type_function in (u'initialize', u'free'):
       if type_function == u'initialize' and initialize_number_of_arguments != 2:
-        continue
+        test_function_name = None
 
-      function_name, test_function_name, have_extern = self._GenerateTypeTest(
-          project_configuration, template_mappings, type_name, type_function,
-          have_extern, header_file, output_writer, output_filename,
-          with_input=with_input)
+      else:
+        function_name, test_function_name, have_extern = self._GenerateTypeTest(
+            project_configuration, template_mappings, type_name, type_function,
+            have_extern, header_file, output_writer, output_filename,
+            with_input=with_input)
+
       if test_function_name:
         tests_to_run.append((function_name, test_function_name))
+
+      if function_name in function_names:
         function_names.remove(function_name)
 
     # TODO: fix libbfio having no open wide.

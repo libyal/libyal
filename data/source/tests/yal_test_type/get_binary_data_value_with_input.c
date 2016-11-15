@@ -17,10 +17,10 @@ int ${library_name_suffix}_test_${type_name}_get_${value_name}(
 	          4096,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT(
 	 "result",
 	 result,
-	 1 );
+	 -1 );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
          "error",
