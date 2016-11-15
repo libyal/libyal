@@ -68,11 +68,10 @@ int main(
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
-#if defined( LIB${library_name_suffix_upper_case}_HAVE_BFIO )
-
-		/* TODO add test for ${library_name}_check_${signature_type}_file_io_handle */
-
-#endif /* defined( LIB${library_name_suffix_upper_case}_HAVE_BFIO ) */
+		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
+		 "${library_name}_check_${signature_type}_signature_file_io_handle",
+		 ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle,
+		 source );
 	}
 #endif /* !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 ) */
 

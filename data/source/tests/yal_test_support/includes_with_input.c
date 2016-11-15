@@ -3,11 +3,13 @@
 #include <narrow_string.h>
 #include <system_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
 #endif
 
+#include "${library_name_suffix}_test_libbfio.h"
 #include "${library_name_suffix}_test_libcerror.h"
 #include "${library_name_suffix}_test_libclocale.h"
 #include "${library_name_suffix}_test_libcsystem.h"
@@ -15,6 +17,11 @@
 #include "${library_name_suffix}_test_libuna.h"
 #include "${library_name_suffix}_test_macros.h"
 #include "${library_name_suffix}_test_unused.h"
+
+${library_name_upper_case}_EXTERN \
+int ${library_name}_check_${signature_type}_signature_file_io_handle(
+     libbfio_handle_t *file_io_handle,
+     libcerror_error_t **error );
 
 /* Retrieves source as a narrow string
  * Returns 1 if successful or -1 on error

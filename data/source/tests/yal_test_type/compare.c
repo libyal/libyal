@@ -35,7 +35,7 @@ int ${library_name_suffix}_test_${type_name}_compare(
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 LIBCDATA_COMPARE_EQUAL );
+	 1 );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
          "second_${type_name}",
@@ -55,7 +55,7 @@ int ${library_name_suffix}_test_${type_name}_compare(
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 1 );
+	 LIBCDATA_COMPARE_EQUAL );
 
         ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
          "error",

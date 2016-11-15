@@ -3595,7 +3595,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_mappings[u'library_function'] = test
 
       elif test in api_functions_with_input:
-        template_filename = u'yal_test_function_with_input.am'
+        if test == u'support':
+          template_filename = u'yal_test_support_with_input.am'
+        else:
+          template_filename = u'yal_test_function_with_input.am'
+
         template_mappings[u'library_function'] = test
 
       elif test in api_types or test in internal_types:
@@ -3689,10 +3693,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       value_type, _, _ = function_argument_string.partition(u' ')
 
       if len(function_prototype.arguments) == 3:
-        if with_input:
-          template_filename = u'get_value_with_input.c'
+        if value_type.startswith(project_configuration.library_name):
+          if with_input:
+            template_filename = u'get_type_value_with_input.c'
+          else:
+            template_filename = u'get_type_value.c'
         else:
-          template_filename = u'get_value.c'
+          if with_input:
+            template_filename = u'get_value_with_input.c'
+          else:
+            template_filename = u'get_value.c'
 
       elif function_argument_string == u'uint8_t *guid_data':
         if with_input:
