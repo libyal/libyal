@@ -3797,43 +3797,51 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    # TODO: treat external functions as internal when initialize_is_internal
+    # except for free.
     have_extern = True
+    initialize_is_internal = False
+    initialize_number_of_arguments = None
 
     function_name = u'{0:s}_{1:s}_initialize'.format(
         project_configuration.library_name, type_name)
-    function_prototype = header_file.functions_per_name.get(function_name, None)
+    if function_name in function_names:
+      function_prototype = header_file.functions_per_name.get(
+          function_name, None)
 
-    if not function_prototype:
-      initialize_number_of_arguments = None
-      initialize_is_internal = False
-    else:
-      initialize_number_of_arguments = len(function_prototype.arguments)
       initialize_is_internal = not function_prototype.have_extern
+      initialize_number_of_arguments = len(function_prototype.arguments)
 
-    if is_internal or initialize_is_internal:
-      template_filename = os.path.join(
-          template_directory, u'includes_internal.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      if is_internal or initialize_is_internal:
+        template_filename = os.path.join(
+            template_directory, u'includes_internal.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
 
-    for type_function in (u'initialize', u'free'):
-      if type_function == u'initialize' and initialize_number_of_arguments != 2:
-        test_function_name = None
-
-      else:
+      test_function_name = None
+      if initialize_number_of_arguments == 2:
         function_name, test_function_name, have_extern = self._GenerateTypeTest(
-            project_configuration, template_mappings, type_name, type_function,
+            project_configuration, template_mappings, type_name, u'initialize',
             have_extern, header_file, output_writer, output_filename,
             with_input=with_input)
 
-      if test_function_name:
-        tests_to_run.append((function_name, test_function_name))
+      tests_to_run.append((function_name, test_function_name))
+      function_names.remove(function_name)
 
-      if function_name in function_names:
-        function_names.remove(function_name)
+    function_name = u'{0:s}_{1:s}_free'.format(
+        project_configuration.library_name, type_name)
+    if function_name in function_names:
+      function_name, test_function_name, have_extern = self._GenerateTypeTest(
+          project_configuration, template_mappings, type_name, u'free',
+          have_extern, header_file, output_writer, output_filename,
+          with_input=with_input)
+
+      tests_to_run.append((function_name, test_function_name))
+      function_names.remove(function_name)
 
     # TODO: fix libbfio having no open wide.
+    # TODO: make handling open close more generic for libpff attachment handle.
     for type_function in (u'open', u'open_wide', u'close'):
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, type_function,
