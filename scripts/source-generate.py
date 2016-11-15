@@ -1433,6 +1433,69 @@ class SourceFileGenerator(object):
     file_object.close()
     return string.Template(file_data)
 
+  def _SetTypeFunctionInTemplateMappings(
+      self, template_mappings, type_function):
+    """Sets type function in template mappings.
+
+    Args:
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_function (str): type function.
+    """
+    if not type_function:
+      template_mappings[u'type_function'] = u''
+      template_mappings[u'type_function_upper_case'] = u''
+    else:
+      template_mappings[u'type_function'] = type_function
+      template_mappings[u'type_function_upper_case'] = type_function.upper()
+
+  def _SetTypeNameInTemplateMappings(self, template_mappings, type_name):
+    """Sets type name in template mappings.
+
+    Args:
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): type name.
+    """
+    if not type_name:
+      template_mappings[u'type_description'] = u''
+      template_mappings[u'type_name'] = u''
+      template_mappings[u'type_name_upper_case'] = u''
+    else:
+      template_mappings[u'type_description'] = type_name.replace(u'_', u' ')
+      template_mappings[u'type_name'] = type_name
+      template_mappings[u'type_name_upper_case'] = type_name.upper()
+
+  def _SetValueNameInTemplateMappings(self, template_mappings, value_name):
+    """Sets value name in template mappings.
+
+    Args:
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      value_name (str): value name.
+    """
+    if not value_name:
+      template_mappings[u'value_description'] = u''
+      template_mappings[u'value_name'] = u''
+      template_mappings[u'value_name_upper_case'] = u''
+    else:
+      template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
+      template_mappings[u'value_name'] = value_name
+      template_mappings[u'value_name_upper_case'] = value_name.upper()
+
+  def _SetValueTypeInTemplateMappings(self, template_mappings, value_type):
+    """Sets value type in template mappings.
+
+    Args:
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the type of a template variable.
+      value_type (str): value type.
+    """
+    if not value_type:
+      template_mappings[u'value_type'] = u''
+    else:
+      template_mappings[u'value_type'] = value_type
+
   def _SortIncludeHeaders(self, project_configuration, output_filename):
     """Sorts the include headers within a source file.
 
@@ -2427,16 +2490,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename = os.path.join(template_directory, template_filename)
 
       if not template_filename or not os.path.exists(template_filename):
-        logging.warning(u'Template missing for type function: {0:s}'.format(
-            type_function))
+        logging.warning((
+            u'Unable to generate Python type header code for type function: '
+            u'{0:s} with error: missing template').format(type_function))
         continue
 
-      template_mappings[u'type_function'] = type_function
-      template_mappings[u'type_function_upper_case'] = type_function.upper()
-
-      if value_name:
-        template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
-        template_mappings[u'value_name'] = value_name
+      self._SetTypeFunctionInTemplateMappings(template_mappings, type_function)
+      self._SetValueNameInTemplateMappings(template_mappings, value_name)
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -2662,13 +2722,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename = os.path.join(template_directory, template_filename)
 
       if not template_filename or not os.path.exists(template_filename):
-        logging.warning(u'Template missing for type function: {0:s}'.format(
-            type_function))
+        logging.warning((
+            u'Unable to generate Python type source code for type function: '
+            u'{0:s} with error: missing template').format(type_function))
         continue
 
-      if value_name:
-        template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
-        template_mappings[u'value_name'] = value_name
+      self._SetValueNameInTemplateMappings(template_mappings, value_name)
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -3218,9 +3277,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       api_types.extend(api_types_with_input)
       for type_name in list(api_types):
-        template_mappings[u'type_name'] = type_name
-        template_mappings[u'type_name_upper_case'] = type_name.upper()
-        template_mappings[u'type_description'] = type_name.replace(u'_', u' ')
+        self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
         python_function_prototypes = self._GetPythonTypeObjectFunctionPrototypes(
             project_configuration, type_name)
@@ -3253,9 +3310,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             python_function_prototypes, output_writer)
 
       for type_name in list(sequence_types):
-        template_mappings[u'type_name'] = type_name
-        template_mappings[u'type_name_upper_case'] = type_name.upper()
-        template_mappings[u'type_description'] = type_name.replace(u'_', u' ')
+        self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
         self._GenerateSequenceTypeSourceFile(
             project_configuration, template_mappings, type_name, output_writer)
@@ -3498,8 +3553,15 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     cppflags = list(makefile_am_file.cppflags)
     if api_functions_with_input or api_types_with_input:
-      # TODO: add libcsystem before non libyal cppflags.
-      cppflags.append(u'libcsystem')
+      # Add libcsystem before non libyal cppflags.
+      index = 0
+      while index < len(cppflags):
+        cppflag = cppflags[index]
+        if not cppflag.startswith(u'lib') or cppflag == u'libcrypto':
+          break
+        index += 1
+
+      cppflags.insert(index, u'libcsystem')
 
     template_mappings[u'cppflags'] = u' \\\n'.join(
         [u'\t@{0:s}_CPPFLAGS@'.format(name.upper()) for name in cppflags])
@@ -3538,15 +3600,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       elif test in api_types or test in internal_types:
         template_filename = u'yal_test_type.am'
-        template_mappings[u'type_name'] = test
-        template_mappings[u'type_name_upper_case'] = test.upper()
-        template_mappings[u'type_description'] = test.replace(u'_', u' ')
+
+        self._SetTypeNameInTemplateMappings(template_mappings, test)
 
       elif test in api_types_with_input:
         template_filename = u'yal_test_type_with_input.am'
-        template_mappings[u'type_name'] = test
-        template_mappings[u'type_name_upper_case'] = test.upper()
-        template_mappings[u'type_description'] = test.replace(u'_', u' ')
+
+        self._SetTypeNameInTemplateMappings(template_mappings, test)
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -3562,7 +3622,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateTypeTest(
       self, project_configuration, template_mappings, type_name, type_function,
-      last_have_extern, header_file, output_writer, output_filename):
+      last_have_extern, header_file, output_writer, output_filename,
+      with_input=False):
     """Generates a type test within the type tests source file.
 
     Args:
@@ -3576,6 +3637,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       header_file (LibraryHeaderFile): library header file.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
+      with_input (Optional[bool]): True if the type is to be tested with
+          input data.
 
     Returns:
       tuple: contains:
@@ -3585,15 +3648,37 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     """
     function_name = u'{0:s}_{1:s}_{2:s}'.format(
         project_configuration.library_name, type_name, type_function)
-    if function_name not in header_file.functions_per_name:
+
+    function_prototype = header_file.functions_per_name.get(function_name, None)
+    if not function_prototype:
       return function_name, None, last_have_extern
 
     template_directory = os.path.join(
         self._template_directory, u'yal_test_type')
 
-    template_filename = u'{0:s}.c'.format(type_function)
+    if type_function.startswith(u'get_'):
+      if len(function_prototype.arguments) != 3:
+        return function_name, None, last_have_extern
+
+      function_argument_string = function_prototype.arguments[1].CopyToString()
+      value_type, _, _ = function_argument_string.partition(u' ')
+
+      self._SetValueNameInTemplateMappings(template_mappings, type_function[4:])
+      self._SetValueTypeInTemplateMappings(template_mappings, value_type)
+
+      if with_input:
+        template_filename = u'get_value_with_input.c'
+      else:
+        template_filename = u'get_value.c'
+
+    else:
+      template_filename = u'{0:s}.c'.format(type_function)
+
     template_filename = os.path.join(template_directory, template_filename)
     if not os.path.exists(template_filename):
+      logging.warning((
+          u'Unable to generate test type source code for type function: '
+          u'{0:s} with error: missing template').format(type_function))
       return function_name, None, last_have_extern
 
     function_prototype = header_file.functions_per_name.get(function_name, None)
@@ -3664,9 +3749,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     tests_to_run = []
     tests_to_run_with_args = []
 
-    template_mappings[u'type_name'] = type_name
-    template_mappings[u'type_name_upper_case'] = type_name.upper()
-    template_mappings[u'type_description'] = type_name.replace(u'_', u' ')
+    self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
     template_filename = os.path.join(template_directory, u'header.c')
     self._GenerateSection(
@@ -3682,13 +3765,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    have_extern = True
+
     function_name = u'{0:s}_{1:s}_initialize'.format(
         project_configuration.library_name, type_name)
     function_prototype = header_file.functions_per_name.get(function_name, None)
 
-    have_extern = True
-    initialize_is_internal = (
-        function_prototype and not function_prototype.have_extern)
+    if not function_prototype:
+      initialize_number_of_arguments = None
+      initialize_is_internal = False
+    else:
+      initialize_number_of_arguments = len(function_prototype.arguments)
+      initialize_is_internal = not function_prototype.have_extern
 
     if is_internal or initialize_is_internal:
       template_filename = os.path.join(
@@ -3698,9 +3786,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     for type_function in (u'initialize', u'free'):
+      if type_function == u'initialize' and initialize_number_of_arguments != 2:
+        continue
+
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, type_function,
-          have_extern, header_file, output_writer, output_filename)
+          have_extern, header_file, output_writer, output_filename,
+          with_input=with_input)
       if test_function_name:
         tests_to_run.append((function_name, test_function_name))
         function_names.remove(function_name)
@@ -3710,7 +3802,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       for type_function in (u'open', u'get_ascii_codepage'):
         function_name, test_function_name, have_extern = self._GenerateTypeTest(
             project_configuration, template_mappings, type_name, type_function,
-            have_extern, header_file, output_writer, output_filename)
+            have_extern, header_file, output_writer, output_filename,
+            with_input=with_input)
 
         if test_function_name:
           function_names.remove(function_name)
@@ -3737,7 +3830,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     function_name, test_function_name, have_extern = self._GenerateTypeTest(
         project_configuration, template_mappings, type_name,
         u'set_ascii_codepage', have_extern, header_file, output_writer,
-        output_filename)
+        output_filename, with_input=with_input)
     if test_function_name:
       tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
@@ -3747,17 +3840,24 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     function_name_prefix_length = len(function_name_prefix)
 
     for function_name in function_names:
+      # TODO: improve can currently only handle simple initialize functions.
+      if initialize_number_of_arguments != 2:
+        continue
+
       if not function_name.startswith(function_name_prefix):
         continue
 
-      type_function = function_name[function_name_prefix_length:]
-      test_function_name = None
+      function_prototype = header_file.functions_per_name.get(
+          function_name, None)
+      if not function_prototype:
+        continue
 
-      template_filename = os.path.join(template_directory, template_filename)
-      if os.path.exists(template_filename):
-        _, test_function_name, have_extern = self._GenerateTypeTest(
-            project_configuration, template_mappings, type_name, type_function,
-            have_extern, header_file, output_writer, output_filename)
+      type_function = function_name[function_name_prefix_length:]
+
+      _, test_function_name, have_extern = self._GenerateTypeTest(
+          project_configuration, template_mappings, type_name, type_function,
+          have_extern, header_file, output_writer, output_filename,
+          with_input=with_input)
 
       if with_input:
         tests_to_run_with_args.append((function_name, test_function_name))

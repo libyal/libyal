@@ -1,14 +1,14 @@
 /* Sets the ${value_description}
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_${type_name}_set_${value_type}(
+PyObject *${python_module_name}_${type_name}_set_${value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments,
            PyObject *keywords )
 {
 	libcerror_error_t *error    = NULL;
-	static char *function       = "${python_module_name}_${type_name}_set_${value_type}";
-	static char *keyword_list[] = { "${value_type}", NULL };
+	static char *function       = "${python_module_name}_${type_name}_set_${value_name}";
+	static char *keyword_list[] = { "${value_name}", NULL };
 	char *utf8_string           = NULL;
 	size_t utf8_string_length   = 0;
 	int result                  = 0;
@@ -45,7 +45,7 @@ PyObject *${python_module_name}_${type_name}_set_${value_type}(
 
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_set_utf8_${value_type}(
+	result = ${library_name}_${type_name}_set_utf8_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
 	          (uint8_t *) utf8_string,
 	          utf8_string_length,
