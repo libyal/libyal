@@ -1,10 +1,12 @@
-/* Tests the ${library_name}_${type_name}_open function
+#if defined( HAVE_WIDE_CHARACTER_TYPE )
+
+/* Tests the ${library_name}_${type_name}_open_wide function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_${type_name}_open(
+int ${library_name_suffix}_test_${type_name}_open_wide(
      const system_character_t *source )
 {
-	char narrow_source[ 256 ];
+	wchar_t wide_source[ 256 ];
 
 	libcerror_error_t *error = NULL;
 	${library_name}_${type_name}_t *${type_name}      = NULL;
@@ -12,9 +14,9 @@ int ${library_name_suffix}_test_${type_name}_open(
 
 	/* Initialize test
 	 */
-	result = ${library_name_suffix}_test_${type_name}_get_narrow_source(
+	result = ${library_name_suffix}_test_${type_name}_get_wide_source(
 	          source,
-	          narrow_source,
+	          wide_source,
 	          256,
 	          &error );
 
@@ -46,9 +48,9 @@ int ${library_name_suffix}_test_${type_name}_open(
 
 	/* Test open
 	 */
-	result = ${library_name}_${type_name}_open(
+	result = ${library_name}_${type_name}_open_wide(
 	          ${type_name},
-	          narrow_source,
+	          wide_source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
 
@@ -63,9 +65,9 @@ int ${library_name_suffix}_test_${type_name}_open(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${type_name}_open(
+	result = ${library_name}_${type_name}_open_wide(
 	          ${type_name},
-	          narrow_source,
+	          wide_source,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
 
@@ -116,4 +118,6 @@ on_error:
 	}
 	return( 0 );
 }
+
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 

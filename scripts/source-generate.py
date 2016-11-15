@@ -3656,23 +3656,55 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, u'yal_test_type')
 
-    if type_function.startswith(u'get_'):
-      if len(function_prototype.arguments) != 3:
-        return function_name, None, last_have_extern
+    template_filename = None
+    value_name = None
+    value_type = None
 
+    if (type_function.startswith(u'get_utf8_') or
+        type_function.startswith(u'get_utf16_')):
       function_argument_string = function_prototype.arguments[1].CopyToString()
+
+      value_name = type_function[4:]
       value_type, _, _ = function_argument_string.partition(u' ')
 
-      self._SetValueNameInTemplateMappings(template_mappings, type_function[4:])
-      self._SetValueTypeInTemplateMappings(template_mappings, value_type)
+      if type_function.endswith(u'_size'):
+        if len(function_prototype.arguments) == 3:
+          if with_input:
+            template_filename = u'get_value_with_input.c'
+          else:
+            template_filename = u'get_value.c'
 
-      if with_input:
-        template_filename = u'get_value_with_input.c'
       else:
-        template_filename = u'get_value.c'
+        if len(function_prototype.arguments) == 4:
+          if with_input:
+            template_filename = u'get_string_value_with_input.c'
+          else:
+            template_filename = u'get_string_value.c'
 
-    else:
+    elif (type_function.startswith(u'get_') and
+        len(function_prototype.arguments) in (3, 4)):
+      function_argument_string = function_prototype.arguments[1].CopyToString()
+
+      value_name = type_function[4:]
+      value_type, _, _ = function_argument_string.partition(u' ')
+
+      if len(function_prototype.arguments) == 3:
+        if with_input:
+          template_filename = u'get_value_with_input.c'
+        else:
+          template_filename = u'get_value.c'
+
+      elif function_argument_string == u'uint8_t *guid_data':
+        if with_input:
+          template_filename = u'get_guid_value_with_input.c'
+        else:
+          template_filename = u'get_guid_value.c'
+
+    if not template_filename:
       template_filename = u'{0:s}.c'.format(type_function)
+
+    self._SetValueNameInTemplateMappings(template_mappings, value_name)
+    self._SetValueTypeInTemplateMappings(template_mappings, value_type)
 
     template_filename = os.path.join(template_directory, template_filename)
     if not os.path.exists(template_filename):
@@ -3798,66 +3830,46 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         function_names.remove(function_name)
 
     # TODO: fix libbfio having no open wide.
+    for type_function in (u'open', u'open_wide', u'close'):
+      function_name, test_function_name, have_extern = self._GenerateTypeTest(
+          project_configuration, template_mappings, type_name, type_function,
+          have_extern, header_file, output_writer, output_filename,
+          with_input=with_input)
+
+      if test_function_name:
+        function_names.remove(function_name)
+
     if with_input:
-      for type_function in (u'open', u'get_ascii_codepage'):
-        function_name, test_function_name, have_extern = self._GenerateTypeTest(
-            project_configuration, template_mappings, type_name, type_function,
-            have_extern, header_file, output_writer, output_filename,
-            with_input=with_input)
+      template_filename = os.path.join(template_directory, u'open_close.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
-        if test_function_name:
-          function_names.remove(function_name)
-
-          # The open, close and open-close functions are defined in the template
-          # so no need to add them to tests_to_run or tests_to_run_with_args.
-          if type_function == u'open':
-            function_name = u'{0:s}_{1:s}_open_wide'.format(
-                project_configuration.library_name, type_name, type_function)
-            function_names.remove(function_name)
-
-            function_name = u'{0:s}_{1:s}_open_file_io_handle'.format(
-                project_configuration.library_name, type_name, type_function)
-            function_names.remove(function_name)
-
-            function_name = u'{0:s}_{1:s}_close'.format(
-                project_configuration.library_name, type_name, type_function)
-            function_names.remove(function_name)
-
-            # TODO: remove open_read?
-          else:
-            tests_to_run_with_args.append((function_name, test_function_name))
-
-    function_name, test_function_name, have_extern = self._GenerateTypeTest(
-        project_configuration, template_mappings, type_name,
-        u'set_ascii_codepage', have_extern, header_file, output_writer,
-        output_filename, with_input=with_input)
-    if test_function_name:
-      tests_to_run.append((function_name, test_function_name))
+      # The open, close and open-close functions are defined in the template
+      # so no need to add them to tests_to_run or tests_to_run_with_args.
+      function_name = u'{0:s}_{1:s}_open_file_io_handle'.format(
+          project_configuration.library_name, type_name)
       function_names.remove(function_name)
+
+      # TODO: remove open_read?
 
     function_name_prefix = u'{0:s}_{1:s}_'.format(
         project_configuration.library_name, type_name)
     function_name_prefix_length = len(function_name_prefix)
 
     for function_name in function_names:
-      # TODO: improve can currently only handle simple initialize functions.
-      if initialize_number_of_arguments != 2:
-        continue
-
       if not function_name.startswith(function_name_prefix):
         continue
 
-      function_prototype = header_file.functions_per_name.get(
-          function_name, None)
-      if not function_prototype:
-        continue
-
       type_function = function_name[function_name_prefix_length:]
+      test_function_name = None
 
-      _, test_function_name, have_extern = self._GenerateTypeTest(
-          project_configuration, template_mappings, type_name, type_function,
-          have_extern, header_file, output_writer, output_filename,
-          with_input=with_input)
+      # TODO: improve can currently only handle simple initialize functions.
+      if initialize_number_of_arguments == 2:
+        _, test_function_name, have_extern = self._GenerateTypeTest(
+            project_configuration, template_mappings, type_name, type_function,
+            have_extern, header_file, output_writer, output_filename,
+            with_input=with_input)
 
       if with_input:
         tests_to_run_with_args.append((function_name, test_function_name))

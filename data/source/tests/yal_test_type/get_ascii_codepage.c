@@ -1,4 +1,4 @@
-/* Tests the ${library_name}_${type_name}_get_ascii_codepage functions
+/* Tests the ${library_name}_${type_name}_get_ascii_codepage function
  * Returns 1 if successful or 0 if not
  */
 int ${library_name_suffix}_test_${type_name}_get_ascii_codepage(
