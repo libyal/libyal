@@ -339,6 +339,7 @@ class PythonTypeObjectFunctionPrototype(object):
   RETURN_TYPE_SIZE32 = u'size32'
   RETURN_TYPE_SIZE64 = u'size64'
   RETURN_TYPE_STRING = u'string'
+  RETURN_TYPE_UINT8 = u'uint8'
   RETURN_TYPE_UINT16 = u'uint16'
   RETURN_TYPE_UINT32 = u'uint32'
   RETURN_TYPE_UINT64 = u'uint64'
@@ -422,6 +423,17 @@ class PythonTypeObjectFunctionPrototype(object):
     if (self._type_function.startswith(u'get_utf8_') or
         self._type_function.startswith(u'set_utf8_')):
       return u''.join([self._type_function[:4], self._type_function[9:]])
+
+    if self._type_function.startswith(u'get_'):
+      if (self._type_function.endswith(u'_by_utf8_name') or
+          self._type_function.endswith(u'_by_utf8_path')):
+        return u''.join([self._type_function[:-10], self._type_function[-5:]])
+
+      if self._type_function.endswith(u'_utf8_string'):
+        return u''.join([self._type_function[:-12], self._type_function[-7:]])
+
+      if self._type_function.endswith(u'_utf8_string_size'):
+        return u''.join([self._type_function[:-17], self._type_function[-12:]])
 
     # TODO: make more generic.
     if self._type_function == u'set_parent_file':
@@ -539,8 +551,8 @@ class PythonTypeObjectFunctionPrototype(object):
     if self.return_type in (
         self.RETURN_TYPE_INT, self.RETURN_TYPE_INT32, self.RETURN_TYPE_OFF64,
         self.RETURN_TYPE_SIZE32, self.RETURN_TYPE_SIZE64,
-        self.RETURN_TYPE_UINT16, self.RETURN_TYPE_UINT32,
-        self.RETURN_TYPE_UINT64):
+        self.RETURN_TYPE_UINT8, self.RETURN_TYPE_UINT16,
+        self.RETURN_TYPE_UINT32, self.RETURN_TYPE_UINT64):
       return u'Integer or None'
 
     if self.return_type in (
@@ -3003,6 +3015,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             type_function.startswith(u'set_utf16_')):
         continue
 
+      elif (type_function.startswith(u'get_') and (
+          type_function.endswith(u'_by_utf16_name') or
+          type_function.endswith(u'_by_utf16_path') or
+          type_function.endswith(u'_utf16_string') or
+          type_function.endswith(u'_utf16_string_size'))):
+        continue
+
       elif (type_function.startswith(u'get_') and
           type_function.endswith(u'_data_size')):
         continue
@@ -3085,6 +3104,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           elif function_argument_string.startswith(u'size64_t *'):
             python_function_prototype.return_type = (
                 PythonTypeObjectFunctionPrototype.RETURN_TYPE_SIZE64)
+
+          elif function_argument_string.startswith(u'uint8_t *'):
+            python_function_prototype.return_type = (
+                PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT8)
 
           elif function_argument_string.startswith(u'uint16_t *'):
             python_function_prototype.return_type = (
@@ -3694,6 +3717,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       if len(function_prototype.arguments) == 3:
         if value_type.startswith(project_configuration.library_name):
+          value_type = value_type[:-2]
+
           if with_input:
             template_filename = u'get_type_value_with_input.c'
           else:
@@ -4186,6 +4211,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
     """
     # TODO: deprecate project_configuration.library_public_types ?
+    # TODO: weave existing test files?
+    # TODO: use data files to generate test data tests/input/.data/<name>
 
     if not self._HasTests(project_configuration):
       return

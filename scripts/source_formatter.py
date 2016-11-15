@@ -27,9 +27,11 @@ class Variable(object):
       b'int8_t',
       b'double',
       b'float',
+      b'intptr_t',
       b'int',
       b'wchar_t',
-      b'char']
+      b'char',
+      b'void']
  
   def __init__(self, declaration):
     """Initializes a C variable.

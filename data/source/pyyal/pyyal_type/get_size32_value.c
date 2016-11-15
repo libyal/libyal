@@ -8,7 +8,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	PyObject *integer_object = NULL;
 	libcerror_error_t *error = NULL;
 	static char *function    = "${python_module_name}_${type_name}_get_${value_name}";
-	off64_t offset           = 0;
+	size32_t ${value_name}   = 0;
 	int result               = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
@@ -26,17 +26,17 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 	result = ${library_name}_${type_name}_get_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
-	          &offset,
+	          &${value_name},
 	          &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result == -1 )
+	if( result != 1 )
 	{
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve ${value_description}.",
+		 "%s: failed to retrieve ${value_description}.",
 		 function );
 
 		libcerror_error_free(
@@ -44,15 +44,8 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 		return( NULL );
 	}
-	else if( result == 0 )
-	{
-		Py_IncRef(
-		 Py_None );
-
-		return( Py_None );
-	}
-	integer_object = ${python_module_name}_integer_signed_new_from_64bit(
-	                  (int64_t) offset );
+	integer_object = PyLong_FromUnsignedLong(
+	                  (unsigned long) ${value_name} );
 
 	return( integer_object );
 }

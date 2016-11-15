@@ -4,10 +4,10 @@
 int ${library_name_suffix}_test_${type_name}_get_${value_name}(
      ${library_name}_${type_name}_t *${type_name} )
 {
-	libcerror_error_t *error     = NULL;
-	${value_type} *${value_name} = 0;
-	int ${value_name}_is_set     = 0;
-	int result                   = 0;
+	libcerror_error_t *error       = NULL;
+	${value_type}_t *${value_name} = 0;
+	int ${value_name}_is_set       = 0;
+	int result                     = 0;
 
 	/* Test regular cases
 	 */
@@ -33,7 +33,7 @@ int ${library_name_suffix}_test_${type_name}_get_${value_name}(
 		 "${value_name}",
 		 ${value_name} );
 
-		result = ${library_name}_${value_type}_free(
+		result = ${value_type}_free(
 		          &${value_name},
 		          &error );
 
@@ -102,7 +102,7 @@ on_error:
 	}
 	if( ${value_name} != NULL )
 	{
-		${library_name}_${value_type}_free(
+		${value_type}_free(
 		 &${value_name},
 		 NULL );
 	}
