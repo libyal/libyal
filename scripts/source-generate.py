@@ -3598,6 +3598,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: add support for get_object_by_type
+    # TODO: add support for get_object_by_identifier
+    # TODO: add support for copy from
+    # TODO: add support for definitions without "definition prefix"
     # TODO: add support for pyolecf_property_value
     # TODO: sequence object rename ${type_name}_index to item_index
     # TODO: generate pyyal.c
