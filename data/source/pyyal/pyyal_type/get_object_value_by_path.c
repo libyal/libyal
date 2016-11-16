@@ -14,7 +14,6 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_path(
 	static char *keyword_list[]                    = { "${value_name}_path", NULL };
 	char *utf8_path                                = NULL;
 	size_t utf8_path_length                        = 0;
-	uint8_t ${value_name}_type                     = 0;
 	int result                                     = 0;
 
 	if( ${python_module_name}_${type_name} == NULL )
@@ -69,36 +68,10 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_path(
 
 		return( Py_None );
 	}
-	Py_BEGIN_ALLOW_THREADS
+	type_object = &${python_module_name}_${value_name}_type_object;
 
-	result = ${library_name}_${value_name}_get_type(
-	          ${value_name},
-	          &${value_name}_type,
-	          &error );
+/* TODO add determine type object function */
 
-	Py_END_ALLOW_THREADS
-
-	if( result == -1 )
-	{
-		${python_module_name}_error_raise(
-		 error,
-		 PyExc_IOError,
-		 "%s: unable to retrieve ${value_description} type.",
-		 function );
-
-		libcerror_error_free(
-		 &error );
-
-		goto on_error;
-	}
-	switch( ${value_name}_type )
-	{
-		/* TODO add ${value_description} types here */
-
-		default:
-			type_object = &${python_module_name}_${value_name}_type_object;
-			break;
-	}
 	${value_name}_object = ${python_module_name}_${value_name}_new(
 	                        type_object,
 	                        ${value_name},

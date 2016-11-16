@@ -68,10 +68,12 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_path(
 
 		return( Py_None );
 	}
+	type_object = &${python_module_name}_${value_name}_type_object;
+
 /* TODO add determine type object function */
 
 	${value_name}_object = ${python_module_name}_${value_name}_new(
-	                        &${python_module_name}_${value_name}_type_object,
+	                        type_object,
 	                        sub_${value_name},
 	                        ${python_module_name}_${value_name}->file_object );
 

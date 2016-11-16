@@ -7,7 +7,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
            PyObject *arguments,
            PyObject *keywords );
 
-PyObject *${python_module_name}_${type_name}_get_${value_name}s(
+PyObject *${python_module_name}_${type_name}_get_${sequence_value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments );
 

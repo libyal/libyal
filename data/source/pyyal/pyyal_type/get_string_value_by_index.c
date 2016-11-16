@@ -150,18 +150,18 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	return( string_object );
 }
 
-/* Retrieves a sequence and iterator object for the ${value_description}s
+/* Retrieves a sequence and iterator object for the ${sequence_value_description}
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_${type_name}_get_${value_name}s(
+PyObject *${python_module_name}_${type_name}_get_${sequence_value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	PyObject *sequence_object    = NULL;
-	libcerror_error_t *error     = NULL;
-	static char *function        = "${python_module_name}_${type_name}_get_${value_name}s";
-	int number_of_${value_name}s = 0;
-	int result                   = 0;
+	PyObject *sequence_object            = NULL;
+	libcerror_error_t *error             = NULL;
+	static char *function                = "${python_module_name}_${type_name}_get_${sequence_value_name}";
+	int number_of_${sequence_value_name} = 0;
+	int result                           = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
@@ -176,9 +176,9 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}s(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_number_of_${value_name}s(
+	result = ${library_name}_${type_name}_get_number_of_${sequence_value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
-	          &number_of_${value_name}s,
+	          &number_of_${sequence_value_name},
 	          &error );
 
 	Py_END_ALLOW_THREADS
@@ -188,7 +188,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}s(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve number of ${value_description}s.",
+		 "%s: unable to retrieve number of ${sequence_value_description}.",
 		 function );
 
 		libcerror_error_free(
@@ -196,10 +196,10 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}s(
 
 		return( NULL );
 	}
-	sequence_object = ${python_module_name}_${value_name}s_new(
+	sequence_object = ${python_module_name}_${sequence_value_name}_new(
 	                   (PyObject *) ${python_module_name}_${type_name},
 	                   &${python_module_name}_${type_name}_get_${value_name}_by_index,
-	                   number_of_${value_name}s );
+	                   number_of_${sequence_value_name} );
 
 	if( sequence_object == NULL )
 	{

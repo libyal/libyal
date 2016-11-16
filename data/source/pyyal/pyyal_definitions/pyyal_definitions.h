@@ -50,10 +50,10 @@ PyObject *${python_module_name}_${definitions_name}_new(
            void );
 
 int ${python_module_name}_${definitions_name}_init(
-     ${python_module_name}_${definitions_name}_t *${python_module_name}_${definitions_name} );
+     ${python_module_name}_${definitions_name}_t *definitions_object );
 
 void ${python_module_name}_${definitions_name}_free(
-      ${python_module_name}_${definitions_name}_t *${python_module_name}_${definitions_name} );
+      ${python_module_name}_${definitions_name}_t *definitions_object );
 
 #if defined( __cplusplus )
 }

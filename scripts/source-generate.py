@@ -486,6 +486,17 @@ class PythonTypeObjectFunctionPrototype(object):
         value_name = self.GetValueName()
         if value_name:
           value_name = value_name.replace(u'_', u' ')
+
+        if self._type_function.endswith(u'_by_index'):
+          description = [u'Retrieves the {0:s} specified by the index.'.format(
+              value_name)]
+
+        elif (self._type_function.endswith(u'_by_utf8_name') or
+            self._type_function.endswith(u'_by_utf8_path')):
+          description = [u'Retrieves the {0:s} specified by the {1:s}.'.format(
+              value_name, self._type_function[-4:])]
+
+        else:
           description = [u'Retrieves the {0:s}.'.format(value_name)]
 
     elif self.function_type == self.FUNCTION_TYPE_OPEN:
@@ -580,6 +591,13 @@ class PythonTypeObjectFunctionPrototype(object):
 
         elif self._type_function.startswith(u'get_'):
           self._value_name = self._type_function[4:]
+
+        if self._value_name.endswith(u'_by_index'):
+          self._value_name = self._value_name[:-9]
+
+        elif (self._value_name.endswith(u'_by_utf8_name') or
+            self._value_name.endswith(u'_by_utf8_path')):
+          self._value_name = self._value_name[:-13]
 
       elif self.function_type == self.FUNCTION_TYPE_SET:
         if self._type_function.startswith(u'set_utf8_'):
@@ -1444,7 +1462,8 @@ class SourceFileGenerator(object):
     file_object.close()
     return string.Template(file_data)
 
-  def _SetSequenceTypeNameInTemplateMappings(self, template_mappings, type_name):
+  def _SetSequenceTypeNameInTemplateMappings(
+      self, template_mappings, type_name):
     """Sets the sequence type name in template mappings.
 
     Args:
@@ -1461,6 +1480,25 @@ class SourceFileGenerator(object):
           u'_', u' ')
       template_mappings[u'sequence_type_name'] = type_name
       template_mappings[u'sequence_type_name_upper_case'] = type_name.upper()
+
+  def _SetSequenceValueNameInTemplateMappings(
+      self, template_mappings, value_name):
+    """Sets the sequence value name in template mappings.
+
+    Args:
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      value_name (str): sequence value name.
+    """
+    if not value_name:
+      template_mappings[u'sequence_value_description'] = u''
+      template_mappings[u'sequence_value_name'] = u''
+      template_mappings[u'sequence_value_name_upper_case'] = u''
+    else:
+      template_mappings[u'sequence_value_description'] = value_name.replace(
+          u'_', u' ')
+      template_mappings[u'sequence_value_name'] = value_name
+      template_mappings[u'sequence_value_name_upper_case'] = value_name.upper()
 
   def _SetTypeFunctionInTemplateMappings(
       self, template_mappings, type_function):
@@ -2372,7 +2410,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       type_name (str): name of type.
       output_writer (OutputWriter): output writer.
     """
-    sequence_type_name = self._GetSequenceTypeName(type_name)
+    sequence_type_name = self._GetSequenceName(type_name)
 
     output_filename = u'{0:s}_{1:s}.h'.format(
         project_configuration.python_module_name, sequence_type_name)
@@ -2408,7 +2446,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       type_is_object (Optional[bool]): True if the type is an object.
     """
-    sequence_type_name = self._GetSequenceTypeName(type_name)
+    sequence_type_name = self._GetSequenceName(type_name)
 
     output_filename = u'{0:s}_{1:s}.c'.format(
         project_configuration.python_module_name, sequence_type_name)
@@ -2441,6 +2479,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_directory, u'pyyal_sequence_type.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
+
+    # TODO: correct xml => XML for pyevtx
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
@@ -2562,8 +2602,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           if (python_function_prototype.arguments and
               not type_function.endswith(u'_by_name') and
               not type_function.endswith(u'_by_path')):
+
             template_filename = u'get_{0:s}_value_by_index.h'.format(
                 python_function_prototype.return_type)
+
+            sequence_value_name = self._GetSequenceName(value_name)
+            self._SetSequenceValueNameInTemplateMappings(
+                template_mappings, sequence_value_name)
 
           elif python_function_prototype.return_type in (
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
@@ -2762,19 +2807,21 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       value_name_prefix = u''
       value_name = None
 
-      if python_function_prototype.function_type in (
+      # Determine the root and sub value prefixed based on the type function
+      # otherwise by_index might be missed.
+      if type_function.startswith(u'get_root_'):
+        value_name_prefix = u'root'
+        value_name = type_function[9:]
+
+      elif type_function.startswith(u'get_sub_'):
+        value_name_prefix = u'sub'
+        value_name = type_function[8:]
+
+      elif python_function_prototype.function_type in (
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET,
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
         value_name = python_function_prototype.GetValueName()
-
-      elif type_function.startswith(u'get_root_'):
-        value_name_prefix = u'root'
-        value_name = value_name[9:]
-
-      elif type_function.startswith(u'get_sub_'):
-        value_name_prefix = u'sub'
-        value_name = value_name[8:]
 
       template_filename = u'{0:s}.c'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
@@ -2833,6 +2880,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               else:
                 template_filename = u'get_{0:s}_value_by_index.c'.format(
                     python_function_prototype.return_type)
+
+              sequence_value_name = self._GetSequenceName(value_name)
+              self._SetSequenceValueNameInTemplateMappings(
+                  template_mappings, sequence_value_name)
 
         elif python_function_prototype.function_type == (
             PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
@@ -3146,8 +3197,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               type_function.endswith(u'_utf16_string_size')))):
         continue
 
-      # TODO: add support
-      if type_function in (u'get_format_version', u'get_version'):
+      # TODO: ignore these functions for now.
+      if type_function in (
+          u'get_format_version', u'get_version',
+          u'get_number_of_unallocated_blocks',
+          u'get_unallocated_block'):
         continue
 
       python_function_prototype = PythonTypeObjectFunctionPrototype(
@@ -3239,8 +3293,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         arguments.append(argument_name)
         value_argument_index = 2
 
-      elif type_function.endswith(u'_by_utf8_name'):
-        if value_argument_string != u'uint8_t *utf8_name':
+      elif (type_function.endswith(u'_by_utf8_name') or
+          type_function.endswith(u'_by_utf8_path')):
+        if value_argument_string != u'const uint8_t *utf8_string':
           logging.warning(u'Unsupported function prototype: {0:s}'.format(
               function_prototype.name))
           return None, None, []
@@ -3248,35 +3303,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         function_argument = function_prototype.arguments[2]
         function_argument_string = function_argument.CopyToString()
 
-        if function_argument_string != u'size_t utf8_name_size':
+        if function_argument_string != u'size_t utf8_string_length':
           logging.warning(u'Unsupported function prototype: {0:s}'.format(
               function_prototype.name))
           return None, None, []
 
-        _, _, argument_name = value_argument_string.rpartition(u' ')
-        _, _, argument_name = argument_name.partition(u'_')
-        argument_name = argument_name.lstrip(u'*')
-        arguments.append(argument_name)
-        value_argument_index = 3
-
-      elif type_function.endswith(u'_by_utf8_path'):
-        if value_argument_string != u'uint8_t *utf8_path':
-          logging.warning(u'Unsupported function prototype: {0:s}'.format(
-              function_prototype.name))
-          return None, None, []
-
-        function_argument = function_prototype.arguments[2]
-        function_argument_string = function_argument.CopyToString()
-
-        if function_argument_string != u'size_t utf8_path_size':
-          logging.warning(u'Unsupported function prototype: {0:s}'.format(
-              function_prototype.name))
-          return None, None, []
-
-        _, _, argument_name = value_argument_string.rpartition(u' ')
-        _, _, argument_name = argument_name.partition(u'_')
-        argument_name = argument_name.lstrip(u'*')
-        arguments.append(argument_name)
+        arguments.append(type_function[-4:])
         value_argument_index = 3
 
       if value_argument_index != 1:
@@ -3370,20 +3402,23 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     return return_type, object_type, arguments
 
-  def _GetSequenceTypeName(self, type_name):
-    """Determines the sequence type name.
+  def _GetSequenceName(self, name):
+    """Determines the sequence type or value name.
 
     Args:
-      type_name (str): name of type.
+      name (str): name of type or value.
 
     Returns:
-      str: sequence type name.
+      str: sequence type or value name.
     """
-    if (type_name[-1] in (u's', u'x', u'z') or (
-        type_name[-1] == u'h'  and type_name[-2] in (u'c', u's'))):
-      return u'{0:s}es'.format(type_name)
+    if (name[-1] in (u's', u'x', u'z') or (
+        name[-1] == u'h'  and name[-2] in (u'c', u's'))):
+      return u'{0:s}es'.format(name)
 
-    return u'{0:s}s'.format(type_name)
+    if name[-1] == u'y':
+      return u'{0:s}ies'.format(name[:-1])
+
+    return u'{0:s}s'.format(name)
 
   def _GetTemplateMappings(self, project_configuration):
     """Retrieves the template mappings.
@@ -3459,11 +3494,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    # TODO: handle get_X_by_utf8_name
+    # TODO: generate pyyal.c
     # TODO: generate pyyal/Makefile.am
     # TODO: generate pyyal-python2/Makefile.am
     # TODO: generate pyyal-python3/Makefile.am
-    # TODO: align assiment statements =
 
     if not self._HasPythonModule(project_configuration):
       return
@@ -3506,10 +3540,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       api_types, api_types_with_input = (
           include_header_file.GetAPITypeTestGroups(project_configuration))
 
-      types_with_sequence_types = []
-
       api_types.extend(api_types_with_input)
-      for type_name in list(api_types):
+      types_with_sequence_types = set([])
+
+      for type_name in api_types:
         self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
         python_function_prototypes = self._GetPythonTypeObjectFunctionPrototypes(
@@ -3518,24 +3552,27 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         for type_function, python_function_prototype in iter(
             python_function_prototypes.items()):
 
-          if python_function_prototype.function_type != (
-              PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
+          if (not python_function_prototype.arguments or
+              python_function_prototype.function_type != (
+                  PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET)):
             continue
 
-          if not python_function_prototype.arguments:
-            continue
+          value_name = type_function[4:]
+          if value_name.startswith(u'recovered_'):
+            value_name = value_name[10:]
+          elif value_name.startswith(u'sub_'):
+            value_name = value_name[4:]
+
+          if value_name.endswith(u'_by_index'):
+            value_name = value_name[:-9]
 
           if python_function_prototype.return_type == (
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
-            value_name = type_function[4:]
-            if not value_name.startswith(u'recovered_'):
-              types_with_sequence_types.append((value_name, True))
+            types_with_sequence_types.add((value_name, True))
 
           elif python_function_prototype.return_type == (
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
-            value_name = type_function[4:]
-            if not value_name.startswith(u'recovered_'):
-              types_with_sequence_types.append((value_name, False))
+            types_with_sequence_types.add((value_name, False))
 
         self._GenerateTypeSourceFile(
             project_configuration, template_mappings, type_name,
@@ -3545,7 +3582,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             project_configuration, template_mappings, type_name,
             python_function_prototypes, output_writer)
 
-      for type_name, type_is_object in list(types_with_sequence_types):
+      for type_name, type_is_object in types_with_sequence_types:
         self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
         self._GenerateSequenceTypeSourceFile(
@@ -4583,7 +4620,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         project_configuration, template_mappings, include_header_file,
         output_writer)
 
-    for type_name in list(api_types):
+    for type_name in api_types:
       if (type_name == u'error' and
           project_configuration.library_name == u'libcerror'):
         continue
@@ -4593,14 +4630,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if not result:
         api_types.remove(type_name)
 
-    for type_name in list(api_types_with_input):
+    for type_name in api_types_with_input:
       result = self._GenerateTypeTests(
           project_configuration, template_mappings, type_name, output_writer,
           with_input=True)
       if not result:
         api_types_with_input.remove(type_name)
 
-    for type_name in list(internal_types):
+    for type_name in internal_types:
       result = self._GenerateTypeTests(
           project_configuration, template_mappings, type_name, output_writer,
           is_internal=True)

@@ -6,6 +6,7 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
 	PyObject *${value_name}_object                      = NULL;
+	PyTypeObject *type_object                           = NULL;
 	libcerror_error_t *error                            = NULL;
 	${library_name}_${value_name}_t *root_${value_name} = NULL;
 	static char *function                               = "${python_module_name}_${type_name}_get_root_${value_name}";
@@ -51,10 +52,12 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 
 		return( Py_None );
 	}
+	type_object = &${python_module_name}_${value_name}_type_object;
+
 /* TODO add determine type object function */
 
 	${value_name}_object = ${python_module_name}_${value_name}_new(
-	                        &${python_module_name}_${value_name}_type_object,
+	                        type_object,
 	                        root_${value_name},
 	                        (PyObject *) ${python_module_name}_${type_name} );
 

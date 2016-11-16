@@ -17,39 +17,39 @@ on_error:
 PyObject *${python_module_name}_${definitions_name}_new(
            void )
 {
-	${python_module_name}_${definitions_name}_t *${python_module_name}_${definitions_name} = NULL;
-	static char *function                                                                  = "${python_module_name}_${definitions_name}_new";
+	${python_module_name}_${definitions_name}_t *definitions_object = NULL;
+	static char *function                                           = "${python_module_name}_${definitions_name}_new";
 
-	${python_module_name}_${definitions_name} = PyObject_New(
-	                                             struct ${python_module_name}_${definitions_name},
-	                                             &${python_module_name}_${definitions_name}_type_object );
+	definitions_object = PyObject_New(
+	                      struct ${python_module_name}_${definitions_name},
+	                      &${python_module_name}_${definitions_name}_type_object );
 
-	if( ${python_module_name}_${definitions_name} == NULL )
+	if( definitions_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize ${definitions_description}.",
+		 "%s: unable to create new definitions object.",
 		 function );
 
 		goto on_error;
 	}
 	if( ${python_module_name}_${definitions_name}_init(
-	     ${python_module_name}_${definitions_name} ) != 0 )
+	     definitions_object ) != 0 )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize ${definitions_description}.",
+		 "%s: unable to initialize definitions object.",
 		 function );
 
 		goto on_error;
 	}
-	return( (PyObject *) ${python_module_name}_${definitions_name} );
+	return( (PyObject *) definitions_object );
 
 on_error:
-	if( ${python_module_name}_${definitions_name} != NULL )
+	if( definitions_object != NULL )
 	{
 		Py_DecRef(
-		 (PyObject *) ${python_module_name}_${definitions_name} );
+		 (PyObject *) definitions_object );
 	}
 	return( NULL );
 }
@@ -58,15 +58,15 @@ on_error:
  * Returns 0 if successful or -1 on error
  */
 int ${python_module_name}_${definitions_name}_init(
-     ${python_module_name}_${definitions_name}_t *${python_module_name}_${definitions_name} )
+     ${python_module_name}_${definitions_name}_t *definitions_object )
 {
 	static char *function = "${python_module_name}_${definitions_name}_init";
 
-	if( ${python_module_name}_${definitions_name} == NULL )
+	if( definitions_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_TypeError,
-		 "%s: invalid ${definitions_description}.",
+		 "%s: invalid definitions object.",
 		 function );
 
 		return( -1 );
@@ -77,22 +77,22 @@ int ${python_module_name}_${definitions_name}_init(
 /* Frees a ${definitions_description} object
  */
 void ${python_module_name}_${definitions_name}_free(
-      ${python_module_name}_${definitions_name}_t *${python_module_name}_${definitions_name} )
+      ${python_module_name}_${definitions_name}_t *definitions_object )
 {
 	struct _typeobject *ob_type = NULL;
 	static char *function       = "${python_module_name}_${definitions_name}_free";
 
-	if( ${python_module_name}_${definitions_name} == NULL )
+	if( definitions_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_TypeError,
-		 "%s: invalid ${definitions_description}.",
+		 "%s: invalid definitions object.",
 		 function );
 
 		return;
 	}
 	ob_type = Py_TYPE(
-	           ${python_module_name}_${definitions_name} );
+	           definitions_object );
 
 	if( ob_type == NULL )
 	{
@@ -113,6 +113,6 @@ void ${python_module_name}_${definitions_name}_free(
 		return;
 	}
 	ob_type->tp_free(
-	 (PyObject*) ${python_module_name}_${definitions_name} );
+	 (PyObject*) definitions_object );
 }
 
