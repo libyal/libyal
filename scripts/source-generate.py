@@ -331,9 +331,10 @@ class PythonTypeObjectFunctionPrototype(object):
   RETURN_TYPE_FAT_DATE_TIME = u'fat_date_time'
   RETURN_TYPE_FILETIME = u'filetime'
   RETURN_TYPE_GUID = u'guid'
-  RETURN_TYPE_NONE = u'none'
   RETURN_TYPE_INT = u'int'
   RETURN_TYPE_INT32 = u'int32'
+  RETURN_TYPE_NARROW_STRING = u'narrow_string'
+  RETURN_TYPE_NONE = u'none'
   RETURN_TYPE_OBJECT = u'object'
   RETURN_TYPE_OFF64 = u'off64'
   RETURN_TYPE_POSIX_TIME = u'posix_time'
@@ -419,6 +420,13 @@ class PythonTypeObjectFunctionPrototype(object):
   @property
   def type_function(self):
     """str: type function."""
+    # TODO: make overrides more generic.
+    if self._type_function == u'get_cache_directory_name':
+      return u'get_cache_directory'
+
+    if self._type_function == u'set_parent_file':
+      return u'set_parent'
+
     if self._type_function.startswith(u'copy_'):
       return u'get_{0:s}'.format(self._type_function[5:])
 
@@ -440,15 +448,15 @@ class PythonTypeObjectFunctionPrototype(object):
       if self._type_function.endswith(u'_utf8_string_size'):
         return u''.join([self._type_function[:-17], self._type_function[-12:]])
 
-    # TODO: make more generic.
-    if self._type_function == u'set_parent_file':
-      return u'set_parent'
-
     return self._type_function
 
   @property
   def value_name(self):
     """str: value name."""
+    # TODO: make overrides more generic.
+    if self._type_function == u'get_cache_directory_name':
+      return u'cache_directory'
+
     if self._value_name is None:
       if self.function_type == self.FUNCTION_TYPE_COPY:
         if self._type_function.startswith(u'copy_'):
@@ -495,6 +503,10 @@ class PythonTypeObjectFunctionPrototype(object):
         value_name = self.value_name
         if value_name:
           value_name = value_name.replace(u'_', u' ')
+
+          # Correct xml => XML in description for pyevtx.
+          value_name = value_name.replace(u' xml ', u' XML ')
+
           description = u'The {0:s}.'.format(value_name)
 
     return description
@@ -532,6 +544,9 @@ class PythonTypeObjectFunctionPrototype(object):
               value_name, self._type_function[-4:])]
 
         else:
+          # Correct xml => XML in description for pyevtx.
+          value_name = value_name.replace(u' xml ', u' XML ')
+
           description = [u'Retrieves the {0:s}.'.format(value_name)]
 
     elif self.function_type == self.FUNCTION_TYPE_OPEN:
@@ -587,7 +602,8 @@ class PythonTypeObjectFunctionPrototype(object):
       return u'Binary string or None'
 
     if self.return_type in (
-        self.RETURN_TYPE_FILETIME, self.RETURN_TYPE_POSIX_TIME):
+        self.RETURN_TYPE_FAT_DATE_TIME, self.RETURN_TYPE_FILETIME,
+        self.RETURN_TYPE_POSIX_TIME):
       return u'Datetime or None'
 
     if self.return_type == self.RETURN_TYPE_OBJECT:
@@ -603,6 +619,9 @@ class PythonTypeObjectFunctionPrototype(object):
     if self.return_type in (
         self.RETURN_TYPE_GUID, self.RETURN_TYPE_STRING):
       return u'Unicode string or None'
+
+    if self.return_type == self.RETURN_TYPE_NARROW_STRING:
+      return u'String or None'
 
     if self.return_type == self.RETURN_TYPE_NONE:
       return u'None'
@@ -2486,8 +2505,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    # TODO: correct xml => XML for pyevtx
-
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
     self._CorrectDescriptionSpelling(sequence_type_name, output_filename)
@@ -2609,14 +2626,21 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               not type_function.endswith(u'_by_name') and
               not type_function.endswith(u'_by_path')):
 
-            template_filename = u'get_{0:s}_value_by_index.h'.format(
-                python_function_prototype.return_type)
+            if value_name.startswith(u'recovered_'):
+              value_name = value_name[10:]
+              template_filename = u'get_recovered_{0:s}_value_by_index.h'.format(
+                  python_function_prototype.return_type)
+
+            else:
+              template_filename = u'get_{0:s}_value_by_index.h'.format(
+                  python_function_prototype.return_type)
 
             sequence_value_name = self._GetSequenceName(value_name)
             self._SetSequenceValueNameInTemplateMappings(
                 template_mappings, sequence_value_name)
 
           elif python_function_prototype.return_type in (
+              PythonTypeObjectFunctionPrototype.RETURN_TYPE_FAT_DATE_TIME,
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
             template_filename = u'get_datetime_value.h'
@@ -2695,8 +2719,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     for python_function_prototype in python_function_prototypes.values():
       if python_function_prototype.return_type in (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FAT_DATE_TIME,
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
+        python_module_include_names.update(set([u'datetime']))
+
+      if python_function_prototype.return_type == (
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
         python_module_include_names.update(set([u'datetime', u'integer']))
 
       elif python_function_prototype.return_type == (
@@ -2721,8 +2749,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       elif python_function_prototype.return_type == (
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
         if len(python_function_prototype.arguments) == 1:
-          sequence_type_name = self._GetSequenceName(
-              python_function_prototype.arguments[0])
+          sequence_type_name = python_function_prototype.arguments[0]
+          if sequence_type_name.endswith(u'_index'):
+            sequence_type_name, _, _ = sequence_type_name.rpartition(u'_')
+
+          sequence_type_name = self._GetSequenceName(sequence_type_name)
           python_module_include_names.add(sequence_type_name)
 
     template_directory = os.path.join(self._template_directory, u'pyyal_type')
@@ -2830,6 +2861,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           value_name.startswith(u'root_') or value_name.startswith(u'sub_'))):
         value_name_prefix, _, value_name = value_name.partition(u'_')
 
+      # TODO: add get_cache_directory template
+
+      if type_function == u'get_format_version':
+        # TODO: determine value type of major and minor version.
+        self._SetValueTypeInTemplateMappings(template_mappings, u'uint8_t')
+
       template_filename = u'{0:s}.c'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
@@ -2866,9 +2903,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 template_filename = u'get_{0:s}_value_by_name.c'.format(
                     python_function_prototype.return_type)
 
-              if value_name not in value_type_objects:
-                generate_get_value_type_object = True
-                value_type_objects.add(value_name)
+              if python_function_prototype.return_type == (
+                  PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
+                if value_name not in value_type_objects:
+                  generate_get_value_type_object = True
+                  value_type_objects.add(value_name)
 
             elif type_function.endswith(u'_by_path'):
               if value_name_prefix:
@@ -2878,9 +2917,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 template_filename = u'get_{0:s}_value_by_path.c'.format(
                     python_function_prototype.return_type)
 
-              if value_name not in value_type_objects:
-                generate_get_value_type_object = True
-                value_type_objects.add(value_name)
+              if python_function_prototype.return_type == (
+                  PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
+                if value_name not in value_type_objects:
+                  generate_get_value_type_object = True
+                  value_type_objects.add(value_name)
 
             else:
               if value_name.startswith(u'recovered_'):
@@ -2896,9 +2937,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 template_filename = u'get_{0:s}_value_by_index.c'.format(
                     python_function_prototype.return_type)
 
-              if value_name not in value_type_objects:
-                generate_get_value_type_object = True
-                value_type_objects.add(value_name)
+              if python_function_prototype.return_type == (
+                  PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
+                if value_name not in value_type_objects:
+                  generate_get_value_type_object = True
+                  value_type_objects.add(value_name)
 
               if python_function_prototype.object_type:
                 sequence_type_name = self._GetSequenceName(
@@ -3040,6 +3083,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             u'\t  "Retrieves the current offset within the data." },'])
 
       elif python_function_prototype.return_type in (
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FAT_DATE_TIME,
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
 
@@ -3054,6 +3098,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             u'\t  "\\n"'])
 
         if python_function_prototype.return_type == (
+            PythonTypeObjectFunctionPrototype.RETURN_TYPE_FAT_DATE_TIME):
+
+          description[0] = (
+              u'{0:s} as a 32-bit integer containing a FAT date time '
+              u'value.').format(description[0][:-1])
+
+        elif python_function_prototype.return_type == (
             PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
 
           description[0] = (
@@ -3245,9 +3296,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       # TODO: ignore these functions for now.
       if type_function in (
-          u'get_format_version', u'get_version',
-          u'get_number_of_unallocated_blocks',
-          u'get_unallocated_block'):
+          u'get_flags', u'get_offset_range', 'get_type',
+          u'get_number_of_unallocated_blocks', u'get_unallocated_block',
+          u'get_version'):
         continue
 
       python_function_prototype = PythonTypeObjectFunctionPrototype(
@@ -3320,8 +3371,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     return_type = None
 
     if type_function == u'get_ascii_codepage':
-      # TODO: replace this by RETURN_TYPE_STRING.
+      # TODO: replace this by RETURN_TYPE_NARROW_STRING ?
       return_type = u'String'
+
+    elif type_function == u'get_format_version':
+      return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING
 
     elif type_function.startswith(u'copy_'):
       return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_BINARY_DATA
@@ -3384,6 +3438,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       elif (value_argument_string == u'uint8_t *utf8_string' and
           value_size_argument_string == u'size_t utf8_string_size'):
         return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING
+
+      elif (value_argument_string == u'char *string' and
+          value_size_argument_string == u'size_t string_size'):
+        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_NARROW_STRING
 
       elif value_argument_string.startswith(u'int *'):
         return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_INT
@@ -3540,6 +3598,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: add support for pyolecf_property_value
     # TODO: sequence object rename ${type_name}_index to item_index
     # TODO: generate pyyal.c
     # TODO: generate pyyal/Makefile.am
