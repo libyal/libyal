@@ -1,19 +1,19 @@
 /* Retrieves the ${value_description}
  * Returns a Python object if successful or NULL on error
  */
-PyObject *py${library_name_suffix}_${type_name}_get_${value_name}(
-           py${library_name_suffix}_${type_name}_t *py${library_name_suffix}_${type_name},
-           PyObject *arguments ${python_module_upper_case}_ATTRIBUTE_UNUSED )
+PyObject *${python_module_name}_${type_name}_get_${value_name}(
+           ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
+           PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
 	PyObject *integer_object = NULL;
 	libcerror_error_t *error = NULL;
-	static char *function    = "py${library_name_suffix}_${type_name}_get_${value_name}";
+	static char *function    = "${python_module_name}_${type_name}_get_${value_name}";
 	uint8_t ${value_name}    = 0;
 	int result               = 0;
 
-	${python_module_upper_case}_UNREFERENCED_PARAMETER( arguments )
+	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
-	if( py${library_name_suffix}_${type_name} == NULL )
+	if( ${python_module_name}_${type_name} == NULL )
 	{
 		PyErr_Format(
 		 PyExc_TypeError,
@@ -25,7 +25,7 @@ PyObject *py${library_name_suffix}_${type_name}_get_${value_name}(
 	Py_BEGIN_ALLOW_THREADS
 
 	result = ${library_name}_${type_name}_get_${value_name}(
-	          py${library_name_suffix}_${type_name}->${type_name},
+	          ${python_module_name}_${type_name}->${type_name},
 	          &${value_name},
 	          &error );
 
@@ -33,7 +33,7 @@ PyObject *py${library_name_suffix}_${type_name}_get_${value_name}(
 
 	if( result != 1 )
 	{
-		py${library_name_suffix}_error_raise(
+		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
 		 "%s: unable to retrieve ${value_description}.",

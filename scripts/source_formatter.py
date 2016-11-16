@@ -6,6 +6,18 @@ from __future__ import print_function
 import sys
 
 
+# TODO: have the SourceFormatter use the GroupModifier to detect a group
+# of lines it applies to and then make the necessary changes.
+class GroupModifier(object):
+  """Class that defines a group of lines modifier."""
+
+
+# TODO: have the SourceFormatter use the LineModifier to detect a line
+# it applies to and then make the necessary changes.
+class LineModifier(object):
+  """Class that defines a line modifier."""
+
+
 class Variable(object):
   """Class that defines a C variable."""
 
