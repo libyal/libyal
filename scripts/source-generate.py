@@ -1444,9 +1444,27 @@ class SourceFileGenerator(object):
     file_object.close()
     return string.Template(file_data)
 
+  def _SetSequenceTypeNameInTemplateMappings(self, template_mappings, type_name):
+    """Sets the sequence type name in template mappings.
+
+    Args:
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): sequence type name.
+    """
+    if not type_name:
+      template_mappings[u'sequence_type_description'] = u''
+      template_mappings[u'sequence_type_name'] = u''
+      template_mappings[u'sequence_type_name_upper_case'] = u''
+    else:
+      template_mappings[u'sequence_type_description'] = type_name.replace(
+          u'_', u' ')
+      template_mappings[u'sequence_type_name'] = type_name
+      template_mappings[u'sequence_type_name_upper_case'] = type_name.upper()
+
   def _SetTypeFunctionInTemplateMappings(
       self, template_mappings, type_function):
-    """Sets type function in template mappings.
+    """Sets the type function in template mappings.
 
     Args:
       template_mappings (dict[str, str]): template mappings, where the key
@@ -1461,7 +1479,7 @@ class SourceFileGenerator(object):
       template_mappings[u'type_function_upper_case'] = type_function.upper()
 
   def _SetTypeNameInTemplateMappings(self, template_mappings, type_name):
-    """Sets type name in template mappings.
+    """Sets the type name in template mappings.
 
     Args:
       template_mappings (dict[str, str]): template mappings, where the key
@@ -2354,13 +2372,18 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       type_name (str): name of type.
       output_writer (OutputWriter): output writer.
     """
-    output_filename = u'{0:s}_{1:s}s.h'.format(
-        project_configuration.python_module_name, type_name)
+    sequence_type_name = self._GetSequenceTypeName(type_name)
+
+    output_filename = u'{0:s}_{1:s}.h'.format(
+        project_configuration.python_module_name, sequence_type_name)
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
     template_directory = os.path.join(
         self._template_directory, u'pyyal_sequence_type')
+
+    self._SetSequenceTypeNameInTemplateMappings(
+        template_mappings, sequence_type_name)
 
     template_filename = os.path.join(
         template_directory, u'pyyal_sequence_type.h')
@@ -2368,11 +2391,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename)
 
     # TODO: change to a generic line modifiers approach.
+    self._CorrectDescriptionSpelling(sequence_type_name, output_filename)
     self._CorrectDescriptionSpelling(type_name, output_filename)
     self._SortIncludeHeaders(project_configuration, output_filename)
 
   def _GenerateSequenceTypeSourceFile(
-      self, project_configuration, template_mappings, type_name, output_writer):
+      self, project_configuration, template_mappings, type_name, output_writer,
+      type_is_object=False):
     """Generates a Python sequence type object source file.
 
     Args:
@@ -2381,14 +2406,36 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           maps to the name of a template variable.
       type_name (str): name of type.
       output_writer (OutputWriter): output writer.
+      type_is_object (Optional[bool]): True if the type is an object.
     """
-    output_filename = u'{0:s}_{1:s}s.c'.format(
-        project_configuration.python_module_name, type_name)
+    sequence_type_name = self._GetSequenceTypeName(type_name)
+
+    output_filename = u'{0:s}_{1:s}.c'.format(
+        project_configuration.python_module_name, sequence_type_name)
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
     template_directory = os.path.join(
         self._template_directory, u'pyyal_sequence_type')
+
+    python_module_include_names = set([
+        project_configuration.library_name, sequence_type_name, u'libcerror',
+        u'python'])
+
+    if type_is_object:
+      python_module_include_names.add(type_name)
+
+    python_module_includes = []
+    for include_name in sorted(python_module_include_names):
+      include = u'#include "{0:s}_{1:s}.h"'.format(
+          project_configuration.python_module_name, include_name)
+      python_module_includes.append(include)
+
+    self._SetSequenceTypeNameInTemplateMappings(
+        template_mappings, sequence_type_name)
+
+    template_mappings[u'python_module_includes'] = u'\n'.join(
+        python_module_includes)
 
     template_filename = os.path.join(
         template_directory, u'pyyal_sequence_type.c')
@@ -2397,6 +2444,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
+    self._CorrectDescriptionSpelling(sequence_type_name, output_filename)
     self._SortIncludeHeaders(project_configuration, output_filename)
     # TODO: combine vertical align functions.
     self._VerticalAlignAssignmentStatements(output_filename)
@@ -3035,6 +3083,93 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+  def _GetPythonTypeObjectFunctionPrototypes(
+      self, project_configuration, type_name):
+    """Determines the Python type object function prototypes.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      type_name (str): name of type.
+
+    Returns:
+      dict[str, PythonTypeObjectFunctionPrototype]: Python type object
+          function prototypes per name.
+    """
+    header_file = self._GetTypeLibraryHeaderFile(
+        project_configuration, type_name)
+
+    # TODO: handle types in non-matching header files.
+    try:
+      header_file.Read(project_configuration)
+    except IOError:
+      logging.warning(u'Skipping: {0:s}'.format(header_file.path))
+      return
+
+    function_name_prefix = u'{0:s}_{1:s}_'.format(
+        project_configuration.library_name, type_name)
+    function_name_prefix_length = len(function_name_prefix)
+
+    functions_per_name = header_file.functions_per_name
+
+    python_function_prototypes = collections.OrderedDict()
+    for function_name, function_prototype in iter(functions_per_name.items()):
+      if not function_prototype.have_extern:
+        continue
+
+      if not function_name.startswith(function_name_prefix):
+        logging.warning(u'Skipping unsupported API function: {0:s}'.format(
+            function_name))
+        continue
+
+      type_function = function_name[function_name_prefix_length:]
+      # Skip functions that are a wide character variant of another function.
+      if type_function.endswith(u'_wide'):
+        continue
+
+      # Skip functions that retrieves the size of binary data.
+      if (type_function.startswith(u'get_') and
+          type_function.endswith(u'_data_size')):
+        continue
+
+      # Skip functions that retrieves the size of an UTF-8 string.
+      if (type_function.startswith(u'get_utf8_') and
+          type_function.endswith(u'_size')):
+        continue
+
+      # Skip functions that are a UTF-16 variant of another function.
+      if (type_function.startswith(u'get_utf16_') or
+          type_function.startswith(u'set_utf16_') or
+          (type_function.startswith(u'get_') and (
+              type_function.endswith(u'_by_utf16_name') or
+              type_function.endswith(u'_by_utf16_path') or
+              type_function.endswith(u'_utf16_string') or
+              type_function.endswith(u'_utf16_string_size')))):
+        continue
+
+      # TODO: add support
+      if type_function in (u'get_format_version', u'get_version'):
+        continue
+
+      python_function_prototype = PythonTypeObjectFunctionPrototype(
+          project_configuration.python_module_name, type_name, type_function)
+
+      if not python_function_prototype.function_type:
+        logging.warning(u'Skipping unsupported type function: {0:s}'.format(
+            function_name))
+        continue
+
+      return_type, object_type, arguments = self._GetReturnTypeAndArguments(
+          project_configuration, type_name, type_function, function_prototype)
+
+      python_function_prototype.arguments = arguments
+      python_function_prototype.return_type = return_type
+      python_function_prototype.object_type = object_type
+
+      type_function = python_function_prototype.type_function
+      python_function_prototypes[type_function] = python_function_prototype
+
+    return python_function_prototypes
+
   def _GetReturnTypeAndArguments(
       self, project_configuration, type_name, type_function, function_prototype):
     """Determines the Python type object function return type and arguments.
@@ -3235,92 +3370,20 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     return return_type, object_type, arguments
 
-  def _GetPythonTypeObjectFunctionPrototypes(
-      self, project_configuration, type_name):
-    """Determines the Python type object function prototypes.
+  def _GetSequenceTypeName(self, type_name):
+    """Determines the sequence type name.
 
     Args:
-      project_configuration (ProjectConfiguration): project configuration.
       type_name (str): name of type.
 
     Returns:
-      dict[str, PythonTypeObjectFunctionPrototype]: Python type object
-          function prototypes per name.
+      str: sequence type name.
     """
-    header_file = self._GetTypeLibraryHeaderFile(
-        project_configuration, type_name)
+    if (type_name[-1] in (u's', u'x', u'z') or (
+        type_name[-1] == u'h'  and type_name[-2] in (u'c', u's'))):
+      return u'{0:s}es'.format(type_name)
 
-    # TODO: handle types in non-matching header files.
-    try:
-      header_file.Read(project_configuration)
-    except IOError:
-      logging.warning(u'Skipping: {0:s}'.format(header_file.path))
-      return
-
-    function_name_prefix = u'{0:s}_{1:s}_'.format(
-        project_configuration.library_name, type_name)
-    function_name_prefix_length = len(function_name_prefix)
-
-    functions_per_name = header_file.functions_per_name
-
-    python_function_prototypes = collections.OrderedDict()
-    for function_name, function_prototype in iter(functions_per_name.items()):
-      if not function_prototype.have_extern:
-        continue
-
-      if not function_name.startswith(function_name_prefix):
-        logging.warning(u'Skipping unsupported API function: {0:s}'.format(
-            function_name))
-        continue
-
-      type_function = function_name[function_name_prefix_length:]
-      # Skip functions that are a wide character variant of another function.
-      if type_function.endswith(u'_wide'):
-        continue
-
-      # Skip functions that retrieves the size of binary data.
-      if (type_function.startswith(u'get_') and
-          type_function.endswith(u'_data_size')):
-        continue
-
-      # Skip functions that retrieves the size of an UTF-8 string.
-      if (type_function.startswith(u'get_utf8_') and
-          type_function.endswith(u'_size')):
-        continue
-
-      # Skip functions that are a UTF-16 variant of another function.
-      if (type_function.startswith(u'get_utf16_') or
-          type_function.startswith(u'set_utf16_') or
-          (type_function.startswith(u'get_') and (
-              type_function.endswith(u'_by_utf16_name') or
-              type_function.endswith(u'_by_utf16_path') or
-              type_function.endswith(u'_utf16_string') or
-              type_function.endswith(u'_utf16_string_size')))):
-        continue
-
-      # TODO: add support
-      if type_function in (u'get_format_version', u'get_version'):
-        continue
-
-      python_function_prototype = PythonTypeObjectFunctionPrototype(
-          project_configuration.python_module_name, type_name, type_function)
-
-      if not python_function_prototype.function_type:
-        logging.warning(u'Skipping unsupported type function: {0:s}'.format(
-            function_name))
-        continue
-
-      return_type, object_type, arguments = self._GetReturnTypeAndArguments(
-          project_configuration, type_name, type_function, function_prototype)
-
-      python_function_prototype.arguments = arguments
-      python_function_prototype.return_type = return_type
-      python_function_prototype.object_type = object_type
-
-      type_function = python_function_prototype.type_function
-      python_function_prototypes[type_function] = python_function_prototype
-
-    return python_function_prototypes
+    return u'{0:s}s'.format(type_name)
 
   def _GetTemplateMappings(self, project_configuration):
     """Retrieves the template mappings.
@@ -3443,7 +3506,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       api_types, api_types_with_input = (
           include_header_file.GetAPITypeTestGroups(project_configuration))
 
-      sequence_types = []
+      types_with_sequence_types = []
 
       api_types.extend(api_types_with_input)
       for type_name in list(api_types):
@@ -3462,14 +3525,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           if not python_function_prototype.arguments:
             continue
 
-          if python_function_prototype.return_type in (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT,
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
+          if python_function_prototype.return_type == (
+              PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
+            value_name = type_function[4:]
+            if not value_name.startswith(u'recovered_'):
+              types_with_sequence_types.append((value_name, True))
 
-            # TODO: check if base type of sequence type exists.
-            sequence_type = type_function[4:]
-            if not sequence_type.startswith(u'recovered_'):
-              sequence_types.append(type_function[4:])
+          elif python_function_prototype.return_type == (
+              PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
+            value_name = type_function[4:]
+            if not value_name.startswith(u'recovered_'):
+              types_with_sequence_types.append((value_name, False))
 
         self._GenerateTypeSourceFile(
             project_configuration, template_mappings, type_name,
@@ -3479,11 +3545,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             project_configuration, template_mappings, type_name,
             python_function_prototypes, output_writer)
 
-      for type_name in list(sequence_types):
+      for type_name, type_is_object in list(types_with_sequence_types):
         self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
         self._GenerateSequenceTypeSourceFile(
-            project_configuration, template_mappings, type_name, output_writer)
+            project_configuration, template_mappings, type_name, output_writer,
+            type_is_object=type_is_object)
 
         self._GenerateSequenceTypeHeaderFile(
             project_configuration, template_mappings, type_name, output_writer)
