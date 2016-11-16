@@ -38,21 +38,29 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_index(
 		 PyExc_IOError,
 		 "%s: unable to retrieve sub ${value_description}: %d.",
 		 function,
-		 ${value_name}_index );
+		 sub_${value_name}_index );
 
 		libcerror_error_free(
 		 &error );
 
 		goto on_error;
 	}
-	type_object = &${python_module_name}_${value_name}_type_object;
+	type_object = ${python_module_name}_${type_name}_get_${value_name}_type_object(
+	               sub_${value_name} );
 
-/* TODO add determine type object function */
+	if( type_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to retrieve ${value_description} type object.",
+		 function );
 
+		goto on_error;
+	}
 	${value_name}_object = ${python_module_name}_${value_name}_new(
 	                        type_object,
 	                        sub_${value_name},
-	                        (PyObject *) ${python_module_name}_${type_name} );
+	                        ( (${python_module_name}_${type_name}_t *) ${python_module_name}_${type_name} )->parent_object );
 
 	if( ${value_name}_object == NULL )
 	{
@@ -66,10 +74,10 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_index(
 	return( ${value_name}_object );
 
 on_error:
-	if( ${value_name} != NULL )
+	if( sub_${value_name} != NULL )
 	{
 		${library_name}_${value_name}_free(
-		 &${value_name},
+		 &sub_${value_name},
 		 NULL );
 	}
 	return( NULL );
@@ -84,7 +92,7 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}(
            PyObject *keywords )
 {
 	PyObject *${value_name}_object = NULL;
-	static char *keyword_list[]    = { "${value_name}_index", NULL };
+	static char *keyword_list[]    = { "sub_${value_name}_index", NULL };
 	int sub_${value_name}_index    = 0;
 
 	if( PyArg_ParseTupleAndKeywords(
@@ -92,7 +100,7 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}(
 	     keywords,
 	     "i",
 	     keyword_list,
-	     sub_&${value_name}_index ) == 0 )
+	     &sub_${value_name}_index ) == 0 )
 	{
 		return( NULL );
 	}

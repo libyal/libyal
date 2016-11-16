@@ -68,14 +68,22 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_path(
 
 		return( Py_None );
 	}
-	type_object = &${python_module_name}_${value_name}_type_object;
+	type_object = ${python_module_name}_${type_name}_get_${value_name}_type_object(
+	               sub_${value_name} );
 
-/* TODO add determine type object function */
+	if( type_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to retrieve ${value_description} type object.",
+		 function );
 
+		goto on_error;
+	}
 	${value_name}_object = ${python_module_name}_${value_name}_new(
 	                        type_object,
 	                        sub_${value_name},
-	                        ${python_module_name}_${value_name}->file_object );
+	                        ${python_module_name}_${value_name}->parent_object );
 
 	if( ${value_name}_object == NULL )
 	{

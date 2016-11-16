@@ -75,7 +75,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_path(
 	${value_name}_object = ${python_module_name}_${value_name}_new(
 	                        type_object,
 	                        ${value_name},
-	                        ${python_module_name}_${type_name} );
+	                        (PyObject *) ${python_module_name}_${type_name} );
 
 	if( ${value_name}_object == NULL )
 	{

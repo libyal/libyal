@@ -487,6 +487,7 @@ class PythonTypeObjectFunctionPrototype(object):
         if value_name:
           value_name = value_name.replace(u'_', u' ')
 
+         # TODO: detect index argument.
         if self._type_function.endswith(u'_by_index'):
           description = [u'Retrieves the {0:s} specified by the index.'.format(
               value_name)]
@@ -2712,6 +2713,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         if argument.endswith(u'_index'):
           argument, _, _ = argument.rpartition(u'_')
           argument = u'{0:s}s'.format(argument)
+
+          if argument.startswith(u'sub_'):
+            argument = argument[4:]
+
           python_module_include_names.add(argument)
 
     template_directory = os.path.join(self._template_directory, u'pyyal_type')
@@ -2721,7 +2726,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename)
 
     # TODO: include header of sub types
-    # TODO: include header of sequence types
 
     python_module_includes = []
     for include_name in sorted(python_module_include_names):
@@ -2797,6 +2801,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    generate_get_value_type_object = False
+    value_type_objects = set([])
+
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
 
@@ -2806,6 +2813,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       # TODO: use prefix in template?
       value_name_prefix = u''
       value_name = None
+
+
+      # TODO: fix _by_name and _by_path in value name.
 
       # Determine the root and sub value prefixed based on the type function
       # otherwise by_index might be missed.
@@ -2859,6 +2869,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 template_filename = u'get_{0:s}_value_by_name.c'.format(
                     python_function_prototype.return_type)
 
+              if value_name not in value_type_objects:
+                generate_get_value_type_object = True
+                value_type_objects.add(value_name)
+
             elif type_function.endswith(u'_by_path'):
               if value_name_prefix:
                 template_filename = u'get_{0:s}_{1:s}_value_by_path.c'.format(
@@ -2866,6 +2880,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               else:
                 template_filename = u'get_{0:s}_value_by_path.c'.format(
                     python_function_prototype.return_type)
+
+              if value_name not in value_type_objects:
+                generate_get_value_type_object = True
+                value_type_objects.add(value_name)
 
             else:
               if value_name.startswith(u'recovered_'):
@@ -2880,6 +2898,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               else:
                 template_filename = u'get_{0:s}_value_by_index.c'.format(
                     python_function_prototype.return_type)
+
+              if value_name not in value_type_objects:
+                generate_get_value_type_object = True
+                value_type_objects.add(value_name)
 
               sequence_value_name = self._GetSequenceName(value_name)
               self._SetSequenceValueNameInTemplateMappings(
@@ -2903,6 +2925,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
+
+      if generate_get_value_type_object:
+        # TODO: generate get_value_type_object.c
+        generate_get_value_type_object = False
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -3082,6 +3108,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if python_function_prototype.function_type not in (
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
+        continue
+
+      if (type_function.endswith(u'_by_name') or
+          type_function.endswith(u'_by_path')):
         continue
 
       if (type_function == u'get_offset' and

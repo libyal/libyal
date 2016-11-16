@@ -1,3 +1,14 @@
+/* Retrieves the root ${value_description} type object
+ * Returns a Python type object if successful or NULL on error
+ */
+PyTypeObject *${python_module_name}_${type_name}_get_root_${value_name}_type_object(
+               ${library_name}_${value_name}_t *root_${value_name} ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+{
+	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( root_${value_name} )
+
+	return( &${python_module_name}_${value_name}_type_object );
+}
+
 /* Retrieves the root ${value_description}
  * Returns a Python object if successful or NULL on error
  */
@@ -52,10 +63,18 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 
 		return( Py_None );
 	}
-	type_object = &${python_module_name}_${value_name}_type_object;
+	type_object = ${python_module_name}_${type_name}_get_root_${value_name}_type_object(
+	               root_${value_name} );
 
-/* TODO add determine type object function */
+	if( type_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to retrieve root ${value_description} type object.",
+		 function );
 
+		goto on_error;
+	}
 	${value_name}_object = ${python_module_name}_${value_name}_new(
 	                        type_object,
 	                        root_${value_name},
