@@ -3153,12 +3153,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT,
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING)):
 
+        sequence_type_function = self._GetSequenceName(type_function[4:])
+        sequence_type_getter = self._GetSequenceName(
+            python_function_prototype.name)
+        sequence_type_description = self._GetSequenceName(description[:-1])
+
         python_type_object_get_set_definitions.extend([
             u'',
-            u'\t{{ "{0:s}s",'.format(type_function[4:]),
-            u'\t  (getter) {0:s}s,'.format(python_function_prototype.name),
+            u'\t{{ "{0:s}",'.format(sequence_type_function),
+            u'\t  (getter) {0:s},'.format(sequence_type_getter),
             u'\t  (setter) {0:s},'.format(setter_function),
-            u'\t  "{0:s}s.",'.format(description[:-1]),
+            u'\t  "{0:s}.",'.format(sequence_type_description),
             u'\t  NULL },'])
 
     python_type_object_get_set_definitions.extend([
