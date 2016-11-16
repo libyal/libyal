@@ -1561,8 +1561,13 @@ class SourceFileGenerator(object):
     """
     if not value_type:
       template_mappings[u'value_type'] = u''
+      template_mappings[u'value_type_description'] = u''
+      template_mappings[u'value_type_upper_case'] = u''
     else:
       template_mappings[u'value_type'] = value_type
+      template_mappings[u'value_type_description'] = value_type.replace(
+          u'_', u' ')
+      template_mappings[u'value_type_upper_case'] = value_type.upper()
 
   def _SortIncludeHeaders(self, project_configuration, output_filename):
     """Sorts the include headers within a source file.
@@ -2895,6 +2900,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 generate_get_value_type_object = True
                 value_type_objects.add(value_name)
 
+              if python_function_prototype.object_type:
+                sequence_type_name = self._GetSequenceName(
+                    python_function_prototype.object_type)
+                self._SetSequenceTypeNameInTemplateMappings(
+                    template_mappings, sequence_type_name)
+
               sequence_value_name = self._GetSequenceName(value_name)
               self._SetSequenceValueNameInTemplateMappings(
                   template_mappings, sequence_value_name)
@@ -3524,6 +3535,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: sequence object rename ${type_name}_index to item_index
     # TODO: generate pyyal.c
     # TODO: generate pyyal/Makefile.am
     # TODO: generate pyyal-python2/Makefile.am

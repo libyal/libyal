@@ -2,11 +2,11 @@
  * Returns a Python type object if successful or NULL on error
  */
 PyTypeObject *${python_module_name}_${type_name}_get_root_${value_name}_type_object(
-               ${library_name}_${value_name}_t *root_${value_name} ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+               ${library_name}_${value_type}_t *root_${value_name} ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( root_${value_name} )
 
-	return( &${python_module_name}_${value_name}_type_object );
+	return( &${python_module_name}_${value_type}_type_object );
 }
 
 /* Retrieves the root ${value_description}
@@ -19,7 +19,7 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 	PyObject *${value_name}_object                      = NULL;
 	PyTypeObject *type_object                           = NULL;
 	libcerror_error_t *error                            = NULL;
-	${library_name}_${value_name}_t *root_${value_name} = NULL;
+	${library_name}_${value_type}_t *root_${value_name} = NULL;
 	static char *function                               = "${python_module_name}_${type_name}_get_root_${value_name}";
 	int result                                          = 0;
 
@@ -75,7 +75,7 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 
 		goto on_error;
 	}
-	${value_name}_object = ${python_module_name}_${value_name}_new(
+	${value_name}_object = ${python_module_name}_${value_type}_new(
 	                        type_object,
 	                        root_${value_name},
 	                        (PyObject *) ${python_module_name}_${type_name} );
@@ -94,7 +94,7 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 on_error:
 	if( root_${value_name} != NULL )
 	{
-		${library_name}_${value_name}_free(
+		${library_name}_${value_type}_free(
 		 &root_${value_name},
 		 NULL );
 	}

@@ -8,7 +8,7 @@ PyObject *${python_module_name}_${type_name}_get_recovered_${value_name}_by_inde
 	PyObject *${value_name}_object                 = NULL;
 	PyTypeObject *type_object                      = NULL;
 	libcerror_error_t *error                       = NULL;
-	${library_name}_${value_name}_t *${value_name} = NULL;
+	${library_name}_${value_type}_t *${value_name} = NULL;
 	static char *function                          = "${python_module_name}_${type_name}_get_recovered_${value_name}_by_index";
 	int result                                     = 0;
 
@@ -45,11 +45,19 @@ PyObject *${python_module_name}_${type_name}_get_recovered_${value_name}_by_inde
 
 		goto on_error;
 	}
-	type_object = &${python_module_name}_${value_name}_type_object;
+	type_object = ${python_module_name}_${type_name}_get_${value_type}_type_object(
+	               ${value_name} );
 
-/* TODO add determine type object function */
+	if( type_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to retrieve ${value_description} type object.",
+		 function );
 
-	${value_name}_object = ${python_module_name}_${value_name}_new(
+		goto on_error;
+	}
+	${value_name}_object = ${python_module_name}_${value_type}_new(
 	                        type_object,
 	                        ${value_name},
 	                        (PyObject *) ${python_module_name}_${type_name} );
@@ -68,7 +76,7 @@ PyObject *${python_module_name}_${type_name}_get_recovered_${value_name}_by_inde
 on_error:
 	if( ${value_name} != NULL )
 	{
-		${library_name}_${value_name}_free(
+		${library_name}_${value_type}_free(
 		 &${value_name},
 		 NULL );
 	}
@@ -149,7 +157,7 @@ PyObject *${python_module_name}_${type_name}_get_recovered_${sequence_value_name
 
 		return( NULL );
 	}
-	sequence_object = ${python_module_name}_${sequence_value_name}_new(
+	sequence_object = ${python_module_name}_${sequence_type_name}_new(
 	                   (PyObject *) ${python_module_name}_${type_name},
 	                   &${python_module_name}_${type_name}_get_recovered_${value_name}_by_index,
 	                   number_of_${sequence_value_name} );
