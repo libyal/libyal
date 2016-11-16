@@ -11,7 +11,7 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_path(
 	libcerror_error_t *error                           = NULL;
 	${library_name}_${value_name}_t *sub_${value_name} = NULL;
 	static char *function                              = "${python_module_name}_${type_name}_get_sub_${value_name}_by_path";
-	static char *keyword_list[]                        = { "sub_${value_name}_path", NULL };
+	static char *keyword_list[]                        = { "path", NULL };
 	char *utf8_path                                    = NULL;
 	size_t utf8_path_length                            = 0;
 	int result                                         = 0;

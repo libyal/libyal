@@ -11,7 +11,7 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_name(
 	libcerror_error_t *error                           = NULL;
 	${library_name}_${value_name}_t *sub_${value_name} = NULL;
 	static char *function                              = "${python_module_name}_${type_name}_get_sub_${value_name}_by_name";
-	static char *keyword_list[]                        = { "sub_${value_name}_name", NULL };
+	static char *keyword_list[]                        = { "name", NULL };
 	char *utf8_name                                    = NULL;
 	size_t utf8_name_length                            = 0;
 	int result                                         = 0;

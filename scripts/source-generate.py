@@ -427,7 +427,10 @@ class PythonTypeObjectFunctionPrototype(object):
       return u''.join([self._type_function[:4], self._type_function[9:]])
 
     if self._type_function.startswith(u'get_'):
-      if (self._type_function.endswith(u'_by_utf8_name') or
+      if self._type_function.endswith(u'_by_index'):
+        return self._type_function[:-9]
+
+      elif (self._type_function.endswith(u'_by_utf8_name') or
           self._type_function.endswith(u'_by_utf8_path')):
         return u''.join([self._type_function[:-10], self._type_function[-5:]])
 
@@ -442,6 +445,37 @@ class PythonTypeObjectFunctionPrototype(object):
       return u'set_parent'
 
     return self._type_function
+
+  @property
+  def value_name(self):
+    """str: value name."""
+    if self._value_name is None:
+      if self.function_type == self.FUNCTION_TYPE_COPY:
+        if self._type_function.startswith(u'copy_'):
+          self._value_name = self._type_function[5:]
+
+      elif self.function_type == self.FUNCTION_TYPE_GET:
+        if self._type_function.startswith(u'get_utf8_'):
+          self._value_name = self._type_function[9:]
+
+        elif self._type_function.startswith(u'get_'):
+          self._value_name = self._type_function[4:]
+
+        if self._value_name.endswith(u'_by_index'):
+          self._value_name = self._value_name[:-9]
+
+        elif (self._value_name.endswith(u'_by_utf8_name') or
+            self._value_name.endswith(u'_by_utf8_path')):
+          self._value_name = self._value_name[:-13]
+
+      elif self.function_type == self.FUNCTION_TYPE_SET:
+        if self._type_function.startswith(u'set_utf8_'):
+          self._value_name = self._type_function[9:]
+
+        elif self._type_function.startswith(u'set_'):
+          self._value_name = self._type_function[4:]
+
+    return self._value_name
 
   def GetAttributeDescription(self):
     """Retrieves the fuction as attribute description.
@@ -458,7 +492,7 @@ class PythonTypeObjectFunctionPrototype(object):
                 self._type_name)
 
       else:
-        value_name = self.GetValueName()
+        value_name = self.value_name
         if value_name:
           value_name = value_name.replace(u'_', u' ')
           description = u'The {0:s}.'.format(value_name)
@@ -483,15 +517,15 @@ class PythonTypeObjectFunctionPrototype(object):
             u'the {0:s}.').format(self._type_name)]
 
       else:
-        value_name = self.GetValueName()
+        value_name = self.value_name
         if value_name:
           value_name = value_name.replace(u'_', u' ')
 
-         # TODO: detect index argument.
-        if self._type_function.endswith(u'_by_index'):
+        if len(self.arguments) == 1 and self.arguments[0].endswith(u'_index'):
           description = [u'Retrieves the {0:s} specified by the index.'.format(
               value_name)]
 
+        # TODO: also use arguments here?
         elif (self._type_function.endswith(u'_by_utf8_name') or
             self._type_function.endswith(u'_by_utf8_path')):
           description = [u'Retrieves the {0:s} specified by the {1:s}.'.format(
@@ -530,7 +564,7 @@ class PythonTypeObjectFunctionPrototype(object):
         description = [u'Sets the parent file.']
 
       else:
-        value_name = self.GetValueName()
+        value_name = self.value_name
         if value_name:
           value_name = value_name.replace(u'_', u' ')
           description = [u'Sets the {0:s}.'.format(value_name)]
@@ -574,40 +608,6 @@ class PythonTypeObjectFunctionPrototype(object):
       return u'None'
 
     return self.return_type
-
-  def GetValueName(self):
-    """Retrieve the value name.
-
-    Returns:
-      str: value name or None.
-    """
-    if self._value_name is None:
-      if self.function_type == self.FUNCTION_TYPE_COPY:
-        if self._type_function.startswith(u'copy_'):
-          self._value_name = self._type_function[5:]
-
-      elif self.function_type == self.FUNCTION_TYPE_GET:
-        if self._type_function.startswith(u'get_utf8_'):
-          self._value_name = self._type_function[9:]
-
-        elif self._type_function.startswith(u'get_'):
-          self._value_name = self._type_function[4:]
-
-        if self._value_name.endswith(u'_by_index'):
-          self._value_name = self._value_name[:-9]
-
-        elif (self._value_name.endswith(u'_by_utf8_name') or
-            self._value_name.endswith(u'_by_utf8_path')):
-          self._value_name = self._value_name[:-13]
-
-      elif self.function_type == self.FUNCTION_TYPE_SET:
-        if self._type_function.startswith(u'set_utf8_'):
-          self._value_name = self._type_function[9:]
-
-        elif self._type_function.startswith(u'set_'):
-          self._value_name = self._type_function[4:]
-
-    return self._value_name
 
 
 class DefinitionsIncludeHeaderFile(object):
@@ -2589,7 +2589,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET,
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
-        value_name = python_function_prototype.GetValueName()
+        value_name = python_function_prototype.value_name
       else:
         value_name = None
 
@@ -2708,16 +2708,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
         python_module_include_names.add(python_function_prototype.object_type)
 
-      if len(python_function_prototype.arguments) == 1:
-        argument = python_function_prototype.arguments[0]
-        if argument.endswith(u'_index'):
-          argument, _, _ = argument.rpartition(u'_')
-          argument = u'{0:s}s'.format(argument)
+        if len(python_function_prototype.arguments) == 1:
+          sequence_type_name = self._GetSequenceName(
+              python_function_prototype.object_type)
+          python_module_include_names.add(sequence_type_name)
 
-          if argument.startswith(u'sub_'):
-            argument = argument[4:]
-
-          python_module_include_names.add(argument)
+      elif python_function_prototype.return_type == (
+          PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
+        if len(python_function_prototype.arguments) == 1:
+          sequence_type_name = self._GetSequenceName(
+              python_function_prototype.arguments[0])
+          python_module_include_names.add(sequence_type_name)
 
     template_directory = os.path.join(self._template_directory, u'pyyal_type')
 
@@ -2814,24 +2815,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       value_name_prefix = u''
       value_name = None
 
-
-      # TODO: fix _by_name and _by_path in value name.
-
-      # Determine the root and sub value prefixed based on the type function
-      # otherwise by_index might be missed.
-      if type_function.startswith(u'get_root_'):
-        value_name_prefix = u'root'
-        value_name = type_function[9:]
-
-      elif type_function.startswith(u'get_sub_'):
-        value_name_prefix = u'sub'
-        value_name = type_function[8:]
-
-      elif python_function_prototype.function_type in (
+      if python_function_prototype.function_type in (
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET,
           PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
-        value_name = python_function_prototype.GetValueName()
+        value_name = python_function_prototype.value_name
+
+      if (value_name and (
+          value_name.startswith(u'root_') or value_name.startswith(u'sub_'))):
+        value_name_prefix, _, value_name = value_name.partition(u'_')
 
       template_filename = u'{0:s}.c'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
@@ -2907,6 +2899,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               self._SetSequenceValueNameInTemplateMappings(
                   template_mappings, sequence_value_name)
 
+            if python_function_prototype.object_type:
+              self._SetValueTypeInTemplateMappings(
+                  template_mappings, python_function_prototype.object_type)
+
         elif python_function_prototype.function_type == (
             PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
 
@@ -2927,7 +2923,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
 
       if generate_get_value_type_object:
-        # TODO: generate get_value_type_object.c
+        additional_template_filename = os.path.join(
+            template_directory, u'get_value_type_object.c')
+        self._GenerateSection(
+            additional_template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
         generate_get_value_type_object = False
 
       self._GenerateSection(
@@ -3587,22 +3587,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                   PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET)):
             continue
 
-          value_name = type_function[4:]
-          if value_name.startswith(u'recovered_'):
-            value_name = value_name[10:]
-          elif value_name.startswith(u'sub_'):
-            value_name = value_name[4:]
-
-          if value_name.endswith(u'_by_index'):
-            value_name = value_name[:-9]
-
           if python_function_prototype.return_type == (
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
-            types_with_sequence_types.add((value_name, True))
+            types_with_sequence_types.add(
+                (python_function_prototype.object_type, True))
 
           elif python_function_prototype.return_type == (
               PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
-            types_with_sequence_types.add((value_name, False))
+            types_with_sequence_types.add(
+                (python_function_prototype.value_name, False))
 
         self._GenerateTypeSourceFile(
             project_configuration, template_mappings, type_name,
