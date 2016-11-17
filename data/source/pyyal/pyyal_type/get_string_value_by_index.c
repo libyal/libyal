@@ -16,7 +16,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
 	if( ${python_module_name}_${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid ${type_description}.",
 		 function );
 
@@ -60,7 +60,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
 	if( utf8_string == NULL )
 	{
 		PyErr_Format(
-		 PyExc_IOError,
+		 PyExc_MemoryError,
 		 "%s: unable to create UTF-8 string.",
 		 function );
 
@@ -168,7 +168,7 @@ PyObject *${python_module_name}_${type_name}_get_${sequence_value_name}(
 	if( ${python_module_name}_${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid ${type_description}.",
 		 function );
 

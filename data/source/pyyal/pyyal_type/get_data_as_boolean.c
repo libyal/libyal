@@ -1,14 +1,13 @@
-/* Retrieves the ${value_description}
+/* Retrieves the data as a boolean value
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_${type_name}_get_${value_name}(
+PyObject *${python_module_name}_${type_name}_get_data_as_boolean(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	PyObject *integer_object = NULL;
 	libcerror_error_t *error = NULL;
-	static char *function    = "${python_module_name}_${type_name}_get_${value_name}";
-	uint8_t ${value_name}    = 0;
+	static char *function    = "${python_module_name}_${type_name}_get_data_as_boolean";
+	uint8_t value_boolean    = 0;
 	int result               = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
@@ -24,19 +23,19 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_${value_name}(
-	          ${python_module_name}_${type_name}->${type_name},
-	          &${value_name},
-	          &error );
+	result = ${library_name}_${type_name}_get_data_as_boolean(
+		  ${python_module_name}_${type_name}->${type_name},
+		  &value_boolean,
+		  &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve ${value_description}.",
+		 "%s: unable to retrieve boolean value.",
 		 function );
 
 		libcerror_error_free(
@@ -44,13 +43,16 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 		return( NULL );
 	}
-#if PY_MAJOR_VERSION >= 3
-	integer_object = PyLong_FromLong(
-	                  (long) ${value_name} );
-#else
-	integer_object = PyInt_FromLong(
-	                  (long) ${value_name} );
-#endif
-	return( integer_object );
+	if( value_boolean == 0x00 )
+	{
+		Py_IncRef(
+		 Py_True );
+
+		return( Py_True );
+	}
+	Py_IncRef(
+	 Py_False );
+
+	return( Py_False );
 }
 

@@ -11,7 +11,7 @@ void ${python_module_name}_${type_name}_free(
 	if( ${python_module_name}_${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid ${type_description}.",
 		 function );
 
@@ -20,7 +20,7 @@ void ${python_module_name}_${type_name}_free(
 	if( ${python_module_name}_${type_name}->${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid ${type_description} - missing ${library_name} ${type_description}.",
 		 function );
 

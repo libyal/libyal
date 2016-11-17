@@ -20,7 +20,7 @@ PyObject *${python_module_name}_${type_name}_read_buffer(
 	if( ${python_module_name}_${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid ${type_description}.",
 		 function );
 

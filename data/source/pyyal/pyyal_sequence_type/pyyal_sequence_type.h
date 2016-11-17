@@ -44,48 +44,48 @@ struct ${python_module_name}_${sequence_type_name}
 	 */
 	PyObject *parent_object;
 
-	/* The get ${type_description} by index callback function
+	/* The get item by index callback function
 	 */
-	PyObject* (*get_${type_name}_by_index)(
+	PyObject* (*get_item_by_index)(
 	             PyObject *parent_object,
-	             int ${type_name}_index );
+	             int index );
 
-	/* The (current) ${type_description} index
+	/* The current index
 	 */
-	int ${type_name}_index;
+	int current_index;
 
-	/* The number of ${sequence_type_description}
+	/* The number of items
 	 */
-	int number_of_${sequence_type_name};
+	int number_of_items;
 };
 
 extern PyTypeObject ${python_module_name}_${sequence_type_name}_type_object;
 
 PyObject *${python_module_name}_${sequence_type_name}_new(
            PyObject *parent_object,
-           PyObject* (*get_${type_name}_by_index)(
+           PyObject* (*get_item_by_index)(
                         PyObject *parent_object,
-                        int ${type_name}_index ),
-           int number_of_${sequence_type_name} );
+                        int index ),
+           int number_of_items );
 
 int ${python_module_name}_${sequence_type_name}_init(
-     ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} );
+     ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
 
 void ${python_module_name}_${sequence_type_name}_free(
-      ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} );
+      ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
 
 Py_ssize_t ${python_module_name}_${sequence_type_name}_len(
-            ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} );
+            ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
 
 PyObject *${python_module_name}_${sequence_type_name}_getitem(
-           ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name},
+           ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object,
            Py_ssize_t item_index );
 
 PyObject *${python_module_name}_${sequence_type_name}_iter(
-           ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} );
+           ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
 
 PyObject *${python_module_name}_${sequence_type_name}_iternext(
-           ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} );
+           ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
 
 #if defined( __cplusplus )
 }

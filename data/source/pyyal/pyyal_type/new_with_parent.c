@@ -12,7 +12,7 @@ PyObject *${python_module_name}_${type_name}_new(
 	if( ${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid ${type_description}.",
 		 function );
 

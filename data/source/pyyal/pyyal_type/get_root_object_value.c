@@ -1,14 +1,3 @@
-/* Retrieves the root ${value_description} type object
- * Returns a Python type object if successful or NULL on error
- */
-PyTypeObject *${python_module_name}_${type_name}_get_root_${value_name}_type_object(
-               ${library_name}_${value_type}_t *root_${value_name} ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
-{
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( root_${value_name} )
-
-	return( &${python_module_name}_${value_type}_type_object );
-}
-
 /* Retrieves the root ${value_description}
  * Returns a Python object if successful or NULL on error
  */
@@ -28,7 +17,7 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 	if( ${python_module_name}_${type_name} == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid ${type_description}.",
 		 function );
 

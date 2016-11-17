@@ -151,13 +151,13 @@ PyTypeObject ${python_module_name}_${sequence_type_name}_type_object = {
  */
 PyObject *${python_module_name}_${sequence_type_name}_new(
            PyObject *parent_object,
-           PyObject* (*get_${type_name}_by_index)(
+           PyObject* (*get_item_by_index)(
                         PyObject *parent_object,
-                        int ${type_name}_index ),
-           int number_of_${sequence_type_name} )
+                        int index ),
+           int number_of_items )
 {
-	${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} = NULL;
-	static char *function                                                                      = "${python_module_name}_${sequence_type_name}_new";
+	${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object = NULL;
+	static char *function                                                       = "${python_module_name}_${sequence_type_name}_new";
 
 	if( parent_object == NULL )
 	{
@@ -168,54 +168,54 @@ PyObject *${python_module_name}_${sequence_type_name}_new(
 
 		return( NULL );
 	}
-	if( get_${type_name}_by_index == NULL )
+	if( get_item_by_index == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid get ${type_description} by index function.",
+		 "%s: invalid get item by index function.",
 		 function );
 
 		return( NULL );
 	}
 	/* Make sure the ${sequence_type_description} values are initialized
 	 */
-	${python_module_name}_${sequence_type_name} = PyObject_New(
-	                                               struct ${python_module_name}_${sequence_type_name},
-	                                               &${python_module_name}_${sequence_type_name}_type_object );
+	${sequence_type_name}_object = PyObject_New(
+	                                struct ${python_module_name}_${sequence_type_name},
+	                                &${python_module_name}_${sequence_type_name}_type_object );
 
-	if( ${python_module_name}_${sequence_type_name} == NULL )
+	if( ${sequence_type_name}_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize ${sequence_type_description}.",
+		 "%s: unable to create ${sequence_type_description} object.",
 		 function );
 
 		goto on_error;
 	}
 	if( ${python_module_name}_${sequence_type_name}_init(
-	     ${python_module_name}_${sequence_type_name} ) != 0 )
+	     ${sequence_type_name}_object ) != 0 )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize ${sequence_type_description}.",
+		 "%s: unable to initialize ${sequence_type_description} object.",
 		 function );
 
 		goto on_error;
 	}
-	${python_module_name}_${sequence_type_name}->parent_object                   = parent_object;
-	${python_module_name}_${sequence_type_name}->get_${type_name}_by_index       = get_${type_name}_by_index;
-	${python_module_name}_${sequence_type_name}->number_of_${sequence_type_name} = number_of_${sequence_type_name};
+	${sequence_type_name}_object->parent_object     = parent_object;
+	${sequence_type_name}_object->get_item_by_index = get_item_by_index;
+	${sequence_type_name}_object->number_of_items   = number_of_items;
 
 	Py_IncRef(
-	 (PyObject *) ${python_module_name}_${sequence_type_name}->parent_object );
+	 (PyObject *) ${sequence_type_name}_object->parent_object );
 
-	return( (PyObject *) ${python_module_name}_${sequence_type_name} );
+	return( (PyObject *) ${sequence_type_name}_object );
 
 on_error:
-	if( ${python_module_name}_${sequence_type_name} != NULL )
+	if( ${sequence_type_name}_object != NULL )
 	{
 		Py_DecRef(
-		 (PyObject *) ${python_module_name}_${sequence_type_name} );
+		 (PyObject *) ${sequence_type_name}_object );
 	}
 	return( NULL );
 }
@@ -224,25 +224,25 @@ on_error:
  * Returns 0 if successful or -1 on error
  */
 int ${python_module_name}_${sequence_type_name}_init(
-     ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} )
+     ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object )
 {
 	static char *function = "${python_module_name}_${sequence_type_name}_init";
 
-	if( ${python_module_name}_${sequence_type_name} == NULL )
+	if( ${sequence_type_name}_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description}.",
+		 "%s: invalid ${sequence_type_description} object.",
 		 function );
 
 		return( -1 );
 	}
 	/* Make sure the ${sequence_type_description} values are initialized
 	 */
-	${python_module_name}_${sequence_type_name}->parent_object                   = NULL;
-	${python_module_name}_${sequence_type_name}->get_${type_name}_by_index       = NULL;
-	${python_module_name}_${sequence_type_name}->${type_name}_index              = 0;
-	${python_module_name}_${sequence_type_name}->number_of_${sequence_type_name} = 0;
+	${sequence_type_name}_object->parent_object     = NULL;
+	${sequence_type_name}_object->get_item_by_index = NULL;
+	${sequence_type_name}_object->current_index     = 0;
+	${sequence_type_name}_object->number_of_items   = 0;
 
 	return( 0 );
 }
@@ -250,22 +250,22 @@ int ${python_module_name}_${sequence_type_name}_init(
 /* Frees a ${sequence_type_description} object
  */
 void ${python_module_name}_${sequence_type_name}_free(
-      ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} )
+      ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object )
 {
 	struct _typeobject *ob_type = NULL;
 	static char *function       = "${python_module_name}_${sequence_type_name}_free";
 
-	if( ${python_module_name}_${sequence_type_name} == NULL )
+	if( ${sequence_type_name}_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description}.",
+		 "%s: invalid ${sequence_type_description} object.",
 		 function );
 
 		return;
 	}
 	ob_type = Py_TYPE(
-	           ${python_module_name}_${sequence_type_name} );
+	           ${sequence_type_name}_object );
 
 	if( ob_type == NULL )
 	{
@@ -285,72 +285,72 @@ void ${python_module_name}_${sequence_type_name}_free(
 
 		return;
 	}
-	if( ${python_module_name}_${sequence_type_name}->parent_object != NULL )
+	if( ${sequence_type_name}_object->parent_object != NULL )
 	{
 		Py_DecRef(
-		 (PyObject *) ${python_module_name}_${sequence_type_name}->parent_object );
+		 (PyObject *) ${sequence_type_name}_object->parent_object );
 	}
 	ob_type->tp_free(
-	 (PyObject*) ${python_module_name}_${sequence_type_name} );
+	 (PyObject*) ${sequence_type_name}_object );
 }
 
 /* The ${sequence_type_description} len() function
  */
 Py_ssize_t ${python_module_name}_${sequence_type_name}_len(
-            ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} )
+            ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object )
 {
 	static char *function = "${python_module_name}_${sequence_type_name}_len";
 
-	if( ${python_module_name}_${sequence_type_name} == NULL )
+	if( ${sequence_type_name}_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description}.",
+		 "%s: invalid ${sequence_type_description} object.",
 		 function );
 
 		return( -1 );
 	}
-	return( (Py_ssize_t) ${python_module_name}_${sequence_type_name}->number_of_${sequence_type_name} );
+	return( (Py_ssize_t) ${sequence_type_name}_object->number_of_items );
 }
 
 /* The ${sequence_type_description} getitem() function
  */
 PyObject *${python_module_name}_${sequence_type_name}_getitem(
-           ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name},
+           ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object,
            Py_ssize_t item_index )
 {
 	PyObject *${type_name}_object = NULL;
 	static char *function         = "${python_module_name}_${sequence_type_name}_getitem";
 
-	if( ${python_module_name}_${sequence_type_name} == NULL )
+	if( ${sequence_type_name}_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description}.",
+		 "%s: invalid ${sequence_type_description} object.",
 		 function );
 
 		return( NULL );
 	}
-	if( ${python_module_name}_${sequence_type_name}->get_${type_name}_by_index == NULL )
+	if( ${sequence_type_name}_object->get_item_by_index == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description} - missing get ${type_description} by index function.",
+		 "%s: invalid ${sequence_type_description} object - missing get item by index function.",
 		 function );
 
 		return( NULL );
 	}
-	if( ${python_module_name}_${sequence_type_name}->number_of_${sequence_type_name} < 0 )
+	if( ${sequence_type_name}_object->number_of_items < 0 )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description} - invalid number of ${sequence_type_description}.",
+		 "%s: invalid ${sequence_type_description} object - invalid number of items.",
 		 function );
 
 		return( NULL );
 	}
 	if( ( item_index < 0 )
-	 || ( item_index >= (Py_ssize_t) ${python_module_name}_${sequence_type_name}->number_of_${sequence_type_name} ) )
+	 || ( item_index >= (Py_ssize_t) ${sequence_type_name}_object->number_of_items ) )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
@@ -359,8 +359,8 @@ PyObject *${python_module_name}_${sequence_type_name}_getitem(
 
 		return( NULL );
 	}
-	${type_name}_object = ${python_module_name}_${sequence_type_name}->get_${type_name}_by_index(
-	                       ${python_module_name}_${sequence_type_name}->parent_object,
+	${type_name}_object = ${sequence_type_name}_object->get_item_by_index(
+	                       ${sequence_type_name}_object->parent_object,
 	                       (int) item_index );
 
 	return( ${type_name}_object );
@@ -369,83 +369,83 @@ PyObject *${python_module_name}_${sequence_type_name}_getitem(
 /* The ${sequence_type_description} iter() function
  */
 PyObject *${python_module_name}_${sequence_type_name}_iter(
-           ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} )
+           ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object )
 {
 	static char *function = "${python_module_name}_${sequence_type_name}_iter";
 
-	if( ${python_module_name}_${sequence_type_name} == NULL )
+	if( ${sequence_type_name}_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description}.",
+		 "%s: invalid ${sequence_type_description} object.",
 		 function );
 
 		return( NULL );
 	}
 	Py_IncRef(
-	 (PyObject *) ${python_module_name}_${sequence_type_name} );
+	 (PyObject *) ${sequence_type_name}_object );
 
-	return( (PyObject *) ${python_module_name}_${sequence_type_name} );
+	return( (PyObject *) ${sequence_type_name}_object );
 }
 
 /* The ${sequence_type_description} iternext() function
  */
 PyObject *${python_module_name}_${sequence_type_name}_iternext(
-           ${python_module_name}_${sequence_type_name}_t *${python_module_name}_${sequence_type_name} )
+           ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object )
 {
 	PyObject *${type_name}_object = NULL;
 	static char *function         = "${python_module_name}_${sequence_type_name}_iternext";
 
-	if( ${python_module_name}_${sequence_type_name} == NULL )
+	if( ${sequence_type_name}_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description}.",
+		 "%s: invalid ${sequence_type_description} object.",
 		 function );
 
 		return( NULL );
 	}
-	if( ${python_module_name}_${sequence_type_name}->get_${type_name}_by_index == NULL )
+	if( ${sequence_type_name}_object->get_item_by_index == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description} - missing get ${type_description} by index function.",
+		 "%s: invalid ${sequence_type_description} object - missing get item by index function.",
 		 function );
 
 		return( NULL );
 	}
-	if( ${python_module_name}_${sequence_type_name}->${type_name}_index < 0 )
+	if( ${sequence_type_name}_object->current_index < 0 )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description} - invalid ${type_description} index.",
+		 "%s: invalid ${sequence_type_description} object - invalid current index.",
 		 function );
 
 		return( NULL );
 	}
-	if( ${python_module_name}_${sequence_type_name}->number_of_${sequence_type_name} < 0 )
+	if( ${sequence_type_name}_object->number_of_items < 0 )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${sequence_type_description} - invalid number of ${sequence_type_description}.",
+		 "%s: invalid ${sequence_type_description} object - invalid number of items.",
 		 function );
 
 		return( NULL );
 	}
-	if( ${python_module_name}_${sequence_type_name}->${type_name}_index >= ${python_module_name}_${sequence_type_name}->number_of_${sequence_type_name} )
+	if( ${sequence_type_name}_object->current_index >= ${sequence_type_name}_object->number_of_items )
 	{
 		PyErr_SetNone(
 		 PyExc_StopIteration );
 
 		return( NULL );
 	}
-	${type_name}_object = ${python_module_name}_${sequence_type_name}->get_${type_name}_by_index(
-	                       ${python_module_name}_${sequence_type_name}->parent_object,
-	                       ${python_module_name}_${sequence_type_name}->${type_name}_index );
+	${type_name}_object = ${sequence_type_name}_object->get_item_by_index(
+	                       ${sequence_type_name}_object->parent_object,
+	                       ${sequence_type_name}_object->current_index );
 
 	if( ${type_name}_object != NULL )
 	{
-		${python_module_name}_${sequence_type_name}->${type_name}_index++;
+		${sequence_type_name}_object->current_index++;
 	}
 	return( ${type_name}_object );
 }
