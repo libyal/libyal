@@ -23,6 +23,44 @@ except ImportError:
 import source_formatter
 
 
+FUNCTION_TYPE_CLOSE = u'close'
+FUNCTION_TYPE_COPY = u'copy'
+FUNCTION_TYPE_COPY_FROM = u'copy_from'
+FUNCTION_TYPE_COPY_TO = u'copy_to'
+FUNCTION_TYPE_FREE = u'free'
+FUNCTION_TYPE_GET = u'get'
+FUNCTION_TYPE_GET_BY_INDEX = u'get_by_index'
+FUNCTION_TYPE_GET_BY_IDENTIFIER = u'get_by_identifier'
+FUNCTION_TYPE_GET_BY_NAME = u'get_by_name'
+FUNCTION_TYPE_GET_BY_PATH = u'get_by_path'
+FUNCTION_TYPE_INITIALIZE = u'initialize'
+FUNCTION_TYPE_OPEN = u'open'
+FUNCTION_TYPE_READ = u'read'
+FUNCTION_TYPE_SEEK = u'seek'
+FUNCTION_TYPE_SET = u'set'
+FUNCTION_TYPE_UTILITY = u'utility'
+FUNCTION_TYPE_WRITE = u'write'
+
+RETURN_TYPE_BINARY_DATA = u'binary_data'
+RETURN_TYPE_FAT_DATE_TIME = u'fat_date_time'
+RETURN_TYPE_FILETIME = u'filetime'
+RETURN_TYPE_GUID = u'guid'
+RETURN_TYPE_INT = u'int'
+RETURN_TYPE_INT32 = u'int32'
+RETURN_TYPE_NARROW_STRING = u'narrow_string'
+RETURN_TYPE_NONE = u'none'
+RETURN_TYPE_OBJECT = u'object'
+RETURN_TYPE_OFF64 = u'off64'
+RETURN_TYPE_POSIX_TIME = u'posix_time'
+RETURN_TYPE_SIZE32 = u'size32'
+RETURN_TYPE_SIZE64 = u'size64'
+RETURN_TYPE_STRING = u'string'
+RETURN_TYPE_UINT8 = u'uint8'
+RETURN_TYPE_UINT16 = u'uint16'
+RETURN_TYPE_UINT32 = u'uint32'
+RETURN_TYPE_UINT64 = u'uint64'
+
+
 class ProjectConfiguration(object):
   """Class that defines a project configuration."""
 
@@ -312,39 +350,11 @@ class PythonTypeObjectFunctionPrototype(object):
 
   Attributes:
     arguments (list[str]): arguments.
+    function_type (str): function type.
     object_type (str): object type.
     return_type (str): return type.
+    value_type (str): value type.
   """
-  FUNCTION_TYPE_CLOSE = u'close'
-  FUNCTION_TYPE_COPY = u'copy'
-  FUNCTION_TYPE_FREE = u'free'
-  FUNCTION_TYPE_GET = u'get'
-  FUNCTION_TYPE_INITIALIZE = u'initialize'
-  FUNCTION_TYPE_OPEN = u'open'
-  FUNCTION_TYPE_READ = u'read'
-  FUNCTION_TYPE_SEEK = u'seek'
-  FUNCTION_TYPE_SET = u'set'
-  FUNCTION_TYPE_UTILITY = u'utility'
-  FUNCTION_TYPE_WRITE = u'write'
-
-  RETURN_TYPE_BINARY_DATA = u'binary_data'
-  RETURN_TYPE_FAT_DATE_TIME = u'fat_date_time'
-  RETURN_TYPE_FILETIME = u'filetime'
-  RETURN_TYPE_GUID = u'guid'
-  RETURN_TYPE_INT = u'int'
-  RETURN_TYPE_INT32 = u'int32'
-  RETURN_TYPE_NARROW_STRING = u'narrow_string'
-  RETURN_TYPE_NONE = u'none'
-  RETURN_TYPE_OBJECT = u'object'
-  RETURN_TYPE_OFF64 = u'off64'
-  RETURN_TYPE_POSIX_TIME = u'posix_time'
-  RETURN_TYPE_SIZE32 = u'size32'
-  RETURN_TYPE_SIZE64 = u'size64'
-  RETURN_TYPE_STRING = u'string'
-  RETURN_TYPE_UINT8 = u'uint8'
-  RETURN_TYPE_UINT16 = u'uint16'
-  RETURN_TYPE_UINT32 = u'uint32'
-  RETURN_TYPE_UINT64 = u'uint64'
 
   def __init__(self, python_module_name, type_name, type_function):
     """Initializes a Python type object function prototype.
@@ -358,55 +368,16 @@ class PythonTypeObjectFunctionPrototype(object):
       type_function = u'open_file_object'
 
     super(PythonTypeObjectFunctionPrototype, self).__init__()
-    self._function_type = None
     self._name = None
     self._python_module_name = python_module_name
     self._type_function = type_function
     self._type_name = type_name
     self._value_name = None
     self.arguments = []
+    self.function_type = None
     self.object_type = None
-    self.return_type = self.RETURN_TYPE_NONE
-
-  @property
-  def function_type(self):
-    """str: function type."""
-    if self._function_type is None:
-      if self._type_function == u'close':
-        self._function_type = self.FUNCTION_TYPE_CLOSE
-
-      elif self._type_function.startswith(u'copy_'):
-        self._function_type = self.FUNCTION_TYPE_COPY
-
-      elif self._type_function == u'free':
-        self._function_type = self.FUNCTION_TYPE_FREE
-
-      elif self._type_function.startswith(u'get_'):
-        self._function_type = self.FUNCTION_TYPE_GET
-
-      elif self._type_function == u'initialize':
-        self._function_type = self.FUNCTION_TYPE_INITIALIZE
-
-      elif (self._type_function == u'open' or
-          self._type_function.startswith(u'open_')):
-        self._function_type = self.FUNCTION_TYPE_OPEN
-
-      elif self._type_function.startswith(u'read_'):
-        self._function_type = self.FUNCTION_TYPE_READ
-
-      elif self._type_function.startswith(u'seek_'):
-        self._function_type = self.FUNCTION_TYPE_SEEK
-
-      elif self._type_function.startswith(u'set_'):
-        self._function_type = self.FUNCTION_TYPE_SET
-
-      elif self._type_function == u'signal_abort':
-        self._function_type = self.FUNCTION_TYPE_UTILITY
-
-      # elif self._type_function.startswith(u'write_'):
-      #   self._function_type = self.FUNCTION_TYPE_WRITE
-
-    return self._function_type
+    self.return_type = RETURN_TYPE_NONE
+    self.value_type = None
 
   @property
   def name(self):
@@ -435,11 +406,13 @@ class PythonTypeObjectFunctionPrototype(object):
       return u''.join([self._type_function[:4], self._type_function[9:]])
 
     if self._type_function.startswith(u'get_'):
-      if self._type_function.endswith(u'_by_index'):
-        return self._type_function[:-9]
+      type_function_prefix, _, type_function_suffix = (
+          self._type_function.partition(u'_by_'))
 
-      elif (self._type_function.endswith(u'_by_utf8_name') or
-          self._type_function.endswith(u'_by_utf8_path')):
+      if type_function_suffix in (u'entry', u'index'):
+        return type_function_prefix
+
+      if type_function_suffix in (u'utf8_name', u'utf8_path'):
         return u''.join([self._type_function[:-10], self._type_function[-5:]])
 
       if self._type_function.endswith(u'_utf8_string'):
@@ -453,30 +426,28 @@ class PythonTypeObjectFunctionPrototype(object):
   @property
   def value_name(self):
     """str: value name."""
-    # TODO: make overrides more generic.
-    if self._type_function == u'get_cache_directory_name':
-      return u'cache_directory'
-
     if self._value_name is None:
-      if self.function_type == self.FUNCTION_TYPE_COPY:
+      # TODO: make overrides more generic.
+      if self._type_function == u'get_cache_directory_name':
+        self._value_name = u'cache_directory'
+
+      elif self.function_type == FUNCTION_TYPE_COPY:
         if self._type_function.startswith(u'copy_'):
           self._value_name = self._type_function[5:]
 
-      elif self.function_type == self.FUNCTION_TYPE_GET:
-        if self._type_function.startswith(u'get_utf8_'):
-          self._value_name = self._type_function[9:]
+      elif self.function_type in (
+          FUNCTION_TYPE_GET, FUNCTION_TYPE_GET_BY_IDENTIFIER,
+          FUNCTION_TYPE_GET_BY_INDEX, FUNCTION_TYPE_GET_BY_NAME,
+          FUNCTION_TYPE_GET_BY_PATH):
+        type_function_prefix, _, _ = self._type_function.partition(u'_by_')
 
-        elif self._type_function.startswith(u'get_'):
-          self._value_name = self._type_function[4:]
+        if type_function_prefix.startswith(u'get_utf8_'):
+          self._value_name = type_function_prefix[9:]
 
-        if self._value_name.endswith(u'_by_index'):
-          self._value_name = self._value_name[:-9]
+        elif type_function_prefix.startswith(u'get_'):
+          self._value_name = type_function_prefix[4:]
 
-        elif (self._value_name.endswith(u'_by_utf8_name') or
-            self._value_name.endswith(u'_by_utf8_path')):
-          self._value_name = self._value_name[:-13]
-
-      elif self.function_type == self.FUNCTION_TYPE_SET:
+      elif self.function_type == FUNCTION_TYPE_SET:
         if self._type_function.startswith(u'set_utf8_'):
           self._value_name = self._type_function[9:]
 
@@ -492,22 +463,21 @@ class PythonTypeObjectFunctionPrototype(object):
       str: function as attribute description.
     """
     description = u''
-    if self.function_type in (
-        self.FUNCTION_TYPE_COPY, self.FUNCTION_TYPE_GET):
-      if self._type_function == u'get_ascii_codepage':
-        description = (
-            u'The codepage used for ASCII strings in the {0:s}.').format(
-                self._type_name)
 
-      else:
-        value_name = self.value_name
-        if value_name:
-          value_name = value_name.replace(u'_', u' ')
+    value_name = self.value_name
+    if value_name:
+      value_name = value_name.replace(u'_', u' ')
 
-          # Correct xml => XML in description for pyevtx.
-          value_name = value_name.replace(u' xml ', u' XML ')
+    if self._type_function == u'get_ascii_codepage':
+      description = (
+          u'The codepage used for ASCII strings in the {0:s}.').format(
+              self._type_name)
 
-          description = u'The {0:s}.'.format(value_name)
+    elif value_name:
+      # Correct xml => XML in description for pyevtx.
+      value_name = value_name.replace(u' xml ', u' XML ')
+
+      description = u'The {0:s}.'.format(value_name)
 
     return description
 
@@ -518,77 +488,70 @@ class PythonTypeObjectFunctionPrototype(object):
       list[str]: lines of the description.
     """
     description = [u'']
-    if self.function_type == self.FUNCTION_TYPE_CLOSE:
+
+    value_name = self.value_name
+    if value_name:
+      value_name = value_name.replace(u'_', u' ')
+
+    if self._type_function == u'close':
       description = [u'Closes a {0:s}.'.format(self._type_name)]
 
+    elif self._type_function == u'get_ascii_codepage':
+      description = [(
+          u'Retrieves the codepage for ASCII strings used in '
+          u'the {0:s}.').format(self._type_name)]
+
+    elif self._type_function == u'open':
+      description = [u'Opens a {0:s}.'.format(self._type_name)]
+
+    elif self._type_function == u'open_file_object':
+      description = [(
+          u'Opens a {0:s} using a file-like object.').format(self._type_name)]
+
+    elif self._type_function == u'read_buffer':
+      description = [u'Reads a buffer of data.']
+
+    elif self._type_function == u'read_buffer_at_offset':
+      description = [u'Reads a buffer of data at a specific offset.']
+
+    elif self._type_function == u'seek_offset':
+      description = [u'Seeks an offset within the data.']
+
+    elif self._type_function == u'set_ascii_codepage':
+      description = [
+          (u'Sets the codepage for ASCII strings used in the '
+           u'{0:s}.').format(self._type_name),
+          (u'Expects the codepage to be a string containing a Python '
+           u'codec definition.')]
+
+    elif self._type_function == u'set_parent':
+      description = [u'Sets the parent file.']
+
+    elif self._type_function == u'signal_abort':
+      description = [u'Signals the {0:s} to abort the current activity.'.format(
+          self._type_name)]
+
+    elif self.function_type == FUNCTION_TYPE_GET_BY_INDEX:
+      _, _, argument_suffix = self.arguments[0].partition(u'_')
+      description = [u'Retrieves the {0:s} specified by the {1:s}.'.format(
+          value_name, argument_suffix)]
+
     elif self.function_type in (
-        self.FUNCTION_TYPE_COPY, self.FUNCTION_TYPE_GET):
-      if self._type_function == u'get_ascii_codepage':
-        description = [(
-            u'Retrieves the codepage for ASCII strings used in '
-            u'the {0:s}.').format(self._type_name)]
+        FUNCTION_TYPE_GET_BY_IDENTIFIER, FUNCTION_TYPE_GET_BY_NAME,
+        FUNCTION_TYPE_GET_BY_PATH):
+      _, _, type_function_suffix = self._type_function.partition(u'_by_')
+      description = [u'Retrieves the {0:s} specified by the {1:s}.'.format(
+          value_name, type_function_suffix)]
 
-      else:
-        value_name = self.value_name
-        if value_name:
-          value_name = value_name.replace(u'_', u' ')
+    elif self.function_type in (FUNCTION_TYPE_COPY, FUNCTION_TYPE_GET):
+      # Correct xml => XML in description for pyevtx.
+      value_name = value_name.replace(u' xml ', u' XML ')
 
-        if len(self.arguments) == 1 and self.arguments[0].endswith(u'_index'):
-          description = [u'Retrieves the {0:s} specified by the index.'.format(
-              value_name)]
+      description = [u'Retrieves the {0:s}.'.format(value_name)]
 
-        # TODO: also use arguments here?
-        elif (self._type_function.endswith(u'_by_utf8_name') or
-            self._type_function.endswith(u'_by_utf8_path')):
-          description = [u'Retrieves the {0:s} specified by the {1:s}.'.format(
-              value_name, self._type_function[-4:])]
-
-        else:
-          # Correct xml => XML in description for pyevtx.
-          value_name = value_name.replace(u' xml ', u' XML ')
-
-          description = [u'Retrieves the {0:s}.'.format(value_name)]
-
-    elif self.function_type == self.FUNCTION_TYPE_OPEN:
-      if self._type_function == u'open_file_object':
-        description = [(
-            u'Opens a {0:s} using a file-like object.').format(self._type_name)]
-      else:
-        description = [u'Opens a {0:s}.'.format(self._type_name)]
-
-    elif self.function_type == self.FUNCTION_TYPE_READ:
-      if self._type_function == u'read_buffer':
-        description = [u'Reads a buffer of data.']
-
-      elif self._type_function == u'read_buffer_at_offset':
-        description = [u'Reads a buffer of data at a specific offset.']
-
-    elif self.function_type == self.FUNCTION_TYPE_SEEK:
-      if self._type_function == u'seek_offset':
-        description = [u'Seeks an offset within the data.']
-
-    elif self.function_type == self.FUNCTION_TYPE_SET:
-      if self._type_function == u'set_ascii_codepage':
-        description = [
-            (u'Sets the codepage for ASCII strings used in the '
-             u'{0:s}.').format(self._type_name),
-            (u'Expects the codepage to be a string containing a Python '
-             u'codec definition.')]
-
-      elif self._type_function == u'set_parent':
-        description = [u'Sets the parent file.']
-
-      else:
-        value_name = self.value_name
-        if value_name:
-          value_name = value_name.replace(u'_', u' ')
-          description = [u'Sets the {0:s}.'.format(value_name)]
-
-    elif self.function_type == self.FUNCTION_TYPE_UTILITY:
-      if self._type_function == u'signal_abort':
-        description = [
-            u'Signals the {0:s} to abort the current activity.'.format(
-                self._type_name)]
+    elif self.function_type == FUNCTION_TYPE_SET:
+      value_name = value_name.replace(u'_', u' ')
+      description = [u'Sets the {0:s}.'.format(value_name)]
 
     return description
 
@@ -598,35 +561,61 @@ class PythonTypeObjectFunctionPrototype(object):
     Returns:
       str: return type description.
     """
-    if self.return_type == self.RETURN_TYPE_BINARY_DATA:
+    if self.return_type == RETURN_TYPE_BINARY_DATA:
       return u'Binary string or None'
 
-    if self.return_type in (
-        self.RETURN_TYPE_FAT_DATE_TIME, self.RETURN_TYPE_FILETIME,
-        self.RETURN_TYPE_POSIX_TIME):
+    if self.ReturnTypeIsDatetime():
       return u'Datetime or None'
 
-    if self.return_type == self.RETURN_TYPE_OBJECT:
+    if self.return_type == RETURN_TYPE_OBJECT:
       return u'Object or None'
 
-    if self.return_type in (
-        self.RETURN_TYPE_INT, self.RETURN_TYPE_INT32, self.RETURN_TYPE_OFF64,
-        self.RETURN_TYPE_SIZE32, self.RETURN_TYPE_SIZE64,
-        self.RETURN_TYPE_UINT8, self.RETURN_TYPE_UINT16,
-        self.RETURN_TYPE_UINT32, self.RETURN_TYPE_UINT64):
+    if self.ReturnTypeIsInteger():
       return u'Integer or None'
 
-    if self.return_type in (
-        self.RETURN_TYPE_GUID, self.RETURN_TYPE_STRING):
+    if self.return_type in (RETURN_TYPE_GUID, RETURN_TYPE_STRING):
       return u'Unicode string or None'
 
-    if self.return_type == self.RETURN_TYPE_NARROW_STRING:
+    if self.return_type == RETURN_TYPE_NARROW_STRING:
       return u'String or None'
 
-    if self.return_type == self.RETURN_TYPE_NONE:
+    if self.return_type == RETURN_TYPE_NONE:
       return u'None'
 
     return self.return_type
+
+  def GetValueNameAndPrefix(self):
+    """Determines the value name and its prefix.
+
+    Returns:
+      tuple[str, str]: value name and prefix.
+    """
+    if self.value_name:
+      value_name_prefix, _, value_name = self.value_name.partition(u'_')
+      if value_name_prefix in (u'root', u'sub'):
+        return value_name, value_name_prefix
+
+    return self.value_name, None
+
+  def ReturnTypeIsDatetime(self):
+    """Determines if the return type is a datetime type.
+
+    Returns:
+      bool: True if the return type is a datetime type.
+    """
+    return self.return_type in (
+        RETURN_TYPE_FAT_DATE_TIME, RETURN_TYPE_FILETIME, RETURN_TYPE_POSIX_TIME)
+
+  def ReturnTypeIsInteger(self):
+    """Determines if the return type is an integer type.
+
+    Returns:
+      bool: True if the return type is an integer type.
+    """
+    return self.return_type in (
+        RETURN_TYPE_INT, RETURN_TYPE_INT32, RETURN_TYPE_OFF64,
+        RETURN_TYPE_SIZE32, RETURN_TYPE_SIZE64, RETURN_TYPE_UINT8,
+        RETURN_TYPE_UINT16, RETURN_TYPE_UINT32, RETURN_TYPE_UINT64)
 
 
 class DefinitionsIncludeHeaderFile(object):
@@ -2607,43 +2596,31 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if type_function in (u'free', u'initialize'):
         continue
 
-      if python_function_prototype.function_type in (
-          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
-          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET,
-          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
-        value_name = python_function_prototype.value_name
-      else:
-        value_name = None
+      value_name = python_function_prototype.value_name
 
       template_filename = u'{0:s}.h'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
         template_filename = None
-        if python_function_prototype.function_type == (
-            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
+        if python_function_prototype.function_type == FUNCTION_TYPE_GET:
 
-          if (python_function_prototype.arguments and
-              not type_function.endswith(u'_by_name') and
-              not type_function.endswith(u'_by_path')):
-
-            if value_name.startswith(u'recovered_'):
-              value_name = value_name[10:]
-              template_filename = u'get_recovered_{0:s}_value_by_index.h'.format(
-                  python_function_prototype.return_type)
-
-            else:
-              template_filename = u'get_{0:s}_value_by_index.h'.format(
-                  python_function_prototype.return_type)
-
-            sequence_value_name = self._GetSequenceName(value_name)
-            self._SetSequenceValueNameInTemplateMappings(
-                template_mappings, sequence_value_name)
-
-          elif python_function_prototype.return_type in (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_FAT_DATE_TIME,
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
+          if python_function_prototype.ReturnTypeIsDatetime():
             template_filename = u'get_datetime_value.h'
+
+        elif python_function_prototype.function_type == (
+            FUNCTION_TYPE_GET_BY_INDEX):
+
+          value_name_prefix = u''
+          if value_name.startswith(u'recovered_'):
+            value_name_prefix = u'recovered_'
+            value_name = value_name[10:]
+
+          template_filename = u'get_{0:s}{1:s}_value_by_index.h'.format(
+              value_name_prefix, python_function_prototype.return_type)
+
+          sequence_value_name = self._GetSequenceName(value_name)
+          self._SetSequenceValueNameInTemplateMappings(
+              template_mappings, sequence_value_name)
 
         if not template_filename:
           if python_function_prototype.arguments:
@@ -2719,26 +2696,20 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     for python_function_prototype in python_function_prototypes.values():
       if python_function_prototype.return_type in (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FAT_DATE_TIME,
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
+          RETURN_TYPE_FAT_DATE_TIME, RETURN_TYPE_POSIX_TIME):
         python_module_include_names.update(set([u'datetime']))
 
-      if python_function_prototype.return_type == (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
+      if python_function_prototype.return_type == RETURN_TYPE_FILETIME:
         python_module_include_names.update(set([u'datetime', u'integer']))
 
-      elif python_function_prototype.return_type == (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_GUID):
+      elif python_function_prototype.return_type == RETURN_TYPE_GUID:
         python_module_include_names.add(u'guid')
 
       elif python_function_prototype.return_type in (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_SIZE64,
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_OFF64,
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT64):
+          RETURN_TYPE_SIZE64, RETURN_TYPE_OFF64, RETURN_TYPE_UINT64):
         python_module_include_names.add(u'integer')
 
-      elif python_function_prototype.return_type == (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
+      elif python_function_prototype.return_type == RETURN_TYPE_OBJECT:
         python_module_include_names.add(python_function_prototype.object_type)
 
         if len(python_function_prototype.arguments) == 1:
@@ -2746,12 +2717,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               python_function_prototype.object_type)
           python_module_include_names.add(sequence_type_name)
 
-      elif python_function_prototype.return_type == (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
+      elif python_function_prototype.return_type == RETURN_TYPE_STRING:
         if len(python_function_prototype.arguments) == 1:
           sequence_type_name = python_function_prototype.arguments[0]
-          if sequence_type_name.endswith(u'_index'):
-            sequence_type_name, _, _ = sequence_type_name.rpartition(u'_')
+
+          sequence_type_prefix, _, sequence_type_suffix = (
+              sequence_type_name.partition(u'_'))
+          if sequence_type_suffix in (u'entry', u'index'):
+            sequence_type_name = sequence_type_prefix
 
           sequence_type_name = self._GetSequenceName(sequence_type_name)
           python_module_include_names.add(sequence_type_name)
@@ -2848,37 +2821,30 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       # TODO: use prefix in template?
-      value_name_prefix = u''
-      value_name = None
-
-      if python_function_prototype.function_type in (
-          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
-          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET,
-          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
-        value_name = python_function_prototype.value_name
-
-      if (value_name and (
-          value_name.startswith(u'root_') or value_name.startswith(u'sub_'))):
-        value_name_prefix, _, value_name = value_name.partition(u'_')
+      value_name, value_name_prefix = (
+          python_function_prototype.GetValueNameAndPrefix())
 
       # TODO: add get_cache_directory template
 
       if type_function == u'get_format_version':
-        # TODO: determine value type of major and minor version.
-        self._SetValueTypeInTemplateMappings(template_mappings, u'uint8_t')
+        self._SetValueTypeInTemplateMappings(
+            template_mappings, python_function_prototype.value_type)
 
       template_filename = u'{0:s}.c'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
         template_filename = None
 
-        if python_function_prototype.function_type == (
-            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY):
+        # TODO: make more generic.
+        if type_function == u'set_password':
+          template_filename = u'set_{0:s}_value.c'.format(u'string')
+
+        elif python_function_prototype.function_type == FUNCTION_TYPE_COPY:
           template_filename = u'copy_{0:s}_value.c'.format(
               python_function_prototype.return_type)
 
-        elif python_function_prototype.function_type == (
-            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
+        elif python_function_prototype.function_type == FUNCTION_TYPE_GET:
+          _, _, type_function_suffix = type_function.partition(u'_by_')
 
           if not python_function_prototype.arguments:
             if value_name.startswith(u'number_of_recovered_'):
@@ -2895,74 +2861,61 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                   python_function_prototype.return_type)
 
           else:
-            if type_function.endswith(u'_by_name'):
+            if type_function.startswith(u'get_value_'):
+              # TODO: implement.
+              pass
+
+            elif type_function_suffix in (u'identifier', u'name', u'path'):
               if value_name_prefix:
-                template_filename = u'get_{0:s}_{1:s}_value_by_name.c'.format(
-                    value_name_prefix, python_function_prototype.return_type)
+                template_filename = u'get_{0:s}_{1:s}_value_by_{2:s}.c'.format(
+                    value_name_prefix, python_function_prototype.return_type,
+                    type_function_suffix)
               else:
-                template_filename = u'get_{0:s}_value_by_name.c'.format(
-                    python_function_prototype.return_type)
+                template_filename = u'get_{0:s}_value_by_{1:s}.c'.format(
+                    python_function_prototype.return_type, type_function_suffix)
 
-              if python_function_prototype.return_type == (
-                  PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
+              if python_function_prototype.return_type == RETURN_TYPE_OBJECT:
                 if value_name not in value_type_objects:
                   generate_get_value_type_object = True
                   value_type_objects.add(value_name)
-
-            elif type_function.endswith(u'_by_path'):
-              if value_name_prefix:
-                template_filename = u'get_{0:s}_{1:s}_value_by_path.c'.format(
-                    value_name_prefix, python_function_prototype.return_type)
-              else:
-                template_filename = u'get_{0:s}_value_by_path.c'.format(
-                    python_function_prototype.return_type)
-
-              if python_function_prototype.return_type == (
-                  PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
-                if value_name not in value_type_objects:
-                  generate_get_value_type_object = True
-                  value_type_objects.add(value_name)
-
-            else:
-              if value_name.startswith(u'recovered_'):
-                value_name = value_name[10:]
-                template_filename = u'get_recovered_{0:s}_value_by_index.c'.format(
-                    python_function_prototype.return_type)
-
-              elif value_name_prefix:
-                template_filename = u'get_{0:s}_{1:s}_value_by_index.c'.format(
-                    value_name_prefix, python_function_prototype.return_type)
-
-              else:
-                template_filename = u'get_{0:s}_value_by_index.c'.format(
-                    python_function_prototype.return_type)
-
-              if python_function_prototype.return_type == (
-                  PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
-                if value_name not in value_type_objects:
-                  generate_get_value_type_object = True
-                  value_type_objects.add(value_name)
-
-              if python_function_prototype.object_type:
-                sequence_type_name = self._GetSequenceName(
-                    python_function_prototype.object_type)
-                self._SetSequenceTypeNameInTemplateMappings(
-                    template_mappings, sequence_type_name)
-
-              sequence_value_name = self._GetSequenceName(value_name)
-              self._SetSequenceValueNameInTemplateMappings(
-                  template_mappings, sequence_value_name)
 
             if python_function_prototype.object_type:
               self._SetValueTypeInTemplateMappings(
                   template_mappings, python_function_prototype.object_type)
 
         elif python_function_prototype.function_type == (
-            PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_SET):
+            FUNCTION_TYPE_GET_BY_INDEX):
 
-          # TODO: make more generic.
-          if type_function == u'set_password':
-            template_filename = u'set_{0:s}_value.c'.format(u'string')
+          if value_name.startswith(u'recovered_'):
+            value_name_prefix = u'recovered_'
+            value_name = value_name[10:]
+
+          elif value_name_prefix:
+            value_name_prefix = u'{0:s}_'.format(value_name_prefix)
+
+          else:
+            value_name_prefix = u''
+
+          template_filename = u'get_{0:s}{1:s}_value_by_index.c'.format(
+              value_name_prefix, python_function_prototype.return_type)
+
+          if python_function_prototype.return_type == RETURN_TYPE_OBJECT:
+            if value_name not in value_type_objects:
+              generate_get_value_type_object = True
+              value_type_objects.add(value_name)
+
+          if python_function_prototype.object_type:
+            self._SetValueTypeInTemplateMappings(
+                template_mappings, python_function_prototype.object_type)
+
+            sequence_type_name = self._GetSequenceName(
+                python_function_prototype.object_type)
+            self._SetSequenceTypeNameInTemplateMappings(
+                template_mappings, sequence_type_name)
+
+          sequence_value_name = self._GetSequenceName(value_name)
+          self._SetSequenceValueNameInTemplateMappings(
+              template_mappings, sequence_value_name)
 
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
@@ -3082,11 +3035,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             u'\t  "\\n"',
             u'\t  "Retrieves the current offset within the data." },'])
 
-      elif python_function_prototype.return_type in (
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FAT_DATE_TIME,
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME,
-          PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
-
+      elif python_function_prototype.ReturnTypeIsDatetime():
         python_type_object_methods.extend([
             u'',
             u'\t{{ "{0:s}_as_integer",'.format(type_function),
@@ -3097,23 +3046,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 type_function, arguments_string),
             u'\t  "\\n"'])
 
-        if python_function_prototype.return_type == (
-            PythonTypeObjectFunctionPrototype.RETURN_TYPE_FAT_DATE_TIME):
-
+        if python_function_prototype.return_type == RETURN_TYPE_FAT_DATE_TIME:
           description[0] = (
               u'{0:s} as a 32-bit integer containing a FAT date time '
               u'value.').format(description[0][:-1])
 
-        elif python_function_prototype.return_type == (
-            PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME):
-
+        elif python_function_prototype.return_type == RETURN_TYPE_FILETIME:
           description[0] = (
               u'{0:s} as a 64-bit integer containing a FILETIME value.').format(
                   description[0][:-1])
 
-        elif python_function_prototype.return_type == (
-            PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME):
-
+        elif python_function_prototype.return_type == RETURN_TYPE_POSIX_TIME:
           description[0] = (
               u'{0:s} as a 32-bit integer containing a POSIX timestamp '
               u'value.').format(description[0][:-1])
@@ -3126,8 +3069,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       elif (python_function_prototype.arguments and
           python_function_prototype.return_type in (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT,
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING)):
+              RETURN_TYPE_OBJECT, RETURN_TYPE_STRING)):
           # TODO: add method for the sequence object.
           pass
 
@@ -3168,8 +3110,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         python_function_prototypes.items()):
 
       if python_function_prototype.function_type not in (
-          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_COPY,
-          PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET):
+          FUNCTION_TYPE_COPY, FUNCTION_TYPE_GET,
+          FUNCTION_TYPE_GET_BY_IDENTIFIER, FUNCTION_TYPE_GET_BY_INDEX,
+          FUNCTION_TYPE_GET_BY_NAME, FUNCTION_TYPE_GET_BY_PATH):
         continue
 
       if (type_function.endswith(u'_by_name') or
@@ -3201,8 +3144,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       if (python_function_prototype.arguments and
           python_function_prototype.return_type in (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT,
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING)):
+              RETURN_TYPE_OBJECT, RETURN_TYPE_STRING)):
 
         sequence_type_function = self._GetSequenceName(type_function[4:])
         sequence_type_getter = self._GetSequenceName(
@@ -3230,6 +3172,258 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+  def _GetPythonTypeObjectFunctionPrototype(
+      self, project_configuration, type_name, type_function, function_prototype):
+    """Determines the Python type object function prototypes.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      type_name (str): type name.
+      type_function (str): type function.
+      function_prototype (FunctionPrototype): C function prototype.
+
+    Returns:
+      PythonTypeObjectFunctionPrototype: Python type object function prototype
+          or None.
+    """
+    if len(function_prototype.arguments) < 2:
+      logging.warning(u'Unsupported function prototype: {0:s}'.format(
+          function_prototype.name))
+      return
+
+    if type_function in (u'free', u'initialize'):
+      self_argument = u'{0:s}_{1:s}_t **{1:s}'.format(
+          project_configuration.library_name, type_name)
+    else:
+      self_argument = u'{0:s}_{1:s}_t *{1:s}'.format(
+          project_configuration.library_name, type_name)
+
+    function_argument = function_prototype.arguments[0]
+    function_argument_string = function_argument.CopyToString()
+    if function_argument_string != self_argument:
+      logging.warning(u'Unsupported function prototype: {0:s}'.format(
+          function_prototype.name))
+      return
+
+    function_argument = function_prototype.arguments[-1]
+    function_argument_string = function_argument.CopyToString()
+    if function_argument_string != u'libcerror_error_t **error':
+      logging.warning(u'Unsupported function prototype: {0:s}'.format(
+          function_prototype.name))
+      return
+
+    # TODO: add support for glob functions
+    # TODO: add support for has, is functions
+
+    arguments = []
+    function_type = None
+    object_type = None
+    return_type = RETURN_TYPE_NONE
+    value_type = None
+
+    if type_function == u'close':
+      function_type = FUNCTION_TYPE_CLOSE
+
+    elif type_function.startswith(u'copy_'):
+      function_type = FUNCTION_TYPE_COPY
+      return_type = RETURN_TYPE_BINARY_DATA
+
+      # TODO: add support for copy_from and copy_to
+
+    elif type_function == u'free':
+      function_type = FUNCTION_TYPE_FREE
+
+    elif type_function.startswith(u'get_'):
+      function_type = FUNCTION_TYPE_GET
+
+      if type_function == u'get_ascii_codepage':
+        # TODO: replace this by RETURN_TYPE_NARROW_STRING ?
+        return_type = u'String'
+
+      elif type_function == u'get_format_version':
+        function_argument = function_prototype.arguments[1]
+        value_argument_string = function_argument.CopyToString()
+
+        return_type = RETURN_TYPE_STRING
+        value_type, _, _ = value_argument_string.partition(u' ')
+
+      else:
+        type_function_prefix, _, type_function_suffix = (
+            type_function.partition(u'_by_'))
+
+        value_argument_index = 1
+
+        function_argument = function_prototype.arguments[value_argument_index]
+        value_argument_string = function_argument.CopyToString()
+
+        _, _, value_argument_suffix = value_argument_string.partition(u'_')
+
+        # Not all get_by_index functions have the suffix _by_index so we need
+        # to detect them based on the function arguments. 
+        if (value_argument_string.startswith(u'int ') and
+            value_argument_suffix in (u'entry', u'index')):
+          function_type = FUNCTION_TYPE_GET_BY_INDEX
+
+          _, _, argument_name = value_argument_string.rpartition(u' ')
+
+          arguments.append(argument_name)
+          value_argument_index = 2
+
+        elif type_function_suffix == u'identifier':
+          function_type = FUNCTION_TYPE_GET_BY_IDENTIFIER
+
+          arguments.append(type_function_suffix)
+          value_argument_index = 2
+
+        elif type_function_suffix in (u'utf8_name', u'utf8_path'):
+          if value_argument_string != u'const uint8_t *utf8_string':
+            logging.warning(u'Unsupported function prototype: {0:s}'.format(
+                function_prototype.name))
+            return
+
+          function_argument = function_prototype.arguments[2]
+          function_argument_string = function_argument.CopyToString()
+
+          if function_argument_string != u'size_t utf8_string_length':
+            logging.warning(u'Unsupported function prototype: {0:s}'.format(
+                function_prototype.name))
+            return
+
+          if type_function_suffix == u'utf8_name':
+            function_type = FUNCTION_TYPE_GET_BY_NAME
+          else:
+            function_type = FUNCTION_TYPE_GET_BY_PATH
+
+          arguments.append(type_function_suffix)
+          value_argument_index = 3
+
+        if value_argument_index != 1:
+          function_argument = function_prototype.arguments[value_argument_index]
+          value_argument_string = function_argument.CopyToString()
+
+        function_argument = function_prototype.arguments[
+            value_argument_index + 1]
+        value_size_argument_string = function_argument.CopyToString()
+
+        if value_argument_string == u'uint64_t *filetime':
+          return_type = RETURN_TYPE_FILETIME
+
+        elif value_argument_string == u'uint32_t *fat_date_time':
+          return_type = RETURN_TYPE_FAT_DATE_TIME
+
+        elif value_argument_string == u'uint32_t *posix_time':
+          return_type = RETURN_TYPE_POSIX_TIME
+
+        elif (value_argument_string == u'uint8_t *data' and
+            value_size_argument_string == u'size_t data_size'):
+          return_type = RETURN_TYPE_BINARY_DATA
+
+        elif (value_argument_string == u'uint8_t *guid_data' and
+            value_size_argument_string == u'size_t guid_data_size'):
+          return_type = RETURN_TYPE_GUID
+
+        elif (value_argument_string == u'uint8_t *utf8_string' and
+            value_size_argument_string == u'size_t utf8_string_size'):
+          return_type = RETURN_TYPE_STRING
+
+        elif (value_argument_string == u'char *string' and
+            value_size_argument_string == u'size_t string_size'):
+          return_type = RETURN_TYPE_NARROW_STRING
+
+        elif value_argument_string.startswith(u'int *'):
+          return_type = RETURN_TYPE_INT
+
+        elif value_argument_string.startswith(u'int32_t *'):
+          return_type = RETURN_TYPE_INT32
+
+        elif value_argument_string.startswith(u'off64_t *'):
+          return_type = RETURN_TYPE_OFF64
+
+        elif value_argument_string.startswith(u'size32_t *'):
+          return_type = RETURN_TYPE_SIZE32
+
+        elif value_argument_string.startswith(u'size64_t *'):
+          return_type = RETURN_TYPE_SIZE64
+
+        elif value_argument_string.startswith(u'uint8_t *'):
+          return_type = RETURN_TYPE_UINT8
+
+        elif value_argument_string.startswith(u'uint16_t *'):
+          return_type = RETURN_TYPE_UINT16
+
+        elif value_argument_string.startswith(u'uint32_t *'):
+          return_type = RETURN_TYPE_UINT32
+
+        elif value_argument_string.startswith(u'uint64_t *'):
+          return_type = RETURN_TYPE_UINT64
+
+        elif value_argument_string.startswith(
+            project_configuration.library_name):
+          return_type = RETURN_TYPE_OBJECT
+
+          object_type, _, _ = value_argument_string.partition(u' ')
+          _, _, object_type = object_type.partition(u'_')
+          object_type = object_type[:-2]
+
+    elif type_function == u'initialize':
+      function_type = FUNCTION_TYPE_INITIALIZE
+
+    elif type_function == u'open' or type_function.startswith(u'open_'):
+      function_type = FUNCTION_TYPE_OPEN
+
+      if type_function == u'open':
+        arguments = [u'filename', u'mode=\'r\'']
+
+      elif type_function == u'open_file_io_handle':
+        arguments = [u'file_object', u'mode=\'r\'']
+
+    elif type_function.startswith(u'read_'):
+      function_type = FUNCTION_TYPE_READ
+
+      if type_function == u'read_buffer':
+        return_type = RETURN_TYPE_BINARY_DATA
+        arguments = [u'size']
+
+      elif type_function == u'read_buffer_at_offset':
+        return_type = RETURN_TYPE_BINARY_DATA
+        arguments = [u'size', u'offset']
+
+    elif type_function.startswith(u'seek_'):
+      function_type = FUNCTION_TYPE_SEEK
+
+      if type_function == u'seek_offset':
+        arguments = [u'offset', u'whence']
+
+    elif type_function.startswith(u'set_'):
+      function_type = FUNCTION_TYPE_SET
+
+      if type_function == u'set_ascii_codepage':
+        arguments = [u'codepage']
+
+      # TODO: make more generic.
+      elif type_function == u'set_parent_file':
+        arguments = [u'parent_file']
+
+      elif type_function == u'set_password':
+        arguments = [u'password']
+
+    elif type_function == u'signal_abort':
+      function_type = FUNCTION_TYPE_UTILITY
+
+    # elif type_function.startswith(u'write_'):
+    #   function_type = FUNCTION_TYPE_WRITE
+
+    python_function_prototype = PythonTypeObjectFunctionPrototype(
+        project_configuration.python_module_name, type_name, type_function)
+
+    python_function_prototype.arguments = arguments
+    python_function_prototype.function_type = function_type
+    python_function_prototype.object_type = object_type
+    python_function_prototype.return_type = return_type
+    python_function_prototype.value_type = value_type
+
+    return python_function_prototype
 
   def _GetPythonTypeObjectFunctionPrototypes(
       self, project_configuration, type_name):
@@ -3295,216 +3489,30 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       # TODO: ignore these functions for now.
+      if (type_function == u'get_type' and ( 
+          project_configuration.python_module_name in (
+              u'libolecf', ))):
+        continue
+
       if type_function in (
-          u'get_flags', u'get_offset_range', 'get_type',
+          u'get_flags', u'get_offset_range', 
           u'get_number_of_unallocated_blocks', u'get_unallocated_block',
           u'get_version'):
         continue
 
-      python_function_prototype = PythonTypeObjectFunctionPrototype(
-          project_configuration.python_module_name, type_name, type_function)
-
-      if not python_function_prototype.function_type:
-        logging.warning(u'Skipping unsupported type function: {0:s}'.format(
-            function_name))
-        continue
-
-      return_type, object_type, arguments = self._GetReturnTypeAndArguments(
+      python_function_prototype = self._GetPythonTypeObjectFunctionPrototype(
           project_configuration, type_name, type_function, function_prototype)
 
-      python_function_prototype.arguments = arguments
-      python_function_prototype.return_type = return_type
-      python_function_prototype.object_type = object_type
+      if (not python_function_prototype or
+          not python_function_prototype.function_type):
+        logging.warning(u'Skipping unsupported type function: {0:s}'.format(
+          function_name))
+        continue
 
       type_function = python_function_prototype.type_function
       python_function_prototypes[type_function] = python_function_prototype
 
     return python_function_prototypes
-
-  def _GetReturnTypeAndArguments(
-      self, project_configuration, type_name, type_function, function_prototype):
-    """Determines the Python type object function return type and arguments.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      type_name (str): type name.
-      type_function (str): type function.
-      function_prototype (FunctionPrototype): C function prototype.
-
-    Returns:
-      tuple: contains:
-        str: return type or None.
-        str: object type or None.
-        list[str]: arguments.
-    """
-    if len(function_prototype.arguments) < 2:
-      logging.warning(u'Unsupported function prototype: {0:s}'.format(
-          function_prototype.name))
-      return None, None, []
-
-    if type_function in (u'free', u'initialize'):
-      self_argument = u'{0:s}_{1:s}_t **{1:s}'.format(
-          project_configuration.library_name, type_name)
-    else:
-      self_argument = u'{0:s}_{1:s}_t *{1:s}'.format(
-          project_configuration.library_name, type_name)
-
-    function_argument = function_prototype.arguments[0]
-    function_argument_string = function_argument.CopyToString()
-    if function_argument_string != self_argument:
-      logging.warning(u'Unsupported function prototype: {0:s}'.format(
-          function_prototype.name))
-      return None, None, []
-
-    function_argument = function_prototype.arguments[-1]
-    function_argument_string = function_argument.CopyToString()
-    if function_argument_string != u'libcerror_error_t **error':
-      logging.warning(u'Unsupported function prototype: {0:s}'.format(
-          function_prototype.name))
-      return None, None, []
-
-    # TODO: add support for glob functions
-    # TODO: add support for has, is functions
-
-    arguments = []
-    object_type = None
-    return_type = None
-
-    if type_function == u'get_ascii_codepage':
-      # TODO: replace this by RETURN_TYPE_NARROW_STRING ?
-      return_type = u'String'
-
-    elif type_function == u'get_format_version':
-      return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING
-
-    elif type_function.startswith(u'copy_'):
-      return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_BINARY_DATA
-
-    elif type_function.startswith(u'get_'):
-      value_argument_index = 1
-      function_argument = function_prototype.arguments[value_argument_index]
-      value_argument_string = function_argument.CopyToString()
-
-      # Not all get_by_index functions have the suffix _by_index so we need
-      # to detect them based on the function arguments. 
-      if (value_argument_string.startswith(u'int ') and
-          value_argument_string.endswith(u'_index')):
-        _, _, argument_name = value_argument_string.rpartition(u' ')
-        arguments.append(argument_name)
-        value_argument_index = 2
-
-      elif (type_function.endswith(u'_by_utf8_name') or
-          type_function.endswith(u'_by_utf8_path')):
-        if value_argument_string != u'const uint8_t *utf8_string':
-          logging.warning(u'Unsupported function prototype: {0:s}'.format(
-              function_prototype.name))
-          return None, None, []
-
-        function_argument = function_prototype.arguments[2]
-        function_argument_string = function_argument.CopyToString()
-
-        if function_argument_string != u'size_t utf8_string_length':
-          logging.warning(u'Unsupported function prototype: {0:s}'.format(
-              function_prototype.name))
-          return None, None, []
-
-        arguments.append(type_function[-4:])
-        value_argument_index = 3
-
-      if value_argument_index != 1:
-        function_argument = function_prototype.arguments[value_argument_index]
-        value_argument_string = function_argument.CopyToString()
-
-      function_argument = function_prototype.arguments[value_argument_index + 1]
-      value_size_argument_string = function_argument.CopyToString()
-
-      if value_argument_string == u'uint64_t *filetime':
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_FILETIME
-
-      elif value_argument_string == u'uint32_t *fat_date_time':
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_FAT_DATE_TIME
-
-      elif value_argument_string == u'uint32_t *posix_time':
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_POSIX_TIME
-
-      elif (value_argument_string == u'uint8_t *data' and
-          value_size_argument_string == u'size_t data_size'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_BINARY_DATA
-
-      elif (value_argument_string == u'uint8_t *guid_data' and
-          value_size_argument_string == u'size_t guid_data_size'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_GUID
-
-      elif (value_argument_string == u'uint8_t *utf8_string' and
-          value_size_argument_string == u'size_t utf8_string_size'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING
-
-      elif (value_argument_string == u'char *string' and
-          value_size_argument_string == u'size_t string_size'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_NARROW_STRING
-
-      elif value_argument_string.startswith(u'int *'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_INT
-
-      elif value_argument_string.startswith(u'int32_t *'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_INT32
-
-      elif value_argument_string.startswith(u'off64_t *'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_OFF64
-
-      elif value_argument_string.startswith(u'size32_t *'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_SIZE32
-
-      elif value_argument_string.startswith(u'size64_t *'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_SIZE64
-
-      elif value_argument_string.startswith(u'uint8_t *'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT8
-
-      elif value_argument_string.startswith(u'uint16_t *'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT16
-
-      elif value_argument_string.startswith(u'uint32_t *'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT32
-
-      elif value_argument_string.startswith(u'uint64_t *'):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_UINT64
-
-      elif value_argument_string.startswith(project_configuration.library_name):
-        return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT
-
-        object_type, _, _ = value_argument_string.partition(u' ')
-        _, _, object_type = object_type.partition(u'_')
-        object_type = object_type[:-2]
-
-    elif type_function == u'open':
-      arguments = [u'filename', u'mode=\'r\'']
-
-    elif type_function == u'open_file_io_handle':
-      arguments = [u'file_object', u'mode=\'r\'']
-
-    elif type_function == u'read_buffer':
-      return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_BINARY_DATA
-      arguments = [u'size']
-
-    elif type_function == u'read_buffer_at_offset':
-      return_type = PythonTypeObjectFunctionPrototype.RETURN_TYPE_BINARY_DATA
-      arguments = [u'size', u'offset']
-
-    elif type_function == u'seek_offset':
-      arguments = [u'offset', u'whence']
-
-    elif type_function == u'set_ascii_codepage':
-      arguments = [u'codepage']
-
-    # TODO: make more generic.
-    elif type_function == u'set_parent_file':
-      arguments = [u'parent_file']
-
-    elif type_function == u'set_password':
-      arguments = [u'password']
-
-    return return_type, object_type, arguments
 
   def _GetSequenceName(self, name):
     """Determines the sequence type or value name.
@@ -3523,6 +3531,38 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       return u'{0:s}ies'.format(name[:-1])
 
     return u'{0:s}s'.format(name)
+
+  def _GetSequenceType(self, python_function_prototype):
+    """Determines if the function prototype implies a sequence type.
+
+    Args:
+      python_function_prototype (PythonTypeObjectFunctionPrototype): Python
+          type object function prototype.
+
+    Returns:
+      tuple: contains:
+        str: sequence type name or None.
+        bool: True if the sequence type is an object type or None.
+    """
+    if not python_function_prototype.arguments:
+      return None, None
+
+    if python_function_prototype.function_type not in (
+        FUNCTION_TYPE_GET, FUNCTION_TYPE_GET_BY_IDENTIFIER,
+        FUNCTION_TYPE_GET_BY_INDEX, FUNCTION_TYPE_GET_BY_NAME,
+        FUNCTION_TYPE_GET_BY_PATH):
+      return None, None
+
+    if python_function_prototype.type_function.startswith(u'get_value_'):
+      return None, None
+
+    if python_function_prototype.return_type == RETURN_TYPE_OBJECT:
+      return python_function_prototype.object_type, True
+
+    elif python_function_prototype.return_type == RETURN_TYPE_STRING:
+      return python_function_prototype.value_name, False
+
+    return None, None
 
   def _GetTemplateMappings(self, project_configuration):
     """Retrieves the template mappings.
@@ -3598,6 +3638,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: add tests configuration e.g. test data, libfwnt
     # TODO: add support for get_object_by_type
     # TODO: add support for get_object_by_identifier
     # TODO: add support for copy from
@@ -3662,20 +3703,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         for type_function, python_function_prototype in iter(
             python_function_prototypes.items()):
 
-          if (not python_function_prototype.arguments or
-              python_function_prototype.function_type != (
-                  PythonTypeObjectFunctionPrototype.FUNCTION_TYPE_GET)):
-            continue
-
-          if python_function_prototype.return_type == (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_OBJECT):
-            types_with_sequence_types.add(
-                (python_function_prototype.object_type, True))
-
-          elif python_function_prototype.return_type == (
-              PythonTypeObjectFunctionPrototype.RETURN_TYPE_STRING):
-            types_with_sequence_types.add(
-                (python_function_prototype.value_name, False))
+          sequence_type_name, type_is_object = self._GetSequenceType(
+              python_function_prototype)
+          if sequence_type_name:
+            types_with_sequence_types.add((sequence_type_name, type_is_object))
 
         self._GenerateTypeSourceFile(
             project_configuration, template_mappings, type_name,
@@ -3685,15 +3716,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             project_configuration, template_mappings, type_name,
             python_function_prototypes, output_writer)
 
-      for type_name, type_is_object in types_with_sequence_types:
-        self._SetTypeNameInTemplateMappings(template_mappings, type_name)
+      for sequence_type_name, type_is_object in types_with_sequence_types:
+        self._SetTypeNameInTemplateMappings(
+            template_mappings, sequence_type_name)
 
         self._GenerateSequenceTypeSourceFile(
-            project_configuration, template_mappings, type_name, output_writer,
-            type_is_object=type_is_object)
+            project_configuration, template_mappings, sequence_type_name,
+            output_writer, type_is_object=type_is_object)
 
         self._GenerateSequenceTypeHeaderFile(
-            project_configuration, template_mappings, type_name, output_writer)
+            project_configuration, template_mappings, sequence_type_name,
+            output_writer)
 
     include_header_file = self._GetDefinitionsIncludeHeaderFile(
         project_configuration)
@@ -4566,6 +4599,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: compare handle fdata and cdata differences, and includes
     # TODO: deprecate project_configuration.library_public_types ?
     # TODO: weave existing test files?
     # TODO: use data files to generate test data tests/input/.data/<name>
