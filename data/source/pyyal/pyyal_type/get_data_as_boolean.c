@@ -43,7 +43,7 @@ PyObject *${python_module_name}_${type_name}_get_data_as_boolean(
 
 		return( NULL );
 	}
-	if( value_boolean == 0x00 )
+	if( value_boolean != 0x00 )
 	{
 		Py_IncRef(
 		 Py_True );

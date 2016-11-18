@@ -5,11 +5,11 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	PyObject *date_time_object = NULL;
-	libcerror_error_t *error   = NULL;
-	static char *function      = "${python_module_name}_${type_name}_get_${value_name}";
-	uint64_t filetime          = 0;
-	int result                 = 0;
+	PyObject *datetime_object = NULL;
+	libcerror_error_t *error  = NULL;
+	static char *function     = "${python_module_name}_${type_name}_get_${value_name}";
+	uint64_t filetime         = 0;
+	int result                = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
@@ -51,10 +51,10 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 		return( Py_None );
 	}
-	date_time_object = ${python_module_name}_datetime_new_from_filetime(
-	                    filetime );
+	datetime_object = ${python_module_name}_datetime_new_from_filetime(
+	                   filetime );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
 /* Retrieves the ${value_description} as an integer

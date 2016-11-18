@@ -37,6 +37,9 @@ PyObject *${python_module_name}_datetime_new_from_fat_date_time(
 PyObject *${python_module_name}_datetime_new_from_filetime(
            uint64_t filetime );
 
+PyObject *${python_module_name}_datetime_new_from_floatingtime(
+           uint64_t floatingtime );
+
 PyObject *${python_module_name}_datetime_new_from_posix_time(
            uint32_t posix_time );
 

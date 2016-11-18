@@ -42,8 +42,11 @@ FUNCTION_TYPE_UTILITY = u'utility'
 FUNCTION_TYPE_WRITE = u'write'
 
 RETURN_TYPE_BINARY_DATA = u'binary_data'
+RETURN_TYPE_DOUBLE = u'double'
 RETURN_TYPE_FAT_DATE_TIME = u'fat_date_time'
 RETURN_TYPE_FILETIME = u'filetime'
+RETURN_TYPE_FLOAT = u'float'
+RETURN_TYPE_FLOATINGTIME = u'floatingtime'
 RETURN_TYPE_GUID = u'guid'
 RETURN_TYPE_INT = u'int'
 RETURN_TYPE_INT32 = u'int32'
@@ -409,10 +412,8 @@ class PythonTypeObjectFunctionPrototype(object):
           u'16bit_integer', u'32bit_integer', u'64bit_integer'):
         return u'get_data_as_integer'
 
-      elif type_function_suffix == u'filetime':
-        # TODO: add support
-        # return u'get_data_as_datetime'
-        return u'get_data_as_integer'
+      elif type_function_suffix in (u'filetime', u'floatingtime'):
+       return u'get_data_as_datetime'
 
       elif type_function_suffix == u'utf8_string':
         return u'get_data_as_string'
@@ -504,9 +505,6 @@ class PythonTypeObjectFunctionPrototype(object):
       description = u'The data as a string.'
 
     elif value_name:
-      # Correct xml => XML in description for pyevtx.
-      value_name = value_name.replace(u' xml ', u' XML ')
-
       description = u'The {0:s}.'.format(value_name)
 
     return description
@@ -590,9 +588,6 @@ class PythonTypeObjectFunctionPrototype(object):
           value_name, type_function_suffix)]
 
     elif self.function_type in (FUNCTION_TYPE_COPY, FUNCTION_TYPE_GET):
-      # Correct xml => XML in description for pyevtx.
-      value_name = value_name.replace(u' xml ', u' XML ')
-
       description = [u'Retrieves the {0:s}.'.format(value_name)]
 
     elif self.function_type == FUNCTION_TYPE_SET:
@@ -615,6 +610,9 @@ class PythonTypeObjectFunctionPrototype(object):
 
     if self.return_type == RETURN_TYPE_OBJECT:
       return u'Object or None'
+
+    if self.ReturnTypeIsFloat():
+      return u'Float or None'
 
     if self.ReturnTypeIsInteger():
       return u'Integer or None'
@@ -650,7 +648,16 @@ class PythonTypeObjectFunctionPrototype(object):
       bool: True if the return type is a datetime type.
     """
     return self.return_type in (
-        RETURN_TYPE_FAT_DATE_TIME, RETURN_TYPE_FILETIME, RETURN_TYPE_POSIX_TIME)
+        RETURN_TYPE_FAT_DATE_TIME, RETURN_TYPE_FILETIME,
+        RETURN_TYPE_FLOATINGTIME, RETURN_TYPE_POSIX_TIME)
+
+  def ReturnTypeIsFloat(self):
+    """Determines if the return type is a floating-point type.
+
+    Returns:
+      bool: True if the return type is a floating-point type.
+    """
+    return self.return_type in (RETURN_TYPE_FLOAT, RETURN_TYPE_DOUBLE)
 
   def ReturnTypeIsInteger(self):
     """Determines if the return type is an integer type.
@@ -2342,6 +2349,40 @@ class LibraryManPageGenerator(SourceFileGenerator):
 class PythonModuleSourceFileGenerator(SourceFileGenerator):
   """Class that generates the Python module source files."""
 
+  def _CopyFunctionToOutputFile(self, lines, search_string, output_filename):
+    """Copies a function to the output file.
+
+    Args:
+      lines (list[bytes]): lines of the input file to copy from.
+      search_string (bytes): string to search the input for.
+      output_filename (str): path of the output file.
+
+    Returns:
+      bool: True if the function was found and copied, False otherwise.
+    """
+    function_index = None
+    for index, line in enumerate(lines):
+      if line.startswith(search_string):
+        # TODO: improve this to determine start of comment based on lines.
+        function_index = index - 3
+        break
+
+    if function_index is None:
+      return False
+
+    with open(output_filename, 'ab') as file_object:
+      line = lines[function_index]
+      while not line.startswith(b'}'):
+        file_object.write(line)
+
+        function_index += 1
+        line = lines[function_index]
+
+      file_object.write(line)
+      file_object.write(lines[function_index + 1])
+
+    return True
+
   def _CorrectDescriptionSpelling(self, name, output_filename):
     """Corrects the spelling of a type or value decription.
 
@@ -2752,7 +2793,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           RETURN_TYPE_FAT_DATE_TIME, RETURN_TYPE_POSIX_TIME):
         python_module_include_names.update(set([u'datetime']))
 
-      if python_function_prototype.return_type == RETURN_TYPE_FILETIME:
+      if python_function_prototype.return_type in (
+          RETURN_TYPE_FILETIME, RETURN_TYPE_FLOATINGTIME):
         python_module_include_names.update(set([u'datetime', u'integer']))
 
       elif python_function_prototype.return_type == RETURN_TYPE_GUID:
@@ -2977,32 +3019,16 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
 
       if generate_get_value_type_object:
-        get_value_type_object_function = (
+        search_string = (
             u'PyTypeObject *{0:s}_{1:s}_get_{2:s}{3:s}_type_object(').format(
                 project_configuration.python_module_name, type_name,
                 value_name_prefix, value_name)
-        get_value_type_object_function = get_value_type_object_function.encode(
-            u'ascii')
 
-        get_value_type_object_function_index = None
-        for index, line in enumerate(lines):
-          if line.startswith(get_value_type_object_function):
-            get_value_type_object_function_index = index - 3
-            break
+        search_string = search_string.encode(u'ascii')
+        result = self._CopyFunctionToOutputFile(
+            lines, search_string, output_filename)
 
-        if get_value_type_object_function_index:
-          with open(output_filename, 'ab') as file_object:
-            line = lines[get_value_type_object_function_index]
-            while not line.startswith(b'}'):
-              file_object.write(line)
-
-              get_value_type_object_function_index += 1
-              line = lines[get_value_type_object_function_index]
-
-            file_object.write(line)
-            file_object.write(lines[get_value_type_object_function_index + 1])
-
-        else:
+        if not result:
           additional_template_filename = u'get_{0:s}value_type_object.c'.format(
               value_name_prefix)
           additional_template_filename = os.path.join(
@@ -3013,9 +3039,23 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
         generate_get_value_type_object = False
 
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      result = False
+      if type_function in (
+          u'get_data_as_datetime', u'get_data_as_floating_point',
+          u'get_data_as_integer'):
+        search_string = (
+            u'PyObject *{0:s}_{1:s}_{2:s}(').format(
+                project_configuration.python_module_name, type_name,
+                type_function)
+
+        search_string = search_string.encode(u'ascii')
+        result = self._CopyFunctionToOutputFile(
+            lines, search_string, output_filename)
+
+      if not result:
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
@@ -3076,6 +3116,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         description = python_function_prototype.GetDescription()
 
       for index, line in enumerate(description):
+        # Correct xml => XML in description for pyevtx.
+        line = line.replace(u' xml ', u' XML ')
+
         if index < len(description) - 1:
           python_type_object_methods.append(u'\t  "{0:s}\\n"'.format(line))
         else:
@@ -3111,7 +3154,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             u'\t  "\\n"',
             u'\t  "Retrieves the current offset within the data." },'])
 
-      elif python_function_prototype.ReturnTypeIsDatetime():
+      elif (python_function_prototype.ReturnTypeIsDatetime() and
+          type_function != u'get_data_as_datetime'):
         python_type_object_methods.extend([
             u'',
             u'\t{{ "{0:s}_as_integer",'.format(type_function),
@@ -3130,6 +3174,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         elif python_function_prototype.return_type == RETURN_TYPE_FILETIME:
           description[0] = (
               u'{0:s} as a 64-bit integer containing a FILETIME value.').format(
+                  description[0][:-1])
+
+        elif python_function_prototype.return_type == RETURN_TYPE_FLOATINGTIME:
+          description[0] = (
+              u'{0:s} as a 64-bit integer containing a floatingtime value.').format(
                   description[0][:-1])
 
         elif python_function_prototype.return_type == RETURN_TYPE_POSIX_TIME:
@@ -3208,6 +3257,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 project_configuration.python_module_name, type_name)
 
       description = python_function_prototype.GetAttributeDescription()
+
+      # Correct xml => XML in description for pyevtx.
+      description = description.replace(u' xml ', u' XML ')
 
       if not python_function_prototype.arguments:
         python_type_object_get_set_definitions.extend([
@@ -3312,7 +3364,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     return_type = RETURN_TYPE_NONE
     value_type = None
 
-    if type_function == u'close':
+    # TODO: add override for
+    # if (type_function == u'copy_link_target_identifier_data' and
+    #    project_configuration.library_name == u'liblnk'):
+
+    if (type_function == u'get_cache_directory_name' and
+        project_configuration.library_name == u'libmsiecf'):
+      type_function = u'get_cache_directory'
+
+      arguments = [u'cache_directory_index']
+      function_type = FUNCTION_TYPE_GET_BY_INDEX
+      return_type = RETURN_TYPE_NARROW_STRING
+
+    elif type_function == u'close':
       function_type = FUNCTION_TYPE_CLOSE
 
     elif type_function.startswith(u'copy_'):
@@ -3330,14 +3394,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if type_function == u'get_ascii_codepage':
         # TODO: replace this by RETURN_TYPE_NARROW_STRING ?
         return_type = u'String'
-
-      elif (type_function == u'get_cache_directory_name' and
-          project_configuration.library_name == u'libmsiecf'):
-        type_function = u'get_cache_directory'
-
-        arguments = [u'cache_directory_index']
-        function_type = FUNCTION_TYPE_GET_BY_INDEX
-        return_type = RETURN_TYPE_NARROW_STRING
 
       elif type_function == u'get_format_version':
         function_argument = function_prototype.arguments[1]
@@ -3409,6 +3465,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         if value_argument_string == u'uint64_t *filetime':
           return_type = RETURN_TYPE_FILETIME
 
+        elif value_argument_string == u'uint64_t *floatingtime':
+          return_type = RETURN_TYPE_FLOATINGTIME
+
         elif value_argument_string == u'uint32_t *fat_date_time':
           return_type = RETURN_TYPE_FAT_DATE_TIME
 
@@ -3430,6 +3489,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         elif (value_argument_string == u'char *string' and
             value_size_argument_string == u'size_t string_size'):
           return_type = RETURN_TYPE_NARROW_STRING
+
+        elif value_argument_string.startswith(u'double *'):
+          return_type = RETURN_TYPE_DOUBLE
+
+        elif value_argument_string.startswith(u'float *'):
+          return_type = RETURN_TYPE_FLOAT
 
         elif value_argument_string.startswith(u'int *'):
           return_type = RETURN_TYPE_INT
@@ -3755,7 +3820,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    # TODO: add tests configuration e.g. test data, libfwnt
+    # TODO: add tests configuration e.g. test data, libfwnt or use in-line
+    # generator hints
     # TODO: add support for get_object_by_type
     # TODO: add support for get_object_by_identifier
     # TODO: add support for copy from
@@ -4154,7 +4220,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   def _GenerateTypeTest(
       self, project_configuration, template_mappings, type_name, type_function,
       last_have_extern, header_file, output_writer, output_filename,
-      with_input=False):
+      initialize_is_internal=False, with_input=False):
     """Generates a type test within the type tests source file.
 
     Args:
@@ -4168,6 +4234,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       header_file (LibraryHeaderFile): library header file.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
+      initialize_is_internal (Optional[bool]): True if the initialize function
+          is not externally available.
       with_input (Optional[bool]): True if the type is to be tested with
           input data.
 
@@ -4256,19 +4324,20 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     function_prototype = header_file.functions_per_name.get(function_name, None)
 
-    if not function_prototype.have_extern and last_have_extern:
-      internal_template_filename = os.path.join(
-          template_directory, u'define_internal_start.c')
-      self._GenerateSection(
-          internal_template_filename, template_mappings, output_writer,
-          output_filename, access_mode='ab')
+    if not initialize_is_internal:
+      if not function_prototype.have_extern and last_have_extern:
+        internal_template_filename = os.path.join(
+            template_directory, u'define_internal_start.c')
+        self._GenerateSection(
+            internal_template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
 
-    elif function_prototype.have_extern and not last_have_extern:
-      internal_template_filename = os.path.join(
-          template_directory, u'define_internal_end.c')
-      self._GenerateSection(
-          internal_template_filename, template_mappings, output_writer,
-          output_filename, access_mode='ab')
+      elif function_prototype.have_extern and not last_have_extern:
+        internal_template_filename = os.path.join(
+            template_directory, u'define_internal_end.c')
+        self._GenerateSection(
+            internal_template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
 
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
@@ -4373,6 +4442,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     function_name = u'{0:s}_{1:s}_free'.format(
         project_configuration.library_name, type_name)
     if function_name in function_names:
+      function_prototype = header_file.functions_per_name.get(
+          function_name, None)
+
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, u'free',
           have_extern, header_file, output_writer, output_filename,
@@ -4381,13 +4453,20 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
 
+      if initialize_is_internal and have_extern:
+        template_filename = os.path.join(
+            template_directory, u'define_internal_start.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
+
     # TODO: fix libbfio having no open wide.
     # TODO: make handling open close more generic for libpff attachment handle.
     for type_function in (u'open', u'open_wide', u'close'):
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, type_function,
           have_extern, header_file, output_writer, output_filename,
-          with_input=with_input)
+          initialize_is_internal=initialize_is_internal, with_input=with_input)
 
       if test_function_name:
         function_names.remove(function_name)
@@ -4422,14 +4501,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         _, test_function_name, have_extern = self._GenerateTypeTest(
             project_configuration, template_mappings, type_name, type_function,
             have_extern, header_file, output_writer, output_filename,
-            with_input=with_input)
+            initialize_is_internal=initialize_is_internal, with_input=with_input)
 
       if with_input:
         tests_to_run_with_args.append((function_name, test_function_name))
       else:
         tests_to_run.append((function_name, test_function_name))
 
-    if not have_extern:
+    if initialize_is_internal or not have_extern:
       template_filename = os.path.join(
           template_directory, u'define_internal_end.c')
       self._GenerateSection(
@@ -4451,7 +4530,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     self._GenerateTypeTestsMainTestsToRun(
         project_configuration, template_mappings, type_name, tests_to_run,
-        header_file, output_writer, output_filename)
+        header_file, output_writer, output_filename,
+        initialize_is_internal=initialize_is_internal)
 
     if with_input:
       template_filename = os.path.join(
@@ -4463,7 +4543,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateTypeTestsMainTestsToRun(
         project_configuration, template_mappings, type_name,
         tests_to_run_with_args, header_file, output_writer, output_filename,
-        with_args=True)
+        initialize_is_internal=initialize_is_internal, with_args=True)
 
     if with_input:
       template_filename = os.path.join(
@@ -4488,7 +4568,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateTypeTestsMainTestsToRun(
       self, project_configuration, template_mappings, type_name, tests_to_run,
-      header_file, output_writer, output_filename, with_args=False):
+      header_file, output_writer, output_filename, initialize_is_internal=False,
+      with_args=False):
     """Generates a type tests source file.
 
     Args:
@@ -4501,6 +4582,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       header_file (LibraryHeaderFile): library header file.
       output_writer (OutputWriter): output writer.
       output_filename (str): name of the output file.
+      initialize_is_internal (Optional[bool]): True if the initialize function
+          is not externally available.
       with_args (Optional[bool]): True if the tests to run have arguments.
     """
     template_directory = os.path.join(
@@ -4508,13 +4591,19 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     library_name_suffix = project_configuration.library_name_suffix.upper()
 
-    last_have_extern = True
+    last_have_extern = not initialize_is_internal
     tests_to_run_mappings = []
     for function_name, test_function_name in tests_to_run:
       function_prototype = header_file.functions_per_name.get(
           function_name, None)
 
-      if function_prototype.have_extern != last_have_extern:
+      if function_prototype.name.endswith(u'_free'):
+        have_extern = function_prototype.have_extern
+      else:
+        have_extern = (
+            not initialize_is_internal and function_prototype.have_extern)
+
+      if have_extern != last_have_extern:
         if tests_to_run_mappings:
           if not last_have_extern:
             template_filename = os.path.join(
@@ -4539,7 +4628,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
                 template_filename, template_mappings, output_writer, output_filename,
                 access_mode='ab')
 
-        last_have_extern = function_prototype.have_extern
+        last_have_extern = have_extern
 
       if tests_to_run_mappings:
         tests_to_run_mappings.append(u'')

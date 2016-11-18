@@ -1,15 +1,15 @@
-/* Retrieves the data as an integer value
+/* Retrieves the data as an datetime value
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_${type_name}_get_data_as_integer(
+PyObject *${python_module_name}_${type_name}_get_data_as_datetime(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	PyObject *integer_object = NULL;
-	libcerror_error_t *error = NULL;
-	static char *function    = "${python_module_name}_${type_name}_get_data_as_integer";
-	int64_t integer_value    = 0;
-	int result               = 0;
+	PyObject *datetime_object = NULL;
+	libcerror_error_t *error  = NULL;
+	static char *function     = "${python_module_name}_${type_name}_get_data_as_datetime";
+	int64_t datetime_value    = 0;
+	int result                = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
@@ -24,9 +24,9 @@ PyObject *${python_module_name}_${type_name}_get_data_as_integer(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_data_as_integer(
+	result = ${library_name}_${type_name}_get_data_as_datetime(
 	          ${python_module_name}_${type_name}->${type_name},
-	          &integer_value,
+	          &datetime_value,
 	          &error );
 
 	Py_END_ALLOW_THREADS
@@ -36,7 +36,7 @@ PyObject *${python_module_name}_${type_name}_get_data_as_integer(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve data as integer value.",
+		 "%s: unable to retrieve data as datetime value.",
 		 function );
 
 		libcerror_error_free(
@@ -44,9 +44,9 @@ PyObject *${python_module_name}_${type_name}_get_data_as_integer(
 
 		return( NULL );
 	}
-	integer_object = ${python_module_name}_integer_signed_new_from_64bit(
-	                  integer_value );
+	datetime_object = ${python_module_name}_datetime_signed_new_from_64bit(
+	                   datetime_value );
 
-	return( integer_object );
+	return( datetime_object );
 }
 

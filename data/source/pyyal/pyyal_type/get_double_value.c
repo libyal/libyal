@@ -1,14 +1,14 @@
-/* Retrieves the data as an integer value
+/* Retrieves the ${value_description}
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_${type_name}_get_data_as_integer(
+PyObject *${python_module_name}_${type_name}_get_${value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	PyObject *integer_object = NULL;
+	PyObject *float_object   = NULL;
 	libcerror_error_t *error = NULL;
-	static char *function    = "${python_module_name}_${type_name}_get_data_as_integer";
-	int64_t integer_value    = 0;
+	static char *function    = "${python_module_name}_${type_name}_get_${value_name}";
+	double value_double      = 0;
 	int result               = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
@@ -24,19 +24,19 @@ PyObject *${python_module_name}_${type_name}_get_data_as_integer(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_data_as_integer(
+	result = ${library_name}_${type_name}_get_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
-	          &integer_value,
+	          &value_double,
 	          &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve data as integer value.",
+		 "%s: unable to retrieve ${value_description}.",
 		 function );
 
 		libcerror_error_free(
@@ -44,9 +44,16 @@ PyObject *${python_module_name}_${type_name}_get_data_as_integer(
 
 		return( NULL );
 	}
-	integer_object = ${python_module_name}_integer_signed_new_from_64bit(
-	                  integer_value );
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
 
-	return( integer_object );
+		return( Py_None );
+	}
+	float_object = PyFloat_FromDouble(
+	                value_double );
+
+	return( float_object );
 }
 
