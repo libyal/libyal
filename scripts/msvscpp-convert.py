@@ -2239,7 +2239,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
     self.WriteLine('    <Link>')
 
     # Visual Studio will convert an empty additional dependencies value.
-    if project_configuration.additional_dependencies_set:
+    if project_configuration.additional_dependencies:
       additional_dependencies = ';'.join(
           sorted(project_configuration.additional_dependencies))
 
@@ -3584,8 +3584,9 @@ class LibyalSourceVSSolution(VSSolution):
     in_ldadd_section = False
     in_sources_section = False
 
-    for line in file_object.readlines():
+    for index, line in enumerate(file_object.readlines()):
       line = line.strip()
+      original_line = line
 
       if in_am_cppflags_section:
         if not line:
@@ -3596,9 +3597,10 @@ class LibyalSourceVSSolution(VSSolution):
             line = line[:-2]
 
           elif line.endswith('\\'):
-            logging.warning(
-                u'Detected missing space before \\ in line: ${0:s}'.format(
-                    line))
+            logging.warning((
+                u'Detected missing space before \\ in line: {0:d} '
+                u'"{1:s}" ({2:s})').format(
+                    index, original_line, makefile_am_path))
             line = line[:-1]
 
           if line.startswith('@') and line.endswith('_CPPFLAGS@'):
@@ -3642,9 +3644,10 @@ class LibyalSourceVSSolution(VSSolution):
             line = line[:-2]
 
           elif line.endswith('\\'):
-            logging.warning(
-                u'Detected missing space before \\ in line: ${0:s}'.format(
-                    line))
+            logging.warning((
+                u'Detected missing space before \\ in line: {0:d} '
+                u'"{1:s}" ({2:s})').format(
+                    index, original_line, makefile_am_path))
             line = line[:-1]
 
           for filename in line.split(' '):
@@ -3706,9 +3709,10 @@ class LibyalSourceVSSolution(VSSolution):
             line = line[:-2]
 
           elif line.endswith('\\'):
-            logging.warning(
-                u'Detected missing space before \\ in line: ${0:s}'.format(
-                    line))
+            logging.warning((
+                u'Detected missing space before \\ in line: {0:d} '
+                u'"{1:s}" ({2:s})').format(
+                    index, original_line, makefile_am_path))
             line = line[:-1]
 
           for filename in line.split(' '):
