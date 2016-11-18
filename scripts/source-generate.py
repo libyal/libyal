@@ -90,6 +90,8 @@ class ProjectConfiguration(object):
 
     self.tests_authors = None
 
+    self.msvscpp_build_dependencies = None
+
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
 
@@ -162,6 +164,15 @@ class ProjectConfiguration(object):
 
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, u'tests', u'authors', default_value=self.project_authors)
+
+    self.msvscpp_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, u'msvscpp', u'build_dependencies', default_value=[])
+
+    self.msvscpp_build_dependencies = [
+        name.split(u' ')[0] for name in self.msvscpp_build_dependencies]
+
+    if config_parser.has_section(u'mount_tool'):
+      self.msvscpp_build_dependencies.append(u'dokan')
 
     self.project_year_of_creation = int(self.project_year_of_creation, 10)
     self.python_module_year_of_creation = int(
@@ -1831,6 +1842,48 @@ class CommonSourceFileGenerator(SourceFileGenerator):
 class ConfigurationFileGenerator(SourceFileGenerator):
   """Class that generates the configuration files."""
 
+  def _GenerateAppVeyorYML(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the appveyor.yml configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, u'appveyor.yml')
+
+    template_filename = os.path.join(template_directory, u'header.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    # TODO: add the right condition.
+    if False:
+      template_filename = os.path.join(template_directory, u'winflexbison.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if u'zlib' in project_configuration.msvscpp_build_dependencies:
+      template_filename = os.path.join(template_directory, u'zlib.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if u'dokan' in project_configuration.msvscpp_build_dependencies:
+      template_filename = os.path.join(template_directory, u'dokan.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, u'footer.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
   def Generate(self, project_configuration, output_writer):
     """Generates configuration files.
 
@@ -1840,8 +1893,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     # TODO: generate spec file, what about Python versus non-Python?
     # TODO: generate dpkg files, what about Python versus non-Python?
-    # TODO: appveyor.yml
-    #   - cmd: git clone https://github.com/joachimmetz/dokan.git && move dokan ..\
 
     makefile_am_file = self._GetLibraryMakefileAM(project_configuration)
 
@@ -1876,6 +1927,10 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
+
+    self._GenerateAppVeyorYML(
+        project_configuration, template_mappings, output_writer,
+        u'appveyor.yml')
 
 
 class IncludeSourceFileGenerator(SourceFileGenerator):
@@ -4805,6 +4860,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: fix empty line in Makefile.am for libcerror
+    # TODO: fix addition of @LIBCERROR_LIBADD@ in Makefile.am for libcerror
+    # TODO: fix addition of cerror_test_libcerror.h in Makefile.am for libcerror
     # TODO: compare handle fdata and cdata differences, and includes
     # TODO: deprecate project_configuration.library_public_types ?
     # TODO: weave existing test files?
