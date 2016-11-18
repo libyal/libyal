@@ -34,15 +34,15 @@
 PyObject *${python_module_name}_datetime_new_from_fat_date_time(
            uint32_t fat_date_time )
 {
-	PyObject *date_time_object = NULL;
-	static char *function      = "${python_module_name}_datetime_new_from_fat_date_time";
-	uint16_t year              = 0;
-	uint8_t day_of_month       = 0;
-	uint8_t days_in_month      = 0;
-	uint8_t hours              = 0;
-	uint8_t minutes            = 0;
-	uint8_t month              = 0;
-	uint8_t seconds            = 0;
+	PyObject *datetime_object = NULL;
+	static char *function     = "${python_module_name}_datetime_new_from_fat_date_time";
+	uint16_t year             = 0;
+	uint8_t day_of_month      = 0;
+	uint8_t days_in_month     = 0;
+	uint8_t hours             = 0;
+	uint8_t minutes           = 0;
+	uint8_t month             = 0;
+	uint8_t seconds           = 0;
 
 	/* The day of month is stored in the next 5 bits
 	 */
@@ -133,16 +133,16 @@ PyObject *${python_module_name}_datetime_new_from_fat_date_time(
 	}
 	PyDateTime_IMPORT;
 
-	date_time_object = (PyObject *) PyDateTime_FromDateAndTime(
-	                                 (int) year,
-	                                 (int) month,
-	                                 (int) day_of_month,
-	                                 (int) hours,
-	                                 (int) minutes,
-	                                 (int) seconds,
-	                                 0 );
+	datetime_object = (PyObject *) PyDateTime_FromDateAndTime(
+	                                (int) year,
+	                                (int) month,
+	                                (int) day_of_month,
+	                                (int) hours,
+	                                (int) minutes,
+	                                (int) seconds,
+	                                0 );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
 /* Creates a new datetime object from a FILETIME
@@ -151,18 +151,18 @@ PyObject *${python_module_name}_datetime_new_from_fat_date_time(
 PyObject *${python_module_name}_datetime_new_from_filetime(
            uint64_t filetime )
 {
-	PyObject *date_time_object = NULL;
-	static char *function      = "${python_module_name}_datetime_new_from_filetime";
-	uint32_t days_in_century   = 0;
-	uint32_t micro_seconds     = 0;
-	uint16_t days_in_year      = 0;
-	uint16_t year              = 0;
-	uint8_t day_of_month       = 0;
-	uint8_t days_in_month      = 0;
-	uint8_t hours              = 0;
-	uint8_t minutes            = 0;
-	uint8_t month              = 0;
-	uint8_t seconds            = 0;
+	PyObject *datetime_object = NULL;
+	static char *function     = "${python_module_name}_datetime_new_from_filetime";
+	uint32_t days_in_century  = 0;
+	uint32_t micro_seconds    = 0;
+	uint16_t days_in_year     = 0;
+	uint16_t year             = 0;
+	uint8_t day_of_month      = 0;
+	uint8_t days_in_month     = 0;
+	uint8_t hours             = 0;
+	uint8_t minutes           = 0;
+	uint8_t month             = 0;
+	uint8_t seconds           = 0;
 
 	/* The timestamp is in units of 100 nano seconds correct the value to seconds
 	 */
@@ -308,16 +308,16 @@ PyObject *${python_module_name}_datetime_new_from_filetime(
 
 	PyDateTime_IMPORT;
 
-	date_time_object = (PyObject *) PyDateTime_FromDateAndTime(
-	                                 (int) year,
-	                                 (int) month,
-	                                 (int) day_of_month,
-	                                 (int) hours,
-	                                 (int) minutes,
-	                                 (int) seconds,
-	                                 (int) micro_seconds );
+	datetime_object = (PyObject *) PyDateTime_FromDateAndTime(
+	                                (int) year,
+	                                (int) month,
+	                                (int) day_of_month,
+	                                (int) hours,
+	                                (int) minutes,
+	                                (int) seconds,
+	                                (int) micro_seconds );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
 /* Creates a new datetime object from a floatingtime
@@ -328,18 +328,18 @@ PyObject *${python_module_name}_datetime_new_from_floatingtime(
 {
 	byte_stream_float64_t timestamp;
 
-	PyObject *date_time_object = NULL;
-	static char *function      = "${python_module_name}_datetime_new_from_floatingtime";
-	uint32_t days_in_century   = 0;
-	uint32_t micro_seconds     = 0;
-	uint16_t days_in_year      = 0;
-	uint16_t year              = 0;
-	uint8_t day_of_month       = 0;
-	uint8_t days_in_month      = 0;
-	uint8_t hours              = 0;
-	uint8_t minutes            = 0;
-	uint8_t month              = 0;
-	uint8_t seconds            = 0;
+	PyObject *datetime_object = NULL;
+	static char *function     = "${python_module_name}_datetime_new_from_floatingtime";
+	uint32_t days_in_century  = 0;
+	uint32_t micro_seconds    = 0;
+	uint16_t days_in_year     = 0;
+	uint16_t year             = 0;
+	uint8_t day_of_month      = 0;
+	uint8_t days_in_month     = 0;
+	uint8_t hours             = 0;
+	uint8_t minutes           = 0;
+	uint8_t month             = 0;
+	uint8_t seconds           = 0;
 
 	timestamp.integer = floatingtime;
 
@@ -488,16 +488,16 @@ PyObject *${python_module_name}_datetime_new_from_floatingtime(
 
 	PyDateTime_IMPORT;
 
-	date_time_object = (PyObject *) PyDateTime_FromDateAndTime(
-	                                 (int) year,
-	                                 (int) month,
-	                                 (int) day_of_month,
-	                                 (int) hours,
-	                                 (int) minutes,
-	                                 (int) seconds,
-	                                 (int) micro_seconds );
+	datetime_object = (PyObject *) PyDateTime_FromDateAndTime(
+	                                (int) year,
+	                                (int) month,
+	                                (int) day_of_month,
+	                                (int) hours,
+	                                (int) minutes,
+	                                (int) seconds,
+	                                (int) micro_seconds );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
 /* Creates a new datetime object from a POSIX time
@@ -506,16 +506,16 @@ PyObject *${python_module_name}_datetime_new_from_floatingtime(
 PyObject *${python_module_name}_datetime_new_from_posix_time(
            uint32_t posix_time )
 {
-	PyObject *date_time_object = NULL;
-	static char *function      = "${python_module_name}_datetime_new_from_posix_time";
-	uint16_t days_in_year      = 0;
-	uint16_t year              = 0;
-	uint8_t day_of_month       = 0;
-	uint8_t days_in_month      = 0;
-	uint8_t hours              = 0;
-	uint8_t minutes            = 0;
-	uint8_t month              = 0;
-	uint8_t seconds            = 0;
+	PyObject *datetime_object = NULL;
+	static char *function     = "${python_module_name}_datetime_new_from_posix_time";
+	uint16_t days_in_year     = 0;
+	uint16_t year             = 0;
+	uint8_t day_of_month      = 0;
+	uint8_t days_in_month     = 0;
+	uint8_t hours             = 0;
+	uint8_t minutes           = 0;
+	uint8_t month             = 0;
+	uint8_t seconds           = 0;
 
 	/* There are 60 seconds in a minute correct the value to minutes
 	 */
@@ -638,15 +638,15 @@ PyObject *${python_module_name}_datetime_new_from_posix_time(
 
 	PyDateTime_IMPORT;
 
-	date_time_object = (PyObject *) PyDateTime_FromDateAndTime(
-	                                 (int) year,
-	                                 (int) month,
-	                                 (int) day_of_month,
-	                                 (int) hours,
-	                                 (int) minutes,
-	                                 (int) seconds,
-	                                 0 );
+	datetime_object = (PyObject *) PyDateTime_FromDateAndTime(
+	                                (int) year,
+	                                (int) month,
+	                                (int) day_of_month,
+	                                (int) hours,
+	                                (int) minutes,
+	                                (int) seconds,
+	                                0 );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
