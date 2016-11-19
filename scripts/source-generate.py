@@ -759,9 +759,39 @@ class LibraryHeaderFile(object):
       path (str): path of the header file.
     """
     super(LibraryHeaderFile, self).__init__()
+    self._library_name = None
     self.functions_per_name = collections.OrderedDict()
     self.path = path
     self.types = []
+
+  def GetTypeFunction(self, type_name, type_function):
+    """Retrieves the function prototype of a specific type function.
+
+    Args:
+      type_name (str): type name.
+      type_function (str): type function.
+
+    Returns:
+      FunctionPrototype: function prototype of the type function or None
+          if no such function.
+    """
+    function_name = u'{0:s}_{1:s}_{2:s}'.format(
+        self._library_name, type_name, type_function)
+    return self.functions_per_name.get(function_name, None)
+
+  def HasTypeFunction(self, type_name, type_function):
+    """Determines if the include header defines a specific type function.
+
+    Args:
+      type_name (str): type name.
+      type_function (str): type function.
+
+    Returns:
+      bool: True if function is defined, False otherwise.
+    """
+    function_name = u'{0:s}_{1:s}_{2:s}'.format(
+        self._library_name, type_name, type_function)
+    return function_name in self.functions_per_name
 
   def Read(self, project_configuration):
     """Reads the header file.
@@ -769,11 +799,12 @@ class LibraryHeaderFile(object):
     Args:
       project_configuration (ProjectConfiguration): project configuration.
     """
+    self._library_name = project_configuration.library_name
+
     self.functions_per_name = collections.OrderedDict()
     self.types = []
 
-    define_extern = b'{0:s}_EXTERN'.format(
-        project_configuration.library_name.upper())
+    define_extern = b'{0:s}_EXTERN'.format(self._library_name.upper())
 
     define_have_debug_output = b'#if defined( HAVE_DEBUG_OUTPUT )'
 
@@ -827,8 +858,7 @@ class LibraryHeaderFile(object):
 
         elif line.endswith(b'('):
           # Get the part of the line before the library name.
-          return_type, _, _ = line.partition(
-              project_configuration.library_name)
+          return_type, _, _ = line.partition(self._library_name)
 
           # Get the part of the line after the return type.
           line = line[len(return_type):]
@@ -894,6 +924,7 @@ class LibraryIncludeHeaderFile(object):
     self._api_types = []
     self._api_types_with_input = []
     self._check_signature_type = None
+    self._library_name = None
     self._path = path
 
     self.functions_per_name = collections.OrderedDict()
@@ -940,9 +971,14 @@ class LibraryIncludeHeaderFile(object):
       function_name_prefix = u'{0:s}_{1:s}_'.format(
           project_configuration.library_name, section_name)
 
-      function_prototype = functions[0]
-      if not function_prototype.name.startswith(function_name_prefix):
-        # Ignore the section header is just informative.
+      found_match = False
+      for function_prototype in functions:
+        if function_prototype.name.startswith(function_name_prefix):
+          found_match = True
+          break
+
+      # Ignore the section header is just informative.
+      if not found_match:
         continue
 
       if (section_name == u'error' and
@@ -1018,32 +1054,44 @@ class LibraryIncludeHeaderFile(object):
 
     return self._check_signature_type
 
+  def HasFunction(self, function_name):
+    """Determines if the include header defines a specific function.
+
+    Args:
+      function_name (str): function name.
+
+    Returns:
+      bool: True if function is defined, False otherwise.
+    """
+    function_name = u'{0:s}_{1:s}'.format(self._library_name, function_name)
+    return function_name in self.functions_per_name
+
   def Read(self, project_configuration):
     """Reads the include header file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
     """
+    self._library_name = project_configuration.library_name
+
     self.functions_per_name = collections.OrderedDict()
     self.functions_per_section = {}
     self.have_bfio = False
     self.have_wide_character_type = False
     self.section_names = []
 
-    define_deprecated = b'{0:s}_DEPRECATED'.format(
-        project_configuration.library_name.upper())
+    define_deprecated = b'{0:s}_DEPRECATED'.format(self._library_name.upper())
 
-    define_extern = b'{0:s}_EXTERN'.format(
-        project_configuration.library_name.upper())
+    define_extern = b'{0:s}_EXTERN'.format(self._library_name.upper())
 
     define_have_bfio = b'#if defined( {0:s}_HAVE_BFIO )'.format(
-        project_configuration.library_name.upper())
+        self._library_name.upper())
 
     define_have_debug_output = b'#if defined( HAVE_DEBUG_OUTPUT )'
 
     define_have_wide_character_type = (
         b'#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )').format(
-            project_configuration.library_name.upper())
+            self._library_name.upper())
 
     function_argument = None
     function_prototype = None
@@ -1104,8 +1152,7 @@ class LibraryIncludeHeaderFile(object):
 
           else:
             # Get the part of the line before the library name.
-            return_type, _, _ = line.partition(
-                project_configuration.library_name)
+            return_type, _, _ = line.partition(self._library_name)
 
             # Get the part of the line after the return type.
             line = line[len(return_type):]
@@ -2010,8 +2057,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
       pkginclude_header = u'\t{0:s}/error.h \\'.format(library_name)
       pkginclude_headers.append(pkginclude_header)
 
-    function_name = u'{0:s}_get_codepage'.format(library_name)
-    if function_name in include_header_file.functions_per_name:
+    if include_header_file.HasFunction(u'get_codepage'):
       pkginclude_header = u'\t{0:s}/codepage.h \\'.format(library_name)
       pkginclude_headers.append(pkginclude_header)
 
@@ -4088,10 +4134,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         project_configuration.library_name_suffix)
     output_filename = os.path.join(u'tests', output_filename)
 
-    function_name = u'{0:s}_get_codepage'.format(
-        project_configuration.library_name)
-    codepage_support = function_name in include_header_file.functions_per_name
-
     template_filename = os.path.join(template_directory, u'header.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
@@ -4114,9 +4156,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     for support_function in (
         u'get_version', u'get_access_flags_read', u'get_codepage',
         u'set_codepage'):
-      function_name = u'{0:s}_{1:s}'.format(
-          project_configuration.library_name, support_function)
-      if function_name not in include_header_file.functions_per_name:
+      if not include_header_file.HasFunction(support_function):
         continue
 
       template_filename = u'{0:s}.c'.format(support_function)
@@ -4142,16 +4182,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._SortIncludeHeaders(project_configuration, output_filename)
 
   def _GenerateMakefileAM(
-      self, project_configuration, template_mappings, makefile_am_file,
-      api_functions, api_functions_with_input, api_types, api_types_with_input,
-      internal_types, output_writer):
+      self, project_configuration, template_mappings, include_header_file,
+      makefile_am_file, api_functions, api_functions_with_input, api_types,
+      api_types_with_input, internal_types, output_writer):
     """Generates a tests Makefile.am file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
-      makefile_am_file (LibraryMakefileAMFile): library Makefile.am file.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
+      include_header_file (LibraryIncludeHeaderFile): library include header
+          file.
+      makefile_am_file (LibraryMakefileAMFile): library Makefile.am file.
       api_functions (list[str]): names of API functions to test.
       api_functions_with_input (list[str]): names of API functions to test
           with input data.
@@ -4270,7 +4312,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     for test_name in tests:
       if test_name in api_functions:
-        template_filename = u'yal_test_function.am'
+        if include_header_file.HasFunction(u'get_codepage'):
+          template_filename = u'yal_test_function.am'
+        else:
+          template_filename = u'yal_test_function_no_error.am'
+
         template_mappings[u'library_function'] = test_name
 
       elif test_name in api_functions_with_input:
@@ -4282,9 +4328,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_mappings[u'library_function'] = test_name
 
       elif test_name in api_types or test_name in internal_types:
-        if (test_name == u'error' and
-            project_configuration.library_name == u'libcerror'):
-          template_filename = u'yal_test_error.am'
+        if project_configuration.library_name == u'libcerror':
+          template_filename = u'yal_test_type_no_error.am'
         else:
           template_filename = u'yal_test_type.am'
 
@@ -4338,7 +4383,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     function_name = u'{0:s}_{1:s}_{2:s}'.format(
         project_configuration.library_name, type_name, type_function)
 
-    function_prototype = header_file.functions_per_name.get(function_name, None)
+    function_prototype = header_file.GetTypeFunction(type_name, type_function)
     if not function_prototype:
       return function_name, None, last_have_extern
 
@@ -4411,8 +4456,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           u'Unable to generate test type source code for type function: '
           u'{0:s} with error: missing template').format(type_function))
       return function_name, None, last_have_extern
-
-    function_prototype = header_file.functions_per_name.get(function_name, None)
 
     if not initialize_is_internal:
       if not function_prototype.have_extern and last_have_extern:
@@ -4503,12 +4546,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     initialize_is_internal = False
     initialize_number_of_arguments = None
 
-    function_name = u'{0:s}_{1:s}_initialize'.format(
-        project_configuration.library_name, type_name)
-    if function_name in function_names:
-      function_prototype = header_file.functions_per_name.get(
-          function_name, None)
-
+    function_prototype = header_file.GetTypeFunction(type_name, u'initialize')
+    if function_prototype:
       initialize_is_internal = not function_prototype.have_extern
       initialize_number_of_arguments = len(function_prototype.arguments)
 
@@ -4519,22 +4558,21 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
-      test_function_name = None
       if initialize_number_of_arguments == 2:
         function_name, test_function_name, have_extern = self._GenerateTypeTest(
             project_configuration, template_mappings, type_name, u'initialize',
             have_extern, header_file, output_writer, output_filename,
             with_input=with_input)
+      else:
+        function_name = u'{0:s}_{1:s}_initialize'.format(
+            project_configuration.library_name, type_name)
+        test_function_name = None
 
       tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
 
-    function_name = u'{0:s}_{1:s}_free'.format(
-        project_configuration.library_name, type_name)
-    if function_name in function_names:
-      function_prototype = header_file.functions_per_name.get(
-          function_name, None)
-
+    function_prototype = header_file.GetTypeFunction(type_name, u'free')
+    if function_prototype:
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, u'free',
           have_extern, header_file, output_writer, output_filename,
@@ -5080,8 +5118,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         internal_types.remove(type_name)
 
     self._GenerateMakefileAM(
-        project_configuration, template_mappings, makefile_am_file,
-        api_functions, api_functions_with_input, api_types,
+        project_configuration, template_mappings, include_header_file,
+        makefile_am_file, api_functions, api_functions_with_input, api_types,
         api_types_with_input, internal_types, output_writer)
 
 
