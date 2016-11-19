@@ -779,20 +779,6 @@ class LibraryHeaderFile(object):
         self._library_name, type_name, type_function)
     return self.functions_per_name.get(function_name, None)
 
-  def HasTypeFunction(self, type_name, type_function):
-    """Determines if the include header defines a specific type function.
-
-    Args:
-      type_name (str): type name.
-      type_function (str): type function.
-
-    Returns:
-      bool: True if function is defined, False otherwise.
-    """
-    function_name = u'{0:s}_{1:s}_{2:s}'.format(
-        self._library_name, type_name, type_function)
-    return function_name in self.functions_per_name
-
   def Read(self, project_configuration):
     """Reads the header file.
 
@@ -919,10 +905,10 @@ class LibraryIncludeHeaderFile(object):
       path (str): path library include header file.
     """
     super(LibraryIncludeHeaderFile, self).__init__()
-    self._api_functions = []
-    self._api_functions_with_input = []
-    self._api_types = []
-    self._api_types_with_input = []
+    self._api_functions_group = {}
+    self._api_functions_with_input_group = {}
+    self._api_types_group = {}
+    self._api_types_with_input_group = {}
     self._check_signature_type = None
     self._library_name = None
     self._path = path
@@ -934,42 +920,23 @@ class LibraryIncludeHeaderFile(object):
     self.name = os.path.basename(path)
     self.section_names = []
 
-  def _AnalyzeTestGroups(self, project_configuration):
-    """Analyzes the library include header file for test groups.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-    """
-    self._api_functions = []
-    self._api_functions_with_input = []
-    self._api_types = []
-    self._api_types_with_input = []
-
-    signature_type = self.GetCheckSignatureType(project_configuration)
-    if signature_type:
-      self._api_functions_with_input.append(u'support')
-    else:
-      self._api_functions.append(u'support')
+  def _AnalyzeFunctionGroups(self):
+    """Analyzes the library include header file for function groups."""
+    self._api_functions_group = {}
+    self._api_functions_with_input_group = {}
+    self._api_types_group = {}
+    self._api_types_with_input_group = {}
 
     for section_name, functions in self.functions_per_section.items():
       if not functions:
         continue
 
-      function_name = None
-      for function_prototype in functions:
-        if function_prototype.name.endswith(u'_free'):
-          function_name = function_prototype.name
-          _, _, function_name = function_name.rpartition(
-              project_configuration.library_name)
-          function_name, _, _ = function_name.rpartition(u'_free')
-          break
-
-      section_name = section_name.replace(u' ', u'_')
-      section_name = section_name.lower()
-      section_name, _, _ = section_name.rpartition(u'_functions')
+      group_name = section_name.replace(u' ', u'_')
+      group_name = group_name.lower()
+      group_name, _, _ = group_name.rpartition(u'_functions')
 
       function_name_prefix = u'{0:s}_{1:s}_'.format(
-          project_configuration.library_name, section_name)
+          self._library_name, group_name)
 
       found_match = False
       for function_prototype in functions:
@@ -979,65 +946,57 @@ class LibraryIncludeHeaderFile(object):
 
       # Ignore the section header is just informative.
       if not found_match:
-        continue
+        if group_name == u'support':
+          signature_type = self.GetCheckSignatureType()
+          if signature_type:
+            self._api_functions_with_input_group[group_name] = section_name
+          else:
+            self._api_functions_group[group_name] = section_name
 
-      if (section_name == u'error' and
-          project_configuration.library_name != u'libcerror'):
-        self._api_functions.append(section_name)
-        continue
+      elif self._library_name != u'libcerror' and group_name == u'error':
+        self._api_functions_group[group_name] = section_name
 
-      function_name = u'{0:s}_{1:s}_free'.format(
-          project_configuration.library_name, section_name)
+      elif (not self.HasTypeFunction(group_name, u'create') and
+          not self.HasTypeFunction(group_name, u'free')):
+        self._api_functions_group[group_name] = section_name
 
-      if function_name not in self.functions_per_name:
-        self._api_functions.append(section_name)
-        continue
+      elif not self.HasTypeFunction(group_name, u'open'):
+        self._api_types_group[group_name] = section_name
 
-      function_name = u'{0:s}_{1:s}_open'.format(
-          project_configuration.library_name, section_name)
-
-      if function_name in self.functions_per_name:
-        self._api_types_with_input.append(section_name)
       else:
-        self._api_types.append(section_name)
+        self._api_types_with_input_group[group_name] = section_name
 
-  def GetAPIFunctionTestGroups(self, project_configuration):
+  def GetAPIFunctionTestGroups(self):
     """Determines the API function test groups.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
       tuple: contains:
         list[str]: names of API function groups without test data.
         list[str]: names of API function groups with test data.
     """
-    if not self._api_functions and not self._api_functions_with_input:
-      self._AnalyzeTestGroups(project_configuration)
+    if (not self._api_functions_group and
+        not self._api_functions_with_input_group):
+      self._AnalyzeFunctionGroups()
 
-    return self._api_functions, self._api_functions_with_input
+    return (
+        self._api_functions_group.keys(),
+        self._api_functions_with_input_group.keys())
 
-  def GetAPITypeTestGroups(self, project_configuration):
+  def GetAPITypeTestGroups(self):
     """Determines the API type test groups.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
       tuple: contains:
         list[str]: names of API type groups without test data.
         list[str]: names of API type groups with test data.
     """
-    if not self._api_types and not self._api_types_with_input:
-      self._AnalyzeTestGroups(project_configuration)
+    if not self._api_types_group and not self._api_types_with_input_group:
+      self._AnalyzeFunctionGroups()
 
-    return self._api_types, self._api_types_with_input
+    return self._api_types_group.keys(), self._api_types_with_input_group.keys()
 
-  def GetCheckSignatureType(self, project_configuration):
+  def GetCheckSignatureType(self):
     """Determines the check signature function type.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
       str: check signature function type of None if no check signature function
@@ -1046,13 +1005,59 @@ class LibraryIncludeHeaderFile(object):
     if not self._check_signature_type:
       for signature_type in self._SIGNATURE_TYPES:
         function_name = u'{0:s}_check_{1:s}_signature'.format(
-            project_configuration.library_name, signature_type)
+            self._library_name, signature_type)
 
         if function_name in self.functions_per_name:
           self._check_signature_type = signature_type
           break
 
     return self._check_signature_type
+
+  def GetFunctionGroup(self, group_name):
+    """Retrieves a function group.
+
+    Args:
+      group_name (str): group name.
+
+    Returns:
+      list[FunctionPrototype]: function prototypes of the functions in
+          the group.
+    """
+    section_name = self._api_functions_group.get(group_name, None)
+    if not section_name:
+      section_name = self._api_functions_with_input_group.get(group_name, None)
+    if not section_name:
+      section_name = self._api_types_group.get(group_name, None)
+    if not section_name:
+      section_name = self._api_types_with_input_group.get(group_name, None)
+    if not section_name:
+      return []
+
+    return self.functions_per_section.get(section_name, [])
+
+  def HasErrorArgument(self, group_name):
+    """Determines if a function group has functions with an error argument.
+
+    Args:
+      group_name (str): group name.
+
+    Returns:
+      bool: True if there ar functions with an error argument defined,
+          False otherwise.
+    """
+    error_type = u'{0:s}_error_t '.format(self._library_name)
+
+    functions = self.GetFunctionGroup(group_name)
+    for function_prototype in functions:
+      if not function_prototype.arguments:
+        continue
+
+      function_argument = function_prototype.arguments[-1]
+      function_argument_string = function_argument.CopyToString()
+      if function_argument_string.startswith(error_type):
+        return True
+
+    return False
 
   def HasFunction(self, function_name):
     """Determines if the include header defines a specific function.
@@ -1064,6 +1069,20 @@ class LibraryIncludeHeaderFile(object):
       bool: True if function is defined, False otherwise.
     """
     function_name = u'{0:s}_{1:s}'.format(self._library_name, function_name)
+    return function_name in self.functions_per_name
+
+  def HasTypeFunction(self, type_name, type_function):
+    """Determines if the include header defines a specific type function.
+
+    Args:
+      type_name (str): type name.
+      type_function (str): type function.
+
+    Returns:
+      bool: True if function is defined, False otherwise.
+    """
+    function_name = u'{0:s}_{1:s}_{2:s}'.format(
+        self._library_name, type_name, type_function)
     return function_name in self.functions_per_name
 
   def Read(self, project_configuration):
@@ -1222,8 +1241,8 @@ class LibraryMakefileAMFile(object):
       path (str): path of the Makefile.am file.
     """
     super(LibraryMakefileAMFile, self).__init__()
+    self._library_name = None
     self._path = path
-
     self.cppflags = []
     self.libraries = []
     self.sources = []
@@ -1234,15 +1253,14 @@ class LibraryMakefileAMFile(object):
     Args:
       project_configuration (ProjectConfiguration): project configuration.
     """
+    self._library_name = project_configuration.library_name
+
     self.cppflags = []
     self.libraries = []
     self.sources = []
 
-    library_sources = b'{0:s}_la_SOURCES'.format(
-        project_configuration.library_name)
-
-    library_libadd = b'{0:s}_la_LIBADD'.format(
-        project_configuration.library_name)
+    library_sources = b'{0:s}_la_SOURCES'.format(self._library_name)
+    library_libadd = b'{0:s}_la_LIBADD'.format(self._library_name)
 
     in_section = None
 
@@ -1296,8 +1314,8 @@ class MainMakefileAMFile(object):
       path (str): path of the Makefile.am file.
     """
     super(MainMakefileAMFile, self).__init__()
+    self._library_name = None
     self._path = path
-
     self.libraries = []
 
   def Read(self, project_configuration):
@@ -1306,6 +1324,8 @@ class MainMakefileAMFile(object):
     Args:
       project_configuration (ProjectConfiguration): project configuration.
     """
+    self._library_name = project_configuration.library_name
+
     in_subdirs = False
 
     with open(self._path, 'rb') as file_object:
@@ -1319,8 +1339,7 @@ class MainMakefileAMFile(object):
           if not line:
             in_subdirs = False
 
-          elif (line.startswith(b'lib') and
-                line != project_configuration.library_name):
+          elif line.startswith(b'lib') and line != self._library_name:
             self.libraries.append(line)
 
         elif line.startswith(b'SUBDIRS'):
@@ -1343,8 +1362,8 @@ class TypesIncludeHeaderFile(object):
       path (str): path of the include header file.
     """
     super(TypesIncludeHeaderFile, self).__init__()
+    self._library_name = None
     self._path = path
-
     self.types = []
 
   def Read(self, project_configuration):
@@ -1353,10 +1372,11 @@ class TypesIncludeHeaderFile(object):
     Args:
       project_configuration (ProjectConfiguration): project configuration.
     """
+    self._library_name = project_configuration.library_name
+
     self.types = []
 
-    typedef_prefix = b'typedef intptr_t {0:s}_'.format(
-        project_configuration.library_name)
+    typedef_prefix = b'typedef intptr_t {0:s}_'.format(self._library_name)
     typedef_prefix_length = len(typedef_prefix)
 
     with open(self._path, 'rb') as file_object:
@@ -3998,7 +4018,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               self._library_include_header_path))
     else:
       api_types, api_types_with_input = (
-          include_header_file.GetAPITypeTestGroups(project_configuration))
+          include_header_file.GetAPITypeTestGroups())
 
       api_types.extend(api_types_with_input)
       types_with_sequence_types = set([])
@@ -4138,8 +4158,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    signature_type = include_header_file.GetCheckSignatureType(
-        project_configuration)
+    signature_type = include_header_file.GetCheckSignatureType()
 
     if signature_type:
       template_filename = os.path.join(
@@ -4310,35 +4329,37 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    for test_name in tests:
-      if test_name in api_functions:
-        if include_header_file.HasFunction(u'get_codepage'):
+    for group_name in tests:
+      if group_name in api_functions:
+        has_error_argument = include_header_file.HasErrorArgument(group_name)
+        if (project_configuration.library_name != u'libcerror' and
+            has_error_argument):
           template_filename = u'yal_test_function.am'
         else:
           template_filename = u'yal_test_function_no_error.am'
 
-        template_mappings[u'library_function'] = test_name
+        template_mappings[u'library_function'] = group_name
 
-      elif test_name in api_functions_with_input:
-        if test_name == u'support':
+      elif group_name in api_functions_with_input:
+        if group_name == u'support':
           template_filename = u'yal_test_support_with_input.am'
         else:
           template_filename = u'yal_test_function_with_input.am'
 
-        template_mappings[u'library_function'] = test_name
+        template_mappings[u'library_function'] = group_name
 
-      elif test_name in api_types or test_name in internal_types:
+      elif group_name in api_types or group_name in internal_types:
         if project_configuration.library_name == u'libcerror':
           template_filename = u'yal_test_type_no_error.am'
         else:
           template_filename = u'yal_test_type.am'
 
-        self._SetTypeNameInTemplateMappings(template_mappings, test_name)
+        self._SetTypeNameInTemplateMappings(template_mappings, group_name)
 
-      elif test_name in api_types_with_input:
+      elif group_name in api_types_with_input:
         template_filename = u'yal_test_type_with_input.am'
 
-        self._SetTypeNameInTemplateMappings(template_mappings, test_name)
+        self._SetTypeNameInTemplateMappings(template_mappings, group_name)
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -4961,10 +4982,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       return
 
     api_functions, api_functions_with_input = (
-        include_header_file.GetAPIFunctionTestGroups(project_configuration))
+        include_header_file.GetAPIFunctionTestGroups())
 
     api_types, api_types_with_input = (
-        include_header_file.GetAPITypeTestGroups(project_configuration))
+        include_header_file.GetAPITypeTestGroups())
 
     # TODO: handle internal functions
     types = self._GetLibraryTypes(project_configuration, makefile_am_file)
@@ -4983,6 +5004,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         continue
 
       internal_types.append(type_name)
+
+    logging.info(u'Found public functions: {0:s}'.format(
+        u', '.join(public_functions)))
+    logging.info(u'Found public types: {0:s}'.format(u', '.join(public_types)))
+    logging.info(u'Found internal types: {0:s}'.format(
+        u', '.join(internal_types)))
 
     # TODO: handle non-template files differently.
     # TODO: yal_test_open_close.c handle file, handle, volume
@@ -5269,6 +5296,9 @@ def Main():
     print(u'No such output directory: {0:s}.'.format(options.output_directory))
     print(u'')
     return False
+
+  logging.basicConfig(
+      level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
   project_configuration = ProjectConfiguration()
   project_configuration.ReadFromFile(options.configuration_file)
