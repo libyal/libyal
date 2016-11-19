@@ -1,4 +1,3 @@
-
 /* Reads data at the current offset into a buffer
  * Returns a Python object if successful or NULL on error
  */

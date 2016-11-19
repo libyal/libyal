@@ -2073,12 +2073,23 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
         u'\t{0:s}/features.h \\'.format(library_name),
         u'\t{0:s}/types.h'.format(library_name)]
 
+    # TODO: detect if header file exits.
     if library_name != u'libcerror':
       pkginclude_header = u'\t{0:s}/error.h \\'.format(library_name)
       pkginclude_headers.append(pkginclude_header)
 
     if include_header_file.HasFunction(u'get_codepage'):
       pkginclude_header = u'\t{0:s}/codepage.h \\'.format(library_name)
+      pkginclude_headers.append(pkginclude_header)
+
+    # TODO: detect if header file exits.
+    if library_name in (u'libnk2', u'libpff'):
+      pkginclude_header = u'\t{0:s}/mapi.h \\'.format(library_name)
+      pkginclude_headers.append(pkginclude_header)
+
+    # TODO: detect if header file exits.
+    if library_name == u'libolecf':
+      pkginclude_header = u'\t{0:s}/ole.h \\'.format(library_name)
       pkginclude_headers.append(pkginclude_header)
 
     pkginclude_headers = sorted(pkginclude_headers)
@@ -3143,7 +3154,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             if value_name_prefix != u'root_':
               value_name_prefix = u''
 
-            object_type_name = u'{0:s}{1:s}'.format(value_name_prefix, value_name)
+            object_type_name = u'{0:s}{1:s}'.format(
+                value_name_prefix, python_function_prototype.value_type)
             if object_type_name not in value_type_objects:
               generate_get_value_type_object = True
               value_type_objects.add(object_type_name)
@@ -3806,7 +3818,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       # TODO: ignore these functions for now.
       if (type_function == u'get_type' and ( 
           project_configuration.library_name in (
-              u'libmsiecf', u'libolecf'))):
+              u'libmsiecf', u'libolecf', u'libpff'))):
         continue
 
       # TODO: remove when removed after deprecation.
@@ -3974,6 +3986,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     # TODO: add support for definitions without "definition prefix"
     # TODO: add support for pyolecf_property_value
     # TODO: sequence object rename ${type_name}_index to item_index
+    # TODO: generate non type files.
     # TODO: generate pyyal.c
     # TODO: generate pyyal/Makefile.am
     # TODO: generate pyyal-python2/Makefile.am
@@ -4333,7 +4346,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if group_name in api_functions:
         has_error_argument = include_header_file.HasErrorArgument(group_name)
         if (project_configuration.library_name != u'libcerror' and
-            has_error_argument):
+            group_name != u'error' and has_error_argument):
           template_filename = u'yal_test_function.am'
         else:
           template_filename = u'yal_test_function_no_error.am'

@@ -44,6 +44,7 @@ PyObject *${python_module_name}_${type_name}_get_data_as_integer(
 
 		return( NULL );
 	}
+#warning "This is generated code make sure to implement this functionality."
 	integer_object = ${python_module_name}_integer_signed_new_from_64bit(
 	                  integer_value );
 

@@ -5,11 +5,11 @@ PyObject *${python_module_name}_${type_name}_get_data_as_floating_point(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	PyObject *floatr_object      = NULL;
-	libcerror_error_t *error     = NULL;
-	static char *function        = "${python_module_name}_${type_name}_get_data_as_floating_point";
-	int64_t floating_point_value = 0;
-	int result                   = 0;
+	PyObject *float_object      = NULL;
+	libcerror_error_t *error    = NULL;
+	static char *function       = "${python_module_name}_${type_name}_get_data_as_floating_point";
+	double floating_point_value = 0;
+	int result                  = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 

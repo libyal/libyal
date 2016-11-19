@@ -1,16 +1,16 @@
-/* Retrieves the root ${value_description}
+/* Retrieves the ${value_description}
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
+PyObject *${python_module_name}_${type_name}_get_${value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	PyObject *${value_name}_object                      = NULL;
-	PyTypeObject *type_object                           = NULL;
-	libcerror_error_t *error                            = NULL;
-	${library_name}_${value_type}_t *root_${value_name} = NULL;
-	static char *function                               = "${python_module_name}_${type_name}_get_root_${value_name}";
-	int result                                          = 0;
+	PyObject *${value_name}_object                 = NULL;
+	PyTypeObject *type_object                      = NULL;
+	${library_name}_${value_type}_t *${value_name} = NULL;
+	libcerror_error_t *error                       = NULL;
+	static char *function                          = "${python_module_name}_${type_name}_get_${value_name}";
+	int result                                     = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
@@ -25,9 +25,9 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_root_${value_name}(
+	result = ${library_name}_${type_name}_get_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
-	          &root_${value_name},
+	          &${value_name},
 	          &error );
 
 	Py_END_ALLOW_THREADS
@@ -37,7 +37,7 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve root ${value_description}.",
+		 "%s: unable to retrieve ${value_description}.",
 		 function );
 
 		libcerror_error_free(
@@ -52,21 +52,21 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 
 		return( Py_None );
 	}
-	type_object = ${python_module_name}_${type_name}_get_root_${value_type}_type_object(
-	               root_${value_name} );
+	type_object = ${python_module_name}_${type_name}_get_${value_type}_type_object(
+	               ${value_name} );
 
 	if( type_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_IOError,
-		 "%s: unable to retrieve root ${value_type_description} type object.",
+		 "%s: unable to retrieve ${value_type_description} type object.",
 		 function );
 
 		goto on_error;
 	}
 	${value_name}_object = ${python_module_name}_${value_type}_new(
 	                        type_object,
-	                        root_${value_name},
+	                        ${value_name},
 	                        (PyObject *) ${python_module_name}_${type_name} );
 
 	if( ${value_name}_object == NULL )
@@ -81,10 +81,10 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 	return( ${value_name}_object );
 
 on_error:
-	if( root_${value_name} != NULL )
+	if( ${value_name} != NULL )
 	{
 		${library_name}_${value_type}_free(
-		 &root_${value_name},
+		 &${value_name},
 		 NULL );
 	}
 	return( NULL );

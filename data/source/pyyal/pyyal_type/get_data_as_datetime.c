@@ -44,7 +44,8 @@ PyObject *${python_module_name}_${type_name}_get_data_as_datetime(
 
 		return( NULL );
 	}
-	datetime_object = ${python_module_name}_datetime_signed_new_from_64bit(
+#warning "This is generated code make sure to implement this functionality."
+	datetime_object = ${python_module_name}_datetime_new_from_datetime_value(
 	                   datetime_value );
 
 	return( datetime_object );
