@@ -1,6 +1,5 @@
 AM_CPPFLAGS = \
 	-I$$(top_srcdir)/include \
 	-I$$(top_srcdir)/common \
-${cppflags} \
-	@${library_name_upper_case}_DLL_IMPORT@
+${cppflags}
 

@@ -37,17 +37,17 @@ build_script:
 
     C:\cygwin\bin\bash -e -l -c "./configure && make -j4"
 
-    rem Prepare minGW build
+    rem Prepare MinGW build
 
     C:\msys64\usr\bin\bash -e -l -c "cd ${library_name}"
 
     C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh"
 
-    rem Build with minGW 32-bit
+    rem Build with MinGW 32-bit
 
     C:\msys64\usr\bin\bash -e -l -c "./configure --host=i686-w64-mingw32 && make -j4"
 
-    rem Build with minGW 64-bit
+    rem Build with MinGW 64-bit
 
     C:\msys64\usr\bin\bash -e -l -c "./configure --host=x86_64-w64-mingw32 && make -j4"
 

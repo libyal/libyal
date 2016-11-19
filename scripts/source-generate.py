@@ -1983,6 +1983,48 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+  def _GenerateMakefileAM(
+      self, project_configuration, template_mappings, include_header_file,
+      makefile_am_file, output_writer, output_filename):
+    """Generates a tests Makefile.am file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      include_header_file (LibraryIncludeHeaderFile): library include header
+          file.
+      makefile_am_file (LibraryMakefileAMFile): library Makefile.am file.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    library_name = project_configuration.library_name
+
+    pkginclude_headers = [
+        u'\t{0:s}/definitions.h \\'.format(library_name),
+        u'\t{0:s}/extern.h \\'.format(library_name),
+        u'\t{0:s}/features.h \\'.format(library_name),
+        u'\t{0:s}/types.h'.format(library_name)]
+
+    if library_name != u'libcerror':
+      pkginclude_header = u'\t{0:s}/error.h \\'.format(library_name)
+      pkginclude_headers.append(pkginclude_header)
+
+    function_name = u'{0:s}_get_codepage'.format(library_name)
+    if function_name in include_header_file.functions_per_name:
+      pkginclude_header = u'\t{0:s}/codepage.h \\'.format(library_name)
+      pkginclude_headers.append(pkginclude_header)
+
+    pkginclude_headers = sorted(pkginclude_headers)
+
+    template_mappings[u'pkginclude_headers'] = u'\n'.join(pkginclude_headers)
+
+    template_filename = os.path.join(self._template_directory, u'Makefile.am')
+
+    output_filename = os.path.join(u'include', u'Makefile.am')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
   def _GenerateTypesHeader(
       self, project_configuration, template_mappings, include_header_file,
       output_writer, output_filename):
@@ -2047,31 +2089,13 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
     makefile_am_file = MainMakefileAMFile(makefile_am_path)
     makefile_am_file.Read(project_configuration)
 
-    pkginclude_headers = [
-        u'\t{0:s}/definitions.h \\'.format(project_configuration.library_name),
-        u'\t{0:s}/error.h \\'.format(project_configuration.library_name),
-        u'\t{0:s}/extern.h \\'.format(project_configuration.library_name),
-        u'\t{0:s}/features.h \\'.format(project_configuration.library_name),
-        u'\t{0:s}/types.h'.format(project_configuration.library_name)]
-
-    function_name = u'{0:s}_get_codepage'.format(
-        project_configuration.library_name)
-    if function_name in include_header_file.functions_per_name:
-      pkginclude_header = u'\t{0:s}/codepage.h \\'.format(
-          project_configuration.library_name)
-      pkginclude_headers.append(pkginclude_header)
-
-    pkginclude_headers = sorted(pkginclude_headers)
-
     template_mappings = project_configuration.GetTemplateMappings(
         authors_separator=u',\n *                          ')
-    template_mappings[u'pkginclude_headers'] = u'\n'.join(pkginclude_headers)
-
-    template_filename = os.path.join(self._template_directory, u'Makefile.am')
 
     output_filename = os.path.join(u'include', u'Makefile.am')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateMakefileAM(
+        project_configuration, template_mappings, include_header_file,
+        makefile_am_file, output_writer, output_filename)
 
     output_directory = os.path.join(
         u'include', project_configuration.library_name)
@@ -2116,6 +2140,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: libcsplit skip wide_string.[ch]
     # TODO: add support for libuna/libuna_types.h
     # TODO: types.h alingment of debug types?
     # TODO: libsmraw/libsmraw_codepage.h alignment of definitions
@@ -4211,8 +4236,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       cppflags.insert(index, u'libcsystem')
 
+    cppflags = [u'@{0:s}_CPPFLAGS@'.format(name.upper()) for name in cppflags]
+
+    cppflag = u'@{0:s}_DLL_IMPORT@'.format(
+        project_configuration.library_name.upper())
+    cppflags.append(cppflag)
+
     template_mappings[u'cppflags'] = u' \\\n'.join(
-        [u'\t@{0:s}_CPPFLAGS@'.format(name.upper()) for name in cppflags])
+        [u'\t{0:s}'.format(name) for name in cppflags])
     template_mappings[u'python_tests'] = u' \\\n'.join(
         [u'\t{0:s}'.format(filename) for filename in python_test_scripts])
     template_mappings[u'tests'] = u' \\\n'.join(
@@ -4237,28 +4268,32 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    for test in tests:
-      if test in api_functions:
+    for test_name in tests:
+      if test_name in api_functions:
         template_filename = u'yal_test_function.am'
-        template_mappings[u'library_function'] = test
+        template_mappings[u'library_function'] = test_name
 
-      elif test in api_functions_with_input:
-        if test == u'support':
+      elif test_name in api_functions_with_input:
+        if test_name == u'support':
           template_filename = u'yal_test_support_with_input.am'
         else:
           template_filename = u'yal_test_function_with_input.am'
 
-        template_mappings[u'library_function'] = test
+        template_mappings[u'library_function'] = test_name
 
-      elif test in api_types or test in internal_types:
-        template_filename = u'yal_test_type.am'
+      elif test_name in api_types or test_name in internal_types:
+        if (test_name == u'error' and
+            project_configuration.library_name == u'libcerror'):
+          template_filename = u'yal_test_error.am'
+        else:
+          template_filename = u'yal_test_type.am'
 
-        self._SetTypeNameInTemplateMappings(template_mappings, test)
+        self._SetTypeNameInTemplateMappings(template_mappings, test_name)
 
-      elif test in api_types_with_input:
+      elif test_name in api_types_with_input:
         template_filename = u'yal_test_type_with_input.am'
 
-        self._SetTypeNameInTemplateMappings(template_mappings, test)
+        self._SetTypeNameInTemplateMappings(template_mappings, test_name)
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -4536,7 +4571,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       # so no need to add them to tests_to_run or tests_to_run_with_args.
       function_name = u'{0:s}_{1:s}_open_file_io_handle'.format(
           project_configuration.library_name, type_name)
-      function_names.remove(function_name)
+
+      if function_name in function_names:
+        function_names.remove(function_name)
 
       # TODO: remove open_read?
 
@@ -4860,9 +4897,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    # TODO: fix empty line in Makefile.am for libcerror
-    # TODO: fix addition of @LIBCERROR_LIBADD@ in Makefile.am for libcerror
-    # TODO: fix addition of cerror_test_libcerror.h in Makefile.am for libcerror
     # TODO: compare handle fdata and cdata differences, and includes
     # TODO: deprecate project_configuration.library_public_types ?
     # TODO: weave existing test files?
