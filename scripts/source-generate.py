@@ -667,6 +667,7 @@ class PythonTypeObjectFunctionPrototype(object):
       if type_name:
         type_name = type_name.replace(u'_', u' ')
 
+      # TODO: fix value name.
       description = [u'Copies the the {0:s} from the {1:s}'.format(
           type_name, value_name)]
 
@@ -2860,9 +2861,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     python_type_prefix = u'{0:s}_{1:s}'.format(
         project_configuration.python_module_name, type_name)
 
-    if open_support:
-      template_filename = u'new_with_input.h'
-    elif with_parent:
+    if with_parent:
       template_filename = u'new_with_parent.h'
     else:
       template_filename = u'new.h'
@@ -3102,6 +3101,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     if with_parent:
       template_filename = u'init_with_parent.c'
+    elif open_support:
+      template_filename = u'init_with_input.c'
     else:
       template_filename = u'init.c'
 

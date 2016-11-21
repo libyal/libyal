@@ -13,10 +13,6 @@ struct ${python_module_name}_${type_name}
 	/* The ${library_name} ${type_description}
 	 */
 	${library_name}_${type_name}_t *${type_name};
-
-	/* The parent object
-	 */
-	PyObject *parent_object;
 };
 
 extern PyMethodDef ${python_module_name}_${type_name}_object_methods[];
