@@ -38,9 +38,9 @@
 #include <${library_name}/extern.h>
 
 #else
-#define ${library_name_upper_case}_EXTERN	extern
+#define ${library_name_upper_case}_EXTERN	/* extern */
 
-#endif
+#endif /* !defined( HAVE_LOCAL_${library_name_upper_case} ) */
 
 #endif /* !defined( _${library_name_upper_case}_INTERNAL_EXTERN_H ) */
 

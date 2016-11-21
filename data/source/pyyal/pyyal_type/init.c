@@ -16,8 +16,8 @@ int ${python_module_name}_${type_name}_init(
 
 		return( -1 );
 	}
-	${python_module_name}_${type_name}->${type_name}           = NULL;
-	${python_module_name}_${type_name}->${type_name}_io_handle = NULL;
+	${python_module_name}_${type_name}->${type_name}   = NULL;
+	${python_module_name}_${type_name}->file_io_handle = NULL;
 
 	if( ${library_name}_${type_name}_initialize(
 	     &( ${python_module_name}_${type_name}->${type_name} ),

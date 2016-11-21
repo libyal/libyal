@@ -19,19 +19,19 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${tools_name_upper_case}_{library_name_upper_case}_H )
-#define _${tools_name_upper_case}_{library_name_upper_case}_H
+#if !defined( _${tools_name_upper_case}_${library_name_upper_case}_H )
+#define _${tools_name_upper_case}_${library_name_upper_case}_H
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled set {library_name_upper_case}_DLL_IMPORT
+/* If Cygwin libtool DLL support is enabled set ${library_name_upper_case}_DLL_IMPORT
  * before including ${library_name}.h
  */
 #if defined( _WIN32 ) && defined( DLL_EXPORT )
-#define {library_name_upper_case}_DLL_IMPORT
+#define ${library_name_upper_case}_DLL_IMPORT
 #endif
 
 #include <${library_name}.h>
 
-#endif /* !defined( _${tools_name_upper_case}_{library_name_upper_case}_H ) */
+#endif /* !defined( _${tools_name_upper_case}_${library_name_upper_case}_H ) */
 
