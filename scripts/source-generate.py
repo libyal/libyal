@@ -2695,6 +2695,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       constant_name = constant_name[constant_name_prefix_length:]
+
+      if constant_name in (u'undefined', u'unknown'):
+        continue
+
       template_mappings[u'constant_name'] = constant_name
       template_mappings[u'constant_name_upper_case'] = constant_name.upper()
 
@@ -3821,7 +3825,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       elif type_function == u'set_keys':
         arguments = [u'mode', u'key', u'tweak_key']
 
-      elif type_function == u'set_password':
+      elif type_function in (u'set_password', u'set_utf8_password'):
         arguments = [u'password']
 
       else:
@@ -3961,8 +3965,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       if (type_function.startswith(u'write_buffer') and ( 
-          project_configuration.library_name in (
-              u'libvhdi', ))):
+          project_configuration.library_name not in (
+              u'libewf', ))):
         continue
 
       if type_function in (

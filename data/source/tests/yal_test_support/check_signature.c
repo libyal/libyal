@@ -146,10 +146,10 @@ on_error:
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
-/* Tests the ${library_name}_check_file_signature_file_io_handle function
+/* Tests the ${library_name}_check_${signature_type}_signature_file_io_handle function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_check_file_signature_file_io_handle(
+int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle(
      const system_character_t *source )
 {
 	uint8_t empty_block[ 512 ];
@@ -218,9 +218,9 @@ int ${library_name_suffix}_test_check_file_signature_file_io_handle(
          "error",
          error );
 
-	/* Test check file signature
+	/* Test check ${signature_type} signature
 	 */
-	result = ${library_name}_check_file_signature_file_io_handle(
+	result = ${library_name}_check_${signature_type}_signature_file_io_handle(
 	          file_io_handle,
 	          &error );
 
@@ -235,7 +235,7 @@ int ${library_name_suffix}_test_check_file_signature_file_io_handle(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_check_file_signature_file_io_handle(
+	result = ${library_name}_check_${signature_type}_signature_file_io_handle(
 	          NULL,
 	          &error );
 
@@ -340,9 +340,9 @@ int ${library_name_suffix}_test_check_file_signature_file_io_handle(
          "error",
          error );
 
-	/* Test check file signature
+	/* Test check ${signature_type} signature
 	 */
-	result = ${library_name}_check_file_signature_file_io_handle(
+	result = ${library_name}_check_${signature_type}_signature_file_io_handle(
 	          file_io_handle,
 	          &error );
 
@@ -387,7 +387,7 @@ int ${library_name_suffix}_test_check_file_signature_file_io_handle(
          "error",
          error );
 
-	/* TODO test file too small */
+	/* TODO test ${signature_type} too small */
 
 	return( 1 );
 
