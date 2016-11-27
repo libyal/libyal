@@ -91,6 +91,7 @@ class ProjectConfiguration(object):
     self.tools_names = None
 
     self.tests_authors = None
+    self.tests_options = None
 
     self.msvscpp_build_dependencies = None
 
@@ -166,6 +167,8 @@ class ProjectConfiguration(object):
 
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, u'tests', u'authors', default_value=self.project_authors)
+    self.tools_names = self._GetOptionalConfigValue(
+        config_parser, u'tests', u'options', default_value=[])
 
     self.msvscpp_build_dependencies = self._GetOptionalConfigValue(
         config_parser, u'msvscpp', u'build_dependencies', default_value=[])
@@ -3825,7 +3828,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       elif type_function == u'set_keys':
         arguments = [u'mode', u'key', u'tweak_key']
 
-      elif type_function in (u'set_password', u'set_utf8_password'):
+      elif type_function in (
+          u'set_password', u'set_recovery_password', u'set_utf8_password'):
         arguments = [u'password']
 
       else:
@@ -5107,6 +5111,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: deprecate project_configuration.library_public_types ?
     # TODO: weave existing test files?
     # TODO: use data files to generate test data tests/input/.data/<name>
+    # TODO: add support for options in configuration file to set option sets.
 
     if not self._HasTests(project_configuration):
       return
