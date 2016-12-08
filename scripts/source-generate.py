@@ -465,6 +465,10 @@ class PythonTypeObjectFunctionPrototype(object):
         if self._type_function.startswith(u'copy_'):
           self._value_name = self._type_function[5:]
 
+      elif self.function_type == FUNCTION_TYPE_COPY_FROM:
+        if self._type_function.startswith(u'copy_from_'):
+          self._value_name = self._type_function[10:]
+
       elif self.function_type in (
           FUNCTION_TYPE_GET, FUNCTION_TYPE_GET_BY_IDENTIFIER,
           FUNCTION_TYPE_GET_BY_INDEX, FUNCTION_TYPE_GET_BY_NAME,
