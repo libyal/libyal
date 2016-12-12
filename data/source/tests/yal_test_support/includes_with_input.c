@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #endif
 
+#include "${library_name_suffix}_test_getopt.h"
 #include "${library_name_suffix}_test_libbfio.h"
 #include "${library_name_suffix}_test_libcerror.h"
 #include "${library_name_suffix}_test_libclocale.h"
-#include "${library_name_suffix}_test_libcsystem.h"
 #include "${library_name_suffix}_test_${library_name}.h"
 #include "${library_name_suffix}_test_libuna.h"
 #include "${library_name_suffix}_test_macros.h"

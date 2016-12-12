@@ -1,14 +1,14 @@
 ${library_name_suffix}_test_${library_function}_SOURCES = \
 	${library_name_suffix}_test_${library_function}.c \
+	${library_name_suffix}_test_getopt.h \
 	${library_name_suffix}_test_libcerror.h \
 	${library_name_suffix}_test_libclocale.h \
-	${library_name_suffix}_test_libcsystem.h \
+	${library_name_suffix}_test_libcnotify.h \
 	${library_name_suffix}_test_${library_name}.h \
 	${library_name_suffix}_test_libuna.h \
 	${library_name_suffix}_test_macros.h
 
 ${library_name_suffix}_test_${library_function}_LDADD = \
-	@LIBCSYSTEM_LIBADD@ \
 	@LIBUNA_LIBADD@ \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
