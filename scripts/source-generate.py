@@ -4004,6 +4004,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     Returns:
       str: sequence type or value name.
     """
+    if name == u'key':
+      return u'{0:s}s'.format(name)
+
     if (name[-1] in (u's', u'x', u'z') or (
         name[-1] == u'h'  and name[-2] in (u'c', u's'))):
       return u'{0:s}es'.format(name)
