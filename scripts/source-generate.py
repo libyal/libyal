@@ -3261,8 +3261,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             lines, search_string, output_filename)
 
         if not result:
-          additional_template_filename = u'get_{0:s}value_type_object.c'.format(
-              value_name_prefix)
+          additional_template_filename = u'get_value_type_object.c'
           additional_template_filename = os.path.join(
               template_directory, additional_template_filename)
           self._GenerateSection(
