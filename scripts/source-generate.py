@@ -4417,10 +4417,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       test_scripts.append(test_script)
 
     python_scripts = []
-    python_test_scripts = [
-        u'test_python_functions.sh',
-        u'test_{0:s}_set_ascii_codepage.sh'.format(
-            project_configuration.python_module_name)]
+    python_test_scripts = [u'test_python_functions.sh']
 
     check_scripts = [u'test_runner.sh']
     check_scripts.extend(test_scripts)
@@ -4428,8 +4425,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       check_scripts.extend(python_scripts)
       check_scripts.extend(python_test_scripts)
       check_scripts.extend([
-          u'{0:s}_test_set_ascii_codepage.py'.format(
-              project_configuration.python_module_name),
           u'{0:s}_test_support.py'.format(
               project_configuration.python_module_name)])
 
