@@ -1636,11 +1636,14 @@ class SourceFileGenerator(object):
     if not type_name:
       template_mappings[u'sequence_type_description'] = u''
       template_mappings[u'sequence_type_name'] = u''
+      template_mappings[u'sequence_type_name_camel_case'] = u''
       template_mappings[u'sequence_type_name_upper_case'] = u''
     else:
       template_mappings[u'sequence_type_description'] = type_name.replace(
           u'_', u' ')
       template_mappings[u'sequence_type_name'] = type_name
+      template_mappings[u'sequence_type_name_camel_case'] = u''.join([
+          word.title() for word in type_name.split(u'_')])
       template_mappings[u'sequence_type_name_upper_case'] = type_name.upper()
 
   def _SetSequenceValueNameInTemplateMappings(
@@ -1689,10 +1692,13 @@ class SourceFileGenerator(object):
     if not type_name:
       template_mappings[u'type_description'] = u''
       template_mappings[u'type_name'] = u''
+      template_mappings[u'type_name_camel_case'] = u''
       template_mappings[u'type_name_upper_case'] = u''
     else:
       template_mappings[u'type_description'] = type_name.replace(u'_', u' ')
       template_mappings[u'type_name'] = type_name
+      template_mappings[u'type_name_camel_case'] = u''.join([
+          word.title() for word in type_name.split(u'_')])
       template_mappings[u'type_name_upper_case'] = type_name.upper()
 
   def _SetValueNameInTemplateMappings(self, template_mappings, value_name):
@@ -4422,11 +4428,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       check_scripts.extend(python_scripts)
       check_scripts.extend(python_test_scripts)
       check_scripts.extend([
-          u'{0:s}_test_get_version.py'.format(
-              project_configuration.python_module_name),
-          u'{0:s}_test_open_close.py'.format(
-              project_configuration.python_module_name),
           u'{0:s}_test_set_ascii_codepage.py'.format(
+              project_configuration.python_module_name),
+          u'{0:s}_test_support.py'.format(
               project_configuration.python_module_name)])
 
     check_scripts = sorted(check_scripts)
@@ -4533,7 +4537,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   def _GeneratePythonModuleSupportTests(
       self, project_configuration, template_mappings, include_header_file,
       output_writer):
-    """Generates a Python module support tests source file.
+    """Generates a Python module support tests script file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
@@ -4559,12 +4563,69 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    template_filename = os.path.join(template_directory, u'test_case.py')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
     for support_function in (
         u'get_version', ):
       if not include_header_file.HasFunction(support_function):
         continue
 
       template_filename = u'{0:s}.py'.format(support_function)
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, u'main.py')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+  def _GeneratePythonModuleTypeTests(
+      self, project_configuration, template_mappings, type_name, output_writer,
+      with_input=False):
+    """Generates a Python module type tests script file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      output_writer (OutputWriter): output writer.
+      with_input (Optional[bool]): True if the type is to be tested with
+          input data.
+
+    Returns:
+      bool: True if successful or False if not.
+    """
+    template_directory = os.path.join(
+        self._template_directory, u'pyyal_test_type')
+
+    output_filename = u'{0:s}_test_{1:s}.py'.format(
+        project_configuration.python_module_name, type_name)
+    output_filename = os.path.join(u'tests', output_filename)
+
+    template_filename = os.path.join(template_directory, u'header.py')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, u'imports.py')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, u'test_case.py')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: implement.
+    for type_function in (
+        u'open', u'set_ascii_codepage'):
+      template_filename = u'{0:s}.py'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -5319,9 +5380,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
+    has_python_module = self._HasPythonModule(project_configuration)
+
     self._GenerateAPISupportTests(
         project_configuration, template_mappings, include_header_file,
         output_writer)
+
+    if has_python_module:
+      self._GeneratePythonModuleSupportTests(
+          project_configuration, template_mappings, include_header_file,
+          output_writer)
 
     for type_name in api_types:
       if (type_name == u'error' and
@@ -5333,6 +5401,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if not result:
         api_types.remove(type_name)
 
+      if has_python_module:
+        self._GeneratePythonModuleTypeTests(
+            project_configuration, template_mappings, type_name, output_writer)
+
     for type_name in api_types_with_input:
       result = self._GenerateTypeTests(
           project_configuration, template_mappings, type_name, output_writer,
@@ -5340,17 +5412,17 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if not result:
         api_types_with_input.remove(type_name)
 
+      if has_python_module:
+        self._GeneratePythonModuleTypeTests(
+            project_configuration, template_mappings, type_name, output_writer,
+            with_input=True)
+
     for type_name in internal_types:
       result = self._GenerateTypeTests(
           project_configuration, template_mappings, type_name, output_writer,
           is_internal=True)
       if not result:
         internal_types.remove(type_name)
-
-    if self._HasPythonModule(project_configuration):
-      self._GeneratePythonModuleSupportTests(
-          project_configuration, template_mappings, include_header_file,
-          output_writer)
 
     self._GenerateMakefileAM(
         project_configuration, template_mappings, include_header_file,

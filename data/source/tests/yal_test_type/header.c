@@ -1,5 +1,5 @@
 /*
- * Library ${type_name} type testing program
+ * Library ${type_name} type test program
  *
  * Copyright (C) ${copyright}, ${tests_authors}
  *
