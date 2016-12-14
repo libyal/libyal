@@ -4284,7 +4284,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   """Class that generates the tests source files."""
 
   _PYTHON_FUNCTION_NAMES = (
-      u'get_version', )
+      u'support', )
 
   _PYTHON_FUNCTION_WITH_INPUT_NAMES = (
       u'open_close', u'seek', u'read')
@@ -4292,7 +4292,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   def _GenerateAPISupportTests(
       self, project_configuration, template_mappings, include_header_file,
       output_writer):
-    """Generates an API type tests source file.
+    """Generates an API support tests source file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
@@ -4529,6 +4529,51 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     self._SortSources(output_filename)
+
+  def _GeneratePythonModuleSupportTests(
+      self, project_configuration, template_mappings, include_header_file,
+      output_writer):
+    """Generates a Python module support tests source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      include_header_file (LibraryIncludeHeaderFile): library include header
+          file.
+      output_writer (OutputWriter): output writer.
+    """
+    template_directory = os.path.join(
+        self._template_directory, u'pyyal_test_support')
+
+    output_filename = u'{0:s}_test_support.py'.format(
+        project_configuration.python_module_name)
+    output_filename = os.path.join(u'tests', output_filename)
+
+    template_filename = os.path.join(template_directory, u'header.py')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, u'imports.py')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    for support_function in (
+        u'get_version', ):
+      if not include_header_file.HasFunction(support_function):
+        continue
+
+      template_filename = u'{0:s}.py'.format(support_function)
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, u'main.py')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
 
   def _GenerateTypeTest(
       self, project_configuration, template_mappings, type_name, type_function,
@@ -5301,6 +5346,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           is_internal=True)
       if not result:
         internal_types.remove(type_name)
+
+    if self._HasPythonModule(project_configuration):
+      self._GeneratePythonModuleSupportTests(
+          project_configuration, template_mappings, include_header_file,
+          output_writer)
 
     self._GenerateMakefileAM(
         project_configuration, template_mappings, include_header_file,

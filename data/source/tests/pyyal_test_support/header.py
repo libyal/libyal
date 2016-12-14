@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Python-bindings get version test program
+# Python-bindings support functions test script
 #
 # Copyright (C) ${copyright}, ${tests_authors}
 #
@@ -19,28 +19,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this software.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse
-import sys
-
-import ${python_module_name}
-
-
-def main():
-  args_parser = argparse.ArgumentParser(
-      description="Tests get_version.")
-
-  options = args_parser.parse_args()
-
-  try:
-    ${python_module_name}.get_version()
-  except Exception:
-    return False
-
-  return True
-
-
-if __name__ == "__main__":
-  if not main():
-    sys.exit(1)
-  else:
-    sys.exit(0)

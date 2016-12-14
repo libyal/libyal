@@ -1,5 +1,5 @@
 ${library_name_suffix}_test_support_SOURCES = \
-	${library_name_suffix}_test_getopt.h \
+	${library_name_suffix}_test_getopt.c ${library_name_suffix}_test_getopt.h \
 	${library_name_suffix}_test_libbfio.h \
 	${library_name_suffix}_test_libcerror.h \
 	${library_name_suffix}_test_libclocale.h \
