@@ -52,7 +52,7 @@ PyObject *${python_module_name}_${type_name}_get_root_${value_name}(
 
 		return( Py_None );
 	}
-	type_object = ${python_module_name}_${type_name}_get_root_${value_type}_type_object(
+	type_object = ${python_module_name}_${type_name}_get_${value_type}_type_object(
 	               root_${value_name} );
 
 	if( type_object == NULL )

@@ -3252,9 +3252,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       if generate_get_value_type_object:
         search_string = (
-            u'PyTypeObject *{0:s}_{1:s}_get_{2:s}{3:s}_type_object(').format(
+            u'PyTypeObject *{0:s}_{1:s}_get_{2:s}_type_object(').format(
                 project_configuration.python_module_name, type_name,
-                value_name_prefix, value_name)
+                value_name)
 
         search_string = search_string.encode(u'ascii')
         result = self._CopyFunctionToOutputFile(
