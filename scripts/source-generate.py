@@ -25,6 +25,7 @@ except ImportError:
 import source_formatter
 
 
+DATA_TYPE_BOOLEAN = u'boolean'
 DATA_TYPE_BINARY_DATA = u'binary_data'
 DATA_TYPE_DOUBLE = u'double'
 DATA_TYPE_FAT_DATE_TIME = u'fat_date_time'
@@ -58,6 +59,7 @@ FUNCTION_TYPE_GET_BY_IDENTIFIER = u'get_by_identifier'
 FUNCTION_TYPE_GET_BY_NAME = u'get_by_name'
 FUNCTION_TYPE_GET_BY_PATH = u'get_by_path'
 FUNCTION_TYPE_INITIALIZE = u'initialize'
+FUNCTION_TYPE_IS = u'is'
 FUNCTION_TYPE_OPEN = u'open'
 FUNCTION_TYPE_READ = u'read'
 FUNCTION_TYPE_SEEK = u'seek'
@@ -483,6 +485,10 @@ class PythonTypeObjectFunctionPrototype(object):
 
         self._value_name = type_function_prefix
 
+      elif self.function_type == FUNCTION_TYPE_IS:
+        if self._type_function.startswith(u'is_'):
+          self._value_name = self._type_function[3:]
+
       elif self.function_type == FUNCTION_TYPE_SET:
         if self._type_function.startswith(u'set_utf8_'):
           self._value_name = self._type_function[9:]
@@ -554,6 +560,14 @@ class PythonTypeObjectFunctionPrototype(object):
     elif type_function == u'get_data_as_string':
       description = u'The data as a string.'
 
+    elif self.function_type == FUNCTION_TYPE_IS:
+      type_name = self._type_name
+      if type_name:
+        type_name = type_name.replace(u'_', u' ')
+
+      description = u'Indicates the {0:s} is {1:s}.'.format(
+          type_name, value_name)
+
     elif value_name:
       description = u'The {0:s}.'.format(value_name)
 
@@ -567,6 +581,9 @@ class PythonTypeObjectFunctionPrototype(object):
     """
     if self.data_type == DATA_TYPE_BINARY_DATA:
       return u'Binary string or None'
+
+    if self.data_type == DATA_TYPE_BOOLEAN:
+      return u'Boolean'
 
     if self.DataTypeIsDatetime():
       return u'Datetime or None'
@@ -680,6 +697,15 @@ class PythonTypeObjectFunctionPrototype(object):
 
     elif self.function_type in (FUNCTION_TYPE_COPY, FUNCTION_TYPE_GET):
       description = [u'Retrieves the {0:s}.'.format(value_name)]
+
+    elif self.function_type == FUNCTION_TYPE_IS:
+      type_name = self._type_name
+      if type_name:
+        type_name = type_name.replace(u'_', u' ')
+
+      value_name = value_name.replace(u'_', u' ')
+      description = [u'Determines if the {0:s} is {1:s}.'.format(
+          type_name, value_name)]
 
     elif self.function_type == FUNCTION_TYPE_SET:
       value_name = value_name.replace(u'_', u' ')
@@ -3244,6 +3270,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             self._SetValueTypeInTemplateMappings(
                 template_mappings, python_function_prototype.object_type)
 
+        elif python_function_prototype.function_type == FUNCTION_TYPE_IS:
+          template_filename = u'is_value.c'
+
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
 
@@ -3794,6 +3823,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     elif type_function == u'initialize':
       function_type = FUNCTION_TYPE_INITIALIZE
+
+    elif type_function.startswith(u'is_'):
+      function_type = FUNCTION_TYPE_IS
+      data_type = DATA_TYPE_BOOLEAN
 
     elif type_function == u'open' or type_function.startswith(u'open_'):
       function_type = FUNCTION_TYPE_OPEN
@@ -4451,8 +4484,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           break
         index += 1
 
-      cppflags.insert(index, u'libcsystem')
-
     cppflags = [u'@{0:s}_CPPFLAGS@'.format(name.upper()) for name in cppflags]
 
     cppflag = u'@{0:s}_DLL_IMPORT@'.format(
@@ -4596,6 +4627,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     Returns:
       bool: True if successful or False if not.
     """
+    header_file = self._GetTypeLibraryHeaderFile(
+        project_configuration, type_name)
+
+    # TODO: handle types in non-matching header files.
+    try:
+      header_file.Read(project_configuration)
+    except IOError:
+      logging.warning(u'Skipping: {0:s}'.format(header_file.path))
+      return False
+
     template_directory = os.path.join(
         self._template_directory, u'pyyal_test_type')
 
@@ -4617,9 +4658,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: implement.
     for type_function in (
-        u'open', u'set_ascii_codepage'):
+        u'open', u'set_ascii_codepage', u'read_buffer', u'seek_offset'):
+      function_prototype = header_file.GetTypeFunction(type_name, type_function)
+      if not function_prototype:
+        continue
+
       template_filename = u'{0:s}.py'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(

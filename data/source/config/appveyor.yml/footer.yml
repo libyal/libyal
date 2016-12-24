@@ -1,4 +1,8 @@
 
+before_build:
+- cmd: xcopy /q /s C:\projects\${library_name} C:\cygwin\home\appveyor\
+- cmd: xcopy /q /s C:\projects\${library_name} C:\msys64\home\appveyor\
+
 build_script:
 - ps: .\synclibs.ps1
 - ps: .\autogen.ps1

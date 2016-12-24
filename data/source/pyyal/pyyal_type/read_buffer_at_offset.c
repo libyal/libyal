@@ -12,9 +12,9 @@ PyObject *${python_module_name}_${type_name}_read_buffer_at_offset(
 	char *buffer                = NULL;
 	static char *function       = "${python_module_name}_${type_name}_read_buffer_at_offset";
 	static char *keyword_list[] = { "size", "offset", NULL };
-	size64_t read_size          = 0;
 	ssize_t read_count          = 0;
 	off64_t read_offset         = 0;
+	int64_t read_size           = 0;
 	int result                  = 0;
 
 	if( ${python_module_name}_${type_name} == NULL )
@@ -71,9 +71,9 @@ PyObject *${python_module_name}_${type_name}_read_buffer_at_offset(
 #endif
 	if( result != 0 )
 	{
-		if( ${python_module_name}_integer_unsigned_copy_to_64bit(
+		if( ${python_module_name}_integer_signed_copy_to_64bit(
 		     integer_object,
-		     (uint64_t *) &read_size,
+		     &read_size,
 		     &error ) != 1 )
 		{
 			${python_module_name}_error_raise(
@@ -108,10 +108,19 @@ PyObject *${python_module_name}_${type_name}_read_buffer_at_offset(
 #endif
 		return( string_object );
 	}
+	if( read_size < 0 )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid read size value less than zero.",
+		 function );
+
+		return( NULL );
+	}
 	/* Make sure the data fits into a memory buffer
 	 */
-	if( ( read_size > (size64_t) INT_MAX )
-	 || ( read_size > (size64_t) SSIZE_MAX ) )
+	if( ( read_size > (int64_t) INT_MAX )
+	 || ( read_size > (int64_t) SSIZE_MAX ) )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
@@ -120,10 +129,19 @@ PyObject *${python_module_name}_${type_name}_read_buffer_at_offset(
 
 		return( NULL );
 	}
+	if( read_offset < 0 )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid read offset value less than zero.",
+		 function );
+
+		return( NULL );
+	}
 #if PY_MAJOR_VERSION >= 3
 	string_object = PyBytes_FromStringAndSize(
 	                 NULL,
-	                 read_size );
+	                 (Py_ssize_t) read_size );
 
 	buffer = PyBytes_AsString(
 	          string_object );
@@ -132,7 +150,7 @@ PyObject *${python_module_name}_${type_name}_read_buffer_at_offset(
 	 */
 	string_object = PyString_FromStringAndSize(
 	                 NULL,
-	                 read_size );
+	                 (Py_ssize_t) read_size );
 
 	buffer = PyString_AsString(
 	          string_object );
@@ -148,7 +166,7 @@ PyObject *${python_module_name}_${type_name}_read_buffer_at_offset(
 
 	Py_END_ALLOW_THREADS
 
-	if( read_count != (ssize_t) read_size )
+	if( read_count == -1 )
 	{
 		${python_module_name}_error_raise(
 		 error,

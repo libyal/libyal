@@ -11,7 +11,3 @@ configuration:
 
 install:
 - cmd: git clone https://github.com/libyal/libyal.git && move libyal ..\
-
-before_build:
-- cmd: xcopy /q /s C:\projects\${library_name} C:\cygwin\home\appveyor\
-- cmd: xcopy /q /s C:\projects\${library_name} C:\msys64\home\appveyor\
