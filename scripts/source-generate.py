@@ -3748,78 +3748,79 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           function_argument = function_prototype.arguments[value_argument_index]
           value_argument_string = function_argument.CopyToString()
 
-        function_argument = function_prototype.arguments[
-            value_argument_index + 1]
-        value_size_argument_string = function_argument.CopyToString()
+        if value_argument_index + 1 < len(function_prototype.arguments):
+          function_argument = function_prototype.arguments[
+              value_argument_index + 1]
+          value_size_argument_string = function_argument.CopyToString()
 
-        if value_argument_string == u'uint64_t *filetime':
-          data_type = DATA_TYPE_FILETIME
+          if value_argument_string == u'uint64_t *filetime':
+            data_type = DATA_TYPE_FILETIME
 
-        elif value_argument_string == u'uint64_t *floatingtime':
-          data_type = DATA_TYPE_FLOATINGTIME
+          elif value_argument_string == u'uint64_t *floatingtime':
+            data_type = DATA_TYPE_FLOATINGTIME
 
-        elif value_argument_string == u'uint32_t *fat_date_time':
-          data_type = DATA_TYPE_FAT_DATE_TIME
+          elif value_argument_string == u'uint32_t *fat_date_time':
+            data_type = DATA_TYPE_FAT_DATE_TIME
 
-        elif value_argument_string == u'uint32_t *posix_time':
-          data_type = DATA_TYPE_POSIX_TIME
+          elif value_argument_string == u'uint32_t *posix_time':
+            data_type = DATA_TYPE_POSIX_TIME
 
-        elif (value_argument_string == u'uint8_t *data' and
-            value_size_argument_string == u'size_t data_size'):
-          data_type = DATA_TYPE_BINARY_DATA
+          elif (value_argument_string == u'uint8_t *data' and
+              value_size_argument_string == u'size_t data_size'):
+            data_type = DATA_TYPE_BINARY_DATA
 
-        elif (value_argument_string == u'uint8_t *guid_data' and
-            value_size_argument_string == u'size_t guid_data_size'):
-          data_type = DATA_TYPE_GUID
+          elif (value_argument_string == u'uint8_t *guid_data' and
+              value_size_argument_string == u'size_t guid_data_size'):
+            data_type = DATA_TYPE_GUID
 
-        elif (value_argument_string == u'uint8_t *utf8_string' and
-            value_size_argument_string == u'size_t utf8_string_size'):
-          data_type = DATA_TYPE_STRING
+          elif (value_argument_string == u'uint8_t *utf8_string' and
+              value_size_argument_string == u'size_t utf8_string_size'):
+            data_type = DATA_TYPE_STRING
 
-        elif (value_argument_string == u'char *string' and
-            value_size_argument_string == u'size_t string_size'):
-          data_type = DATA_TYPE_NARROW_STRING
+          elif (value_argument_string == u'char *string' and
+              value_size_argument_string == u'size_t string_size'):
+            data_type = DATA_TYPE_NARROW_STRING
 
-        elif value_argument_string.startswith(u'double *'):
-          data_type = DATA_TYPE_DOUBLE
+          elif value_argument_string.startswith(u'double *'):
+            data_type = DATA_TYPE_DOUBLE
 
-        elif value_argument_string.startswith(u'float *'):
-          data_type = DATA_TYPE_FLOAT
+          elif value_argument_string.startswith(u'float *'):
+            data_type = DATA_TYPE_FLOAT
 
-        elif value_argument_string.startswith(u'int *'):
-          data_type = DATA_TYPE_INT
+          elif value_argument_string.startswith(u'int *'):
+            data_type = DATA_TYPE_INT
 
-        elif value_argument_string.startswith(u'int32_t *'):
-          data_type = DATA_TYPE_INT32
+          elif value_argument_string.startswith(u'int32_t *'):
+            data_type = DATA_TYPE_INT32
 
-        elif value_argument_string.startswith(u'off64_t *'):
-          data_type = DATA_TYPE_OFF64
+          elif value_argument_string.startswith(u'off64_t *'):
+            data_type = DATA_TYPE_OFF64
 
-        elif value_argument_string.startswith(u'size32_t *'):
-          data_type = DATA_TYPE_SIZE32
+          elif value_argument_string.startswith(u'size32_t *'):
+            data_type = DATA_TYPE_SIZE32
 
-        elif value_argument_string.startswith(u'size64_t *'):
-          data_type = DATA_TYPE_SIZE64
+          elif value_argument_string.startswith(u'size64_t *'):
+            data_type = DATA_TYPE_SIZE64
 
-        elif value_argument_string.startswith(u'uint8_t *'):
-          data_type = DATA_TYPE_UINT8
+          elif value_argument_string.startswith(u'uint8_t *'):
+            data_type = DATA_TYPE_UINT8
 
-        elif value_argument_string.startswith(u'uint16_t *'):
-          data_type = DATA_TYPE_UINT16
+          elif value_argument_string.startswith(u'uint16_t *'):
+            data_type = DATA_TYPE_UINT16
 
-        elif value_argument_string.startswith(u'uint32_t *'):
-          data_type = DATA_TYPE_UINT32
+          elif value_argument_string.startswith(u'uint32_t *'):
+            data_type = DATA_TYPE_UINT32
 
-        elif value_argument_string.startswith(u'uint64_t *'):
-          data_type = DATA_TYPE_UINT64
+          elif value_argument_string.startswith(u'uint64_t *'):
+            data_type = DATA_TYPE_UINT64
 
-        elif value_argument_string.startswith(
-            project_configuration.library_name):
-          data_type = DATA_TYPE_OBJECT
+          elif value_argument_string.startswith(
+              project_configuration.library_name):
+            data_type = DATA_TYPE_OBJECT
 
-          object_type, _, _ = value_argument_string.partition(u' ')
-          _, _, object_type = object_type.partition(u'_')
-          object_type = object_type[:-2]
+            object_type, _, _ = value_argument_string.partition(u' ')
+            _, _, object_type = object_type.partition(u'_')
+            object_type = object_type[:-2]
 
     elif type_function == u'initialize':
       function_type = FUNCTION_TYPE_INITIALIZE
