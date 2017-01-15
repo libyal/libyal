@@ -2866,7 +2866,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateTypeHeaderFile(
       self, project_configuration, template_mappings, type_name,
-      python_function_prototypes, output_writer):
+      python_function_prototypes, output_writer, is_pseudo_type=False):
     """Generates a Python type object header file.
 
     Args:
@@ -2878,6 +2878,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           (dict[str, PythonTypeObjectFunctionPrototype]): Python type object
           function prototypes per name.
       output_writer (OutputWriter): output writer.
+      is_pseudo_type (Optional[bool]): True if type is a pseudo type.
     """
     output_filename = u'{0:s}_{1:s}.h'.format(
         project_configuration.python_module_name, type_name)
@@ -2889,7 +2890,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         u'initialize' not in python_function_prototypes and
         u'free' in python_function_prototypes)
 
-    template_directory = os.path.join(self._template_directory, u'pyyal_type')
+    if is_pseudo_type:
+      template_directory = os.path.join(
+          self._template_directory, u'pyyal_pseudo_type')
+    else:
+      template_directory = os.path.join(self._template_directory, u'pyyal_type')
+
+    if is_pseudo_type:
+      # TODO: determine base type.
+      template_mappings[u'base_type_name'] = u'item'
+      # TODO: determine base type.
+      template_mappings[u'base_type_description'] = u'item'
+      # TODO: determine base indicator.
+      template_mappings[u'base_type_indicator'] = u''
 
     template_filename = os.path.join(template_directory, u'header.h')
     self._GenerateSection(
@@ -2920,34 +2933,37 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     python_type_prefix = u'{0:s}_{1:s}'.format(
         project_configuration.python_module_name, type_name)
 
-    if with_parent:
-      template_filename = u'new_with_parent.h'
-    else:
-      template_filename = u'new.h'
+    if not is_pseudo_type:
+      if with_parent:
+        template_filename = u'new_with_parent.h'
+      else:
+        template_filename = u'new.h'
 
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    if open_support:
-      template_filename = os.path.join(template_directory, u'new_open.h')
+      template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+      if open_support:
+        template_filename = os.path.join(template_directory, u'new_open.h')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
+
       # TODO: make open with file object object generated conditionally?
       # if u'open_file_object' in python_function_prototypes:
 
-    template_filename = os.path.join(template_directory, u'init.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    if not is_pseudo_type:
+      template_filename = os.path.join(template_directory, u'init.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'free.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    if not is_pseudo_type:
+      template_filename = os.path.join(template_directory, u'free.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
@@ -3017,7 +3033,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateTypeSourceFile(
       self, project_configuration, template_mappings, type_name,
-      python_function_prototypes, output_writer):
+      python_function_prototypes, output_writer, is_pseudo_type=False):
     """Generates a Python type object source file.
 
     Args:
@@ -3029,6 +3045,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           (dict[str, PythonTypeObjectFunctionPrototype]): Python type object
           function prototypes per name.
       output_writer (OutputWriter): output writer.
+      is_pseudo_type (Optional[bool]): True if type is a pseudo type.
     """
     output_filename = u'{0:s}_{1:s}.c'.format(
         project_configuration.python_module_name, type_name)
@@ -3096,7 +3113,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           sequence_type_name = self._GetSequenceName(sequence_type_name)
           python_module_include_names.add(sequence_type_name)
 
-    template_directory = os.path.join(self._template_directory, u'pyyal_type')
+    if is_pseudo_type:
+      template_directory = os.path.join(
+          self._template_directory, u'pyyal_pseudo_type')
+    else:
+      template_directory = os.path.join(self._template_directory, u'pyyal_type')
+
+    if is_pseudo_type:
+      # TODO: determine base type.
+      template_mappings[u'base_type_name'] = u'item'
+      # TODO: determine base type.
+      template_mappings[u'base_type_description'] = u'item'
+      # TODO: determine base indicator.
+      template_mappings[u'base_type_indicator'] = u''
 
     template_filename = os.path.join(template_directory, u'header.c')
     self._GenerateSection(
@@ -3142,15 +3171,16 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if with_parent:
-      template_filename = u'new_with_parent.c'
-    else:
-      template_filename = u'new.c'
+    if not is_pseudo_type:
+      if with_parent:
+        template_filename = u'new_with_parent.c'
+      else:
+        template_filename = u'new.c'
 
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     if open_support:
       template_filename = os.path.join(template_directory, u'new_open.c')
@@ -3158,27 +3188,29 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if with_parent:
-      template_filename = u'init_with_parent.c'
-    elif open_support:
-      template_filename = u'init_with_input.c'
-    else:
-      template_filename = u'init.c'
+    if not is_pseudo_type:
+      if with_parent:
+        template_filename = u'init_with_parent.c'
+      elif open_support:
+        template_filename = u'init_with_input.c'
+      else:
+        template_filename = u'init.c'
 
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
-    if with_parent:
-      template_filename = u'free_with_parent.c'
-    else:
-      template_filename = u'free.c'
+    if not is_pseudo_type:
+      if with_parent:
+        template_filename = u'free_with_parent.c'
+      else:
+        template_filename = u'free.c'
 
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     generate_get_value_type_object = False
     value_type_objects = set([])
@@ -3598,7 +3630,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
   def _GetPythonTypeObjectFunctionPrototype(
-      self, project_configuration, type_name, type_function, function_prototype):
+      self, project_configuration, type_name, type_function, function_prototype,
+      is_pseudo_type=False):
     """Determines the Python type object function prototypes.
 
     Args:
@@ -3606,6 +3639,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       type_name (str): type name.
       type_function (str): type function.
       function_prototype (FunctionPrototype): C function prototype.
+      is_pseudo_type (Optional[bool]): True if type is a pseudo type.
 
     Returns:
       PythonTypeObjectFunctionPrototype: Python type object function prototype
@@ -3619,6 +3653,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     if type_function in (u'free', u'initialize'):
       self_argument = u'{0:s}_{1:s}_t **{1:s}'.format(
           project_configuration.library_name, type_name)
+
+    elif is_pseudo_type:
+      base_type_name = u'item'
+      self_argument = u'{0:s}_{1:s}_t *{2:s}'.format(
+          project_configuration.library_name, base_type_name, type_name)
+
     else:
       self_argument = u'{0:s}_{1:s}_t *{1:s}'.format(
           project_configuration.library_name, type_name)
@@ -3943,12 +3983,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     return python_function_prototype
 
   def _GetPythonTypeObjectFunctionPrototypes(
-      self, project_configuration, type_name):
+      self, project_configuration, type_name, is_pseudo_type=False):
     """Determines the Python type object function prototypes.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       type_name (str): name of type.
+      is_pseudo_type (Optional[bool]): True if type is a pseudo type.
 
     Returns:
       dict[str, PythonTypeObjectFunctionPrototype]: Python type object
@@ -3990,7 +4031,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           type_function.endswith(u'_data_size')):
         continue
 
-      # Skip functions that retrieves the size of an UTF-8 string.
+      # Skip functions that retrieve the size of an UTF-8 string.
       if (type_function.startswith(u'get_utf8_') and
           type_function.endswith(u'_size')):
         continue
@@ -4010,6 +4051,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       # TODO: ignore these functions for now.
+      # TODO: improve check only to apply for types with pseudo types.
       if (type_function == u'get_type' and ( 
           project_configuration.library_name in (
               u'libmsiecf', u'libolecf', u'libpff'))):
@@ -4038,13 +4080,16 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       python_function_prototype = self._GetPythonTypeObjectFunctionPrototype(
-          project_configuration, type_name, type_function, function_prototype)
+          project_configuration, type_name, type_function, function_prototype,
+          is_pseudo_type=is_pseudo_type)
 
       if (not python_function_prototype or
           not python_function_prototype.function_type):
         logging.warning(u'Skipping unsupported type function: {0:s}'.format(
           function_name))
         continue
+
+      # TODO: Skip functions that retrieve the size of a narrow string.
 
       type_function = python_function_prototype.type_function
       python_function_prototypes[type_function] = python_function_prototype
@@ -4231,14 +4276,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       api_types, api_types_with_input = (
           include_header_file.GetAPITypeTestGroups())
 
+      api_pseudo_types = include_header_file.GetAPIPseudoTypeTestGroups()
+
       api_types.extend(api_types_with_input)
+      api_types.extend(api_pseudo_types)
       types_with_sequence_types = set([])
 
       for type_name in api_types:
         self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
+        is_pseudo_type = type_name in api_pseudo_types
+
         python_function_prototypes = self._GetPythonTypeObjectFunctionPrototypes(
-            project_configuration, type_name)
+            project_configuration, type_name, is_pseudo_type=is_pseudo_type)
 
         for type_function, python_function_prototype in iter(
             python_function_prototypes.items()):
@@ -4250,11 +4300,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
         self._GenerateTypeSourceFile(
             project_configuration, template_mappings, type_name,
-            python_function_prototypes, output_writer)
+            python_function_prototypes, output_writer,
+            is_pseudo_type=is_pseudo_type)
 
         self._GenerateTypeHeaderFile(
             project_configuration, template_mappings, type_name,
-            python_function_prototypes, output_writer)
+            python_function_prototypes, output_writer,
+            is_pseudo_type=is_pseudo_type)
 
       for sequence_type_name, type_is_object in types_with_sequence_types:
         self._SetTypeNameInTemplateMappings(

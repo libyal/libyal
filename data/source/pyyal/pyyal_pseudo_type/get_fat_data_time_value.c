@@ -2,7 +2,7 @@
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_${value_name}(
-           ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
+           ${python_module_name}_${base_type_name}_t *${python_module_name}_${base_type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
 	PyObject *datetime_object = NULL;
@@ -13,11 +13,11 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
-	if( ${python_module_name}_${type_name} == NULL )
+	if( ${python_module_name}_${base_type_name} == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${type_description}.",
+		 "%s: invalid ${base_type_description}.",
 		 function );
 
 		return( NULL );
@@ -25,7 +25,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	Py_BEGIN_ALLOW_THREADS
 
 	result = ${library_name}_${type_name}_get_${value_name}(
-	          ${python_module_name}_${type_name}->${type_name},
+	          ${python_module_name}_${base_type_name}->${base_type_name},
 	          &fat_date_time,
 	          &error );
 
@@ -54,7 +54,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
-           ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
+           ${python_module_name}_${base_type_name}_t *${python_module_name}_${base_type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
@@ -65,11 +65,11 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
-	if( ${python_module_name}_${type_name} == NULL )
+	if( ${python_module_name}_${base_type_name} == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid ${type_description}.",
+		 "%s: invalid ${base_type_description}.",
 		 function );
 
 		return( NULL );
@@ -77,7 +77,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
 	Py_BEGIN_ALLOW_THREADS
 
 	result = ${library_name}_${type_name}_get_${value_name}(
-	          ${python_module_name}_${type_name}->${type_name},
+	          ${python_module_name}_${base_type_name}->${base_type_name},
 	          &fat_date_time,
 	          &error );
 
