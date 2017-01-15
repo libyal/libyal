@@ -30,8 +30,7 @@
 
     ${library_name_suffix}_${type_name}.open_file_object(file_object)
 
-    # TODO: change MemoryError into IOError
-    with self.assertRaises(MemoryError):
+    with self.assertRaises(IOError):
       ${library_name_suffix}_${type_name}.open_file_object(file_object)
 
     ${library_name_suffix}_${type_name}.close()

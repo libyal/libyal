@@ -35,7 +35,7 @@
 
 #if defined( WINAPI )
 
-void (*${tools_name}_signal_signal_handler)( olecftools_signal_t ) = NULL;
+void (*${tools_name}_signal_signal_handler)( ${tools_name}_signal_t ) = NULL;
 
 /* Signal handler for Ctrl+C or Ctrl+Break signals
  */

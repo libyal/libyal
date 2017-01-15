@@ -952,6 +952,7 @@ class LibraryIncludeHeaderFile(object):
     super(LibraryIncludeHeaderFile, self).__init__()
     self._api_functions_group = {}
     self._api_functions_with_input_group = {}
+    self._api_pseudo_types_group = {}
     self._api_types_group = {}
     self._api_types_with_input_group = {}
     self._check_signature_type = None
@@ -989,7 +990,7 @@ class LibraryIncludeHeaderFile(object):
           found_match = True
           break
 
-      # Ignore the section header is just informative.
+      # Ignore the section header if it is just informative.
       if not found_match:
         if group_name == u'support':
           signature_type = self.GetCheckSignatureType()
@@ -997,6 +998,13 @@ class LibraryIncludeHeaderFile(object):
             self._api_functions_with_input_group[group_name] = section_name
           else:
             self._api_functions_group[group_name] = section_name
+
+        else:
+          # TODO: improve pseudo type detection.
+          if group_name.endswith(u'_item'):
+            group_name = group_name[:-5]
+
+          self._api_pseudo_types_group[group_name] = section_name
 
       elif self._library_name != u'libcerror' and group_name == u'error':
         self._api_functions_group[group_name] = section_name
@@ -1026,6 +1034,17 @@ class LibraryIncludeHeaderFile(object):
     return (
         self._api_functions_group.keys(),
         self._api_functions_with_input_group.keys())
+
+  def GetAPIPseudoTypeTestGroups(self):
+    """Determines the API pseudo type test groups.
+
+    Returns:
+      list[str]: names of API pseudo type groups without test data.
+    """
+    if not self._api_types_group and not self._api_types_with_input_group:
+      self._AnalyzeFunctionGroups()
+
+    return self._api_pseudo_types_group.keys()
 
   def GetAPITypeTestGroups(self):
     """Determines the API type test groups.
@@ -2415,14 +2434,11 @@ class LibraryManPageGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    stat_object = os.stat(self._library_include_header_path)
-    modification_time = time.gmtime(stat_object.st_mtime)
-
     backup_filename = u'{0:s}.{1:d}'.format(output_filename, os.getpid())
     shutil.copyfile(output_filename, backup_filename)
 
     template_mappings[u'date'] = time.strftime(
-        u'%B %d, %Y', modification_time).replace(u' 0', u'  ')
+        u'%B %d, %Y', time.gmtime()).replace(u' 0', u'  ')
 
     template_filename = os.path.join(self._template_directory, u'header.txt')
     self._GenerateSection(
@@ -4400,7 +4416,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   def _GenerateMakefileAM(
       self, project_configuration, template_mappings, include_header_file,
       makefile_am_file, api_functions, api_functions_with_input, api_types,
-      api_types_with_input, internal_types, output_writer):
+      api_types_with_input, api_pseudo_types, internal_types, output_writer):
     """Generates a tests Makefile.am file.
 
     Args:
@@ -4416,12 +4432,15 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       api_types (list[str]): names of API types to test.
       api_types_with_input (list[str]): names of API types to test with
           input data.
+      api_pseudo_types (list[str]): names of API pseudo types to test.
       internal_types (list[str]): names of internal types to test.
       output_writer (OutputWriter): output writer.
     """
     tests = set(api_functions).union(set(api_functions_with_input))
     tests.update(set(api_types).union(set(api_types_with_input)))
-    tests = sorted(tests.union(set(internal_types)))
+    tests.update(set(api_pseudo_types))
+    tests.update(set(internal_types))
+    tests = sorted(tests)
 
     has_python_module = self._HasPythonModule(project_configuration)
 
@@ -4430,12 +4449,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     output_filename = os.path.join(u'tests', u'Makefile.am')
 
     test_scripts = []
-    if api_functions or api_functions_with_input:
-      test_script = u'test_api_functions.sh'
-      test_scripts.append(test_script)
-
-    if api_types or api_types_with_input:
-      test_script = u'test_api_types.sh'
+    if (api_functions or api_functions_with_input or api_types or
+        api_types_with_input or api_pseudo_types):
+      test_script = u'test_library.sh'
       test_scripts.append(test_script)
 
     tool_name = u'{0:s}info'.format(
@@ -4451,7 +4467,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       test_scripts.append(test_script)
 
     python_scripts = []
-    python_test_scripts = [u'test_python_functions.sh']
+    python_test_scripts = [u'test_python_module.sh']
 
     check_scripts = [u'test_runner.sh']
     check_scripts.extend(test_scripts)
@@ -4536,7 +4552,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
         template_mappings[u'library_function'] = group_name
 
-      elif group_name in api_types or group_name in internal_types:
+      elif (group_name in api_types or group_name in api_pseudo_types or
+            group_name in internal_types):
         if project_configuration.library_name == u'libcerror':
           template_filename = u'yal_test_type_no_error.am'
         else:
@@ -4660,7 +4677,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     for type_function in (
-        u'open', u'set_ascii_codepage', u'read_buffer', u'seek_offset'):
+        u'signal_abort', u'open', u'set_ascii_codepage', u'read_buffer',
+        u'seek_offset'):
       function_prototype = header_file.GetTypeFunction(type_name, type_function)
       if not function_prototype:
         continue
@@ -5172,8 +5190,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
   def _GetTemplateMappings(
       self, project_configuration, api_functions, api_functions_with_input,
-      api_types, api_types_with_input, internal_types, python_functions,
-      python_functions_with_input):
+      api_types, api_types_with_input, api_pseudo_types, internal_types,
+      python_functions, python_functions_with_input):
     """Retrieves the template mappings.
 
     Args:
@@ -5184,6 +5202,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       api_types (list[str]): names of API types to test.
       api_types_with_input (list[str]): names of API types to test with
           input data.
+      api_pseudo_types (list[str]): names of API pseudo types to test.
       internal_types (list[str]): names of internal types to test.
       python_functions (list[str]): names of Python functions to test.
       python_functions_with_input (list[str]): names of Python functions to
@@ -5195,14 +5214,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     """
     template_mappings = project_configuration.GetTemplateMappings()
 
-    template_mappings[u'test_api_functions'] = u' '.join(sorted(api_functions))
-    template_mappings[u'test_api_functions_with_input'] = u' '.join(
-        sorted(api_functions_with_input))
-
     test_api_types = set(api_types).union(set(internal_types))
-    template_mappings[u'test_api_types'] = u' '.join(sorted(test_api_types))
-    template_mappings[u'test_api_types_with_input'] = u' '.join(
-        sorted(api_types_with_input))
+    library_tests = sorted(set(api_functions).union(test_api_types))
+    library_tests_with_input = sorted(
+        set(api_functions_with_input).union(set(api_types_with_input)))
+
+    template_mappings[u'library_tests'] = u' '.join(library_tests)
+    template_mappings[u'library_tests_with_input'] = u' '.join(
+        library_tests_with_input)
 
     template_mappings[u'test_python_functions'] = u' '.join(
         sorted(python_functions))
@@ -5291,6 +5310,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     api_types, api_types_with_input = (
         include_header_file.GetAPITypeTestGroups())
 
+    api_pseudo_types = include_header_file.GetAPIPseudoTypeTestGroups()
+
     # TODO: handle internal functions
     types = self._GetLibraryTypes(project_configuration, makefile_am_file)
 
@@ -5312,6 +5333,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     logging.info(u'Found public functions: {0:s}'.format(
         u', '.join(public_functions)))
     logging.info(u'Found public types: {0:s}'.format(u', '.join(public_types)))
+    logging.info(u'Found public pseudo types: {0:s}'.format(
+        u', '.join(api_pseudo_types)))
     logging.info(u'Found internal types: {0:s}'.format(
         u', '.join(internal_types)))
 
@@ -5339,8 +5362,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     template_mappings = self._GetTemplateMappings(
         project_configuration, api_functions, api_functions_with_input,
-        api_types, api_types_with_input, internal_types, test_python_functions,
-        test_python_functions_with_input)
+        api_types, api_types_with_input, api_pseudo_types, internal_types,
+        test_python_functions, test_python_functions_with_input)
 
     for directory_entry in os.listdir(self._template_directory):
       # Ignore yal_test_library.h in favor of yal_test_libyal.h
@@ -5384,12 +5407,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       else:
         output_filename = directory_entry
 
-      if directory_entry in (
-          u'test_api_functions.ps1', u'test_api_functions.sh'):
-        force_create = bool(public_functions)
-
-      elif directory_entry in (u'test_api_types.ps1', u'test_api_types.sh'):
-        force_create = bool(public_types)
+      if directory_entry in (u'test_library.ps1', u'test_library.sh'):
+        force_create = bool(public_functions) or bool(public_types)
 
       elif directory_entry in (u'test_yalinfo.ps1', u'test_yalinfo.sh'):
         tool_name = u'{0:s}info'.format(
@@ -5457,6 +5476,20 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             project_configuration, template_mappings, type_name, output_writer,
             with_input=True)
 
+    for type_name in api_pseudo_types:
+      if (type_name == u'error' and
+          project_configuration.library_name == u'libcerror'):
+        continue
+
+      result = self._GenerateTypeTests(
+          project_configuration, template_mappings, type_name, output_writer)
+      if not result:
+        api_pseudo_types.remove(type_name)
+
+      if has_python_module:
+        self._GeneratePythonModuleTypeTests(
+            project_configuration, template_mappings, type_name, output_writer)
+
     for type_name in internal_types:
       result = self._GenerateTypeTests(
           project_configuration, template_mappings, type_name, output_writer,
@@ -5467,7 +5500,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateMakefileAM(
         project_configuration, template_mappings, include_header_file,
         makefile_am_file, api_functions, api_functions_with_input, api_types,
-        api_types_with_input, internal_types, output_writer)
+        api_types_with_input, api_pseudo_types, internal_types, output_writer)
 
 
 class ToolsSourceFileGenerator(SourceFileGenerator):

@@ -43,6 +43,16 @@ PyObject *${python_module_name}_${type_name}_open_file_object(
 
 		return( NULL );
 	}
+	if( ${python_module_name}_${type_name}->file_io_handle != NULL )
+	{
+		${python_module_name}_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: invalid ${type_description} - file IO handle already set.",
+		 function );
+
+		goto on_error;
+	}
 	if( ${python_module_name}_file_object_initialize(
 	     &( ${python_module_name}_${type_name}->file_io_handle ),
 	     file_object,

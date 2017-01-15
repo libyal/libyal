@@ -23,7 +23,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_${value_name}(
+	result = ${library_name}_${type_name}_get_${value_name}_by_index(
 	          ( (${python_module_name}_${type_name}_t *) ${python_module_name}_${type_name} )->${type_name},
 	          ${value_name}_index,
 	          &${value_name},
