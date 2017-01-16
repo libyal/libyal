@@ -4290,6 +4290,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         python_function_prototypes = self._GetPythonTypeObjectFunctionPrototypes(
             project_configuration, type_name, is_pseudo_type=is_pseudo_type)
 
+        if not python_function_prototypes:
+          logging.warning((
+              u'Missing function prototypes for type: {0:s} skipping '
+              u'generation of Python type object source and header '
+              u'files.').format(type_name))
+          continue
+
         for type_function, python_function_prototype in iter(
             python_function_prototypes.items()):
 
