@@ -3,13 +3,13 @@
  */
 PyObject *${python_module_name}_${type_name}_is_${value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
-           PyObject *arguments PYREGF_ATTRIBUTE_UNUSED )
+           PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "${python_module_name}_${type_name}_is_${value_name}";
 	int result               = 0;
 
-	PYREGF_UNREFERENCED_PARAMETER( arguments )
+	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
 	if( ${python_module_name}_${type_name} == NULL )
 	{

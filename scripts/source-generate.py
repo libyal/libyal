@@ -5342,6 +5342,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: weave existing test files?
     # TODO: use data files to generate test data tests/input/.data/<name>
     # TODO: add support for options in configuration file to set option sets.
+    # TODO: fix creation of fwsi_test_file_entry_(item) when include header
+    # file contains (item).
 
     if not self._HasTests(project_configuration):
       return
