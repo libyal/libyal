@@ -5344,6 +5344,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: add support for options in configuration file to set option sets.
     # TODO: fix creation of fwsi_test_file_entry_(item) when include header
     # file contains (item).
+    # TODO: fix libwrc message-table
 
     if not self._HasTests(project_configuration):
       return
