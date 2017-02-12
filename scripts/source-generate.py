@@ -5345,6 +5345,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: fix creation of fwsi_test_file_entry_(item) when include header
     # file contains (item).
     # TODO: fix libwrc message-table
+    # TODO: handle libfsntfs $attribute_name
 
     if not self._HasTests(project_configuration):
       return
