@@ -1997,8 +1997,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    # TODO: add the right condition.
-    if False:
+    if (os.path.exists(u'syncwinflexbison.ps1') or
+        os.path.exists(u'syncwinflexbison.sh')):
       template_filename = os.path.join(template_directory, u'winflexbison.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -4404,6 +4404,30 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   _PYTHON_FUNCTION_WITH_INPUT_NAMES = (
       u'open_close', u'seek', u'read')
 
+  def _FormatTestData(self, data):
+    """Formats the test data as a C byte array.
+
+    Args:
+      data (bytes): data.
+
+    Returns:
+      str: data as a C byte array.
+    """
+    # TODO: print text as text?
+
+    hexadecimal_lines = []
+    data_size = len(data)
+    for block_index in xrange(0, data_size, 16):
+      data_string = data[block_index:block_index + 16]
+
+      hexadecimal_string = ', '.join([
+          u'0x{0:02x}'.format(ord(byte_value))
+          for byte_value in data_string[0:16]])
+
+      hexadecimal_lines.append(u'\t{0:s},'.format(hexadecimal_string))
+
+    return u'\n'.join(hexadecimal_lines)
+
   def _GenerateAPISupportTests(
       self, project_configuration, template_mappings, include_header_file,
       output_writer):
@@ -4940,6 +4964,26 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    # TODO: include test data.
+    test_data_directory = os.path.join(u'tests', u'data')
+    if os.path.exists(test_data_directory):
+      for directory_entry in os.listdir(test_data_directory):
+        directory_entry_type_name, _, _ = directory_entry.rpartition(u'.')
+        if directory_entry_type_name != type_name:
+          continue
+
+        test_data_file = os.path.join(test_data_directory, directory_entry)
+        with open(test_data_file, 'rb') as file_object:
+          test_data = file_object.read()
+
+        template_mappings[u'test_data'] = self._FormatTestData(test_data)
+        template_mappings[u'test_data_size'] = len(test_data)
+
+        template_filename = os.path.join(template_directory, u'test_data.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
 
     # TODO: treat external functions as internal when initialize_is_internal
     # except for free.
