@@ -4424,7 +4424,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           u'0x{0:02x}'.format(ord(byte_value))
           for byte_value in data_string[0:16]])
 
-      hexadecimal_lines.append(u'\t{0:s},'.format(hexadecimal_string))
+      if len(data_string) < 16:
+        hexadecimal_lines.append(u'\t{0:s}'.format(hexadecimal_string))
+      else:
+        hexadecimal_lines.append(u'\t{0:s},'.format(hexadecimal_string))
 
     return u'\n'.join(hexadecimal_lines)
 
@@ -4965,26 +4968,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: include test data.
-    test_data_directory = os.path.join(u'tests', u'data')
-    if os.path.exists(test_data_directory):
-      for directory_entry in os.listdir(test_data_directory):
-        directory_entry_type_name, _, _ = directory_entry.rpartition(u'.')
-        if directory_entry_type_name != type_name:
-          continue
-
-        test_data_file = os.path.join(test_data_directory, directory_entry)
-        with open(test_data_file, 'rb') as file_object:
-          test_data = file_object.read()
-
-        template_mappings[u'test_data'] = self._FormatTestData(test_data)
-        template_mappings[u'test_data_size'] = len(test_data)
-
-        template_filename = os.path.join(template_directory, u'test_data.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
-
     # TODO: treat external functions as internal when initialize_is_internal
     # except for free.
     have_extern = True
@@ -5002,6 +4985,36 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
+
+    test_data_directory = os.path.join(u'tests', u'data')
+    if os.path.exists(test_data_directory):
+      for directory_entry in sorted(os.listdir(test_data_directory)):
+        test_type_name, _, test_data_suffix = directory_entry.partition(u'.')
+        if test_type_name != type_name:
+          continue
+
+        test_data_suffix, _, test_data_index = test_data_suffix.rpartition(u'.')
+        if test_data_suffix:
+          test_data_suffix = u'_{0:s}'.format(test_data_suffix)
+
+        test_data_file = os.path.join(test_data_directory, directory_entry)
+        with open(test_data_file, 'rb') as file_object:
+          test_data = file_object.read()
+
+        template_mappings[u'test_data'] = self._FormatTestData(test_data)
+        template_mappings[u'test_data_size'] = len(test_data)
+        template_mappings[u'test_data_index'] = test_data_index
+        template_mappings[u'test_data_suffix'] = test_data_suffix
+
+        template_filename = os.path.join(template_directory, u'test_data.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
+
+    function_prototype = header_file.GetTypeFunction(type_name, u'initialize')
+    if function_prototype:
+      initialize_is_internal = not function_prototype.have_extern
+      initialize_number_of_arguments = len(function_prototype.arguments)
 
       if initialize_number_of_arguments == 2:
         function_name, test_function_name, have_extern = self._GenerateTypeTest(
