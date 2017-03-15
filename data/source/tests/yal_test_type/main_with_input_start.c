@@ -1,6 +1,27 @@
 #if !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 )
 	if( source != NULL )
 	{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = ${library_name}_check_${type_name}_signature_wide(
+		          source,
+		          &error );
+#else
+		result = ${library_name}_check_${type_name}_signature(
+		          source,
+		          &error );
+#endif
+
+		${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	         "error",
+	         error );
+	}
+	if( result != 0 )
+	{
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
 		 "${library_name}_${type_name}_open",
 		 ${library_name_suffix}_test_${type_name}_open,

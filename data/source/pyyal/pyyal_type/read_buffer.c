@@ -100,7 +100,7 @@ PyObject *${python_module_name}_${type_name}_read_buffer(
 
 		result = ${library_name}_${type_name}_get_size(
 			  ${python_module_name}_${type_name}->${type_name},
-			  &read_size,
+			  (size64_t *) &read_size,
 			  &error );
 
 		Py_END_ALLOW_THREADS

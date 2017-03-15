@@ -13,8 +13,8 @@ PyObject *${python_module_name}_${type_name}_set_keys(
 	static char *keyword_list[]       = { "mode", "key", "tweak_key", NULL };
 	char *key_data                    = NULL;
 	char *tweak_key_data              = NULL;
-        Py_ssize_t key_data_size          = 0;
-        Py_ssize_t tweak_key_data_size    = 0;
+	Py_ssize_t key_data_size          = 0;
+	Py_ssize_t tweak_key_data_size    = 0;
 	int mode                          = 0;
 	int result                        = 0;
 
