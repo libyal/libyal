@@ -978,6 +978,7 @@ class LibraryIncludeHeaderFile(object):
         continue
 
       group_name = section_name.replace(u' ', u'_')
+      group_name = group_name.replace(u'-', u'_')
       group_name = group_name.lower()
       group_name, _, _ = group_name.rpartition(u'_functions')
 
