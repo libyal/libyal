@@ -1,0 +1,5 @@
+${library_name} (@VERSION@-1) unstable; urgency=low
+
+  * Auto-generated
+
+ -- ${authors}  @DPKG_DATE@

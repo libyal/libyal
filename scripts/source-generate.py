@@ -2022,6 +2022,49 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+  def _GenerateDpkg(
+      self, project_configuration, template_mappings, output_writer,
+      output_directory):
+    """Generates the dpkg packaging files.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_directory (str): path of the output directory.
+    """
+    # TODO: add support for projects without Python bindings.
+
+    template_directory = os.path.join(self._template_directory, u'dpkg')
+
+    for directory_entry in os.listdir(template_directory):
+      template_filename = os.path.join(template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      output_filename = directory_entry
+      if output_filename.startswith(u'libyal'):
+        output_filename = u'{0:s}{1:s}'.format(
+            project_configuration.library_name, output_filename[6:])
+
+      output_filename = os.path.join(output_directory, output_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
+    template_directory = os.path.join(
+        self._template_directory, u'dpkg', u'source')
+    output_directory = os.path.join(output_directory, u'source')
+
+    for directory_entry in os.listdir(template_directory):
+      template_filename = os.path.join(template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      output_filename = os.path.join(output_directory, directory_entry)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
+
   def Generate(self, project_configuration, output_writer):
     """Generates configuration files.
 
@@ -2030,7 +2073,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
     """
     # TODO: generate spec file, what about Python versus non-Python?
-    # TODO: generate dpkg files, what about Python versus non-Python?
 
     makefile_am_file = self._GetLibraryMakefileAM(project_configuration)
 
@@ -2040,7 +2082,10 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               self._library_makefile_am_path))
       return
 
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = project_configuration.GetTemplateMappings(
+        authors_separator=u',\n *                          ')
+    template_mappings[u'authors'] = u'Joachim Metz <joachim.metz@gmail.com>'
+
     pc_libs_private = []
     for library in makefile_am_file.libraries:
       if library == u'libdl':
@@ -2069,6 +2114,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer,
         u'appveyor.yml')
+
+    self._GenerateDpkg(
+        project_configuration, template_mappings, output_writer, u'dpkg')
 
 
 class IncludeSourceFileGenerator(SourceFileGenerator):
