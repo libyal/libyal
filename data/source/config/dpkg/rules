@@ -19,5 +19,10 @@ override_dh_install:
 
 .PHONY: override_dh_strip
 override_dh_strip:
-	dh_strip --dbg-package=${library_name}-dbg
+ifeq (,$$(filter nostrip,$$(DEB_BUILD_OPTIONS)))
+	dh_strip -p${library_name} --dbg-package=${library_name}-dbg
+	dh_strip -p${library_name}-tools --dbg-package=${library_name}-tools-dbg
+	dh_strip -p${library_name}-python --dbg-package=${library_name}-python-dbg
+	dh_strip -p${library_name}-python3 --dbg-package=${library_name}-python3-dbg
+endif
 

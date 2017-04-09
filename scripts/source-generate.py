@@ -89,6 +89,7 @@ class ProjectConfiguration(object):
     self.python_module_year_of_creation = None
 
     self.tools_authors = None
+    self.tools_description = None
     self.tools_name = None
     self.tools_names = None
 
@@ -163,13 +164,15 @@ class ProjectConfiguration(object):
 
     self.tools_authors = self._GetOptionalConfigValue(
         config_parser, u'tools', u'authors', default_value=self.project_authors)
+    self.tools_description = self._GetConfigValue(
+        config_parser, u'tools', u'description')
     self.tools_name = u'{0:s}tools'.format(self.library_name_suffix)
     self.tools_names = self._GetOptionalConfigValue(
         config_parser, u'tools', u'names', default_value=[])
 
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, u'tests', u'authors', default_value=self.project_authors)
-    self.tools_names = self._GetOptionalConfigValue(
+    self.tests_options = self._GetOptionalConfigValue(
         config_parser, u'tests', u'options', default_value=[])
 
     self.msvscpp_build_dependencies = self._GetOptionalConfigValue(
@@ -220,6 +223,9 @@ class ProjectConfiguration(object):
     tools_authors = authors_separator.join(self.tools_authors)
     tests_authors = authors_separator.join(self.tests_authors)
 
+    library_description_lower_case = u'{0:s}{1:s}'.format(
+        self.library_description[0].lower(), self.library_description[1:])
+
     template_mappings = {
         u'authors': authors,
         u'copyright': project_copyright,
@@ -229,6 +235,7 @@ class ProjectConfiguration(object):
         u'library_name_suffix': self.library_name_suffix,
         u'library_name_suffix_upper_case': self.library_name_suffix.upper(),
         u'library_description': self.library_description,
+        u'library_description_lower_case': library_description_lower_case,
 
         u'python_module_authors': python_module_authors,
         u'python_module_name': self.python_module_name,
@@ -238,6 +245,7 @@ class ProjectConfiguration(object):
         u'tools_authors': tools_authors,
         u'tools_name': self.tools_name,
         u'tools_name_upper_case': self.tools_name.upper(),
+        u'tools_description': self.tools_description,
 
         u'tests_authors': tests_authors,
     }
@@ -2035,6 +2043,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       output_directory (str): path of the output directory.
     """
     # TODO: add support for projects without Python bindings.
+    # TODO: fix lintian issues.
 
     template_directory = os.path.join(self._template_directory, u'dpkg')
 
