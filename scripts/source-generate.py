@@ -164,8 +164,8 @@ class ProjectConfiguration(object):
 
     self.tools_authors = self._GetOptionalConfigValue(
         config_parser, u'tools', u'authors', default_value=self.project_authors)
-    self.tools_description = self._GetConfigValue(
-        config_parser, u'tools', u'description')
+    self.tools_description = self._GetOptionalConfigValue(
+        config_parser, u'tools', u'description', default_value=u'')
     self.tools_name = u'{0:s}tools'.format(self.library_name_suffix)
     self.tools_names = self._GetOptionalConfigValue(
         config_parser, u'tools', u'names', default_value=[])
@@ -1477,6 +1477,7 @@ class SourceFileGenerator(object):
     self._experimental = experimental
     self._has_python_module = None
     self._has_tests = None
+    self._has_tools = None
     self._library_include_header_file = None
     self._library_include_header_path = None
     self._library_makefile_am_file = None
@@ -1486,6 +1487,7 @@ class SourceFileGenerator(object):
     self._python_module_path = None
     self._template_directory = template_directory
     self._tests_path = None
+    self._tools_path = None
     self._types_include_header_file = None
     self._types_include_header_path = None
 
@@ -1663,6 +1665,26 @@ class SourceFileGenerator(object):
       self._has_tests = os.path.exists(self._tests_path)
 
     return self._has_tests
+
+  def _HasTools(self, project_configuration):
+    """Determines if the project has tools.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      bool: True if the tools path exits.
+    """
+    if not self._tools_path:
+      tools_name = u'{0:s}tools'.format(
+          project_configuration.library_name_suffix)
+      self._tools_path = os.path.join(
+          self._projects_directory, project_configuration.library_name,
+          tools_name)
+
+      self._has_tools = os.path.exists(self._tools_path)
+
+    return self._has_tools
 
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.
@@ -2045,12 +2067,26 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     # TODO: add support for projects without Python bindings.
     # TODO: fix lintian issues.
 
+    has_python_module = self._HasPythonModule(project_configuration)
+    has_tools = self._HasTools(project_configuration)
+
     template_directory = os.path.join(self._template_directory, u'dpkg')
 
     for directory_entry in os.listdir(template_directory):
       template_filename = os.path.join(template_directory, directory_entry)
       if not os.path.isfile(template_filename):
         continue
+
+      if (directory_entry.startswith(u'control') or
+          directory_entry.startswith(u'rules')):
+        continue
+
+      if directory_entry.endswith(u'.install'):
+        if not has_python_module and u'-python' in directory_entry:
+          continue
+
+        if not has_tools and u'-tools' in directory_entry:
+          continue
 
       output_filename = directory_entry
       if output_filename.startswith(u'libyal'):
@@ -2060,6 +2096,31 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       output_filename = os.path.join(output_directory, output_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
+
+    # TODO: generate control incrementally
+    if has_python_module:
+      template_filename = u'control-with-python'
+    elif has_tools:
+      template_filename = u'control-with-tools'
+    else:
+      template_filename = u'control'
+
+    template_filename = os.path.join(template_directory, template_filename)
+    output_filename = os.path.join(output_directory, u'control')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    if has_python_module:
+      template_filename = u'rules-with-python'
+    elif has_tools:
+      template_filename = u'rules-with-tools'
+    else:
+      template_filename = u'rules'
+
+    template_filename = os.path.join(template_directory, template_filename)
+    output_filename = os.path.join(output_directory, u'rules')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
 
     template_directory = os.path.join(
         self._template_directory, u'dpkg', u'source')
