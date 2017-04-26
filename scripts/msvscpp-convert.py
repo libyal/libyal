@@ -3805,7 +3805,8 @@ class LibyalSourceVSSolution(VSSolution):
     file_object.close()
 
     if project_name in ('libcaes', 'libhmac'):
-      preprocessor_definitions.append('HAVE_WINCRYPT')
+      if 'HAVE_WINCRYPT' not in preprocessor_definitions:
+        preprocessor_definitions.append('HAVE_WINCRYPT')
 
     if project_name.endswith('.net'):
       dependencies.append(solution_name)

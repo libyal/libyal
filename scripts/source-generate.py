@@ -3694,6 +3694,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       # Correct xml => XML in description for pyevtx.
       description = description.replace(u' xml ', u' XML ')
 
+      # TODO: fix libcreg getter name keies instead of keys.
+
       if not python_function_prototype.arguments:
         python_type_object_get_set_definitions.extend([
             u'',
