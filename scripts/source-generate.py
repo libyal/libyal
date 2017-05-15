@@ -69,10 +69,15 @@ FUNCTION_TYPE_WRITE = u'write'
 
 
 class ProjectConfiguration(object):
-  """Class that defines a project configuration."""
+  """Project configuration.
+
+  Attributes:
+    project_name (str): name of the project.
+  """
+  # TODO: add attributes.
 
   def __init__(self):
-    """Initializes a project configuation object."""
+    """Initializes a project configuation."""
     super(ProjectConfiguration, self).__init__()
     self.project_authors = None
     self.project_name = None
