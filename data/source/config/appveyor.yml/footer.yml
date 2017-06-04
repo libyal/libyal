@@ -31,6 +31,14 @@ build_script:
 
     msbuild vs2013\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
+    rem Prepare Visual Studio 2015 build
+
+    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2015 msvscpp\${library_name}.sln
+
+    rem Build with Visual Studio 2015
+
+    msbuild vs2015\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
     rem Prepare Cygwin build
 
     C:\cygwin\bin\bash -e -l -c "cd ${library_name}"

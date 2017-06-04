@@ -376,8 +376,8 @@ class VSProjectConfiguration(VSConfiguration):
         platform_toolset = u'Windows7.1SDK'
       elif output_version == 2012:
         platform_toolset = u'v110'
-      elif output_version == 2015:
-        platform_toolset = u'v140'
+      # elif output_version == 2015:
+      #   platform_toolset = u'v140'
     return platform_toolset
 
 
