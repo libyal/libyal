@@ -5944,6 +5944,8 @@ def Main():
 
     source_file.Generate(project_configuration, output_writer)
 
+  # TODO: dpkg handle dependencies
+
   # TODO: add support for Unicode templates.
 
   # TODO: generate manuals/Makefile.am

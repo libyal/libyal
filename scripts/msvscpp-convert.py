@@ -11,13 +11,16 @@ Currently supported output formats:
 * 2010 (11.0)
 * 2012 (12.0)
 * 2013 (13.0)
+* 2015 (14.0)
 """
 
 # TODO: add automated tests.
 # TODO: add vs2010 reader.
 # TODO: add vs2012 reader.
 # TODO: add vs2013 reader.
-# TODO: add vs2013 writer.
+# TODO: add vs2015 reader.
+# TODO: add vs2017 reader.
+# TODO: add vs2017 writer.
 
 from __future__ import print_function
 import abc
@@ -30,7 +33,7 @@ import uuid
 
 
 class VSConfiguration(object):
-  """Class to represent a Visual Studio configurations."""
+  """Visual Studio configuration."""
 
   def __init__(self, name=u'', platform=u''):
     """Initializes a Visual Studio configuration.
@@ -48,7 +51,7 @@ class VSConfiguration(object):
 
 
 class VSConfigurations(object):
-  """Class to represent a Visual Studio solution and project configurations."""
+  """Visual Studio solution and project configurations."""
 
   def __init__(self):
     """Initializes a Visual Studio configurations."""
@@ -124,7 +127,7 @@ class VSConfigurations(object):
 
 
 class VSProjectConfiguration(VSConfiguration):
-  """Class to represent a Visual Studio project configuration."""
+  """Visual Studio project configuration."""
 
   def __init__(self):
     """Initializes a Visual Studio project configuration."""
@@ -199,6 +202,8 @@ class VSProjectConfiguration(VSConfiguration):
   @property
   def data_execution_prevention_string(self):
     data_execution_prevention = int(self.data_execution_prevention, 10)
+    if data_execution_prevention == 1:
+      return u'false'
     if data_execution_prevention == 2:
       return u'true'
     return u''
@@ -371,11 +376,13 @@ class VSProjectConfiguration(VSConfiguration):
         platform_toolset = u'Windows7.1SDK'
       elif output_version == 2012:
         platform_toolset = u'v110'
+      elif output_version == 2015:
+        platform_toolset = u'v140'
     return platform_toolset
 
 
 class VSProjectInformation(object):
-  """Class to represent a Visual Studio project information."""
+  """Visual Studio project information."""
 
   def __init__(self):
     """Initializes Visual Studio project information."""
@@ -392,7 +399,7 @@ class VSProjectInformation(object):
 
 
 class VSSolutionConfiguration(VSConfiguration):
-  """Class to represent a Visual Studio solution configuration."""
+  """Visual Studio solution configuration."""
 
   def CopyToX64(self):
     """Copies the Visual Studio solution configuration to an x64 equivalent."""
@@ -405,7 +412,7 @@ class VSSolutionConfiguration(VSConfiguration):
 
 
 class VSSolutionProject(object):
-  """Class to represent a Visual Studio solution project."""
+  """Visual Studio solution project."""
 
   def __init__(self, name, filename, guid):
     """Initializes a Visual Studio project.
@@ -430,7 +437,7 @@ class VSSolutionProject(object):
 
 
 class FileReader(object):
-  """Class to represent a file reader."""
+  """File reader."""
 
   def __init__(self):
     """Initializes a file reader."""
@@ -477,11 +484,11 @@ class FileReader(object):
 
 
 class VSProjectFileReader(FileReader):
-  """Class to represent a Visual Studio project file reader."""
+  """Visual Studio project file reader."""
 
 
 class VS2008ProjectFileReader(VSProjectFileReader):
-  """Class to represent a Visual Studio 2008 project file reader."""
+  """Visual Studio 2008 project file reader."""
 
   def _ReadConfiguration(self, line):
     """Reads a configuration.
@@ -951,22 +958,27 @@ class VS2008ProjectFileReader(VSProjectFileReader):
 
 
 class VS2010ProjectFileReader(VSProjectFileReader):
-  """Class to represent a Visual Studio 2010 project file reader."""
+  """Visual Studio 2010 project file reader."""
   # TODO: implement.
 
 
 class VS2012ProjectFileReader(VSProjectFileReader):
-  """Class to represent a Visual Studio 2012 project file reader."""
+  """Visual Studio 2012 project file reader."""
   # TODO: implement.
 
 
 class VS2013ProjectFileReader(VSProjectFileReader):
-  """Class to represent a Visual Studio 2013 project file reader."""
+  """Visual Studio 2013 project file reader."""
+  # TODO: implement.
+
+
+class VS2015ProjectFileReader(VSProjectFileReader):
+  """Visual Studio 2015 project file reader."""
   # TODO: implement.
 
 
 class VSProjectFileWriter(object):
-  """Class to represent a Visual Studio project file writer."""
+  """Visual Studio project file writer."""
 
   def __init__(self):
     """Initializes a Visual Studio project configuration."""
@@ -1006,7 +1018,7 @@ class VSProjectFileWriter(object):
 
 
 class VS2008ProjectFileWriter(VSProjectFileWriter):
-  """Class to represent a Visual Studio 2008 project file writer."""
+  """Visual Studio 2008 project file writer."""
 
   def __init__(self):
     """Initializes a Visual Studio project file writer."""
@@ -1426,7 +1438,7 @@ class VS2008ProjectFileWriter(VSProjectFileWriter):
 
 
 class VS2010ProjectFileWriter(VSProjectFileWriter):
-  """Class to represent a Visual Studio 2010 project file writer."""
+  """Visual Studio 2010 project file writer."""
 
   def __init__(self):
     """Initializes a Visual Studio project file writer."""
@@ -2007,7 +2019,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
 
 
 class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
-  """Class to represent a Visual Studio 2012 project file writer."""
+  """Visual Studio 2012 project file writer."""
 
   def __init__(self):
     """Initializes a Visual Studio project file writer."""
@@ -2378,7 +2390,7 @@ class VS2012ProjectFileWriter(VS2010ProjectFileWriter):
 
 
 class VS2013ProjectFileWriter(VS2010ProjectFileWriter):
-  """Class to represent a Visual Studio 2013 project file writer."""
+  """Visual Studio 2013 project file writer."""
 
   def __init__(self):
     """Initializes a Visual Studio project file writer."""
@@ -2388,8 +2400,40 @@ class VS2013ProjectFileWriter(VS2010ProjectFileWriter):
     self._version = 2013
 
 
+class VS2015ProjectFileWriter(VS2012ProjectFileWriter):
+  """Visual Studio 2015 project file writer."""
+
+  def __init__(self):
+    """Initializes a Visual Studio project file writer."""
+    super(VS2015ProjectFileWriter, self).__init__()
+    self._project_file_version = '14.0.25431.1'
+    self._tools_version = '14.0'
+    self._version = 2015
+
+  def _WriteOutIntDirConditions(
+      self, configuration_name, project_configurations):
+    """Writes the OutDir and IntDir conditions.
+
+    Args:
+      configuration_name (str): name of the configuration.
+      project_configurations (VSConfigurations): configurations.
+    """
+    for configuration_platform in sorted(project_configurations.platforms):
+      project_configuration = project_configurations.GetByIdentifier(
+          configuration_name, configuration_platform)
+
+      self.WriteLines([
+          ('  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'=='
+           '\'{0:s}|{1:s}\'">').format(
+               project_configuration.name, project_configuration.platform),
+          '    <OutDir>$(SolutionDir)$(Configuration)\\</OutDir>',
+          '    <IntDir>$(Configuration)\\</IntDir>'])
+
+      self.WriteLine('  </PropertyGroup>')
+
+
 class VSSolutionFileReader(FileReader):
-  """Class to represent a Visual Studio solution file reader."""
+  """Visual Studio solution file reader."""
 
   @abc.abstractmethod
   def _CheckFormatVersion(self, line):
@@ -2561,7 +2605,7 @@ class VSSolutionFileReader(FileReader):
 
 
 class VS2008SolutionFileReader(VSSolutionFileReader):
-  """Class to represent a Visual Studio 2008 solution file reader."""
+  """Visual Studio 2008 solution file reader."""
 
   def _CheckFormatVersion(self, line):
     """Checks the format version.
@@ -2576,7 +2620,7 @@ class VS2008SolutionFileReader(VSSolutionFileReader):
 
 
 class VS2010SolutionFileReader(object):
-  """Class to represent a Visual Studio 2010 solution file reader."""
+  """Visual Studio 2010 solution file reader."""
 
   def _CheckFormatVersion(self, line):
     """Checks the format version.
@@ -2591,17 +2635,22 @@ class VS2010SolutionFileReader(object):
 
 
 class VS2012SolutionFileReader(object):
-  """Class to represent a Visual Studio 2012 solution file reader."""
+  """Visual Studio 2012 solution file reader."""
   # TODO: implement.
 
 
 class VS2013SolutionFileReader(object):
-  """Class to represent a Visual Studio 2013 solution file reader."""
+  """Visual Studio 2013 solution file reader."""
+  # TODO: implement.
+
+
+class VS2015SolutionFileReader(object):
+  """Visual Studio 2015 solution file reader."""
   # TODO: implement.
 
 
 class VSSolutionFileWriter(object):
-  """Class to represent a Visual Studio solution file writer."""
+  """Visual Studio solution file writer."""
 
   def __init__(self):
     """Initializes a Visual Studio project configuration."""
@@ -2653,7 +2702,7 @@ class VSSolutionFileWriter(object):
 
 
 class VS2008SolutionFileWriter(VSSolutionFileWriter):
-  """Class to represent a Visual Studio 2008 solution file writer."""
+  """Visual Studio 2008 solution file writer."""
 
   def WriteHeader(self):
     """Writes a file header."""
@@ -2742,7 +2791,7 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
 
 
 class VS2010SolutionFileWriter(VSSolutionFileWriter):
-  """Class to represent a Visual Studio 2010 solution file writer."""
+  """Visual Studio 2010 solution file writer."""
 
   def WriteHeader(self):
     """Writes a file header."""
@@ -2820,7 +2869,7 @@ class VS2010SolutionFileWriter(VSSolutionFileWriter):
 
 
 class VS2012SolutionFileWriter(VS2010SolutionFileWriter):
-  """Class to represent a Visual Studio 2013 solution file writer."""
+  """Visual Studio 2012 solution file writer."""
 
   def WriteHeader(self):
     """Writes a file header."""
@@ -2853,7 +2902,7 @@ class VS2012SolutionFileWriter(VS2010SolutionFileWriter):
 
 
 class VS2013SolutionFileWriter(VS2010SolutionFileWriter):
-  """Class to represent a Visual Studio 2013 solution file writer."""
+  """Visual Studio 2013 solution file writer."""
 
   def WriteHeader(self):
     """Writes a file header."""
@@ -2865,8 +2914,21 @@ class VS2013SolutionFileWriter(VS2010SolutionFileWriter):
         'MinimumVisualStudioVersion = 10.0.40219.1'])
 
 
+class VS2015SolutionFileWriter(VS2010SolutionFileWriter):
+  """Visual Studio 2015 solution file writer."""
+
+  def WriteHeader(self):
+    """Writes a file header."""
+    self.WriteLines([
+        '\xef\xbb\xbf',
+        'Microsoft Visual Studio Solution File, Format Version 12.00',
+        '# Visual Studio 14',
+        'VisualStudioVersion = 14.0.25420.1',
+        'MinimumVisualStudioVersion = 10.0.40219.1'])
+
+
 class VSSolution(object):
-  """Class to represent a Visual Studio solution."""
+  """Visual Studio solution."""
 
   def _ConvertProject(
       self, input_version, input_directory, output_version, solution_project,
@@ -2895,7 +2957,7 @@ class VSSolution(object):
     # TODO: move logic into the reader?
     if input_version == '2008':
       input_project_filename = '{0:s}.vcproj'.format(input_project_filename)
-    elif output_version in ['2010', '2012', '2013']:
+    elif output_version in ('2010', '2012', '2013', '2015'):
       input_project_filename = '{0:s}.vcxproj'.format(input_project_filename)
 
     if not os.path.exists(input_project_filename):
@@ -2909,6 +2971,8 @@ class VSSolution(object):
       project_reader = VS2012ProjectFileReader()
     elif input_version == '2013':
       project_reader = VS2013ProjectFileReader()
+    elif input_version == '2015':
+      project_reader = VS2015ProjectFileReader()
 
     logging.info('Reading: {0:s}'.format(input_project_filename))
 
@@ -2950,7 +3014,7 @@ class VSSolution(object):
     # TODO: move logic into the writer?
     if output_version == '2008':
       output_project_filename = '{0:s}.vcproj'.format(output_project_filename)
-    elif output_version in ['2010', '2012', '2013']:
+    elif output_version in ('2010', '2012', '2013', '2015'):
       output_project_filename = '{0:s}.vcxproj'.format(output_project_filename)
 
     output_directory = os.path.dirname(output_project_filename)
@@ -2964,6 +3028,8 @@ class VSSolution(object):
       project_writer = VS2012ProjectFileWriter()
     elif output_version == '2013':
       project_writer = VS2013ProjectFileWriter()
+    elif output_version == '2015':
+      project_writer = VS2015ProjectFileWriter()
 
     logging.info('Writing: {0:s}'.format(output_project_filename))
 
@@ -3007,6 +3073,8 @@ class VSSolution(object):
       solution_writer = VS2012SolutionFileWriter()
     elif output_version == '2013':
       solution_writer = VS2013SolutionFileWriter()
+    elif output_version == '2015':
+      solution_writer = VS2015SolutionFileWriter()
 
     solution_writer.Open(output_sln_filename)
     solution_writer.WriteHeader()
@@ -3041,6 +3109,8 @@ class VSSolution(object):
       solution_reader = VS2012SolutionFileReader()
     elif input_version == '2013':
       solution_reader = VS2013SolutionFileReader()
+    elif input_version == '2015':
+      solution_reader = VS2015SolutionFileReader()
 
     solution_reader.Open(input_sln_path)
 
@@ -3077,7 +3147,7 @@ class VSSolution(object):
 
 
 class LibyalReleaseVSProjectConfiguration(VSProjectConfiguration):
-  """Class to represent a libyal release VS project configuration."""
+  """Libyal release VS project configuration."""
 
   def __init__(self):
     """Initializes a Visual Studio project configuration."""
@@ -3098,7 +3168,7 @@ class LibyalReleaseVSProjectConfiguration(VSProjectConfiguration):
 
 
 class LibyalDebugVSProjectConfiguration(VSProjectConfiguration):
-  """Class to represent a libyal debug VS project configuration."""
+  """Libyal debug VS project configuration."""
 
   def __init__(self):
     """Initializes a Visual Studio project configuration."""
@@ -3122,7 +3192,7 @@ class LibyalDebugVSProjectConfiguration(VSProjectConfiguration):
 
 
 class LibyalSourceVSSolution(VSSolution):
-  """Class to represent a libyal source Visual Studio solution generator."""
+  """Libyal source Visual Studio solution generator."""
 
   _SUPPORTED_THIRD_PARTY_DEPENDENCIES = frozenset([
       'bzip2', 'dokan', 'zlib'])
@@ -4131,7 +4201,7 @@ def Main():
   Returns:
     bool: True if successful or False if not.
   """
-  output_formats = frozenset(['2008', '2010', '2012', '2013'])
+  output_formats = frozenset(['2008', '2010', '2012', '2013', '2015'])
 
   argument_parser = argparse.ArgumentParser(description=(
       'Converts source directory (autoconf and automake files) into '
