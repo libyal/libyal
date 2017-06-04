@@ -1,70 +1,37 @@
 
-before_build:
-- cmd: xcopy /q /s C:\projects\${library_name} C:\cygwin\home\appveyor\
-- cmd: xcopy /q /s C:\projects\${library_name} C:\msys64\home\appveyor\
-
 build_script:
 - ps: .\synclibs.ps1
 - ps: .\autogen.ps1
-- cmd: >-
-    rem Prepare Visual Studio 2010 build
-
-    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2010 msvscpp\${library_name}.sln
-
-    rem Build with Visual Studio 2010
-
-    msbuild vs2010\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-
-    rem Prepare Visual Studio 2012 build
-
-    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2012 msvscpp\${library_name}.sln
-
-    rem Build with Visual Studio 2012
-
-    msbuild vs2012\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-
-    rem Prepare Visual Studio 2013 build
-
-    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2013 msvscpp\${library_name}.sln
-
-    rem Build with Visual Studio 2013
-
-    msbuild vs2013\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-
-    rem Prepare Visual Studio 2015 build
-
-    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2015 msvscpp\${library_name}.sln
-
-    rem Build with Visual Studio 2015
-
-    msbuild vs2015\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-
-    rem Prepare Cygwin build
-
-    C:\cygwin\bin\bash -e -l -c "cd ${library_name}"
-
-    C:\cygwin\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh"
-
-    rem Build with Cygwin
-
-    C:\cygwin\bin\bash -e -l -c "./configure && make -j4"
-
-    rem Prepare MinGW build
-
-    C:\msys64\usr\bin\bash -e -l -c "cd ${library_name}"
-
-    C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh"
-
-    rem Build with MinGW 32-bit
-
-    C:\msys64\usr\bin\bash -e -l -c "./configure --host=i686-w64-mingw32 && make -j4"
-
-    rem Build with MinGW 64-bit
-
-    C:\msys64\usr\bin\bash -e -l -c "./configure --host=x86_64-w64-mingw32 && make -j4"
-
-    rem Run tests
+- cmd: if [%TARGET%]==[vs2010] (
+    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2010 msvscpp\liblnk.sln &&
+    msbuild vs2010\liblnk.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+- cmd: if [%TARGET%]==[vs2012] (
+    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2012 msvscpp\liblnk.sln &&
+    msbuild vs2012\liblnk.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+- cmd: if [%TARGET%]==[vs2013] (
+    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2013 msvscpp\liblnk.sln &&
+    msbuild vs2013\liblnk.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+- cmd: if [%TARGET%]==[vs2015] (
+    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2015 msvscpp\liblnk.sln &&
+    msbuild vs2015\liblnk.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+- cmd: if [%TARGET%]==[cygwin] (
+    xcopy /q /s C:\projects\liblnk C:\cygwin\home\appveyor\ &&
+    C:\cygwin\bin\bash -e -l -c "cd liblnk" &&
+    C:\cygwin\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
+    C:\cygwin\bin\bash -e -l -c "./configure && make -j4" )
+- cmd: if [%TARGET%]==[mingw32] (
+    xcopy /q /s C:\projects\liblnk C:\msys64\home\appveyor\ &&
+    C:\msys64\usr\bin\bash -e -l -c "cd liblnk" &&
+    C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
+    C:\msys64\usr\bin\bash -e -l -c "./configure --host=i686-w64-mingw32 && make -j4" )
+- cmd: if [%TARGET%]==[mingw64] (
+    xcopy /q /s C:\projects\liblnk C:\msys64\home\appveyor\ &&
+    C:\msys64\usr\bin\bash -e -l -c "cd liblnk" &&
+    C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
+    C:\msys64\usr\bin\bash -e -l -c "./configure --host=x86_64-w64-mingw32 && make -j4" )
 
 test_script:
-- ps: .\runtests.ps1
+- cmd: rem Run tests
+- ps: if ($$env:TARGET -eq "vs2010") {
+    .\runtests.ps1 }
 

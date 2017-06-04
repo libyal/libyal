@@ -1,5 +1,13 @@
 environment:
   VisualStudioVersion: 11.0
+  matrix:
+  - TARGET: vs2010
+  - TARGET: vs2012
+  - TARGET: vs2013
+  - TARGET: vs2015
+  - TARGET: cygwin
+  - TARGET: mingw32
+  - TARGET: mingw64
 
 # TODO: add x64, fix issue: LNK1158: cannot run 'cvtres.exe'
 platform:
