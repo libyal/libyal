@@ -2,6 +2,8 @@
 build_script:
 - ps: .\synclibs.ps1
 - ps: .\autogen.ps1
+- cmd: if [%TARGET%]==[vs2008] (
+    msbuild msvscpp\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2010] (
     C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2010 msvscpp\${library_name}.sln &&
     msbuild vs2010\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
@@ -32,6 +34,14 @@ build_script:
 
 test_script:
 - cmd: rem Run tests
+- ps: if ($$env:TARGET -eq "vs2008") {
+    .\runtests.ps1 }
 - ps: if ($$env:TARGET -eq "vs2010") {
+    .\runtests.ps1 }
+- ps: if ($$env:TARGET -eq "vs2012") {
+    .\runtests.ps1 }
+- ps: if ($$env:TARGET -eq "vs2013") {
+    .\runtests.ps1 }
+- ps: if ($$env:TARGET -eq "vs2015") {
     .\runtests.ps1 }
 
