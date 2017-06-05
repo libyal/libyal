@@ -4,13 +4,13 @@
 
 Currently supported input formats:
 * libyal source directory (configure.ac and Makefile.am)
-* 2008 (10.0)
+* 2008 (9.0)
 
 Currently supported output formats:
-* 2008 (10.0)
-* 2010 (11.0)
-* 2012 (12.0)
-* 2013 (13.0)
+* 2008 (9.0)
+* 2010 (10.0)
+* 2012 (11.0)
+* 2013 (12.0)
 * 2015 (14.0)
 """
 
