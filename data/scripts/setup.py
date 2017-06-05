@@ -101,6 +101,8 @@ class custom_build_ext(build_ext):
           if sys.version_info[0] >= 3:
             line = line.decode("ascii")
           configure_arguments.append("{0:s}=no".format(line))
+        elif line == b"--with-bzip2":
+          configure_arguments.append("--with-bzip2=no")
         elif line == b"--with-openssl":
           configure_arguments.append("--with-openssl=no")
         elif line == b"--with-zlib":
@@ -132,7 +134,7 @@ class custom_sdist(sdist):
   """Custom handler for the sdist command."""
 
   def run(self):
-      """Builds a source distribution (sdist) package."""
+    """Builds a source distribution (sdist) package."""
     if self.formats != ["gztar"]:
       print("'setup.py sdist' unsupported format.")
       sys.exit(1)
