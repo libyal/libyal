@@ -258,7 +258,7 @@ class ProjectConfiguration(object):
 
 
 class EnumDeclaration(object):
-  """Class that defines an enumeration type declaration.
+  """Enumeration type declaration.
 
   Attributes:
     name (str): name.
@@ -277,7 +277,7 @@ class EnumDeclaration(object):
 
 
 class FunctionArgument(object):
-  """Class that defines a function argument."""
+  """Function argument."""
 
   def __init__(self, argument_string):
     """Initializes a function argument.
@@ -316,7 +316,7 @@ class FunctionArgument(object):
 
 
 class FunctionPrototype(object):
-  """Class that defines a function prototype.
+  """Function prototype.
 
   Attributes:
     arguments (list[FunctionArgument]): function arguments.
@@ -380,7 +380,7 @@ class FunctionPrototype(object):
 
 
 class PythonTypeObjectFunctionPrototype(object):
-  """Class that defines a Python type object function prototype.
+  """Python type object function prototype.
 
   Attributes:
     arguments (list[str]): arguments.
@@ -741,7 +741,7 @@ class PythonTypeObjectFunctionPrototype(object):
 
 
 class DefinitionsIncludeHeaderFile(object):
-  """Class that defines a definitions include header file.
+  """Definitions include header file.
 
   Attributes:
     enum_declarations (list[EnumDeclaration]): enumeration type declarations.
@@ -801,7 +801,7 @@ class DefinitionsIncludeHeaderFile(object):
 
 
 class LibraryHeaderFile(object):
-  """Class that defines a library header file.
+  """Library header file.
 
   Attributes:
     functions_per_name (dict[str, list[FunctionPrototype]]): function
@@ -940,7 +940,7 @@ class LibraryHeaderFile(object):
 
 
 class LibraryIncludeHeaderFile(object):
-  """Class that defines a library include header file.
+  """Library include header file.
 
   Attributes:
     functions_per_name (dict[str, list[FunctionPrototype]]): function
@@ -1304,7 +1304,7 @@ class LibraryIncludeHeaderFile(object):
 
 
 class LibraryMakefileAMFile(object):
-  """Class that defines a library Makefile.am file.
+  """Library Makefile.am file.
 
   Attributes:
     cppflags (list[str]): C preprocess flags.
@@ -1379,7 +1379,7 @@ class LibraryMakefileAMFile(object):
 
 
 class MainMakefileAMFile(object):
-  """Class that defines a main Makefile.am file.
+  """Main Makefile.am file.
 
   Attributes:
     libraries (list[str]): library names.
@@ -1427,7 +1427,7 @@ class MainMakefileAMFile(object):
 
 
 class TypesIncludeHeaderFile(object):
-  """Class that defines a types include header file.
+  """Types include header file.
 
   Attributes:
     types (list[str]): type names.
@@ -1465,11 +1465,11 @@ class TypesIncludeHeaderFile(object):
 
 
 class SourceFileGenerator(object):
-  """Class that generates source files."""
+  """Source files generator."""
 
   def __init__(
       self, projects_directory, template_directory, experimental=False):
-    """Initialize the source file generator.
+    """Initialize a source file generator.
 
     Args:
       projects_directory (str): path of the projects directory.
@@ -1987,7 +1987,7 @@ class SourceFileGenerator(object):
 
 
 class CommonSourceFileGenerator(SourceFileGenerator):
-  """Class that generates the common source files."""
+  """Common source files."""
 
   def Generate(self, project_configuration, output_writer):
     """Generates common source files.
@@ -2013,7 +2013,7 @@ class CommonSourceFileGenerator(SourceFileGenerator):
 
 
 class ConfigurationFileGenerator(SourceFileGenerator):
-  """Class that generates the configuration files."""
+  """Configuration files generator."""
 
   def _GenerateAppVeyorYML(
       self, project_configuration, template_mappings, output_writer,
@@ -2195,7 +2195,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
 
 class IncludeSourceFileGenerator(SourceFileGenerator):
-  """Class that generates the include source files."""
+  """Include source files generator."""
 
   def _GenerateFeaturesHeader(
       self, project_configuration, template_mappings, include_header_file,
@@ -2403,7 +2403,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
 
 
 class LibrarySourceFileGenerator(SourceFileGenerator):
-  """Class that generates the library source files."""
+  """Library source files generator."""
 
   def Generate(self, project_configuration, output_writer):
     """Generates library source files.
@@ -2542,7 +2542,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
 
 
 class LibraryManPageGenerator(SourceFileGenerator):
-  """Class that generates the library man page file (libyal.3)."""
+  """Library man page file (libyal.3) generator."""
 
   def _GenerateLibraryManPage(
       self, project_configuration, template_mappings, include_header_file,
@@ -2738,7 +2738,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
 
 
 class PythonModuleSourceFileGenerator(SourceFileGenerator):
-  """Class that generates the Python module source files."""
+  """Python module source files generator."""
 
   def _CopyFunctionToOutputFile(self, lines, search_string, output_filename):
     """Copies a function to the output file.
@@ -4486,7 +4486,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
 
 class ScriptFileGenerator(SourceFileGenerator):
-  """Class that generates the script files."""
+  """Script files generator."""
 
   def Generate(self, project_configuration, output_writer):
     """Generates script files.
@@ -4522,7 +4522,7 @@ class ScriptFileGenerator(SourceFileGenerator):
 
 
 class TestsSourceFileGenerator(SourceFileGenerator):
-  """Class that generates the tests source files."""
+  """Tests source files generator."""
 
   _PYTHON_FUNCTION_NAMES = (
       u'support', )
@@ -5750,7 +5750,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
 
 class ToolsSourceFileGenerator(SourceFileGenerator):
-  """Class that generates the tools source files."""
+  """Tools source files generator."""
 
   def Generate(self, project_configuration, output_writer):
     """Generates tools source files.
@@ -5803,10 +5803,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
 
 class FileWriter(object):
-  """Class that defines a file output writer."""
+  """File output writer."""
 
   def __init__(self, output_directory):
-    """Initialize the output writer.
+    """Initialize an output writer.
 
     Args:
       output_directory: string containing the path of the output directory.
@@ -5829,7 +5829,7 @@ class FileWriter(object):
 
 
 class StdoutWriter(object):
-  """Class that defines a stdout output writer."""
+  """Stdout output writer."""
 
   def __init__(self):
     """Initialize the output writer."""
