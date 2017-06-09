@@ -862,6 +862,10 @@ class LibraryHeaderFile(object):
     have_wide_character_type = False
     in_function_prototype = False
 
+    # TODO: use .h.in or run configure?
+    if not os.path.exists(self.path):
+      raise IOError(u'Missing include header file: {0:s}'.format(self.path))
+
     with open(self.path, 'rb') as file_object:
       for line in file_object.readlines():
         line = line.strip()
@@ -5869,6 +5873,10 @@ def Main():
       default=False, help=u'enable experimental functionality.')
 
   argument_parser.add_argument(
+      u'-g', u'--generators', dest=u'generators', action=u'store', default=u'all',
+      help=u'names of the generators to run.')
+
+  argument_parser.add_argument(
       u'-o', u'--output', dest=u'output_directory', action=u'store',
       metavar=u'OUTPUT_DIRECTORY', default=None,
       help=u'path of the output files to write to.')
@@ -5918,6 +5926,11 @@ def Main():
   # include headers
   # yal.net files
 
+  if options.generators == u'all':
+    generators = []
+  else:
+    generators = options.generators.split(u',')
+
   SOURCE_GENERATORS = [
       (u'common', CommonSourceFileGenerator),
       (u'config', ConfigurationFileGenerator),
@@ -5932,6 +5945,9 @@ def Main():
   sources_directory = os.path.join(
       libyal_directory, u'data', u'source')
   for source_category, source_generator_class in SOURCE_GENERATORS:
+    if generators and source_category not in generators:
+      continue
+
     template_directory = os.path.join(sources_directory, source_category,)
     source_file = source_generator_class(
         projects_directory, template_directory,
@@ -5957,6 +5973,9 @@ def Main():
   manuals_directory = os.path.join(
       libyal_directory, u'data', u'source', u'manuals')
   for source_category, source_generator_class in source_files:
+    if generators and source_category not in generators:
+      continue
+
     template_directory = os.path.join(manuals_directory, source_category)
     source_file = source_generator_class(
         projects_directory, template_directory,
