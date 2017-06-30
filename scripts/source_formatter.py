@@ -1,25 +1,23 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Script to format source of the libyal libraries."""
+"""Classes to format source of the libyal libraries."""
 
 from __future__ import print_function
-import sys
 
 
 # TODO: have the SourceFormatter use the GroupModifier to detect a group
 # of lines it applies to and then make the necessary changes.
 class GroupModifier(object):
-  """Class that defines a group of lines modifier."""
+  """Group of lines modifier."""
 
 
 # TODO: have the SourceFormatter use the LineModifier to detect a line
 # it applies to and then make the necessary changes.
 class LineModifier(object):
-  """Class that defines a line modifier."""
+  """Line modifier."""
 
 
 class Variable(object):
-  """Class that defines a C variable."""
+  """C variable."""
 
   _TYPE_SORT_RANKING = [
       b'FILE',
@@ -44,14 +42,14 @@ class Variable(object):
       b'wchar_t',
       b'char',
       b'void']
- 
+
   def __init__(self, declaration):
     """Initializes a C variable.
 
     Args:
       declaration (str): C variable declaration.
     """
-    prefix, _, suffix = declaration.partition(b'=')
+    prefix, _, _ = declaration.partition(b'=')
     prefix = prefix.strip()
     prefix, _, name = prefix.rpartition(b' ')
     modifiers, _, variable_type = prefix.rpartition(b' ')
@@ -106,7 +104,7 @@ class Variable(object):
 
 
 class SourceFormatter(object):
-  """Class that defines a C source formatter."""
+  """C source formatter."""
 
   def CompareVariableDeclarations(
       self, first_variable_declaration, second_variable_declaration):
@@ -169,7 +167,7 @@ class SourceFormatter(object):
       if b'=' not in striped_line or striped_line.endswith(b' = {'):
         continue
 
-      prefix, _, suffix = line.rpartition(b'=')
+      prefix, _, _ = line.rpartition(b'=')
       prefix = prefix.rstrip()
       formatted_prefix = prefix.replace(b'\t', ' ' * 8)
 
@@ -233,4 +231,3 @@ class SourceFormatter(object):
       declaration_lines = []
 
     return formatted_lines
-

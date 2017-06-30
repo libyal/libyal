@@ -13,4 +13,3 @@ if __name__ == '__main__':
   lines = formatter.FormatSource(sys.stdin.readlines())
 
   print(b''.join(lines), end=b'')
-  

@@ -622,10 +622,10 @@ class ProjectConfiguration(object):
           u'* [Using setup.py](Building#using-setuppy)\n')
 
     development_table_of_contents += (
-      u'* [C/C++ development](C-development)\n')
+        u'* [C/C++ development](C-development)\n')
 
     if self.supports_python:
-        development_table_of_contents += (
+      development_table_of_contents += (
           u'* [Python development](Python-development)\n')
 
     if self.development_main_object_pre_open_python:

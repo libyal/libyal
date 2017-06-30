@@ -430,7 +430,7 @@ class PythonTypeObjectFunctionPrototype(object):
       return u'set_parent'
 
     if (self._type_function.startswith(u'copy_') and
-       not self._type_function.startswith(u'copy_from_')):
+        not self._type_function.startswith(u'copy_from_')):
       return u'get_{0:s}'.format(self._type_function[5:])
 
     if (self._type_function.startswith(u'get_utf8_') or
@@ -445,7 +445,7 @@ class PythonTypeObjectFunctionPrototype(object):
         return u'get_data_as_integer'
 
       elif type_function_suffix in (u'filetime', u'floatingtime'):
-       return u'get_data_as_datetime'
+        return u'get_data_as_datetime'
 
       elif type_function_suffix == u'utf8_string':
         return u'get_data_as_string'
@@ -1028,7 +1028,7 @@ class LibraryIncludeHeaderFile(object):
         self._api_functions_group[group_name] = section_name
 
       elif (not self.HasTypeFunction(group_name, u'create') and
-          not self.HasTypeFunction(group_name, u'free')):
+            not self.HasTypeFunction(group_name, u'free')):
         self._api_functions_group[group_name] = section_name
 
       elif not self.HasTypeFunction(group_name, u'open'):
@@ -1360,11 +1360,11 @@ class LibraryMakefileAMFile(object):
 
           if (in_section == u'cppflags' and line.startswith(b'@') and
               line.endswith(b'_CPPFLAGS@')):
-              self.cppflags.append(line[1:-10].lower())
+            self.cppflags.append(line[1:-10].lower())
 
           elif (in_section == u'libadd' and line.startswith(b'@') and
                 line.endswith(b'_LIBADD@')):
-              self.libraries.append(line[1:-8].lower())
+            self.libraries.append(line[1:-8].lower())
 
           elif in_section == u'sources':
             sources = line.split(b' ')
@@ -1611,7 +1611,7 @@ class SourceFileGenerator(object):
 
     # TODO: cache header files.
     header_file_path = u'{0:s}_{1:s}.h'.format(
-       project_configuration.library_name, type_name)
+        project_configuration.library_name, type_name)
     header_file_path = os.path.join(self._library_path, header_file_path)
     header_file = LibraryHeaderFile(header_file_path)
 
@@ -2512,9 +2512,9 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
 
       # TODO: improve generation of _types.h file
       if (directory_entry == u'libyal_types.h' and (
-              not os.path.exists(types_header_file) or
-              project_configuration.library_name in (
-                  u'libcerror', u'libcthreads'))):
+          not os.path.exists(types_header_file) or
+          project_configuration.library_name in (
+              u'libcerror', u'libcthreads'))):
         continue
 
       template_filename = os.path.join(
@@ -2700,7 +2700,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
     output_lines = output_file.readlines()
 
     diff_lines = list(difflib.ndiff(backup_lines[1:], output_lines[1:]))
-    diff_lines = [line for line in diff_lines if line.startswith(b'-')] 
+    diff_lines = [line for line in diff_lines if line.startswith(b'-')]
 
     # Check if there are changes besides the date.
     if diff_lines:
@@ -2736,9 +2736,9 @@ class LibraryManPageGenerator(SourceFileGenerator):
     output_filename = u'{0:s}.3'.format(project_configuration.library_name)
     output_filename = os.path.join(u'manuals', output_filename)
 
-    self._GenerateLibraryManPage(project_configuration, template_mappings, include_header_file,
-      output_writer, output_filename)
-
+    self._GenerateLibraryManPage(
+        project_configuration, template_mappings, include_header_file,
+        output_writer, output_filename)
 
 
 class PythonModuleSourceFileGenerator(SourceFileGenerator):
@@ -3432,7 +3432,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
             template_filename = u'get_{0:s}{1:s}_value_by_{2:s}.c'.format(
                 value_name_prefix, python_function_prototype.data_type,
-                  type_function_suffix)
+                type_function_suffix)
 
           if python_function_prototype.data_type == DATA_TYPE_OBJECT:
             if value_name_prefix != u'root_':
@@ -3597,7 +3597,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             u'\t  "Retrieves the current offset within the data." },'])
 
       elif (python_function_prototype.DataTypeIsDatetime() and
-          type_function != u'get_data_as_datetime'):
+            type_function != u'get_data_as_datetime'):
         python_type_object_methods.extend([
             u'',
             u'\t{{ "{0:s}_as_integer",'.format(type_function),
@@ -3635,10 +3635,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
 
       elif (python_function_prototype.arguments and
-          python_function_prototype.data_type in (
-              DATA_TYPE_OBJECT, DATA_TYPE_STRING)):
+            python_function_prototype.data_type in (
+                DATA_TYPE_OBJECT, DATA_TYPE_STRING)):
           # TODO: add method for the sequence object.
-          pass
+        pass
 
     python_type_object_methods.extend([
         u'',
@@ -3848,11 +3848,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       value_size_argument_string = function_argument.CopyToString()
 
       if (value_argument_string == u'const uint8_t *byte_stream' and
-        value_size_argument_string == u'size_t byte_stream_size'):
+          value_size_argument_string == u'size_t byte_stream_size'):
         data_type = DATA_TYPE_BINARY_DATA
 
       elif (value_argument_string == u'const uint8_t *data' and
-        value_size_argument_string == u'size_t data_size'):
+            value_size_argument_string == u'size_t data_size'):
         data_type = DATA_TYPE_BINARY_DATA
 
     elif type_function.startswith(u'copy_'):
@@ -3890,7 +3890,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         _, _, value_argument_suffix = value_argument_string.rpartition(u'_')
 
         # Not all get_by_index functions have the suffix _by_index so we need
-        # to detect them based on the function arguments. 
+        # to detect them based on the function arguments.
         if (value_argument_string.startswith(u'int ') and
             value_argument_suffix in (u'entry', u'index')):
           function_type = FUNCTION_TYPE_GET_BY_INDEX
@@ -3952,19 +3952,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             data_type = DATA_TYPE_POSIX_TIME
 
           elif (value_argument_string == u'uint8_t *data' and
-              value_size_argument_string == u'size_t data_size'):
+                value_size_argument_string == u'size_t data_size'):
             data_type = DATA_TYPE_BINARY_DATA
 
           elif (value_argument_string == u'uint8_t *guid_data' and
-              value_size_argument_string == u'size_t guid_data_size'):
+                value_size_argument_string == u'size_t guid_data_size'):
             data_type = DATA_TYPE_GUID
 
           elif (value_argument_string == u'uint8_t *utf8_string' and
-              value_size_argument_string == u'size_t utf8_string_size'):
+                value_size_argument_string == u'size_t utf8_string_size'):
             data_type = DATA_TYPE_STRING
 
           elif (value_argument_string == u'char *string' and
-              value_size_argument_string == u'size_t string_size'):
+                value_size_argument_string == u'size_t string_size'):
             data_type = DATA_TYPE_NARROW_STRING
 
           elif value_argument_string.startswith(u'double *'):
@@ -4050,7 +4050,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       elif type_function == u'set_parent_file':
         arguments = [u'parent_file']
- 
+
       elif type_function == u'set_key':
         arguments = [u'mode', u'key']
 
@@ -4076,15 +4076,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         value_size_argument_string = function_argument.CopyToString()
 
         if (value_argument_string == u'uint8_t *data' and
-          value_size_argument_string == u'size_t data_size'):
+            value_size_argument_string == u'size_t data_size'):
           data_type = DATA_TYPE_BINARY_DATA
 
         elif (value_argument_string == u'uint8_t *utf8_string' and
-            value_size_argument_string == u'size_t utf8_string_size'):
+              value_size_argument_string == u'size_t utf8_string_size'):
           data_type = DATA_TYPE_STRING
 
         elif (value_argument_string == u'char *string' and
-            value_size_argument_string == u'size_t string_size'):
+              value_size_argument_string == u'size_t string_size'):
           data_type = DATA_TYPE_NARROW_STRING
 
         elif value_argument_string.startswith(
@@ -4182,7 +4182,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       # TODO: ignore these functions for now.
       # TODO: improve check only to apply for types with pseudo types.
-      if (type_function == u'get_type' and ( 
+      if (type_function == u'get_type' and (
           project_configuration.library_name in (
               u'libmsiecf', u'libolecf', u'libpff'))):
         continue
@@ -4194,18 +4194,18 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               u'libolecf', )):
         continue
 
-      if (type_function == u'get_version' and ( 
+      if (type_function == u'get_version' and (
           project_configuration.library_name in (
               u'libevt', u'libevtx'))):
         continue
 
-      if (type_function.startswith(u'write_buffer') and ( 
+      if (type_function.startswith(u'write_buffer') and (
           project_configuration.library_name not in (
               u'libewf', ))):
         continue
 
       if type_function in (
-          u'get_flags', u'get_offset_range', 
+          u'get_flags', u'get_offset_range',
           u'get_number_of_unallocated_blocks', u'get_unallocated_block'):
         continue
 
@@ -4216,7 +4216,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if (not python_function_prototype or
           not python_function_prototype.function_type):
         logging.warning(u'Skipping unsupported type function: {0:s}'.format(
-          function_name))
+            function_name))
         continue
 
       # TODO: Skip functions that retrieve the size of a narrow string.
@@ -4975,7 +4975,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             template_filename = u'get_string_value.c'
 
     elif (type_function.startswith(u'get_') and
-        len(function_prototype.arguments) in (3, 4)):
+          len(function_prototype.arguments) in (3, 4)):
       function_argument = function_prototype.arguments[1]
       function_argument_string = function_argument.CopyToString()
 

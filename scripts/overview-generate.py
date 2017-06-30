@@ -829,10 +829,10 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
         # TODO: handle yal and pyyal place holders.
         if script_file.name in (
-           u'test_pyyal_set_ascii_codepage.sh',
-           u'test_yalexport.sh',
-           u'test_yalinfo.sh'):
-            continue
+            u'test_pyyal_set_ascii_codepage.sh',
+            u'test_yalexport.sh',
+            u'test_yalinfo.sh'):
+          continue
 
         versions_per_script[script_file.name] = {version: []}
 
