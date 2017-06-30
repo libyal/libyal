@@ -84,6 +84,51 @@ class SourceGenerator(object):
     self._templates_path = templates_path
     self._template_string_generator = template_string.TemplateStringGenerator()
 
+  def _GenerateStoredStructureHeader(self, data_type_definition):
+    """Generates a stored structure header.
+
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+    """
+    format_definition = self._GetFormatDefinitions()
+
+    template_mappings = self._GetTemplateMappings()
+
+    structure_description = self._GetStructureDescription(data_type_definition)
+    structure_description_title = '{0:s}{1:s}'.format(
+        structure_description[0].upper(), structure_description[1:])
+
+    if format_definition.description:
+      structure_description = '{0:s} of a {1:s}'.format(
+          structure_description_title, format_definition.description)
+
+    structure_members = self._GetStoredStructureHeaderMembers(
+        data_type_definition)
+
+    template_mappings['structure_description'] = structure_description
+    template_mappings['structure_description_title'] = structure_description_title
+    template_mappings['structure_members'] = structure_members
+    template_mappings['structure_name'] = data_type_definition.name
+    template_mappings['structure_name_upper_case'] = (
+        data_type_definition.name.upper())
+
+    template_filename = os.path.join(
+        self._templates_path, self._STORED_STRUCTURE_HEADER_TEMPLATE_FILE)
+
+    output_data = self._template_string_generator.Generate(
+        template_filename, template_mappings)
+
+    if self._prefix:
+      output_file = os.path.join(
+          'lib{0:s}'.format(self._prefix),
+          '{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
+    else:
+      output_file = self._STORED_STRUCTURE_HEADER_TEMPLATE_FILE
+
+    logging.info('Writing: {0:s}'.format(output_file))
+    with open(output_file, 'wb') as file_object:
+      file_object.write(output_data)
+
   def _GenerateRuntimeStructureHeader(self, data_type_definition):
     """Generates a runtime structure header.
 
@@ -92,10 +137,9 @@ class SourceGenerator(object):
     """
     template_mappings = self._GetTemplateMappings()
 
-    if data_type_definition.description:
-      structure_description = data_type_definition.description
-    else:
-      structure_description = data_type_definition.name
+    structure_description = self._GetStructureDescription(data_type_definition)
+    structure_description_title = '{0:s}{1:s}'.format(
+        structure_description[0].upper(), structure_description[1:])
 
     structure_members = self._GetRuntimeStructureHeaderMembers(
         data_type_definition)
@@ -106,6 +150,7 @@ class SourceGenerator(object):
     template_mappings['library_name_upper_case'] = library_name.upper()
 
     template_mappings['structure_description'] = structure_description
+    template_mappings['structure_description_title'] = structure_description_title
     template_mappings['structure_members'] = structure_members
     template_mappings['structure_name'] = data_type_definition.name
     template_mappings['structure_name_upper_case'] = (
@@ -136,10 +181,9 @@ class SourceGenerator(object):
     """
     template_mappings = self._GetTemplateMappings()
 
-    if data_type_definition.description:
-      structure_description = data_type_definition.description
-    else:
-      structure_description = data_type_definition.name
+    structure_description = self._GetStructureDescription(data_type_definition)
+    structure_description_title = '{0:s}{1:s}'.format(
+        structure_description[0].upper(), structure_description[1:])
 
     structure_members_copy_from_byte_stream = (
         self._GetRuntimeStructureSourceMembersCopyFromByteStream(
@@ -155,6 +199,7 @@ class SourceGenerator(object):
     template_mappings['library_name_upper_case'] = library_name.upper()
 
     template_mappings['structure_description'] = structure_description
+    template_mappings['structure_description_title'] = structure_description_title
     template_mappings['structure_members_copy_from_byte_stream'] = (
         structure_members_copy_from_byte_stream)
     template_mappings['structure_members_debug_print'] = (
@@ -175,51 +220,6 @@ class SourceGenerator(object):
           'lib{0:s}_{1:s}.c'.format(self._prefix, data_type_definition.name))
     else:
       output_file = self._RUNTIME_STRUCTURE_SOURCE_TEMPLATE_FILE
-
-    logging.info('Writing: {0:s}'.format(output_file))
-    with open(output_file, 'wb') as file_object:
-      file_object.write(output_data)
-
-  def _GenerateStoredStructureHeader(self, data_type_definition):
-    """Generates a stored structure header.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
-    """
-    format_definition = self._GetFormatDefinitions()
-
-    template_mappings = self._GetTemplateMappings()
-
-    if data_type_definition.description:
-      structure_description = data_type_definition.description
-    else:
-      structure_description = data_type_definition.name
-
-    if format_definition.description:
-      structure_description = '{0:s} of a {1:s}'.format(
-          structure_description, format_definition.description)
-
-    structure_members = self._GetStoredStructureHeaderMembers(
-        data_type_definition)
-
-    template_mappings['structure_description'] = structure_description
-    template_mappings['structure_members'] = structure_members
-    template_mappings['structure_name'] = data_type_definition.name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition.name.upper())
-
-    template_filename = os.path.join(
-        self._templates_path, self._STORED_STRUCTURE_HEADER_TEMPLATE_FILE)
-
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
-
-    if self._prefix:
-      output_file = os.path.join(
-          'lib{0:s}'.format(self._prefix),
-          '{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
-    else:
-      output_file = self._STORED_STRUCTURE_HEADER_TEMPLATE_FILE
 
     logging.info('Writing: {0:s}'.format(output_file))
     with open(output_file, 'wb') as file_object:
@@ -533,6 +533,22 @@ class SourceGenerator(object):
         lines.append('')
 
     return '\n'.join(lines)
+
+  def _GetStructureDescription(self, data_type_definition):
+    """Retrieves the structure description.
+
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+
+    Returns:
+      str: structure description.
+    """
+    if data_type_definition.description:
+      structure_description = data_type_definition.description
+    else:
+      structure_description = data_type_definition.name
+
+    return structure_description.lower()
 
   def _GetTemplateMappings(self):
     """Retrieves the template mappings.

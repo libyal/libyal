@@ -1,5 +1,5 @@
 /*
- * ${structure_description} functions
+ * ${structure_description_title} functions
  *
  * Copyright (C) ${copyright}, ${authors}
  *
@@ -85,7 +85,7 @@ int ${library_name}_${structure_name}_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear file.",
+		 "%s: unable to clear ${structure_description}.",
 		 function );
 
 		goto on_error;
@@ -133,7 +133,7 @@ int ${library_name}_${structure_name}_free(
 	return( 1 );
 }
 
-/* Reads the ${structure_description}
+/* Reads the ${structure_description} data
  * Returns 1 if successful or -1 on error
  */
 int ${library_name}_${structure_name}_read_data(

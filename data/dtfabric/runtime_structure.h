@@ -1,5 +1,5 @@
 /*
- * ${structure_description} functions
+ * ${structure_description_title} functions
  *
  * Copyright (C) ${copyright}, ${authors}
  *
