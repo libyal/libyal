@@ -3,6 +3,8 @@
 """Script to automate generation of source of the libyal libraries."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import abc
 import argparse
 import collections
@@ -25,47 +27,47 @@ except ImportError:
 import source_formatter
 
 
-DATA_TYPE_BOOLEAN = u'boolean'
-DATA_TYPE_BINARY_DATA = u'binary_data'
-DATA_TYPE_DOUBLE = u'double'
-DATA_TYPE_FAT_DATE_TIME = u'fat_date_time'
-DATA_TYPE_FILETIME = u'filetime'
-DATA_TYPE_FLOAT = u'float'
-DATA_TYPE_FLOATINGTIME = u'floatingtime'
-DATA_TYPE_GUID = u'guid'
-DATA_TYPE_INT = u'int'
-DATA_TYPE_INT32 = u'int32'
-DATA_TYPE_NARROW_STRING = u'narrow_string'
-DATA_TYPE_NONE = u'none'
-DATA_TYPE_OBJECT = u'object'
-DATA_TYPE_OFF64 = u'off64'
-DATA_TYPE_POSIX_TIME = u'posix_time'
-DATA_TYPE_SIZE32 = u'size32'
-DATA_TYPE_SIZE64 = u'size64'
-DATA_TYPE_STRING = u'string'
-DATA_TYPE_UINT8 = u'uint8'
-DATA_TYPE_UINT16 = u'uint16'
-DATA_TYPE_UINT32 = u'uint32'
-DATA_TYPE_UINT64 = u'uint64'
+DATA_TYPE_BOOLEAN = 'boolean'
+DATA_TYPE_BINARY_DATA = 'binary_data'
+DATA_TYPE_DOUBLE = 'double'
+DATA_TYPE_FAT_DATE_TIME = 'fat_date_time'
+DATA_TYPE_FILETIME = 'filetime'
+DATA_TYPE_FLOAT = 'float'
+DATA_TYPE_FLOATINGTIME = 'floatingtime'
+DATA_TYPE_GUID = 'guid'
+DATA_TYPE_INT = 'int'
+DATA_TYPE_INT32 = 'int32'
+DATA_TYPE_NARROW_STRING = 'narrow_string'
+DATA_TYPE_NONE = 'none'
+DATA_TYPE_OBJECT = 'object'
+DATA_TYPE_OFF64 = 'off64'
+DATA_TYPE_POSIX_TIME = 'posix_time'
+DATA_TYPE_SIZE32 = 'size32'
+DATA_TYPE_SIZE64 = 'size64'
+DATA_TYPE_STRING = 'string'
+DATA_TYPE_UINT8 = 'uint8'
+DATA_TYPE_UINT16 = 'uint16'
+DATA_TYPE_UINT32 = 'uint32'
+DATA_TYPE_UINT64 = 'uint64'
 
-FUNCTION_TYPE_CLOSE = u'close'
-FUNCTION_TYPE_COPY = u'copy'
-FUNCTION_TYPE_COPY_FROM = u'copy_from'
-FUNCTION_TYPE_COPY_TO = u'copy_to'
-FUNCTION_TYPE_FREE = u'free'
-FUNCTION_TYPE_GET = u'get'
-FUNCTION_TYPE_GET_BY_INDEX = u'get_by_index'
-FUNCTION_TYPE_GET_BY_IDENTIFIER = u'get_by_identifier'
-FUNCTION_TYPE_GET_BY_NAME = u'get_by_name'
-FUNCTION_TYPE_GET_BY_PATH = u'get_by_path'
-FUNCTION_TYPE_INITIALIZE = u'initialize'
-FUNCTION_TYPE_IS = u'is'
-FUNCTION_TYPE_OPEN = u'open'
-FUNCTION_TYPE_READ = u'read'
-FUNCTION_TYPE_SEEK = u'seek'
-FUNCTION_TYPE_SET = u'set'
-FUNCTION_TYPE_UTILITY = u'utility'
-FUNCTION_TYPE_WRITE = u'write'
+FUNCTION_TYPE_CLOSE = 'close'
+FUNCTION_TYPE_COPY = 'copy'
+FUNCTION_TYPE_COPY_FROM = 'copy_from'
+FUNCTION_TYPE_COPY_TO = 'copy_to'
+FUNCTION_TYPE_FREE = 'free'
+FUNCTION_TYPE_GET = 'get'
+FUNCTION_TYPE_GET_BY_INDEX = 'get_by_index'
+FUNCTION_TYPE_GET_BY_IDENTIFIER = 'get_by_identifier'
+FUNCTION_TYPE_GET_BY_NAME = 'get_by_name'
+FUNCTION_TYPE_GET_BY_PATH = 'get_by_path'
+FUNCTION_TYPE_INITIALIZE = 'initialize'
+FUNCTION_TYPE_IS = 'is'
+FUNCTION_TYPE_OPEN = 'open'
+FUNCTION_TYPE_READ = 'read'
+FUNCTION_TYPE_SEEK = 'seek'
+FUNCTION_TYPE_SET = 'set'
+FUNCTION_TYPE_UTILITY = 'utility'
+FUNCTION_TYPE_WRITE = 'write'
 
 
 class ProjectConfiguration(object):
@@ -146,54 +148,54 @@ class ProjectConfiguration(object):
     config_parser.read([filename])
 
     self.project_name = self._GetConfigValue(
-        config_parser, u'project', u'name')
+        config_parser, 'project', 'name')
     self.project_authors = self._GetConfigValue(
-        config_parser, u'project', u'authors')
+        config_parser, 'project', 'authors')
     self.project_year_of_creation = self._GetConfigValue(
-        config_parser, u'project', u'year_of_creation')
+        config_parser, 'project', 'year_of_creation')
 
     self.library_description = self._GetConfigValue(
-        config_parser, u'library', u'description')
+        config_parser, 'library', 'description')
     self.library_name = self.project_name
     self.library_name_suffix = self.project_name[3:]
     self.library_public_types = self._GetOptionalConfigValue(
-        config_parser, u'library', u'public_types', default_value=[])
+        config_parser, 'library', 'public_types', default_value=[])
 
     self.python_module_authors = self._GetOptionalConfigValue(
-        config_parser, u'python_module', u'authors',
+        config_parser, 'python_module', 'authors',
         default_value=self.project_authors)
-    self.python_module_name = u'py{0:s}'.format(self.library_name_suffix)
+    self.python_module_name = 'py{0:s}'.format(self.library_name_suffix)
     self.python_module_year_of_creation = self._GetOptionalConfigValue(
-        config_parser, u'python_module', u'year_of_creation',
+        config_parser, 'python_module', 'year_of_creation',
         default_value=self.project_year_of_creation)
 
     self.tools_authors = self._GetOptionalConfigValue(
-        config_parser, u'tools', u'authors', default_value=self.project_authors)
+        config_parser, 'tools', 'authors', default_value=self.project_authors)
     self.tools_description = self._GetOptionalConfigValue(
-        config_parser, u'tools', u'description', default_value=u'')
-    self.tools_name = u'{0:s}tools'.format(self.library_name_suffix)
+        config_parser, 'tools', 'description', default_value='')
+    self.tools_name = '{0:s}tools'.format(self.library_name_suffix)
     self.tools_names = self._GetOptionalConfigValue(
-        config_parser, u'tools', u'names', default_value=[])
+        config_parser, 'tools', 'names', default_value=[])
 
     self.tests_authors = self._GetOptionalConfigValue(
-        config_parser, u'tests', u'authors', default_value=self.project_authors)
+        config_parser, 'tests', 'authors', default_value=self.project_authors)
     self.tests_options = self._GetOptionalConfigValue(
-        config_parser, u'tests', u'options', default_value=[])
+        config_parser, 'tests', 'options', default_value=[])
 
     self.msvscpp_build_dependencies = self._GetOptionalConfigValue(
-        config_parser, u'msvscpp', u'build_dependencies', default_value=[])
+        config_parser, 'msvscpp', 'build_dependencies', default_value=[])
 
     self.msvscpp_build_dependencies = [
-        name.split(u' ')[0] for name in self.msvscpp_build_dependencies]
+        name.split(' ')[0] for name in self.msvscpp_build_dependencies]
 
-    if config_parser.has_section(u'mount_tool'):
-      self.msvscpp_build_dependencies.append(u'dokan')
+    if config_parser.has_section('mount_tool'):
+      self.msvscpp_build_dependencies.append('dokan')
 
     self.project_year_of_creation = int(self.project_year_of_creation, 10)
     self.python_module_year_of_creation = int(
         self.python_module_year_of_creation, 10)
 
-  def GetTemplateMappings(self, authors_separator=u', '):
+  def GetTemplateMappings(self, authors_separator=', '):
     """Retrieves the template mappings.
 
     Args:
@@ -208,19 +210,19 @@ class ProjectConfiguration(object):
     """
     date = datetime.date.today()
     if self.project_year_of_creation > date.year:
-      raise ValueError(u'Year of creation value out of bounds.')
+      raise ValueError('Year of creation value out of bounds.')
 
     if self.project_year_of_creation == date.year:
-      project_copyright = u'{0:d}'.format(self.project_year_of_creation)
+      project_copyright = '{0:d}'.format(self.project_year_of_creation)
     else:
-      project_copyright = u'{0:d}-{1:d}'.format(
+      project_copyright = '{0:d}-{1:d}'.format(
           self.project_year_of_creation, date.year)
 
     if self.python_module_year_of_creation == date.year:
-      python_module_copyright = u'{0:d}'.format(
+      python_module_copyright = '{0:d}'.format(
           self.python_module_year_of_creation)
     else:
-      python_module_copyright = u'{0:d}-{1:d}'.format(
+      python_module_copyright = '{0:d}-{1:d}'.format(
           self.python_module_year_of_creation, date.year)
 
     authors = authors_separator.join(self.project_authors)
@@ -228,31 +230,31 @@ class ProjectConfiguration(object):
     tools_authors = authors_separator.join(self.tools_authors)
     tests_authors = authors_separator.join(self.tests_authors)
 
-    library_description_lower_case = u'{0:s}{1:s}'.format(
+    library_description_lower_case = '{0:s}{1:s}'.format(
         self.library_description[0].lower(), self.library_description[1:])
 
     template_mappings = {
-        u'authors': authors,
-        u'copyright': project_copyright,
+        'authors': authors,
+        'copyright': project_copyright,
 
-        u'library_name': self.library_name,
-        u'library_name_upper_case': self.library_name.upper(),
-        u'library_name_suffix': self.library_name_suffix,
-        u'library_name_suffix_upper_case': self.library_name_suffix.upper(),
-        u'library_description': self.library_description,
-        u'library_description_lower_case': library_description_lower_case,
+        'library_name': self.library_name,
+        'library_name_upper_case': self.library_name.upper(),
+        'library_name_suffix': self.library_name_suffix,
+        'library_name_suffix_upper_case': self.library_name_suffix.upper(),
+        'library_description': self.library_description,
+        'library_description_lower_case': library_description_lower_case,
 
-        u'python_module_authors': python_module_authors,
-        u'python_module_name': self.python_module_name,
-        u'python_module_name_upper_case': self.python_module_name.upper(),
-        u'python_module_copyright': python_module_copyright,
+        'python_module_authors': python_module_authors,
+        'python_module_name': self.python_module_name,
+        'python_module_name_upper_case': self.python_module_name.upper(),
+        'python_module_copyright': python_module_copyright,
 
-        u'tools_authors': tools_authors,
-        u'tools_name': self.tools_name,
-        u'tools_name_upper_case': self.tools_name.upper(),
-        u'tools_description': self.tools_description,
+        'tools_authors': tools_authors,
+        'tools_name': self.tools_name,
+        'tools_name_upper_case': self.tools_name.upper(),
+        'tools_description': self.tools_description,
 
-        u'tests_authors': tests_authors,
+        'tests_authors': tests_authors,
     }
     return template_mappings
 
@@ -304,13 +306,13 @@ class FunctionArgument(object):
     """
     number_of_strings = len(self._strings)
 
-    argument_string = u''
+    argument_string = ''
     if number_of_strings == 1:
       argument_string = self._strings[0]
 
     elif number_of_strings > 1:
-      argument_string = u'{0:s}{1:s}'.format(
-          self._strings[0], u', '.join(self._strings[1:]))
+      argument_string = '{0:s}{1:s}'.format(
+          self._strings[0], ', '.join(self._strings[1:]))
 
     return argument_string
 
@@ -376,7 +378,7 @@ class FunctionPrototype(object):
       argument_string = function_argument.CopyToString()
       argument_strings.append(argument_string)
 
-    return u', '.join(argument_strings)
+    return ', '.join(argument_strings)
 
 
 class PythonTypeObjectFunctionPrototype(object):
@@ -398,8 +400,8 @@ class PythonTypeObjectFunctionPrototype(object):
       type_name (str): type name.
       type_function (str): type function.
     """
-    if type_function == u'open_file_io_handle':
-      type_function = u'open_file_object'
+    if type_function == 'open_file_io_handle':
+      type_function = 'open_file_object'
 
     super(PythonTypeObjectFunctionPrototype, self).__init__()
     self._name = None
@@ -417,7 +419,7 @@ class PythonTypeObjectFunctionPrototype(object):
   def name(self):
     """str: name."""
     if self._name is None:
-      self._name = u'{0:s}_{1:s}_{2:s}'.format(
+      self._name = '{0:s}_{1:s}_{2:s}'.format(
           self._python_module_name, self._type_name, self.type_function)
 
     return self._name
@@ -426,48 +428,48 @@ class PythonTypeObjectFunctionPrototype(object):
   def type_function(self):
     """str: type function."""
     # TODO: make overrides more generic.
-    if self._type_function == u'set_parent_file':
-      return u'set_parent'
+    if self._type_function == 'set_parent_file':
+      return 'set_parent'
 
-    if (self._type_function.startswith(u'copy_') and
-        not self._type_function.startswith(u'copy_from_')):
-      return u'get_{0:s}'.format(self._type_function[5:])
+    if (self._type_function.startswith('copy_') and
+        not self._type_function.startswith('copy_from_')):
+      return 'get_{0:s}'.format(self._type_function[5:])
 
-    if (self._type_function.startswith(u'get_utf8_') or
-        self._type_function.startswith(u'set_utf8_')):
-      return u''.join([self._type_function[:4], self._type_function[9:]])
+    if (self._type_function.startswith('get_utf8_') or
+        self._type_function.startswith('set_utf8_')):
+      return ''.join([self._type_function[:4], self._type_function[9:]])
 
-    if self._type_function.startswith(u'get_data_as_'):
-      _, _, type_function_suffix = self._type_function.partition(u'_data_as_')
+    if self._type_function.startswith('get_data_as_'):
+      _, _, type_function_suffix = self._type_function.partition('_data_as_')
 
       if type_function_suffix in (
-          u'16bit_integer', u'32bit_integer', u'64bit_integer'):
-        return u'get_data_as_integer'
+          '16bit_integer', '32bit_integer', '64bit_integer'):
+        return 'get_data_as_integer'
 
-      elif type_function_suffix in (u'filetime', u'floatingtime'):
-        return u'get_data_as_datetime'
+      elif type_function_suffix in ('filetime', 'floatingtime'):
+        return 'get_data_as_datetime'
 
-      elif type_function_suffix == u'utf8_string':
-        return u'get_data_as_string'
+      elif type_function_suffix == 'utf8_string':
+        return 'get_data_as_string'
 
       else:
         return self._type_function
 
-    if self._type_function.startswith(u'get_'):
+    if self._type_function.startswith('get_'):
       type_function_prefix, _, type_function_suffix = (
-          self._type_function.partition(u'_by_'))
+          self._type_function.partition('_by_'))
 
-      if type_function_suffix in (u'entry', u'index'):
+      if type_function_suffix in ('entry', 'index'):
         return type_function_prefix
 
-      if type_function_suffix in (u'utf8_name', u'utf8_path'):
-        return u''.join([self._type_function[:-10], self._type_function[-5:]])
+      if type_function_suffix in ('utf8_name', 'utf8_path'):
+        return ''.join([self._type_function[:-10], self._type_function[-5:]])
 
-      if self._type_function.endswith(u'_utf8_string'):
-        return u''.join([self._type_function[:-12], self._type_function[-7:]])
+      if self._type_function.endswith('_utf8_string'):
+        return ''.join([self._type_function[:-12], self._type_function[-7:]])
 
-      if self._type_function.endswith(u'_utf8_string_size'):
-        return u''.join([self._type_function[:-17], self._type_function[-12:]])
+      if self._type_function.endswith('_utf8_string_size'):
+        return ''.join([self._type_function[:-17], self._type_function[-12:]])
 
     return self._type_function
 
@@ -477,36 +479,36 @@ class PythonTypeObjectFunctionPrototype(object):
     if self._value_name is None:
       # TODO: make overrides more generic.
       if self.function_type == FUNCTION_TYPE_COPY:
-        if self._type_function.startswith(u'copy_'):
+        if self._type_function.startswith('copy_'):
           self._value_name = self._type_function[5:]
 
       elif self.function_type == FUNCTION_TYPE_COPY_FROM:
-        if self._type_function.startswith(u'copy_from_'):
+        if self._type_function.startswith('copy_from_'):
           self._value_name = self._type_function[10:]
 
       elif self.function_type in (
           FUNCTION_TYPE_GET, FUNCTION_TYPE_GET_BY_IDENTIFIER,
           FUNCTION_TYPE_GET_BY_INDEX, FUNCTION_TYPE_GET_BY_NAME,
           FUNCTION_TYPE_GET_BY_PATH):
-        type_function_prefix, _, _ = self._type_function.partition(u'_by_')
+        type_function_prefix, _, _ = self._type_function.partition('_by_')
 
-        if type_function_prefix.startswith(u'get_'):
+        if type_function_prefix.startswith('get_'):
           type_function_prefix = type_function_prefix[4:]
 
-        if type_function_prefix.startswith(u'utf8_'):
+        if type_function_prefix.startswith('utf8_'):
           type_function_prefix = type_function_prefix[5:]
 
         self._value_name = type_function_prefix
 
       elif self.function_type == FUNCTION_TYPE_IS:
-        if self._type_function.startswith(u'is_'):
+        if self._type_function.startswith('is_'):
           self._value_name = self._type_function[3:]
 
       elif self.function_type == FUNCTION_TYPE_SET:
-        if self._type_function.startswith(u'set_utf8_'):
+        if self._type_function.startswith('set_utf8_'):
           self._value_name = self._type_function[9:]
 
-        elif self._type_function.startswith(u'set_'):
+        elif self._type_function.startswith('set_'):
           self._value_name = self._type_function[4:]
 
     return self._value_name
@@ -546,43 +548,43 @@ class PythonTypeObjectFunctionPrototype(object):
     Returns:
       str: function as attribute description.
     """
-    description = u''
+    description = ''
 
     type_function = self.type_function
     value_name = self.value_name
     if value_name:
-      value_name = value_name.replace(u'_', u' ')
+      value_name = value_name.replace('_', ' ')
 
-    if type_function == u'get_ascii_codepage':
+    if type_function == 'get_ascii_codepage':
       description = (
-          u'The codepage used for ASCII strings in the {0:s}.').format(
+          'The codepage used for ASCII strings in the {0:s}.').format(
               self._type_name)
 
-    elif type_function == u'get_data_as_boolean':
-      description = u'The data as a boolean.'
+    elif type_function == 'get_data_as_boolean':
+      description = 'The data as a boolean.'
 
-    elif type_function == u'get_data_as_datetime':
-      description = u'The data as a datetime object.'
+    elif type_function == 'get_data_as_datetime':
+      description = 'The data as a datetime object.'
 
-    elif type_function == u'get_data_as_integer':
-      description = u'The data as an integer.'
+    elif type_function == 'get_data_as_integer':
+      description = 'The data as an integer.'
 
-    elif type_function == u'get_data_as_floating_point':
-      description = u'The data as a floating point.'
+    elif type_function == 'get_data_as_floating_point':
+      description = 'The data as a floating point.'
 
-    elif type_function == u'get_data_as_string':
-      description = u'The data as a string.'
+    elif type_function == 'get_data_as_string':
+      description = 'The data as a string.'
 
     elif self.function_type == FUNCTION_TYPE_IS:
       type_name = self._type_name
       if type_name:
-        type_name = type_name.replace(u'_', u' ')
+        type_name = type_name.replace('_', ' ')
 
-      description = u'Indicates the {0:s} is {1:s}.'.format(
+      description = 'Indicates the {0:s} is {1:s}.'.format(
           type_name, value_name)
 
     elif value_name:
-      description = u'The {0:s}.'.format(value_name)
+      description = 'The {0:s}.'.format(value_name)
 
     return description
 
@@ -593,31 +595,31 @@ class PythonTypeObjectFunctionPrototype(object):
       str: data type description.
     """
     if self.data_type == DATA_TYPE_BINARY_DATA:
-      return u'Binary string or None'
+      return 'Binary string or None'
 
     if self.data_type == DATA_TYPE_BOOLEAN:
-      return u'Boolean'
+      return 'Boolean'
 
     if self.DataTypeIsDatetime():
-      return u'Datetime or None'
+      return 'Datetime or None'
 
     if self.data_type == DATA_TYPE_OBJECT:
-      return u'Object or None'
+      return 'Object or None'
 
     if self.DataTypeIsFloat():
-      return u'Float or None'
+      return 'Float or None'
 
     if self.DataTypeIsInteger():
-      return u'Integer or None'
+      return 'Integer or None'
 
     if self.data_type in (DATA_TYPE_GUID, DATA_TYPE_STRING):
-      return u'Unicode string or None'
+      return 'Unicode string or None'
 
     if self.data_type == DATA_TYPE_NARROW_STRING:
-      return u'String or None'
+      return 'String or None'
 
     if self.data_type == DATA_TYPE_NONE:
-      return u'None'
+      return 'None'
 
     return self.data_type
 
@@ -627,102 +629,102 @@ class PythonTypeObjectFunctionPrototype(object):
     Returns:
       list[str]: lines of the description.
     """
-    description = [u'']
+    description = ['']
 
     type_function = self.type_function
     value_name = self.value_name
     if value_name:
-      value_name = value_name.replace(u'_', u' ')
+      value_name = value_name.replace('_', ' ')
 
-    if type_function == u'close':
-      description = [u'Closes a {0:s}.'.format(self._type_name)]
+    if type_function == 'close':
+      description = ['Closes a {0:s}.'.format(self._type_name)]
 
-    elif type_function == u'get_ascii_codepage':
+    elif type_function == 'get_ascii_codepage':
       description = [(
-          u'Retrieves the codepage for ASCII strings used in '
-          u'the {0:s}.').format(self._type_name)]
+          'Retrieves the codepage for ASCII strings used in '
+          'the {0:s}.').format(self._type_name)]
 
-    elif type_function == u'get_data_as_boolean':
-      description = [u'Retrieves the data as a boolean.']
+    elif type_function == 'get_data_as_boolean':
+      description = ['Retrieves the data as a boolean.']
 
-    elif type_function == u'get_data_as_datetime':
-      description = [u'Retrieves the data as a datetime object.']
+    elif type_function == 'get_data_as_datetime':
+      description = ['Retrieves the data as a datetime object.']
 
-    elif type_function == u'get_data_as_integer':
-      description = [u'Retrieves the data as an integer.']
+    elif type_function == 'get_data_as_integer':
+      description = ['Retrieves the data as an integer.']
 
-    elif type_function == u'get_data_as_floating_point':
-      description = [u'Retrieves the data as a floating point.']
+    elif type_function == 'get_data_as_floating_point':
+      description = ['Retrieves the data as a floating point.']
 
-    elif type_function == u'get_data_as_string':
-      description = [u'Retrieves the data as a string.']
+    elif type_function == 'get_data_as_string':
+      description = ['Retrieves the data as a string.']
 
-    elif type_function == u'open':
-      description = [u'Opens a {0:s}.'.format(self._type_name)]
+    elif type_function == 'open':
+      description = ['Opens a {0:s}.'.format(self._type_name)]
 
-    elif type_function == u'open_file_object':
+    elif type_function == 'open_file_object':
       description = [(
-          u'Opens a {0:s} using a file-like object.').format(self._type_name)]
+          'Opens a {0:s} using a file-like object.').format(self._type_name)]
 
-    elif type_function == u'read_buffer':
-      description = [u'Reads a buffer of data.']
+    elif type_function == 'read_buffer':
+      description = ['Reads a buffer of data.']
 
-    elif type_function == u'read_buffer_at_offset':
-      description = [u'Reads a buffer of data at a specific offset.']
+    elif type_function == 'read_buffer_at_offset':
+      description = ['Reads a buffer of data at a specific offset.']
 
-    elif type_function == u'seek_offset':
-      description = [u'Seeks an offset within the data.']
+    elif type_function == 'seek_offset':
+      description = ['Seeks an offset within the data.']
 
-    elif type_function == u'set_ascii_codepage':
+    elif type_function == 'set_ascii_codepage':
       description = [
-          (u'Sets the codepage for ASCII strings used in the '
-           u'{0:s}.').format(self._type_name),
-          (u'Expects the codepage to be a string containing a Python '
-           u'codec definition.')]
+          ('Sets the codepage for ASCII strings used in the '
+           '{0:s}.').format(self._type_name),
+          ('Expects the codepage to be a string containing a Python '
+           'codec definition.')]
 
-    elif type_function == u'set_parent':
-      description = [u'Sets the parent file.']
+    elif type_function == 'set_parent':
+      description = ['Sets the parent file.']
 
-    elif type_function == u'signal_abort':
-      description = [u'Signals the {0:s} to abort the current activity.'.format(
+    elif type_function == 'signal_abort':
+      description = ['Signals the {0:s} to abort the current activity.'.format(
           self._type_name)]
 
     elif self.function_type == FUNCTION_TYPE_GET_BY_INDEX:
-      _, _, argument_suffix = self.arguments[0].rpartition(u'_')
-      description = [u'Retrieves the {0:s} specified by the {1:s}.'.format(
+      _, _, argument_suffix = self.arguments[0].rpartition('_')
+      description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
           value_name, argument_suffix)]
 
     elif self.function_type in (
         FUNCTION_TYPE_GET_BY_IDENTIFIER, FUNCTION_TYPE_GET_BY_NAME,
         FUNCTION_TYPE_GET_BY_PATH):
-      _, _, type_function_suffix = type_function.partition(u'_by_')
-      description = [u'Retrieves the {0:s} specified by the {1:s}.'.format(
+      _, _, type_function_suffix = type_function.partition('_by_')
+      description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
           value_name, type_function_suffix)]
 
     elif self.function_type == FUNCTION_TYPE_COPY_FROM:
       type_name = self._type_name
       if type_name:
-        type_name = type_name.replace(u'_', u' ')
+        type_name = type_name.replace('_', ' ')
 
       # TODO: fix value name.
-      description = [u'Copies the the {0:s} from the {1:s}'.format(
+      description = ['Copies the the {0:s} from the {1:s}'.format(
           type_name, value_name)]
 
     elif self.function_type in (FUNCTION_TYPE_COPY, FUNCTION_TYPE_GET):
-      description = [u'Retrieves the {0:s}.'.format(value_name)]
+      description = ['Retrieves the {0:s}.'.format(value_name)]
 
     elif self.function_type == FUNCTION_TYPE_IS:
       type_name = self._type_name
       if type_name:
-        type_name = type_name.replace(u'_', u' ')
+        type_name = type_name.replace('_', ' ')
 
-      value_name = value_name.replace(u'_', u' ')
-      description = [u'Determines if the {0:s} is {1:s}.'.format(
+      value_name = value_name.replace('_', ' ')
+      description = ['Determines if the {0:s} is {1:s}.'.format(
           type_name, value_name)]
 
     elif self.function_type == FUNCTION_TYPE_SET:
-      value_name = value_name.replace(u'_', u' ')
-      description = [u'Sets the {0:s}.'.format(value_name)]
+      value_name = value_name.replace('_', ' ')
+      description = ['Sets the {0:s}.'.format(value_name)]
 
     return description
 
@@ -733,8 +735,8 @@ class PythonTypeObjectFunctionPrototype(object):
       tuple[str, str]: value name and prefix.
     """
     if self.value_name:
-      value_name_prefix, _, value_name = self.value_name.partition(u'_')
-      if value_name_prefix in (u'root', u'sub'):
+      value_name_prefix, _, value_name = self.value_name.partition('_')
+      if value_name_prefix in ('root', 'sub'):
         return value_name, value_name_prefix
 
     return self.value_name, None
@@ -833,7 +835,7 @@ class LibraryHeaderFile(object):
       FunctionPrototype: function prototype of the type function or None
           if no such function.
     """
-    function_name = u'{0:s}_{1:s}_{2:s}'.format(
+    function_name = '{0:s}_{1:s}_{2:s}'.format(
         self._library_name, type_name, type_function)
     return self.functions_per_name.get(function_name, None)
 
@@ -864,27 +866,27 @@ class LibraryHeaderFile(object):
 
     # TODO: use .h.in or run configure?
     if not os.path.exists(self.path):
-      raise IOError(u'Missing include header file: {0:s}'.format(self.path))
+      raise IOError('Missing include header file: {0:s}'.format(self.path))
 
     with open(self.path, 'rb') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
         if in_function_prototype:
-          line = line.decode(u'ascii')
+          line = line.decode('ascii')
 
           # Check if we have a callback function argument.
-          if line.endswith(u'('):
-            argument_string = u'{0:s} '.format(line)
+          if line.endswith('('):
+            argument_string = '{0:s} '.format(line)
             function_argument = FunctionArgument(argument_string)
 
           else:
-            if line.endswith(u' );'):
+            if line.endswith(' );'):
               argument_string = line[:-3]
 
             else:
               # Get the part of the line before the ','.
-              argument_string, _, _ = line.partition(u',')
+              argument_string, _, _ = line.partition(',')
 
             if not function_argument:
               function_prototype.AddArgumentString(argument_string)
@@ -892,11 +894,11 @@ class LibraryHeaderFile(object):
             else:
               function_argument.AddArgumentString(argument_string)
 
-          if function_argument and line.endswith(u' ),'):
+          if function_argument and line.endswith(' ),'):
             function_prototype.AddArgument(function_argument)
             function_argument = None
 
-          elif line.endswith(u' );'):
+          elif line.endswith(' );'):
             self.functions_per_name[function_prototype.name] = (
                 function_prototype)
 
@@ -913,7 +915,7 @@ class LibraryHeaderFile(object):
           data_type = data_type.strip()
 
           # Get the part of the remainder of the line before the '('.
-          name, _, _ = line.partition(u'(')
+          name, _, _ = line.partition('(')
 
           function_prototype = FunctionPrototype(name, data_type)
           function_prototype.have_extern = have_extern
@@ -958,7 +960,7 @@ class LibraryIncludeHeaderFile(object):
     section_names (list[str]): section names.
   """
 
-  _SIGNATURE_TYPES = (u'file', u'volume')
+  _SIGNATURE_TYPES = ('file', 'volume')
 
   def __init__(self, path):
     """Initializes a library include header file.
@@ -994,12 +996,12 @@ class LibraryIncludeHeaderFile(object):
       if not functions:
         continue
 
-      group_name = section_name.replace(u' ', u'_')
-      group_name = group_name.replace(u'-', u'_')
+      group_name = section_name.replace(' ', '_')
+      group_name = group_name.replace('-', '_')
       group_name = group_name.lower()
-      group_name, _, _ = group_name.rpartition(u'_functions')
+      group_name, _, _ = group_name.rpartition('_functions')
 
-      function_name_prefix = u'{0:s}_{1:s}_'.format(
+      function_name_prefix = '{0:s}_{1:s}_'.format(
           self._library_name, group_name)
 
       found_match = False
@@ -1010,7 +1012,7 @@ class LibraryIncludeHeaderFile(object):
 
       # Ignore the section header if it is just informative.
       if not found_match:
-        if group_name == u'support':
+        if group_name == 'support':
           signature_type = self.GetCheckSignatureType()
           if signature_type:
             self._api_functions_with_input_group[group_name] = section_name
@@ -1019,19 +1021,19 @@ class LibraryIncludeHeaderFile(object):
 
         else:
           # TODO: improve pseudo type detection.
-          if group_name.endswith(u'_item'):
+          if group_name.endswith('_item'):
             group_name = group_name[:-5]
 
           self._api_pseudo_types_group[group_name] = section_name
 
-      elif self._library_name != u'libcerror' and group_name == u'error':
+      elif self._library_name != 'libcerror' and group_name == 'error':
         self._api_functions_group[group_name] = section_name
 
-      elif (not self.HasTypeFunction(group_name, u'create') and
-            not self.HasTypeFunction(group_name, u'free')):
+      elif (not self.HasTypeFunction(group_name, 'create') and
+            not self.HasTypeFunction(group_name, 'free')):
         self._api_functions_group[group_name] = section_name
 
-      elif not self.HasTypeFunction(group_name, u'open'):
+      elif not self.HasTypeFunction(group_name, 'open'):
         self._api_types_group[group_name] = section_name
 
       else:
@@ -1086,7 +1088,7 @@ class LibraryIncludeHeaderFile(object):
     """
     if not self._check_signature_type:
       for signature_type in self._SIGNATURE_TYPES:
-        function_name = u'{0:s}_check_{1:s}_signature'.format(
+        function_name = '{0:s}_check_{1:s}_signature'.format(
             self._library_name, signature_type)
 
         if function_name in self.functions_per_name:
@@ -1127,7 +1129,7 @@ class LibraryIncludeHeaderFile(object):
       bool: True if there ar functions with an error argument defined,
           False otherwise.
     """
-    error_type = u'{0:s}_error_t '.format(self._library_name)
+    error_type = '{0:s}_error_t '.format(self._library_name)
 
     functions = self.GetFunctionGroup(group_name)
     for function_prototype in functions:
@@ -1150,7 +1152,7 @@ class LibraryIncludeHeaderFile(object):
     Returns:
       bool: True if function is defined, False otherwise.
     """
-    function_name = u'{0:s}_{1:s}'.format(self._library_name, function_name)
+    function_name = '{0:s}_{1:s}'.format(self._library_name, function_name)
     return function_name in self.functions_per_name
 
   def HasTypeFunction(self, type_name, type_function):
@@ -1163,7 +1165,7 @@ class LibraryIncludeHeaderFile(object):
     Returns:
       bool: True if function is defined, False otherwise.
     """
-    function_name = u'{0:s}_{1:s}_{2:s}'.format(
+    function_name = '{0:s}_{1:s}_{2:s}'.format(
         self._library_name, type_name, type_function)
     return function_name in self.functions_per_name
 
@@ -1209,21 +1211,21 @@ class LibraryIncludeHeaderFile(object):
         line = line.strip()
 
         if have_extern:
-          line = line.decode(u'ascii')
+          line = line.decode('ascii')
 
           if function_prototype:
             # Check if we have a callback function argument.
-            if line.endswith(u'('):
-              argument_string = u'{0:s} '.format(line)
+            if line.endswith('('):
+              argument_string = '{0:s} '.format(line)
               function_argument = FunctionArgument(argument_string)
 
             else:
-              if line.endswith(u' );'):
+              if line.endswith(' );'):
                 argument_string = line[:-3]
 
               else:
                 # Get the part of the line before the ','.
-                argument_string, _, _ = line.partition(u',')
+                argument_string, _, _ = line.partition(',')
 
               if not function_argument:
                 function_prototype.AddArgumentString(argument_string)
@@ -1231,11 +1233,11 @@ class LibraryIncludeHeaderFile(object):
               else:
                 function_argument.AddArgumentString(argument_string)
 
-            if function_argument and line.endswith(u' ),'):
+            if function_argument and line.endswith(' ),'):
               function_prototype.AddArgument(function_argument)
               function_argument = None
 
-            elif line.endswith(u' );'):
+            elif line.endswith(' );'):
               if not in_define_deprecated:
                 self.functions_per_name[function_prototype.name] = (
                     function_prototype)
@@ -1247,7 +1249,7 @@ class LibraryIncludeHeaderFile(object):
               in_define_deprecated = False
               have_extern = False
 
-          elif line.endswith(u';'):
+          elif line.endswith(';'):
             # The line contains a variable definition.
             have_extern = False
 
@@ -1260,7 +1262,7 @@ class LibraryIncludeHeaderFile(object):
             data_type = data_type.strip()
 
             # Get the part of the remainder of the line before the '('.
-            name, _, _ = line.partition(u'(')
+            name, _, _ = line.partition('(')
 
             function_prototype = FunctionPrototype(name, data_type)
             function_prototype.have_bfio = have_bfio
@@ -1358,26 +1360,26 @@ class LibraryMakefileAMFile(object):
           if line.endswith(b'\\'):
             line = line[:-1].strip()
 
-          if (in_section == u'cppflags' and line.startswith(b'@') and
+          if (in_section == 'cppflags' and line.startswith(b'@') and
               line.endswith(b'_CPPFLAGS@')):
             self.cppflags.append(line[1:-10].lower())
 
-          elif (in_section == u'libadd' and line.startswith(b'@') and
+          elif (in_section == 'libadd' and line.startswith(b'@') and
                 line.endswith(b'_LIBADD@')):
             self.libraries.append(line[1:-8].lower())
 
-          elif in_section == u'sources':
+          elif in_section == 'sources':
             sources = line.split(b' ')
             self.sources.extend(sources)
 
         elif line == b'AM_CPPFLAGS = \\':
-          in_section = u'cppflags'
+          in_section = 'cppflags'
 
         elif line.startswith(library_libadd):
-          in_section = u'libadd'
+          in_section = 'libadd'
 
         elif line.startswith(library_sources):
-          in_section = u'sources'
+          in_section = 'sources'
 
     self.libraries = sorted(self.libraries)
 
@@ -1518,7 +1520,7 @@ class SourceFileGenerator(object):
       output_data = template_string.substitute(template_mappings)
     except (KeyError, ValueError) as exception:
       logging.error(
-          u'Unable to format template: {0:s} with error: {1:s}'.format(
+          'Unable to format template: {0:s} with error: {1:s}'.format(
               template_filename, exception))
       return
 
@@ -1538,7 +1540,7 @@ class SourceFileGenerator(object):
     if not self._definitions_include_header_file:
       self._definitions_include_header_path = os.path.join(
           self._projects_directory, project_configuration.library_name,
-          u'include', project_configuration.library_name, u'definitions.h.in')
+          'include', project_configuration.library_name, 'definitions.h.in')
 
       if os.path.exists(self._definitions_include_header_path):
         self._definitions_include_header_file = DefinitionsIncludeHeaderFile(
@@ -1558,11 +1560,11 @@ class SourceFileGenerator(object):
           the library include header file cannot be found.
     """
     if not self._library_include_header_file:
-      self._library_include_header_path = u'{0:s}.h.in'.format(
+      self._library_include_header_path = '{0:s}.h.in'.format(
           project_configuration.library_name)
       self._library_include_header_path = os.path.join(
           self._projects_directory, project_configuration.library_name,
-          u'include', self._library_include_header_path)
+          'include', self._library_include_header_path)
 
       if os.path.exists(self._library_include_header_path):
         self._library_include_header_file = LibraryIncludeHeaderFile(
@@ -1584,7 +1586,7 @@ class SourceFileGenerator(object):
     if not self._library_makefile_am_file:
       self._library_makefile_am_path = os.path.join(
           self._projects_directory, project_configuration.library_name,
-          project_configuration.library_name, u'Makefile.am')
+          project_configuration.library_name, 'Makefile.am')
 
       if os.path.exists(self._library_makefile_am_path):
         self._library_makefile_am_file = LibraryMakefileAMFile(
@@ -1610,7 +1612,7 @@ class SourceFileGenerator(object):
           project_configuration.library_name)
 
     # TODO: cache header files.
-    header_file_path = u'{0:s}_{1:s}.h'.format(
+    header_file_path = '{0:s}_{1:s}.h'.format(
         project_configuration.library_name, type_name)
     header_file_path = os.path.join(self._library_path, header_file_path)
     header_file = LibraryHeaderFile(header_file_path)
@@ -1630,7 +1632,7 @@ class SourceFileGenerator(object):
     if not self._types_include_header_file:
       self._types_include_header_path = os.path.join(
           self._projects_directory, project_configuration.library_name,
-          u'include', project_configuration.library_name, u'types.h.in')
+          'include', project_configuration.library_name, 'types.h.in')
 
       if os.path.exists(self._types_include_header_path):
         self._types_include_header_file = TypesIncludeHeaderFile(
@@ -1669,7 +1671,7 @@ class SourceFileGenerator(object):
     if not self._tests_path:
       self._tests_path = os.path.join(
           self._projects_directory, project_configuration.library_name,
-          u'tests')
+          'tests')
 
       self._has_tests = os.path.exists(self._tests_path)
 
@@ -1685,7 +1687,7 @@ class SourceFileGenerator(object):
       bool: True if the tools path exits.
     """
     if not self._tools_path:
-      tools_name = u'{0:s}tools'.format(
+      tools_name = '{0:s}tools'.format(
           project_configuration.library_name_suffix)
       self._tools_path = os.path.join(
           self._projects_directory, project_configuration.library_name,
@@ -1719,17 +1721,17 @@ class SourceFileGenerator(object):
       type_name (str): sequence type name.
     """
     if not type_name:
-      template_mappings[u'sequence_type_description'] = u''
-      template_mappings[u'sequence_type_name'] = u''
-      template_mappings[u'sequence_type_name_camel_case'] = u''
-      template_mappings[u'sequence_type_name_upper_case'] = u''
+      template_mappings['sequence_type_description'] = ''
+      template_mappings['sequence_type_name'] = ''
+      template_mappings['sequence_type_name_camel_case'] = ''
+      template_mappings['sequence_type_name_upper_case'] = ''
     else:
-      template_mappings[u'sequence_type_description'] = type_name.replace(
-          u'_', u' ')
-      template_mappings[u'sequence_type_name'] = type_name
-      template_mappings[u'sequence_type_name_camel_case'] = u''.join([
-          word.title() for word in type_name.split(u'_')])
-      template_mappings[u'sequence_type_name_upper_case'] = type_name.upper()
+      template_mappings['sequence_type_description'] = type_name.replace(
+          '_', ' ')
+      template_mappings['sequence_type_name'] = type_name
+      template_mappings['sequence_type_name_camel_case'] = ''.join([
+          word.title() for word in type_name.split('_')])
+      template_mappings['sequence_type_name_upper_case'] = type_name.upper()
 
   def _SetSequenceValueNameInTemplateMappings(
       self, template_mappings, value_name):
@@ -1741,14 +1743,14 @@ class SourceFileGenerator(object):
       value_name (str): sequence value name.
     """
     if not value_name:
-      template_mappings[u'sequence_value_description'] = u''
-      template_mappings[u'sequence_value_name'] = u''
-      template_mappings[u'sequence_value_name_upper_case'] = u''
+      template_mappings['sequence_value_description'] = ''
+      template_mappings['sequence_value_name'] = ''
+      template_mappings['sequence_value_name_upper_case'] = ''
     else:
-      template_mappings[u'sequence_value_description'] = value_name.replace(
-          u'_', u' ')
-      template_mappings[u'sequence_value_name'] = value_name
-      template_mappings[u'sequence_value_name_upper_case'] = value_name.upper()
+      template_mappings['sequence_value_description'] = value_name.replace(
+          '_', ' ')
+      template_mappings['sequence_value_name'] = value_name
+      template_mappings['sequence_value_name_upper_case'] = value_name.upper()
 
   def _SetTypeFunctionInTemplateMappings(
       self, template_mappings, type_function):
@@ -1760,11 +1762,11 @@ class SourceFileGenerator(object):
       type_function (str): type function.
     """
     if not type_function:
-      template_mappings[u'type_function'] = u''
-      template_mappings[u'type_function_upper_case'] = u''
+      template_mappings['type_function'] = ''
+      template_mappings['type_function_upper_case'] = ''
     else:
-      template_mappings[u'type_function'] = type_function
-      template_mappings[u'type_function_upper_case'] = type_function.upper()
+      template_mappings['type_function'] = type_function
+      template_mappings['type_function_upper_case'] = type_function.upper()
 
   def _SetTypeNameInTemplateMappings(self, template_mappings, type_name):
     """Sets the type name in template mappings.
@@ -1775,16 +1777,16 @@ class SourceFileGenerator(object):
       type_name (str): type name.
     """
     if not type_name:
-      template_mappings[u'type_description'] = u''
-      template_mappings[u'type_name'] = u''
-      template_mappings[u'type_name_camel_case'] = u''
-      template_mappings[u'type_name_upper_case'] = u''
+      template_mappings['type_description'] = ''
+      template_mappings['type_name'] = ''
+      template_mappings['type_name_camel_case'] = ''
+      template_mappings['type_name_upper_case'] = ''
     else:
-      template_mappings[u'type_description'] = type_name.replace(u'_', u' ')
-      template_mappings[u'type_name'] = type_name
-      template_mappings[u'type_name_camel_case'] = u''.join([
-          word.title() for word in type_name.split(u'_')])
-      template_mappings[u'type_name_upper_case'] = type_name.upper()
+      template_mappings['type_description'] = type_name.replace('_', ' ')
+      template_mappings['type_name'] = type_name
+      template_mappings['type_name_camel_case'] = ''.join([
+          word.title() for word in type_name.split('_')])
+      template_mappings['type_name_upper_case'] = type_name.upper()
 
   def _SetValueNameInTemplateMappings(self, template_mappings, value_name):
     """Sets value name in template mappings.
@@ -1795,13 +1797,13 @@ class SourceFileGenerator(object):
       value_name (str): value name.
     """
     if not value_name:
-      template_mappings[u'value_description'] = u''
-      template_mappings[u'value_name'] = u''
-      template_mappings[u'value_name_upper_case'] = u''
+      template_mappings['value_description'] = ''
+      template_mappings['value_name'] = ''
+      template_mappings['value_name_upper_case'] = ''
     else:
-      template_mappings[u'value_description'] = value_name.replace(u'_', u' ')
-      template_mappings[u'value_name'] = value_name
-      template_mappings[u'value_name_upper_case'] = value_name.upper()
+      template_mappings['value_description'] = value_name.replace('_', ' ')
+      template_mappings['value_name'] = value_name
+      template_mappings['value_name_upper_case'] = value_name.upper()
 
   def _SetValueTypeInTemplateMappings(self, template_mappings, value_type):
     """Sets value type in template mappings.
@@ -1812,14 +1814,14 @@ class SourceFileGenerator(object):
       value_type (str): value type.
     """
     if not value_type:
-      template_mappings[u'value_type'] = u''
-      template_mappings[u'value_type_description'] = u''
-      template_mappings[u'value_type_upper_case'] = u''
+      template_mappings['value_type'] = ''
+      template_mappings['value_type_description'] = ''
+      template_mappings['value_type_upper_case'] = ''
     else:
-      template_mappings[u'value_type'] = value_type
-      template_mappings[u'value_type_description'] = value_type.replace(
-          u'_', u' ')
-      template_mappings[u'value_type_upper_case'] = value_type.upper()
+      template_mappings['value_type'] = value_type
+      template_mappings['value_type_description'] = value_type.replace(
+          '_', ' ')
+      template_mappings['value_type_upper_case'] = value_type.upper()
 
   def _SortIncludeHeaders(self, project_configuration, output_filename):
     """Sorts the include headers within a source file.
@@ -2001,8 +2003,8 @@ class CommonSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
     """
     template_mappings = project_configuration.GetTemplateMappings(
-        authors_separator=u',\n *                          ')
-    template_mappings[u'authors'] = u'Joachim Metz <joachim.metz@gmail.com>'
+        authors_separator=',\n *                          ')
+    template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
@@ -2010,7 +2012,7 @@ class CommonSourceFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      output_filename = os.path.join(u'common', directory_entry)
+      output_filename = os.path.join('common', directory_entry)
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
@@ -2031,32 +2033,32 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, u'appveyor.yml')
+    template_directory = os.path.join(self._template_directory, 'appveyor.yml')
 
-    template_filename = os.path.join(template_directory, u'header.yml')
+    template_filename = os.path.join(template_directory, 'header.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    if (os.path.exists(u'syncwinflexbison.ps1') or
-        os.path.exists(u'syncwinflexbison.sh')):
-      template_filename = os.path.join(template_directory, u'winflexbison.yml')
+    if (os.path.exists('syncwinflexbison.ps1') or
+        os.path.exists('syncwinflexbison.sh')):
+      template_filename = os.path.join(template_directory, 'winflexbison.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if u'zlib' in project_configuration.msvscpp_build_dependencies:
-      template_filename = os.path.join(template_directory, u'zlib.yml')
+    if 'zlib' in project_configuration.msvscpp_build_dependencies:
+      template_filename = os.path.join(template_directory, 'zlib.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if u'dokan' in project_configuration.msvscpp_build_dependencies:
-      template_filename = os.path.join(template_directory, u'dokan.yml')
+    if 'dokan' in project_configuration.msvscpp_build_dependencies:
+      template_filename = os.path.join(template_directory, 'dokan.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'footer.yml')
+    template_filename = os.path.join(template_directory, 'footer.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2079,27 +2081,27 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     has_python_module = self._HasPythonModule(project_configuration)
     has_tools = self._HasTools(project_configuration)
 
-    template_directory = os.path.join(self._template_directory, u'dpkg')
+    template_directory = os.path.join(self._template_directory, 'dpkg')
 
     for directory_entry in os.listdir(template_directory):
       template_filename = os.path.join(template_directory, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
-      if (directory_entry.startswith(u'control') or
-          directory_entry.startswith(u'rules')):
+      if (directory_entry.startswith('control') or
+          directory_entry.startswith('rules')):
         continue
 
-      if directory_entry.endswith(u'.install'):
-        if not has_python_module and u'-python' in directory_entry:
+      if directory_entry.endswith('.install'):
+        if not has_python_module and '-python' in directory_entry:
           continue
 
-        if not has_tools and u'-tools' in directory_entry:
+        if not has_tools and '-tools' in directory_entry:
           continue
 
       output_filename = directory_entry
-      if output_filename.startswith(u'libyal'):
-        output_filename = u'{0:s}{1:s}'.format(
+      if output_filename.startswith('libyal'):
+        output_filename = '{0:s}{1:s}'.format(
             project_configuration.library_name, output_filename[6:])
 
       output_filename = os.path.join(output_directory, output_filename)
@@ -2108,32 +2110,32 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     # TODO: generate control incrementally
     if has_python_module:
-      template_filename = u'control-with-python'
+      template_filename = 'control-with-python'
     elif has_tools:
-      template_filename = u'control-with-tools'
+      template_filename = 'control-with-tools'
     else:
-      template_filename = u'control'
+      template_filename = 'control'
 
     template_filename = os.path.join(template_directory, template_filename)
-    output_filename = os.path.join(output_directory, u'control')
+    output_filename = os.path.join(output_directory, 'control')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
     if has_python_module:
-      template_filename = u'rules-with-python'
+      template_filename = 'rules-with-python'
     elif has_tools:
-      template_filename = u'rules-with-tools'
+      template_filename = 'rules-with-tools'
     else:
-      template_filename = u'rules'
+      template_filename = 'rules'
 
     template_filename = os.path.join(template_directory, template_filename)
-    output_filename = os.path.join(output_directory, u'rules')
+    output_filename = os.path.join(output_directory, 'rules')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
     template_directory = os.path.join(
-        self._template_directory, u'dpkg', u'source')
-    output_directory = os.path.join(output_directory, u'source')
+        self._template_directory, 'dpkg', 'source')
+    output_directory = os.path.join(output_directory, 'source')
 
     for directory_entry in os.listdir(template_directory):
       template_filename = os.path.join(template_directory, directory_entry)
@@ -2157,23 +2159,23 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     if not makefile_am_file:
       logging.warning(
-          u'Missing: {0:s} skipping generation of configuration files.'.format(
+          'Missing: {0:s} skipping generation of configuration files.'.format(
               self._library_makefile_am_path))
       return
 
     template_mappings = project_configuration.GetTemplateMappings(
-        authors_separator=u',\n *                          ')
-    template_mappings[u'authors'] = u'Joachim Metz <joachim.metz@gmail.com>'
+        authors_separator=',\n *                          ')
+    template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
 
     pc_libs_private = []
     for library in makefile_am_file.libraries:
-      if library == u'libdl':
+      if library == 'libdl':
         continue
 
-      pc_lib_private = u'@ax_{0:s}_pc_libs_private@'.format(library)
+      pc_lib_private = '@ax_{0:s}_pc_libs_private@'.format(library)
       pc_libs_private.append(pc_lib_private)
 
-    template_mappings[u'pc_libs_private'] = u' '.join(pc_libs_private)
+    template_mappings['pc_libs_private'] = ' '.join(pc_libs_private)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
@@ -2181,8 +2183,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      if directory_entry == u'libyal.pc.in':
-        output_filename = u'{0:s}.pc.in'.format(
+      if directory_entry == 'libyal.pc.in':
+        output_filename = '{0:s}.pc.in'.format(
             project_configuration.library_name)
       else:
         output_filename = directory_entry
@@ -2192,10 +2194,10 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer,
-        u'appveyor.yml')
+        'appveyor.yml')
 
     self._GenerateDpkg(
-        project_configuration, template_mappings, output_writer, u'dpkg')
+        project_configuration, template_mappings, output_writer, 'dpkg')
 
 
 class IncludeSourceFileGenerator(SourceFileGenerator):
@@ -2217,34 +2219,34 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
       output_filename (str): path of the output file.
     """
     template_directory = os.path.join(
-        self._template_directory, u'libyal', u'features.h.in')
+        self._template_directory, 'libyal', 'features.h.in')
 
-    template_filename = os.path.join(template_directory, u'header.h')
+    template_filename = os.path.join(template_directory, 'header.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
     # TODO: fix check for libsigscan.
     if include_header_file.have_wide_character_type:
       template_filename = os.path.join(
-          template_directory, u'wide_character_type.h')
+          template_directory, 'wide_character_type.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
     # TODO: improve detection if include is needed.
-    if u'libcthreads' in makefile_am_file.libraries:
-      template_filename = os.path.join(template_directory, u'multi_thread.h')
+    if 'libcthreads' in makefile_am_file.libraries:
+      template_filename = os.path.join(template_directory, 'multi_thread.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
     if include_header_file.have_bfio:
-      template_filename = os.path.join(template_directory, u'bfio.h')
+      template_filename = os.path.join(template_directory, 'bfio.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'footer.h')
+    template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2267,37 +2269,37 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
     library_name = project_configuration.library_name
 
     pkginclude_headers = [
-        u'\t{0:s}/definitions.h \\'.format(library_name),
-        u'\t{0:s}/extern.h \\'.format(library_name),
-        u'\t{0:s}/features.h \\'.format(library_name),
-        u'\t{0:s}/types.h'.format(library_name)]
+        '\t{0:s}/definitions.h \\'.format(library_name),
+        '\t{0:s}/extern.h \\'.format(library_name),
+        '\t{0:s}/features.h \\'.format(library_name),
+        '\t{0:s}/types.h'.format(library_name)]
 
     # TODO: detect if header file exits.
-    if library_name != u'libcerror':
-      pkginclude_header = u'\t{0:s}/error.h \\'.format(library_name)
+    if library_name != 'libcerror':
+      pkginclude_header = '\t{0:s}/error.h \\'.format(library_name)
       pkginclude_headers.append(pkginclude_header)
 
-    if include_header_file.HasFunction(u'get_codepage'):
-      pkginclude_header = u'\t{0:s}/codepage.h \\'.format(library_name)
-      pkginclude_headers.append(pkginclude_header)
-
-    # TODO: detect if header file exits.
-    if library_name in (u'libnk2', u'libpff'):
-      pkginclude_header = u'\t{0:s}/mapi.h \\'.format(library_name)
+    if include_header_file.HasFunction('get_codepage'):
+      pkginclude_header = '\t{0:s}/codepage.h \\'.format(library_name)
       pkginclude_headers.append(pkginclude_header)
 
     # TODO: detect if header file exits.
-    if library_name == u'libolecf':
-      pkginclude_header = u'\t{0:s}/ole.h \\'.format(library_name)
+    if library_name in ('libnk2', 'libpff'):
+      pkginclude_header = '\t{0:s}/mapi.h \\'.format(library_name)
+      pkginclude_headers.append(pkginclude_header)
+
+    # TODO: detect if header file exits.
+    if library_name == 'libolecf':
+      pkginclude_header = '\t{0:s}/ole.h \\'.format(library_name)
       pkginclude_headers.append(pkginclude_header)
 
     pkginclude_headers = sorted(pkginclude_headers)
 
-    template_mappings[u'pkginclude_headers'] = u'\n'.join(pkginclude_headers)
+    template_mappings['pkginclude_headers'] = '\n'.join(pkginclude_headers)
 
-    template_filename = os.path.join(self._template_directory, u'Makefile.am')
+    template_filename = os.path.join(self._template_directory, 'Makefile.am')
 
-    output_filename = os.path.join(u'include', u'Makefile.am')
+    output_filename = os.path.join('include', 'Makefile.am')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
@@ -2316,28 +2318,28 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
       output_filename (str): path of the output file.
     """
     template_directory = os.path.join(
-        self._template_directory, u'libyal', u'types.h.in')
+        self._template_directory, 'libyal', 'types.h.in')
 
     type_definitions = []
     for type_name in sorted(project_configuration.library_public_types):
-      type_definition = u'typedef intptr_t {0:s}_{1:s}_t;'.format(
+      type_definition = 'typedef intptr_t {0:s}_{1:s}_t;'.format(
           project_configuration.library_name, type_name)
       type_definitions.append(type_definition)
 
-    template_mappings[u'library_type_definitions'] = u'\n'.join(
+    template_mappings['library_type_definitions'] = '\n'.join(
         type_definitions)
 
-    template_filename = os.path.join(template_directory, u'header.h')
+    template_filename = os.path.join(template_directory, 'header.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
     if type_definitions:
-      template_filename = os.path.join(template_directory, u'public_types.h')
+      template_filename = os.path.join(template_directory, 'public_types.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'footer.h')
+    template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2354,53 +2356,53 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
 
     if not include_header_file:
       logging.warning(
-          u'Missing: {0:s} skipping generation of include source files.'.format(
+          'Missing: {0:s} skipping generation of include source files.'.format(
               self._library_include_header_path))
       return
 
     makefile_am_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
-        u'Makefile.am')
+        'Makefile.am')
 
     makefile_am_file = MainMakefileAMFile(makefile_am_path)
     makefile_am_file.Read(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings(
-        authors_separator=u',\n *                          ')
+        authors_separator=',\n *                          ')
 
-    output_filename = os.path.join(u'include', u'Makefile.am')
+    output_filename = os.path.join('include', 'Makefile.am')
     self._GenerateMakefileAM(
         project_configuration, template_mappings, include_header_file,
         makefile_am_file, output_writer, output_filename)
 
     output_directory = os.path.join(
-        u'include', project_configuration.library_name)
-    template_directory = os.path.join(self._template_directory, u'libyal')
+        'include', project_configuration.library_name)
+    template_directory = os.path.join(self._template_directory, 'libyal')
     for directory_entry in os.listdir(template_directory):
       template_filename = os.path.join(template_directory, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
       output_filename = os.path.join(output_directory, directory_entry)
-      if (directory_entry not in (u'definitions.h.in', u'extern.h') and
+      if (directory_entry not in ('definitions.h.in', 'extern.h') and
           not os.path.exists(output_filename)):
         continue
 
       # Do not overwrite defintions.h.in when it exist.
-      if (directory_entry != u'definitions.h.in' and
+      if (directory_entry != 'definitions.h.in' and
           os.path.exists(output_filename)):
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename)
 
-      if directory_entry in (u'codepage.h', u'definitions.h.in', u'error.h'):
+      if directory_entry in ('codepage.h', 'definitions.h.in', 'error.h'):
         self._VerticalAlignTabs(output_filename)
 
-    output_filename = os.path.join(output_directory, u'features.h.in')
+    output_filename = os.path.join(output_directory, 'features.h.in')
     self._GenerateFeaturesHeader(
         project_configuration, template_mappings, include_header_file,
         makefile_am_file, output_writer, output_filename)
 
-    output_filename = os.path.join(output_directory, u'types.h.in')
+    output_filename = os.path.join(output_directory, 'types.h.in')
     self._GenerateTypesHeader(
         project_configuration, template_mappings, include_header_file,
         output_writer, output_filename)
@@ -2426,7 +2428,7 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
 
     if not include_header_file:
       logging.warning(
-          u'Missing: {0:s} skipping generation of library source files.'.format(
+          'Missing: {0:s} skipping generation of library source files.'.format(
               self._types_include_header_path))
       return
 
@@ -2435,86 +2437,86 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
         project_configuration.library_name)
 
     codepage_header_file = os.path.join(
-        library_path, u'{0:s}_codepage.h'.format(
+        library_path, '{0:s}_codepage.h'.format(
             project_configuration.library_name))
     error_header_file = os.path.join(
-        library_path, u'{0:s}_error.h'.format(
+        library_path, '{0:s}_error.h'.format(
             project_configuration.library_name))
     notify_header_file = os.path.join(
-        library_path, u'{0:s}_notify.h'.format(
+        library_path, '{0:s}_notify.h'.format(
             project_configuration.library_name))
     types_header_file = os.path.join(
-        library_path, u'{0:s}_types.h'.format(
+        library_path, '{0:s}_types.h'.format(
             project_configuration.library_name))
 
     if include_header_file.types:
       longest_type_name = max(include_header_file.types, key=len)
       longest_library_debug_type_prefix = (
-          u'typedef struct {0:s}_{1:s} {{}}').format(
+          'typedef struct {0:s}_{1:s} {{}}').format(
               project_configuration.library_name, longest_type_name)
 
     library_debug_type_definitions = []
     type_definitions = []
     for type_name in include_header_file.types:
-      library_debug_type_prefix = u'typedef struct {0:s}_{1:s} {{}}'.format(
+      library_debug_type_prefix = 'typedef struct {0:s}_{1:s} {{}}'.format(
           project_configuration.library_name, type_name)
 
       library_debug_type_definition = (
-          u'typedef struct {0:s}_{1:s} {{}}\t{0:s}_{1:s}_t;').format(
+          'typedef struct {0:s}_{1:s} {{}}\t{0:s}_{1:s}_t;').format(
               project_configuration.library_name, type_name)
       library_debug_type_definitions.append(library_debug_type_definition)
 
-      type_definition = u'typedef intptr_t {0:s}_{1:s}_t;'.format(
+      type_definition = 'typedef intptr_t {0:s}_{1:s}_t;'.format(
           project_configuration.library_name, type_name)
       type_definitions.append(type_definition)
 
     template_mappings = project_configuration.GetTemplateMappings(
-        authors_separator=u',\n *                          ')
-    template_mappings[u'library_debug_type_definitions'] = u'\n'.join(
+        authors_separator=',\n *                          ')
+    template_mappings['library_debug_type_definitions'] = '\n'.join(
         library_debug_type_definitions)
-    template_mappings[u'library_type_definitions'] = u'\n'.join(
+    template_mappings['library_type_definitions'] = '\n'.join(
         type_definitions)
 
-    authors_template_mapping = template_mappings[u'authors']
+    authors_template_mapping = template_mappings['authors']
 
     for directory_entry in os.listdir(self._template_directory):
-      if not directory_entry.startswith(u'libyal'):
+      if not directory_entry.startswith('libyal'):
         continue
 
-      if directory_entry.endswith(u'_{0:s}.h'.format(
+      if directory_entry.endswith('_{0:s}.h'.format(
           project_configuration.library_name)):
         continue
 
-      if (directory_entry == u'libyal_codepage.h' and (
+      if (directory_entry == 'libyal_codepage.h' and (
           not os.path.exists(codepage_header_file) or
-          project_configuration.library_name == u'libclocale')):
+          project_configuration.library_name == 'libclocale')):
         continue
 
-      if ((directory_entry == u'libyal_libcerror.h' or
-           directory_entry == u'libyal_error.c' or
-           directory_entry == u'libyal_error.h') and (
+      if ((directory_entry == 'libyal_libcerror.h' or
+           directory_entry == 'libyal_error.c' or
+           directory_entry == 'libyal_error.h') and (
                not os.path.exists(error_header_file) or
-               project_configuration.library_name == u'libcerror')):
+               project_configuration.library_name == 'libcerror')):
         continue
 
-      if ((directory_entry == u'libyal_libcnotify.h' or
-           directory_entry == u'libyal_notify.c' or
-           directory_entry == u'libyal_notify.h') and (
+      if ((directory_entry == 'libyal_libcnotify.h' or
+           directory_entry == 'libyal_notify.c' or
+           directory_entry == 'libyal_notify.h') and (
                not os.path.exists(notify_header_file) or
-               project_configuration.library_name == u'libcnotify')):
+               project_configuration.library_name == 'libcnotify')):
         continue
 
-      if ((directory_entry == u'libyal_wide_string.c' or
-           directory_entry == u'libyal_wide_string.h') and (
+      if ((directory_entry == 'libyal_wide_string.c' or
+           directory_entry == 'libyal_wide_string.h') and (
                not os.path.exists(notify_header_file) or
-               project_configuration.library_name == u'libcsplit')):
+               project_configuration.library_name == 'libcsplit')):
         continue
 
       # TODO: improve generation of _types.h file
-      if (directory_entry == u'libyal_types.h' and (
+      if (directory_entry == 'libyal_types.h' and (
           not os.path.exists(types_header_file) or
           project_configuration.library_name in (
-              u'libcerror', u'libcthreads'))):
+              'libcerror', 'libcthreads'))):
         continue
 
       template_filename = os.path.join(
@@ -2522,26 +2524,26 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      output_filename = u'{0:s}{1:s}'.format(
+      output_filename = '{0:s}{1:s}'.format(
           project_configuration.library_name, directory_entry[6:])
       output_filename = os.path.join(
           project_configuration.library_name, output_filename)
 
       if not os.path.exists(output_filename) and not directory_entry in (
-          u'libyal.c', u'libyal_extern.h', u'libyal.rc.in', u'libyal_support.c',
-          u'libyal_support.h', u'libyal_unused.h'):
+          'libyal.c', 'libyal_extern.h', 'libyal.rc.in', 'libyal_support.c',
+          'libyal_support.h', 'libyal_unused.h'):
         continue
 
-      if directory_entry == u'libyal.rc.in':
-        template_mappings[u'authors'] = u', '.join(
+      if directory_entry == 'libyal.rc.in':
+        template_mappings['authors'] = ', '.join(
             project_configuration.project_authors)
       else:
-        template_mappings[u'authors'] = authors_template_mapping
+        template_mappings['authors'] = authors_template_mapping
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-      if directory_entry in (u'libyal_codepage.h', u'libyal_types.h'):
+      if directory_entry in ('libyal_codepage.h', 'libyal_types.h'):
         self._VerticalAlignTabs(output_filename)
 
 
@@ -2562,13 +2564,13 @@ class LibraryManPageGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    backup_filename = u'{0:s}.{1:d}'.format(output_filename, os.getpid())
+    backup_filename = '{0:s}.{1:d}'.format(output_filename, os.getpid())
     shutil.copyfile(output_filename, backup_filename)
 
-    template_mappings[u'date'] = time.strftime(
-        u'%B %d, %Y', time.gmtime()).replace(u' 0', u'  ')
+    template_mappings['date'] = time.strftime(
+        '%B %d, %Y', time.gmtime()).replace(' 0', '  ')
 
-    template_filename = os.path.join(self._template_directory, u'header.txt')
+    template_filename = os.path.join(self._template_directory, 'header.txt')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
@@ -2581,9 +2583,9 @@ class LibraryManPageGenerator(SourceFileGenerator):
         continue
 
       section_template_mappings = {
-          u'section_name': section_name,
+          'section_name': section_name,
       }
-      template_filename = os.path.join(self._template_directory, u'section.txt')
+      template_filename = os.path.join(self._template_directory, 'section.txt')
       self._GenerateSection(
           template_filename, section_template_mappings, output_writer,
           output_filename, access_mode='ab')
@@ -2605,12 +2607,12 @@ class LibraryManPageGenerator(SourceFileGenerator):
       for function_prototype in functions:
         function_arguments_string = function_prototype.CopyToString()
         function_template_mappings = {
-            u'function_arguments': function_arguments_string,
-            u'function_name': function_prototype.name,
-            u'function_return_type': function_prototype.return_type,
+            'function_arguments': function_arguments_string,
+            'function_name': function_prototype.name,
+            'function_return_type': function_prototype.return_type,
         }
         template_filename = os.path.join(
-            self._template_directory, u'function.txt')
+            self._template_directory, 'function.txt')
         self._GenerateSection(
             template_filename, function_template_mappings, output_writer,
             output_filename, access_mode='ab')
@@ -2619,13 +2621,13 @@ class LibraryManPageGenerator(SourceFileGenerator):
         have_wide_character_type_functions = True
 
         # Ignore adding the wide string support section header in some cases.
-        if project_configuration.library_name != u'libcsplit':
+        if project_configuration.library_name != 'libcsplit':
           section_template_mappings = {
-              u'section_name': (
-                  u'Available when compiled with wide character string support:')
+              'section_name': (
+                  'Available when compiled with wide character string support:')
           }
           template_filename = os.path.join(
-              self._template_directory, u'section.txt')
+              self._template_directory, 'section.txt')
           self._GenerateSection(
               template_filename, section_template_mappings, output_writer,
               output_filename, access_mode='ab')
@@ -2633,23 +2635,23 @@ class LibraryManPageGenerator(SourceFileGenerator):
         for function_prototype in wide_character_type_functions:
           function_arguments_string = function_prototype.CopyToString()
           function_template_mappings = {
-              u'function_arguments': function_arguments_string,
-              u'function_name': function_prototype.name,
-              u'function_return_type': function_prototype.return_type,
+              'function_arguments': function_arguments_string,
+              'function_name': function_prototype.name,
+              'function_return_type': function_prototype.return_type,
           }
           template_filename = os.path.join(
-              self._template_directory, u'function.txt')
+              self._template_directory, 'function.txt')
           self._GenerateSection(
               template_filename, function_template_mappings, output_writer,
               output_filename, access_mode='ab')
 
       if bfio_functions:
         section_template_mappings = {
-            u'section_name': (
-                u'Available when compiled with libbfio support:')
+            'section_name': (
+                'Available when compiled with libbfio support:')
         }
         template_filename = os.path.join(
-            self._template_directory, u'section.txt')
+            self._template_directory, 'section.txt')
         self._GenerateSection(
             template_filename, section_template_mappings, output_writer,
             output_filename, access_mode='ab')
@@ -2657,12 +2659,12 @@ class LibraryManPageGenerator(SourceFileGenerator):
         for function_prototype in bfio_functions:
           function_arguments_string = function_prototype.CopyToString()
           function_template_mappings = {
-              u'function_arguments': function_arguments_string,
-              u'function_name': function_prototype.name,
-              u'function_return_type': function_prototype.return_type,
+              'function_arguments': function_arguments_string,
+              'function_name': function_prototype.name,
+              'function_return_type': function_prototype.return_type,
           }
           template_filename = os.path.join(
-              self._template_directory, u'function.txt')
+              self._template_directory, 'function.txt')
           self._GenerateSection(
               template_filename, function_template_mappings, output_writer,
               output_filename, access_mode='ab')
@@ -2670,25 +2672,25 @@ class LibraryManPageGenerator(SourceFileGenerator):
       # TODO: add support for debug output functions.
 
     template_filename = os.path.join(
-        self._template_directory, u'description.txt')
+        self._template_directory, 'description.txt')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
     if have_wide_character_type_functions:
-      template_filename = os.path.join(self._template_directory, u'notes.txt')
+      template_filename = os.path.join(self._template_directory, 'notes.txt')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
     if have_wide_character_type_functions:
       template_filename = os.path.join(
-          self._template_directory, u'notes_wchar.txt')
+          self._template_directory, 'notes_wchar.txt')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(self._template_directory, u'footer.txt')
+    template_filename = os.path.join(self._template_directory, 'footer.txt')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2727,14 +2729,14 @@ class LibraryManPageGenerator(SourceFileGenerator):
 
     if not include_header_file:
       logging.warning(
-          u'Missing: {0:s} skipping generation of library man page.'.format(
+          'Missing: {0:s} skipping generation of library man page.'.format(
               self._library_include_header_path))
       return
 
     template_mappings = project_configuration.GetTemplateMappings()
 
-    output_filename = u'{0:s}.3'.format(project_configuration.library_name)
-    output_filename = os.path.join(u'manuals', output_filename)
+    output_filename = '{0:s}.3'.format(project_configuration.library_name)
+    output_filename = os.path.join('manuals', output_filename)
 
     self._GenerateLibraryManPage(
         project_configuration, template_mappings, include_header_file,
@@ -2785,15 +2787,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       name (str): type or value name.
       output_filename (str): path of the output file.
     """
-    if not name or name[0] not in (u'a', u'e', u'i', u'o', u'u'):
+    if not name or name[0] not in ('a', 'e', 'i', 'o', ''):
       return
 
     with open(output_filename, 'rb') as file_object:
       lines = file_object.readlines()
 
-    name = name.replace(u'_', u' ')
-    description = u' a {0:s}'.format(name)
-    corrected_description = u' an {0:s}'.format(name)
+    name = name.replace('_', ' ')
+    description = ' a {0:s}'.format(name)
+    corrected_description = ' an {0:s}'.format(name)
 
     with open(output_filename, 'wb') as file_object:
       for line in lines:
@@ -2813,20 +2815,20 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       enum_declaration (EnumDeclaration): enumeration type declaration.
       output_writer (OutputWriter): output writer.
     """
-    output_filename = u'{0:s}_{1:s}.h'.format(
+    output_filename = '{0:s}_{1:s}.h'.format(
         project_configuration.python_module_name, definitions_name)
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
     template_directory = os.path.join(
-        self._template_directory, u'pyyal_definitions')
+        self._template_directory, 'pyyal_definitions')
 
-    template_mappings[u'definitions_name'] = definitions_name
-    template_mappings[u'definitions_name_upper_case'] = definitions_name.upper()
-    template_mappings[u'definitions_description'] = definitions_name.replace(
-        u'_', u' ')
+    template_mappings['definitions_name'] = definitions_name
+    template_mappings['definitions_name_upper_case'] = definitions_name.upper()
+    template_mappings['definitions_description'] = definitions_name.replace(
+        '_', ' ')
 
-    template_filename = os.path.join(template_directory, u'pyyal_definitions.h')
+    template_filename = os.path.join(template_directory, 'pyyal_definitions.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
@@ -2847,28 +2849,28 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       enum_declaration (EnumDeclaration): enumeration type declaration.
       output_writer (OutputWriter): output writer.
     """
-    output_filename = u'{0:s}_{1:s}.c'.format(
+    output_filename = '{0:s}_{1:s}.c'.format(
         project_configuration.python_module_name, definitions_name)
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
     template_directory = os.path.join(
-        self._template_directory, u'pyyal_definitions')
+        self._template_directory, 'pyyal_definitions')
 
-    template_mappings[u'definitions_name'] = definitions_name
-    template_mappings[u'definitions_name_upper_case'] = definitions_name.upper()
-    template_mappings[u'definitions_description'] = definitions_name.replace(
-        u'_', u' ')
+    template_mappings['definitions_name'] = definitions_name
+    template_mappings['definitions_name_upper_case'] = definitions_name.upper()
+    template_mappings['definitions_description'] = definitions_name.replace(
+        '_', ' ')
 
-    template_mappings[u'definition_name'] = definitions_name[:-1]
-    template_mappings[u'definition_name_upper_case'] = (
+    template_mappings['definition_name'] = definitions_name[:-1]
+    template_mappings['definition_name_upper_case'] = (
         definitions_name[:-1].upper())
 
-    template_filename = os.path.join(template_directory, u'header.c')
+    template_filename = os.path.join(template_directory, 'header.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    constant_name_prefix = u'{0:s}_{1:s}_'.format(
+    constant_name_prefix = '{0:s}_{1:s}_'.format(
         project_configuration.library_name, definitions_name[:-1])
     constant_name_prefix_length = len(constant_name_prefix)
 
@@ -2879,19 +2881,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       constant_name = constant_name[constant_name_prefix_length:]
 
-      if constant_name in (u'undefined', u'unknown'):
+      if constant_name in ('undefined', 'unknown'):
         continue
 
-      template_mappings[u'constant_name'] = constant_name
-      template_mappings[u'constant_name_upper_case'] = constant_name.upper()
+      template_mappings['constant_name'] = constant_name
+      template_mappings['constant_name_upper_case'] = constant_name.upper()
 
-      template_filename = os.path.join(template_directory, u'constant.c')
+      template_filename = os.path.join(template_directory, 'constant.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
       self._CorrectDescriptionSpelling(constant_name, output_filename)
 
-    template_filename = os.path.join(template_directory, u'footer.c')
+    template_filename = os.path.join(template_directory, 'footer.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2915,19 +2917,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     """
     sequence_type_name = self._GetSequenceName(type_name)
 
-    output_filename = u'{0:s}_{1:s}.h'.format(
+    output_filename = '{0:s}_{1:s}.h'.format(
         project_configuration.python_module_name, sequence_type_name)
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
     template_directory = os.path.join(
-        self._template_directory, u'pyyal_sequence_type')
+        self._template_directory, 'pyyal_sequence_type')
 
     self._SetSequenceTypeNameInTemplateMappings(
         template_mappings, sequence_type_name)
 
     template_filename = os.path.join(
-        template_directory, u'pyyal_sequence_type.h')
+        template_directory, 'pyyal_sequence_type.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
@@ -2951,35 +2953,35 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     """
     sequence_type_name = self._GetSequenceName(type_name)
 
-    output_filename = u'{0:s}_{1:s}.c'.format(
+    output_filename = '{0:s}_{1:s}.c'.format(
         project_configuration.python_module_name, sequence_type_name)
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
     template_directory = os.path.join(
-        self._template_directory, u'pyyal_sequence_type')
+        self._template_directory, 'pyyal_sequence_type')
 
     python_module_include_names = set([
-        project_configuration.library_name, sequence_type_name, u'libcerror',
-        u'python'])
+        project_configuration.library_name, sequence_type_name, 'libcerror',
+        'python'])
 
     if type_is_object:
       python_module_include_names.add(type_name)
 
     python_module_includes = []
     for include_name in sorted(python_module_include_names):
-      include = u'#include "{0:s}_{1:s}.h"'.format(
+      include = '#include "{0:s}_{1:s}.h"'.format(
           project_configuration.python_module_name, include_name)
       python_module_includes.append(include)
 
     self._SetSequenceTypeNameInTemplateMappings(
         template_mappings, sequence_type_name)
 
-    template_mappings[u'python_module_includes'] = u'\n'.join(
+    template_mappings['python_module_includes'] = '\n'.join(
         python_module_includes)
 
     template_filename = os.path.join(
-        template_directory, u'pyyal_sequence_type.c')
+        template_directory, 'pyyal_sequence_type.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
@@ -3008,38 +3010,38 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       is_pseudo_type (Optional[bool]): True if type is a pseudo type.
     """
-    output_filename = u'{0:s}_{1:s}.h'.format(
+    output_filename = '{0:s}_{1:s}.h'.format(
         project_configuration.python_module_name, type_name)
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
-    open_support = u'open' in python_function_prototypes
+    open_support = 'open' in python_function_prototypes
     with_parent = (
-        u'initialize' not in python_function_prototypes and
-        u'free' in python_function_prototypes)
+        'initialize' not in python_function_prototypes and
+        'free' in python_function_prototypes)
 
     if is_pseudo_type:
       template_directory = os.path.join(
-          self._template_directory, u'pyyal_pseudo_type')
+          self._template_directory, 'pyyal_pseudo_type')
     else:
-      template_directory = os.path.join(self._template_directory, u'pyyal_type')
+      template_directory = os.path.join(self._template_directory, 'pyyal_type')
 
     if is_pseudo_type:
       # TODO: determine base type.
-      template_mappings[u'base_type_name'] = u'item'
+      template_mappings['base_type_name'] = 'item'
       # TODO: determine base type.
-      template_mappings[u'base_type_description'] = u'item'
+      template_mappings['base_type_description'] = 'item'
       # TODO: determine base indicator.
-      template_mappings[u'base_type_indicator'] = u''
+      template_mappings['base_type_indicator'] = ''
 
-    template_filename = os.path.join(template_directory, u'header.h')
+    template_filename = os.path.join(template_directory, 'header.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
     if open_support:
-      template_filename = u'includes_with_input.h'
+      template_filename = 'includes_with_input.h'
     else:
-      template_filename = u'includes.h'
+      template_filename = 'includes.h'
 
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
@@ -3047,25 +3049,25 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     if open_support:
-      template_filename = u'typedef_with_input.h'
+      template_filename = 'typedef_with_input.h'
     elif with_parent:
-      template_filename = u'typedef_with_parent.h'
+      template_filename = 'typedef_with_parent.h'
     else:
-      template_filename = u'typedef.h'
+      template_filename = 'typedef.h'
 
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    python_type_prefix = u'{0:s}_{1:s}'.format(
+    python_type_prefix = '{0:s}_{1:s}'.format(
         project_configuration.python_module_name, type_name)
 
     if not is_pseudo_type:
       if with_parent:
-        template_filename = u'new_with_parent.h'
+        template_filename = 'new_with_parent.h'
       else:
-        template_filename = u'new.h'
+        template_filename = 'new.h'
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -3073,22 +3075,22 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
       if open_support:
-        template_filename = os.path.join(template_directory, u'new_open.h')
+        template_filename = os.path.join(template_directory, 'new_open.h')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
       # TODO: make open with file object object generated conditionally?
-      # if u'open_file_object' in python_function_prototypes:
+      # if 'open_file_object' in python_function_prototypes:
 
     if not is_pseudo_type:
-      template_filename = os.path.join(template_directory, u'init.h')
+      template_filename = os.path.join(template_directory, 'init.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
     if not is_pseudo_type:
-      template_filename = os.path.join(template_directory, u'free.h')
+      template_filename = os.path.join(template_directory, 'free.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -3096,29 +3098,29 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
 
-      if type_function in (u'free', u'initialize'):
+      if type_function in ('free', 'initialize'):
         continue
 
       value_name = python_function_prototype.value_name
 
-      template_filename = u'{0:s}.h'.format(type_function)
+      template_filename = '{0:s}.h'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
         template_filename = None
         if python_function_prototype.function_type == FUNCTION_TYPE_GET:
 
           if python_function_prototype.DataTypeIsDatetime():
-            template_filename = u'get_datetime_value.h'
+            template_filename = 'get_datetime_value.h'
 
         elif python_function_prototype.function_type == (
             FUNCTION_TYPE_GET_BY_INDEX):
 
-          value_name_prefix = u''
-          if value_name.startswith(u'recovered_'):
-            value_name_prefix = u'recovered_'
+          value_name_prefix = ''
+          if value_name.startswith('recovered_'):
+            value_name_prefix = 'recovered_'
             value_name = value_name[10:]
 
-          template_filename = u'get_{0:s}{1:s}_value_by_index.h'.format(
+          template_filename = 'get_{0:s}{1:s}_value_by_index.h'.format(
               value_name_prefix, python_function_prototype.data_type)
 
           sequence_value_name = self._GetSequenceName(value_name)
@@ -3127,17 +3129,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
         if not template_filename:
           if python_function_prototype.arguments:
-            template_filename = u'type_object_function_with_args.h'
+            template_filename = 'type_object_function_with_args.h'
           else:
-            template_filename = u'type_object_function.h'
+            template_filename = 'type_object_function.h'
 
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
 
       if not template_filename or not os.path.exists(template_filename):
         logging.warning((
-            u'Unable to generate Python type object header for: {0:s}.{1:s} '
-            u'missing template: {1:s}').format(
+            'Unable to generate Python type object header for: {0:s}.{1:s} '
+            'missing template: {1:s}').format(
                 type_name, type_function, template_filename))
         continue
 
@@ -3150,7 +3152,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
       self._CorrectDescriptionSpelling(value_name, output_filename)
 
-    template_filename = os.path.join(template_directory, u'footer.h')
+    template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -3175,7 +3177,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       is_pseudo_type (Optional[bool]): True if type is a pseudo type.
     """
-    output_filename = u'{0:s}_{1:s}.c'.format(
+    output_filename = '{0:s}_{1:s}.c'.format(
         project_configuration.python_module_name, type_name)
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
@@ -3184,39 +3186,39 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       with open(output_filename, 'rb') as file_object:
         lines = file_object.readlines()
 
-    bfio_support = u'open_file_object' in python_function_prototypes
-    codepage_support = u'get_ascii_codepage' in python_function_prototypes
-    open_support = u'open' in python_function_prototypes
+    bfio_support = 'open_file_object' in python_function_prototypes
+    codepage_support = 'get_ascii_codepage' in python_function_prototypes
+    open_support = 'open' in python_function_prototypes
     with_parent = (
-        u'initialize' not in python_function_prototypes and
-        u'free' in python_function_prototypes)
+        'initialize' not in python_function_prototypes and
+        'free' in python_function_prototypes)
 
     python_module_include_names = set([
-        project_configuration.library_name, type_name, u'error', u'libcerror',
-        u'python', u'unused'])
+        project_configuration.library_name, type_name, 'error', 'libcerror',
+        'python', 'unused'])
 
     if bfio_support:
       python_module_include_names.update(
-          set([u'file_object_io_handle', 'libbfio']))
+          set(['file_object_io_handle', 'libbfio']))
 
     if codepage_support:
-      python_module_include_names.update(set([u'codepage', 'libclocale']))
+      python_module_include_names.update(set(['codepage', 'libclocale']))
 
     for python_function_prototype in python_function_prototypes.values():
       if python_function_prototype.data_type in (
           DATA_TYPE_FAT_DATE_TIME, DATA_TYPE_POSIX_TIME):
-        python_module_include_names.update(set([u'datetime']))
+        python_module_include_names.update(set(['datetime']))
 
       if python_function_prototype.data_type in (
           DATA_TYPE_FILETIME, DATA_TYPE_FLOATINGTIME):
-        python_module_include_names.update(set([u'datetime', u'integer']))
+        python_module_include_names.update(set(['datetime', 'integer']))
 
       elif python_function_prototype.data_type == DATA_TYPE_GUID:
-        python_module_include_names.add(u'guid')
+        python_module_include_names.add('guid')
 
       elif python_function_prototype.data_type in (
           DATA_TYPE_SIZE64, DATA_TYPE_OFF64, DATA_TYPE_UINT64):
-        python_module_include_names.add(u'integer')
+        python_module_include_names.add('integer')
 
       elif python_function_prototype.data_type == DATA_TYPE_OBJECT:
         python_module_include_names.add(python_function_prototype.object_type)
@@ -3233,9 +3235,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           sequence_type_name = python_function_prototype.arguments[0]
 
           sequence_type_prefix, _, sequence_type_suffix = (
-              sequence_type_name.rpartition(u'_'))
+              sequence_type_name.rpartition('_'))
 
-          if sequence_type_suffix in (u'entry', u'index'):
+          if sequence_type_suffix in ('entry', 'index'):
             sequence_type_name = sequence_type_prefix
 
           sequence_type_name = self._GetSequenceName(sequence_type_name)
@@ -3243,19 +3245,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     if is_pseudo_type:
       template_directory = os.path.join(
-          self._template_directory, u'pyyal_pseudo_type')
+          self._template_directory, 'pyyal_pseudo_type')
     else:
-      template_directory = os.path.join(self._template_directory, u'pyyal_type')
+      template_directory = os.path.join(self._template_directory, 'pyyal_type')
 
     if is_pseudo_type:
       # TODO: determine base type.
-      template_mappings[u'base_type_name'] = u'item'
+      template_mappings['base_type_name'] = 'item'
       # TODO: determine base type.
-      template_mappings[u'base_type_description'] = u'item'
+      template_mappings['base_type_description'] = 'item'
       # TODO: determine base indicator.
-      template_mappings[u'base_type_indicator'] = u''
+      template_mappings['base_type_indicator'] = ''
 
-    template_filename = os.path.join(template_directory, u'header.c')
+    template_filename = os.path.join(template_directory, 'header.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
@@ -3263,17 +3265,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     python_module_includes = []
     for include_name in sorted(python_module_include_names):
-      include = u'#include "{0:s}_{1:s}.h"'.format(
+      include = '#include "{0:s}_{1:s}.h"'.format(
           project_configuration.python_module_name, include_name)
       python_module_includes.append(include)
 
-    template_mappings[u'python_module_includes'] = u'\n'.join(
+    template_mappings['python_module_includes'] = '\n'.join(
         python_module_includes)
 
     if codepage_support:
-      template_filename = u'includes_with_codepage.c'
+      template_filename = 'includes_with_codepage.c'
     else:
-      template_filename = u'includes.c'
+      template_filename = 'includes.c'
 
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
@@ -3281,7 +3283,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     if bfio_support:
-      template_filename = os.path.join(template_directory, u'have_bfio.c')
+      template_filename = os.path.join(template_directory, 'have_bfio.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -3294,16 +3296,16 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         project_configuration, template_mappings, type_name,
         python_function_prototypes, output_writer, output_filename)
 
-    template_filename = os.path.join(template_directory, u'type_object.c')
+    template_filename = os.path.join(template_directory, 'type_object.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
     if not is_pseudo_type:
       if with_parent:
-        template_filename = u'new_with_parent.c'
+        template_filename = 'new_with_parent.c'
       else:
-        template_filename = u'new.c'
+        template_filename = 'new.c'
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -3311,18 +3313,18 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     if open_support:
-      template_filename = os.path.join(template_directory, u'new_open.c')
+      template_filename = os.path.join(template_directory, 'new_open.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
     if not is_pseudo_type:
       if with_parent:
-        template_filename = u'init_with_parent.c'
+        template_filename = 'init_with_parent.c'
       elif open_support:
-        template_filename = u'init_with_input.c'
+        template_filename = 'init_with_input.c'
       else:
-        template_filename = u'init.c'
+        template_filename = 'init.c'
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -3331,9 +3333,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     if not is_pseudo_type:
       if with_parent:
-        template_filename = u'free_with_parent.c'
+        template_filename = 'free_with_parent.c'
       else:
-        template_filename = u'free.c'
+        template_filename = 'free.c'
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -3346,7 +3348,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
 
-      if type_function in (u'free', u'initialize'):
+      if type_function in ('free', 'initialize'):
         continue
 
       # TODO: use prefix in template?
@@ -3355,31 +3357,31 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       # TODO: add get_cache_directory template
 
-      if type_function == u'get_format_version':
+      if type_function == 'get_format_version':
         self._SetValueTypeInTemplateMappings(
             template_mappings, python_function_prototype.value_type)
 
-      template_filename = u'{0:s}.c'.format(type_function)
+      template_filename = '{0:s}.c'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
         template_filename = None
 
         # TODO: make more generic.
-        if type_function == u'set_key':
-          template_filename = u'set_key_with_mode.c'
+        if type_function == 'set_key':
+          template_filename = 'set_key_with_mode.c'
 
-        elif type_function == u'set_keys':
-          template_filename = u'set_keys_with_mode.c'
+        elif type_function == 'set_keys':
+          template_filename = 'set_keys_with_mode.c'
 
-        elif type_function == u'set_password':
-          template_filename = u'set_{0:s}_value.c'.format(u'string')
+        elif type_function == 'set_password':
+          template_filename = 'set_{0:s}_value.c'.format('string')
 
         elif python_function_prototype.function_type == FUNCTION_TYPE_COPY_FROM:
-          template_filename = u'copy_from_{0:s}_value.c'.format(
+          template_filename = 'copy_from_{0:s}_value.c'.format(
               python_function_prototype.data_type)
 
         elif python_function_prototype.function_type == FUNCTION_TYPE_COPY:
-          template_filename = u'copy_{0:s}_value.c'.format(
+          template_filename = 'copy_{0:s}_value.c'.format(
               python_function_prototype.data_type)
 
         elif python_function_prototype.function_type in (
@@ -3387,31 +3389,31 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             FUNCTION_TYPE_GET_BY_INDEX, FUNCTION_TYPE_GET_BY_NAME,
             FUNCTION_TYPE_GET_BY_PATH):
 
-          if value_name.startswith(u'recovered_'):
-            value_name_prefix = u'recovered_'
+          if value_name.startswith('recovered_'):
+            value_name_prefix = 'recovered_'
             value_name = value_name[10:]
 
           elif value_name_prefix:
-            value_name_prefix = u'{0:s}_'.format(value_name_prefix)
+            value_name_prefix = '{0:s}_'.format(value_name_prefix)
 
           else:
-            value_name_prefix = u''
+            value_name_prefix = ''
 
           if python_function_prototype.function_type == FUNCTION_TYPE_GET:
             if not python_function_prototype.arguments:
-              if value_name.startswith(u'number_of_recovered_'):
+              if value_name.startswith('number_of_recovered_'):
                 value_name = value_name[20:]
-                template_filename = u'get_number_of_recovered_{0:s}_value.c'.format(
+                template_filename = 'get_number_of_recovered_{0:s}_value.c'.format(
                     python_function_prototype.data_type)
 
               else:
-                template_filename = u'get_{0:s}{1:s}_value.c'.format(
+                template_filename = 'get_{0:s}{1:s}_value.c'.format(
                     value_name_prefix, python_function_prototype.data_type)
 
           elif python_function_prototype.function_type == (
               FUNCTION_TYPE_GET_BY_INDEX):
 
-            template_filename = u'get_{0:s}{1:s}_value_by_index.c'.format(
+            template_filename = 'get_{0:s}{1:s}_value_by_index.c'.format(
                 value_name_prefix, python_function_prototype.data_type)
 
             if python_function_prototype.object_type:
@@ -3428,15 +3430,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               FUNCTION_TYPE_GET_BY_IDENTIFIER, FUNCTION_TYPE_GET_BY_NAME,
               FUNCTION_TYPE_GET_BY_PATH):
 
-            _, _, type_function_suffix = type_function.partition(u'_by_')
+            _, _, type_function_suffix = type_function.partition('_by_')
 
-            template_filename = u'get_{0:s}{1:s}_value_by_{2:s}.c'.format(
+            template_filename = 'get_{0:s}{1:s}_value_by_{2:s}.c'.format(
                 value_name_prefix, python_function_prototype.data_type,
                 type_function_suffix)
 
           if python_function_prototype.data_type == DATA_TYPE_OBJECT:
-            if value_name_prefix != u'root_':
-              value_name_prefix = u''
+            if value_name_prefix != 'root_':
+              value_name_prefix = ''
 
             if python_function_prototype.value_type not in value_type_objects:
               generate_get_value_type_object = True
@@ -3447,15 +3449,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 template_mappings, python_function_prototype.object_type)
 
         elif python_function_prototype.function_type == FUNCTION_TYPE_IS:
-          template_filename = u'is_value.c'
+          template_filename = 'is_value.c'
 
         if template_filename:
           template_filename = os.path.join(template_directory, template_filename)
 
       if not template_filename or not os.path.exists(template_filename):
         logging.warning((
-            u'Unable to generate Python type object source code for: '
-            u'{0:s}.{1:s} missing template: {1:s}').format(
+            'Unable to generate Python type object source code for: '
+            '{0:s}.{1:s} missing template: {1:s}').format(
                 type_name, type_function, template_filename))
         continue
 
@@ -3463,16 +3465,16 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       if generate_get_value_type_object:
         search_string = (
-            u'PyTypeObject *{0:s}_{1:s}_get_{2:s}_type_object(').format(
+            'PyTypeObject *{0:s}_{1:s}_get_{2:s}_type_object(').format(
                 project_configuration.python_module_name, type_name,
                 value_name)
 
-        search_string = search_string.encode(u'ascii')
+        search_string = search_string.encode('ascii')
         result = self._CopyFunctionToOutputFile(
             lines, search_string, output_filename)
 
         if not result:
-          additional_template_filename = u'get_value_type_object.c'
+          additional_template_filename = 'get_value_type_object.c'
           additional_template_filename = os.path.join(
               template_directory, additional_template_filename)
           self._GenerateSection(
@@ -3483,14 +3485,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       result = False
       if type_function in (
-          u'get_data_as_datetime', u'get_data_as_floating_point',
-          u'get_data_as_integer'):
+          'get_data_as_datetime', 'get_data_as_floating_point',
+          'get_data_as_integer'):
         search_string = (
-            u'PyObject *{0:s}_{1:s}_{2:s}(').format(
+            'PyObject *{0:s}_{1:s}_{2:s}(').format(
                 project_configuration.python_module_name, type_name,
                 type_function)
 
-        search_string = search_string.encode(u'ascii')
+        search_string = search_string.encode('ascii')
         result = self._CopyFunctionToOutputFile(
             lines, search_string, output_filename)
 
@@ -3523,116 +3525,116 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, u'pyyal_type')
+    template_directory = os.path.join(self._template_directory, 'pyyal_type')
 
     python_type_object_methods = []
     python_type_object_get_set_definitions = []
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
 
-      if type_function in (u'free', u'initialize'):
+      if type_function in ('free', 'initialize'):
         continue
 
       if not python_function_prototype.arguments:
-        arguments_flags = u'METH_NOARGS'
+        arguments_flags = 'METH_NOARGS'
       else:
-        arguments_flags = u'METH_VARARGS | METH_KEYWORDS'
+        arguments_flags = 'METH_VARARGS | METH_KEYWORDS'
 
-      arguments_string = u', '.join(python_function_prototype.arguments)
+      arguments_string = ', '.join(python_function_prototype.arguments)
       data_type = python_function_prototype.GetDataTypeDescription()
       python_type_object_methods.extend([
-          u'',
-          u'\t{{ "{0:s}",'.format(type_function),
-          u'\t  (PyCFunction) {0:s},'.format(python_function_prototype.name),
-          u'\t  {0:s},'.format(arguments_flags),
-          u'\t  "{0:s}({1:s}) -> {2:s}\\n"'.format(
+          '',
+          '\t{{ "{0:s}",'.format(type_function),
+          '\t  (PyCFunction) {0:s},'.format(python_function_prototype.name),
+          '\t  {0:s},'.format(arguments_flags),
+          '\t  "{0:s}({1:s}) -> {2:s}\\n"'.format(
               type_function, arguments_string, data_type),
-          u'\t  "\\n"'])
+          '\t  "\\n"'])
 
-      if (type_function == u'get_offset' and
-          u'read_buffer' in python_function_prototypes and
-          u'seek_offset' in python_function_prototypes):
+      if (type_function == 'get_offset' and
+          'read_buffer' in python_function_prototypes and
+          'seek_offset' in python_function_prototypes):
 
-        description = [u'Retrieves the current offset within the data.']
+        description = ['Retrieves the current offset within the data.']
       else:
         description = python_function_prototype.GetDescription()
 
       for index, line in enumerate(description):
         # Correct xml => XML in description for pyevtx.
-        line = line.replace(u' xml ', u' XML ')
+        line = line.replace(' xml ', ' XML ')
 
         if index < len(description) - 1:
-          python_type_object_methods.append(u'\t  "{0:s}\\n"'.format(line))
+          python_type_object_methods.append('\t  "{0:s}\\n"'.format(line))
         else:
-          python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
+          python_type_object_methods.append('\t  "{0:s}" }},'.format(line))
 
-      if (type_function == u'get_offset' and
-          u'read_buffer' in python_function_prototypes and
-          u'seek_offset' in python_function_prototypes):
+      if (type_function == 'get_offset' and
+          'read_buffer' in python_function_prototypes and
+          'seek_offset' in python_function_prototypes):
 
         python_type_object_methods.extend([
-            u'',
-            u'\t{ "read",',
-            u'\t  (PyCFunction) {0:s}_{1:s}_read_buffer,'.format(
+            '',
+            '\t{ "read",',
+            '\t  (PyCFunction) {0:s}_{1:s}_read_buffer,'.format(
                 project_configuration.python_module_name, type_name),
-            u'\t  METH_VARARGS | METH_KEYWORDS,',
-            u'\t  "read(size) -> String\\n"',
-            u'\t  "\\n"',
-            u'\t  "Reads a buffer of data." },',
-            u'',
-            u'\t{ "seek",',
-            u'\t  (PyCFunction) {0:s}_{1:s}_seek_offset,'.format(
+            '\t  METH_VARARGS | METH_KEYWORDS,',
+            '\t  "read(size) -> String\\n"',
+            '\t  "\\n"',
+            '\t  "Reads a buffer of data." },',
+            '',
+            '\t{ "seek",',
+            '\t  (PyCFunction) {0:s}_{1:s}_seek_offset,'.format(
                 project_configuration.python_module_name, type_name),
-            u'\t  METH_VARARGS | METH_KEYWORDS,',
-            u'\t  "seek(offset, whence) -> None\\n"',
-            u'\t  "\\n"',
-            u'\t  "Seeks an offset within the data." },',
-            u'',
-            u'\t{ "tell",',
-            u'\t  (PyCFunction) {0:s}_{1:s}_get_offset,'.format(
+            '\t  METH_VARARGS | METH_KEYWORDS,',
+            '\t  "seek(offset, whence) -> None\\n"',
+            '\t  "\\n"',
+            '\t  "Seeks an offset within the data." },',
+            '',
+            '\t{ "tell",',
+            '\t  (PyCFunction) {0:s}_{1:s}_get_offset,'.format(
                 project_configuration.python_module_name, type_name),
-            u'\t  METH_NOARGS,',
-            u'\t  "tell() -> Integer\\n"',
-            u'\t  "\\n"',
-            u'\t  "Retrieves the current offset within the data." },'])
+            '\t  METH_NOARGS,',
+            '\t  "tell() -> Integer\\n"',
+            '\t  "\\n"',
+            '\t  "Retrieves the current offset within the data." },'])
 
       elif (python_function_prototype.DataTypeIsDatetime() and
-            type_function != u'get_data_as_datetime'):
+            type_function != 'get_data_as_datetime'):
         python_type_object_methods.extend([
-            u'',
-            u'\t{{ "{0:s}_as_integer",'.format(type_function),
-            u'\t  (PyCFunction) {0:s}_as_integer,'.format(
+            '',
+            '\t{{ "{0:s}_as_integer",'.format(type_function),
+            '\t  (PyCFunction) {0:s}_as_integer,'.format(
                 python_function_prototype.name),
-            u'\t  METH_NOARGS,',
-            u'\t  "{0:s}_as_integer({1:s}) -> Integer or None\\n"'.format(
+            '\t  METH_NOARGS,',
+            '\t  "{0:s}_as_integer({1:s}) -> Integer or None\\n"'.format(
                 type_function, arguments_string),
-            u'\t  "\\n"'])
+            '\t  "\\n"'])
 
         if python_function_prototype.data_type == DATA_TYPE_FAT_DATE_TIME:
           description[0] = (
-              u'{0:s} as a 32-bit integer containing a FAT date time '
-              u'value.').format(description[0][:-1])
+              '{0:s} as a 32-bit integer containing a FAT date time '
+              'value.').format(description[0][:-1])
 
         elif python_function_prototype.data_type == DATA_TYPE_FILETIME:
           description[0] = (
-              u'{0:s} as a 64-bit integer containing a FILETIME value.').format(
+              '{0:s} as a 64-bit integer containing a FILETIME value.').format(
                   description[0][:-1])
 
         elif python_function_prototype.data_type == DATA_TYPE_FLOATINGTIME:
           description[0] = (
-              u'{0:s} as a 64-bit integer containing a floatingtime value.').format(
+              '{0:s} as a 64-bit integer containing a floatingtime value.').format(
                   description[0][:-1])
 
         elif python_function_prototype.data_type == DATA_TYPE_POSIX_TIME:
           description[0] = (
-              u'{0:s} as a 32-bit integer containing a POSIX timestamp '
-              u'value.').format(description[0][:-1])
+              '{0:s} as a 32-bit integer containing a POSIX timestamp '
+              'value.').format(description[0][:-1])
 
         for index, line in enumerate(description):
           if index < len(description) - 1:
-            python_type_object_methods.append(u'\t  "{0:s}\\n"'.format(line))
+            python_type_object_methods.append('\t  "{0:s}\\n"'.format(line))
           else:
-            python_type_object_methods.append(u'\t  "{0:s}" }},'.format(line))
+            python_type_object_methods.append('\t  "{0:s}" }},'.format(line))
 
       elif (python_function_prototype.arguments and
             python_function_prototype.data_type in (
@@ -3641,15 +3643,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         pass
 
     python_type_object_methods.extend([
-        u'',
-        u'\t/* Sentinel */',
-        u'\t{ NULL, NULL, 0, NULL }'])
+        '',
+        '\t/* Sentinel */',
+        '\t{ NULL, NULL, 0, NULL }'])
 
-    template_mappings[u'python_type_object_methods'] = u'\n'.join(
+    template_mappings['python_type_object_methods'] = '\n'.join(
         python_type_object_methods)
 
     template_filename = os.path.join(
-        template_directory, u'type_object_methods.c')
+        template_directory, 'type_object_methods.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -3670,7 +3672,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, u'pyyal_type')
+    template_directory = os.path.join(self._template_directory, 'pyyal_type')
 
     python_type_object_get_set_definitions = []
     for type_function, python_function_prototype in iter(
@@ -3682,37 +3684,37 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           FUNCTION_TYPE_GET_BY_NAME, FUNCTION_TYPE_GET_BY_PATH):
         continue
 
-      if (type_function.endswith(u'_by_name') or
-          type_function.endswith(u'_by_path')):
+      if (type_function.endswith('_by_name') or
+          type_function.endswith('_by_path')):
         continue
 
-      if (type_function == u'get_offset' and
-          u'read_buffer' in python_function_prototypes and
-          u'seek_offset' in python_function_prototypes):
+      if (type_function == 'get_offset' and
+          'read_buffer' in python_function_prototypes and
+          'seek_offset' in python_function_prototypes):
         continue
 
-      if type_function != u'get_ascii_codepage':
-        setter_function = u'0'
+      if type_function != 'get_ascii_codepage':
+        setter_function = '0'
       else:
         setter_function = (
-            u'{0:s}_{1:s}_set_ascii_codepage_setter').format(
+            '{0:s}_{1:s}_set_ascii_codepage_setter').format(
                 project_configuration.python_module_name, type_name)
 
       description = python_function_prototype.GetAttributeDescription()
 
       # Correct xml => XML in description for pyevtx.
-      description = description.replace(u' xml ', u' XML ')
+      description = description.replace(' xml ', ' XML ')
 
       # TODO: fix libcreg getter name keies instead of keys.
 
       if not python_function_prototype.arguments:
         python_type_object_get_set_definitions.extend([
-            u'',
-            u'\t{{ "{0:s}",'.format(type_function[4:]),
-            u'\t  (getter) {0:s},'.format(python_function_prototype.name),
-            u'\t  (setter) {0:s},'.format(setter_function),
-            u'\t  "{0:s}",'.format(description),
-            u'\t  NULL },'])
+            '',
+            '\t{{ "{0:s}",'.format(type_function[4:]),
+            '\t  (getter) {0:s},'.format(python_function_prototype.name),
+            '\t  (setter) {0:s},'.format(setter_function),
+            '\t  "{0:s}",'.format(description),
+            '\t  NULL },'])
 
       if (python_function_prototype.arguments and
           python_function_prototype.data_type in (
@@ -3724,37 +3726,37 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         sequence_type_description = self._GetSequenceName(description[:-1])
 
         python_type_object_get_set_definitions.extend([
-            u'',
-            u'\t{{ "{0:s}",'.format(sequence_type_function),
-            u'\t  (getter) {0:s},'.format(sequence_type_getter),
-            u'\t  (setter) {0:s},'.format(setter_function),
-            u'\t  "{0:s}.",'.format(sequence_type_description),
-            u'\t  NULL },'])
+            '',
+            '\t{{ "{0:s}",'.format(sequence_type_function),
+            '\t  (getter) {0:s},'.format(sequence_type_getter),
+            '\t  (setter) {0:s},'.format(setter_function),
+            '\t  "{0:s}.",'.format(sequence_type_description),
+            '\t  NULL },'])
 
-      if type_function == u'get_cache_directory':
+      if type_function == 'get_cache_directory':
         sequence_type_function = self._GetSequenceName(type_function[4:])
         sequence_type_getter = self._GetSequenceName(
             python_function_prototype.name)
         sequence_type_description = self._GetSequenceName(description[:-1])
 
         python_type_object_get_set_definitions.extend([
-            u'',
-            u'\t{{ "{0:s}",'.format(sequence_type_function),
-            u'\t  (getter) {0:s},'.format(sequence_type_getter),
-            u'\t  (setter) {0:s},'.format(setter_function),
-            u'\t  "{0:s}.",'.format(sequence_type_description),
-            u'\t  NULL },'])
+            '',
+            '\t{{ "{0:s}",'.format(sequence_type_function),
+            '\t  (getter) {0:s},'.format(sequence_type_getter),
+            '\t  (setter) {0:s},'.format(setter_function),
+            '\t  "{0:s}.",'.format(sequence_type_description),
+            '\t  NULL },'])
 
     python_type_object_get_set_definitions.extend([
-        u'',
-        u'\t/* Sentinel */',
-        u'\t{ NULL, NULL, NULL, NULL, NULL }'])
+        '',
+        '\t/* Sentinel */',
+        '\t{ NULL, NULL, NULL, NULL, NULL }'])
 
-    template_mappings[u'python_type_object_get_set_definitions'] = u'\n'.join(
+    template_mappings['python_type_object_get_set_definitions'] = '\n'.join(
         python_type_object_get_set_definitions)
 
     template_filename = os.path.join(
-        template_directory, u'type_object_get_set_definitions.c')
+        template_directory, 'type_object_get_set_definitions.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -3776,34 +3778,34 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           or None.
     """
     if len(function_prototype.arguments) < 2:
-      logging.warning(u'Unsupported function prototype: {0:s}'.format(
+      logging.warning('Unsupported function prototype: {0:s}'.format(
           function_prototype.name))
       return
 
-    if type_function in (u'free', u'initialize'):
-      self_argument = u'{0:s}_{1:s}_t **{1:s}'.format(
+    if type_function in ('free', 'initialize'):
+      self_argument = '{0:s}_{1:s}_t **{1:s}'.format(
           project_configuration.library_name, type_name)
 
     elif is_pseudo_type:
-      base_type_name = u'item'
-      self_argument = u'{0:s}_{1:s}_t *{2:s}'.format(
+      base_type_name = 'item'
+      self_argument = '{0:s}_{1:s}_t *{2:s}'.format(
           project_configuration.library_name, base_type_name, type_name)
 
     else:
-      self_argument = u'{0:s}_{1:s}_t *{1:s}'.format(
+      self_argument = '{0:s}_{1:s}_t *{1:s}'.format(
           project_configuration.library_name, type_name)
 
     function_argument = function_prototype.arguments[0]
     function_argument_string = function_argument.CopyToString()
     if function_argument_string != self_argument:
-      logging.warning(u'Unsupported function prototype: {0:s}'.format(
+      logging.warning('Unsupported function prototype: {0:s}'.format(
           function_prototype.name))
       return
 
     function_argument = function_prototype.arguments[-1]
     function_argument_string = function_argument.CopyToString()
-    if function_argument_string != u'libcerror_error_t **error':
-      logging.warning(u'Unsupported function prototype: {0:s}'.format(
+    if function_argument_string != 'libcerror_error_t **error':
+      logging.warning('Unsupported function prototype: {0:s}'.format(
           function_prototype.name))
       return
 
@@ -3817,21 +3819,21 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     value_type = None
 
     # TODO: add override for
-    # if (type_function == u'copy_link_target_identifier_data' and
-    #    project_configuration.library_name == u'liblnk'):
+    # if (type_function == 'copy_link_target_identifier_data' and
+    #    project_configuration.library_name == 'liblnk'):
 
-    if (type_function == u'get_cache_directory_name' and
-        project_configuration.library_name == u'libmsiecf'):
-      type_function = u'get_cache_directory'
+    if (type_function == 'get_cache_directory_name' and
+        project_configuration.library_name == 'libmsiecf'):
+      type_function = 'get_cache_directory'
 
-      arguments = [u'cache_directory_index']
+      arguments = ['cache_directory_index']
       function_type = FUNCTION_TYPE_GET_BY_INDEX
       data_type = DATA_TYPE_NARROW_STRING
 
-    elif type_function == u'close':
+    elif type_function == 'close':
       function_type = FUNCTION_TYPE_CLOSE
 
-    elif type_function.startswith(u'copy_from'):
+    elif type_function.startswith('copy_from'):
       function_type = FUNCTION_TYPE_COPY_FROM
 
       value_argument_index = 1
@@ -3839,90 +3841,90 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       function_argument = function_prototype.arguments[value_argument_index]
       value_argument_string = function_argument.CopyToString()
 
-      _, _, argument_name = value_argument_string.rpartition(u' ')
-      argument_name.lstrip(u'*')
+      _, _, argument_name = value_argument_string.rpartition(' ')
+      argument_name.lstrip('*')
       arguments.append(argument_name)
 
       function_argument = function_prototype.arguments[
           value_argument_index + 1]
       value_size_argument_string = function_argument.CopyToString()
 
-      if (value_argument_string == u'const uint8_t *byte_stream' and
-          value_size_argument_string == u'size_t byte_stream_size'):
+      if (value_argument_string == 'const uint8_t *byte_stream' and
+          value_size_argument_string == 'size_t byte_stream_size'):
         data_type = DATA_TYPE_BINARY_DATA
 
-      elif (value_argument_string == u'const uint8_t *data' and
-            value_size_argument_string == u'size_t data_size'):
+      elif (value_argument_string == 'const uint8_t *data' and
+            value_size_argument_string == 'size_t data_size'):
         data_type = DATA_TYPE_BINARY_DATA
 
-    elif type_function.startswith(u'copy_'):
+    elif type_function.startswith('copy_'):
       function_type = FUNCTION_TYPE_COPY
       data_type = DATA_TYPE_BINARY_DATA
 
       # TODO: change copy to or add copy_to
 
-    elif type_function == u'free':
+    elif type_function == 'free':
       function_type = FUNCTION_TYPE_FREE
 
-    elif type_function.startswith(u'get_'):
+    elif type_function.startswith('get_'):
       function_type = FUNCTION_TYPE_GET
 
-      if type_function == u'get_ascii_codepage':
+      if type_function == 'get_ascii_codepage':
         # TODO: replace this by DATA_TYPE_NARROW_STRING ?
-        data_type = u'String'
+        data_type = 'String'
 
-      elif type_function == u'get_format_version':
+      elif type_function == 'get_format_version':
         function_argument = function_prototype.arguments[1]
         value_argument_string = function_argument.CopyToString()
 
         data_type = DATA_TYPE_STRING
-        value_type, _, _ = value_argument_string.partition(u' ')
+        value_type, _, _ = value_argument_string.partition(' ')
 
       else:
         type_function_prefix, _, type_function_suffix = (
-            type_function.partition(u'_by_'))
+            type_function.partition('_by_'))
 
         value_argument_index = 1
 
         function_argument = function_prototype.arguments[value_argument_index]
         value_argument_string = function_argument.CopyToString()
 
-        _, _, value_argument_suffix = value_argument_string.rpartition(u'_')
+        _, _, value_argument_suffix = value_argument_string.rpartition('_')
 
         # Not all get_by_index functions have the suffix _by_index so we need
         # to detect them based on the function arguments.
-        if (value_argument_string.startswith(u'int ') and
-            value_argument_suffix in (u'entry', u'index')):
+        if (value_argument_string.startswith('int ') and
+            value_argument_suffix in ('entry', 'index')):
           function_type = FUNCTION_TYPE_GET_BY_INDEX
 
-          _, _, argument_name = value_argument_string.rpartition(u' ')
+          _, _, argument_name = value_argument_string.rpartition(' ')
 
           arguments.append(argument_name)
           value_argument_index = 2
 
-        elif type_function_suffix == u'identifier':
+        elif type_function_suffix == 'identifier':
           function_type = FUNCTION_TYPE_GET_BY_IDENTIFIER
 
           arguments.append(type_function_suffix)
           value_argument_index = 2
 
-        elif type_function_suffix in (u'utf8_name', u'utf8_path'):
+        elif type_function_suffix in ('utf8_name', 'utf8_path'):
           type_function_suffix = type_function_suffix[5:]
 
-          if value_argument_string != u'const uint8_t *utf8_string':
-            logging.warning(u'Unsupported function prototype: {0:s}'.format(
+          if value_argument_string != 'const uint8_t *utf8_string':
+            logging.warning('Unsupported function prototype: {0:s}'.format(
                 function_prototype.name))
             return
 
           function_argument = function_prototype.arguments[2]
           function_argument_string = function_argument.CopyToString()
 
-          if function_argument_string != u'size_t utf8_string_length':
-            logging.warning(u'Unsupported function prototype: {0:s}'.format(
+          if function_argument_string != 'size_t utf8_string_length':
+            logging.warning('Unsupported function prototype: {0:s}'.format(
                 function_prototype.name))
             return
 
-          if type_function_suffix == u'name':
+          if type_function_suffix == 'name':
             function_type = FUNCTION_TYPE_GET_BY_NAME
           else:
             function_type = FUNCTION_TYPE_GET_BY_PATH
@@ -3939,127 +3941,127 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
               value_argument_index + 1]
           value_size_argument_string = function_argument.CopyToString()
 
-          if value_argument_string == u'uint64_t *filetime':
+          if value_argument_string == 'uint64_t *filetime':
             data_type = DATA_TYPE_FILETIME
 
-          elif value_argument_string == u'uint64_t *floatingtime':
+          elif value_argument_string == 'uint64_t *floatingtime':
             data_type = DATA_TYPE_FLOATINGTIME
 
-          elif value_argument_string == u'uint32_t *fat_date_time':
+          elif value_argument_string == 'uint32_t *fat_date_time':
             data_type = DATA_TYPE_FAT_DATE_TIME
 
-          elif value_argument_string == u'uint32_t *posix_time':
+          elif value_argument_string == 'uint32_t *posix_time':
             data_type = DATA_TYPE_POSIX_TIME
 
-          elif (value_argument_string == u'uint8_t *data' and
-                value_size_argument_string == u'size_t data_size'):
+          elif (value_argument_string == 'uint8_t *data' and
+                value_size_argument_string == 'size_t data_size'):
             data_type = DATA_TYPE_BINARY_DATA
 
-          elif (value_argument_string == u'uint8_t *guid_data' and
-                value_size_argument_string == u'size_t guid_data_size'):
+          elif (value_argument_string == 'uint8_t *guid_data' and
+                value_size_argument_string == 'size_t guid_data_size'):
             data_type = DATA_TYPE_GUID
 
-          elif (value_argument_string == u'uint8_t *utf8_string' and
-                value_size_argument_string == u'size_t utf8_string_size'):
+          elif (value_argument_string == 'uint8_t *utf8_string' and
+                value_size_argument_string == 'size_t utf8_string_size'):
             data_type = DATA_TYPE_STRING
 
-          elif (value_argument_string == u'char *string' and
-                value_size_argument_string == u'size_t string_size'):
+          elif (value_argument_string == 'char *string' and
+                value_size_argument_string == 'size_t string_size'):
             data_type = DATA_TYPE_NARROW_STRING
 
-          elif value_argument_string.startswith(u'double *'):
+          elif value_argument_string.startswith('double *'):
             data_type = DATA_TYPE_DOUBLE
 
-          elif value_argument_string.startswith(u'float *'):
+          elif value_argument_string.startswith('float *'):
             data_type = DATA_TYPE_FLOAT
 
-          elif value_argument_string.startswith(u'int *'):
+          elif value_argument_string.startswith('int *'):
             data_type = DATA_TYPE_INT
 
-          elif value_argument_string.startswith(u'int32_t *'):
+          elif value_argument_string.startswith('int32_t *'):
             data_type = DATA_TYPE_INT32
 
-          elif value_argument_string.startswith(u'off64_t *'):
+          elif value_argument_string.startswith('off64_t *'):
             data_type = DATA_TYPE_OFF64
 
-          elif value_argument_string.startswith(u'size32_t *'):
+          elif value_argument_string.startswith('size32_t *'):
             data_type = DATA_TYPE_SIZE32
 
-          elif value_argument_string.startswith(u'size64_t *'):
+          elif value_argument_string.startswith('size64_t *'):
             data_type = DATA_TYPE_SIZE64
 
-          elif value_argument_string.startswith(u'uint8_t *'):
+          elif value_argument_string.startswith('uint8_t *'):
             data_type = DATA_TYPE_UINT8
 
-          elif value_argument_string.startswith(u'uint16_t *'):
+          elif value_argument_string.startswith('uint16_t *'):
             data_type = DATA_TYPE_UINT16
 
-          elif value_argument_string.startswith(u'uint32_t *'):
+          elif value_argument_string.startswith('uint32_t *'):
             data_type = DATA_TYPE_UINT32
 
-          elif value_argument_string.startswith(u'uint64_t *'):
+          elif value_argument_string.startswith('uint64_t *'):
             data_type = DATA_TYPE_UINT64
 
           elif value_argument_string.startswith(
               project_configuration.library_name):
             data_type = DATA_TYPE_OBJECT
 
-            object_type, _, _ = value_argument_string.partition(u' ')
-            _, _, object_type = object_type.partition(u'_')
+            object_type, _, _ = value_argument_string.partition(' ')
+            _, _, object_type = object_type.partition('_')
             object_type = object_type[:-2]
 
-    elif type_function == u'initialize':
+    elif type_function == 'initialize':
       function_type = FUNCTION_TYPE_INITIALIZE
 
-    elif type_function.startswith(u'is_'):
+    elif type_function.startswith('is_'):
       function_type = FUNCTION_TYPE_IS
       data_type = DATA_TYPE_BOOLEAN
 
-    elif type_function == u'open' or type_function.startswith(u'open_'):
+    elif type_function == 'open' or type_function.startswith('open_'):
       function_type = FUNCTION_TYPE_OPEN
 
-      if type_function == u'open':
-        arguments = [u'filename', u'mode=\'r\'']
+      if type_function == 'open':
+        arguments = ['filename', 'mode=\'r\'']
 
-      elif type_function == u'open_file_io_handle':
-        arguments = [u'file_object', u'mode=\'r\'']
+      elif type_function == 'open_file_io_handle':
+        arguments = ['file_object', 'mode=\'r\'']
 
-    elif type_function.startswith(u'read_'):
+    elif type_function.startswith('read_'):
       function_type = FUNCTION_TYPE_READ
 
-      if type_function == u'read_buffer':
+      if type_function == 'read_buffer':
         data_type = DATA_TYPE_BINARY_DATA
-        arguments = [u'size']
+        arguments = ['size']
 
-      elif type_function == u'read_buffer_at_offset':
+      elif type_function == 'read_buffer_at_offset':
         data_type = DATA_TYPE_BINARY_DATA
-        arguments = [u'size', u'offset']
+        arguments = ['size', 'offset']
 
-    elif type_function.startswith(u'seek_'):
+    elif type_function.startswith('seek_'):
       function_type = FUNCTION_TYPE_SEEK
 
-      if type_function == u'seek_offset':
-        arguments = [u'offset', u'whence']
+      if type_function == 'seek_offset':
+        arguments = ['offset', 'whence']
 
-    elif type_function.startswith(u'set_'):
+    elif type_function.startswith('set_'):
       function_type = FUNCTION_TYPE_SET
 
       # TODO: make more generic.
-      if type_function == u'set_ascii_codepage':
-        arguments = [u'codepage']
+      if type_function == 'set_ascii_codepage':
+        arguments = ['codepage']
 
-      elif type_function == u'set_parent_file':
-        arguments = [u'parent_file']
+      elif type_function == 'set_parent_file':
+        arguments = ['parent_file']
 
-      elif type_function == u'set_key':
-        arguments = [u'mode', u'key']
+      elif type_function == 'set_key':
+        arguments = ['mode', 'key']
 
-      elif type_function == u'set_keys':
-        arguments = [u'mode', u'key', u'tweak_key']
+      elif type_function == 'set_keys':
+        arguments = ['mode', 'key', 'tweak_key']
 
       elif type_function in (
-          u'set_password', u'set_recovery_password', u'set_utf8_password'):
-        arguments = [u'password']
+          'set_password', 'set_recovery_password', 'set_utf8_password'):
+        arguments = ['password']
 
       else:
         value_argument_index = 1
@@ -4067,38 +4069,38 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         function_argument = function_prototype.arguments[value_argument_index]
         value_argument_string = function_argument.CopyToString()
 
-        _, _, argument_name = value_argument_string.rpartition(u' ')
-        argument_name.lstrip(u'*')
+        _, _, argument_name = value_argument_string.rpartition(' ')
+        argument_name.lstrip('*')
         arguments.append(argument_name)
 
         function_argument = function_prototype.arguments[
             value_argument_index + 1]
         value_size_argument_string = function_argument.CopyToString()
 
-        if (value_argument_string == u'uint8_t *data' and
-            value_size_argument_string == u'size_t data_size'):
+        if (value_argument_string == 'uint8_t *data' and
+            value_size_argument_string == 'size_t data_size'):
           data_type = DATA_TYPE_BINARY_DATA
 
-        elif (value_argument_string == u'uint8_t *utf8_string' and
-              value_size_argument_string == u'size_t utf8_string_size'):
+        elif (value_argument_string == 'uint8_t *utf8_string' and
+              value_size_argument_string == 'size_t utf8_string_size'):
           data_type = DATA_TYPE_STRING
 
-        elif (value_argument_string == u'char *string' and
-              value_size_argument_string == u'size_t string_size'):
+        elif (value_argument_string == 'char *string' and
+              value_size_argument_string == 'size_t string_size'):
           data_type = DATA_TYPE_NARROW_STRING
 
         elif value_argument_string.startswith(
             project_configuration.library_name):
           data_type = DATA_TYPE_OBJECT
 
-          object_type, _, _ = value_argument_string.partition(u' ')
-          _, _, object_type = object_type.partition(u'_')
+          object_type, _, _ = value_argument_string.partition(' ')
+          _, _, object_type = object_type.partition('_')
           object_type = object_type[:-2]
 
-    elif type_function == u'signal_abort':
+    elif type_function == 'signal_abort':
       function_type = FUNCTION_TYPE_UTILITY
 
-    # elif type_function.startswith(u'write_'):
+    # elif type_function.startswith('write_'):
     #   function_type = FUNCTION_TYPE_WRITE
 
     python_function_prototype = PythonTypeObjectFunctionPrototype(
@@ -4132,10 +4134,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     try:
       header_file.Read(project_configuration)
     except IOError:
-      logging.warning(u'Skipping: {0:s}'.format(header_file.path))
+      logging.warning('Skipping: {0:s}'.format(header_file.path))
       return
 
-    function_name_prefix = u'{0:s}_{1:s}_'.format(
+    function_name_prefix = '{0:s}_{1:s}_'.format(
         project_configuration.library_name, type_name)
     function_name_prefix_length = len(function_name_prefix)
 
@@ -4147,66 +4149,66 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       if not function_name.startswith(function_name_prefix):
-        logging.warning(u'Skipping unsupported API function: {0:s}'.format(
+        logging.warning('Skipping unsupported API function: {0:s}'.format(
             function_name))
         continue
 
       type_function = function_name[function_name_prefix_length:]
       # Skip functions that are a wide character variant of another function.
-      if type_function.endswith(u'_wide'):
+      if type_function.endswith('_wide'):
         continue
 
       # Skip functions that retrieves the size of binary data.
-      if (type_function.startswith(u'get_') and
-          type_function.endswith(u'_data_size')):
+      if (type_function.startswith('get_') and
+          type_function.endswith('_data_size')):
         continue
 
       # Skip functions that retrieve the size of an UTF-8 string.
-      if (type_function.startswith(u'get_utf8_') and
-          type_function.endswith(u'_size')):
+      if (type_function.startswith('get_utf8_') and
+          type_function.endswith('_size')):
         continue
 
-      if (type_function.startswith(u'get_') and
-          type_function.endswith(u'_utf8_string_size')):
+      if (type_function.startswith('get_') and
+          type_function.endswith('_utf8_string_size')):
         continue
 
       # Skip functions that are a UTF-16 variant of another function.
-      if (type_function.startswith(u'get_utf16_') or
-          type_function.startswith(u'set_utf16_') or
-          (type_function.startswith(u'get_') and (
-              type_function.endswith(u'_by_utf16_name') or
-              type_function.endswith(u'_by_utf16_path') or
-              type_function.endswith(u'_utf16_string') or
-              type_function.endswith(u'_utf16_string_size')))):
+      if (type_function.startswith('get_utf16_') or
+          type_function.startswith('set_utf16_') or
+          (type_function.startswith('get_') and (
+              type_function.endswith('_by_utf16_name') or
+              type_function.endswith('_by_utf16_path') or
+              type_function.endswith('_utf16_string') or
+              type_function.endswith('_utf16_string_size')))):
         continue
 
       # TODO: ignore these functions for now.
       # TODO: improve check only to apply for types with pseudo types.
-      if (type_function == u'get_type' and (
+      if (type_function == 'get_type' and (
           project_configuration.library_name in (
-              u'libmsiecf', u'libolecf', u'libpff'))):
+              'libmsiecf', 'libolecf', 'libpff'))):
         continue
 
       # TODO: remove when removed after deprecation.
-      if (type_function.startswith(u'get_value_') and
-          type_function != u'get_value_type' and
+      if (type_function.startswith('get_value_') and
+          type_function != 'get_value_type' and
           project_configuration.library_name in (
-              u'libolecf', )):
+              'libolecf', )):
         continue
 
-      if (type_function == u'get_version' and (
+      if (type_function == 'get_version' and (
           project_configuration.library_name in (
-              u'libevt', u'libevtx'))):
+              'libevt', 'libevtx'))):
         continue
 
-      if (type_function.startswith(u'write_buffer') and (
+      if (type_function.startswith('write_buffer') and (
           project_configuration.library_name not in (
-              u'libewf', ))):
+              'libewf', ))):
         continue
 
       if type_function in (
-          u'get_flags', u'get_offset_range',
-          u'get_number_of_unallocated_blocks', u'get_unallocated_block'):
+          'get_flags', 'get_offset_range',
+          'get_number_of_unallocated_blocks', 'get_unallocated_block'):
         continue
 
       python_function_prototype = self._GetPythonTypeObjectFunctionPrototype(
@@ -4215,7 +4217,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       if (not python_function_prototype or
           not python_function_prototype.function_type):
-        logging.warning(u'Skipping unsupported type function: {0:s}'.format(
+        logging.warning('Skipping unsupported type function: {0:s}'.format(
             function_name))
         continue
 
@@ -4235,17 +4237,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     Returns:
       str: sequence type or value name.
     """
-    if name == u'key':
-      return u'{0:s}s'.format(name)
+    if name == 'key':
+      return '{0:s}s'.format(name)
 
-    if (name[-1] in (u's', u'x', u'z') or (
-        name[-1] == u'h'  and name[-2] in (u'c', u's'))):
-      return u'{0:s}es'.format(name)
+    if (name[-1] in ('s', 'x', 'z') or (
+        name[-1] == 'h'  and name[-2] in ('c', 's'))):
+      return '{0:s}es'.format(name)
 
-    if name[-1] == u'y':
-      return u'{0:s}ies'.format(name[:-1])
+    if name[-1] == 'y':
+      return '{0:s}ies'.format(name[:-1])
 
-    return u'{0:s}s'.format(name)
+    return '{0:s}s'.format(name)
 
   def _GetSequenceType(self, python_function_prototype):
     """Determines if the function prototype implies a sequence type.
@@ -4287,12 +4289,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           of a template variable.
     """
     template_mappings = project_configuration.GetTemplateMappings(
-        authors_separator=u',\n *                          ')
+        authors_separator=',\n *                          ')
 
     # TODO: have source formatter take care of the alignment.
     # Used to align source in pyyal/pyyal_file_object_io_handle.c
     alignment_padding = len(project_configuration.library_name) - 6
-    template_mappings[u'alignment_padding'] = u' ' * alignment_padding
+    template_mappings['alignment_padding'] = ' ' * alignment_padding
 
     return template_mappings
 
@@ -4371,7 +4373,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     template_mappings = self._GetTemplateMappings(project_configuration)
 
     for directory_entry in os.listdir(self._template_directory):
-      if not directory_entry.startswith(u'pyyal_'):
+      if not directory_entry.startswith('pyyal_'):
         continue
 
       template_filename = os.path.join(
@@ -4381,7 +4383,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       force_create = False
 
-      output_filename = u'{0:s}_{1:s}'.format(
+      output_filename = '{0:s}_{1:s}'.format(
           project_configuration.python_module_name, directory_entry[6:])
       output_filename = os.path.join(
           project_configuration.python_module_name, output_filename)
@@ -4391,7 +4393,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-      if directory_entry == u'pyyal_file_object_io_handle.c':
+      if directory_entry == 'pyyal_file_object_io_handle.c':
         self._SortVariableDeclarations(output_filename)
 
     include_header_file = self._GetLibraryIncludeHeaderFile(
@@ -4399,8 +4401,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     if not include_header_file:
       logging.warning((
-          u'Missing: {0:s} skipping generation of Python type object '
-          u'source and header files.').format(
+          'Missing: {0:s} skipping generation of Python type object '
+          'source and header files.').format(
               self._library_include_header_path))
     else:
       api_types, api_types_with_input = (
@@ -4422,9 +4424,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
         if not python_function_prototypes:
           logging.warning((
-              u'Missing function prototypes for type: {0:s} skipping '
-              u'generation of Python type object source and header '
-              u'files.').format(type_name))
+              'Missing function prototypes for type: {0:s} skipping '
+              'generation of Python type object source and header '
+              'files.').format(type_name))
           continue
 
         for type_function, python_function_prototype in iter(
@@ -4462,11 +4464,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     if not include_header_file:
       logging.warning((
-          u'Missing: {0:s} skipping generation of Python definitions object '
-          u'source and header files.').format(
+          'Missing: {0:s} skipping generation of Python definitions object '
+          'source and header files.').format(
               self._definitions_include_header_path))
     else:
-      definitions_name_prefix = u'{0:s}_'.format(
+      definitions_name_prefix = '{0:s}_'.format(
           project_configuration.library_name)
       definitions_name_prefix_length = len(definitions_name_prefix)
 
@@ -4477,7 +4479,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
         # TODO: skip flags definitions
         definitions_name = definitions_name[definitions_name_prefix_length:]
-        if definitions_name in (u'access_flags', u'endian'):
+        if definitions_name in ('access_flags', 'endian'):
           continue
 
         self._GenerateDefinitionsSourceFile(
@@ -4501,13 +4503,13 @@ class ScriptFileGenerator(SourceFileGenerator):
     """
     makefile_am_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
-        u'Makefile.am')
+        'Makefile.am')
 
     makefile_am_file = MainMakefileAMFile(makefile_am_path)
     makefile_am_file.Read(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings()
-    template_mappings[u'local_libs'] = u' '.join(makefile_am_file.libraries)
+    template_mappings['local_libs'] = ' '.join(makefile_am_file.libraries)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
@@ -4517,7 +4519,7 @@ class ScriptFileGenerator(SourceFileGenerator):
 
       output_filename = directory_entry
 
-      if (directory_entry in (u'syncwinflexbison.ps1', u'synczlib.ps1') and
+      if (directory_entry in ('syncwinflexbison.ps1', 'synczlib.ps1') and
           not os.path.exists(output_filename)):
         continue
 
@@ -4529,10 +4531,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   """Tests source files generator."""
 
   _PYTHON_FUNCTION_NAMES = (
-      u'support', )
+      'support', )
 
   _PYTHON_FUNCTION_WITH_INPUT_NAMES = (
-      u'open_close', u'seek', u'read')
+      'open_close', 'seek', 'read')
 
   def _FormatTestData(self, data):
     """Formats the test data as a C byte array.
@@ -4551,15 +4553,15 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       data_string = data[block_index:block_index + 16]
 
       hexadecimal_string = ', '.join([
-          u'0x{0:02x}'.format(ord(byte_value))
+          '0x{0:02x}'.format(ord(byte_value))
           for byte_value in data_string[0:16]])
 
       if len(data_string) < 16:
-        hexadecimal_lines.append(u'\t{0:s}'.format(hexadecimal_string))
+        hexadecimal_lines.append('\t{0:s}'.format(hexadecimal_string))
       else:
-        hexadecimal_lines.append(u'\t{0:s},'.format(hexadecimal_string))
+        hexadecimal_lines.append('\t{0:s},'.format(hexadecimal_string))
 
-    return u'\n'.join(hexadecimal_lines)
+    return '\n'.join(hexadecimal_lines)
 
   def _GenerateAPISupportTests(
       self, project_configuration, template_mappings, include_header_file,
@@ -4575,13 +4577,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
     """
     template_directory = os.path.join(
-        self._template_directory, u'yal_test_support')
+        self._template_directory, 'yal_test_support')
 
-    output_filename = u'{0:s}_test_support.c'.format(
+    output_filename = '{0:s}_test_support.c'.format(
         project_configuration.library_name_suffix)
-    output_filename = os.path.join(u'tests', output_filename)
+    output_filename = os.path.join('tests', output_filename)
 
-    template_filename = os.path.join(template_directory, u'header.c')
+    template_filename = os.path.join(template_directory, 'header.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
@@ -4591,37 +4593,37 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # libcerror.
     if signature_type:
       template_filename = os.path.join(
-          template_directory, u'includes_with_input.c')
+          template_directory, 'includes_with_input.c')
 
-      template_mappings[u'signature_type'] = signature_type
+      template_mappings['signature_type'] = signature_type
     else:
-      template_filename = os.path.join(template_directory, u'includes.c')
+      template_filename = os.path.join(template_directory, 'includes.c')
 
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
     for support_function in (
-        u'get_version', u'get_access_flags_read', u'get_codepage',
-        u'set_codepage'):
+        'get_version', 'get_access_flags_read', 'get_codepage',
+        'set_codepage'):
       if not include_header_file.HasFunction(support_function):
         continue
 
-      template_filename = u'{0:s}.c'.format(support_function)
+      template_filename = '{0:s}.c'.format(support_function)
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
     if signature_type:
-      template_filename = os.path.join(template_directory, u'check_signature.c')
+      template_filename = os.path.join(template_directory, 'check_signature.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      template_filename = os.path.join(template_directory, u'main_with_input.c')
+      template_filename = os.path.join(template_directory, 'main_with_input.c')
     else:
-      template_filename = os.path.join(template_directory, u'main.c')
+      template_filename = os.path.join(template_directory, 'main.c')
 
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
@@ -4661,49 +4663,49 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     has_python_module = self._HasPythonModule(project_configuration)
 
     template_directory = os.path.join(
-        self._template_directory, u'Makefile.am')
-    output_filename = os.path.join(u'tests', u'Makefile.am')
+        self._template_directory, 'Makefile.am')
+    output_filename = os.path.join('tests', 'Makefile.am')
 
     test_scripts = []
     if (api_functions or api_functions_with_input or api_types or
         api_types_with_input or api_pseudo_types):
-      test_script = u'test_library.sh'
+      test_script = 'test_library.sh'
       test_scripts.append(test_script)
 
-    tool_name = u'{0:s}info'.format(
+    tool_name = '{0:s}info'.format(
         project_configuration.library_name_suffix)
     if tool_name in project_configuration.tools_names:
-      test_script = u'test_{0:s}.sh'.format(tool_name)
+      test_script = 'test_{0:s}.sh'.format(tool_name)
       test_scripts.append(test_script)
 
-    tool_name = u'{0:s}export'.format(
+    tool_name = '{0:s}export'.format(
         project_configuration.library_name_suffix)
     if tool_name in project_configuration.tools_names:
-      test_script = u'test_{0:s}.sh'.format(tool_name)
+      test_script = 'test_{0:s}.sh'.format(tool_name)
       test_scripts.append(test_script)
 
     python_scripts = []
-    python_test_scripts = [u'test_python_module.sh']
+    python_test_scripts = ['test_python_module.sh']
 
-    check_scripts = [u'test_runner.sh']
+    check_scripts = ['test_runner.sh']
     check_scripts.extend(test_scripts)
     if has_python_module:
       check_scripts.extend(python_scripts)
       check_scripts.extend(python_test_scripts)
       check_scripts.extend([
-          u'{0:s}_test_support.py'.format(
+          '{0:s}_test_support.py'.format(
               project_configuration.python_module_name)])
 
     check_scripts = sorted(check_scripts)
 
     if has_python_module:
-      test_script = u'$(TESTS_{0:s})'.format(
+      test_script = '$(TESTS_{0:s})'.format(
           project_configuration.python_module_name.upper())
       test_scripts.append(test_script)
 
     check_programs = []
     for test in tests:
-      check_program = u'{0:s}_test_{1:s}'.format(
+      check_program = '{0:s}_test_{1:s}'.format(
           project_configuration.library_name_suffix, test)
       check_programs.append(check_program)
 
@@ -4713,38 +4715,38 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       index = 0
       while index < len(cppflags):
         cppflag = cppflags[index]
-        if not cppflag.startswith(u'lib') or cppflag == u'libcrypto':
+        if not cppflag.startswith('lib') or cppflag == 'libcrypto':
           break
         index += 1
 
-    cppflags = [u'@{0:s}_CPPFLAGS@'.format(name.upper()) for name in cppflags]
+    cppflags = ['@{0:s}_CPPFLAGS@'.format(name.upper()) for name in cppflags]
 
-    cppflag = u'@{0:s}_DLL_IMPORT@'.format(
+    cppflag = '@{0:s}_DLL_IMPORT@'.format(
         project_configuration.library_name.upper())
     cppflags.append(cppflag)
 
-    template_mappings[u'cppflags'] = u' \\\n'.join(
-        [u'\t{0:s}'.format(name) for name in cppflags])
-    template_mappings[u'python_tests'] = u' \\\n'.join(
-        [u'\t{0:s}'.format(filename) for filename in python_test_scripts])
-    template_mappings[u'tests'] = u' \\\n'.join(
-        [u'\t{0:s}'.format(filename) for filename in test_scripts])
-    template_mappings[u'check_scripts'] = u' \\\n'.join(
-        [u'\t{0:s}'.format(filename) for filename in check_scripts])
-    template_mappings[u'check_programs'] = u' \\\n'.join(
-        [u'\t{0:s}'.format(filename) for filename in check_programs])
+    template_mappings['cppflags'] = ' \\\n'.join(
+        ['\t{0:s}'.format(name) for name in cppflags])
+    template_mappings['python_tests'] = ' \\\n'.join(
+        ['\t{0:s}'.format(filename) for filename in python_test_scripts])
+    template_mappings['tests'] = ' \\\n'.join(
+        ['\t{0:s}'.format(filename) for filename in test_scripts])
+    template_mappings['check_scripts'] = ' \\\n'.join(
+        ['\t{0:s}'.format(filename) for filename in check_scripts])
+    template_mappings['check_programs'] = ' \\\n'.join(
+        ['\t{0:s}'.format(filename) for filename in check_programs])
 
-    template_filename = os.path.join(template_directory, u'header.am')
+    template_filename = os.path.join(template_directory, 'header.am')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
     if has_python_module:
-      template_filename = os.path.join(template_directory, u'python.am')
+      template_filename = os.path.join(template_directory, 'python.am')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'body.am')
+    template_filename = os.path.join(template_directory, 'body.am')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -4752,33 +4754,33 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     for group_name in tests:
       if group_name in api_functions:
         has_error_argument = include_header_file.HasErrorArgument(group_name)
-        if (project_configuration.library_name != u'libcerror' and
-            group_name not in (u'error', u'notify') and has_error_argument):
-          template_filename = u'yal_test_function.am'
+        if (project_configuration.library_name != 'libcerror' and
+            group_name not in ('error', 'notify') and has_error_argument):
+          template_filename = 'yal_test_function.am'
         else:
-          template_filename = u'yal_test_function_no_error.am'
+          template_filename = 'yal_test_function_no_error.am'
 
-        template_mappings[u'library_function'] = group_name
+        template_mappings['library_function'] = group_name
 
       elif group_name in api_functions_with_input:
-        if group_name == u'support':
-          template_filename = u'yal_test_support_with_input.am'
+        if group_name == 'support':
+          template_filename = 'yal_test_support_with_input.am'
         else:
-          template_filename = u'yal_test_function_with_input.am'
+          template_filename = 'yal_test_function_with_input.am'
 
-        template_mappings[u'library_function'] = group_name
+        template_mappings['library_function'] = group_name
 
       elif (group_name in api_types or group_name in api_pseudo_types or
             group_name in internal_types):
-        if project_configuration.library_name == u'libcerror':
-          template_filename = u'yal_test_type_no_error.am'
+        if project_configuration.library_name == 'libcerror':
+          template_filename = 'yal_test_type_no_error.am'
         else:
-          template_filename = u'yal_test_type.am'
+          template_filename = 'yal_test_type.am'
 
         self._SetTypeNameInTemplateMappings(template_mappings, group_name)
 
       elif group_name in api_types_with_input:
-        template_filename = u'yal_test_type_with_input.am'
+        template_filename = 'yal_test_type_with_input.am'
 
         self._SetTypeNameInTemplateMappings(template_mappings, group_name)
 
@@ -4787,7 +4789,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'footer.am')
+    template_filename = os.path.join(template_directory, 'footer.am')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -4808,38 +4810,38 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
     """
     template_directory = os.path.join(
-        self._template_directory, u'pyyal_test_support')
+        self._template_directory, 'pyyal_test_support')
 
-    output_filename = u'{0:s}_test_support.py'.format(
+    output_filename = '{0:s}_test_support.py'.format(
         project_configuration.python_module_name)
-    output_filename = os.path.join(u'tests', output_filename)
+    output_filename = os.path.join('tests', output_filename)
 
-    template_filename = os.path.join(template_directory, u'header.py')
+    template_filename = os.path.join(template_directory, 'header.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    template_filename = os.path.join(template_directory, u'imports.py')
+    template_filename = os.path.join(template_directory, 'imports.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'test_case.py')
+    template_filename = os.path.join(template_directory, 'test_case.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
     for support_function in (
-        u'get_version', ):
+        'get_version', ):
       if not include_header_file.HasFunction(support_function):
         continue
 
-      template_filename = u'{0:s}.py'.format(support_function)
+      template_filename = '{0:s}.py'.format(support_function)
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'main.py')
+    template_filename = os.path.join(template_directory, 'main.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -4868,44 +4870,44 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     try:
       header_file.Read(project_configuration)
     except IOError:
-      logging.warning(u'Skipping: {0:s}'.format(header_file.path))
+      logging.warning('Skipping: {0:s}'.format(header_file.path))
       return False
 
     template_directory = os.path.join(
-        self._template_directory, u'pyyal_test_type')
+        self._template_directory, 'pyyal_test_type')
 
-    output_filename = u'{0:s}_test_{1:s}.py'.format(
+    output_filename = '{0:s}_test_{1:s}.py'.format(
         project_configuration.python_module_name, type_name)
-    output_filename = os.path.join(u'tests', output_filename)
+    output_filename = os.path.join('tests', output_filename)
 
-    template_filename = os.path.join(template_directory, u'header.py')
+    template_filename = os.path.join(template_directory, 'header.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    template_filename = os.path.join(template_directory, u'imports.py')
+    template_filename = os.path.join(template_directory, 'imports.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'test_case.py')
+    template_filename = os.path.join(template_directory, 'test_case.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
     for type_function in (
-        u'signal_abort', u'open', u'set_ascii_codepage', u'read_buffer',
-        u'seek_offset'):
+        'signal_abort', 'open', 'set_ascii_codepage', 'read_buffer',
+        'seek_offset'):
       function_prototype = header_file.GetTypeFunction(type_name, type_function)
       if not function_prototype:
         continue
 
-      template_filename = u'{0:s}.py'.format(type_function)
+      template_filename = '{0:s}.py'.format(type_function)
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, u'main.py')
+    template_filename = os.path.join(template_directory, 'main.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -4938,7 +4940,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         str: name of the test function corresponding to the library type function.
         bool: True if the function prototype was externally available.
     """
-    function_name = u'{0:s}_{1:s}_{2:s}'.format(
+    function_name = '{0:s}_{1:s}_{2:s}'.format(
         project_configuration.library_name, type_name, type_function)
 
     function_prototype = header_file.GetTypeFunction(type_name, type_function)
@@ -4946,64 +4948,64 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       return function_name, None, last_have_extern
 
     template_directory = os.path.join(
-        self._template_directory, u'yal_test_type')
+        self._template_directory, 'yal_test_type')
 
     template_filename = None
     value_name = None
     value_type = None
 
-    if (type_function.startswith(u'get_utf8_') or
-        type_function.startswith(u'get_utf16_')):
+    if (type_function.startswith('get_utf8_') or
+        type_function.startswith('get_utf16_')):
       function_argument = function_prototype.arguments[1]
       function_argument_string = function_argument.CopyToString()
 
       value_name = type_function[4:]
-      value_type, _, _ = function_argument_string.partition(u' ')
+      value_type, _, _ = function_argument_string.partition(' ')
 
-      if type_function.endswith(u'_size'):
+      if type_function.endswith('_size'):
         if len(function_prototype.arguments) == 3:
           if with_input:
-            template_filename = u'get_value_with_input.c'
+            template_filename = 'get_value_with_input.c'
           else:
-            template_filename = u'get_value.c'
+            template_filename = 'get_value.c'
 
       else:
         if len(function_prototype.arguments) == 4:
           if with_input:
-            template_filename = u'get_string_value_with_input.c'
+            template_filename = 'get_string_value_with_input.c'
           else:
-            template_filename = u'get_string_value.c'
+            template_filename = 'get_string_value.c'
 
-    elif (type_function.startswith(u'get_') and
+    elif (type_function.startswith('get_') and
           len(function_prototype.arguments) in (3, 4)):
       function_argument = function_prototype.arguments[1]
       function_argument_string = function_argument.CopyToString()
 
       value_name = type_function[4:]
-      value_type, _, _ = function_argument_string.partition(u' ')
+      value_type, _, _ = function_argument_string.partition(' ')
 
       if len(function_prototype.arguments) == 3:
         if value_type.startswith(project_configuration.library_name):
           value_type = value_type[:-2]
 
           if with_input:
-            template_filename = u'get_type_value_with_input.c'
+            template_filename = 'get_type_value_with_input.c'
           else:
-            template_filename = u'get_type_value.c'
+            template_filename = 'get_type_value.c'
         else:
           if with_input:
-            template_filename = u'get_value_with_input.c'
+            template_filename = 'get_value_with_input.c'
           else:
-            template_filename = u'get_value.c'
+            template_filename = 'get_value.c'
 
-      elif function_argument_string == u'uint8_t *guid_data':
+      elif function_argument_string == 'uint8_t *guid_data':
         if with_input:
-          template_filename = u'get_guid_value_with_input.c'
+          template_filename = 'get_guid_value_with_input.c'
         else:
-          template_filename = u'get_guid_value.c'
+          template_filename = 'get_guid_value.c'
 
     if not template_filename:
-      template_filename = u'{0:s}.c'.format(type_function)
+      template_filename = '{0:s}.c'.format(type_function)
 
     self._SetValueNameInTemplateMappings(template_mappings, value_name)
     self._SetValueTypeInTemplateMappings(template_mappings, value_type)
@@ -5011,21 +5013,21 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     template_filename = os.path.join(template_directory, template_filename)
     if not os.path.exists(template_filename):
       logging.warning((
-          u'Unable to generate test type source code for type function: '
-          u'{0:s} with error: missing template').format(type_function))
+          'Unable to generate test type source code for type function: '
+          '{0:s} with error: missing template').format(type_function))
       return function_name, None, last_have_extern
 
     if not initialize_is_internal:
       if not function_prototype.have_extern and last_have_extern:
         internal_template_filename = os.path.join(
-            template_directory, u'define_internal_start.c')
+            template_directory, 'define_internal_start.c')
         self._GenerateSection(
             internal_template_filename, template_mappings, output_writer,
             output_filename, access_mode='ab')
 
       elif function_prototype.have_extern and not last_have_extern:
         internal_template_filename = os.path.join(
-            template_directory, u'define_internal_end.c')
+            template_directory, 'define_internal_end.c')
         self._GenerateSection(
             internal_template_filename, template_mappings, output_writer,
             output_filename, access_mode='ab')
@@ -5034,7 +5036,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    test_function_name = u'{0:s}_test_{1:s}_{2:s}'.format(
+    test_function_name = '{0:s}_test_{1:s}_{2:s}'.format(
         project_configuration.library_name_suffix, type_name,
         type_function)
 
@@ -5058,9 +5060,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     Returns:
       bool: True if successful or False if not.
     """
-    output_filename = u'{0:s}_test_{1:s}.c'.format(
+    output_filename = '{0:s}_test_{1:s}.c'.format(
         project_configuration.library_name_suffix, type_name)
-    output_filename = os.path.join(u'tests', output_filename)
+    output_filename = os.path.join('tests', output_filename)
 
     if os.path.exists(output_filename) and not self._experimental:
       return False
@@ -5072,11 +5074,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     try:
       header_file.Read(project_configuration)
     except IOError:
-      logging.warning(u'Skipping: {0:s}'.format(header_file.path))
+      logging.warning('Skipping: {0:s}'.format(header_file.path))
       return False
 
     template_directory = os.path.join(
-        self._template_directory, u'yal_test_type')
+        self._template_directory, 'yal_test_type')
 
     function_names = list(header_file.functions_per_name.keys())
     tests_to_run = []
@@ -5084,14 +5086,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
-    template_filename = os.path.join(template_directory, u'header.c')
+    template_filename = os.path.join(template_directory, 'header.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
     if with_input:
-      template_filename = u'includes_with_input.c'
+      template_filename = 'includes_with_input.c'
     else:
-      template_filename = u'includes.c'
+      template_filename = 'includes.c'
 
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
@@ -5104,65 +5106,65 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     initialize_is_internal = False
     initialize_number_of_arguments = None
 
-    function_prototype = header_file.GetTypeFunction(type_name, u'initialize')
+    function_prototype = header_file.GetTypeFunction(type_name, 'initialize')
     if function_prototype:
       initialize_is_internal = not function_prototype.have_extern
       initialize_number_of_arguments = len(function_prototype.arguments)
 
       if is_internal or initialize_is_internal:
         template_filename = os.path.join(
-            template_directory, u'includes_internal.c')
+            template_directory, 'includes_internal.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
-    test_data_directory = os.path.join(u'tests', u'data')
+    test_data_directory = os.path.join('tests', 'data')
     if os.path.exists(test_data_directory):
       for directory_entry in sorted(os.listdir(test_data_directory)):
-        test_type_name, _, test_data_suffix = directory_entry.partition(u'.')
+        test_type_name, _, test_data_suffix = directory_entry.partition('.')
         if test_type_name != type_name:
           continue
 
-        test_data_suffix, _, test_data_index = test_data_suffix.rpartition(u'.')
+        test_data_suffix, _, test_data_index = test_data_suffix.rpartition('.')
         if test_data_suffix:
-          test_data_suffix = u'_{0:s}'.format(test_data_suffix)
+          test_data_suffix = '_{0:s}'.format(test_data_suffix)
 
         test_data_file = os.path.join(test_data_directory, directory_entry)
         with open(test_data_file, 'rb') as file_object:
           test_data = file_object.read()
 
-        template_mappings[u'test_data'] = self._FormatTestData(test_data)
-        template_mappings[u'test_data_size'] = len(test_data)
-        template_mappings[u'test_data_index'] = test_data_index
-        template_mappings[u'test_data_suffix'] = test_data_suffix
+        template_mappings['test_data'] = self._FormatTestData(test_data)
+        template_mappings['test_data_size'] = len(test_data)
+        template_mappings['test_data_index'] = test_data_index
+        template_mappings['test_data_suffix'] = test_data_suffix
 
-        template_filename = os.path.join(template_directory, u'test_data.c')
+        template_filename = os.path.join(template_directory, 'test_data.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
-    function_prototype = header_file.GetTypeFunction(type_name, u'initialize')
+    function_prototype = header_file.GetTypeFunction(type_name, 'initialize')
     if function_prototype:
       initialize_is_internal = not function_prototype.have_extern
       initialize_number_of_arguments = len(function_prototype.arguments)
 
       if initialize_number_of_arguments == 2:
         function_name, test_function_name, have_extern = self._GenerateTypeTest(
-            project_configuration, template_mappings, type_name, u'initialize',
+            project_configuration, template_mappings, type_name, 'initialize',
             have_extern, header_file, output_writer, output_filename,
             with_input=with_input)
       else:
-        function_name = u'{0:s}_{1:s}_initialize'.format(
+        function_name = '{0:s}_{1:s}_initialize'.format(
             project_configuration.library_name, type_name)
         test_function_name = None
 
       tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
 
-    function_prototype = header_file.GetTypeFunction(type_name, u'free')
+    function_prototype = header_file.GetTypeFunction(type_name, 'free')
     if function_prototype:
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
-          project_configuration, template_mappings, type_name, u'free',
+          project_configuration, template_mappings, type_name, 'free',
           have_extern, header_file, output_writer, output_filename,
           with_input=with_input)
 
@@ -5171,14 +5173,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       if initialize_is_internal and have_extern:
         template_filename = os.path.join(
-            template_directory, u'define_internal_start.c')
+            template_directory, 'define_internal_start.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
     # TODO: fix libbfio having no open wide.
     # TODO: make handling open close more generic for libpff attachment handle.
-    for type_function in (u'open', u'open_wide', u'close'):
+    for type_function in ('open', 'open_wide', 'close'):
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, type_function,
           have_extern, header_file, output_writer, output_filename,
@@ -5188,14 +5190,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         function_names.remove(function_name)
 
     if with_input:
-      template_filename = os.path.join(template_directory, u'open_close.c')
+      template_filename = os.path.join(template_directory, 'open_close.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
       # The open, close and open-close functions are defined in the template
       # so no need to add them to tests_to_run or tests_to_run_with_args.
-      function_name = u'{0:s}_{1:s}_open_file_io_handle'.format(
+      function_name = '{0:s}_{1:s}_open_file_io_handle'.format(
           project_configuration.library_name, type_name)
 
       if function_name in function_names:
@@ -5203,7 +5205,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       # TODO: remove open_read?
 
-    function_name_prefix = u'{0:s}_{1:s}_'.format(
+    function_name_prefix = '{0:s}_{1:s}_'.format(
         project_configuration.library_name, type_name)
     function_name_prefix_length = len(function_name_prefix)
 
@@ -5228,7 +5230,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if initialize_is_internal or not have_extern:
       template_filename = os.path.join(
-          template_directory, u'define_internal_end.c')
+          template_directory, 'define_internal_end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -5237,9 +5239,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: generate run test macros.
 
     if with_input:
-      template_filename = u'main_start_with_input.c'
+      template_filename = 'main_start_with_input.c'
     else:
-      template_filename = u'main_start.c'
+      template_filename = 'main_start.c'
 
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
@@ -5253,7 +5255,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if with_input:
       template_filename = os.path.join(
-          template_directory, u'main_with_input_start.c')
+          template_directory, 'main_with_input_start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -5265,14 +5267,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if with_input:
       template_filename = os.path.join(
-          template_directory, u'main_with_input_end.c')
+          template_directory, 'main_with_input_end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      template_filename = u'main_end_with_input.c'
+      template_filename = 'main_end_with_input.c'
     else:
-      template_filename = u'main_end.c'
+      template_filename = 'main_end.c'
 
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
@@ -5305,7 +5307,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       with_args (Optional[bool]): True if the tests to run have arguments.
     """
     template_directory = os.path.join(
-        self._template_directory, u'yal_test_type')
+        self._template_directory, 'yal_test_type')
 
     library_name_suffix = project_configuration.library_name_suffix.upper()
 
@@ -5315,7 +5317,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       function_prototype = header_file.functions_per_name.get(
           function_name, None)
 
-      if function_prototype.name.endswith(u'_free'):
+      if function_prototype.name.endswith('_free'):
         have_extern = function_prototype.have_extern
       else:
         have_extern = (
@@ -5325,23 +5327,23 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         if tests_to_run_mappings:
           if not last_have_extern:
             template_filename = os.path.join(
-                template_directory, u'define_internal_start.c')
+                template_directory, 'define_internal_start.c')
             self._GenerateSection(
                 template_filename, template_mappings, output_writer, output_filename,
                 access_mode='ab')
 
-          template_mappings[u'tests_to_run'] = u'\n'.join(tests_to_run_mappings)
+          template_mappings['tests_to_run'] = '\n'.join(tests_to_run_mappings)
           tests_to_run_mappings = []
 
           template_filename = os.path.join(
-              template_directory, u'main_tests_to_run.c')
+              template_directory, 'main_tests_to_run.c')
           self._GenerateSection(
               template_filename, template_mappings, output_writer, output_filename,
               access_mode='ab')
 
           if not last_have_extern:
             template_filename = os.path.join(
-                template_directory, u'define_internal_end.c')
+                template_directory, 'define_internal_end.c')
             self._GenerateSection(
                 template_filename, template_mappings, output_writer, output_filename,
                 access_mode='ab')
@@ -5349,52 +5351,52 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         last_have_extern = have_extern
 
       if tests_to_run_mappings:
-        tests_to_run_mappings.append(u'')
+        tests_to_run_mappings.append('')
 
       if not test_function_name:
         if with_args:
           tests_to_run_mappings.append(
-              u'\t\t/* TODO: add tests for {0:s} */'.format(function_name))
+              '\t\t/* TODO: add tests for {0:s} */'.format(function_name))
         else:
           tests_to_run_mappings.append(
-              u'\t/* TODO: add tests for {0:s} */'.format(function_name))
+              '\t/* TODO: add tests for {0:s} */'.format(function_name))
 
       else:
         if with_args:
           test_to_run_mappings = [
-              u'\t\t{0:s}_TEST_RUN_WITH_ARGS('.format(library_name_suffix),
-              u'\t\t "{0:s}",'.format(function_name),
-              u'\t\t {0:s},'.format(test_function_name),
-              u'\t\t {0:s} );'.format(type_name)]
+              '\t\t{0:s}_TEST_RUN_WITH_ARGS('.format(library_name_suffix),
+              '\t\t "{0:s}",'.format(function_name),
+              '\t\t {0:s},'.format(test_function_name),
+              '\t\t {0:s} );'.format(type_name)]
 
         else:
           test_to_run_mappings = [
-              u'\t{0:s}_TEST_RUN('.format(library_name_suffix),
-              u'\t "{0:s}",'.format(function_name),
-              u'\t {0:s} );'.format(test_function_name)]
+              '\t{0:s}_TEST_RUN('.format(library_name_suffix),
+              '\t "{0:s}",'.format(function_name),
+              '\t {0:s} );'.format(test_function_name)]
 
         tests_to_run_mappings.extend(test_to_run_mappings)
 
     if tests_to_run_mappings:
       if not last_have_extern:
         template_filename = os.path.join(
-            template_directory, u'define_internal_start.c')
+            template_directory, 'define_internal_start.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
-      template_mappings[u'tests_to_run'] = u'\n'.join(tests_to_run_mappings)
+      template_mappings['tests_to_run'] = '\n'.join(tests_to_run_mappings)
       tests_to_run_mappings = []
 
       template_filename = os.path.join(
-          template_directory, u'main_tests_to_run.c')
+          template_directory, 'main_tests_to_run.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
       if not last_have_extern:
         template_filename = os.path.join(
-            template_directory, u'define_internal_end.c')
+            template_directory, 'define_internal_end.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
@@ -5413,12 +5415,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         self._projects_directory, project_configuration.library_name,
         project_configuration.library_name)
 
-    type_name_prefix = u'{0:s}_'.format(project_configuration.library_name)
+    type_name_prefix = '{0:s}_'.format(project_configuration.library_name)
     type_name_prefix_length = len(type_name_prefix)
 
     types = []
     for source_file in makefile_am_file.sources:
-      if not source_file.endswith(u'.h'):
+      if not source_file.endswith('.h'):
         continue
 
       header_file_path = os.path.join(library_path, source_file)
@@ -5465,17 +5467,17 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     library_tests_with_input = sorted(
         set(api_functions_with_input).union(set(api_types_with_input)))
 
-    template_mappings[u'library_tests'] = u' '.join(library_tests)
-    template_mappings[u'library_tests_with_input'] = u' '.join(
+    template_mappings['library_tests'] = ' '.join(library_tests)
+    template_mappings['library_tests_with_input'] = ' '.join(
         library_tests_with_input)
 
-    template_mappings[u'test_python_functions'] = u' '.join(
+    template_mappings['test_python_functions'] = ' '.join(
         sorted(python_functions))
-    template_mappings[u'test_python_functions_with_input'] = u' '.join(
+    template_mappings['test_python_functions_with_input'] = ' '.join(
         sorted(python_functions_with_input))
 
-    template_mappings[u'alignment_padding'] = (
-        u' ' * len(project_configuration.library_name_suffix))
+    template_mappings['alignment_padding'] = (
+        ' ' * len(project_configuration.library_name_suffix))
 
     return template_mappings
 
@@ -5542,7 +5544,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if not include_header_file:
       logging.warning(
-          u'Missing: {0:s} skipping generation of include source files.'.format(
+          'Missing: {0:s} skipping generation of include source files.'.format(
               self._library_include_header_path))
       return
 
@@ -5550,7 +5552,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if not makefile_am_file:
       logging.warning(
-          u'Missing: {0:s} skipping generation of include source files.'.format(
+          'Missing: {0:s} skipping generation of include source files.'.format(
               self._library_makefile_am_path))
       return
 
@@ -5575,38 +5577,38 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         continue
 
       # Ignore internal type that are proxies by API types.
-      if type_name.startswith(u'internal_'):
+      if type_name.startswith('internal_'):
         continue
 
       internal_types.append(type_name)
 
-    logging.info(u'Found public functions: {0:s}'.format(
-        u', '.join(public_functions)))
-    logging.info(u'Found public types: {0:s}'.format(u', '.join(public_types)))
-    logging.info(u'Found public pseudo types: {0:s}'.format(
-        u', '.join(api_pseudo_types)))
-    logging.info(u'Found internal types: {0:s}'.format(
-        u', '.join(internal_types)))
+    logging.info('Found public functions: {0:s}'.format(
+        ', '.join(public_functions)))
+    logging.info('Found public types: {0:s}'.format(', '.join(public_types)))
+    logging.info('Found public pseudo types: {0:s}'.format(
+        ', '.join(api_pseudo_types)))
+    logging.info('Found internal types: {0:s}'.format(
+        ', '.join(internal_types)))
 
     # TODO: handle non-template files differently.
     # TODO: yal_test_open_close.c handle file, handle, volume
 
-    library_header = u'yal_test_{0:s}.h'.format(
+    library_header = 'yal_test_{0:s}.h'.format(
         project_configuration.library_name)
 
     test_python_functions = []
     for function_name in self._PYTHON_FUNCTION_NAMES:
-      output_filename = u'{0:s}_test_{1:s}.py'.format(
+      output_filename = '{0:s}_test_{1:s}.py'.format(
           project_configuration.python_module_name, function_name)
-      output_filename = os.path.join(u'tests', output_filename)
+      output_filename = os.path.join('tests', output_filename)
       if os.path.exists(output_filename):
         test_python_functions.append(function_name)
 
     test_python_functions_with_input = []
     for function_name in self._PYTHON_FUNCTION_WITH_INPUT_NAMES:
-      output_filename = u'{0:s}_test_{1:s}.py'.format(
+      output_filename = '{0:s}_test_{1:s}.py'.format(
           project_configuration.python_module_name, function_name)
-      output_filename = os.path.join(u'tests', output_filename)
+      output_filename = os.path.join('tests', output_filename)
       if os.path.exists(output_filename):
         test_python_functions_with_input.append(function_name)
 
@@ -5621,8 +5623,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         continue
 
       # For libcerror skip generating yal_test_error.c.
-      if (directory_entry == u'yal_test_error.c' and
-          project_configuration.library_name == u'libcerror'):
+      if (directory_entry == 'yal_test_error.c' and
+          project_configuration.library_name == 'libcerror'):
         continue
 
       template_filename = os.path.join(
@@ -5631,60 +5633,60 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         continue
 
       is_script = (
-          directory_entry.endswith(u'.ps1') or directory_entry.endswith(u'.sh'))
+          directory_entry.endswith('.ps1') or directory_entry.endswith('.sh'))
 
-      if directory_entry == u'yal_test_libyal.h':
-        output_filename = u'{0:s}_test_{1:s}.h'.format(
+      if directory_entry == 'yal_test_libyal.h':
+        output_filename = '{0:s}_test_{1:s}.h'.format(
             project_configuration.library_name_suffix,
             project_configuration.library_name)
 
-      elif directory_entry.startswith(u'yal_test_'):
-        output_filename = u'{0:s}_{1:s}'.format(
+      elif directory_entry.startswith('yal_test_'):
+        output_filename = '{0:s}_{1:s}'.format(
             project_configuration.library_name_suffix, directory_entry[4:])
 
-      elif directory_entry.startswith(u'pyyal_test_'):
-        output_filename = u'{0:s}_{1:s}'.format(
+      elif directory_entry.startswith('pyyal_test_'):
+        output_filename = '{0:s}_{1:s}'.format(
             project_configuration.python_module_name, directory_entry[6:])
 
-      elif directory_entry.startswith(u'test_yal') and is_script:
-        output_filename = u'test_{0:s}{1:s}'.format(
+      elif directory_entry.startswith('test_yal') and is_script:
+        output_filename = 'test_{0:s}{1:s}'.format(
             project_configuration.library_name_suffix, directory_entry[8:])
 
-      elif directory_entry.startswith(u'test_pyyal') and is_script:
-        output_filename = u'test_{0:s}{1:s}'.format(
+      elif directory_entry.startswith('test_pyyal') and is_script:
+        output_filename = 'test_{0:s}{1:s}'.format(
             project_configuration.python_module_name, directory_entry[10:])
 
       else:
         output_filename = directory_entry
 
-      if directory_entry in (u'test_library.ps1', u'test_library.sh'):
+      if directory_entry in ('test_library.ps1', 'test_library.sh'):
         force_create = bool(public_functions) or bool(public_types)
 
-      elif directory_entry in (u'test_yalinfo.ps1', u'test_yalinfo.sh'):
-        tool_name = u'{0:s}info'.format(
+      elif directory_entry in ('test_yalinfo.ps1', 'test_yalinfo.sh'):
+        tool_name = '{0:s}info'.format(
             project_configuration.library_name_suffix)
         force_create = tool_name in project_configuration.tools_names
 
       elif directory_entry == 'yal_test_error.c':
-        force_create = u'error' in api_functions
+        force_create = 'error' in api_functions
 
       elif directory_entry == 'yal_test_notify.c':
-        force_create = u'notify' in api_functions
+        force_create = 'notify' in api_functions
 
       else:
         force_create = False
 
-      output_filename = os.path.join(u'tests', output_filename)
+      output_filename = os.path.join('tests', output_filename)
       if not force_create and not os.path.exists(output_filename):
         continue
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-      if output_filename.endswith(u'.c'):
+      if output_filename.endswith('.c'):
         self._SortIncludeHeaders(project_configuration, output_filename)
 
-      elif output_filename.endswith(u'.sh'):
+      elif output_filename.endswith('.sh'):
         # Set x-bit for .sh scripts.
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
@@ -5701,8 +5703,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           output_writer)
 
     for type_name in api_types:
-      if (type_name == u'error' and
-          project_configuration.library_name == u'libcerror'):
+      if (type_name == 'error' and
+          project_configuration.library_name == 'libcerror'):
         continue
 
       result = self._GenerateTypeTests(
@@ -5727,8 +5729,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             with_input=True)
 
     for type_name in api_pseudo_types:
-      if (type_name == u'error' and
-          project_configuration.library_name == u'libcerror'):
+      if (type_name == 'error' and
+          project_configuration.library_name == 'libcerror'):
         continue
 
       result = self._GenerateTypeTests(
@@ -5763,19 +5765,19 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    tools_name = u'{0:s}tools'.format(project_configuration.library_name_suffix)
+    tools_name = '{0:s}tools'.format(project_configuration.library_name_suffix)
     tools_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
         tools_name)
 
-    library_header = u'yaltools_{0:s}.h'.format(
+    library_header = 'yaltools_{0:s}.h'.format(
         project_configuration.library_name)
 
     if not os.path.exists(tools_path):
       return
 
     template_mappings = project_configuration.GetTemplateMappings(
-        authors_separator=u',\n *                          ')
+        authors_separator=',\n *                          ')
 
     # TODO: add support for ouput.[ch]
 
@@ -5789,13 +5791,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      if directory_entry == u'yaltools_libyal.h':
-        output_filename = u'{0:s}tools_{1:s}.h'.format(
+      if directory_entry == 'yaltools_libyal.h':
+        output_filename = '{0:s}tools_{1:s}.h'.format(
             project_configuration.library_name_suffix,
             project_configuration.library_name)
 
       else:
-        output_filename = u'{0:s}_{1:s}'.format(tools_name, directory_entry[9:])
+        output_filename = '{0:s}_{1:s}'.format(tools_name, directory_entry[9:])
 
       output_filename = os.path.join(tools_name, output_filename)
 
@@ -5848,11 +5850,11 @@ class StdoutWriter(object):
       file_data: binary string containing the data to write.
       access_mode: optional string containing the output file access mode.
     """
-    print(u'-' * 80)
-    print(u'{0: ^80}'.format(file_path))
-    print(u'-' * 80)
-    print(u'')
-    print(file_data, end=u'')
+    print('-' * 80)
+    print('{0: ^80}'.format(file_path))
+    print('-' * 80)
+    print('')
+    print(file_data, end='')
 
 
 def Main():
@@ -5862,52 +5864,52 @@ def Main():
     bool: True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
-      u'Generates source files of the libyal libraries.'))
+      'Generates source files of the libyal libraries.'))
 
   argument_parser.add_argument(
-      u'configuration_file', action=u'store', metavar=u'CONFIGURATION_FILE',
-      default='source.conf', help=u'The source generation configuration file.')
+      'configuration_file', action='store', metavar='CONFIGURATION_FILE',
+      default='source.conf', help='The source generation configuration file.')
 
   argument_parser.add_argument(
-      u'-e', u'--experimental', dest=u'experimental', action=u'store_true',
-      default=False, help=u'enable experimental functionality.')
+      '-e', '--experimental', dest='experimental', action='store_true',
+      default=False, help='enable experimental functionality.')
 
   argument_parser.add_argument(
-      u'-g', u'--generators', dest=u'generators', action=u'store', default=u'all',
-      help=u'names of the generators to run.')
+      '-g', '--generators', dest='generators', action='store', default='all',
+      help='names of the generators to run.')
 
   argument_parser.add_argument(
-      u'-o', u'--output', dest=u'output_directory', action=u'store',
-      metavar=u'OUTPUT_DIRECTORY', default=None,
-      help=u'path of the output files to write to.')
+      '-o', '--output', dest='output_directory', action='store',
+      metavar='OUTPUT_DIRECTORY', default=None,
+      help='path of the output files to write to.')
 
   argument_parser.add_argument(
-      u'-p', u'--projects', dest=u'projects_directory', action=u'store',
-      metavar=u'PROJECTS_DIRECTORY', default=None,
-      help=u'path of the projects.')
+      '-p', '--projects', dest='projects_directory', action='store',
+      metavar='PROJECTS_DIRECTORY', default=None,
+      help='path of the projects.')
 
   options = argument_parser.parse_args()
 
   if not options.configuration_file:
-    print(u'Config file missing.')
-    print(u'')
+    print('Config file missing.')
+    print('')
     argument_parser.print_help()
-    print(u'')
+    print('')
     return False
 
   if not os.path.exists(options.configuration_file):
-    print(u'No such configuration file: {0:s}.'.format(
+    print('No such configuration file: {0:s}.'.format(
         options.configuration_file))
-    print(u'')
+    print('')
     return False
 
   if options.output_directory and not os.path.exists(options.output_directory):
-    print(u'No such output directory: {0:s}.'.format(options.output_directory))
-    print(u'')
+    print('No such output directory: {0:s}.'.format(options.output_directory))
+    print('')
     return False
 
   logging.basicConfig(
-      level=logging.INFO, format=u'[%(levelname)s] %(message)s')
+      level=logging.INFO, format='[%(levelname)s] %(message)s')
 
   project_configuration = ProjectConfiguration()
   project_configuration.ReadFromFile(options.configuration_file)
@@ -5926,24 +5928,24 @@ def Main():
   # include headers
   # yal.net files
 
-  if options.generators == u'all':
+  if options.generators == 'all':
     generators = []
   else:
-    generators = options.generators.split(u',')
+    generators = options.generators.split(',')
 
   SOURCE_GENERATORS = [
-      (u'common', CommonSourceFileGenerator),
-      (u'config', ConfigurationFileGenerator),
-      (u'include', IncludeSourceFileGenerator),
-      (u'libyal', LibrarySourceFileGenerator),
-      (u'pyyal', PythonModuleSourceFileGenerator),
-      (u'scripts', ScriptFileGenerator),
-      (u'tests', TestsSourceFileGenerator),
-      (u'yaltools', ToolsSourceFileGenerator),
+      ('common', CommonSourceFileGenerator),
+      ('config', ConfigurationFileGenerator),
+      ('include', IncludeSourceFileGenerator),
+      ('libyal', LibrarySourceFileGenerator),
+      ('pyyal', PythonModuleSourceFileGenerator),
+      ('scripts', ScriptFileGenerator),
+      ('tests', TestsSourceFileGenerator),
+      ('yaltools', ToolsSourceFileGenerator),
   ]
 
   sources_directory = os.path.join(
-      libyal_directory, u'data', u'source')
+      libyal_directory, 'data', 'source')
   for source_category, source_generator_class in SOURCE_GENERATORS:
     if generators and source_category not in generators:
       continue
@@ -5967,11 +5969,11 @@ def Main():
   # TODO: generate manuals/Makefile.am
 
   source_files = [
-      (u'libyal.3', LibraryManPageGenerator),
+      ('libyal.3', LibraryManPageGenerator),
   ]
 
   manuals_directory = os.path.join(
-      libyal_directory, u'data', u'source', u'manuals')
+      libyal_directory, 'data', 'source', 'manuals')
   for source_category, source_generator_class in source_files:
     if generators and source_category not in generators:
       continue
