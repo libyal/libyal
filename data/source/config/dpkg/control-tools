@@ -1,0 +1,14 @@
+Package: ${library_name}-tools
+Section: utils
+Architecture: any
+Depends: ${library_name} (= $${binary:Version}), $${shlibs:Depends}, $${misc:Depends}
+Description: ${tools_description}
+ ${tools_description}.
+
+Package: ${library_name}-tools-dbg
+Section: debug
+Architecture: any
+Depends: ${library_name}-tools (= $${binary:Version}), $${misc:Depends}
+Description: Debugging symbols for ${library_name}-tools
+ Debugging symbols for ${library_name}-tools.
+

@@ -1,0 +1,30 @@
+Package: ${library_name}-python
+Section: python
+Architecture: any
+Depends: ${library_name} (= $${binary:Version}), $${shlibs:Depends}, $${misc:Depends}
+Suggests: ${library_name}-python-dbg
+Description: Python 2 bindings for ${library_name}
+ Python 2 bindings for ${library_name}.
+
+Package: ${library_name}-python-dbg
+Section: debug
+Architecture: any
+Depends: ${library_name}-python (= $${binary:Version}), $${misc:Depends}
+Description: Debugging symbols for ${library_name}-python
+ Debugging symbols for ${library_name}-python.
+
+Package: ${library_name}-python3
+Section: python
+Architecture: any
+Depends: ${library_name} (= $${binary:Version}), $${shlibs:Depends}, $${misc:Depends}
+Suggests: ${library_name}-python3-dbg
+Description: Python 3 bindings for ${library_name}
+ Python 3 bindings for ${library_name}.
+
+Package: ${library_name}-python3-dbg
+Section: debug
+Architecture: any
+Depends: ${library_name}-python3 (= $${binary:Version}), $${misc:Depends}
+Description: Debugging symbols for ${library_name}-python3
+ Debugging symbols for ${library_name}-python3.
+

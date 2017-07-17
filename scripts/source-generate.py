@@ -103,7 +103,11 @@ class ProjectConfiguration(object):
     self.tests_authors = None
     self.tests_options = None
 
+    self.dpkg_build_dependencies = None
+
     self.msvscpp_build_dependencies = None
+
+    self.rpm_build_dependencies = None
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
@@ -182,13 +186,26 @@ class ProjectConfiguration(object):
     self.tests_options = self._GetOptionalConfigValue(
         config_parser, 'tests', 'options', default_value=[])
 
+    self.dpkg_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'dpkg', 'build_dependencies', default_value=[])
+
+    self.dpkg_build_dependencies = [
+        name.split(' ')[0] for name in self.dpkg_build_dependencies]
+
     self.msvscpp_build_dependencies = self._GetOptionalConfigValue(
         config_parser, 'msvscpp', 'build_dependencies', default_value=[])
 
     self.msvscpp_build_dependencies = [
         name.split(' ')[0] for name in self.msvscpp_build_dependencies]
 
+    self.rpm_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'rpm', 'build_dependencies', default_value=[])
+
+    self.rpm_build_dependencies = [
+        name.split(' ')[0] for name in self.rpm_build_dependencies]
+
     if config_parser.has_section('mount_tool'):
+      self.dpkg_build_dependencies.append('libfuse-dev')
       self.msvscpp_build_dependencies.append('dokan')
 
     self.project_year_of_creation = int(self.project_year_of_creation, 10)
@@ -2108,18 +2125,34 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-    # TODO: generate control incrementally
-    if has_python_module:
-      template_filename = 'control-with-python'
-    elif has_tools:
-      template_filename = 'control-with-tools'
-    else:
-      template_filename = 'control'
+    dpkg_build_dependencies = ['debhelper (>= 9)', 'dh-autoreconf', 'pkg-config']
 
-    template_filename = os.path.join(template_directory, template_filename)
+    if project_configuration.dpkg_build_dependencies:
+      dpkg_build_dependencies.extend(project_configuration.dpkg_build_dependencies)
+
+    if has_python_module:
+      dpkg_build_dependencies.extend(['python-dev', 'python3-dev'])
+
+    template_mappings['dpkg_build_dependencies'] = ', '.join(dpkg_build_dependencies)
+
+    template_filename = os.path.join(template_directory, 'control')
     output_filename = os.path.join(output_directory, 'control')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
+
+    if has_tools:
+      template_filename = os.path.join(template_directory, 'control-tools')
+      output_filename = os.path.join(output_directory, 'control')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if has_python_module:
+      template_filename = os.path.join(template_directory, 'control-python')
+      output_filename = os.path.join(output_directory, 'control')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     if has_python_module:
       template_filename = 'rules-with-python'
