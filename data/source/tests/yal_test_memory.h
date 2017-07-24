@@ -28,7 +28,7 @@
 extern "C" {
 #endif
 
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __arm__ ) && !defined( __mips__ ) && !defined( __hppa__ ) && !defined( __sparc__ )
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) && !defined( __arm__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) && !defined( __hppa__ ) && !defined( __mips__ ) && !defined( __sparc__ )
 #define HAVE_${library_name_suffix_upper_case}_TEST_MEMORY		1
 #endif
 

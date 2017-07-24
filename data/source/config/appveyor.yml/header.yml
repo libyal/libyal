@@ -16,8 +16,9 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     VisualStudioVersion: 14.0
   - TARGET: cygwin
-  - TARGET: mingw32
-  - TARGET: mingw64
+  - TARGET: cygwin64
+  - TARGET: mingw
+  - TARGET: mingw-w64
 
 # TODO: add x64, fix issue: LNK1158: cannot run 'cvtres.exe'
 platform:

@@ -20,17 +20,22 @@ build_script:
     xcopy /q /s C:\projects\${library_name} C:\cygwin\home\appveyor\ &&
     C:\cygwin\bin\bash -e -l -c "cd ${library_name}" &&
     C:\cygwin\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\cygwin\bin\bash -e -l -c "./configure && make -j4" )
-- cmd: if [%TARGET%]==[mingw32] (
+    C:\cygwin\bin\bash -e -l -c "./runtests.sh" )
+- cmd: if [%TARGET%]==[cygwin64] (
+    xcopy /q /s C:\projects\${library_name} C:\cygwin64\home\appveyor\ &&
+    C:\cygwin64\bin\bash -e -l -c "cd ${library_name}" &&
+    C:\cygwin64\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
+    C:\cygwin64\bin\bash -e -l -c "./runtests.sh" )
+- cmd: if [%TARGET%]==[mingw] (
+    xcopy /q /s C:\projects\${library_name} C:\MinGW\msys\1.0\home\appveyor\ &&
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd ${library_name}" &&
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "./runtests.sh" )
+- cmd: if [%TARGET%]==[mingw-w64] (
     xcopy /q /s C:\projects\${library_name} C:\msys64\home\appveyor\ &&
     C:\msys64\usr\bin\bash -e -l -c "cd ${library_name}" &&
     C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\msys64\usr\bin\bash -e -l -c "./configure --host=i686-w64-mingw32 && make -j4" )
-- cmd: if [%TARGET%]==[mingw64] (
-    xcopy /q /s C:\projects\${library_name} C:\msys64\home\appveyor\ &&
-    C:\msys64\usr\bin\bash -e -l -c "cd ${library_name}" &&
-    C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\msys64\usr\bin\bash -e -l -c "./configure --host=x86_64-w64-mingw32 && make -j4" )
+    C:\msys64\usr\bin\bash -e -l -c "./runtests.sh" )
 
 test_script:
 - cmd: rem Run tests

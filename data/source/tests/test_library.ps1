@@ -1,14 +1,10 @@
 # Tests C library functions and types.
 #
-# Version: 20170115
+# Version: 20170722
 
 $$ExitSuccess = 0
 $$ExitFailure = 1
 $$ExitIgnore = 77
-
-$$TestPrefix = Split-Path -path $${Pwd}.Path -parent
-$$TestPrefix = Split-Path -path $${TestPrefix} -leaf
-$$TestPrefix = $${TestPrefix}.Substring(3)
 
 $$LibraryTests = "${library_tests}"
 $$LibraryTestsWithInput = "${library_tests_with_input}"
@@ -20,7 +16,7 @@ Function RunTest
 	param( [string]$$TestType )
 
 	$$TestDescription = "Testing: $${TestName}"
-	$$TestExecutable = "$${TestToolDirectory}\$${TestPrefix}_test_$${TestName}.exe"
+	$$TestExecutable = "$${TestToolDirectory}\${library_name_suffix}_test_$${TestName}.exe"
 
 	$$Output = Invoke-Expression $${TestExecutable}
 	$$Result = $${LastExitCode}

@@ -1,22 +1,20 @@
 #!/bin/bash
 # Info tool testing script
 #
-# Version: 20160328
+# Version: 20170722
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-TEST_PREFIX=`dirname $${PWD}`;
-TEST_PREFIX=`basename $${TEST_PREFIX} | sed 's/^lib\([^-]*\).*$$/\1/'`;
 TEST_SUFFIX="info";
 
-TEST_PROFILE="$${TEST_PREFIX}$${TEST_SUFFIX}";
-TEST_DESCRIPTION="$${TEST_PREFIX}$${TEST_SUFFIX}";
+TEST_PROFILE="${library_name_suffix}$${TEST_SUFFIX}";
+TEST_DESCRIPTION="${library_name_suffix}$${TEST_SUFFIX}";
 OPTION_SETS="";
 
-TEST_TOOL_DIRECTORY="../$${TEST_PREFIX}tools";
-TEST_TOOL="$${TEST_PREFIX}$${TEST_SUFFIX}";
+TEST_TOOL_DIRECTORY="../${library_name_suffix}tools";
+TEST_TOOL="${library_name_suffix}$${TEST_SUFFIX}";
 INPUT_DIRECTORY="input";
 INPUT_GLOB="*";
 

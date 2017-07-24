@@ -1,18 +1,13 @@
 # Info tool testing script
 #
-# Version: 20161101
+# Version: 20170722
 
 $$ExitSuccess = 0
 $$ExitFailure = 1
 $$ExitIgnore = 77
 
-$$TestPrefix = Split-Path -path $${Pwd}.Path -parent
-$$TestPrefix = Split-Path -path $${TestPrefix} -leaf
-$$TestPrefix = $${TestPrefix}.Substring(3)
-$$TestSuffix = "info"
-
 $$TestToolDirectory = "..\msvscpp\Release"
-$$TestTool = "$${TestPrefix}$${TestSuffix}"
+$$TestTool = "${library_name_suffix}info"
 $$InputDirectory = "input"
 $$InputGlob = "*"
 

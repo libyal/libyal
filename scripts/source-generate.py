@@ -109,6 +109,8 @@ class ProjectConfiguration(object):
 
     self.rpm_build_dependencies = None
 
+    self.coverty_scan_token = None
+
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
 
@@ -203,6 +205,9 @@ class ProjectConfiguration(object):
 
     self.rpm_build_dependencies = [
         name.split(' ')[0] for name in self.rpm_build_dependencies]
+
+    self.coverty_scan_token = self._GetOptionalConfigValue(
+        config_parser, 'coverty', 'scan_token', default_value='')
 
     if config_parser.has_section('mount_tool'):
       self.dpkg_build_dependencies.append('libfuse-dev')
@@ -2209,6 +2214,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       pc_libs_private.append(pc_lib_private)
 
     template_mappings['pc_libs_private'] = ' '.join(pc_libs_private)
+
+    template_mappings['coverty_scan_token'] = (
+        project_configuration.coverty_scan_token)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
