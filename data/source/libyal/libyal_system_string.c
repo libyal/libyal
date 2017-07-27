@@ -513,7 +513,7 @@ int ${library_name}_system_string_copy_from_narrow_string(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to set narrow_string.",
+		 "%s: unable to set narrow string.",
 		 function );
 
 		return( -1 );
@@ -952,7 +952,7 @@ int ${library_name}_system_string_copy_from_wide_string(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to set wide_string.",
+		 "%s: unable to set wide string.",
 		 function );
 
 		return( -1 );
