@@ -1,4 +1,4 @@
-# Info tool testing script
+# Verification tool testing script
 #
 # Version: 20170802
 
@@ -33,7 +33,7 @@ If (-Not (Test-Path $${TestToolDirectory}))
 	Exit $${ExitFailure}
 }
 
-$$TestExecutable = "$${TestToolDirectory}\${library_name_suffix}info.exe"
+$$TestExecutable = "$${TestToolDirectory}\${library_name_suffix}verify.exe"
 
 If (-Not (Test-Path -Path "input"))
 {

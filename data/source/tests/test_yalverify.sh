@@ -1,5 +1,5 @@
 #!/bin/bash
-# Info tool testing script
+# Verification tool testing script
 #
 # Version: 20170802
 
@@ -16,11 +16,11 @@ then
 	exit $${EXIT_IGNORE};
 fi
 
-TEST_EXECUTABLE="../${library_name_suffix}tools/${library_name_suffix}info";
+TEST_EXECUTABLE="../${library_name_suffix}tools/${library_name_suffix}verify";
 
 if ! test -x "$${TEST_EXECUTABLE}";
 then
-	TEST_EXECUTABLE="../${library_name_suffix}tools/${library_name_suffix}info.exe";
+	TEST_EXECUTABLE="../${library_name_suffix}tools/${library_name_suffix}verify.exe";
 fi
 
 if ! test -x "$${TEST_EXECUTABLE}";
@@ -46,7 +46,7 @@ fi
 
 source $${TEST_RUNNER};
 
-run_test_on_input_directory "${library_name_suffix}info" "${library_name_suffix}info" "with_stdout_reference" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "input" "$${INPUT_GLOB}";
+run_test_on_input_directory "${library_name_suffix}verify" "${library_name_suffix}verify" "with_stdout_reference" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "input" "$${INPUT_GLOB}";
 RESULT=$$?;
 
 exit $${RESULT};
