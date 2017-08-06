@@ -1,5 +1,5 @@
 #!/bin/bash
-# Verification tool testing script
+# Verify tool testing script
 #
 # Version: 20170802
 

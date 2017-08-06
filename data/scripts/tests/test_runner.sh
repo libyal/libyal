@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20170805
+# Version: 20170806
 #
 # When CHECK_WITH_GDB is set to a non-empty value the test executable
 # is run with gdb, otherwise it is run without.
@@ -687,6 +687,7 @@ run_test_with_input_and_arguments()
 			fi
 
 		elif test "${PLATFORM}" = "CYGWIN_NT";
+		then
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
 				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
@@ -728,6 +729,7 @@ run_test_with_input_and_arguments()
 			fi
 
 		elif test "${PLATFORM}" = "CYGWIN_NT";
+		then
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
 				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
@@ -813,6 +815,7 @@ run_test_with_input_and_arguments()
 			fi
 
 		elif test "${PLATFORM}" = "CYGWIN_NT";
+		then
 			if test -n "${CHECK_WITH_STDERR}";
 			then
 				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
