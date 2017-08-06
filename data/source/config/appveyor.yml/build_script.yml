@@ -19,35 +19,18 @@ build_script:
 - cmd: if [%TARGET%]==[cygwin] (
     xcopy /q /s C:\projects\${library_name} C:\cygwin\home\appveyor\ &&
     C:\cygwin\bin\bash -e -l -c "cd ${library_name}" &&
-    C:\cygwin\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\cygwin\bin\bash -e -l -c "./runtests.sh" )
+    C:\cygwin\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" )
 - cmd: if [%TARGET%]==[cygwin64] (
     xcopy /q /s C:\projects\${library_name} C:\cygwin64\home\appveyor\ &&
     C:\cygwin64\bin\bash -e -l -c "cd ${library_name}" &&
-    C:\cygwin64\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\cygwin64\bin\bash -e -l -c "./runtests.sh" )
+    C:\cygwin64\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" )
 - cmd: if [%TARGET%]==[mingw] (
     xcopy /q /s C:\projects\${library_name} C:\MinGW\msys\1.0\home\appveyor\ &&
     C:\MinGW\msys\1.0\bin\bash -e -l -c "cd ${library_name}" &&
     C:\MinGW\msys\1.0\bin\bash -e -l -c "sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4" &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "./runtests.sh" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" )
 - cmd: if [%TARGET%]==[mingw-w64] (
     xcopy /q /s C:\projects\${library_name} C:\msys64\home\appveyor\ &&
     C:\msys64\usr\bin\bash -e -l -c "cd ${library_name}" &&
-    C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\msys64\usr\bin\bash -e -l -c "./runtests.sh" )
-
-test_script:
-- cmd: rem Run tests
-- ps: if ($$env:TARGET -eq "vs2008") {
-    .\runtests.ps1 }
-- ps: if ($$env:TARGET -eq "vs2010") {
-    .\runtests.ps1 }
-- ps: if ($$env:TARGET -eq "vs2012") {
-    .\runtests.ps1 }
-- ps: if ($$env:TARGET -eq "vs2013") {
-    .\runtests.ps1 }
-- ps: if ($$env:TARGET -eq "vs2015") {
-    .\runtests.ps1 }
+    C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" )
 

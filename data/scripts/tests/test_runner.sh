@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20161115
+# Version: 20170805
 #
 # When CHECK_WITH_GDB is set to a non-empty value the test executable
 # is run with gdb, otherwise it is run without.
@@ -393,7 +393,7 @@ run_test_with_arguments()
 
 		return ${EXIT_FAILURE};
 	fi
-	local PLATFORM=`uname -s`;
+	local PLATFORM=`uname -s | sed 's/-.*$//'`;
 
 	# Note that the behavior of `file -bi` is not helpful on Mac OS X.
 	local EXECUTABLE_TYPE=`file -b ${TEST_EXECUTABLE}`;
@@ -433,6 +433,18 @@ run_test_with_arguments()
 				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
 				RESULT=$?;
 			fi
+
+		elif test "${PLATFORM}" = "CYGWIN_NT";
+		then
+			if test ${IS_PYTHON_SCRIPT} -eq 0;
+			then
+				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			else
+				PATH="${LIBRARY_PATH}:${PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			fi
+
 		else
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
@@ -463,6 +475,18 @@ run_test_with_arguments()
 				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
 				RESULT=$?;
 			fi
+
+		elif test "${PLATFORM}" = "CYGWIN_NT";
+		then
+			if test ${IS_PYTHON_SCRIPT} -eq 0;
+			then
+				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			else
+				PATH="${LIBRARY_PATH}:${PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			fi
+
 		else
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
@@ -537,6 +561,18 @@ run_test_with_arguments()
 				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} 2> /dev/null;
 				RESULT=$?;
 			fi
+
+		elif test "${PLATFORM}" = "CYGWIN_NT";
+		then
+			if test -n "${CHECK_WITH_STDERR}";
+			then
+				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			else
+				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} 2> /dev/null;
+				RESULT=$?;
+			fi
+
 		else
 			if test -n "${CHECK_WITH_STDERR}";
 			then
@@ -609,7 +645,7 @@ run_test_with_input_and_arguments()
 
 		return ${EXIT_FAILURE};
 	fi
-	local PLATFORM=`uname -s`;
+	local PLATFORM=`uname -s | sed 's/-.*$//'`;
 
 	# Note that the behavior of `file -bi` is not helpful on Mac OS X.
 	local EXECUTABLE_TYPE=`file -b ${TEST_EXECUTABLE}`;
@@ -649,6 +685,17 @@ run_test_with_input_and_arguments()
 				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
 				RESULT=$?;
 			fi
+
+		elif test "${PLATFORM}" = "CYGWIN_NT";
+			if test ${IS_PYTHON_SCRIPT} -eq 0;
+			then
+				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			else
+				PATH="${LIBRARY_PATH}:${PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			fi
+
 		else
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
@@ -679,6 +726,17 @@ run_test_with_input_and_arguments()
 				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
 				RESULT=$?;
 			fi
+
+		elif test "${PLATFORM}" = "CYGWIN_NT";
+			if test ${IS_PYTHON_SCRIPT} -eq 0;
+			then
+				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			else
+				PATH="${LIBRARY_PATH}:${PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			fi
+
 		else
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
@@ -753,6 +811,17 @@ run_test_with_input_and_arguments()
 				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}" 2> /dev/null;
 				RESULT=$?;
 			fi
+
+		elif test "${PLATFORM}" = "CYGWIN_NT";
+			if test -n "${CHECK_WITH_STDERR}";
+			then
+				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			else
+				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}" 2> /dev/null;
+				RESULT=$?;
+			fi
+
 		else
 			if test -n "${CHECK_WITH_STDERR}";
 			then

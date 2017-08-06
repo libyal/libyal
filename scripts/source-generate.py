@@ -2063,24 +2063,36 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     if (os.path.exists('syncwinflexbison.ps1') or
         os.path.exists('syncwinflexbison.sh')):
-      template_filename = os.path.join(template_directory, 'winflexbison.yml')
+      template_filename = os.path.join(
+          template_directory, 'install-winflexbison.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
     if 'zlib' in project_configuration.msvscpp_build_dependencies:
-      template_filename = os.path.join(template_directory, 'zlib.yml')
+      template_filename = os.path.join(template_directory, 'install-zlib.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if self._HasPythonModule(project_configuration):
+      template_filename = os.path.join(template_directory, 'install-python.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
     if 'dokan' in project_configuration.msvscpp_build_dependencies:
-      template_filename = os.path.join(template_directory, 'dokan.yml')
+      template_filename = os.path.join(template_directory, 'install-dokan.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, 'footer.yml')
+    template_filename = os.path.join(template_directory, 'build_script.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'test_script.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')

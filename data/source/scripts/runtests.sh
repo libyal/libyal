@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script that runs the tests
 #
-# Version: 20161018
+# Version: 20170805
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -180,7 +180,9 @@ fi
 
 HAVE_ENABLE_PYTHON=$$?;
 
-if test $${HAVE_ENABLE_PYTHON} -eq 0;
+PYTHON_CONFIG=`whereis python-config | sed 's/^.*:[ ]*//' 2> /dev/null`;
+
+if test $${HAVE_ENABLE_PYTHON} -eq 0 && test -n "$${PYTHON_CONFIG}";
 then
 	# Test with Python 2.
 	PYTHON2=`which python2 2> /dev/null`;

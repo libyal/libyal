@@ -1,0 +1,21 @@
+test_script:
+- cmd: rem Run tests
+- ps: if ($$env:TARGET -eq "vs2008") {
+    .\runtests.ps1 }
+- ps: if ($$env:TARGET -eq "vs2010") {
+    .\runtests.ps1 }
+- ps: if ($$env:TARGET -eq "vs2012") {
+    .\runtests.ps1 }
+- ps: if ($$env:TARGET -eq "vs2013") {
+    .\runtests.ps1 }
+- ps: if ($$env:TARGET -eq "vs2015") {
+    .\runtests.ps1 }
+- cmd: if [%TARGET%]==[cygwin] (
+    C:\cygwin\bin\bash -e -l -c "./runtests.sh" )
+- cmd: if [%TARGET%]==[cygwin64] (
+    C:\cygwin64\bin\bash -e -l -c "./runtests.sh" )
+- cmd: if [%TARGET%]==[mingw] (
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "./runtests.sh" )
+- cmd: if [%TARGET%]==[mingw-w64] (
+    C:\msys64\usr\bin\bash -e -l -c "./runtests.sh" )
+
