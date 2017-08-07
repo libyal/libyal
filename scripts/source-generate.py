@@ -2057,9 +2057,23 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'appveyor.yml')
 
-    template_filename = os.path.join(template_directory, 'header.yml')
+    template_filename = os.path.join(
+        template_directory, 'environment-header.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
+
+    if self._HasPythonModule(project_configuration):
+      template_filename = os.path.join(
+          template_directory, 'environment-python.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'environment-footer.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
 
     if (os.path.exists('syncwinflexbison.ps1') or
         os.path.exists('syncwinflexbison.sh')):
@@ -2087,7 +2101,21 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, 'build_script.yml')
+    template_filename = os.path.join(
+        template_directory, 'build_script-header.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if self._HasPythonModule(project_configuration):
+      template_filename = os.path.join(
+          template_directory, 'build_script-python.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'build_script-footer.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')

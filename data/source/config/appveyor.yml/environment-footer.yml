@@ -1,0 +1,7 @@
+  - TARGET: cygwin
+  - TARGET: cygwin64
+  - TARGET: mingw
+  - TARGET: mingw-w64
+
+install:
+- cmd: git clone https://github.com/libyal/libyal.git && move libyal ..\

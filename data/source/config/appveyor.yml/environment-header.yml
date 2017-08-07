@@ -3,30 +3,25 @@ environment:
   - TARGET: vs2008
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 9.0
+    platform: Win32
+    configuration: Release
   - TARGET: vs2010
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 10.0
+    platform: Win32
+    configuration: VSDebug
   - TARGET: vs2012
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 11.0
+    platform: x64
+    configuration: Release
   - TARGET: vs2013
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 12.0
+    platform: Win32
+    configuration: Release
   - TARGET: vs2015
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     VisualStudioVersion: 14.0
-  - TARGET: cygwin
-  - TARGET: cygwin64
-  - TARGET: mingw
-  - TARGET: mingw-w64
-
-# TODO: add x64, fix issue: LNK1158: cannot run 'cvtres.exe'
-platform:
-- Win32
-
-# TODO: add VSDebug
-configuration:
-- Release
-
-install:
-- cmd: git clone https://github.com/libyal/libyal.git && move libyal ..\
+    platform: Win32
+    configuration: Release

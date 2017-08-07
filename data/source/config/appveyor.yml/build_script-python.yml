@@ -1,0 +1,4 @@
+- cmd: if [%TARGET%]==[python27] (
+    C:\Python27\python.exe setup.py bdist_msi )
+- cmd: if [%TARGET%]==[python36] (
+    C:\Python36\python.exe setup.py bdist_msi )
