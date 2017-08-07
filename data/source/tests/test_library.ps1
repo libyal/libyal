@@ -1,6 +1,6 @@
 # Tests C library functions and types.
 #
-# Version: 20170722
+# Version: 20170807
 
 $$ExitSuccess = 0
 $$ExitFailure = 1
@@ -40,7 +40,15 @@ Function RunTest
 
 If (-Not (Test-Path $${TestToolDirectory}))
 {
+	$$TestToolDirectory = "..\msvscpp\VSDebug"
+}
+If (-Not (Test-Path $${TestToolDirectory}))
+{
 	$$TestToolDirectory = "..\vs2010\Release"
+}
+If (-Not (Test-Path $${TestToolDirectory}))
+{
+	$$TestToolDirectory = "..\vs2010\VSDebug"
 }
 If (-Not (Test-Path $${TestToolDirectory}))
 {
@@ -48,7 +56,19 @@ If (-Not (Test-Path $${TestToolDirectory}))
 }
 If (-Not (Test-Path $${TestToolDirectory}))
 {
+	$$TestToolDirectory = "..\vs2012\VSDebug"
+}
+If (-Not (Test-Path $${TestToolDirectory}))
+{
 	$$TestToolDirectory = "..\vs2013\Release"
+}
+If (-Not (Test-Path $${TestToolDirectory}))
+{
+	$$TestToolDirectory = "..\vs2013\VSDebug"
+}
+If (-Not (Test-Path $${TestToolDirectory}))
+{
+	$$TestToolDirectory = "..\vs2015\Release"
 }
 If (-Not (Test-Path $${TestToolDirectory}))
 {
