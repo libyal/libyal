@@ -2199,8 +2199,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    # TODO: fix libcaes using rules-with-tools
-
     if has_python_module:
       template_filename = 'rules-with-python'
     elif has_tools:
