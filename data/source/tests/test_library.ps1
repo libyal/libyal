@@ -72,7 +72,7 @@ If (-Not (Test-Path $${TestToolDirectory}))
 }
 If (-Not (Test-Path $${TestToolDirectory}))
 {
-	$$TestToolDirectory = "..\vs2015\Release"
+	$$TestToolDirectory = "..\vs2015\VSDebug"
 }
 If (-Not (Test-Path $${TestToolDirectory}))
 {
