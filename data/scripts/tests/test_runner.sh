@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20170825
+# Version: 20170826
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -423,29 +423,46 @@ run_test_with_arguments()
 
 	if test -n "${CHECK_WITH_ASAN}";
 	then
-		assert_availability_binary ldconfig;
-
-		local LIBASAN=`ldconfig -p | grep libasan | sed 's/^.* => //'`;
-
-		if ! test -f ${LIBASAN};
-		then
-			echo "Missing library: ${BINARY}";
-			echo "";
-
-			exit ${EXIT_FAILURE};
-		fi
-
 		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
 		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
 
-		if test ${IS_PYTHON_SCRIPT} -eq 0;
+		if test "${PLATFORM}" = "Darwin";
 		then
-			LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-			RESULT=$?;
+			if test ${IS_PYTHON_SCRIPT} -eq 0;
+			then
+				LSAN_OPTIONS=suppressions="lsan.suppressions" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			else
+				LSAN_OPTIONS=suppressions="lsan.suppressions" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			fi
 		else
-			LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-			RESULT=$?;
+			local CC=`cat ../config.log | grep -e "^CC=" | sed "s/CC='\\(.*\\)'/\1/"`;
+			local LIBASAN="";
+
+			if test -z ${CC} || test ${CC} != "clang";
+			then
+				assert_availability_binary ldconfig;
+
+				LIBASAN=`ldconfig -p | grep libasan | sed 's/^.* => //'`;
+
+				if ! test -f ${LIBASAN};
+				then
+					echo "Missing library: ${BINARY}";
+					echo "";
+
+					exit ${EXIT_FAILURE};
+				fi
+			fi
+			if test ${IS_PYTHON_SCRIPT} -eq 0;
+			then
+				LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			else
+				LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				RESULT=$?;
+			fi
 		fi
 
 	elif test -n "${CHECK_WITH_GDB}";
@@ -703,29 +720,47 @@ run_test_with_input_and_arguments()
 
 	if test -n "${CHECK_WITH_ASAN}";
 	then
-		assert_availability_binary ldconfig;
-
-		local LIBASAN=`ldconfig -p | grep libasan | sed 's/^.* => //'`;
-
-		if ! test -f ${LIBASAN};
-		then
-			echo "Missing library: ${BINARY}";
-			echo "";
-
-			exit ${EXIT_FAILURE};
-		fi
-
 		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
 		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
 
-		if test ${IS_PYTHON_SCRIPT} -eq 0;
+		if test "${PLATFORM}" = "Darwin";
 		then
-			LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-			RESULT=$?;
+			# TODO DYLD_INSERT_LIBRARIES=/Library/Developer/CommandLineTools/usr/lib/clang/8.1.0/lib/darwin/libclang_rt.asan_osx_dynamic.dylib
+			if test ${IS_PYTHON_SCRIPT} -eq 0;
+			then
+				LSAN_OPTIONS=suppressions="lsan.suppressions" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			else
+				LSAN_OPTIONS=suppressions="lsan.suppressions" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			fi
 		else
-			LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-			RESULT=$?;
+			local CC=`cat ../config.log | grep -e "^CC=" | sed "s/CC='\\(.*\\)'/\1/"`;
+			local LIBASAN="";
+
+			if test -z ${CC} || test ${CC} != "clang";
+			then
+				assert_availability_binary ldconfig;
+
+				LIBASAN=`ldconfig -p | grep libasan | sed 's/^.* => //'`;
+
+				if ! test -f ${LIBASAN};
+				then
+					echo "Missing library: ${BINARY}";
+					echo "";
+
+					exit ${EXIT_FAILURE};
+				fi
+			fi
+			if test ${IS_PYTHON_SCRIPT} -eq 0;
+			then
+				LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			else
+				LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				RESULT=$?;
+			fi
 		fi
 
 	elif test -n "${CHECK_WITH_GDB}";
