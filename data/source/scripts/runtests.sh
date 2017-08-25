@@ -326,7 +326,9 @@ fi
 
 if test $${HAVE_ENABLE_PYTHON} -eq 0 && test -n "$${PYTHON_CONFIG}";
 then
-	CONFIGURE_OPTIONS="--enable-python";
+	# Issue with running the python bindings with asan disabled for now.
+	# CONFIGURE_OPTIONS="--enable-python";
+	CONFIGURE_OPTIONS="";
 else
 	CONFIGURE_OPTIONS="";
 fi

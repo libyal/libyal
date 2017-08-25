@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20170826
+# Version: 20170827
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -427,25 +427,48 @@ run_test_with_arguments()
 		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
 
+		local LSAN_SUPPRESSIONS="lsan.suppressions";
+
+		if ! test -f ${LSAN_SUPPRESSIONS};
+		then
+			LSAN_SUPPRESSIONS="../lsan.suppressions";
+		fi
 		if test "${PLATFORM}" = "Darwin";
 		then
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
-				LSAN_OPTIONS=suppressions="lsan.suppressions" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
 				RESULT=$?;
 			else
-				LSAN_OPTIONS=suppressions="lsan.suppressions" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
 				RESULT=$?;
 			fi
 		else
-			local CC=`cat ../config.log | grep -e "^CC=" | sed "s/CC='\\(.*\\)'/\1/"`;
+			local CONFIG_LOG="../config.log";
+
+			if ! test -f ${CONFIG_LOG};
+			then
+				CONFIG_LOG="../../config.log";
+			fi
+			local CC=`cat ${CONFIG_LOG} | grep -e "^CC=" | sed "s/CC='\\(.*\\)'/\1/"`;
 			local LIBASAN="";
 
 			if test -z ${CC} || test ${CC} != "clang";
 			then
-				assert_availability_binary ldconfig;
+				local LDCONFIG=`which ldconfig 2> /dev/null`;
 
-				LIBASAN=`ldconfig -p | grep libasan | sed 's/^.* => //'`;
+				if test -z ${LDCONFIG} || ! test -x ${LDCONFIG};
+				then
+					LDCONFIG="/sbin/ldconfig";
+				fi
+				if test -z ${LDCONFIG} || ! test -x ${LDCONFIG};
+				then
+					echo "Missing binary: ldconfig";
+					echo "";
+
+					exit ${EXIT_FAILURE};
+				fi
+				LIBASAN=`${LDCONFIG} -p | grep libasan | sed 's/^.* => //'`;
 
 				if ! test -f ${LIBASAN};
 				then
@@ -457,10 +480,10 @@ run_test_with_arguments()
 			fi
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
-				LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
 				RESULT=$?;
 			else
-				LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
+				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
 				RESULT=$?;
 			fi
 		fi
@@ -724,26 +747,49 @@ run_test_with_input_and_arguments()
 		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
 
+		local LSAN_SUPPRESSIONS="lsan.suppressions";
+
+		if ! test -f ${LSAN_SUPPRESSIONS};
+		then
+			LSAN_SUPPRESSIONS="../lsan.suppressions";
+		fi
 		if test "${PLATFORM}" = "Darwin";
 		then
 			# TODO DYLD_INSERT_LIBRARIES=/Library/Developer/CommandLineTools/usr/lib/clang/8.1.0/lib/darwin/libclang_rt.asan_osx_dynamic.dylib
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
-				LSAN_OPTIONS=suppressions="lsan.suppressions" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
 				RESULT=$?;
 			else
-				LSAN_OPTIONS=suppressions="lsan.suppressions" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
 				RESULT=$?;
 			fi
 		else
-			local CC=`cat ../config.log | grep -e "^CC=" | sed "s/CC='\\(.*\\)'/\1/"`;
+			local CONFIG_LOG="../config.log";
+
+			if ! test -f ${CONFIG_LOG};
+			then
+				CONFIG_LOG="../../config.log";
+			fi
+			local CC=`cat ${CONFIG_LOG} | grep -e "^CC=" | sed "s/CC='\\(.*\\)'/\1/"`;
 			local LIBASAN="";
 
 			if test -z ${CC} || test ${CC} != "clang";
 			then
-				assert_availability_binary ldconfig;
+				local LDCONFIG=`which ldconfig 2> /dev/null`;
 
-				LIBASAN=`ldconfig -p | grep libasan | sed 's/^.* => //'`;
+				if test -z ${LDCONFIG} || ! test -x ${LDCONFIG};
+				then
+					LDCONFIG="/sbin/ldconfig";
+				fi
+				if test -z ${LDCONFIG} || ! test -x ${LDCONFIG};
+				then
+					echo "Missing binary: ldconfig";
+					echo "";
+
+					exit ${EXIT_FAILURE};
+				fi
+				LIBASAN=`${LDCONFIG} -p | grep libasan | sed 's/^.* => //'`;
 
 				if ! test -f ${LIBASAN};
 				then
@@ -755,10 +801,10 @@ run_test_with_input_and_arguments()
 			fi
 			if test ${IS_PYTHON_SCRIPT} -eq 0;
 			then
-				LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
 				RESULT=$?;
 			else
-				LSAN_OPTIONS=suppressions="lsan.suppressions" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
+				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
 				RESULT=$?;
 			fi
 		fi
