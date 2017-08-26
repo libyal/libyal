@@ -2199,7 +2199,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if has_python_module:
+    if has_python_module and has_tools:
+      template_filename = 'rules-with-python-and-tools'
+    elif has_python_module:
       template_filename = 'rules-with-python'
     elif has_tools:
       template_filename = 'rules-with-tools'
@@ -4614,8 +4616,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   _PYTHON_FUNCTION_NAMES = (
       'support', )
 
+  # TODO: replace by type specific test scripts.
   _PYTHON_FUNCTION_WITH_INPUT_NAMES = (
-      'open_close', 'seek', 'read')
+      'open_close', 'seek', 'read', 'file')
 
   def _FormatTestData(self, data):
     """Formats the test data as a C byte array.
