@@ -19,13 +19,13 @@ int ${library_name_suffix}_test_${type_name}_open_close(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "${type_name}",
-         ${type_name} );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "${type_name}",
+	 ${type_name} );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test open and close
 	 */
@@ -48,9 +48,9 @@ int ${library_name_suffix}_test_${type_name}_open_close(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = ${library_name}_${type_name}_close(
 	          ${type_name},
@@ -61,9 +61,9 @@ int ${library_name_suffix}_test_${type_name}_open_close(
 	 result,
 	 0 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test open and close a second time to validate clean up on close
 	 */
@@ -86,9 +86,9 @@ int ${library_name_suffix}_test_${type_name}_open_close(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = ${library_name}_${type_name}_close(
 	          ${type_name},
@@ -99,9 +99,9 @@ int ${library_name_suffix}_test_${type_name}_open_close(
 	 result,
 	 0 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Clean up
 	 */
@@ -114,13 +114,13 @@ int ${library_name_suffix}_test_${type_name}_open_close(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "${type_name}",
-         ${type_name} );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "${type_name}",
+	 ${type_name} );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	return( 1 );
 

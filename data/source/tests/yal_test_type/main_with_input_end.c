@@ -10,12 +10,12 @@
 		 0 );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	         "${type_name}",
-	         ${type_name} );
+		 "${type_name}",
+		 ${type_name} );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	         "error",
-	         error );
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
 	}
 #endif /* !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 ) */
 

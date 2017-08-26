@@ -25,13 +25,13 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "${type_name}",
-         ${type_name} );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "${type_name}",
+	 ${type_name} );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = ${library_name}_${type_name}_free(
 	          &${type_name},
@@ -42,13 +42,13 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "${type_name}",
-         ${type_name} );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "${type_name}",
+	 ${type_name} );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -61,9 +61,9 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	 result,
 	 -1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -79,9 +79,9 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	 result,
 	 -1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );

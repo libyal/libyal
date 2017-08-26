@@ -16,9 +16,9 @@
 		 result,
 		 -1 );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	         "error",
-	         error );
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
 	}
 	if( result != 0 )
 	{
@@ -63,11 +63,11 @@
 		 result,
 		 1 );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-	         "${type_name}",
-	         ${type_name} );
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		 "${type_name}",
+		 ${type_name} );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	         "error",
-	         error );
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
 

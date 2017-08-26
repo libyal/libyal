@@ -63,9 +63,9 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
 		 result,
 		 1 );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	         "error",
-	         error );
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
 	}
 	/* Test error cases
 	 */
@@ -79,9 +79,9 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
 	 result,
 	 -1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -102,9 +102,9 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
 		 result,
 		 -1 );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-	         "error",
-	         error );
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
 
 		libcerror_error_free(
 		 &error );
@@ -121,9 +121,9 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	return( 1 );
 

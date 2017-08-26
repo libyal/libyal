@@ -982,7 +982,7 @@ class LibraryIncludeHeaderFile(object):
     section_names (list[str]): section names.
   """
 
-  _SIGNATURE_TYPES = ('file', 'volume')
+  _SIGNATURE_TYPES = ('container', 'file', 'store', 'volume')
 
   def __init__(self, path):
     """Initializes a library include header file.
@@ -4618,7 +4618,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
   # TODO: replace by type specific test scripts.
   _PYTHON_FUNCTION_WITH_INPUT_NAMES = (
-      'open_close', 'seek', 'read', 'file')
+      'open_close', 'seek', 'read', 'file', 'volume')
 
   def _FormatTestData(self, data):
     """Formats the test data as a C byte array.
