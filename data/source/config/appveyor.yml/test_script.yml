@@ -10,6 +10,8 @@ test_script:
     .\runtests.ps1 }
 - ps: if ($$env:TARGET -eq "vs2015") {
     .\runtests.ps1 }
+- ps: if ($$env:TARGET -eq "vs2017") {
+    .\runtests.ps1 }
 - cmd: if [%TARGET%]==[cygwin] (
     C:\cygwin\bin\bash -e -l -c "./runtests.sh" )
 - cmd: if [%TARGET%]==[cygwin64] (

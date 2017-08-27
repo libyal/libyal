@@ -74,9 +74,27 @@ class ProjectConfiguration(object):
   """Project configuration.
 
   Attributes:
-    project_name (str): name of the project.
+    coverty_scan_token (str): scan token for Coverty Scan (scan.coverity.com).
+    dpkg_build_dependencies (str): dpkg build dependencies.
+    library_description (str): description of the library.
+    library_name (str): name of the library.
+    library_name_suffix (str): suffix of the name of the library.
+    library_public_types (str): types publicly exported by the library.
+    msvscpp_build_dependencies (str): msvscpp build dependencies.
+    project_authors (str): authors of the project.
+    project_name (str): name of the project, such as "libyal".
+    project_year_of_creation (str): year the project was created.
+    python_module_authors (str): authors of the Python module.
+    python_module_name (str): name of the Python module, such as "pyyal".
+    python_module_year_of_creation (str): year the Python module was created.
+    rpm_build_dependencies (str): rpm build dependencies.
+    tests_authors (str): authors of the test files.
+    tests_options (str): option sets used by the tests.
+    tools_authors (str): authors of the tools.
+    tools_description (str): description of the tools.
+    tools_names (str): names of the individual tools.
+    tools_name (str): name of the all the tools, such as "yaltools".
   """
-  # TODO: add attributes.
 
   def __init__(self):
     """Initializes a project configuation."""
@@ -982,7 +1000,7 @@ class LibraryIncludeHeaderFile(object):
     section_names (list[str]): section names.
   """
 
-  _SIGNATURE_TYPES = ('container', 'file', 'store', 'volume')
+  _SIGNATURE_TYPES = ('container', 'file', 'handle', 'store', 'volume')
 
   def __init__(self, path):
     """Initializes a library include header file.
@@ -5619,6 +5637,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # file contains (item).
     # TODO: fix libwrc message-table
     # TODO: handle libfsntfs $attribute_name
+    # TODO: detect internal free functions
+    # TODO: handle glob, options and options sets in test scripts.
 
     if not self._HasTests(project_configuration):
       return
