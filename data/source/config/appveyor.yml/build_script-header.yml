@@ -10,7 +10,7 @@ build_script:
     msbuild vs2010\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2012] (
     set PYTHONPATH=..\vstools &&
-    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2012 --extend-with-x64 --python-include "C:\\Python27-x64" msvscpp\${library_name}.sln &&
+    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2012 --extend-with-x64 --python-path "C:\\Python27-x64" msvscpp\${library_name}.sln &&
     msbuild vs2012\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2013] (
     set PYTHONPATH=..\vstools &&
