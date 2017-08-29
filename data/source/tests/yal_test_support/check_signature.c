@@ -22,9 +22,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test check ${signature_type} signature
 	 */
@@ -37,9 +37,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -52,9 +52,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 	 result,
 	 -1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -96,9 +96,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test check ${signature_type} signature
 	 */
@@ -111,9 +111,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -126,9 +126,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 	 result,
 	 -1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -171,13 +171,13 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "file_io_handle",
-         file_io_handle );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "file_io_handle",
+	 file_io_handle );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	source_length = system_string_length(
 	                 source );
@@ -200,9 +200,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbfio_handle_open(
 	          file_io_handle,
@@ -214,9 +214,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test check ${signature_type} signature
 	 */
@@ -229,9 +229,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -244,9 +244,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 -1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -262,9 +262,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 0 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbfio_handle_free(
 	          &file_io_handle,
@@ -275,13 +275,13 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "file_io_handle",
-         file_io_handle );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "file_io_handle",
+	 file_io_handle );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Initialize test
 	 */
@@ -290,9 +290,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	                 0,
 	                 sizeof( uint8_t ) * 512 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "memset_result",
-         memset_result );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "memset_result",
+	 memset_result );
 
 	result = libbfio_memory_range_initialize(
 	          &file_io_handle,
@@ -303,13 +303,13 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "file_io_handle",
-         file_io_handle );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "file_io_handle",
+	 file_io_handle );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbfio_memory_range_set(
 	          file_io_handle,
@@ -322,9 +322,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbfio_handle_open(
 	          file_io_handle,
@@ -336,9 +336,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test check ${signature_type} signature
 	 */
@@ -351,9 +351,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 0 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Clean up
 	 */
@@ -366,9 +366,9 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 0 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbfio_handle_free(
 	          &file_io_handle,
@@ -379,13 +379,13 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "file_io_handle",
-         file_io_handle );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "file_io_handle",
+	 file_io_handle );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* TODO test ${signature_type} too small */
 
