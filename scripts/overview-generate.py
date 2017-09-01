@@ -3,6 +3,8 @@
 """Script to automate generation of an overview of the libyal libraries."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import abc
 import argparse
 import glob
@@ -24,6 +26,7 @@ class Project(object):
   Attributes:
     appveyor_identifier (str): AppVeyor identifier.
     category (str): category.
+    coverty_badge (int): Coverty badge identifier.
     description (str): description.
     display_name (str): display name.
     documentation_only (bool): True if the project only contains documentation.
@@ -40,6 +43,7 @@ class Project(object):
     super(Project, self).__init__()
     self.appveyor_identifier = None
     self.category = None
+    self.coverty_badge = None
     self.description = None
     self.display_name = name
     self.documentation_only = False
@@ -86,27 +90,34 @@ class ProjectsReader(object):
 
       try:
         project.appveyor_identifier = self._GetConfigValue(
-            project_name, u'appveyor_identifier')
+            project_name, 'appveyor_identifier')
       except configparser.NoOptionError:
         pass
 
-      project.category = self._GetConfigValue(project_name, u'category')
-      project.description = self._GetConfigValue(project_name, u'description')
+      project.category = self._GetConfigValue(project_name, 'category')
+
+      try:
+        project.coverty_badge = self._GetConfigValue(
+            project_name, 'coverty_badge')
+      except configparser.NoOptionError:
+        pass
+
+      project.description = self._GetConfigValue(project_name, 'description')
 
       try:
         project.display_name = self._GetConfigValue(
-            project_name, u'display_name')
+            project_name, 'display_name')
       except configparser.NoOptionError:
         pass
 
       try:
         project.documentation_only = self._GetConfigValue(
-            project_name, u'documentation_only')
+            project_name, 'documentation_only')
       except configparser.NoOptionError:
         pass
 
       try:
-        project.group = self._GetConfigValue(project_name, u'group')
+        project.group = self._GetConfigValue(project_name, 'group')
       except configparser.NoOptionError:
         pass
 
@@ -149,7 +160,7 @@ class ConfigureAcFile(object):
           version = line[1:-2]
 
           # TODO: convert version to integer?
-          self.version = version.decode(u'ascii')
+          self.version = version.decode('ascii')
 
           return True
 
@@ -188,7 +199,7 @@ class DefinitionsHeaderFile(object):
     Returns:
       bool: True if the version was read from the file.
     """
-    library_name, _, _ = self.name.partition(u'_')
+    library_name, _, _ = self.name.partition('_')
     version_line = b'#define {0:s}_VERSION'.format(library_name.upper())
 
     with open(self._path, 'rb') as file_object:
@@ -199,7 +210,7 @@ class DefinitionsHeaderFile(object):
           version = version.strip()
 
           # TODO: convert version to integer?
-          self.version = version.decode(u'ascii')
+          self.version = version.decode('ascii')
 
           return True
 
@@ -238,7 +249,7 @@ class M4ScriptFile(object):
         if line.startswith(b'dnl Version: '):
           _, _, version = line.rpartition(b'dnl Version: ')
           # TODO: convert version to integer?
-          self.version = version.decode(u'ascii')
+          self.version = version.decode('ascii')
 
           return True
 
@@ -277,7 +288,7 @@ class ScriptFile(object):
         if line.startswith(b'# Version: '):
           _, _, version = line.rpartition(b'# Version: ')
           # TODO: convert version to integer?
-          self.version = version.decode(u'ascii')
+          self.version = version.decode('ascii')
 
           return True
 
@@ -288,46 +299,46 @@ class WikiPageGenerator(object):
   """Class that generates wiki pages."""
 
   _CATEGORIES = {
-      u'cross_platform': (
-          u'Cross-platform functionality',
-          u'Several libraries for cross-platform C functions'),
-      u'data_format': (
-          u'Data formats',
-          u'Several libraries for different types of file format data'),
-      u'file_format': (
-          u'File formats',
-          u'Several libraries for different types of file formats'),
-      u'in_file_format': (
-          u'In-file formats',
-          u'Several libraries for different types of in-file formats'),
-      u'file_system_format': (
-          u'File system formats',
-          u'Several libraries for different types of file systems'),
-      u'volume_system_format': (
-          u'Volume (system) formats',
-          u'Several libraries for different types of volume (system) formats'),
-      u'storage_media_image_format': (
-          u'Storage media image formats',
-          (u'Several libraries for different types of storage media image '
-           u'formats')),
-      u'utility': (
-          u'Utility libraries',
-          u'Several libraries for different "utility" functionality'),
-      u'other': (
-          u'Non-library projects',
-          u''),
-      u'knowledge_base': (
-          u'Knowledge base projects',
-          u''),
+      'cross_platform': (
+          'Cross-platform functionality',
+          'Several libraries for cross-platform C functions'),
+      'data_format': (
+          'Data formats',
+          'Several libraries for different types of file format data'),
+      'file_format': (
+          'File formats',
+          'Several libraries for different types of file formats'),
+      'in_file_format': (
+          'In-file formats',
+          'Several libraries for different types of in-file formats'),
+      'file_system_format': (
+          'File system formats',
+          'Several libraries for different types of file systems'),
+      'volume_system_format': (
+          'Volume (system) formats',
+          'Several libraries for different types of volume (system) formats'),
+      'storage_media_image_format': (
+          'Storage media image formats',
+          ('Several libraries for different types of storage media image '
+           'formats')),
+      'utility': (
+          'Utility libraries',
+          'Several libraries for different "utility" functionality'),
+      'other': (
+          'Non-library projects',
+          ''),
+      'knowledge_base': (
+          'Knowledge base projects',
+          ''),
   }
 
   _ORDER_OF_LIBRARY_CATEGORIES = (
-      u'cross_platform', u'data_format', u'file_format', u'in_file_format',
-      u'file_system_format', u'volume_system_format',
-      u'storage_media_image_format', u'utility')
+      'cross_platform', 'data_format', 'file_format', 'in_file_format',
+      'file_system_format', 'volume_system_format',
+      'storage_media_image_format', 'utility')
 
   _ORDER_OF_OTHER_CATEGORIES = (
-      u'other', u'knowledge_base')
+      'other', 'knowledge_base')
 
   def __init__(self, data_directory, template_directory):
     """Initialize a wiki page generator.
@@ -390,7 +401,7 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
       projects: a list of project objects (instances of Project).
       output_writer: an output writer object (instance of OutputWriter).
     """
-    self._GenerateSection(u'introduction.txt', {}, output_writer)
+    self._GenerateSection('introduction.txt', {}, output_writer)
 
     # TODO: add support for test scripts
     # TODO: add support for source generated files
@@ -404,74 +415,84 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
     for category in self._ORDER_OF_LIBRARY_CATEGORIES:
       template_mappings = {
-          u'category_description': self._CATEGORIES[category][1],
-          u'category_title': self._CATEGORIES[category][0]
+          'category_description': self._CATEGORIES[category][1],
+          'category_title': self._CATEGORIES[category][0]
       }
       self._GenerateSection(
-          u'category_library.txt', template_mappings, output_writer)
+          'category_library.txt', template_mappings, output_writer)
 
       projects = projects_per_category[category]
       for project in projects_per_category[category]:
-        appveyor_build_status = u''
-        codecov_status = u''
-        travis_build_status = u''
+        appveyor_build_status = ''
+        codecov_status = ''
+        coverity_status = ''
+        travis_build_status = ''
 
         if project.documentation_only:
           project_description = (
-              u'{0:s} (**at the moment [documentation]'
-              u'(https://github.com/libyal/{1:s}/blob/master/documentation) '
-              u'only**)').format(project.description, project.name)
+              '{0:s} (**at the moment [documentation]'
+              '(https://github.com/libyal/{1:s}/blob/master/documentation) '
+              'only**)').format(project.description, project.name)
 
         else:
           project_description = project.description
 
           if project.appveyor_identifier:
             appveyor_build_status = (
-                u'[![Build status]'
-                u'(https://ci.appveyor.com/api/projects/status/{0:s}?svg=true)]'
-                u'(https://ci.appveyor.com/project/joachimmetz/{1:s})').format(
+                '[![Build status]'
+                '(https://ci.appveyor.com/api/projects/status/{0:s}?svg=true)]'
+                '(https://ci.appveyor.com/project/joachimmetz/{1:s})').format(
                     project.appveyor_identifier, project.name)
 
           codecov_status = (
-              u'[![codecov](https://codecov.io/gh/libyal/{0:s}/branch/master/'
-              u'graph/badge.svg)](https://codecov.io/gh/libyal/{0:s})').format(
+              '[![codecov](https://codecov.io/gh/libyal/{0:s}/branch/master/'
+              'graph/badge.svg)](https://codecov.io/gh/libyal/{0:s})').format(
                   project.name)
 
+          if project.coverty_badge:
+            coverity_status = (
+                '[![Coverity Scan Build Status](https://scan.coverity.com/'
+                'projects/{0:d}/badge.svg)](https://scan.coverity.com/projects/'
+                'libyal-{1:s})').format(project.coverty_badge, project.name)
+
           travis_build_status = (
-              u'[![Build status]'
-              u'(https://travis-ci.org/libyal/{0:s}.svg?branch=master)]'
-              u'(https://travis-ci.org/libyal/{0:s})').format(
+              '[![Build status]'
+              '(https://travis-ci.org/libyal/{0:s}.svg?branch=master)]'
+              '(https://travis-ci.org/libyal/{0:s})').format(
                   project.name)
 
         # TODO: solve this in a more elegant way.
-        if project.name == u'libtableau':
-          codecov_status = u''
-          travis_build_status = u''
+        if project.name == 'libtableau':
+          appveyor_build_status = ''
+          codecov_status = ''
+          coverity_status = ''
+          travis_build_status = ''
 
         template_mappings = {
-            u'appveyor_build_status': appveyor_build_status,
-            u'codecov_status': codecov_status,
-            u'project_description': project_description,
-            u'project_name': project.name,
-            u'travis_build_status': travis_build_status
+            'appveyor_build_status': appveyor_build_status,
+            'codecov_status': codecov_status,
+            'coverity_status': coverity_status,
+            'project_description': project_description,
+            'project_name': project.name,
+            'travis_build_status': travis_build_status
         }
-        self._GenerateSection(u'library.txt', template_mappings, output_writer)
+        self._GenerateSection('library.txt', template_mappings, output_writer)
 
     for category in self._ORDER_OF_OTHER_CATEGORIES:
       template_mappings = {
-          u'category_title': self._CATEGORIES[category][0]
+          'category_title': self._CATEGORIES[category][0]
       }
       self._GenerateSection(
-          u'category_other.txt', template_mappings, output_writer)
+          'category_other.txt', template_mappings, output_writer)
 
       projects = projects_per_category[category]
       for project in projects_per_category[category]:
         template_mappings = {
-            u'project_description': project.description,
-            u'project_display_name': project.display_name,
-            u'project_name': project.name,
+            'project_description': project.description,
+            'project_display_name': project.display_name,
+            'project_name': project.name,
         }
-        self._GenerateSection(u'other.txt', template_mappings, output_writer)
+        self._GenerateSection('other.txt', template_mappings, output_writer)
 
 
 class StatusWikiPageGenerator(WikiPageGenerator):
@@ -496,12 +517,12 @@ class StatusWikiPageGenerator(WikiPageGenerator):
           project_names.pop(project_names.index(project))
 
       if line:
-        lines.append(u', '.join(line))
+        lines.append(', '.join(line))
 
     if project_names:
-      lines.append(u', '.join(project_names))
+      lines.append(', '.join(project_names))
 
-    return u'<br>'.join(lines)
+    return '<br>'.join(lines)
 
   def _GetVersionsPerConfigurationFile(self, projects):
     """Retrieves the versions per configuration file.
@@ -519,18 +540,18 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
 
-    configs_directory = os.path.join(self._data_directory, u'configs')
+    configs_directory = os.path.join(self._data_directory, 'configs')
     versions_per_configuration = {}
     for directory_entry in os.listdir(configs_directory):
       path = os.path.join(configs_directory, directory_entry)
       configuration_file = ScriptFile(path)
 
       version = None
-      logging.info(u'Reading: {0:s}'.format(path))
+      logging.info('Reading: {0:s}'.format(path))
       if configuration_file.ReadVersion():
         version = configuration_file.version
       if not version:
-        version = u'missing'
+        version = 'missing'
 
       versions_per_configuration[configuration_file.name] = {version: []}
 
@@ -546,11 +567,11 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         configuration_file = ScriptFile(configuration_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(configuration_path))
+        logging.info('Reading: {0:s}'.format(configuration_path))
         if configuration_file.ReadVersion():
           version = configuration_file.version
         if not version:
-          version = u'missing'
+          version = 'missing'
 
         projects_per_version = versions_per_configuration[configuration]
         if version not in projects_per_version:
@@ -583,18 +604,18 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         continue
 
       configure_ac_path = os.path.join(
-          projects_path, project.name, u'configure.ac')
+          projects_path, project.name, 'configure.ac')
       if not os.path.exists(configure_ac_path):
         continue
 
       configure_ac_file = ConfigureAcFile(configure_ac_path)
 
       version = None
-      logging.info(u'Reading: {0:s}'.format(configure_ac_path))
+      logging.info('Reading: {0:s}'.format(configure_ac_path))
       if configure_ac_file.ReadVersion():
         version = configure_ac_file.version
       if not version:
-        version = u'missing'
+        version = 'missing'
 
       versions_per_library[project.name] = {version: []}
 
@@ -606,18 +627,18 @@ class StatusWikiPageGenerator(WikiPageGenerator):
           continue
 
         definitions_header_path = os.path.join(
-            project_path, library, u'{0:s}_definitions.h'.format(library))
+            project_path, library, '{0:s}_definitions.h'.format(library))
         if not os.path.exists(definitions_header_path):
           continue
 
         definitions_header_file = DefinitionsHeaderFile(definitions_header_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(definitions_header_path))
+        logging.info('Reading: {0:s}'.format(definitions_header_path))
         if definitions_header_file.ReadVersion():
           version = definitions_header_file.version
         if not version:
-          version = u'missing'
+          version = 'missing'
 
         projects_per_version = versions_per_library[library]
         if version not in projects_per_version:
@@ -643,22 +664,22 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
 
-    m4_script_glob = os.path.join(self._data_directory, u'm4', u'*.m4')
+    m4_script_glob = os.path.join(self._data_directory, 'm4', '*.m4')
     versions_per_m4_script = {}
     for path in glob.glob(m4_script_glob):
       m4_script_file = M4ScriptFile(path)
 
       version = None
-      logging.info(u'Reading: {0:s}'.format(path))
+      logging.info('Reading: {0:s}'.format(path))
       if m4_script_file.ReadVersion():
         version = m4_script_file.version
       if not version:
-        version = u'missing'
+        version = 'missing'
 
       versions_per_m4_script[m4_script_file.name] = {version: []}
 
     for project in projects:
-      project_m4_scripts_path = os.path.join(projects_path, project.name, u'm4')
+      project_m4_scripts_path = os.path.join(projects_path, project.name, 'm4')
 
       for m4_script in versions_per_m4_script.keys():
         m4_script_path = os.path.join(project_m4_scripts_path, m4_script)
@@ -668,11 +689,11 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         m4_script_file = M4ScriptFile(m4_script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(m4_script_path))
+        logging.info('Reading: {0:s}'.format(m4_script_path))
         if m4_script_file.ReadVersion():
           version = m4_script_file.version
         if not version:
-          version = u'missing'
+          version = 'missing'
 
         projects_per_version = versions_per_m4_script[m4_script]
         if version not in projects_per_version:
@@ -698,17 +719,17 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
 
-    py_script_glob = os.path.join(self._data_directory, u'scripts', u'*.py')
+    py_script_glob = os.path.join(self._data_directory, 'scripts', '*.py')
     versions_per_py_script = {}
     for path in glob.glob(py_script_glob):
       py_script_file = ScriptFile(path)
 
       version = None
-      logging.info(u'Reading: {0:s}'.format(path))
+      logging.info('Reading: {0:s}'.format(path))
       if py_script_file.ReadVersion():
         version = py_script_file.version
       if not version:
-        version = u'missing'
+        version = 'missing'
 
       versions_per_py_script[py_script_file.name] = {version: []}
 
@@ -723,11 +744,11 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         py_script_file = ScriptFile(py_script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(py_script_path))
+        logging.info('Reading: {0:s}'.format(py_script_path))
         if py_script_file.ReadVersion():
           version = py_script_file.version
         if not version:
-          version = u'missing'
+          version = 'missing'
 
         projects_per_version = versions_per_py_script[py_script]
         if version not in projects_per_version:
@@ -753,17 +774,17 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
 
-    script_glob = os.path.join(self._data_directory, u'scripts', u'*.*')
+    script_glob = os.path.join(self._data_directory, 'scripts', '*.*')
     versions_per_script = {}
     for path in glob.glob(script_glob):
       script_file = ScriptFile(path)
 
       version = None
-      logging.info(u'Reading: {0:s}'.format(path))
+      logging.info('Reading: {0:s}'.format(path))
       if script_file.ReadVersion():
         version = script_file.version
       if not version:
-        version = u'missing'
+        version = 'missing'
 
       versions_per_script[script_file.name] = {version: []}
 
@@ -778,11 +799,11 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         script_file = ScriptFile(script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(script_path))
+        logging.info('Reading: {0:s}'.format(script_path))
         if script_file.ReadVersion():
           version = script_file.version
         if not version:
-          version = u'missing'
+          version = 'missing'
 
         projects_per_version = versions_per_script[script]
         if version not in projects_per_version:
@@ -810,35 +831,35 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     # TODO: determine if Python glob supports "*.{ps1,sh}".
     versions_per_script = {}
-    for extension in (u'ps1', 'sh'):
-      extension_glob = u'*.{0:s}'.format(extension)
+    for extension in ('ps1', 'sh'):
+      extension_glob = '*.{0:s}'.format(extension)
       script_glob = os.path.join(
-          self._data_directory, u'source', u'tests', extension_glob)
+          self._data_directory, 'source', 'tests', extension_glob)
       for path in glob.glob(script_glob):
-        if path.endswith(u'test_yalinfo.ps1'):
+        if path.endswith('test_yalinfo.ps1'):
           continue
 
         script_file = ScriptFile(path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(path))
+        logging.info('Reading: {0:s}'.format(path))
         if script_file.ReadVersion():
           version = script_file.version
         if not version:
-          version = u'missing'
+          version = 'missing'
 
         # TODO: handle yal and pyyal place holders.
         if script_file.name in (
-            u'test_pyyal_set_ascii_codepage.sh',
-            u'test_yalexport.sh',
-            u'test_yalinfo.sh'):
+            'test_pyyal_set_ascii_codepage.sh',
+            'test_yalexport.sh',
+            'test_yalinfo.sh'):
           continue
 
         versions_per_script[script_file.name] = {version: []}
 
     for project in projects:
       project_test_scripts_path = os.path.join(
-          projects_path, project.name, u'tests')
+          projects_path, project.name, 'tests')
 
       for script in versions_per_script.keys():
         # TODO: handle yal and pyyal place holders.
@@ -850,11 +871,11 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         script_file = ScriptFile(script_path)
 
         version = None
-        logging.info(u'Reading: {0:s}'.format(script_path))
+        logging.info('Reading: {0:s}'.format(script_path))
         if script_file.ReadVersion():
           version = script_file.version
         if not version:
-          version = u'missing'
+          version = 'missing'
 
         projects_per_version = versions_per_script[script]
         if version not in projects_per_version:
@@ -871,7 +892,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       projects list[Project]: projects.
       output_writer (OutputWriter): output writer.
     """
-    self._GenerateSection(u'introduction.txt', {}, output_writer)
+    self._GenerateSection('introduction.txt', {}, output_writer)
 
     versions_per_configuration = self._GetVersionsPerConfigurationFile(projects)
     versions_per_m4_script = self._GetVersionsPerM4Script(projects)
@@ -887,48 +908,48 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
     table_of_contents = []
 
-    table_of_contents.append(u'* [Configurations](Status#configurations)')
+    table_of_contents.append('* [Configurations](Status#configurations)')
     for configuration in sorted(versions_per_configuration.keys()):
-      configuration_reference = configuration.lower().replace(u'.', u'')
-      table_of_contents.append(u'  * [{0:s}](Status#{1:s})'.format(
+      configuration_reference = configuration.lower().replace('.', '')
+      table_of_contents.append('  * [{0:s}](Status#{1:s})'.format(
           configuration, configuration_reference))
 
-    table_of_contents.append(u'* [Scripts](Status#scripts)')
+    table_of_contents.append('* [Scripts](Status#scripts)')
     for script in sorted(versions_per_script.keys()):
-      script_reference = script.lower().replace(u'.', u'')
-      table_of_contents.append(u'  * [{0:s}](Status#{1:s})'.format(
+      script_reference = script.lower().replace('.', '')
+      table_of_contents.append('  * [{0:s}](Status#{1:s})'.format(
           script, script_reference))
 
-    table_of_contents.append(u'* [M4 scripts](Status#m4-scripts)')
+    table_of_contents.append('* [M4 scripts](Status#m4-scripts)')
     for m4_script in sorted(versions_per_m4_script.keys()):
-      m4_script_reference = m4_script.lower().replace(u'.', u'')
-      table_of_contents.append(u'  * [{0:s}](Status#{1:s})'.format(
+      m4_script_reference = m4_script.lower().replace('.', '')
+      table_of_contents.append('  * [{0:s}](Status#{1:s})'.format(
           m4_script, m4_script_reference))
 
     # TODO: add version check for common.
 
     for category in self._ORDER_OF_LIBRARY_CATEGORIES:
       category_title = self._CATEGORIES[category][0]
-      catergory_reference = category_title.lower().replace(u' ', u'-')
-      table_of_contents.append(u'* [{0:s}](Status#{1:s})'.format(
+      catergory_reference = category_title.lower().replace(' ', '-')
+      table_of_contents.append('* [{0:s}](Status#{1:s})'.format(
           category_title, catergory_reference))
 
       for project in projects_per_category[category]:
-        table_of_contents.append(u'  * [{0:s}](Status#{0:s})'.format(
+        table_of_contents.append('  * [{0:s}](Status#{0:s})'.format(
             project.name))
 
-    table_of_contents.append(u'* [Test scripts](Status#test-scripts)')
+    table_of_contents.append('* [Test scripts](Status#test-scripts)')
     for script in sorted(versions_per_test_script.keys()):
-      script_reference = script.lower().replace(u'.', u'')
-      table_of_contents.append(u'  * [{0:s}](Status#{1:s})'.format(
+      script_reference = script.lower().replace('.', '')
+      table_of_contents.append('  * [{0:s}](Status#{1:s})'.format(
           script, script_reference))
 
-    table_of_contents.append(u'')
-    output_data = u'\n'.join(table_of_contents).encode(u'utf-8')
+    table_of_contents.append('')
+    output_data = '\n'.join(table_of_contents).encode('utf-8')
     output_writer.Write(output_data)
 
-    template_mappings = {u'category_title': u'Configurations'}
-    self._GenerateSection(u'category.txt', template_mappings, output_writer)
+    template_mappings = {'category_title': 'Configurations'}
+    self._GenerateSection('category.txt', template_mappings, output_writer)
 
     project_groups = {}
     for project in projects:
@@ -945,114 +966,114 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     for configuration, projects_per_version in sorted(
         versions_per_configuration.items()):
       template_mappings = {
-          u'title': configuration,
+          'title': configuration,
       }
       self._GenerateSection(
-          u'table_header.txt', template_mappings, output_writer)
+          'table_header.txt', template_mappings, output_writer)
 
       for version, project_names in sorted(
           projects_per_version.items(), reverse=True):
         project_names = self._FormatProjectNames(project_groups, project_names)
 
         template_mappings = {
-            u'project_names': project_names,
-            u'version': version,
+            'project_names': project_names,
+            'version': version,
         }
         self._GenerateSection(
-            u'table_entry.txt', template_mappings, output_writer)
+            'table_entry.txt', template_mappings, output_writer)
 
-    template_mappings = {u'category_title': u'Scripts'}
-    self._GenerateSection(u'category.txt', template_mappings, output_writer)
+    template_mappings = {'category_title': 'Scripts'}
+    self._GenerateSection('category.txt', template_mappings, output_writer)
 
     for script, projects_per_version in sorted(
         versions_per_script.items()):
       template_mappings = {
-          u'title': script,
+          'title': script,
       }
       self._GenerateSection(
-          u'table_header.txt', template_mappings, output_writer)
+          'table_header.txt', template_mappings, output_writer)
 
       for version, project_names in sorted(
           projects_per_version.items(), reverse=True):
         project_names = self._FormatProjectNames(project_groups, project_names)
 
         template_mappings = {
-            u'project_names': project_names,
-            u'version': version,
+            'project_names': project_names,
+            'version': version,
         }
         self._GenerateSection(
-            u'table_entry.txt', template_mappings, output_writer)
+            'table_entry.txt', template_mappings, output_writer)
 
-    template_mappings = {u'category_title': u'M4 scripts'}
-    self._GenerateSection(u'category.txt', template_mappings, output_writer)
+    template_mappings = {'category_title': 'M4 scripts'}
+    self._GenerateSection('category.txt', template_mappings, output_writer)
 
     for m4_script, projects_per_version in sorted(
         versions_per_m4_script.items()):
       template_mappings = {
-          u'title': m4_script,
+          'title': m4_script,
       }
       self._GenerateSection(
-          u'table_header.txt', template_mappings, output_writer)
+          'table_header.txt', template_mappings, output_writer)
 
       for version, project_names in sorted(
           projects_per_version.items(), reverse=True):
         project_names = self._FormatProjectNames(project_groups, project_names)
 
         template_mappings = {
-            u'project_names': project_names,
-            u'version': version,
+            'project_names': project_names,
+            'version': version,
         }
         self._GenerateSection(
-            u'table_entry.txt', template_mappings, output_writer)
+            'table_entry.txt', template_mappings, output_writer)
 
     # TODO: sort by groups.
     for category in self._ORDER_OF_LIBRARY_CATEGORIES:
       template_mappings = {
-          u'category_title': self._CATEGORIES[category][0],
+          'category_title': self._CATEGORIES[category][0],
       }
-      self._GenerateSection(u'category.txt', template_mappings, output_writer)
+      self._GenerateSection('category.txt', template_mappings, output_writer)
 
       versions_per_library = self._GetVersionsPerLibrary(projects, category)
       for library, projects_per_version in sorted(
           versions_per_library.items()):
         template_mappings = {
-            u'title': library,
+            'title': library,
         }
         self._GenerateSection(
-            u'table_header.txt', template_mappings, output_writer)
+            'table_header.txt', template_mappings, output_writer)
 
         for version, project_names in sorted(
             projects_per_version.items(), reverse=True):
           project_names = self._FormatProjectNames(project_groups, project_names)
 
           template_mappings = {
-              u'project_names': project_names,
-              u'version': version,
+              'project_names': project_names,
+              'version': version,
           }
           self._GenerateSection(
-              u'table_entry.txt', template_mappings, output_writer)
+              'table_entry.txt', template_mappings, output_writer)
 
-    template_mappings = {u'category_title': u'Test scripts'}
-    self._GenerateSection(u'category.txt', template_mappings, output_writer)
+    template_mappings = {'category_title': 'Test scripts'}
+    self._GenerateSection('category.txt', template_mappings, output_writer)
 
     for script, projects_per_version in sorted(
         versions_per_test_script.items()):
       template_mappings = {
-          u'title': script,
+          'title': script,
       }
       self._GenerateSection(
-          u'table_header.txt', template_mappings, output_writer)
+          'table_header.txt', template_mappings, output_writer)
 
       for version, project_names in sorted(
           projects_per_version.items(), reverse=True):
         project_names = self._FormatProjectNames(project_groups, project_names)
 
         template_mappings = {
-            u'project_names': project_names,
-            u'version': version,
+            'project_names': project_names,
+            'version': version,
         }
         self._GenerateSection(
-            u'table_entry.txt', template_mappings, output_writer)
+            'table_entry.txt', template_mappings, output_writer)
 
 
 class FileWriter(object):
@@ -1115,7 +1136,7 @@ class StdoutWriter(object):
     Args:
       data (bytes): data to write.
     """
-    print(data, end=u'')
+    print(data, end='')
 
 
 def Main():
@@ -1125,40 +1146,40 @@ def Main():
     bool: True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
-      u'Generates an overview of the libyal libraries.'))
+      'Generates an overview of the libyal libraries.'))
 
   argument_parser.add_argument(
-      u'configuration_file', action=u'store', metavar=u'CONFIGURATION_FILE',
-      default=u'projects.ini', help=(
-          u'The overview generation configuration file.'))
+      'configuration_file', action='store', metavar='CONFIGURATION_FILE',
+      default='projects.ini', help=(
+          'The overview generation configuration file.'))
 
   argument_parser.add_argument(
-      u'-o', u'--output', dest=u'output_directory', action=u'store',
-      metavar=u'OUTPUT_DIRECTORY', default=None,
-      help=u'path of the output files to write to.')
+      '-o', '--output', dest='output_directory', action='store',
+      metavar='OUTPUT_DIRECTORY', default=None,
+      help='path of the output files to write to.')
 
   options = argument_parser.parse_args()
 
   if not options.configuration_file:
-    print(u'Configuration file missing.')
-    print(u'')
+    print('Configuration file missing.')
+    print('')
     argument_parser.print_help()
-    print(u'')
+    print('')
     return False
 
   if not os.path.exists(options.configuration_file):
-    print(u'No such configuration file: {0:s}.'.format(
+    print('No such configuration file: {0:s}.'.format(
         options.configuration_file))
-    print(u'')
+    print('')
     return False
 
   if options.output_directory and not os.path.exists(options.output_directory):
-    print(u'No such output directory: {0:s}.'.format(options.output_directory))
-    print(u'')
+    print('No such output directory: {0:s}.'.format(options.output_directory))
+    print('')
     return False
 
   logging.basicConfig(
-      level=logging.INFO, format=u'[%(levelname)s] %(message)s')
+      level=logging.INFO, format='[%(levelname)s] %(message)s')
 
   libyal_directory = os.path.abspath(__file__)
   libyal_directory = os.path.dirname(libyal_directory)
@@ -1168,31 +1189,31 @@ def Main():
 
   projects = projects_reader.ReadFromFile(options.configuration_file)
   if not projects:
-    print(u'Unable to read projects from configuration file: {0:s}.'.format(
+    print('Unable to read projects from configuration file: {0:s}.'.format(
         options.configuration_file))
-    print(u'')
+    print('')
     return False
 
   wiki_pages = [
-      (u'Overview', OverviewWikiPageGenerator),
-      (u'Status', StatusWikiPageGenerator),
+      ('Overview', OverviewWikiPageGenerator),
+      ('Status', StatusWikiPageGenerator),
   ]
 
   for page_name, page_generator_class in wiki_pages:
-    data_directory = os.path.join(libyal_directory, u'data')
-    template_directory = os.path.join(data_directory, u'wiki', page_name)
+    data_directory = os.path.join(libyal_directory, 'data')
+    template_directory = os.path.join(data_directory, 'wiki', page_name)
     wiki_page = page_generator_class(data_directory, template_directory)
 
     if options.output_directory:
-      filename = u'{0:s}.md'.format(page_name)
+      filename = '{0:s}.md'.format(page_name)
       output_file = os.path.join(options.output_directory, filename)
       output_writer = FileWriter(output_file)
     else:
       output_writer = StdoutWriter()
 
     if not output_writer.Open():
-      print(u'Unable to open output writer.')
-      print(u'')
+      print('Unable to open output writer.')
+      print('')
       return False
 
     wiki_page.Generate(projects, output_writer)
