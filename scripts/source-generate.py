@@ -88,6 +88,7 @@ class ProjectConfiguration(object):
     python_module_name (str): name of the Python module, such as "pyyal".
     python_module_year_of_creation (str): year the Python module was created.
     rpm_build_dependencies (str): rpm build dependencies.
+    supports_debug_output (bool): True if the project supports debug output.
     tests_authors (str): authors of the test files.
     tests_options (str): option sets used by the tests.
     tools_authors (str): authors of the tools.
@@ -102,6 +103,9 @@ class ProjectConfiguration(object):
     self.project_authors = None
     self.project_name = None
     self.project_year_of_creation = None
+
+    # Functionality the project offsers.
+    self.supports_debug_output = False
 
     self.library_description = None
     self.library_name = None
@@ -177,6 +181,11 @@ class ProjectConfiguration(object):
         config_parser, 'project', 'authors')
     self.project_year_of_creation = self._GetConfigValue(
         config_parser, 'project', 'year_of_creation')
+
+    features = self._GetConfigValue(
+        config_parser, u'project', u'features')
+
+    self.supports_debug_output = u'debug_output' in features
 
     self.library_description = self._GetConfigValue(
         config_parser, 'library', 'description')
@@ -2268,6 +2277,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
 
+    if project_configuration.supports_debug_output:
+      template_filename = os.path.join(
+          template_directory, 'check_debug_output.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     template_filename = os.path.join(
         template_directory, 'check_tests_support.ac')
     self._GenerateSection(
@@ -2372,6 +2388,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
 
+    # TODO: add support for Makefile in documents (libuna)
+
     template_filename = os.path.join(
         template_directory, 'config_files_end.ac')
     self._GenerateSection(
@@ -2410,6 +2428,21 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       description = '{0:s} are build as static executables'.format(
           project_configuration.tools_name)
       value = '$ac_cv_enable_static_executables'
+      features_information.append((description, value))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+    if project_configuration.supports_debug_output:
+      description = 'Verbose output'
+      value = '$ac_cv_enable_verbose_output'
+      features_information.append((description, value))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+      description = 'Debug output'
+      value = '$ac_cv_enable_debug_output'
       features_information.append((description, value))
 
       maximum_description_length = max(

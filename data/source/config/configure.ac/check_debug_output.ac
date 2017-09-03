@@ -1,0 +1,6 @@
+dnl Check if ${library_name} should be build with verbose output
+AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT
+
+dnl Check if ${library_name} should be build with debug output
+AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT
+
