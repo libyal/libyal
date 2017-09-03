@@ -1421,14 +1421,15 @@ class LibraryMakefileAMFile(object):
         elif line.startswith(library_sources):
           in_section = 'sources'
 
-    self.libraries = sorted(self.libraries)
-
 
 class MainMakefileAMFile(object):
   """Main Makefile.am file.
 
   Attributes:
     libraries (list[str]): library names.
+    library_dependencies (list[str]): names of the dependencies of the main
+        library.
+    tools_dependencies (list[str]): names of the dependencies of the tools.
   """
 
   def __init__(self, path):
@@ -1441,6 +1442,8 @@ class MainMakefileAMFile(object):
     self._library_name = None
     self._path = path
     self.libraries = []
+    self.library_dependencies = []
+    self.tools_dependencies = []
 
   def Read(self, project_configuration):
     """Reads the Makefile.am file.
@@ -1451,6 +1454,7 @@ class MainMakefileAMFile(object):
     self._library_name = project_configuration.library_name
 
     in_subdirs = False
+    in_library_dependencies = True
 
     with open(self._path, 'rb') as file_object:
       for line in file_object.readlines():
@@ -1463,13 +1467,19 @@ class MainMakefileAMFile(object):
           if not line:
             in_subdirs = False
 
-          elif line.startswith(b'lib') and line != self._library_name:
-            self.libraries.append(line)
+          elif line.startswith(b'lib'):
+            if line == self._library_name:
+              in_library_dependencies = False
+            else:
+              self.libraries.append(line)
+
+              if in_library_dependencies:
+                self.library_dependencies.append(line)
+              else:
+                self.tools_dependencies.append(line)
 
         elif line.startswith(b'SUBDIRS'):
           in_subdirs = True
-
-    self.libraries = sorted(self.libraries)
 
 
 class TypesIncludeHeaderFile(object):
@@ -2177,6 +2187,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
+    has_tools = self._HasTools(project_configuration)
+
     template_directory = os.path.join(self._template_directory, 'configure.ac')
 
     library_version = time.strftime('%Y%m%d', time.gmtime())
@@ -2213,8 +2225,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if makefile_am_file.libraries:
-      for name in makefile_am_file.libraries:
+    if makefile_am_file.library_dependencies:
+      for name in makefile_am_file.library_dependencies:
         template_mappings['local_library_name'] = name
         template_mappings['local_library_name_upper_case'] = name.upper()
 
@@ -2234,7 +2246,27 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     # TODO: python dependencies
-    # TODO: for each tool dependency
+
+    if has_tools:
+      if makefile_am_file.tools_dependencies:
+        for name in makefile_am_file.tools_dependencies:
+          template_mappings['local_library_name'] = name
+          template_mappings['local_library_name_upper_case'] = name.upper()
+
+          template_filename = os.path.join(
+              template_directory, 'check_dependency_support.ac')
+          self._GenerateSection(
+              template_filename, template_mappings, output_writer,
+              output_filename, access_mode='ab')
+
+        del template_mappings['local_library_name']
+        del template_mappings['local_library_name_upper_case']
+
+      template_filename = os.path.join(
+          template_directory, 'check_tools_support.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer,
+          output_filename, access_mode='ab')
 
     template_filename = os.path.join(
         template_directory, 'check_tests_support.ac')
@@ -2254,24 +2286,40 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if makefile_am_file.libraries:
+    if makefile_am_file.library_dependencies:
       local_library_tests = []
-      for name in makefile_am_file.libraries:
+      for name in makefile_am_file.library_dependencies:
         local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
         local_library_tests.append(local_library_test)
 
-      template_mappings['local_library_tests'] = ' && '.join(
+      template_mappings['local_library_tests'] = ' || '.join(
           local_library_tests)
 
       template_filename = os.path.join(
-          template_directory, 'spec_requires.ac')
+          template_directory, 'spec_requires_library.ac')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
       del template_mappings['local_library_tests']
 
-    # TODO: tool spec dependencies
+    if has_tools:
+      if makefile_am_file.tools_dependencies:
+        local_library_tests = []
+        for name in makefile_am_file.tools_dependencies:
+          local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
+          local_library_tests.append(local_library_test)
+
+        template_mappings['local_library_tests'] = ' || '.join(
+            local_library_tests)
+
+        template_filename = os.path.join(
+            template_directory, 'spec_requires_tools.ac')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
+
+        del template_mappings['local_library_tests']
 
     template_filename = os.path.join(
         template_directory, 'dates.ac')
@@ -2285,8 +2333,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if makefile_am_file.libraries:
-      for name in makefile_am_file.libraries:
+    if makefile_am_file.library_dependencies:
+      for name in makefile_am_file.library_dependencies:
         template_mappings['local_library_name'] = name
 
         template_filename = os.path.join(
@@ -2304,7 +2352,25 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     # TODO: python dependencies
-    # TODO: for each tool dependency
+
+    if has_tools:
+      if makefile_am_file.tools_dependencies:
+        for name in makefile_am_file.tools_dependencies:
+          template_mappings['local_library_name'] = name
+
+          template_filename = os.path.join(
+              template_directory, 'config_files_dependency.ac')
+          self._GenerateSection(
+              template_filename, template_mappings, output_writer,
+              output_filename, access_mode='ab')
+
+        del template_mappings['local_library_name']
+
+      template_filename = os.path.join(
+          template_directory, 'config_files_tools.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer,
+          output_filename, access_mode='ab')
 
     template_filename = os.path.join(
         template_directory, 'config_files_end.ac')
@@ -2339,6 +2405,15 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     maximum_description_length = max(
         maximum_description_length, len(description))
+
+    if has_tools:
+      description = '{0:s} are build as static executables'.format(
+          project_configuration.tools_name)
+      value = '$ac_cv_enable_static_executables'
+      features_information.append((description, value))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
 
     notice_message = []
 
@@ -2498,7 +2573,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
 
     pc_libs_private = []
-    for library in makefile_am_file.libraries:
+    for library in sorted(makefile_am_file.libraries):
       if library == 'libdl':
         continue
 
@@ -4836,8 +4911,9 @@ class ScriptFileGenerator(SourceFileGenerator):
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings()
-    template_mappings['local_libs'] = ' '.join(makefile_am_file.libraries)
-    template_mappings['shared_libs'] = ' '.join(makefile_am_file.libraries)
+    libraries = ' '.join(sorted(makefile_am_file.libraries))
+    template_mappings['local_libs'] = libraries
+    template_mappings['shared_libs'] = libraries
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(

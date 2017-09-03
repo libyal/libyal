@@ -1,0 +1,7 @@
+AS_IF(
+ [${local_library_tests}],
+ [AC_SUBST(
+  [${library_name}_tools_spec_build_requires],
+  [BuildRequires:])
+ ])
+

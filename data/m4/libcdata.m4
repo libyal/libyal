@@ -458,7 +458,7 @@ AC_DEFUN([AX_LIBCDATA_CHECK_LIB],
   ])
 
 dnl Function to detect if libcdata dependencies are available
-AC_DEFUN([AX_LIBDATA_CHECK_LOCAL],
+AC_DEFUN([AX_LIBCDATA_CHECK_LOCAL],
   [dnl No additional checks.
 
   ac_cv_libcdata_CPPFLAGS="-I../libcdata";
