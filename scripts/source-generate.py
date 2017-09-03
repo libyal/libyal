@@ -2255,12 +2255,23 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     if makefile_am_file.libraries:
-      # TODO: generate test statements
+      local_library_tests = []
+      for name in makefile_am_file.libraries:
+        local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
+        local_library_tests.append(local_library_test)
+
+      template_mappings['local_library_tests'] = ' && '.join(
+          local_library_tests)
+
       template_filename = os.path.join(
           template_directory, 'spec_requires.ac')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
+
+      del template_mappings['local_library_tests']
+
+    # TODO: tool spec dependencies
 
     template_filename = os.path.join(
         template_directory, 'dates.ac')
@@ -2301,32 +2312,57 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: handle alignment.
+    maximum_description_length = 0
+
     build_information = []
     for name in makefile_am_file.libraries:
-      line = '   {0:s} support:           $ac_cv_{0:s}'.format(name)
-      build_information.append(line)
+      description = '{0:s} support'.format(name)
+      value = '$ac_cv_{0:s}'.format(name)
+      build_information.append((description, value))
 
-    if build_information:
-      build_information.insert(0, 'Building:')
-      build_information.append('')
+      maximum_description_length = max(
+          maximum_description_length, len(description))
 
     features_information = []
-
     if (project_configuration.library_name == 'libcthreads' or
         'libcthreads' in makefile_am_file.libraries):
-      line = (
-          '   Multi-threading support:     $ac_cv_libcthreads_multi_threading')
-      features_information.append(line)
+      description = 'Multi-threading support'
+      value = '$ac_cv_libcthreads_multi_threading'
+      features_information.append((description, value))
 
-    line = '   Wide character type support: $ac_cv_enable_wide_character_type'
-    features_information.append(line)
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+    description = 'Wide character type support'
+    value = '$ac_cv_enable_wide_character_type'
+    features_information.append((description, value))
+
+    maximum_description_length = max(
+        maximum_description_length, len(description))
+
+    notice_message = []
+
+    if build_information:
+      notice_message.append('Building:')
+
+      for description, value in build_information:
+        padding_length = maximum_description_length - len(description)
+        padding = ' ' * padding_length
+
+        notice_line = '   {0:s}: {1:s}{2:s}'.format(description, padding, value)
+        notice_message.append(notice_line)
+
+      notice_message.append('')
 
     if features_information:
-      features_information.insert(0, 'Features:')
+      notice_message.append('Features:')
 
-    notice_message = list(build_information)
-    notice_message.extend(features_information)
+      for description, value in features_information:
+        padding_length = maximum_description_length - len(description)
+        padding = ' ' * padding_length
+
+        notice_line = '   {0:s}: {1:s}{2:s}'.format(description, padding, value)
+        notice_message.append(notice_line)
 
     template_mappings['notice_message'] = '\n'.join(notice_message)
 
@@ -4801,6 +4837,7 @@ class ScriptFileGenerator(SourceFileGenerator):
 
     template_mappings = project_configuration.GetTemplateMappings()
     template_mappings['local_libs'] = ' '.join(makefile_am_file.libraries)
+    template_mappings['shared_libs'] = ' '.join(makefile_am_file.libraries)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
@@ -4816,6 +4853,11 @@ class ScriptFileGenerator(SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
+
+      if output_filename.endswith('.sh'):
+        # Set x-bit for .sh scripts.
+        stat_info = os.stat(output_filename)
+        os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
 
 class TestsSourceFileGenerator(SourceFileGenerator):
