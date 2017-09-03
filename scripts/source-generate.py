@@ -1635,6 +1635,26 @@ class SourceFileGenerator(object):
 
     return self._library_makefile_am_file
 
+  def _GetMainMakefileAM(self, project_configuration):
+    """Retrieves the main Makefile.am file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      MainMakefileAMFile: main Makefile.am file or None if the main
+          Makefile.am file cannot be found.
+    """
+    # TODO: cache MainMakefileAMFile object and makefile_am_path
+    makefile_am_path = os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        'Makefile.am')
+
+    makefile_am_file = MainMakefileAMFile(makefile_am_path)
+    makefile_am_file.Read(project_configuration)
+
+    return makefile_am_file
+
   def _GetTypeLibraryHeaderFile(self, project_configuration, type_name):
     """Retrieves a type specific library include header file.
 
@@ -2143,6 +2163,181 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+  def _GenerateConfigureAC(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the configure.ac configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    makefile_am_file = self._GetMainMakefileAM(project_configuration)
+
+    template_directory = os.path.join(self._template_directory, 'configure.ac')
+
+    library_version = time.strftime('%Y%m%d', time.gmtime())
+    template_mappings['library_version'] = library_version
+
+    template_filename = os.path.join(
+        template_directory, 'header.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    del template_mappings['library_version']
+
+    template_filename = os.path.join(
+        template_directory, 'programs.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'compiler_language.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'build_features.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'check_common_support.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if makefile_am_file.libraries:
+      for name in makefile_am_file.libraries:
+        template_mappings['local_library_name'] = name
+        template_mappings['local_library_name_upper_case'] = name.upper()
+
+        template_filename = os.path.join(
+            template_directory, 'check_dependency_support.ac')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+      del template_mappings['local_library_name']
+      del template_mappings['local_library_name_upper_case']
+
+    template_filename = os.path.join(
+        template_directory, 'check_library_support.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: python dependencies
+    # TODO: for each tool dependency
+
+    template_filename = os.path.join(
+        template_directory, 'check_tests_support.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'dll_support.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'compiler_flags.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if makefile_am_file.libraries:
+      # TODO: generate test statements
+      template_filename = os.path.join(
+          template_directory, 'spec_requires.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'dates.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'config_files_start.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if makefile_am_file.libraries:
+      for name in makefile_am_file.libraries:
+        template_mappings['local_library_name'] = name
+
+        template_filename = os.path.join(
+            template_directory, 'config_files_dependency.ac')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+      del template_mappings['local_library_name']
+
+    template_filename = os.path.join(
+        template_directory, 'config_files_library.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: python dependencies
+    # TODO: for each tool dependency
+
+    template_filename = os.path.join(
+        template_directory, 'config_files_end.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: handle alignment.
+    build_information = []
+    for name in makefile_am_file.libraries:
+      line = '   {0:s} support:           $ac_cv_{0:s}'.format(name)
+      build_information.append(line)
+
+    if build_information:
+      build_information.insert(0, 'Building:')
+      build_information.append('')
+
+    features_information = []
+
+    if (project_configuration.library_name == 'libcthreads' or
+        'libcthreads' in makefile_am_file.libraries):
+      line = (
+          '   Multi-threading support:     $ac_cv_libcthreads_multi_threading')
+      features_information.append(line)
+
+    line = '   Wide character type support: $ac_cv_enable_wide_character_type'
+    features_information.append(line)
+
+    if features_information:
+      features_information.insert(0, 'Features:')
+
+    notice_message = list(build_information)
+    notice_message.extend(features_information)
+
+    template_mappings['notice_message'] = '\n'.join(notice_message)
+
+    template_filename = os.path.join(
+        template_directory, 'footer.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['notice_message']
+
   def _GenerateDpkg(
       self, project_configuration, template_mappings, output_writer,
       output_directory):
@@ -2263,6 +2458,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     template_mappings = project_configuration.GetTemplateMappings(
         authors_separator=',\n *                          ')
+
     template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
 
     pc_libs_private = []
@@ -2296,6 +2492,10 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer,
         'appveyor.yml')
+
+    self._GenerateConfigureAC(
+        project_configuration, template_mappings, output_writer,
+        'configure.ac')
 
     self._GenerateDpkg(
         project_configuration, template_mappings, output_writer, 'dpkg')
@@ -2461,12 +2661,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
               self._library_include_header_path))
       return
 
-    makefile_am_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        'Makefile.am')
-
-    makefile_am_file = MainMakefileAMFile(makefile_am_path)
-    makefile_am_file.Read(project_configuration)
+    makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings(
         authors_separator=',\n *                          ')
@@ -4602,12 +4797,7 @@ class ScriptFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    makefile_am_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        'Makefile.am')
-
-    makefile_am_file = MainMakefileAMFile(makefile_am_path)
-    makefile_am_file.Read(project_configuration)
+    makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
     template_mappings = project_configuration.GetTemplateMappings()
     template_mappings['local_libs'] = ' '.join(makefile_am_file.libraries)

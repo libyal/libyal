@@ -1,0 +1,7 @@
+AC_OUTPUT
+
+dnl Print a summary
+AC_MSG_NOTICE([
+${notice_message}
+]);
+

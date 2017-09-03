@@ -1,0 +1,4 @@
+dnl Generate Makefiles
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([include/Makefile])
+AC_CONFIG_FILES([common/Makefile])

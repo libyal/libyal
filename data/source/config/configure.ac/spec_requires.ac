@@ -1,0 +1,11 @@
+dnl Check if requires and build requires should be set in spec file
+AS_IF(
+ [test "x$$ac_cv_libcerror" = xyes],
+ [AC_SUBST(
+  [${library_name}_spec_requires],
+  [Requires:])
+ AC_SUBST(
+  [${library_name}_spec_build_requires],
+  [BuildRequires:])
+ ])
+

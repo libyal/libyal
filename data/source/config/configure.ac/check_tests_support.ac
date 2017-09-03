@@ -1,0 +1,3 @@
+dnl Check for test function support
+AX_TESTS_CHECK_LOCAL
+

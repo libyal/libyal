@@ -1,0 +1,21 @@
+dnl Check if DLL support is needed
+AS_IF(
+ [test "x$$enable_shared" = xyes],
+ [AS_CASE(
+  [$$host],
+  [*cygwin* | *mingw*],
+  [AC_DEFINE(
+   [HAVE_DLLMAIN],
+   [1],
+   [Define to 1 to enable the DllMain function.])
+  AC_SUBST(
+   [HAVE_DLLMAIN],
+   [1])
+
+  dnl Used in tests
+  AC_SUBST(
+   [${library_name_upper_case}_DLL_IMPORT],
+   ["-D${library_name_upper_case}_DLL_IMPORT"])
+  ])
+ ])
+

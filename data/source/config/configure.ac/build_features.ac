@@ -1,0 +1,12 @@
+dnl Check for large file support
+AC_SYS_LARGEFILE
+
+dnl Check if WINAPI support should be enabled
+AX_COMMON_CHECK_ENABLE_WINAPI
+
+dnl Check if wide character type should be enabled
+AX_COMMON_CHECK_ENABLE_WIDE_CHARACTER_TYPE
+
+dnl Check for type definitions
+AX_TYPES_CHECK_LOCAL
+

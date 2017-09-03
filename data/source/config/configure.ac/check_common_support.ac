@@ -1,0 +1,3 @@
+dnl Check if common headers and functions are available
+AX_COMMON_CHECK_LOCAL
+
