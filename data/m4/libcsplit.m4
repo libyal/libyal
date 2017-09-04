@@ -13,8 +13,8 @@ AC_DEFUN([AX_LIBCSPLIT_CHECK_LIB],
       [CFLAGS="$CFLAGS -I${ac_cv_with_libcsplit}/include"
       LDFLAGS="$LDFLAGS -L${ac_cv_with_libcsplit}/lib"],
       [AC_MSG_WARN([no such directory: $ac_cv_with_libcsplit])
-      ])
     ])
+  ])
 
   AS_IF(
     [test "x$ac_cv_with_libcsplit" = xno],
@@ -26,13 +26,38 @@ AC_DEFUN([AX_LIBCSPLIT_CHECK_LIB],
         [libcsplit],
         [libcsplit >= 20120701],
         [ac_cv_libcsplit=yes],
+        [ac_cv_libcsplit=check])
+    ])
+
+    AS_IF(
+      [test "x$ac_cv_libcsplit" = xyes && test "x$ac_cv_enable_wide_character_type" != xno],
+      [AC_CACHE_CHECK(
+       [whether libcsplit/features.h defines LIBCSPLIT_HAVE_WIDE_CHARACTER_TYPE as 1],
+       [ac_cv_header_libcsplit_features_h_have_wide_character_type],
+       [AC_LANG_PUSH(C)
+       AC_COMPILE_IFELSE(
+         [AC_LANG_PROGRAM(
+           [[#include <libcsplit/features.h>]],
+           [[#if !defined( LIBCSPLIT_HAVE_WIDE_CHARACTER_TYPE ) || ( LIBCSPLIT_HAVE_WIDE_CHARACTER_TYPE != 1 )
+#error LIBCSPLIT_HAVE_WIDE_CHARACTER_TYPE not defined
+##endif]] )],
+         [ac_cv_header_libcsplit_features_h_have_wide_character_type=yes],
+         [ac_cv_header_libcsplit_features_h_have_wide_character_type=no])
+       AC_LANG_POP(C)],
+       [ac_cv_header_libcsplit_features_h_have_wide_character_type=no])
+
+      AS_IF(
+        [test "x$ac_cv_header_libcsplit_features_h_have_wide_character_type" = xno],
         [ac_cv_libcsplit=no])
-      ])
+    ])
 
     AS_IF(
       [test "x$ac_cv_libcsplit" = xyes],
       [ac_cv_libcsplit_CPPFLAGS="$pkg_cv_libcsplit_CFLAGS"
-      ac_cv_libcsplit_LIBADD="$pkg_cv_libcsplit_LIBS"],
+      ac_cv_libcsplit_LIBADD="$pkg_cv_libcsplit_LIBS"])
+
+    AS_IF(
+      [test "x$ac_cv_libcsplit" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libcsplit.h])
 

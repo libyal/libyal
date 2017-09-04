@@ -1,6 +1,6 @@
 dnl Checks for libcdatetime or required headers and functions
 dnl
-dnl Version: 20170903
+dnl Version: 20170904
 
 dnl Function to detect if libcdatetime is available
 dnl ac_libcdatetime_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -26,13 +26,16 @@ AC_DEFUN([AX_LIBCDATETIME_CHECK_LIB],
         [libcdatetime],
         [libcdatetime >= 20141018],
         [ac_cv_libcdatetime=yes],
-        [ac_cv_libcdatetime=no])
+        [ac_cv_libcdatetime=check])
       ])
 
     AS_IF(
       [test "x$ac_cv_libcdatetime" = xyes],
       [ac_cv_libcdatetime_CPPFLAGS="$pkg_cv_libcdatetime_CFLAGS"
-      ac_cv_libcdatetime_LIBADD="$pkg_cv_libcdatetime_LIBS"],
+      ac_cv_libcdatetime_LIBADD="$pkg_cv_libcdatetime_LIBS"])
+
+    AS_IF(
+      [test "x$ac_cv_libcdatetime" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libcdatetime.h])
 

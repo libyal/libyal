@@ -1,6 +1,6 @@
 dnl Checks for libclocale or required headers and functions
 dnl
-dnl Version: 20170903
+dnl Version: 20170904
 
 dnl Function to detect if libclocale is available
 dnl ac_libclocale_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -26,13 +26,38 @@ AC_DEFUN([AX_LIBCLOCALE_CHECK_LIB],
         [libclocale],
         [libclocale >= 20120425],
         [ac_cv_libclocale=yes],
-        [ac_cv_libclocale=no])
+        [ac_cv_libclocale=check])
       ])
+
+    AS_IF(
+      [test "x$ac_cv_libclocale" = xyes && test "x$ac_cv_enable_wide_character_type" != xno],
+      [AC_CACHE_CHECK(
+       [whether libclocale/features.h defines LIBCLOCALE_HAVE_WIDE_CHARACTER_TYPE as 1],
+       [ac_cv_header_libclocale_features_h_have_wide_character_type],
+       [AC_LANG_PUSH(C)
+       AC_COMPILE_IFELSE(
+         [AC_LANG_PROGRAM(
+           [[#include <libclocale/features.h>]],
+           [[#if !defined( LIBCLOCALE_HAVE_WIDE_CHARACTER_TYPE ) || ( LIBCLOCALE_HAVE_WIDE_CHARACTER_TYPE != 1 )
+#error LIBCLOCALE_HAVE_WIDE_CHARACTER_TYPE not defined
+##endif]] )],
+         [ac_cv_header_libclocale_features_h_have_wide_character_type=yes],
+         [ac_cv_header_libclocale_features_h_have_wide_character_type=no])
+       AC_LANG_POP(C)],
+       [ac_cv_header_libclocale_features_h_have_wide_character_type=no])
+
+      AS_IF(
+        [test "x$ac_cv_header_libclocale_features_h_have_wide_character_type" = xno],
+        [ac_cv_libclocale=no])
+    ])
 
     AS_IF(
       [test "x$ac_cv_libclocale" = xyes],
       [ac_cv_libclocale_CPPFLAGS="$pkg_cv_libclocale_CFLAGS"
-      ac_cv_libclocale_LIBADD="$pkg_cv_libclocale_LIBS"],
+      ac_cv_libclocale_LIBADD="$pkg_cv_libclocale_LIBS"])
+
+    AS_IF(
+      [test "x$ac_cv_libclocale" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libclocale.h])
 

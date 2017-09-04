@@ -1,6 +1,6 @@
 dnl Checks for libcthreads or required headers and functions
 dnl
-dnl Version: 20170903
+dnl Version: 20170904
 
 dnl Function to detect if libcthreads is available
 dnl ac_libcthreads_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -26,13 +26,16 @@ AC_DEFUN([AX_LIBCTHREADS_CHECK_LIB],
         [libcthreads],
         [libcthreads >= 20160404],
         [ac_cv_libcthreads=yes],
-        [ac_cv_libcthreads=no])
+        [ac_cv_libcthreads=check])
       ])
 
     AS_IF(
       [test "x$ac_cv_libcthreads" = xyes],
       [ac_cv_libcthreads_CPPFLAGS="$pkg_cv_libcthreads_CFLAGS"
-      ac_cv_libcthreads_LIBADD="$pkg_cv_libcthreads_LIBS"],
+      ac_cv_libcthreads_LIBADD="$pkg_cv_libcthreads_LIBS"])
+
+    AS_IF(
+      [test "x$ac_cv_libcthreads" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libcthreads.h])
 

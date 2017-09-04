@@ -1,6 +1,6 @@
 dnl Checks for libcpath or required headers and functions
 dnl
-dnl Version: 20170903
+dnl Version: 20170904
 
 dnl Function to detect if libcpath is available
 dnl ac_libcpath_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -26,13 +26,38 @@ AC_DEFUN([AX_LIBCPATH_CHECK_LIB],
         [libcpath],
         [libcpath >= 20120701],
         [ac_cv_libcpath=yes],
-        [ac_cv_libcpath=no])
+        [ac_cv_libcpath=check])
       ])
+
+    AS_IF(
+      [test "x$ac_cv_libcpath" = xyes && test "x$ac_cv_enable_wide_character_type" != xno],
+      [AC_CACHE_CHECK(
+       [whether libcpath/features.h defines LIBCPATH_HAVE_WIDE_CHARACTER_TYPE as 1],
+       [ac_cv_header_libcpath_features_h_have_wide_character_type],
+       [AC_LANG_PUSH(C)
+       AC_COMPILE_IFELSE(
+         [AC_LANG_PROGRAM(
+           [[#include <libcpath/features.h>]],
+           [[#if !defined( LIBCPATH_HAVE_WIDE_CHARACTER_TYPE ) || ( LIBCPATH_HAVE_WIDE_CHARACTER_TYPE != 1 )
+#error LIBCPATH_HAVE_WIDE_CHARACTER_TYPE not defined
+##endif]] )],
+         [ac_cv_header_libcpath_features_h_have_wide_character_type=yes],
+         [ac_cv_header_libcpath_features_h_have_wide_character_type=no])
+       AC_LANG_POP(C)],
+       [ac_cv_header_libcpath_features_h_have_wide_character_type=no])
+
+      AS_IF(
+        [test "x$ac_cv_header_libcpath_features_h_have_wide_character_type" = xno],
+        [ac_cv_libcpath=no])
+    ])
 
     AS_IF(
       [test "x$ac_cv_libcpath" = xyes],
       [ac_cv_libcpath_CPPFLAGS="$pkg_cv_libcpath_CFLAGS"
-      ac_cv_libcpath_LIBADD="$pkg_cv_libcpath_LIBS"],
+      ac_cv_libcpath_LIBADD="$pkg_cv_libcpath_LIBS"])
+
+    AS_IF(
+      [test "x$ac_cv_libcpath" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libcpath.h])
 
