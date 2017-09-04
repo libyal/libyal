@@ -2200,6 +2200,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
+    has_python_module = self._HasPythonModule(project_configuration)
     has_tools = self._HasTools(project_configuration)
 
     template_directory = os.path.join(self._template_directory, 'configure.ac')
@@ -2271,7 +2272,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: python dependencies
+    if has_python_module:
+      template_filename = os.path.join(
+          template_directory, 'check_python_support.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     if has_tools:
       if makefile_am_file.tools_dependencies:
@@ -2337,6 +2343,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       del template_mappings['local_library_tests']
 
     if has_tools:
+      # TODO: add support for libcrypto for libcaes
       if makefile_am_file.tools_dependencies:
         local_library_tests = []
         for name in makefile_am_file.tools_dependencies:
@@ -2384,7 +2391,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: python dependencies
+    if has_python_module:
+      template_filename = os.path.join(
+          template_directory, 'config_files_python.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     if has_tools:
       if makefile_am_file.tools_dependencies:
@@ -2424,6 +2436,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       maximum_description_length = max(
           maximum_description_length, len(description))
 
+      # TODO: add support for
+      # AES support:                       $ac_cv_libcaes_aes
+
     features_information = []
     if (project_configuration.library_name == 'libcthreads' or
         'libcthreads' in makefile_am_file.libraries):
@@ -2461,6 +2476,31 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       description = 'Debug output'
       value = '$ac_cv_enable_debug_output'
+      features_information.append((description, value))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+    if has_python_module:
+      description = 'Python ({0:s}) support'.format(
+          project_configuration.python_module_name)
+      value = '$ac_cv_enable_python'
+      features_information.append((description, value))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+      description = 'Python version 2 ({0:s}) support'.format(
+          project_configuration.python_module_name)
+      value = '$ac_cv_enable_python2'
+      features_information.append((description, value))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+      description = 'Python version 3 ({0:s}) support'.format(
+          project_configuration.python_module_name)
+      value = '$ac_cv_enable_python3'
       features_information.append((description, value))
 
       maximum_description_length = max(

@@ -158,6 +158,11 @@ AC_DEFUN([AX_LIBCAES_CHECK_LOCAL],
   AS_IF(
     [test "x$ac_cv_libcaes_aes" = xno],
     [ac_cv_libcaes_aes=local])
+
+  ac_cv_libcaes_CPPFLAGS="-I../libcaes";
+  ac_cv_libcaes_LIBADD="../libcaes/libcaes.la";
+
+  ac_cv_libcaes=local
   ])
 
 dnl Function to detect how to enable libcaes
@@ -187,11 +192,6 @@ AC_DEFUN([AX_LIBCAES_CHECK_ENABLE],
     AC_SUBST(
       [HAVE_LOCAL_LIBCAES],
       [1])
-
-    ac_cv_libcaes_CPPFLAGS="-I../libcaes";
-    ac_cv_libcaes_LIBADD="../libcaes/libcaes.la";
-
-    ac_cv_libcaes=local
     ])
 
   AM_CONDITIONAL(
