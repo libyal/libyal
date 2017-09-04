@@ -461,13 +461,6 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
               '(https://travis-ci.org/libyal/{0:s})').format(
                   project.name)
 
-        # TODO: solve this in a more elegant way.
-        if project.name == 'libtableau':
-          appveyor_build_status = ''
-          codecov_status = ''
-          coverity_status = ''
-          travis_build_status = ''
-
         template_mappings = {
             'appveyor_build_status': appveyor_build_status,
             'codecov_status': codecov_status,

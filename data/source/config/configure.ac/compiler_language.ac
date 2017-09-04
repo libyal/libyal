@@ -1,5 +1,4 @@
 dnl Check for compiler language support
 AC_C_CONST
-AC_C_INLINE
 AC_C_VOLATILE
 

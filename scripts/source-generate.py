@@ -1288,6 +1288,7 @@ class LibraryIncludeHeaderFile(object):
 
             elif line.endswith(' );'):
               if not in_define_deprecated:
+                # TODO: handle section_name is None
                 self.functions_per_name[function_prototype.name] = (
                     function_prototype)
 
@@ -2194,6 +2195,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
+    include_header_file = self._GetLibraryIncludeHeaderFile(
+        project_configuration)
+
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
     has_tools = self._HasTools(project_configuration)
@@ -2224,6 +2228,19 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     template_filename = os.path.join(
         template_directory, 'build_features.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if include_header_file and include_header_file.have_wide_character_type:
+      template_filename = os.path.join(
+          template_directory, 'check_wide_character_support.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'check_types_support.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2417,12 +2434,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       maximum_description_length = max(
           maximum_description_length, len(description))
 
-    description = 'Wide character type support'
-    value = '$ac_cv_enable_wide_character_type'
-    features_information.append((description, value))
+    if include_header_file and include_header_file.have_wide_character_type:
+      description = 'Wide character type support'
+      value = '$ac_cv_enable_wide_character_type'
+      features_information.append((description, value))
 
-    maximum_description_length = max(
-        maximum_description_length, len(description))
+      maximum_description_length = max(
+          maximum_description_length, len(description))
 
     if has_tools:
       description = '{0:s} are build as static executables'.format(
