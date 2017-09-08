@@ -2466,21 +2466,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       maximum_description_length = max(
           maximum_description_length, len(description))
 
-    if project_configuration.supports_debug_output:
-      description = 'Verbose output'
-      value = '$ac_cv_enable_verbose_output'
-      features_information.append((description, value))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
-
-      description = 'Debug output'
-      value = '$ac_cv_enable_debug_output'
-      features_information.append((description, value))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
-
     if has_python_module:
       description = 'Python ({0:s}) support'.format(
           project_configuration.python_module_name)
@@ -2501,6 +2486,21 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       description = 'Python version 3 ({0:s}) support'.format(
           project_configuration.python_module_name)
       value = '$ac_cv_enable_python3'
+      features_information.append((description, value))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+    if project_configuration.supports_debug_output:
+      description = 'Verbose output'
+      value = '$ac_cv_enable_verbose_output'
+      features_information.append((description, value))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+      description = 'Debug output'
+      value = '$ac_cv_enable_debug_output'
       features_information.append((description, value))
 
       maximum_description_length = max(
