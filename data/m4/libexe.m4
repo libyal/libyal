@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBEXE_CHECK_LIB],
    ac_cv_libexe_LIBADD="$pkg_cv_libexe_LIBS"],
    [dnl Check for headers
    AC_CHECK_HEADERS([libexe.h])
-  
+
    AS_IF(
     [test "x$ac_cv_header_libexe_h" = xno],
     [ac_cv_libexe=no],
@@ -47,9 +47,9 @@ AC_DEFUN([AX_LIBEXE_CHECK_LIB],
      libexe_get_version,
      [ac_cv_libexe_dummy=yes],
      [ac_cv_libexe=no])
-   
+
     dnl TODO add functions
- 
+
     ac_cv_libexe_LIBADD="-lexe"
     ])
    ])

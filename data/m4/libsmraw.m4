@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBSMRAW_CHECK_LIB],
    ac_cv_libsmraw_LIBADD="$pkg_cv_libsmraw_LIBS"],
    [dnl Check for headers
    AC_CHECK_HEADERS([libsmraw.h])
-  
+
    AS_IF(
     [test "x$ac_cv_header_libsmraw_h" = xno],
     [ac_cv_libsmraw=no],
@@ -46,7 +46,7 @@ AC_DEFUN([AX_LIBSMRAW_CHECK_LIB],
      libsmraw_get_version,
      [ac_cv_libsmraw_dummy=yes],
      [ac_cv_libsmraw=no])
-  
+
     dnl Handle functions
     AC_CHECK_LIB(
      smraw,
@@ -88,7 +88,7 @@ AC_DEFUN([AX_LIBSMRAW_CHECK_LIB],
      libsmraw_handle_write_buffer,
      [ac_cv_libsmraw_dummy=yes],
      [ac_cv_libsmraw=no])
-  
+
     AS_IF(
      [test "x$ac_cv_enable_wide_character_type" != xno],
      [AC_CHECK_LIB(
@@ -97,7 +97,7 @@ AC_DEFUN([AX_LIBSMRAW_CHECK_LIB],
       [ac_cv_libsmraw_dummy=yes],
       [ac_cv_libsmraw=no])
      ])
-  
+
     AC_CHECK_LIB(
      smraw,
      libsmraw_handle_get_media_size,
@@ -118,7 +118,7 @@ AC_DEFUN([AX_LIBSMRAW_CHECK_LIB],
      libsmraw_handle_get_utf16_information_value
      [ac_cv_libsmraw_dummy=yes],
      [ac_cv_libsmraw=no])
-  
+
     AC_CHECK_LIB(
      smraw,
      libsmraw_handle_set_maximum_segment_size,

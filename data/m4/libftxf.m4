@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBFTXF_CHECK_LIB],
       ac_cv_libftxf_LIBADD="$pkg_cv_libftxf_LIBS"],
       [dnl Check for headers
       AC_CHECK_HEADERS([libftxf.h])
-  
+
     AS_IF(
         [test "x$ac_cv_header_libftxf_h" = xno],
         [ac_cv_libftxf=no],
@@ -47,7 +47,7 @@ AC_DEFUN([AX_LIBFTXF_CHECK_LIB],
           libftxf_get_version,
           [ac_cv_libftxf_dummy=yes],
           [ac_cv_libftxf=no])
-    
+
         dnl TODO add functions
 
         ac_cv_libftxf_LIBADD="-lftxf"

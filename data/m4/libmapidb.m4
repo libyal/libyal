@@ -20,7 +20,7 @@ AC_DEFUN([AX_LIBMAPIDB_CHECK_LIB],
   [ac_cv_libmapidb=no],
   [dnl Check for headers
   AC_CHECK_HEADERS([libmapidb.h])
- 
+
   AS_IF(
    [test "x$ac_cv_header_libmapidb_h" = xno],
    [ac_cv_libmapidb=no],
@@ -30,7 +30,7 @@ AC_DEFUN([AX_LIBMAPIDB_CHECK_LIB],
     libmapidb_get_version,
     [],
     [ac_cv_libmapidb=no])
-  
+
    dnl TODO add functions
    ])
   ])

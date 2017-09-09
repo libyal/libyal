@@ -1,6 +1,6 @@
 dnl Functions for libfole
 dnl
-dnl Version: 20170906
+dnl Version: 20170909
 
 dnl Function to detect if libfole is available
 dnl ac_libfole_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBFOLE_CHECK_LIB],
       ac_cv_libfole_LIBADD="$pkg_cv_libfole_LIBS"],
       [dnl Check for headers
       AC_CHECK_HEADERS([libfole.h])
-  
+
       AS_IF(
         [test "x$ac_cv_header_libfole_h" = xno],
         [ac_cv_libfole=no],
@@ -47,9 +47,9 @@ AC_DEFUN([AX_LIBFOLE_CHECK_LIB],
           libfole_get_version,
           [ac_cv_libfole_dummy=yes],
           [ac_cv_libfole=no])
-      
+
         dnl TODO add functions
-  
+
         ac_cv_libfole_LIBADD="-lfole"
         ])
       ])

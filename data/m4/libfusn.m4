@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBFUSN_CHECK_LIB],
       ac_cv_libfusn_LIBADD="$pkg_cv_libfusn_LIBS"],
       [dnl Check for headers
       AC_CHECK_HEADERS([libfusn.h])
-  
+
     AS_IF(
         [test "x$ac_cv_header_libfusn_h" = xno],
         [ac_cv_libfusn=no],
@@ -47,7 +47,7 @@ AC_DEFUN([AX_LIBFUSN_CHECK_LIB],
           libfusn_get_version,
           [ac_cv_libfusn_dummy=yes],
           [ac_cv_libfusn=no])
-    
+
         dnl TODO add functions
 
         ac_cv_libfusn_LIBADD="-lfusn"

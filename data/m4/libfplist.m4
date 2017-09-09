@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBFPLIST_CHECK_LIB],
       ac_cv_libfplist_LIBADD="$pkg_cv_libfplist_LIBS"],
       [dnl Check for headers
       AC_CHECK_HEADERS([libfplist.h])
-  
+
       AS_IF(
         [test "x$ac_cv_header_libfplist_h" = xno],
         [ac_cv_libfplist=no],
@@ -46,7 +46,7 @@ AC_DEFUN([AX_LIBFPLIST_CHECK_LIB],
           libfplist_get_version,
           [ac_cv_libfplist_dummy=yes],
           [ac_cv_libfplist=no])
-    
+
         dnl Plist functions
         AC_CHECK_LIB(
           fplist,
@@ -73,7 +73,7 @@ AC_DEFUN([AX_LIBFPLIST_CHECK_LIB],
           libfplist_property_list_get_root_property,
           [ac_cv_libfplist_dummy=yes],
           [ac_cv_libfplist=no])
-    
+
         dnl Key functions
         AC_CHECK_LIB(
           fplist,

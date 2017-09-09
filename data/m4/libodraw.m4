@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBODRAW_CHECK_LIB],
    ac_cv_libodraw_LIBADD="$pkg_cv_libodraw_LIBS"],
    [dnl Check for headers
    AC_CHECK_HEADERS([libodraw.h])
- 
+
    AS_IF(
     [test "x$ac_cv_header_libodraw_h" = xno],
     [ac_cv_libodraw=no],
@@ -46,7 +46,7 @@ AC_DEFUN([AX_LIBODRAW_CHECK_LIB],
      libodraw_get_version,
      [ac_cv_libodraw_dummy=yes],
      [ac_cv_libodraw=no])
-  
+
     dnl Handle functions
     AC_CHECK_LIB(
      odraw,
@@ -88,7 +88,7 @@ AC_DEFUN([AX_LIBODRAW_CHECK_LIB],
      libodraw_handle_seek_offset,
      [ac_cv_libodraw_dummy=yes],
      [ac_cv_libodraw=no])
-  
+
     AS_IF(
      [test "x$ac_cv_enable_wide_character_type" != xno],
      [AC_CHECK_LIB(
@@ -97,7 +97,7 @@ AC_DEFUN([AX_LIBODRAW_CHECK_LIB],
       [ac_cv_libodraw_dummy=yes],
       [ac_cv_libodraw=no])
      ])
-  
+
     AC_CHECK_LIB(
      odraw,
      libodraw_handle_get_bytes_per_sector,
@@ -138,7 +138,7 @@ AC_DEFUN([AX_LIBODRAW_CHECK_LIB],
      libodraw_handle_get_track,
      [ac_cv_libodraw_dummy=yes],
      [ac_cv_libodraw=no])
-  
+
     dnl Data file functions
     AC_CHECK_LIB(
      odraw,
@@ -150,7 +150,7 @@ AC_DEFUN([AX_LIBODRAW_CHECK_LIB],
      libodraw_data_file_set_filename,
      [ac_cv_libodraw_dummy=yes],
      [ac_cv_libodraw=no])
-  
+
     AS_IF(
      [test "x$ac_cv_enable_wide_character_type" != xno],
      [AC_CHECK_LIB(

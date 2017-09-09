@@ -23,7 +23,7 @@ AC_DEFUN([AX_LIBUUID_CHECK_LIB],
    [ac_cv_libuuid=librpcrt4
    ac_cv_libuuid_LIBADD=-lrpcrt4],
    [ac_cv_libuuid=no])
- 
+
   AS_IF(
    [test "x$ac_cv_libuuid" = xno],
    [dnl Check for a pkg-config file
@@ -42,7 +42,7 @@ AC_DEFUN([AX_LIBUUID_CHECK_LIB],
     ac_cv_libuuid_LIBADD="$pkg_cv_uuid_LIBS"],
     [dnl Check for headers
     AC_CHECK_HEADERS([uuid/uuid.h])
-  
+
     AS_IF(
      [test "x$ac_cv_header_uuid_uuid_h" != xno],
      [AC_CHECK_FUNC(
@@ -57,7 +57,7 @@ AC_DEFUN([AX_LIBUUID_CHECK_LIB],
       ])
      ])
     ])
-  
+
    AS_IF(
     [test "x$ac_cv_libuuid" != xno],
     [AC_DEFINE(
@@ -65,7 +65,7 @@ AC_DEFUN([AX_LIBUUID_CHECK_LIB],
      [1],
      [Define to 1 if GUID/UUID support is available.])
     ])
-  
+
    AS_IF(
     [test "x$ac_cv_libuuid" = xnative],
     [AC_CHECK_FUNC(
@@ -83,7 +83,7 @@ AC_DEFUN([AX_LIBUUID_CHECK_LIB],
       [Define to 1 if uuid_generate_time funtion is available.])
      ])
     ])
-   
+
    AS_IF(
     [test "x$ac_cv_libuuid" = xlibuuid],
     [AC_CHECK_LIB(

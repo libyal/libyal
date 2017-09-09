@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
       ac_cv_libfwevt_LIBADD="$pkg_cv_libfwevt_LIBS"],
       [dnl Check for headers
       AC_CHECK_HEADERS([libfwevt.h])
-  
+
     AS_IF(
         [test "x$ac_cv_header_libfwevt_h" = xno],
         [ac_cv_libfwevt=no],
@@ -47,7 +47,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_get_version,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Channel functions
         AC_CHECK_LIB(
           fwevt,
@@ -59,13 +59,13 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_channel_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_channel_read,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Event functions
         AC_CHECK_LIB(
           fwevt,
@@ -77,7 +77,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_event_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_event_read,
@@ -98,7 +98,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_event_get_template_offset,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Keyword functions
         AC_CHECK_LIB(
           fwevt,
@@ -110,13 +110,13 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_keyword_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_keyword_read,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Level functions
         AC_CHECK_LIB(
           fwevt,
@@ -128,13 +128,13 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_level_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_level_read,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Manifest functions
         AC_CHECK_LIB(
           fwevt,
@@ -146,7 +146,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_manifest_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_manifest_read,
@@ -167,7 +167,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_manifest_get_provider_by_identifier,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Map functions
         AC_CHECK_LIB(
           fwevt,
@@ -179,13 +179,13 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_map_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_map_read,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Opcode functions
         AC_CHECK_LIB(
           fwevt,
@@ -197,13 +197,13 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_opcode_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_opcode_read,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Provider functions
         AC_CHECK_LIB(
           fwevt,
@@ -215,7 +215,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_provider_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_provider_read,
@@ -261,7 +261,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_provider_read_templates,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_provider_compare_identifier,
@@ -357,7 +357,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_provider_get_template_by_offset,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Task functions
         AC_CHECK_LIB(
           fwevt,
@@ -369,13 +369,13 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_task_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_task_read,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl Template functions
         AC_CHECK_LIB(
           fwevt,
@@ -387,7 +387,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_template_free,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_template_read,
@@ -429,7 +429,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_template_get_size
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-      
+
         dnl XML document functions
         AC_CHECK_LIB(
           fwevt,
@@ -446,7 +446,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_xml_document_clone,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AC_CHECK_LIB(
           fwevt,
           libfwevt_xml_document_get_root_xml_tag,
@@ -477,7 +477,7 @@ AC_DEFUN([AX_LIBFWEVT_CHECK_LIB],
           libfwevt_xml_document_get_utf16_xml_string,
           [ac_cv_libfwevt_dummy=yes],
           [ac_cv_libfwevt=no])
-    
+
         AS_IF(
           [test "x$ac_cv_enable_debug_output" != xno ],
           [AC_CHECK_LIB(

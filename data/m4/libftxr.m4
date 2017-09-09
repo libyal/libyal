@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBFTXR_CHECK_LIB],
       ac_cv_libftxr_LIBADD="$pkg_cv_libftxr_LIBS"],
       [dnl Check for headers
       AC_CHECK_HEADERS([libftxr.h])
-  
+
     AS_IF(
         [test "x$ac_cv_header_libftxr_h" = xno],
         [ac_cv_libftxr=no],
@@ -47,7 +47,7 @@ AC_DEFUN([AX_LIBFTXR_CHECK_LIB],
           libftxr_get_version,
           [ac_cv_libftxr_dummy=yes],
           [ac_cv_libftxr=no])
-    
+
         dnl TODO add functions
 
         ac_cv_libftxr_LIBADD="-lftxr"

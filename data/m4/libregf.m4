@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBREGF_CHECK_LIB],
    ac_cv_libregf_LIBADD="$pkg_cv_libregf_LIBS"],
    [dnl Check for headers
    AC_CHECK_HEADERS([libregf.h])
- 
+
    AS_IF(
     [test "x$ac_cv_header_libregf_h" = xno],
     [ac_cv_libregf=no],
@@ -47,7 +47,7 @@ AC_DEFUN([AX_LIBREGF_CHECK_LIB],
      libregf_get_version,
      [ac_cv_libregf_dummy=yes],
      [ac_cv_libregf=no])
-  
+
     dnl TODO add functions
 
     ac_cv_libregf_LIBADD="-lregf"
@@ -83,14 +83,14 @@ AC_DEFUN([AX_LIBREGF_CHECK_LOCAL],
  dnl Functions used in libregf/libregf_file.h, libregf/libregf_key.h
  dnl libregf/libregf_key_item_values.h and libregf/libregf_value_item_values.h
  AC_CHECK_FUNCS([towupper])
- 
+
  AS_IF(
   [test "x$ac_cv_func_towupper" != xyes],
   [AC_MSG_FAILURE(
    [Missing functions: towupper],
    [1])
   ])
- 
+
  ac_cv_libregf_CPPFLAGS="-I../libregf";
  ac_cv_libregf_LIBADD="../libregf/libregf.la";
 

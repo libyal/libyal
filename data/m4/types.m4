@@ -67,7 +67,7 @@ AC_DEFUN([AX_TYPES_CHECK_LOCAL],
  AC_TYPE_MODE_T
  AC_TYPE_OFF_T
  AC_TYPE_SIZE_T
- 
+
  AC_CHECK_TYPE(
   [size32_t],
   [AC_SUBST(
@@ -77,7 +77,7 @@ AC_DEFUN([AX_TYPES_CHECK_LOCAL],
    [HAVE_SIZE32_T],
    [0])
   ])
- 
+
  AC_CHECK_TYPE(
   [ssize32_t],
   [AC_SUBST(
@@ -87,7 +87,7 @@ AC_DEFUN([AX_TYPES_CHECK_LOCAL],
    [HAVE_SSIZE32_T],
    [0])
   ])
- 
+
  AC_CHECK_TYPE(
   [size64_t],
   [AC_SUBST(
@@ -97,7 +97,7 @@ AC_DEFUN([AX_TYPES_CHECK_LOCAL],
    [HAVE_SIZE64_T],
    [0])
   ])
- 
+
  AC_CHECK_TYPE(
   [ssize64_t],
   [AC_SUBST(
@@ -107,7 +107,7 @@ AC_DEFUN([AX_TYPES_CHECK_LOCAL],
    [HAVE_SSIZE64_T],
    [0])
   ])
- 
+
  AC_CHECK_TYPE(
   [off64_t],
   [AC_SUBST(
@@ -117,14 +117,14 @@ AC_DEFUN([AX_TYPES_CHECK_LOCAL],
    [HAVE_OFF64_T],
    [0])
   ])
- 
+
  AC_CHECK_TYPE([ssize_t])
  AC_CHECK_TYPE([u64])
- 
+
  AC_CHECK_SIZEOF([int])
  AC_CHECK_SIZEOF([off_t])
  AC_CHECK_SIZEOF([size_t])
- 
+
  AS_IF(
   [test "x$ac_cv_header_wchar_h" = xyes],
   [AC_CHECK_SIZEOF([wchar_t])])

@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBWRC_CHECK_LIB],
    ac_cv_libwrc_LIBADD="$pkg_cv_libwrc_LIBS"],
    [dnl Check for headers
    AC_CHECK_HEADERS([libwrc.h])
- 
+
    AS_IF(
     [test "x$ac_cv_header_libwrc_h" = xno],
     [ac_cv_libwrc=no],
@@ -47,7 +47,7 @@ AC_DEFUN([AX_LIBWRC_CHECK_LIB],
      libwrc_get_version,
      [ac_cv_libwrc_dummy=yes],
      [ac_cv_libwrc=no])
-  
+
     dnl TODO add functions
 
     ac_cv_libwrc_LIBADD="-lwrc"

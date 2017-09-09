@@ -35,7 +35,7 @@ AC_DEFUN([AX_LIBSMDEV_CHECK_LIB],
    ac_cv_libsmdev_LIBADD="$pkg_cv_libsmdev_LIBS"],
    [dnl Check for headers
    AC_CHECK_HEADERS([libsmdev.h])
-  
+
    AS_IF(
     [test "x$ac_cv_header_libsmdev_h" = xno],
     [ac_cv_libsmdev=no],
@@ -46,13 +46,13 @@ AC_DEFUN([AX_LIBSMDEV_CHECK_LIB],
      libsmdev_get_version,
      [ac_cv_libsmdev_dummy=yes],
      [ac_cv_libsmdev=no])
-  
+
     AC_CHECK_LIB(
      smdev,
      libsmdev_check_device,
      [ac_cv_libsmdev_dummy=yes],
      [ac_cv_libsmdev=no])
-  
+
     AS_IF(
      [test "x$ac_cv_enable_wide_character_type" != xno],
      [AC_CHECK_LIB(
@@ -61,7 +61,7 @@ AC_DEFUN([AX_LIBSMDEV_CHECK_LIB],
       [ac_cv_libsmdev_dummy=yes],
       [ac_cv_libsmdev=no])
      ])
-  
+
     dnl Handle functions
     AC_CHECK_LIB(
      smdev,
@@ -78,7 +78,7 @@ AC_DEFUN([AX_LIBSMDEV_CHECK_LIB],
      libsmdev_handle_signal_abort,
      [ac_cv_libsmdev_dummy=yes],
      [ac_cv_libsmdev=no])
-  
+
     AC_CHECK_LIB(
      smdev,
      libsmdev_handle_open,
@@ -99,7 +99,7 @@ AC_DEFUN([AX_LIBSMDEV_CHECK_LIB],
      libsmdev_handle_seek_offset,
      [ac_cv_libsmdev_dummy=yes],
      [ac_cv_libsmdev=no])
-  
+
     AS_IF(
      [test "x$ac_cv_enable_wide_character_type" != xno],
      [AC_CHECK_LIB(
@@ -108,7 +108,7 @@ AC_DEFUN([AX_LIBSMDEV_CHECK_LIB],
       [ac_cv_libsmdev_dummy=yes],
       [ac_cv_libsmdev=no])
      ])
-  
+
     AC_CHECK_LIB(
      smdev,
      libsmdev_handle_get_bus_type,
@@ -169,7 +169,7 @@ AC_DEFUN([AX_LIBSMDEV_CHECK_LIB],
      libsmdev_handle_get_track,
      [ac_cv_libsmdev_dummy=yes],
      [ac_cv_libsmdev=no])
-  
+
     AC_CHECK_LIB(
      smdev,
      libsmdev_handle_set_error_flags,
@@ -280,56 +280,56 @@ AC_DEFUN([AX_LIBSMDEV_CHECK_LOCAL],
    [Missing function: close],
    [1])
   ])
- 
+
  AS_IF(
   [test "x$ac_cv_func_fstat" != xyes],
   [AC_MSG_FAILURE(
    [Missing function: fstat],
    [1])
   ])
- 
+
  AS_IF(
   [test "x$ac_cv_func_ftruncate" != xyes],
   [AC_MSG_FAILURE(
    [Missing function: ftruncate],
    [1])
   ])
- 
+
  AS_IF(
   [test "x$ac_cv_func_lseek" != xyes],
   [AC_MSG_FAILURE(
    [Missing function: lseek],
    [1])
   ])
- 
+
  AS_IF(
   [test "x$ac_cv_func_open" != xyes],
   [AC_MSG_FAILURE(
    [Missing function: open],
    [1])
   ])
- 
+
  AS_IF(
   [test "x$ac_cv_func_read" != xyes],
   [AC_MSG_FAILURE(
    [Missing function: read],
    [1])
   ])
- 
+
  AS_IF(
   [test "x$ac_cv_func_stat" != xyes],
   [AC_MSG_FAILURE(
    [Missing function: stat],
    [1])
   ])
- 
+
  AS_IF(
   [test "x$ac_cv_func_write" != xyes],
   [AC_MSG_FAILURE(
    [Missing function: write],
    [1])
   ])
- 
+
  dnl Check for error string functions used in libsmdev/libsmdev_error_string.c
  AC_FUNC_STRERROR_R()
 

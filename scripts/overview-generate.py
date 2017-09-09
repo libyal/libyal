@@ -21,7 +21,7 @@ except ImportError:
 
 
 class Project(object):
-  """Class that defines a project.
+  """Project definition.
 
   Attributes:
     appveyor_identifier (str): AppVeyor identifier.
@@ -52,10 +52,10 @@ class Project(object):
 
 
 class ProjectsReader(object):
-  """Class that defines a project reader."""
+  """Project definition reader."""
 
   def __init__(self):
-    """Initializes a projects reader object."""
+    """Initializes a projects definition reader."""
     super(ProjectsReader, self).__init__()
     # TODO: replace by:
     # self._config_parser = configparser. ConfigParser(interpolation=None)
@@ -127,7 +127,7 @@ class ProjectsReader(object):
 
 
 class ConfigureAcFile(object):
-  """Class that defines a configure.ac file.
+  """Configure.ac file.
 
   Attributes:
     name (str): name.
@@ -174,7 +174,7 @@ class ConfigureAcFile(object):
 
 
 class DefinitionsHeaderFile(object):
-  """Class that defines a definitions header file.
+  """Definitions header file.
 
   Attributes:
     name (str): name.
@@ -218,7 +218,7 @@ class DefinitionsHeaderFile(object):
 
 
 class M4ScriptFile(object):
-  """Class that defines a m4 script file.
+  """M4 script file.
 
   Attributes:
     name (str): name.
@@ -257,7 +257,7 @@ class M4ScriptFile(object):
 
 
 class ScriptFile(object):
-  """Class that defines a script or configuration file.
+  """Script or configuration file.
 
   Attributes:
     name (str): name.
@@ -296,7 +296,7 @@ class ScriptFile(object):
 
 
 class WikiPageGenerator(object):
-  """Class that generates wiki pages."""
+  """Generates wiki pages."""
 
   _CATEGORIES = {
       'cross_platform': (
@@ -330,12 +330,15 @@ class WikiPageGenerator(object):
       'knowledge_base': (
           'Knowledge base projects',
           ''),
+      'legacy': (
+          'Legacy projects',
+          'Projects that will be discontinued'),
   }
 
   _ORDER_OF_LIBRARY_CATEGORIES = (
       'cross_platform', 'data_format', 'file_format', 'in_file_format',
       'file_system_format', 'volume_system_format',
-      'storage_media_image_format', 'utility')
+      'storage_media_image_format', 'utility', 'legacy')
 
   _ORDER_OF_OTHER_CATEGORIES = (
       'other', 'knowledge_base')
@@ -344,9 +347,8 @@ class WikiPageGenerator(object):
     """Initialize a wiki page generator.
 
     Args:
-      data_directory: a string containing the path of the data directory.
-      template_directory: a string containing the path of the template
-                          directory.
+      data_directory (str): path of the data directory.
+      template_directory (str): path of the template directory.
     """
     super(WikiPageGenerator, self).__init__()
     self._data_directory = data_directory
@@ -357,10 +359,10 @@ class WikiPageGenerator(object):
     """Generates a section from template filename.
 
     Args:
-      template_filename: a string containing the name of the template file.
-      template_mpppings: a dictionary containing the template mappings, where
-                         the key maps to the name of a template variable.
-      output_writer: an output writer object (instance of OutputWriter).
+      template_filename (str): name of the template file.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): an output writer.
     """
     template_string = self._ReadTemplateFile(template_filename)
     output_data = template_string.substitute(template_mappings)
@@ -370,10 +372,10 @@ class WikiPageGenerator(object):
     """Reads a template string from file.
 
     Args:
-      filename: the name of the file containing the template string.
+      filename (str): name of the file containing the template string.
 
     Returns:
-      A template string (instance of string.Template).
+      string.Template: a template string.
     """
     path = os.path.join(self._template_directory, filename)
     file_object = open(path, 'rb')
@@ -386,13 +388,13 @@ class WikiPageGenerator(object):
     """Generates a wiki page.
 
     Args:
-      projects: a list of project objects (instances of Project).
-      output_writer: an output writer object (instance of OutputWriter).
+      projects (list[Project]): projects.
+      output_writer (OutputWriter): an output writer.
     """
 
 
 class OverviewWikiPageGenerator(WikiPageGenerator):
-  """Class that generates the "Overview" wiki page."""
+  """Generates the "Overview" wiki page."""
 
   def Generate(self, projects, output_writer):
     """Generates a wiki page.
@@ -489,7 +491,7 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
 
 class StatusWikiPageGenerator(WikiPageGenerator):
-  """Class that generates the "Status" wiki page."""
+  """Generates the "Status" wiki page."""
 
   def _FormatProjectNames(self, project_groups, project_names):
     """Formats the project names.
@@ -1070,7 +1072,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
 
 class FileWriter(object):
-  """Class that defines a file output writer."""
+  """File-based output writer."""
 
   def __init__(self, name):
     """Initialize an output writer.
@@ -1105,7 +1107,7 @@ class FileWriter(object):
 
 
 class StdoutWriter(object):
-  """Class that defines a stdout output writer."""
+  """Stdout-based output writer."""
 
   def __init__(self):
     """Initialize an output writer."""
