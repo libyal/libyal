@@ -282,6 +282,8 @@ class ProjectConfiguration(object):
     library_description_lower_case = '{0:s}{1:s}'.format(
         self.library_description[0].lower(), self.library_description[1:])
 
+    library_version = time.strftime('%Y%m%d', time.gmtime())
+
     template_mappings = {
         'authors': authors,
         'copyright': project_copyright,
@@ -292,6 +294,7 @@ class ProjectConfiguration(object):
         'library_name_suffix_upper_case': self.library_name_suffix.upper(),
         'library_description': self.library_description,
         'library_description_lower_case': library_description_lower_case,
+        'library_version': library_version,
 
         'python_module_authors': python_module_authors,
         'python_module_name': self.python_module_name,
@@ -2165,6 +2168,20 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    # TODO: make this configuration driven
+    if project_configuration.library_name == 'libevt':
+      template_filename = os.path.join(
+          template_directory, 'build_script-vs2017-nuget.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+    else:
+      template_filename = os.path.join(
+          template_directory, 'build_script-vs2017.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     if self._HasPythonModule(project_configuration):
       template_filename = os.path.join(
           template_directory, 'build_script-python.yml')
@@ -2179,6 +2196,11 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     template_filename = os.path.join(template_directory, 'test_script.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'deploy.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2205,15 +2227,10 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     template_directory = os.path.join(self._template_directory, 'configure.ac')
 
-    library_version = time.strftime('%Y%m%d', time.gmtime())
-    template_mappings['library_version'] = library_version
-
     template_filename = os.path.join(
         template_directory, 'header.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
-
-    del template_mappings['library_version']
 
     template_filename = os.path.join(
         template_directory, 'programs.ac')
@@ -2233,7 +2250,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if include_header_file and include_header_file.have_wide_character_type:
+    if (include_header_file and include_header_file.have_wide_character_type or
+        has_tools):
       template_filename = os.path.join(
           template_directory, 'check_wide_character_support.ac')
       self._GenerateSection(
@@ -2344,6 +2362,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     if has_tools:
       # TODO: add support for libcrypto for libcaes
+      #  || test "x$ac_cv_libcrypto" = xyes
       if makefile_am_file.tools_dependencies:
         local_library_tests = []
         for name in makefile_am_file.tools_dependencies:
@@ -2449,7 +2468,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       maximum_description_length = max(
           maximum_description_length, len(description))
 
-    if include_header_file and include_header_file.have_wide_character_type:
+    if (include_header_file and include_header_file.have_wide_character_type or
+        has_tools):
       description = 'Wide character type support'
       value = '$ac_cv_enable_wide_character_type'
       features_information.append((description, value))
@@ -2658,10 +2678,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               self._library_makefile_am_path))
       return
 
-    template_mappings = project_configuration.GetTemplateMappings(
-        authors_separator=',\n *                          ')
-
-    template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
+    dpkg_build_dependencies = ['autopoint']
+    dpkg_build_dependencies.extend(
+        project_configuration.dpkg_build_dependencies)
 
     pc_libs_private = []
     for library in sorted(makefile_am_file.libraries):
@@ -2671,10 +2690,18 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       pc_lib_private = '@ax_{0:s}_pc_libs_private@'.format(library)
       pc_libs_private.append(pc_lib_private)
 
-    template_mappings['pc_libs_private'] = ' '.join(pc_libs_private)
+    template_mappings = project_configuration.GetTemplateMappings(
+        authors_separator=',\n *                          ')
+
+    template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
 
     template_mappings['coverty_scan_token'] = (
         project_configuration.coverty_scan_token)
+
+    template_mappings['dpkg_build_dependencies'] = ' '.join(
+        dpkg_build_dependencies)
+
+    template_mappings['pc_libs_private'] = ' '.join(pc_libs_private)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
@@ -2682,9 +2709,14 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      if directory_entry == 'libyal.pc.in':
+      if directory_entry == 'libyal.nuspec':
+        output_filename = '{0:s}.nuspec'.format(
+            project_configuration.library_name)
+
+      elif directory_entry == 'libyal.pc.in':
         output_filename = '{0:s}.pc.in'.format(
             project_configuration.library_name)
+
       else:
         output_filename = directory_entry
 

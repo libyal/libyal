@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>${library_name}</id>
+    <version>${library_version}</version>
+    <authors>Joachim Metz</authors>
+    <owners>joachimmetz</owners>
+    <licenseUrl>https://raw.githubusercontent.com/libyal/${library_name}/master/COPYING</licenseUrl>
+    <projectUrl>https://github.com/libyal/${library_name}</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <title>${library_name}</title>
+    <description>${library_description}</description>
+    <releaseNotes>Release of ${library_name} ${library_version}</releaseNotes>
+    <copyright>Copyright (C) ${copyright}</copyright>
+    <tags>native</tags>
+  </metadata>
+  <files>
+    <file src="include\*.h" target="lib\native\include\" />
+    <file src="include\${library_name}\*.h" target="lib\native\include\${library_name}\" />
+    <file src="msvscpp\Release\Win32\${library_name}.dll" target="lib\native\lib\Win32\" />
+    <file src="msvscpp\Release\Win32\${library_name}.lib" target="lib\native\lib\Win32\" />
+    <file src="msvscpp\Release\Win32\${library_name}.pdb" target="lib\native\lib\Win32\" />
+    <file src="msvscpp\Release\x64\${library_name}.dll" target="lib\native\lib\x64\" />
+    <file src="msvscpp\Release\x64\${library_name}.lib" target="lib\native\lib\x64\" />
+    <file src="msvscpp\Release\x64\${library_name}.pdb" target="lib\native\lib\x64\" />
+  </files>
+</package>

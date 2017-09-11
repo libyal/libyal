@@ -13,11 +13,11 @@ test_script:
 - ps: if ($$env:TARGET -eq "vs2017") {
     .\runtests.ps1 }
 - cmd: if [%TARGET%]==[cygwin] (
-    C:\cygwin\bin\bash -e -l -c "./runtests.sh" )
+    C:\cygwin\bin\bash -e -l -c "cd ${library_name} && ./runtests.sh" )
 - cmd: if [%TARGET%]==[cygwin64] (
-    C:\cygwin64\bin\bash -e -l -c "./runtests.sh" )
+    C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && ./runtests.sh" )
 - cmd: if [%TARGET%]==[mingw] (
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "./runtests.sh" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd ${library_name} && ./runtests.sh" )
 - cmd: if [%TARGET%]==[mingw-w64] (
-    C:\msys64\usr\bin\bash -e -l -c "./runtests.sh" )
+    C:\msys64\usr\bin\bash -e -l -c "cd ${library_name} && ./runtests.sh" )
 

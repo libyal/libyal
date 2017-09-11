@@ -1,0 +1,14 @@
+artifacts:
+- path: \*.nupkg
+
+deploy:
+- provider: NuGet
+  skip_symbols: true
+  api_key:
+    secure: KCX1SbiZLx5iX4uxBrG6I5QuuNI+hz3DjM9ymJaP2/srQU9yFcKD8ifYuPMfm0wF
+  artifact: /.*\.nupkg/
+  on:
+    branch: master
+    appveyor_repo_tag: true
+    target: vs2017
+

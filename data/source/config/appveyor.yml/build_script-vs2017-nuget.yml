@@ -1,0 +1,8 @@
+- cmd: if [%TARGET%]==[vs2017] (
+    set PYTHONPATH=..\vstools &&
+    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2017 msvscpp\libevt.sln &&
+    msbuild vs2017\libevt.sln /property:Platform=Win32 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
+    msbuild vs2017\libevt.sln /property:Platform=x64 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
+    move msvscpp vs2008 &&
+    move vs2017 msvscpp &&
+    nuget pack libevt.nuspec )

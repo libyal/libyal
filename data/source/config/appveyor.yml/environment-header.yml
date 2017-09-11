@@ -28,5 +28,4 @@ environment:
   - TARGET: vs2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     VisualStudioVersion: 15.0
-    platform: Win32
     configuration: Release
