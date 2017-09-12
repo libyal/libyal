@@ -1,1 +1,1 @@
-- cmd: git clone https://github.com/joachimmetz/dokan.git && move dokan ..\
+- cmd: git clone https://github.com/joachimmetz/dokan.git ..\dokan

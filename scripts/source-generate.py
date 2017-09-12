@@ -75,11 +75,13 @@ class ProjectConfiguration(object):
 
   Attributes:
     coverty_scan_token (str): scan token for Coverty Scan (scan.coverity.com).
+    cygwin_build_dependencies (str): Cygwin build dependencies.
     dpkg_build_dependencies (str): dpkg build dependencies.
     library_description (str): description of the library.
     library_name (str): name of the library.
     library_name_suffix (str): suffix of the name of the library.
     library_public_types (str): types publicly exported by the library.
+    mingw_msys_build_dependencies (str): MinGW-MSYS build dependencies.
     msvscpp_build_dependencies (str): msvscpp build dependencies.
     project_authors (str): authors of the project.
     project_name (str): name of the project, such as "libyal".
@@ -124,6 +126,10 @@ class ProjectConfiguration(object):
 
     self.tests_authors = None
     self.tests_options = None
+
+    self.cygwin_build_dependencies = None
+
+    self.mingw_msys_build_dependencies = None
 
     self.dpkg_build_dependencies = None
 
@@ -214,6 +220,18 @@ class ProjectConfiguration(object):
         config_parser, 'tests', 'authors', default_value=self.project_authors)
     self.tests_options = self._GetOptionalConfigValue(
         config_parser, 'tests', 'options', default_value=[])
+
+    self.cygwin_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'cygwin', 'build_dependencies', default_value=[])
+
+    self.cygwin_build_dependencies = [
+        name.split(' ')[0] for name in self.cygwin_build_dependencies]
+
+    self.mingw_msys_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'cygwin', 'build_dependencies', default_value=[])
+
+    self.mingw_msys_build_dependencies = [
+        name.split(' ')[0] for name in self.mingw_msys_build_dependencies]
 
     self.dpkg_build_dependencies = self._GetOptionalConfigValue(
         config_parser, 'dpkg', 'build_dependencies', default_value=[])
@@ -2118,6 +2136,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'appveyor.yml')
 
+    # TODO: improve check
+    have_lex_yacc = False
+    if (os.path.exists('syncwinflexbison.ps1') or
+        os.path.exists('syncwinflexbison.sh')):
+      have_lex_yacc = True
+
     template_filename = os.path.join(
         template_directory, 'environment-header.yml')
     self._GenerateSection(
@@ -2136,8 +2160,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if (os.path.exists('syncwinflexbison.ps1') or
-        os.path.exists('syncwinflexbison.sh')):
+    if have_lex_yacc:
       template_filename = os.path.join(
           template_directory, 'install-winflexbison.yml')
       self._GenerateSection(
@@ -2150,17 +2173,46 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if self._HasPythonModule(project_configuration):
-      template_filename = os.path.join(template_directory, 'install-python.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
     if 'dokan' in project_configuration.msvscpp_build_dependencies:
       template_filename = os.path.join(template_directory, 'install-dokan.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
+
+    cygwin_build_dependencies = list(
+        project_configuration.cygwin_build_dependencies)
+    if self._HasPythonModule(project_configuration):
+      cygwin_build_dependencies.append('python2-devel')
+      cygwin_build_dependencies.append('python3-devel')
+
+    if cygwin_build_dependencies:
+      cygwin_build_dependencies = [' '.join([
+          '-P {0:s}'.format(name) for name in cygwin_build_dependencies])]
+      template_mappings['cygwin_build_dependencies'] = cygwin_build_dependencies
+
+      template_filename = os.path.join(template_directory, 'install-cygwin.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['cygwin_build_dependencies']
+
+    mingw_msys_build_dependencies = list(
+        project_configuration.mingw_msys_build_dependencies)
+
+    if mingw_msys_build_dependencies:
+      mingw_msys_build_dependencies = [' '.join([
+          '-P {0:s}'.format(name) for name in mingw_msys_build_dependencies])]
+      template_mappings['mingw_msys_build_dependencies'] = (
+          mingw_msys_build_dependencies)
+
+      template_filename = os.path.join(
+          template_directory, 'install-mingw-msys.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['mingw_msys_build_dependencies']
 
     template_filename = os.path.join(
         template_directory, 'build_script-header.yml')
@@ -2200,10 +2252,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(template_directory, 'deploy.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    # TODO: make this configuration driven
+    if project_configuration.library_name == 'libevt':
+      template_filename = os.path.join(template_directory, 'deploy.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
   def _GenerateConfigureAC(
       self, project_configuration, template_mappings, output_writer,
@@ -2217,6 +2271,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
+    # TODO: change indentation of templates.
+
     include_header_file = self._GetLibraryIncludeHeaderFile(
         project_configuration)
 
@@ -2318,6 +2374,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
 
+    # TODO: add support for libfuse
+
     if project_configuration.supports_debug_output:
       template_filename = os.path.join(
           template_directory, 'check_debug_output.ac')
@@ -2363,6 +2421,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     if has_tools:
       # TODO: add support for libcrypto for libcaes
       #  || test "x$ac_cv_libcrypto" = xyes
+      # TODO: add support for libfuse
       if makefile_am_file.tools_dependencies:
         local_library_tests = []
         for name in makefile_am_file.tools_dependencies:
@@ -2456,7 +2515,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           maximum_description_length, len(description))
 
       # TODO: add support for
-      # AES support:                       $ac_cv_libcaes_aes
+      # AES support: $ac_cv_libcaes_aes
+      # FUSE support: $ac_cv_libfuse
 
     features_information = []
     if (project_configuration.library_name == 'libcthreads' or

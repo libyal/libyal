@@ -4,4 +4,4 @@
   - TARGET: mingw-w64
 
 install:
-- cmd: git clone https://github.com/libyal/vstools.git && move vstools ..\
+- cmd: git clone https://github.com/libyal/vstools.git ..\vstools
