@@ -2186,8 +2186,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       cygwin_build_dependencies.append('python3-devel')
 
     if cygwin_build_dependencies:
-      cygwin_build_dependencies = [' '.join([
-          '-P {0:s}'.format(name) for name in cygwin_build_dependencies])]
+      cygwin_build_dependencies = ' '.join([
+          '-P {0:s}'.format(name) for name in cygwin_build_dependencies])
       template_mappings['cygwin_build_dependencies'] = cygwin_build_dependencies
 
       template_filename = os.path.join(template_directory, 'install-cygwin.yml')
@@ -2201,8 +2201,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         project_configuration.mingw_msys_build_dependencies)
 
     if mingw_msys_build_dependencies:
-      mingw_msys_build_dependencies = [' '.join([
-          '-P {0:s}'.format(name) for name in mingw_msys_build_dependencies])]
+      mingw_msys_build_dependencies = ' '.join([
+          '-P {0:s}'.format(name) for name in mingw_msys_build_dependencies])
       template_mappings['mingw_msys_build_dependencies'] = (
           mingw_msys_build_dependencies)
 
