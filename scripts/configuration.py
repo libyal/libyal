@@ -402,8 +402,8 @@ class ProjectConfiguration(object):
       config_parser (ConfigParser): configuration file parser.
 
     Raises:
-      ValueError: if the project year of creation cannot be converted to
-          a base 10 integer value.
+      ConfigurationError: if the project year of creation cannot
+          be converted to a base 10 integer value.
     """
     self.project_authors = self._GetConfigValue(
         config_parser, 'project', 'authors')
@@ -432,8 +432,9 @@ class ProjectConfiguration(object):
     try:
       self.project_year_of_creation = int(self.project_year_of_creation, 10)
     except ValueError:
-      raise ValueError('Invalid project year of creation: {0!s}'.format(
-          self.project_year_of_creation))
+      raise errors.ConfigurationError(
+          'Invalid project year of creation: {0!s}'.format(
+              self.project_year_of_creation))
 
     features = self._GetConfigValue(
         config_parser, u'project', u'features')
@@ -451,8 +452,8 @@ class ProjectConfiguration(object):
       config_parser (ConfigParser): configuration file parser.
 
     Raises:
-      ValueError: if the Python module year of creation cannot be converted to
-          a base 10 integer value.
+      ConfigurationError: if the Python module year of creation cannot
+          be converted to a base 10 integer value.
     """
     self.python_module_authors = self._GetOptionalConfigValue(
         config_parser, 'python_module', 'authors',
@@ -468,8 +469,9 @@ class ProjectConfiguration(object):
         self.python_module_year_of_creation = int(
             self.python_module_year_of_creation, 10)
       except ValueError:
-        raise ValueError('Invalid Python module year of creation: {0!s}'.format(
-            self.python_module_year_of_creation))
+        raise errors.ConfigurationError(
+            'Invalid Python module year of creation: {0!s}'.format(
+                self.python_module_year_of_creation))
 
   def _ReadRPMConfiguration(self, config_parser):
     """Reads the RPM configuration.
