@@ -10,7 +10,6 @@ import argparse
 import collections
 import datetime
 import difflib
-import json
 import logging
 import os
 import shutil
@@ -19,11 +18,7 @@ import string
 import sys
 import time
 
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
-
+import configuration
 import source_formatter
 
 
@@ -68,265 +63,6 @@ FUNCTION_TYPE_SEEK = 'seek'
 FUNCTION_TYPE_SET = 'set'
 FUNCTION_TYPE_UTILITY = 'utility'
 FUNCTION_TYPE_WRITE = 'write'
-
-
-class ProjectConfiguration(object):
-  """Project configuration.
-
-  Attributes:
-    coverty_scan_token (str): scan token for Coverty Scan (scan.coverity.com).
-    cygwin_build_dependencies (str): Cygwin build dependencies.
-    dpkg_build_dependencies (str): dpkg build dependencies.
-    library_description (str): description of the library.
-    library_name (str): name of the library.
-    library_name_suffix (str): suffix of the name of the library.
-    library_public_types (str): types publicly exported by the library.
-    mingw_msys_build_dependencies (str): MinGW-MSYS build dependencies.
-    msvscpp_build_dependencies (str): msvscpp build dependencies.
-    project_authors (str): authors of the project.
-    project_name (str): name of the project, such as "libyal".
-    project_year_of_creation (str): year the project was created.
-    python_module_authors (str): authors of the Python module.
-    python_module_name (str): name of the Python module, such as "pyyal".
-    python_module_year_of_creation (str): year the Python module was created.
-    rpm_build_dependencies (str): rpm build dependencies.
-    supports_debug_output (bool): True if the project supports debug output.
-    tests_authors (str): authors of the test files.
-    tests_options (str): option sets used by the tests.
-    tools_authors (str): authors of the tools.
-    tools_description (str): description of the tools.
-    tools_names (str): names of the individual tools.
-    tools_name (str): name of the all the tools, such as "yaltools".
-  """
-
-  def __init__(self):
-    """Initializes a project configuation."""
-    super(ProjectConfiguration, self).__init__()
-    self.project_authors = None
-    self.project_name = None
-    self.project_year_of_creation = None
-
-    # Functionality the project offsers.
-    self.supports_debug_output = False
-
-    self.library_description = None
-    self.library_name = None
-    self.library_name_suffix = None
-    # TODO: determine public types based on include header.
-    self.library_public_types = None
-
-    self.python_module_authors = None
-    self.python_module_name = None
-    self.python_module_year_of_creation = None
-
-    self.tools_authors = None
-    self.tools_description = None
-    self.tools_name = None
-    self.tools_names = None
-
-    self.tests_authors = None
-    self.tests_options = None
-
-    self.cygwin_build_dependencies = None
-
-    self.mingw_msys_build_dependencies = None
-
-    self.dpkg_build_dependencies = None
-
-    self.msvscpp_build_dependencies = None
-
-    self.rpm_build_dependencies = None
-
-    self.coverty_scan_token = None
-
-  def _GetConfigValue(self, config_parser, section_name, value_name):
-    """Retrieves a value from the config parser.
-
-    Args:
-      config_parser (ConfigParser): configuration parser.
-      section_name (str): name of the section that contains the value.
-      value_name (name): name of the value.
-
-    Returns:
-      object: value.
-    """
-    return json.loads(config_parser.get(section_name, value_name))
-
-  def _GetOptionalConfigValue(
-      self, config_parser, section_name, value_name, default_value=None):
-    """Retrieves an optional configuration value from the config parser.
-
-    Args:
-      config_parser (ConfigParser): configuration parser.
-      section_name (str): name of the section that contains the value.
-      value_name (name): name of the value.
-      default_value (Optional[object]): default value.
-
-    Returns:
-      object: value or default value if not available.
-    """
-    try:
-      return self._GetConfigValue(config_parser, section_name, value_name)
-    except (configparser.NoOptionError, configparser.NoSectionError):
-      return default_value
-
-  def ReadFromFile(self, filename):
-    """Reads the configuration from file.
-
-    Args:
-      filename (str): path of the configuration file.
-    """
-    # TODO: replace by:
-    # config_parser = configparser. ConfigParser(interpolation=None)
-    config_parser = configparser.RawConfigParser()
-    config_parser.read([filename])
-
-    self.project_name = self._GetConfigValue(
-        config_parser, 'project', 'name')
-    self.project_authors = self._GetConfigValue(
-        config_parser, 'project', 'authors')
-    self.project_year_of_creation = self._GetConfigValue(
-        config_parser, 'project', 'year_of_creation')
-
-    features = self._GetConfigValue(
-        config_parser, u'project', u'features')
-
-    self.supports_debug_output = u'debug_output' in features
-
-    self.library_description = self._GetConfigValue(
-        config_parser, 'library', 'description')
-    self.library_name = self.project_name
-    self.library_name_suffix = self.project_name[3:]
-    self.library_public_types = self._GetOptionalConfigValue(
-        config_parser, 'library', 'public_types', default_value=[])
-
-    self.python_module_authors = self._GetOptionalConfigValue(
-        config_parser, 'python_module', 'authors',
-        default_value=self.project_authors)
-    self.python_module_name = 'py{0:s}'.format(self.library_name_suffix)
-    self.python_module_year_of_creation = self._GetOptionalConfigValue(
-        config_parser, 'python_module', 'year_of_creation',
-        default_value=self.project_year_of_creation)
-
-    self.tools_authors = self._GetOptionalConfigValue(
-        config_parser, 'tools', 'authors', default_value=self.project_authors)
-    self.tools_description = self._GetOptionalConfigValue(
-        config_parser, 'tools', 'description', default_value='')
-    self.tools_name = '{0:s}tools'.format(self.library_name_suffix)
-    self.tools_names = self._GetOptionalConfigValue(
-        config_parser, 'tools', 'names', default_value=[])
-
-    self.tests_authors = self._GetOptionalConfigValue(
-        config_parser, 'tests', 'authors', default_value=self.project_authors)
-    self.tests_options = self._GetOptionalConfigValue(
-        config_parser, 'tests', 'options', default_value=[])
-
-    self.cygwin_build_dependencies = self._GetOptionalConfigValue(
-        config_parser, 'cygwin', 'build_dependencies', default_value=[])
-
-    self.cygwin_build_dependencies = [
-        name.split(' ')[0] for name in self.cygwin_build_dependencies]
-
-    self.mingw_msys_build_dependencies = self._GetOptionalConfigValue(
-        config_parser, 'cygwin', 'build_dependencies', default_value=[])
-
-    self.mingw_msys_build_dependencies = [
-        name.split(' ')[0] for name in self.mingw_msys_build_dependencies]
-
-    self.dpkg_build_dependencies = self._GetOptionalConfigValue(
-        config_parser, 'dpkg', 'build_dependencies', default_value=[])
-
-    self.dpkg_build_dependencies = [
-        name.split(' ')[0] for name in self.dpkg_build_dependencies]
-
-    self.msvscpp_build_dependencies = self._GetOptionalConfigValue(
-        config_parser, 'msvscpp', 'build_dependencies', default_value=[])
-
-    self.msvscpp_build_dependencies = [
-        name.split(' ')[0] for name in self.msvscpp_build_dependencies]
-
-    self.rpm_build_dependencies = self._GetOptionalConfigValue(
-        config_parser, 'rpm', 'build_dependencies', default_value=[])
-
-    self.rpm_build_dependencies = [
-        name.split(' ')[0] for name in self.rpm_build_dependencies]
-
-    self.coverty_scan_token = self._GetOptionalConfigValue(
-        config_parser, 'coverty', 'scan_token', default_value='')
-
-    if config_parser.has_section('mount_tool'):
-      self.dpkg_build_dependencies.append('libfuse-dev')
-      self.msvscpp_build_dependencies.append('dokan')
-
-    self.project_year_of_creation = int(self.project_year_of_creation, 10)
-    self.python_module_year_of_creation = int(
-        self.python_module_year_of_creation, 10)
-
-  def GetTemplateMappings(self, authors_separator=', '):
-    """Retrieves the template mappings.
-
-    Args:
-      authors_separator (Optional[str]): authors separator.
-
-    Returns:
-      dict[str, str]: string template mappings, where the key maps to the name
-          of a template variable.
-
-    Raises:
-      ValueError: if the year of creation value is out of bounds.
-    """
-    date = datetime.date.today()
-    if self.project_year_of_creation > date.year:
-      raise ValueError('Year of creation value out of bounds.')
-
-    if self.project_year_of_creation == date.year:
-      project_copyright = '{0:d}'.format(self.project_year_of_creation)
-    else:
-      project_copyright = '{0:d}-{1:d}'.format(
-          self.project_year_of_creation, date.year)
-
-    if self.python_module_year_of_creation == date.year:
-      python_module_copyright = '{0:d}'.format(
-          self.python_module_year_of_creation)
-    else:
-      python_module_copyright = '{0:d}-{1:d}'.format(
-          self.python_module_year_of_creation, date.year)
-
-    authors = authors_separator.join(self.project_authors)
-    python_module_authors = authors_separator.join(self.python_module_authors)
-    tools_authors = authors_separator.join(self.tools_authors)
-    tests_authors = authors_separator.join(self.tests_authors)
-
-    library_description_lower_case = '{0:s}{1:s}'.format(
-        self.library_description[0].lower(), self.library_description[1:])
-
-    library_version = time.strftime('%Y%m%d', time.gmtime())
-
-    template_mappings = {
-        'authors': authors,
-        'copyright': project_copyright,
-
-        'library_name': self.library_name,
-        'library_name_upper_case': self.library_name.upper(),
-        'library_name_suffix': self.library_name_suffix,
-        'library_name_suffix_upper_case': self.library_name_suffix.upper(),
-        'library_description': self.library_description,
-        'library_description_lower_case': library_description_lower_case,
-        'library_version': library_version,
-
-        'python_module_authors': python_module_authors,
-        'python_module_name': self.python_module_name,
-        'python_module_name_upper_case': self.python_module_name.upper(),
-        'python_module_copyright': python_module_copyright,
-
-        'tools_authors': tools_authors,
-        'tools_name': self.tools_name,
-        'tools_name_upper_case': self.tools_name.upper(),
-        'tools_description': self.tools_description,
-
-        'tests_authors': tests_authors,
-    }
-    return template_mappings
 
 
 class EnumDeclaration(object):
@@ -1696,6 +1432,78 @@ class SourceFileGenerator(object):
 
     return makefile_am_file
 
+  def _GetTemplateMappings(self, project_configuration, authors_separator=', '):
+    """Retrieves the template mappings.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      authors_separator (Optional[str]): authors separator.
+
+    Returns:
+      dict[str, str]: string template mappings, where the key maps to the name
+          of a template variable.
+
+    Raises:
+      ValueError: if the year of creation value is out of bounds.
+    """
+    date = datetime.date.today()
+    if project_configuration.project_year_of_creation > date.year:
+      raise ValueError('Year of creation value out of bounds.')
+
+    if project_configuration.project_year_of_creation == date.year:
+      project_copyright = '{0:d}'.format(
+          project_configuration.project_year_of_creation)
+    else:
+      project_copyright = '{0:d}-{1:d}'.format(
+          project_configuration.project_year_of_creation, date.year)
+
+    if project_configuration.python_module_year_of_creation == date.year:
+      python_module_copyright = '{0:d}'.format(
+          project_configuration.python_module_year_of_creation)
+    else:
+      python_module_copyright = '{0:d}-{1:d}'.format(
+          project_configuration.python_module_year_of_creation, date.year)
+
+    authors = authors_separator.join(project_configuration.project_authors)
+    python_module_authors = authors_separator.join(
+        project_configuration.python_module_authors)
+    tools_authors = authors_separator.join(project_configuration.tools_authors)
+    tests_authors = authors_separator.join(project_configuration.tests_authors)
+
+    library_description_lower_case = '{0:s}{1:s}'.format(
+        project_configuration.library_description[0].lower(),
+        project_configuration.library_description[1:])
+
+    library_version = time.strftime('%Y%m%d', time.gmtime())
+
+    template_mappings = {
+        'authors': authors,
+        'copyright': project_copyright,
+
+        'library_name': project_configuration.library_name,
+        'library_name_upper_case': project_configuration.library_name.upper(),
+        'library_name_suffix': project_configuration.library_name_suffix,
+        'library_name_suffix_upper_case': (
+            project_configuration.library_name_suffix.upper()),
+        'library_description': project_configuration.library_description,
+        'library_description_lower_case': library_description_lower_case,
+        'library_version': library_version,
+
+        'python_module_authors': python_module_authors,
+        'python_module_name': project_configuration.python_module_name,
+        'python_module_name_upper_case': (
+            project_configuration.python_module_name.upper()),
+        'python_module_copyright': python_module_copyright,
+
+        'tools_authors': tools_authors,
+        'tools_name': project_configuration.tools_name,
+        'tools_name_upper_case': project_configuration.tools_name.upper(),
+        'tools_description': project_configuration.tools_description,
+
+        'tests_authors': tests_authors,
+    }
+    return template_mappings
+
   def _GetTypeLibraryHeaderFile(self, project_configuration, type_name):
     """Retrieves a type specific library include header file.
 
@@ -2103,7 +1911,8 @@ class CommonSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    template_mappings = project_configuration.GetTemplateMappings(
+    template_mappings = self._GetTemplateMappings(
+        project_configuration,
         authors_separator=',\n *                          ')
     template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
 
@@ -2750,7 +2559,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       pc_lib_private = '@ax_{0:s}_pc_libs_private@'.format(library)
       pc_libs_private.append(pc_lib_private)
 
-    template_mappings = project_configuration.GetTemplateMappings(
+    template_mappings = self._GetTemplateMappings(
+        project_configuration,
         authors_separator=',\n *                          ')
 
     template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
@@ -2957,7 +2767,8 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
 
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
-    template_mappings = project_configuration.GetTemplateMappings(
+    template_mappings = self._GetTemplateMappings(
+        project_configuration,
         authors_separator=',\n *                          ')
 
     output_filename = os.path.join('include', 'Makefile.am')
@@ -3060,7 +2871,8 @@ class LibrarySourceFileGenerator(SourceFileGenerator):
           project_configuration.library_name, type_name)
       type_definitions.append(type_definition)
 
-    template_mappings = project_configuration.GetTemplateMappings(
+    template_mappings = self._GetTemplateMappings(
+        project_configuration,
         authors_separator=',\n *                          ')
     template_mappings['library_debug_type_definitions'] = '\n'.join(
         library_debug_type_definitions)
@@ -3323,7 +3135,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
               self._library_include_header_path))
       return
 
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
 
     output_filename = '{0:s}.3'.format(project_configuration.library_name)
     output_filename = os.path.join('manuals', output_filename)
@@ -4878,8 +4690,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       dict[str, str]: string template mappings, where the key maps to the name
           of a template variable.
     """
-    template_mappings = project_configuration.GetTemplateMappings(
-        authors_separator=',\n *                          ')
+    template_mappings = super(
+        PythonModuleSourceFileGenerator, self)._GetTemplateMappings(
+            project_configuration,
+            authors_separator=',\n *                          ')
 
     # TODO: have source formatter take care of the alignment.
     # Used to align source in pyyal/pyyal_file_object_io_handle.c
@@ -5093,7 +4907,7 @@ class ScriptFileGenerator(SourceFileGenerator):
     """
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
     libraries = ' '.join(sorted(makefile_am_file.libraries))
     template_mappings['local_libs'] = libraries
     template_mappings['shared_libs'] = libraries
@@ -6053,7 +5867,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       dict[str, str]: string template mappings, where the key maps to the name
           of a template variable.
     """
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = super(
+        TestsSourceFileGenerator, self)._GetTemplateMappings(
+            project_configuration)
 
     test_api_types = set(api_types).union(set(internal_types))
     library_tests = sorted(set(api_functions).union(test_api_types))
@@ -6371,7 +6187,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not os.path.exists(tools_path):
       return
 
-    template_mappings = project_configuration.GetTemplateMappings(
+    template_mappings = self._GetTemplateMappings(
+        project_configuration,
         authors_separator=',\n *                          ')
 
     # TODO: add support for ouput.[ch]
@@ -6506,7 +6323,7 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format='[%(levelname)s] %(message)s')
 
-  project_configuration = ProjectConfiguration()
+  project_configuration = configuration.ProjectConfiguration()
   project_configuration.ReadFromFile(options.configuration_file)
 
   libyal_directory = os.path.abspath(__file__)

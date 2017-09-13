@@ -7,323 +7,49 @@ from __future__ import unicode_literals
 
 import abc
 import argparse
-import json
 import string
 import os
 import re
 import sys
 
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
+import configuration
 
 
-class ConfigError(Exception):
-  """Configuration error."""
+class WikiPageGenerator(object):
+  """Class that generates wiki pages."""
 
-
-class ProjectConfiguration(object):
-  """Project configuration."""
-
-  # TODO: add attributes to docstring.
-
-  def __init__(self):
-    """Initializes a project configuation."""
-    super(ProjectConfiguration, self).__init__()
-    self.project_name = None
-    self.project_status = None
-    self.project_description = None
-    self.project_documentation_url = None
-    self.project_download_url = None
-    self.project_git_url = None
-
-    # Functionality the project offsers.
-    self.supports_debug_output = False
-    self.supports_tests = False
-    self.supports_tools = False
-    self.supports_python = False
-
-    # Compilers the project supports.
-    self.supports_cygwin = False
-    self.supports_gcc = False
-    self.supports_mingw = False
-    self.supports_msvscpp = False
-
-    # Packaging methods the project supports.
-    self.supports_dpkg = False
-    self.supports_rpm = False
-
-    # Other.
-    self.supports_dokan = False
-    self.supports_fuse = False
-
-    self.library_build_dependencies = None
-
-    self.development_main_object = None
-    self.development_main_object_filename = None
-    self.development_main_object_pre_open_python = None
-    self.development_main_object_post_open_python = None
-    self.development_main_object_post_open_file_object_python = None
-    self.development_main_object_size = None
-    self.development_glob = False
-    self.development_pytsk3 = False
-
-    self.tests_supports_valgrind = None
-    self.tests_profiles = None
-    self.tests_example_filename1 = None
-    self.tests_example_filename2 = None
-
-    self.troubleshooting_example = None
-
-    self.tools_names = None
-    self.tools_directory = None
-
-    self.cygwin_build_dependencies = None
-    self.cygwin_dll_dependencies = None
-    self.cygwin_dll_filename = None
-
-    self.gcc_build_dependencies = None
-    self.gcc_static_build_dependencies = None
-
-    self.mingw_build_dependencies = None
-    self.mingw_dll_dependencies = None
-    self.mingw_dll_filename = None
-
-    self.msvscpp_build_dependencies = None
-    self.msvscpp_dll_dependencies = None
-    self.msvscpp_zlib_dependency = None
-
-    self.dpkg_build_dependencies = None
-
-    self.rpm_build_dependencies = None
-
-    self.mount_tool_additional_arguments = None
-    self.mount_tool_missing_backend_error = None
-    self.mount_tool_mount_point = None
-    self.mount_tool_mounted_description = None
-    self.mount_tool_mounted_dokan = None
-    self.mount_tool_mounted_fuse = None
-    self.mount_tool_source = None
-    self.mount_tool_source_description = None
-    self.mount_tool_source_description_long = None
-    self.mount_tool_source_type = None
-    self.mount_tool_supported_backends = None
-
-  def _GetConfigValue(self, config_parser, section_name, value_name):
-    """Retrieves a configuration value from the config parser.
+  def __init__(self, template_directory):
+    """Initializes a wiki page generator.
 
     Args:
-      config_parser (ConfigParser): configuration parser.
-      section_name (str): name of the section that contains the value.
-      value_name (str): name of the value.
-
-    Returns:
-      object: value.
+      template_directory (str): path of the template directory.
     """
-    return json.loads(config_parser.get(section_name, value_name))
+    super(WikiPageGenerator, self).__init__()
+    self._template_directory = template_directory
 
-  def _GetOptionalConfigValue(
-      self, config_parser, section_name, value_name, default_value=None):
-    """Retrieves an optional configuration value from the config parser.
+  def _GenerateSection(
+      self, template_filename, template_mappings, output_writer):
+    """Generates a section from template filename.
 
     Args:
-      config_parser (ConfigParser): configuration parser.
-      section_name (str): name of the section that contains the value.
-      value_name (str): name of the value.
-
-    Returns:
-      object: value or default value if not available.
+      template_filename (str): path of the template file.
+      template_mpppings (dict[str, str]): the template mappings, where
+          the key maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
     """
-    try:
-      return self._GetConfigValue(config_parser, section_name, value_name)
-    except configparser.NoOptionError:
-      return default_value
+    template_string = self._ReadTemplateFile(template_filename)
+    output_data = template_string.substitute(template_mappings)
+    output_writer.Write(output_data)
 
-  def ReadFromFile(self, filename):
-    """Reads the configuration from file.
-
-    Args:
-      filename (str): path of the configuration file.
-    """
-    # TODO: replace by:
-    # config_parser = configparser. ConfigParser(interpolation=None)
-    config_parser = configparser.RawConfigParser()
-    config_parser.read([filename])
-
-    self.project_name = self._GetConfigValue(
-        config_parser, 'project', 'name')
-    self.project_status = self._GetConfigValue(
-        config_parser, 'project', 'status')
-
-    self.project_documentation_url = self._GetOptionalConfigValue(
-        config_parser, 'project', 'documentation_url')
-
-    self.project_download_url = self._GetConfigValue(
-        config_parser, 'project', 'download_url')
-    self.project_git_url = self._GetConfigValue(
-        config_parser, 'project', 'git_url')
-
-    features = self._GetConfigValue(
-        config_parser, 'project', 'features')
-
-    self.supports_debug_output = 'debug_output' in features
-    self.supports_python = 'python' in features
-
-    self.supports_dokan = 'dokan' in features
-    self.supports_fuse = 'fuse' in features
-
-    self.library_build_dependencies = self._GetConfigValue(
-        config_parser, 'library', 'build_dependencies')
-
-    if config_parser.has_section('development'):
-      features = self._GetOptionalConfigValue(
-          config_parser, 'development', 'features')
-
-      if features:
-        self.development_glob = 'glob' in features
-        self.development_pytsk3 = 'pytsk3' in features
-
-      self.development_main_object = self._GetConfigValue(
-          config_parser, 'development', 'main_object')
-
-      self.development_main_object_filename = self._GetConfigValue(
-          config_parser, 'development', 'main_object_filename')
-
-      self.development_main_object_size = self._GetOptionalConfigValue(
-          config_parser, 'development', 'main_object_size')
-
-      self.development_main_object_pre_open_python = (
-          self._GetOptionalConfigValue(
-              config_parser, 'development', 'main_object_pre_open_python'))
-
-      self.development_main_object_post_open_python = (
-          self._GetOptionalConfigValue(
-              config_parser, 'development', 'main_object_post_open_python'))
-
-      self.development_main_object_post_open_file_object_python = (
-          self._GetOptionalConfigValue(
-              config_parser, 'development',
-              'main_object_post_open_file_object_python'))
-
-    if config_parser.has_section('tests'):
-      self.supports_tests = True
-      tests_features = self._GetConfigValue(
-          config_parser, 'tests', 'features')
-
-      self.tests_supports_valgrind = 'valgrind' in tests_features
-
-      if 'profiles' in tests_features:
-        self.tests_profiles = self._GetConfigValue(
-            config_parser, 'tests', 'profiles')
-        self.tests_example_filename1 = self._GetOptionalConfigValue(
-            config_parser, 'tests', 'example_filename1')
-        self.tests_example_filename2 = self._GetOptionalConfigValue(
-            config_parser, 'tests', 'example_filename2')
-
-    if config_parser.has_section('troubleshooting'):
-      self.troubleshooting_example = self._GetOptionalConfigValue(
-          config_parser, 'troubleshooting', 'example')
-
-    if config_parser.has_section('tools'):
-      self.supports_tools = True
-      self.tools_directory = self._GetConfigValue(
-          config_parser, 'tools', 'directory')
-      self.tools_names = self._GetConfigValue(
-          config_parser, 'tools', 'names')
-
-    if config_parser.has_section('cygwin'):
-      self.supports_cygwin = True
-      self.cygwin_build_dependencies = self._GetConfigValue(
-          config_parser, 'cygwin', 'build_dependencies')
-      self.cygwin_dll_dependencies = self._GetConfigValue(
-          config_parser, 'cygwin', 'dll_dependencies')
-      self.cygwin_dll_filename = self._GetConfigValue(
-          config_parser, 'cygwin', 'dll_filename')
-
-    if config_parser.has_section('gcc'):
-      self.supports_gcc = True
-      self.gcc_build_dependencies = self._GetConfigValue(
-          config_parser, 'gcc', 'build_dependencies')
-      self.gcc_static_build_dependencies = self._GetConfigValue(
-          config_parser, 'gcc', 'static_build_dependencies')
-
-    if config_parser.has_section('mingw'):
-      self.supports_mingw = True
-      self.mingw_build_dependencies = self._GetConfigValue(
-          config_parser, 'mingw', 'build_dependencies')
-      self.mingw_dll_dependencies = self._GetConfigValue(
-          config_parser, 'mingw', 'dll_dependencies')
-      self.mingw_dll_filename = self._GetConfigValue(
-          config_parser, 'mingw', 'dll_filename')
-
-    if config_parser.has_section('msvscpp'):
-      self.supports_msvscpp = True
-      self.msvscpp_build_dependencies = self._GetConfigValue(
-          config_parser, 'msvscpp', 'build_dependencies')
-      self.msvscpp_dll_dependencies = self._GetConfigValue(
-          config_parser, 'msvscpp', 'dll_dependencies')
-
-    if config_parser.has_section('dpkg'):
-      self.supports_dpkg = True
-      self.dpkg_build_dependencies = self._GetConfigValue(
-          config_parser, 'dpkg', 'build_dependencies')
-
-    if config_parser.has_section('rpm'):
-      self.supports_rpm = True
-      self.rpm_build_dependencies = self._GetConfigValue(
-          config_parser, 'rpm', 'build_dependencies')
-
-    if ((self.supports_dokan or self.supports_fuse) and
-        not config_parser.has_section('mount_tool')):
-      raise ConfigError((
-          'Support for dokan and/or fuse enabled but no corresponding '
-          'section: mount_tool is missing.'))
-
-    if config_parser.has_section('mount_tool'):
-      self.mount_tool_additional_arguments = self._GetOptionalConfigValue(
-          config_parser, 'mount_tool', 'additional_arguments')
-
-      self.mount_tool_missing_backend_error = self._GetConfigValue(
-          config_parser, 'mount_tool', 'missing_backend_error')
-      self.mount_tool_mount_point = self._GetConfigValue(
-          config_parser, 'mount_tool', 'mount_point')
-      self.mount_tool_mounted_description = self._GetConfigValue(
-          config_parser, 'mount_tool', 'mounted_description')
-      self.mount_tool_mounted_dokan = self._GetConfigValue(
-          config_parser, 'mount_tool', 'mounted_dokan')
-      self.mount_tool_mounted_fuse = self._GetConfigValue(
-          config_parser, 'mount_tool', 'mounted_fuse')
-      self.mount_tool_source = self._GetConfigValue(
-          config_parser, 'mount_tool', 'source')
-      self.mount_tool_source_description = self._GetConfigValue(
-          config_parser, 'mount_tool', 'source_description')
-
-      # If the long source description is not set it will default to
-      # source description.
-      self.mount_tool_source_description_long = self._GetOptionalConfigValue(
-          config_parser, 'mount_tool', 'source_description_long')
-
-      self.mount_tool_source_type = self._GetConfigValue(
-          config_parser, 'mount_tool', 'source_type')
-
-      if self.mount_tool_source_type not in ['image', 'volume']:
-        raise ConfigError('unsupported mount tool source type: {0:s}'.format(
-            self.mount_tool_source_type))
-
-      self.mount_tool_supported_backends = self._GetConfigValue(
-          config_parser, 'mount_tool', 'supported_backends')
-
-    self.msvscpp_zlib_dependency = False
-    for dependency in self.msvscpp_build_dependencies:
-      if dependency.startswith('zlib '):
-        self.msvscpp_zlib_dependency = True
-
-  def GetTemplateMappings(self):
+  def _GetTemplateMappings(self, project_configuration):
     """Retrieves the template mappings.
 
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
     Returns:
-      dict[str, str]: template mappings.
+      dict[str, str]: string template mappings, where the key maps to the name
+          of a template variable.
     """
     building_table_of_contents = ''
 
@@ -373,80 +99,86 @@ class ProjectConfiguration(object):
     mount_tool_source_description_long = ''
     mount_tool_supported_backends = ''
 
-    development_prefix = self.project_name[3:]
-    python_bindings_name = 'py{0:s}'.format(self.project_name[3:])
-    mount_tool_name = '{0:s}mount'.format(self.project_name[3:])
-    tools_name = '{0:s}tools'.format(self.project_name[3:])
+    development_prefix = project_configuration.project_name[3:]
+    python_bindings_name = 'py{0:s}'.format(
+        project_configuration.project_name[3:])
+    mount_tool_name = '{0:s}mount'.format(
+        project_configuration.project_name[3:])
+    tools_name = '{0:s}tools'.format(project_configuration.project_name[3:])
 
-    if self.project_status:
-      project_status += '-{0:s}'.format(self.project_status)
+    if project_configuration.project_status:
+      project_status += '-{0:s}'.format(project_configuration.project_status)
 
-    if self.project_documentation_url:
+    if project_configuration.project_documentation_url:
       documentation = '* [Documentation]({0:s})\n'.format(
-          self.project_documentation_url)
+          project_configuration.project_documentation_url)
 
-    if self.library_build_dependencies:
-      for dependency in self.library_build_dependencies:
+    if project_configuration.library_build_dependencies:
+      for dependency in project_configuration.library_build_dependencies:
         build_dependencies += '* {0:s}\n'.format(dependency)
 
-    if self.supports_tests and self.tests_profiles:
-      for profile in self.tests_profiles:
+    if (project_configuration.supports_tests and
+        project_configuration.tests_profiles):
+      for profile in project_configuration.tests_profiles:
         tests_profiles += '* {0:s}\n'.format(profile)
 
-    if self.troubleshooting_example:
-      troubleshooting_example = self.troubleshooting_example
+    if project_configuration.troubleshooting_example:
+      troubleshooting_example = project_configuration.troubleshooting_example
 
-    if self.supports_gcc or self.supports_mingw or self.supports_msvscpp:
+    if (project_configuration.supports_gcc or
+        project_configuration.supports_mingw or
+        project_configuration.supports_msvscpp):
       building_table_of_contents += (
           'The {0:s} source code can be build with different compilers:\n'
-          '\n').format(self.project_name)
+          '\n').format(project_configuration.project_name)
 
-    if self.supports_gcc:
+    if project_configuration.supports_gcc:
       building_table_of_contents += (
           '* [Using GNU Compiler Collection (GCC)]'
           '(Building#using-gnu-compiler-collection-gcc)\n')
 
-      if self.gcc_build_dependencies:
+      if project_configuration.gcc_build_dependencies:
         gcc_build_dependencies = (
             '\n'
             'Also make sure to have the following dependencies including '
             'source headers installed:\n')
 
-        for dependency in self.gcc_build_dependencies:
+        for dependency in project_configuration.gcc_build_dependencies:
           gcc_build_dependencies += '* {0:s}\n'.format(dependency)
 
-      if self.gcc_static_build_dependencies:
-        for dependency in self.gcc_static_build_dependencies:
+      if project_configuration.gcc_static_build_dependencies:
+        for dependency in project_configuration.gcc_static_build_dependencies:
           gcc_static_build_dependencies += '* {0:s}\n'.format(dependency)
 
-      if self.supports_fuse:
+      if project_configuration.supports_fuse:
         gcc_static_build_dependencies += (
             '* fuse (optional, can be disabled by --with-libfuse=no)\n')
 
-      if self.supports_cygwin:
+      if project_configuration.supports_cygwin:
         building_table_of_contents += '  * [Using Cygwin](Building#cygwin)\n'
 
-        if self.cygwin_build_dependencies:
-          for dependency in self.cygwin_build_dependencies:
+        if project_configuration.cygwin_build_dependencies:
+          for dependency in project_configuration.cygwin_build_dependencies:
             cygwin_build_dependencies += '* {0:s}\n'.format(dependency)
 
-        if self.cygwin_dll_dependencies:
-          for dependency in self.cygwin_dll_dependencies:
+        if project_configuration.cygwin_dll_dependencies:
+          for dependency in project_configuration.cygwin_dll_dependencies:
             cygwin_dll_dependencies += '* {0:s}\n'.format(dependency)
 
-        if self.supports_tools:
+        if project_configuration.supports_tools:
           cygwin_executables += (
               'And the following executables:\n'
               '```\n')
 
-          for name in self.tools_names:
+          for name in project_configuration.tools_names:
             cygwin_executables += (
-                '{0:s}/.libs/{1:s}.exe\n'.format(self.tools_directory, name))
+                '{0:s}/.libs/{1:s}.exe\n'.format(
+                    project_configuration.tools_directory, name))
 
           cygwin_executables += (
               '```\n')
 
-      if self.supports_fuse:
+      if project_configuration.supports_fuse:
         gcc_mount_tool += (
             '\n'
             'If you want to be able to use {0:s}, make sure that:\n'
@@ -457,58 +189,59 @@ class ProjectConfiguration(object):
             '(http://osxfuse.github.com/) installed.\n').format(
                 mount_tool_name)
 
-    if self.supports_mingw:
+    if project_configuration.supports_mingw:
       building_table_of_contents += (
           '* [Using Minimalist GNU for Windows (MinGW)]'
           '(Building#using-minimalist-gnu-for-windows-mingw)\n')
 
-      if self.mingw_build_dependencies:
-        for dependency in self.mingw_build_dependencies:
+      if project_configuration.mingw_build_dependencies:
+        for dependency in project_configuration.mingw_build_dependencies:
           mingw_build_dependencies += '* {0:s}\n'.format(dependency)
 
-      if self.mingw_dll_dependencies:
-        for dependency in self.mingw_dll_dependencies:
+      if project_configuration.mingw_dll_dependencies:
+        for dependency in project_configuration.mingw_dll_dependencies:
           mingw_dll_dependencies += '* {0:s}\n'.format(dependency)
 
-      if self.supports_tools:
+      if project_configuration.supports_tools:
         mingw_executables += (
             'And the following executables:\n'
             '```\n')
 
-        for name in self.tools_names:
+        for name in project_configuration.tools_names:
           mingw_executables += (
-              '{0:s}/.libs/{1:s}.exe\n'.format(self.tools_directory, name))
+              '{0:s}/.libs/{1:s}.exe\n'.format(
+                  project_configuration.tools_directory, name))
 
         mingw_executables += (
             '```\n'
             '\n')
 
-    if self.supports_msvscpp:
+    if project_configuration.supports_msvscpp:
       building_table_of_contents += (
           '* [Using Microsoft Visual Studio]'
           '(Building#using-microsoft-visual-studio)\n')
 
-      if self.msvscpp_build_dependencies:
+      if project_configuration.msvscpp_build_dependencies:
         msvscpp_build_dependencies = (
             '\n'
             'To compile {0:s} using Microsoft Visual Studio you\'ll '
             'need:\n'
-            '\n').format(self.project_name)
+            '\n').format(project_configuration.project_name)
 
-        for dependency in self.msvscpp_build_dependencies:
+        for dependency in project_configuration.msvscpp_build_dependencies:
           msvscpp_build_dependencies += '* {0:s}\n'.format(dependency)
 
-      if self.msvscpp_dll_dependencies:
+      if project_configuration.msvscpp_dll_dependencies:
         msvscpp_dll_dependencies = '{0:s}.dll is dependent on:\n'.format(
-            self.project_name)
+            project_configuration.project_name)
 
-        for dependency in self.msvscpp_dll_dependencies:
+        for dependency in project_configuration.msvscpp_dll_dependencies:
           msvscpp_dll_dependencies += '* {0:s}\n'.format(dependency)
 
         msvscpp_dll_dependencies += (
             '\n'
             'These DLLs can be found in the same directory as '
-            '{0:s}.dll.\n').format(self.project_name)
+            '{0:s}.dll.\n').format(project_configuration.project_name)
 
       msvscpp_build_git = (
           '\n'
@@ -516,9 +249,9 @@ class ProjectConfiguration(object):
           'git with Visual Studio make sure the autotools are able to make '
           'a distribution package of {0:s} before trying to build it.\n'
           'You can create distribution package by running: '
-          '"make dist".\n').format(self.project_name)
+          '"make dist".\n').format(project_configuration.project_name)
 
-      if self.supports_dokan:
+      if project_configuration.supports_dokan:
         msvscpp_mount_tool += (
             '\n'
             'If you want to be able to use {0:s} you\'ll need Dokan library '
@@ -526,26 +259,29 @@ class ProjectConfiguration(object):
             'Otherwise ignore or remove the dokan_dll and {0:s} Visual Studio '
             'project files.\n').format(mount_tool_name)
 
-    if self.supports_gcc or self.supports_mingw or self.supports_msvscpp:
+    if (project_configuration.supports_gcc or
+        project_configuration.supports_mingw or
+        project_configuration.supports_msvscpp):
       building_table_of_contents += '\n'
 
     building_table_of_contents += (
         'Or directly packaged with different package managers:\n\n')
 
-    if self.supports_dpkg:
+    if project_configuration.supports_dpkg:
       building_table_of_contents += (
           '* [Using Debian package tools (DEB)]'
           '(Building#using-debian-package-tools-deb)\n')
 
-      if self.dpkg_build_dependencies is None:
+      if project_configuration.dpkg_build_dependencies is None:
         dpkg_build_dependencies = []
       else:
-        dpkg_build_dependencies = list(self.dpkg_build_dependencies)
+        dpkg_build_dependencies = list(
+            project_configuration.dpkg_build_dependencies)
 
-      if self.supports_fuse:
+      if project_configuration.supports_fuse:
         dpkg_build_dependencies.append('libfuse-dev')
 
-      if self.supports_python:
+      if project_configuration.supports_python:
         dpkg_build_dependencies.append('python-all-dev')
         dpkg_build_dependencies.append('python3-all-dev')
 
@@ -554,121 +290,123 @@ class ProjectConfiguration(object):
       dpkg_filenames += (
           '{0:s}_<version>-1_<arch>.deb\n'
           '{0:s}-dev_<version>-1_<arch>.deb').format(
-              self.project_name)
+              project_configuration.project_name)
 
-      if self.supports_python:
+      if project_configuration.supports_python:
         dpkg_filenames += (
             '\n{0:s}-python_<version>-1_<arch>.deb').format(
-                self.project_name)
+                project_configuration.project_name)
         dpkg_filenames += (
             '\n{0:s}-python3_<version>-1_<arch>.deb').format(
-                self.project_name)
+                project_configuration.project_name)
 
-      if self.supports_tools:
+      if project_configuration.supports_tools:
         dpkg_filenames += (
             '\n{0:s}-tools_<version>-1_<arch>.deb').format(
-                self.project_name)
+                project_configuration.project_name)
 
-    if self.supports_rpm:
+    if project_configuration.supports_rpm:
       building_table_of_contents += (
           '* [Using RedHat package tools (RPM)]'
           '(Building#using-redhat-package-tools-rpm)\n')
 
-      if self.rpm_build_dependencies is None:
+      if project_configuration.rpm_build_dependencies is None:
         rpm_build_dependencies = []
       else:
-        rpm_build_dependencies = list(self.rpm_build_dependencies)
+        rpm_build_dependencies = list(
+            project_configuration.rpm_build_dependencies)
 
-      if self.supports_fuse:
+      if project_configuration.supports_fuse:
         rpm_build_dependencies.append('fuse-devel')
 
-      if self.supports_python:
+      if project_configuration.supports_python:
         rpm_build_dependencies.append('python-devel')
         rpm_build_dependencies.append('python3-devel')
 
       rpm_build_dependencies = ' '.join(rpm_build_dependencies)
 
-      if self.project_status:
+      if project_configuration.project_status:
         rpm_rename_source_package += (
             'mv {0:s}-{1:s}-<version>.tar.gz {0:s}-<version>.tar.gz\n'.format(
-                self.project_name, self.project_status))
+                project_configuration.project_name,
+                project_configuration.project_status))
 
       rpm_filenames += (
           '~/rpmbuild/RPMS/<arch>/{0:s}-<version>-1.<arch>.rpm\n'
           '~/rpmbuild/RPMS/<arch>/{0:s}-devel-<version>-1.<arch>'
-          '.rpm\n').format(self.project_name)
+          '.rpm\n').format(project_configuration.project_name)
 
-      if self.supports_python:
+      if project_configuration.supports_python:
         rpm_filenames += (
             '~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>'
-            '.rpm\n').format(self.project_name)
+            '.rpm\n').format(project_configuration.project_name)
         rpm_filenames += (
             '~/rpmbuild/RPMS/<arch>/{0:s}-python3-<version>-1.<arch>'
-            '.rpm\n').format(self.project_name)
+            '.rpm\n').format(project_configuration.project_name)
 
-      if self.supports_tools:
+      if project_configuration.supports_tools:
         rpm_filenames += (
             '~/rpmbuild/RPMS/<arch>/{0:s}-tools-<version>-1.<arch>'
-            '.rpm\n').format(self.project_name)
+            '.rpm\n').format(project_configuration.project_name)
 
       rpm_filenames += (
           '~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm').format(
-              self.project_name)
+              project_configuration.project_name)
 
     building_table_of_contents += (
         '* [Using Mac OS X pkgbuild](Building#using-mac-os-x-pkgbuild)\n')
 
-    if self.supports_python:
+    if project_configuration.supports_python:
       macosx_pkg_configure_options = ' --enable-python --with-pyprefix'
 
-    if self.supports_python:
+    if project_configuration.supports_python:
       building_table_of_contents += (
           '* [Using setup.py](Building#using-setuppy)\n')
 
     development_table_of_contents += (
         '* [C/C++ development](C-development)\n')
 
-    if self.supports_python:
+    if project_configuration.supports_python:
       development_table_of_contents += (
           '* [Python development](Python-development)\n')
 
-    if self.development_main_object_pre_open_python:
+    if project_configuration.development_main_object_pre_open_python:
       development_main_object_pre_open_python = '{0:s}\n'.format(
-          self.development_main_object_pre_open_python)
+          project_configuration.development_main_object_pre_open_python)
 
-    if self.development_main_object_post_open_python:
+    if project_configuration.development_main_object_post_open_python:
       development_main_object_post_open_python = '{0:s}\n'.format(
-          '\n'.join(self.development_main_object_post_open_python))
+          '\n'.join(project_configuration.development_main_object_post_open_python))
 
-    if self.development_main_object_post_open_file_object_python:
+    if project_configuration.development_main_object_post_open_file_object_python:
       development_main_object_post_open_file_object_python = '{0:s}\n'.format(
-          '\n'.join(self.development_main_object_post_open_file_object_python))
-    elif self.development_main_object_post_open_python:
+          '\n'.join(project_configuration.development_main_object_post_open_file_object_python))
+    elif project_configuration.development_main_object_post_open_python:
       development_main_object_post_open_file_object_python = '{0:s}\n'.format(
-          '\n'.join(self.development_main_object_post_open_python))
+          '\n'.join(project_configuration.development_main_object_post_open_python))
 
-    if self.mount_tool_additional_arguments:
-      mount_tool_additional_arguments = self.mount_tool_additional_arguments
+    if project_configuration.mount_tool_additional_arguments:
+      mount_tool_additional_arguments = project_configuration.mount_tool_additional_arguments
 
-    if self.mount_tool_source_description_long:
+    if project_configuration.mount_tool_source_description_long:
       mount_tool_source_description_long = (
-          self.mount_tool_source_description_long)
+          project_configuration.mount_tool_source_description_long)
     else:
-      mount_tool_source_description_long = self.mount_tool_source_description
+      mount_tool_source_description_long = project_configuration.mount_tool_source_description
 
-    if self.mount_tool_supported_backends:
-      for backend in self.mount_tool_supported_backends:
+    if project_configuration.mount_tool_supported_backends:
+      for backend in project_configuration.mount_tool_supported_backends:
         mount_tool_supported_backends += '* {0:s}\n'.format(backend)
 
     template_mappings = {
         'building_table_of_contents': building_table_of_contents,
 
-        'project_name': self.project_name,
-        'project_name_upper_case': self.project_name.upper(),
+        'project_name': project_configuration.project_name,
+        'project_name_upper_case': project_configuration.project_name.upper(),
         'project_status': project_status,
-        'project_description': self.project_description,
-        'project_git_url': self.project_git_url,
-        'project_download_url': self.project_download_url,
+        'project_description': project_configuration.project_description,
+        'project_git_url': project_configuration.project_git_url,
+        'project_downloads_url': project_configuration.project_downloads_url,
 
         'build_dependencies': build_dependencies,
 
@@ -681,26 +419,26 @@ class ProjectConfiguration(object):
         'development_table_of_contents': development_table_of_contents,
 
         'development_prefix': development_prefix,
-        'development_main_object': self.development_main_object,
+        'development_main_object': project_configuration.development_main_object,
         'development_main_object_filename': (
-            self.development_main_object_filename),
+            project_configuration.development_main_object_filename),
         'development_main_object_pre_open_python': (
             development_main_object_pre_open_python),
         'development_main_object_post_open_python': (
             development_main_object_post_open_python),
         'development_main_object_post_open_file_object_python': (
             development_main_object_post_open_file_object_python),
-        'development_main_object_size': self.development_main_object_size,
+        'development_main_object_size': project_configuration.development_main_object_size,
 
         'tests_profiles': tests_profiles,
-        'tests_example_filename1': self.tests_example_filename1,
-        'tests_example_filename2': self.tests_example_filename2,
+        'tests_example_filename1': project_configuration.tests_example_filename1,
+        'tests_example_filename2': project_configuration.tests_example_filename2,
 
         'troubleshooting_example': troubleshooting_example,
 
         'cygwin_build_dependencies': cygwin_build_dependencies,
         'cygwin_dll_dependencies': cygwin_dll_dependencies,
-        'cygwin_dll_filename': self.cygwin_dll_filename,
+        'cygwin_dll_filename': project_configuration.cygwin_dll_filename,
         'cygwin_executables': cygwin_executables,
 
         'gcc_build_dependencies': gcc_build_dependencies,
@@ -709,7 +447,7 @@ class ProjectConfiguration(object):
 
         'mingw_build_dependencies': mingw_build_dependencies,
         'mingw_dll_dependencies': mingw_dll_dependencies,
-        'mingw_dll_filename': self.mingw_dll_filename,
+        'mingw_dll_filename': project_configuration.mingw_dll_filename,
         'mingw_executables': mingw_executables,
 
         'msvscpp_build_dependencies': msvscpp_build_dependencies,
@@ -728,45 +466,18 @@ class ProjectConfiguration(object):
 
         'mount_tool_additional_arguments': mount_tool_additional_arguments,
         'mount_tool_missing_backend_error': (
-            self.mount_tool_missing_backend_error),
-        'mount_tool_mount_point': self.mount_tool_mount_point,
-        'mount_tool_mounted_description': self.mount_tool_mounted_description,
-        'mount_tool_mounted_dokan': self.mount_tool_mounted_dokan,
-        'mount_tool_mounted_fuse': self.mount_tool_mounted_fuse,
-        'mount_tool_source': self.mount_tool_source,
-        'mount_tool_source_description': self.mount_tool_source_description,
+            project_configuration.mount_tool_missing_backend_error),
+        'mount_tool_mount_point': project_configuration.mount_tool_mount_point,
+        'mount_tool_mounted_description': project_configuration.mount_tool_mounted_description,
+        'mount_tool_mounted_dokan': project_configuration.mount_tool_mounted_dokan,
+        'mount_tool_mounted_fuse': project_configuration.mount_tool_mounted_fuse,
+        'mount_tool_source': project_configuration.mount_tool_source,
+        'mount_tool_source_description': project_configuration.mount_tool_source_description,
         'mount_tool_source_description_long': (
             mount_tool_source_description_long),
         'mount_tool_supported_backends': mount_tool_supported_backends,
     }
     return template_mappings
-
-
-class WikiPageGenerator(object):
-  """Class that generates wiki pages."""
-
-  def __init__(self, template_directory):
-    """Initializes a wiki page generator.
-
-    Args:
-      template_directory (str): path of the template directory.
-    """
-    super(WikiPageGenerator, self).__init__()
-    self._template_directory = template_directory
-
-  def _GenerateSection(
-      self, template_filename, template_mappings, output_writer):
-    """Generates a section from template filename.
-
-    Args:
-      template_filename (str): path of the template file.
-      template_mpppings (dict[str, str]): the template mappings, where
-          the key maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-    """
-    template_string = self._ReadTemplateFile(template_filename)
-    output_data = template_string.substitute(template_mappings)
-    output_writer.Write(output_data)
 
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.
@@ -814,7 +525,7 @@ class BuildingPageGenerator(WikiPageGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
     self._GenerateSection('introduction.txt', template_mappings, output_writer)
 
     self._GenerateSection('source.txt', template_mappings, output_writer)
@@ -917,7 +628,7 @@ class DevelopmentPageGenerator(WikiPageGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
     self._GenerateSection('main.txt', template_mappings, output_writer)
 
   def HasContent(self, project_configuration):
@@ -944,7 +655,7 @@ class CDevelopmentPageGenerator(WikiPageGenerator):
     """
     # TODO: add support for also_see.txt, main_object.txt
 
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
     self._GenerateSection('main.txt', template_mappings, output_writer)
 
     if project_configuration.development_main_object:
@@ -980,7 +691,7 @@ class PythonDevelopmentPageGenerator(WikiPageGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
     self._GenerateSection('main.txt', template_mappings, output_writer)
 
     if project_configuration.development_main_object:
@@ -1025,7 +736,7 @@ class HomePageGenerator(WikiPageGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
     self._GenerateSection('introduction.txt', template_mappings, output_writer)
 
   def HasContent(self, unused_project_configuration):
@@ -1050,7 +761,7 @@ class MountingPageGenerator(WikiPageGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
     if (project_configuration.supports_dokan or
         project_configuration.supports_fuse):
       self._GenerateSection(
@@ -1126,7 +837,7 @@ class TestingPageGenerator(WikiPageGenerator):
       output_writer (OutputWriter): output writer.
     """
     # TODO: implement testing page without input files.
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
     if project_configuration.supports_tests:
       self._GenerateSection('tests.txt', template_mappings, output_writer)
 
@@ -1173,7 +884,7 @@ class TroubleshootingPageGenerator(WikiPageGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    template_mappings = project_configuration.GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(project_configuration)
     self._GenerateSection(
         'introduction.txt', template_mappings, output_writer)
     self._GenerateSection(
@@ -1303,7 +1014,7 @@ def Main():
     print('')
     return False
 
-  project_configuration = ProjectConfiguration()
+  project_configuration = configuration.ProjectConfiguration()
   project_configuration.ReadFromFile(options.configuration_file)
 
   readme_file = os.path.join(
