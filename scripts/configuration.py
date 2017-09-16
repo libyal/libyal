@@ -129,7 +129,7 @@ class ProjectConfiguration(object):
     self.tools_description = None
     self.tools_directory = None
     self.tools_name = None
-    self.tools_names = None
+    self.tools_names = []
 
     # Tests configuration.
     self.tests_authors = None
@@ -497,11 +497,13 @@ class ProjectConfiguration(object):
       config_parser (ConfigParser): configuration file parser.
     """
     self.supports_tests = config_parser.has_section('tests')
-    if not self.supports_tests:
-      return
 
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, 'tests', 'authors', default_value=self.project_authors)
+
+    if not self.supports_tests:
+      return
+
     self.tests_options = self._GetOptionalConfigValue(
         config_parser, 'tests', 'options', default_value=[])
 
@@ -525,16 +527,18 @@ class ProjectConfiguration(object):
       config_parser (ConfigParser): configuration file parser.
     """
     self.supports_tools = config_parser.has_section('tools')
-    if not self.supports_tools:
-      return
 
     self.tools_authors = self._GetOptionalConfigValue(
         config_parser, 'tools', 'authors', default_value=self.project_authors)
+    self.tools_name = '{0:s}tools'.format(self.library_name_suffix)
+
+    if not self.supports_tools:
+      return
+
     self.tools_description = self._GetOptionalConfigValue(
         config_parser, 'tools', 'description', default_value='')
     self.tools_directory = self._GetConfigValue(
         config_parser, 'tools', 'directory')
-    self.tools_name = '{0:s}tools'.format(self.library_name_suffix)
     self.tools_names = self._GetOptionalConfigValue(
         config_parser, 'tools', 'names', default_value=[])
 

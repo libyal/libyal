@@ -2568,33 +2568,44 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['tools_executables']
 
-    makefile_am_file = self._GetMainMakefileAM(project_configuration)
-
-    libraries = [
-        '/{0:s}'.format(name) for name in sorted(makefile_am_file.libraries)]
-
     source_glob = '{0:s}_test_*.c'.format(
         project_configuration.library_name_suffix)
     source_glob = os.path.join('tests', source_glob)
 
-    tests_executables = []
+    tests_files = ['/tests/tmp*']
+    if os.path.exists(os.path.join('tests', 'input')):
+      tests_files.append('/tests/input')
+
     for source_file in sorted(glob.glob(source_glob)):
       if source_file.endswith('_getopt.c') or source_file.endswith('_memory.c'):
         continue
 
       source_file = '/{0:s}'.format(source_file[:-2])
-      tests_executables.append(source_file)
+      tests_files.append(source_file)
 
-    template_mappings['local_libraries'] = '\n'.join(libraries)
-    template_mappings['tests_executables'] = '\n'.join(tests_executables)
+    template_mappings['tests_files'] = '\n'.join(sorted(tests_files))
 
-    template_filename = os.path.join(template_directory, 'footer')
+    template_filename = os.path.join(template_directory, 'tests')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    del template_mappings['local_libraries']
-    del template_mappings['tests_executables']
+    del template_mappings['tests_files']
+
+    makefile_am_file = self._GetMainMakefileAM(project_configuration)
+
+    libraries = [
+        '/{0:s}'.format(name) for name in sorted(makefile_am_file.libraries)]
+
+    if libraries:
+      template_mappings['local_libraries'] = '\n'.join(libraries)
+
+      template_filename = os.path.join(template_directory, 'local_libraries')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['local_libraries']
 
   def Generate(self, project_configuration, output_writer):
     """Generates configuration files.
