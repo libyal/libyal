@@ -1,0 +1,7 @@
+/tests/*.exe
+/tests/input
+/tests/tmp*
+${tests_executables}
+
+# Local library dependencies specific files
+${local_libraries}

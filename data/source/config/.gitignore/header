@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20161030
+# Version: 20170916
 
 # Generic auto-generated build files
 *~
@@ -107,3 +107,7 @@ stamp-h[1-9]
 /po/remove-potcdate.sin
 
 # Project specific files
+/common/config.h
+/common/config.h.in
+/common/types.h
+/dpkg/changelog

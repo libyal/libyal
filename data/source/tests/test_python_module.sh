@@ -19,7 +19,7 @@ test_python_function()
 	local TEST_FUNCTION=$$1;
 
 	local TEST_DESCRIPTION="Testing Python-bindings functions: $${TEST_FUNCTION}";
-	local TEST_SCRIPT="$${TEST_TOOL_DIRECTORY}/py${library_name_suffix}_test_$${TEST_FUNCTION}.py";
+	local TEST_SCRIPT="$${TEST_TOOL_DIRECTORY}/${python_module_name}_test_$${TEST_FUNCTION}.py";
 
 	run_test_with_arguments "$${TEST_DESCRIPTION}" "$${TEST_SCRIPT}";
 	local RESULT=$$?;
@@ -32,9 +32,9 @@ test_python_function_with_input()
 	local TEST_FUNCTION=$$1;
 
 	local TEST_DESCRIPTION="Testing Python-bindings functions: $${TEST_FUNCTION}";
-	local TEST_SCRIPT="$${TEST_TOOL_DIRECTORY}/py${library_name_suffix}_test_$${TEST_FUNCTION}.py";
+	local TEST_SCRIPT="$${TEST_TOOL_DIRECTORY}/${python_module_name}_test_$${TEST_FUNCTION}.py";
 
-	run_test_on_input_directory "py${library_name_suffix}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_SCRIPT}" "input" "$${INPUT_GLOB}";
+	run_test_on_input_directory "${python_module_name}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_SCRIPT}" "input" "$${INPUT_GLOB}";
 	local RESULT=$$?;
 
 	return $${RESULT};

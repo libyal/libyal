@@ -10,6 +10,7 @@ import argparse
 import collections
 import datetime
 import difflib
+import glob
 import logging
 import os
 import shutil
@@ -2092,25 +2093,21 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     template_directory = os.path.join(self._template_directory, 'configure.ac')
 
-    template_filename = os.path.join(
-        template_directory, 'header.ac')
+    template_filename = os.path.join(template_directory, 'header.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    template_filename = os.path.join(
-        template_directory, 'programs.ac')
+    template_filename = os.path.join(template_directory, 'programs.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(
-        template_directory, 'compiler_language.ac')
+    template_filename = os.path.join(template_directory, 'compiler_language.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(
-        template_directory, 'build_features.ac')
+    template_filename = os.path.join(template_directory, 'build_features.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2149,8 +2146,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       del template_mappings['local_library_name']
       del template_mappings['local_library_name_upper_case']
 
-    template_filename = os.path.join(
-        template_directory, 'check_library_support.ac')
+    template_filename = os.path.join( template_directory, 'check_library_support.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2192,20 +2188,17 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(
-        template_directory, 'check_tests_support.ac')
+    template_filename = os.path.join( template_directory, 'check_tests_support.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(
-        template_directory, 'dll_support.ac')
+    template_filename = os.path.join(template_directory, 'dll_support.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(
-        template_directory, 'compiler_flags.ac')
+    template_filename = os.path.join(template_directory, 'compiler_flags.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2248,8 +2241,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
         del template_mappings['local_library_tests']
 
-    template_filename = os.path.join(
-        template_directory, 'dates.ac')
+    template_filename = os.path.join(template_directory, 'dates.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2306,8 +2298,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     # TODO: add support for Makefile in documents (libuna)
 
-    template_filename = os.path.join(
-        template_directory, 'config_files_end.ac')
+    template_filename = os.path.join(template_directory, 'config_files_end.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2421,8 +2412,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     template_mappings['notice_message'] = '\n'.join(notice_message)
 
-    template_filename = os.path.join(
-        template_directory, 'footer.ac')
+    template_filename = os.path.join(template_directory, 'footer.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2530,6 +2520,82 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
+  def _GenerateGitignore(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the .gitignore configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    include_header_file = self._GetLibraryIncludeHeaderFile(
+        project_configuration)
+
+    template_directory = os.path.join(self._template_directory, '.gitignore')
+
+    template_filename = os.path.join(template_directory, 'header')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'library')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if self._HasPythonModule(project_configuration):
+      template_filename = os.path.join(template_directory, 'python_module')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if self._HasTools(project_configuration):
+      tools_executables = []
+      for name in sorted(project_configuration.tools_names):
+        tools_executable = '/{0:s}/{1:s}'.format(
+            project_configuration.tools_name, name)
+        tools_executables.append(tools_executable)
+
+      template_mappings['tools_executables'] = '\n'.join(tools_executables)
+
+      template_filename = os.path.join(template_directory, 'tools')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['tools_executables']
+
+    makefile_am_file = self._GetMainMakefileAM(project_configuration)
+
+    libraries = [
+        '/{0:s}'.format(name) for name in sorted(makefile_am_file.libraries)]
+
+    source_glob = '{0:s}_test_*.c'.format(
+        project_configuration.library_name_suffix)
+    source_glob = os.path.join('tests', source_glob)
+
+    tests_executables = []
+    for source_file in sorted(glob.glob(source_glob)):
+      if source_file.endswith('_getopt.c') or source_file.endswith('_memory.c'):
+        continue
+
+      source_file = '/{0:s}'.format(source_file[:-2])
+      tests_executables.append(source_file)
+
+    template_mappings['local_libraries'] = '\n'.join(libraries)
+    template_mappings['tests_executables'] = '\n'.join(tests_executables)
+
+    template_filename = os.path.join(template_directory, 'footer')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['local_libraries']
+    del template_mappings['tests_executables']
+
   def Generate(self, project_configuration, output_writer):
     """Generates configuration files.
 
@@ -2603,6 +2669,10 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     self._GenerateDpkg(
         project_configuration, template_mappings, output_writer, 'dpkg')
+
+    self._GenerateGitignore(
+        project_configuration, template_mappings, output_writer,
+        '.gitignore')
 
 
 class IncludeSourceFileGenerator(SourceFileGenerator):
@@ -6336,7 +6406,6 @@ def Main():
 
   # TODO: generate more source files.
   # AUTHORS, NEWS
-  # configure.ac
   # include headers
   # yal.net files
 

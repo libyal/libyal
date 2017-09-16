@@ -1,0 +1,8 @@
+/include/${library_name}.h
+/include/${library_name}/definitions.h
+/include/${library_name}/features.h
+/include/${library_name}/types.h
+/${library_name}.pc
+/${library_name}.spec
+/${library_name}/${library_name}.rc
+/${library_name}/${library_name}_definitions.h
