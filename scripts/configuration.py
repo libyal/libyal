@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import json
 import logging
+import os
 
 try:
   import ConfigParser as configparser
@@ -48,18 +49,8 @@ class ProjectConfiguration(object):
     python_module_name (str): name of the Python module, such as "pyyal".
     python_module_year_of_creation (str): year the Python module was created.
     rpm_build_dependencies (str): rpm build dependencies.
-    supports_cygwin (bool): True if the project supports Cygwin.
     supports_debug_output (bool): True if the project supports debug output.
-    supports_dokan (bool): True if the project supports dokan.
-    supports_dpkg (bool): True if the project provides dpkg packaging files.
-    supports_fuse (bool): True if the project supports fuse.
-    supports_gcc (bool): True if the project provides gcc.
-    supports_mingw (bool): True if the project provides MinGW.
-    supports_msvscpp (bool): True if the project provides Visual Studio.
-    supports_python (bool): True if the project provides a Python module.
-    supports_rpm (bool): True if the project provides rpm packaging files.
     supports_tests (bool): True if the project provides tests.
-    supports_tools (bool): True if the project provides tools.
     tests_authors (str): authors of the test files.
     tests_example_filename1 (str): name of the first test example filename.
     tests_example_filename2 (str): name of the second test example filename.
@@ -67,15 +58,19 @@ class ProjectConfiguration(object):
     tests_profiles (list[str]): names of the test profiles.
     tests_supports_valgrind (boot): True if the tests support valgrind.
     tools_authors (str): authors of the tools.
+    tools_build_dependencies (str): tools build dependencies.
     tools_description (str): description of the tools.
     tools_directory (str): name of the directory that contains the tools.
     tools_names (str): names of the individual tools.
-    tools_name (str): name of the all the tools, such as "yaltools".
   """
 
   def __init__(self):
     """Initializes a project configuation."""
     super(ProjectConfiguration, self).__init__()
+    self._has_dpkg = None
+    self._has_rpm = None
+    self._has_python_module = None
+    self._has_tools = None
 
     # Project configuration.
     self.project_authors = None
@@ -90,26 +85,7 @@ class ProjectConfiguration(object):
     # Functionality the project offsers.
     self.supports_debug_output = False
     # TODO: deprecate these supports, derive from project sources.
-    self.supports_python = False
     self.supports_tests = False
-    self.supports_tools = False
-
-    # Compilers the project supports.
-    # TODO: deprecate these supports, derive from project sources.
-    self.supports_cygwin = False
-    self.supports_gcc = False
-    self.supports_mingw = False
-    self.supports_msvscpp = False
-
-    # Packaging methods the project supports.
-    # TODO: deprecate these supports, derive from project sources.
-    self.supports_dpkg = False
-    self.supports_rpm = False
-
-    # Other.
-    # TODO: deprecate these supports, derive from project sources.
-    self.supports_dokan = False
-    self.supports_fuse = False
 
     # Library configuration.
     self.library_build_dependencies = None
@@ -126,9 +102,9 @@ class ProjectConfiguration(object):
 
     # Tools configuration.
     self.tools_authors = None
+    self.tools_build_dependencies = None
     self.tools_description = None
     self.tools_directory = None
-    self.tools_name = None
     self.tools_names = []
 
     # Tests configuration.
@@ -235,16 +211,15 @@ class ProjectConfiguration(object):
     Args:
       config_parser (ConfigParser): configuration file parser.
     """
-    self.supports_cygwin = config_parser.has_section('cygwin')
-    if not self.supports_cygwin:
-      return
-
     self.cygwin_build_dependencies = self._GetOptionalConfigValue(
         config_parser, 'cygwin', 'build_dependencies', default_value=[])
     self.cygwin_dll_dependencies = self._GetOptionalConfigValue(
         config_parser, 'cygwin', 'dll_dependencies', default_value=[])
-    self.cygwin_dll_filename = self._GetConfigValue(
-        config_parser, 'cygwin', 'dll_filename')
+
+    cygwin_dll_filename = 'cyg{0:s}-0.dll'.format(self.library_name_suffix)
+    self.cygwin_dll_filename = self._GetOptionalConfigValue(
+        config_parser, 'cygwin', 'dll_filename',
+        default_value=cygwin_dll_filename)
 
     # Remove trailing comments.
     self.cygwin_build_dependencies = [
@@ -294,10 +269,6 @@ class ProjectConfiguration(object):
     Args:
       config_parser (ConfigParser): configuration file parser.
     """
-    self.supports_dpkg = config_parser.has_section('dpkg')
-    if not self.supports_dpkg:
-      return
-
     self.dpkg_build_dependencies = self._GetOptionalConfigValue(
         config_parser, 'dpkg', 'build_dependencies', default_value=[])
 
@@ -311,14 +282,16 @@ class ProjectConfiguration(object):
     Args:
       config_parser (ConfigParser): configuration file parser.
     """
-    self.supports_gcc = config_parser.has_section('gcc')
-    if not self.supports_gcc:
-      return
+    self.gcc_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'gcc', 'build_dependencies', default_value=[])
+    self.gcc_static_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'gcc', 'static_build_dependencies', default_value=[])
 
-    self.gcc_build_dependencies = self._GetConfigValue(
-        config_parser, 'gcc', 'build_dependencies')
-    self.gcc_static_build_dependencies = self._GetConfigValue(
-        config_parser, 'gcc', 'static_build_dependencies')
+    # Remove trailing comments.
+    self.gcc_build_dependencies = [
+        name.split(' ')[0] for name in self.gcc_build_dependencies]
+    self.gcc_static_build_dependencies = [
+        name.split(' ')[0] for name in self.gcc_static_build_dependencies]
 
   def _ReadLibraryConfiguration(self, config_parser):
     """Reads the library configuration.
@@ -328,12 +301,16 @@ class ProjectConfiguration(object):
     """
     self.library_description = self._GetConfigValue(
         config_parser, 'library', 'description')
-    self.library_build_dependencies = self._GetConfigValue(
-        config_parser, 'library', 'build_dependencies')
+    self.library_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'library', 'build_dependencies', default_value=[])
     self.library_name = self.project_name
-    self.library_name_suffix = self.project_name[3:]
+    self.library_name_suffix = self.library_name[3:]
     self.library_public_types = self._GetOptionalConfigValue(
         config_parser, 'library', 'public_types', default_value=[])
+
+    # Remove trailing comments.
+    self.library_build_dependencies = [
+        name.split(' ')[0] for name in self.library_build_dependencies]
 
   def _ReadMinGWConfiguration(self, config_parser):
     """Reads the MinGW configuration.
@@ -341,16 +318,19 @@ class ProjectConfiguration(object):
     Args:
       config_parser (ConfigParser): configuration file parser.
     """
-    self.supports_mingw = config_parser.has_section('mingw')
-    if not self.supports_mingw:
-      return
+    self.mingw_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'mingw', 'build_dependencies', default_value=[])
+    self.mingw_dll_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'mingw', 'dll_dependencies', default_value=[])
 
-    self.mingw_build_dependencies = self._GetConfigValue(
-        config_parser, 'mingw', 'build_dependencies')
-    self.mingw_dll_dependencies = self._GetConfigValue(
-        config_parser, 'mingw', 'dll_dependencies')
-    self.mingw_dll_filename = self._GetConfigValue(
-        config_parser, 'mingw', 'dll_filename')
+    mingw_dll_filename = 'lib{0:s}-1.dll'.format(self.library_name_suffix)
+    self.mingw_dll_filename = self._GetOptionalConfigValue(
+        config_parser, 'mingw', 'dll_filename',
+        default_value=mingw_dll_filename)
+
+    # Remove trailing comments.
+    self.mingw_build_dependencies = [
+        name.split(' ')[0] for name in self.mingw_build_dependencies]
 
   def _ReadMountToolConfiguration(self, config_parser):
     """Reads the mount tool configuration.
@@ -405,25 +385,27 @@ class ProjectConfiguration(object):
       ConfigurationError: if the project year of creation cannot
           be converted to a base 10 integer value.
     """
-    self.project_authors = self._GetConfigValue(
-        config_parser, 'project', 'authors')
+    self.project_name = self._GetConfigValue(
+        config_parser, 'project', 'name')
+
+    project_authors = ['Joachim Metz <joachim.metz@gmail.com>']
+    self.project_authors = self._GetOptionalConfigValue(
+        config_parser, 'project', 'authors', default_value=project_authors)
+
     self.project_documentation_url = self._GetOptionalConfigValue(
         config_parser, 'project', 'documentation_url')
 
+    project_downloads_url = 'https://github.com/libyal/{0:s}/releases'.format(
+        self.project_name)
     self.project_downloads_url = self._GetOptionalConfigValue(
-        config_parser, 'project', 'download_url')
-    if self.project_downloads_url:
-      logging.warning(
-          'Older configuration detected. Change download_url into '
-          'downloads_url')
-    else:
-      self.project_downloads_url = self._GetConfigValue(
-          config_parser, 'project', 'downloads_url')
+        config_parser, 'project', 'downloads_url',
+        default_value=project_downloads_url)
 
-    self.project_git_url = self._GetConfigValue(
-        config_parser, 'project', 'git_url')
-    self.project_name = self._GetConfigValue(
-        config_parser, 'project', 'name')
+    project_git_url = 'https://github.com/libyal/{0:s}.git'.format(
+        self.project_name)
+    self.project_git_url = self._GetOptionalConfigValue(
+        config_parser, 'project', 'git_url', default_value=project_git_url)
+
     self.project_status = self._GetConfigValue(
         config_parser, 'project', 'status')
     self.project_year_of_creation = self._GetConfigValue(
@@ -440,10 +422,6 @@ class ProjectConfiguration(object):
         config_parser, u'project', u'features')
 
     self.supports_debug_output = 'debug_output' in features
-    self.supports_python = 'python' in features
-
-    self.supports_dokan = 'dokan' in features
-    self.supports_fuse = 'fuse' in features
 
   def _ReadPythonModuleConfiguration(self, config_parser):
     """Reads the Python module configuration.
@@ -479,10 +457,6 @@ class ProjectConfiguration(object):
     Args:
       config_parser (ConfigParser): configuration file parser.
     """
-    self.supports_rpm = config_parser.has_section('rpm')
-    if not self.supports_rpm:
-      return
-
     self.rpm_build_dependencies = self._GetOptionalConfigValue(
         config_parser, 'rpm', 'build_dependencies', default_value=[])
 
@@ -526,21 +500,23 @@ class ProjectConfiguration(object):
     Args:
       config_parser (ConfigParser): configuration file parser.
     """
-    self.supports_tools = config_parser.has_section('tools')
-
     self.tools_authors = self._GetOptionalConfigValue(
         config_parser, 'tools', 'authors', default_value=self.project_authors)
-    self.tools_name = '{0:s}tools'.format(self.library_name_suffix)
-
-    if not self.supports_tools:
-      return
-
+    self.tools_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'tools', 'build_dependencies', default_value=[])
     self.tools_description = self._GetOptionalConfigValue(
         config_parser, 'tools', 'description', default_value='')
-    self.tools_directory = self._GetConfigValue(
-        config_parser, 'tools', 'directory')
+
+    tools_directory = '{0:s}tools'.format(self.library_name_suffix)
+    self.tools_directory = self._GetOptionalConfigValue(
+        config_parser, 'tools', 'directory', default_value=tools_directory)
+
     self.tools_names = self._GetOptionalConfigValue(
         config_parser, 'tools', 'names', default_value=[])
+
+    # Remove trailing comments.
+    self.tools_build_dependencies = [
+        name.split(' ')[0] for name in self.tools_build_dependencies]
 
   def _ReadTroubleshootingConfiguration(self, config_parser):
     """Reads the troubleshooting configuration.
@@ -560,10 +536,6 @@ class ProjectConfiguration(object):
     Args:
       config_parser (ConfigParser): configuration file parser.
     """
-    self.supports_msvscpp = config_parser.has_section('msvscpp')
-    if not self.supports_msvscpp:
-      return
-
     self.msvscpp_build_dependencies = self._GetOptionalConfigValue(
         config_parser, 'msvscpp', 'build_dependencies', default_value=[])
     self.msvscpp_dll_dependencies = self._GetOptionalConfigValue(
@@ -572,6 +544,67 @@ class ProjectConfiguration(object):
     # Remove trailing comments.
     self.msvscpp_build_dependencies = [
         name.split(' ')[0] for name in self.msvscpp_build_dependencies]
+
+  def HasDependencyDokan(self):
+    """Determines if the project depends on Dokan.
+
+    Returns:
+      bool: True if the project depends on Dokan.
+    """
+    return 'dokan' in self.msvscpp_build_dependencies
+
+  def HasDependencyFuse(self):
+    """Determines if the project depends on fuse.
+
+    Returns:
+      bool: True if the project depends on fuse.
+    """
+    return 'fuse' in self.tools_build_dependencies
+
+  def HasDpkg(self):
+    """Determines if the project provides dpkg configuration files.
+
+    Returns:
+      bool: True if the dpkg directory exits.
+    """
+    if self._has_dpkg is None:
+      self._has_dpkg = os.path.exists('dpkg')
+
+    return self._has_dpkg
+
+  def HasPythonModule(self):
+    """Determines if the project provides a Python module.
+
+    Returns:
+      bool: True if the a Python module directory exits.
+    """
+    if self._has_python_module is None:
+      self._has_python_module = os.path.exists(self.python_module_name)
+
+    return self._has_python_module
+
+  def HasRpm(self):
+    """Determines if the project provides rpm configuration files.
+
+    Returns:
+      bool: True if the rpm spec file exits.
+    """
+    if self._has_rpm is None:
+      spec_filename = '{0:s}.spec.in'.format(self.project_name)
+      self._has_rpm = os.path.exists(spec_filename)
+
+    return self._has_rpm
+
+  def HasTools(self):
+    """Determines if the project provides tools.
+
+    Returns:
+      bool: True if the tools directory exits.
+    """
+    if self._has_tools is None:
+      self._has_tools = os.path.exists(self.tools_directory)
+
+    return self._has_tools
 
   def ReadFromFile(self, filename):
     """Reads the configuration from file.
@@ -615,12 +648,6 @@ class ProjectConfiguration(object):
     if config_parser.has_section('mount_tool'):
       self.dpkg_build_dependencies.append('libfuse-dev')
       self.msvscpp_build_dependencies.append('dokan')
-
-    if ((self.supports_dokan or self.supports_fuse) and
-        not config_parser.has_section('mount_tool')):
-      raise errors.ConfigurationError((
-          'Support for dokan and/or fuse enabled but no corresponding '
-          'section: mount_tool is missing.'))
 
     self._ReadMountToolConfiguration(config_parser)
 

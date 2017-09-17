@@ -1,0 +1,3 @@
+dnl Check if libpff java bindings (jpff) should be build
+AX_JAVA_CHECK_ENABLE
+

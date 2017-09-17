@@ -1304,9 +1304,7 @@ class SourceFileGenerator(object):
     self._definitions_include_header_file = None
     self._definitions_include_header_path = None
     self._experimental = experimental
-    self._has_python_module = None
     self._has_tests = None
-    self._has_tools = None
     self._library_include_header_file = None
     self._library_include_header_path = None
     self._library_makefile_am_file = None
@@ -1497,8 +1495,8 @@ class SourceFileGenerator(object):
         'python_module_copyright': python_module_copyright,
 
         'tools_authors': tools_authors,
-        'tools_name': project_configuration.tools_name,
-        'tools_name_upper_case': project_configuration.tools_name.upper(),
+        'tools_name': project_configuration.tools_directory,
+        'tools_name_upper_case': project_configuration.tools_directory.upper(),
         'tools_description': project_configuration.tools_description,
 
         'tests_authors': tests_authors,
@@ -1551,24 +1549,6 @@ class SourceFileGenerator(object):
 
     return self._types_include_header_file
 
-  def _HasPythonModule(self, project_configuration):
-    """Determines if the project has a Python module.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-
-    Returns:
-      bool: True if the python module path exits.
-    """
-    if not self._python_module_path:
-      self._python_module_path = os.path.join(
-          self._projects_directory, project_configuration.library_name,
-          project_configuration.python_module_name)
-
-      self._has_python_module = os.path.exists(self._python_module_path)
-
-    return self._has_python_module
-
   def _HasTests(self, project_configuration):
     """Determines if the project has tests.
 
@@ -1586,26 +1566,6 @@ class SourceFileGenerator(object):
       self._has_tests = os.path.exists(self._tests_path)
 
     return self._has_tests
-
-  def _HasTools(self, project_configuration):
-    """Determines if the project has tools.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-
-    Returns:
-      bool: True if the tools path exits.
-    """
-    if not self._tools_path:
-      tools_name = '{0:s}tools'.format(
-          project_configuration.library_name_suffix)
-      self._tools_path = os.path.join(
-          self._projects_directory, project_configuration.library_name,
-          tools_name)
-
-      self._has_tools = os.path.exists(self._tools_path)
-
-    return self._has_tools
 
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.
@@ -1957,7 +1917,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    if self._HasPythonModule(project_configuration):
+    if project_configuration.HasPythonModule():
       template_filename = os.path.join(
           template_directory, 'environment-python.yml')
       self._GenerateSection(
@@ -1983,7 +1943,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if 'dokan' in project_configuration.msvscpp_build_dependencies:
+    if project_configuration.HasDependencyDokan():
       template_filename = os.path.join(template_directory, 'install-dokan.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -1991,7 +1951,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     cygwin_build_dependencies = list(
         project_configuration.cygwin_build_dependencies)
-    if self._HasPythonModule(project_configuration):
+    if project_configuration.HasPythonModule():
       cygwin_build_dependencies.append('python2-devel')
       cygwin_build_dependencies.append('python3-devel')
 
@@ -2044,7 +2004,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if self._HasPythonModule(project_configuration):
+    if project_configuration.HasPythonModule():
       template_filename = os.path.join(
           template_directory, 'build_script-python.yml')
       self._GenerateSection(
@@ -2088,9 +2048,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
-    has_python_module = self._HasPythonModule(project_configuration)
-    has_tools = self._HasTools(project_configuration)
-
     template_directory = os.path.join(self._template_directory, 'configure.ac')
 
     template_filename = os.path.join(template_directory, 'header.ac')
@@ -2113,7 +2070,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     if (include_header_file and include_header_file.have_wide_character_type or
-        has_tools):
+        project_configuration.HasTools()):
       template_filename = os.path.join(
           template_directory, 'check_wide_character_support.ac')
       self._GenerateSection(
@@ -2151,16 +2108,22 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if has_python_module:
+    if project_configuration.HasPythonModule():
       template_filename = os.path.join(
           template_directory, 'check_python_support.ac')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if has_tools:
-      if makefile_am_file.tools_dependencies:
-        for name in makefile_am_file.tools_dependencies:
+    # TODO: add java bindings support (check_java_support.ac)
+
+    if project_configuration.HasTools():
+      tools_dependencies = list(makefile_am_file.tools_dependencies)
+      if project_configuration.HasDependencyFuse():
+        tools_dependencies.append('libfuse')
+
+      if tools_dependencies:
+        for name in tools_dependencies:
           template_mappings['local_library_name'] = name
           template_mappings['local_library_name_upper_case'] = name.upper()
 
@@ -2178,8 +2141,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
-
-    # TODO: add support for libfuse
 
     if project_configuration.supports_debug_output:
       template_filename = os.path.join(
@@ -2220,14 +2181,22 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['local_library_tests']
 
-    if has_tools:
+    if project_configuration.HasTools():
       # TODO: add support for libcrypto for libcaes
       #  || test "x$ac_cv_libcrypto" = xyes
-      # TODO: add support for libfuse
-      if makefile_am_file.tools_dependencies:
+
+      tools_dependencies = list(makefile_am_file.tools_dependencies)
+      if project_configuration.HasDependencyFuse():
+        tools_dependencies.append('libfuse')
+
+      if tools_dependencies:
         local_library_tests = []
-        for name in makefile_am_file.tools_dependencies:
-          local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
+        for name in tools_dependencies:
+          if name in ('libcrypto', 'libfuse', 'zlib'):
+            local_library_test = 'test "x$ac_cv_{0:s}" != xno'.format(name)
+          else:
+            local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
+
           local_library_tests.append(local_library_test)
 
         template_mappings['local_library_tests'] = ' || '.join(
@@ -2270,14 +2239,14 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if has_python_module:
+    if project_configuration.HasPythonModule():
       template_filename = os.path.join(
           template_directory, 'config_files_python.ac')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if has_tools:
+    if project_configuration.HasTools():
       if makefile_am_file.tools_dependencies:
         for name in makefile_am_file.tools_dependencies:
           template_mappings['local_library_name'] = name
@@ -2316,7 +2285,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       # TODO: add support for
       # AES support: $ac_cv_libcaes_aes
-      # FUSE support: $ac_cv_libfuse
+
+    if project_configuration.HasDependencyFuse():
+      description = 'FUSE support'
+      build_information.append((description, '$ac_cv_libfuse'))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
 
     features_information = []
     if (project_configuration.library_name == 'libcthreads' or
@@ -2329,7 +2304,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           maximum_description_length, len(description))
 
     if (include_header_file and include_header_file.have_wide_character_type or
-        has_tools):
+        project_configuration.HasTools()):
       description = 'Wide character type support'
       value = '$ac_cv_enable_wide_character_type'
       features_information.append((description, value))
@@ -2337,16 +2312,16 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       maximum_description_length = max(
           maximum_description_length, len(description))
 
-    if has_tools:
+    if project_configuration.HasTools():
       description = '{0:s} are build as static executables'.format(
-          project_configuration.tools_name)
+          project_configuration.tools_directory)
       value = '$ac_cv_enable_static_executables'
       features_information.append((description, value))
 
       maximum_description_length = max(
           maximum_description_length, len(description))
 
-    if has_python_module:
+    if project_configuration.HasPythonModule():
       description = 'Python ({0:s}) support'.format(
           project_configuration.python_module_name)
       value = '$ac_cv_enable_python'
@@ -2434,9 +2409,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     # TODO: add support for projects without Python bindings.
     # TODO: fix lintian issues.
 
-    has_python_module = self._HasPythonModule(project_configuration)
-    has_tools = self._HasTools(project_configuration)
-
     template_directory = os.path.join(self._template_directory, 'dpkg')
 
     for directory_entry in os.listdir(template_directory):
@@ -2449,10 +2421,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         continue
 
       if directory_entry.endswith('.install'):
-        if not has_python_module and '-python' in directory_entry:
+        if (not project_configuration.HasPythonModule() and
+            '-python' in directory_entry):
           continue
 
-        if not has_tools and '-tools' in directory_entry:
+        if (not project_configuration.HasTools() and
+            '-tools' in directory_entry):
           continue
 
       output_filename = directory_entry
@@ -2469,7 +2443,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     if project_configuration.dpkg_build_dependencies:
       dpkg_build_dependencies.extend(project_configuration.dpkg_build_dependencies)
 
-    if has_python_module:
+    if project_configuration.HasPythonModule():
       dpkg_build_dependencies.extend(['python-dev', 'python3-dev'])
 
     template_mappings['dpkg_build_dependencies'] = ', '.join(dpkg_build_dependencies)
@@ -2479,25 +2453,26 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    if has_tools:
+    if project_configuration.HasTools():
       template_filename = os.path.join(template_directory, 'control-tools')
       output_filename = os.path.join(output_directory, 'control')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if has_python_module:
+    if project_configuration.HasPythonModule():
       template_filename = os.path.join(template_directory, 'control-python')
       output_filename = os.path.join(output_directory, 'control')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if has_python_module and has_tools:
+    if (project_configuration.HasPythonModule() and
+        project_configuration.HasTools()):
       template_filename = 'rules-with-python-and-tools'
-    elif has_python_module:
+    elif project_configuration.HasPythonModule():
       template_filename = 'rules-with-python'
-    elif has_tools:
+    elif project_configuration.HasTools():
       template_filename = 'rules-with-tools'
     else:
       template_filename = 'rules'
@@ -2546,17 +2521,20 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if self._HasPythonModule(project_configuration):
+    if project_configuration.HasPythonModule():
       template_filename = os.path.join(template_directory, 'python_module')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if self._HasTools(project_configuration):
+    # TODO: add java bindings support (java_binding)
+    # TODO: add .net bindings support
+
+    if project_configuration.HasTools():
       tools_executables = []
       for name in sorted(project_configuration.tools_names):
         tools_executable = '/{0:s}/{1:s}'.format(
-            project_configuration.tools_name, name)
+            project_configuration.tools_directory, name)
         tools_executables.append(tools_executable)
 
       template_mappings['tools_executables'] = '\n'.join(tools_executables)
@@ -4852,7 +4830,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     # TODO: generate pyyal-python2/Makefile.am
     # TODO: generate pyyal-python3/Makefile.am
 
-    if not self._HasPythonModule(project_configuration):
+    if not project_configuration.HasPythonModule():
       return
 
     template_mappings = self._GetTemplateMappings(project_configuration)
@@ -5148,8 +5126,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     tests.update(set(internal_types))
     tests = sorted(tests)
 
-    has_python_module = self._HasPythonModule(project_configuration)
-
     template_directory = os.path.join(
         self._template_directory, 'Makefile.am')
     output_filename = os.path.join('tests', 'Makefile.am')
@@ -5177,7 +5153,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     check_scripts = ['test_runner.sh']
     check_scripts.extend(test_scripts)
-    if has_python_module:
+    if project_configuration.HasPythonModule():
       check_scripts.extend(python_scripts)
       check_scripts.extend(python_test_scripts)
       check_scripts.extend([
@@ -5186,7 +5162,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     check_scripts = sorted(check_scripts)
 
-    if has_python_module:
+    if project_configuration.HasPythonModule():
       test_script = '$(TESTS_{0:s})'.format(
           project_configuration.python_module_name.upper())
       test_scripts.append(test_script)
@@ -5228,7 +5204,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    if has_python_module:
+    if project_configuration.HasPythonModule():
       template_filename = os.path.join(template_directory, 'python.am')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -6183,13 +6159,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
-    has_python_module = self._HasPythonModule(project_configuration)
-
     self._GenerateAPISupportTests(
         project_configuration, template_mappings, include_header_file,
         output_writer)
 
-    if has_python_module:
+    if project_configuration.HasPythonModule():
       self._GeneratePythonModuleSupportTests(
           project_configuration, template_mappings, include_header_file,
           output_writer)
@@ -6204,7 +6178,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if not result:
         api_types.remove(type_name)
 
-      if has_python_module:
+      if project_configuration.HasPythonModule():
         self._GeneratePythonModuleTypeTests(
             project_configuration, template_mappings, type_name, output_writer)
 
@@ -6215,7 +6189,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if not result:
         api_types_with_input.remove(type_name)
 
-      if has_python_module:
+      if project_configuration.HasPythonModule():
         self._GeneratePythonModuleTypeTests(
             project_configuration, template_mappings, type_name, output_writer,
             with_input=True)
@@ -6230,7 +6204,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if not result:
         api_pseudo_types.remove(type_name)
 
-      if has_python_module:
+      if project_configuration.HasPythonModule():
         self._GeneratePythonModuleTypeTests(
             project_configuration, template_mappings, type_name, output_writer)
 
@@ -6257,10 +6231,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
-    tools_name = '{0:s}tools'.format(project_configuration.library_name_suffix)
     tools_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
-        tools_name)
+        project_configuration.tools_directory)
 
     library_header = 'yaltools_{0:s}.h'.format(
         project_configuration.library_name)
@@ -6290,9 +6263,11 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
             project_configuration.library_name)
 
       else:
-        output_filename = '{0:s}_{1:s}'.format(tools_name, directory_entry[9:])
+        output_filename = '{0:s}_{1:s}'.format(
+            project_configuration.tools_directory, directory_entry[9:])
 
-      output_filename = os.path.join(tools_name, output_filename)
+      output_filename = os.path.join(
+          project_configuration.tools_directory, output_filename)
 
       if not os.path.exists(output_filename):
         continue

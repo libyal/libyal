@@ -125,149 +125,144 @@ class WikiPageGenerator(object):
     if project_configuration.troubleshooting_example:
       troubleshooting_example = project_configuration.troubleshooting_example
 
-    if (project_configuration.supports_gcc or
-        project_configuration.supports_mingw or
-        project_configuration.supports_msvscpp):
-      building_table_of_contents += (
-          'The {0:s} source code can be build with different compilers:\n'
+    building_table_of_contents += (
+        'The {0:s} source code can be build with different compilers:\n'
+        '\n').format(project_configuration.project_name)
+
+    # GCC support.
+    building_table_of_contents += (
+        '* [Using GNU Compiler Collection (GCC)]'
+        '(Building#using-gnu-compiler-collection-gcc)\n')
+
+    if project_configuration.gcc_build_dependencies:
+      gcc_build_dependencies = (
+          '\n'
+          'Also make sure to have the following dependencies including '
+          'source headers installed:\n')
+
+      for dependency in project_configuration.gcc_build_dependencies:
+        gcc_build_dependencies += '* {0:s}\n'.format(dependency)
+
+    if project_configuration.gcc_static_build_dependencies:
+      for dependency in project_configuration.gcc_static_build_dependencies:
+        gcc_static_build_dependencies += '* {0:s}\n'.format(dependency)
+
+    if project_configuration.HasDependencyFuse():
+      gcc_static_build_dependencies += (
+          '* fuse (optional, can be disabled by --with-libfuse=no)\n')
+
+    # Cygwin support.
+    building_table_of_contents += '  * [Using Cygwin](Building#cygwin)\n'
+
+    if project_configuration.cygwin_build_dependencies:
+      for dependency in project_configuration.cygwin_build_dependencies:
+        cygwin_build_dependencies += '* {0:s}\n'.format(dependency)
+
+    if project_configuration.cygwin_dll_dependencies:
+      for dependency in project_configuration.cygwin_dll_dependencies:
+        cygwin_dll_dependencies += '* {0:s}\n'.format(dependency)
+
+    if project_configuration.HasTools():
+      cygwin_executables += (
+          'And the following executables:\n'
+          '```\n')
+
+      for name in project_configuration.tools_names:
+        cygwin_executables += (
+            '{0:s}/.libs/{1:s}.exe\n'.format(
+                project_configuration.tools_directory, name))
+
+      cygwin_executables += (
+          '```\n')
+
+    # Fuse support.
+    if project_configuration.HasDependencyFuse():
+      gcc_mount_tool += (
+          '\n'
+          'If you want to be able to use {0:s}, make sure that:\n'
+          '\n'
+          '* on a Linux system you have libfuse-dev (Debian-based) or '
+          'fuse-devel (RedHat-based) installed.\n'
+          '* on a Mac OS X system, you have OSXFuse '
+          '(http://osxfuse.github.com/) installed.\n').format(
+              mount_tool_name)
+
+    # MinGW support.
+    building_table_of_contents += (
+        '* [Using Minimalist GNU for Windows (MinGW)]'
+        '(Building#using-minimalist-gnu-for-windows-mingw)\n')
+
+    if project_configuration.mingw_build_dependencies:
+      for dependency in project_configuration.mingw_build_dependencies:
+        mingw_build_dependencies += '* {0:s}\n'.format(dependency)
+
+    if project_configuration.mingw_dll_dependencies:
+      for dependency in project_configuration.mingw_dll_dependencies:
+        mingw_dll_dependencies += '* {0:s}\n'.format(dependency)
+
+    if project_configuration.HasTools():
+      mingw_executables += (
+          'And the following executables:\n'
+          '```\n')
+
+      for name in project_configuration.tools_names:
+        mingw_executables += (
+            '{0:s}/.libs/{1:s}.exe\n'.format(
+                project_configuration.tools_directory, name))
+
+      mingw_executables += (
+          '```\n'
+          '\n')
+
+    # Visual Studio support.
+    building_table_of_contents += (
+        '* [Using Microsoft Visual Studio]'
+        '(Building#using-microsoft-visual-studio)\n')
+
+    if project_configuration.msvscpp_build_dependencies:
+      msvscpp_build_dependencies = (
+          '\n'
+          'To compile {0:s} using Microsoft Visual Studio you\'ll '
+          'need:\n'
           '\n').format(project_configuration.project_name)
 
-    if project_configuration.supports_gcc:
-      building_table_of_contents += (
-          '* [Using GNU Compiler Collection (GCC)]'
-          '(Building#using-gnu-compiler-collection-gcc)\n')
+      for dependency in project_configuration.msvscpp_build_dependencies:
+        msvscpp_build_dependencies += '* {0:s}\n'.format(dependency)
 
-      if project_configuration.gcc_build_dependencies:
-        gcc_build_dependencies = (
-            '\n'
-            'Also make sure to have the following dependencies including '
-            'source headers installed:\n')
+    if project_configuration.msvscpp_dll_dependencies:
+      msvscpp_dll_dependencies = '{0:s}.dll is dependent on:\n'.format(
+          project_configuration.project_name)
 
-        for dependency in project_configuration.gcc_build_dependencies:
-          gcc_build_dependencies += '* {0:s}\n'.format(dependency)
+      for dependency in project_configuration.msvscpp_dll_dependencies:
+        msvscpp_dll_dependencies += '* {0:s}\n'.format(dependency)
 
-      if project_configuration.gcc_static_build_dependencies:
-        for dependency in project_configuration.gcc_static_build_dependencies:
-          gcc_static_build_dependencies += '* {0:s}\n'.format(dependency)
-
-      if project_configuration.supports_fuse:
-        gcc_static_build_dependencies += (
-            '* fuse (optional, can be disabled by --with-libfuse=no)\n')
-
-      if project_configuration.supports_cygwin:
-        building_table_of_contents += '  * [Using Cygwin](Building#cygwin)\n'
-
-        if project_configuration.cygwin_build_dependencies:
-          for dependency in project_configuration.cygwin_build_dependencies:
-            cygwin_build_dependencies += '* {0:s}\n'.format(dependency)
-
-        if project_configuration.cygwin_dll_dependencies:
-          for dependency in project_configuration.cygwin_dll_dependencies:
-            cygwin_dll_dependencies += '* {0:s}\n'.format(dependency)
-
-        if project_configuration.supports_tools:
-          cygwin_executables += (
-              'And the following executables:\n'
-              '```\n')
-
-          for name in project_configuration.tools_names:
-            cygwin_executables += (
-                '{0:s}/.libs/{1:s}.exe\n'.format(
-                    project_configuration.tools_directory, name))
-
-          cygwin_executables += (
-              '```\n')
-
-      if project_configuration.supports_fuse:
-        gcc_mount_tool += (
-            '\n'
-            'If you want to be able to use {0:s}, make sure that:\n'
-            '\n'
-            '* on a Linux system you have libfuse-dev (Debian-based) or '
-            'fuse-devel (RedHat-based) installed.\n'
-            '* on a Mac OS X system, you have OSXFuse '
-            '(http://osxfuse.github.com/) installed.\n').format(
-                mount_tool_name)
-
-    if project_configuration.supports_mingw:
-      building_table_of_contents += (
-          '* [Using Minimalist GNU for Windows (MinGW)]'
-          '(Building#using-minimalist-gnu-for-windows-mingw)\n')
-
-      if project_configuration.mingw_build_dependencies:
-        for dependency in project_configuration.mingw_build_dependencies:
-          mingw_build_dependencies += '* {0:s}\n'.format(dependency)
-
-      if project_configuration.mingw_dll_dependencies:
-        for dependency in project_configuration.mingw_dll_dependencies:
-          mingw_dll_dependencies += '* {0:s}\n'.format(dependency)
-
-      if project_configuration.supports_tools:
-        mingw_executables += (
-            'And the following executables:\n'
-            '```\n')
-
-        for name in project_configuration.tools_names:
-          mingw_executables += (
-              '{0:s}/.libs/{1:s}.exe\n'.format(
-                  project_configuration.tools_directory, name))
-
-        mingw_executables += (
-            '```\n'
-            '\n')
-
-    if project_configuration.supports_msvscpp:
-      building_table_of_contents += (
-          '* [Using Microsoft Visual Studio]'
-          '(Building#using-microsoft-visual-studio)\n')
-
-      if project_configuration.msvscpp_build_dependencies:
-        msvscpp_build_dependencies = (
-            '\n'
-            'To compile {0:s} using Microsoft Visual Studio you\'ll '
-            'need:\n'
-            '\n').format(project_configuration.project_name)
-
-        for dependency in project_configuration.msvscpp_build_dependencies:
-          msvscpp_build_dependencies += '* {0:s}\n'.format(dependency)
-
-      if project_configuration.msvscpp_dll_dependencies:
-        msvscpp_dll_dependencies = '{0:s}.dll is dependent on:\n'.format(
-            project_configuration.project_name)
-
-        for dependency in project_configuration.msvscpp_dll_dependencies:
-          msvscpp_dll_dependencies += '* {0:s}\n'.format(dependency)
-
-        msvscpp_dll_dependencies += (
-            '\n'
-            'These DLLs can be found in the same directory as '
-            '{0:s}.dll.\n').format(project_configuration.project_name)
-
-      msvscpp_build_git = (
+      msvscpp_dll_dependencies += (
           '\n'
-          'Note that if you want to build {0:s} from source checked out of '
-          'git with Visual Studio make sure the autotools are able to make '
-          'a distribution package of {0:s} before trying to build it.\n'
-          'You can create distribution package by running: '
-          '"make dist".\n').format(project_configuration.project_name)
+          'These DLLs can be found in the same directory as '
+          '{0:s}.dll.\n').format(project_configuration.project_name)
 
-      if project_configuration.supports_dokan:
-        msvscpp_mount_tool += (
-            '\n'
-            'If you want to be able to use {0:s} you\'ll need Dokan library '
-            'see the corresponding section below.\n'
-            'Otherwise ignore or remove the dokan_dll and {0:s} Visual Studio '
-            'project files.\n').format(mount_tool_name)
+    msvscpp_build_git = (
+        '\n'
+        'Note that if you want to build {0:s} from source checked out of '
+        'git with Visual Studio make sure the autotools are able to make '
+        'a distribution package of {0:s} before trying to build it.\n'
+        'You can create distribution package by running: '
+        '"make dist".\n').format(project_configuration.project_name)
 
-    if (project_configuration.supports_gcc or
-        project_configuration.supports_mingw or
-        project_configuration.supports_msvscpp):
-      building_table_of_contents += '\n'
+    if project_configuration.HasDependencyDokan():
+      msvscpp_mount_tool += (
+          '\n'
+          'If you want to be able to use {0:s} you\'ll need Dokan library '
+          'see the corresponding section below.\n'
+          'Otherwise ignore or remove the dokan_dll and {0:s} Visual Studio '
+          'project files.\n').format(mount_tool_name)
+
+    building_table_of_contents += '\n'
 
     building_table_of_contents += (
         'Or directly packaged with different package managers:\n\n')
 
-    if project_configuration.supports_dpkg:
+    if project_configuration.HasDpkg():
       building_table_of_contents += (
           '* [Using Debian package tools (DEB)]'
           '(Building#using-debian-package-tools-deb)\n')
@@ -278,10 +273,10 @@ class WikiPageGenerator(object):
         dpkg_build_dependencies = list(
             project_configuration.dpkg_build_dependencies)
 
-      if project_configuration.supports_fuse:
+      if project_configuration.HasDependencyFuse():
         dpkg_build_dependencies.append('libfuse-dev')
 
-      if project_configuration.supports_python:
+      if project_configuration.HasPythonModule():
         dpkg_build_dependencies.append('python-all-dev')
         dpkg_build_dependencies.append('python3-all-dev')
 
@@ -292,7 +287,7 @@ class WikiPageGenerator(object):
           '{0:s}-dev_<version>-1_<arch>.deb').format(
               project_configuration.project_name)
 
-      if project_configuration.supports_python:
+      if project_configuration.HasPythonModule():
         dpkg_filenames += (
             '\n{0:s}-python_<version>-1_<arch>.deb').format(
                 project_configuration.project_name)
@@ -300,12 +295,12 @@ class WikiPageGenerator(object):
             '\n{0:s}-python3_<version>-1_<arch>.deb').format(
                 project_configuration.project_name)
 
-      if project_configuration.supports_tools:
+      if project_configuration.HasTools():
         dpkg_filenames += (
             '\n{0:s}-tools_<version>-1_<arch>.deb').format(
                 project_configuration.project_name)
 
-    if project_configuration.supports_rpm:
+    if project_configuration.HasRpm():
       building_table_of_contents += (
           '* [Using RedHat package tools (RPM)]'
           '(Building#using-redhat-package-tools-rpm)\n')
@@ -316,10 +311,10 @@ class WikiPageGenerator(object):
         rpm_build_dependencies = list(
             project_configuration.rpm_build_dependencies)
 
-      if project_configuration.supports_fuse:
+      if project_configuration.HasDependencyFuse():
         rpm_build_dependencies.append('fuse-devel')
 
-      if project_configuration.supports_python:
+      if project_configuration.HasPythonModule():
         rpm_build_dependencies.append('python-devel')
         rpm_build_dependencies.append('python3-devel')
 
@@ -336,7 +331,7 @@ class WikiPageGenerator(object):
           '~/rpmbuild/RPMS/<arch>/{0:s}-devel-<version>-1.<arch>'
           '.rpm\n').format(project_configuration.project_name)
 
-      if project_configuration.supports_python:
+      if project_configuration.HasPythonModule():
         rpm_filenames += (
             '~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>'
             '.rpm\n').format(project_configuration.project_name)
@@ -344,7 +339,7 @@ class WikiPageGenerator(object):
             '~/rpmbuild/RPMS/<arch>/{0:s}-python3-<version>-1.<arch>'
             '.rpm\n').format(project_configuration.project_name)
 
-      if project_configuration.supports_tools:
+      if project_configuration.HasTools():
         rpm_filenames += (
             '~/rpmbuild/RPMS/<arch>/{0:s}-tools-<version>-1.<arch>'
             '.rpm\n').format(project_configuration.project_name)
@@ -356,17 +351,17 @@ class WikiPageGenerator(object):
     building_table_of_contents += (
         '* [Using Mac OS X pkgbuild](Building#using-mac-os-x-pkgbuild)\n')
 
-    if project_configuration.supports_python:
+    if project_configuration.HasPythonModule():
       macosx_pkg_configure_options = ' --enable-python --with-pyprefix'
 
-    if project_configuration.supports_python:
+    if project_configuration.HasPythonModule():
       building_table_of_contents += (
           '* [Using setup.py](Building#using-setuppy)\n')
 
     development_table_of_contents += (
         '* [C/C++ development](C-development)\n')
 
-    if project_configuration.supports_python:
+    if project_configuration.HasPythonModule():
       development_table_of_contents += (
           '* [Python development](Python-development)\n')
 
@@ -533,77 +528,76 @@ class BuildingPageGenerator(WikiPageGenerator):
         'source_distribution_package.txt', template_mappings, output_writer)
     self._GenerateSection('source_git.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_gcc:
-      self._GenerateSection('gcc.txt', template_mappings, output_writer)
+    self._GenerateSection('gcc.txt', template_mappings, output_writer)
 
-      if project_configuration.supports_debug_output:
-        self._GenerateSection(
-            'gcc_debug_output.txt', template_mappings, output_writer)
-
+    if project_configuration.supports_debug_output:
       self._GenerateSection(
-          'gcc_static_library.txt', template_mappings, output_writer)
+          'gcc_debug_output.txt', template_mappings, output_writer)
 
-      if project_configuration.supports_tools:
-        self._GenerateSection(
-            'gcc_static_executables.txt', template_mappings, output_writer)
+    self._GenerateSection(
+        'gcc_static_library.txt', template_mappings, output_writer)
 
-      if project_configuration.supports_python:
-        self._GenerateSection(
-            'gcc_python.txt', template_mappings, output_writer)
-
-      self._GenerateSection('cygwin.txt', template_mappings, output_writer)
-      self._GenerateSection('gcc_macosx.txt', template_mappings, output_writer)
-
-      if project_configuration.supports_python:
-        self._GenerateSection(
-            'gcc_macosx_python.txt', template_mappings, output_writer)
-
+    if project_configuration.HasTools():
       self._GenerateSection(
-          'gcc_solaris.txt', template_mappings, output_writer)
+          'gcc_static_executables.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_mingw:
-      self._GenerateSection('mingw.txt', template_mappings, output_writer)
-      self._GenerateSection('mingw_msys.txt', template_mappings, output_writer)
-      self._GenerateSection('mingw_dll.txt', template_mappings, output_writer)
+    if project_configuration.HasPythonModule():
       self._GenerateSection(
-          'mingw_troubleshooting.txt', template_mappings, output_writer)
+          'gcc_python.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_msvscpp:
-      self._GenerateSection('msvscpp.txt', template_mappings, output_writer)
+    self._GenerateSection('cygwin.txt', template_mappings, output_writer)
+    self._GenerateSection('gcc_macosx.txt', template_mappings, output_writer)
 
-      if project_configuration.supports_debug_output:
-        self._GenerateSection(
-            'msvscpp_debug.txt', template_mappings, output_writer)
-
-      if project_configuration.msvscpp_zlib_dependency:
-        self._GenerateSection(
-            'msvscpp_zlib.txt', template_mappings, output_writer)
-
-      if project_configuration.supports_dokan:
-        self._GenerateSection(
-            'msvscpp_dokan.txt', template_mappings, output_writer)
-
-      if project_configuration.supports_python:
-        self._GenerateSection(
-            'msvscpp_python.txt', template_mappings, output_writer)
-
+    if project_configuration.HasPythonModule():
       self._GenerateSection(
-          'msvscpp_build.txt', template_mappings, output_writer)
-      self._GenerateSection(
-          'msvscpp_dll.txt', template_mappings, output_writer)
+          'gcc_macosx_python.txt', template_mappings, output_writer)
 
-      self._GenerateSection(
-          'msvscpp_2010.txt', template_mappings, output_writer)
+    self._GenerateSection(
+        'gcc_solaris.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_dpkg:
+    # MinGW support.
+    self._GenerateSection('mingw.txt', template_mappings, output_writer)
+    self._GenerateSection('mingw_msys.txt', template_mappings, output_writer)
+    self._GenerateSection('mingw_dll.txt', template_mappings, output_writer)
+    self._GenerateSection(
+        'mingw_troubleshooting.txt', template_mappings, output_writer)
+
+    # Visual Studio support.
+    self._GenerateSection('msvscpp.txt', template_mappings, output_writer)
+
+    if project_configuration.supports_debug_output:
+      self._GenerateSection(
+          'msvscpp_debug.txt', template_mappings, output_writer)
+
+    if project_configuration.msvscpp_zlib_dependency:
+      self._GenerateSection(
+          'msvscpp_zlib.txt', template_mappings, output_writer)
+
+    if project_configuration.HasDependencyDokan():
+      self._GenerateSection(
+          'msvscpp_dokan.txt', template_mappings, output_writer)
+
+    if project_configuration.HasPythonModule():
+      self._GenerateSection(
+          'msvscpp_python.txt', template_mappings, output_writer)
+
+    self._GenerateSection(
+        'msvscpp_build.txt', template_mappings, output_writer)
+    self._GenerateSection(
+        'msvscpp_dll.txt', template_mappings, output_writer)
+
+    self._GenerateSection(
+        'msvscpp_2010.txt', template_mappings, output_writer)
+
+    if project_configuration.HasDpkg():
       self._GenerateSection('dpkg.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_rpm:
+    if project_configuration.HasRpm():
       self._GenerateSection('rpm.txt', template_mappings, output_writer)
 
     self._GenerateSection('macosx_pkg.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_python:
+    if project_configuration.HasPythonModule():
       self._GenerateSection('setup_py.txt', template_mappings, output_writer)
 
   def HasContent(self, unused_project_configuration):
@@ -640,7 +634,7 @@ class DevelopmentPageGenerator(WikiPageGenerator):
     Returns:
       bool: True if the generator will generate content.
     """
-    return project_configuration.supports_python
+    return project_configuration.HasPythonModule()
 
 
 class CDevelopmentPageGenerator(WikiPageGenerator):
@@ -723,7 +717,7 @@ class PythonDevelopmentPageGenerator(WikiPageGenerator):
     Returns:
       bool: True if the generator will generate content.
     """
-    return project_configuration.supports_python
+    return project_configuration.HasPythonModule()
 
 
 class HomePageGenerator(WikiPageGenerator):
@@ -762,8 +756,8 @@ class MountingPageGenerator(WikiPageGenerator):
       output_writer (OutputWriter): output writer.
     """
     template_mappings = self._GetTemplateMappings(project_configuration)
-    if (project_configuration.supports_dokan or
-        project_configuration.supports_fuse):
+    if (project_configuration.HasDependencyDokan() or
+        project_configuration.HasDependencyFuse()):
       self._GenerateSection(
           'introduction.txt', template_mappings, output_writer)
 
@@ -789,7 +783,7 @@ class MountingPageGenerator(WikiPageGenerator):
       self._GenerateSection(
           'mounting_root_access.txt', template_mappings, output_writer)
 
-      if project_configuration.supports_dokan:
+      if project_configuration.HasDependencyDokan():
         if project_configuration.mount_tool_source_type == 'image':
           self._GenerateSection(
               'mounting_image_windows.txt', template_mappings,
@@ -803,7 +797,7 @@ class MountingPageGenerator(WikiPageGenerator):
       self._GenerateSection(
           'unmounting.txt', template_mappings, output_writer)
 
-      if project_configuration.supports_dokan:
+      if project_configuration.HasDependencyDokan():
         self._GenerateSection(
             'unmounting_windows.txt', template_mappings, output_writer)
 
@@ -819,8 +813,8 @@ class MountingPageGenerator(WikiPageGenerator):
     Returns:
       bool: True if the generator will generate content.
     """
-    if (project_configuration.supports_dokan or
-        project_configuration.supports_fuse):
+    if (project_configuration.HasDependencyDokan() or
+        project_configuration.HasDependencyFuse()):
       return True
 
     return False
@@ -896,7 +890,7 @@ class TroubleshootingPageGenerator(WikiPageGenerator):
       self._GenerateSection(
           'format_errors.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_tools:
+    if project_configuration.HasTools():
       self._GenerateSection(
           'crashes.txt', template_mappings, output_writer)
 
