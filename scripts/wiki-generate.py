@@ -117,7 +117,7 @@ class WikiPageGenerator(object):
       for dependency in project_configuration.library_build_dependencies:
         build_dependencies += '* {0:s}\n'.format(dependency)
 
-    if (project_configuration.supports_tests and
+    if (project_configuration.HasTests() and
         project_configuration.tests_profiles):
       for profile in project_configuration.tests_profiles:
         tests_profiles += '* {0:s}\n'.format(profile)
@@ -832,7 +832,7 @@ class TestingPageGenerator(WikiPageGenerator):
     """
     # TODO: implement testing page without input files.
     template_mappings = self._GetTemplateMappings(project_configuration)
-    if project_configuration.supports_tests:
+    if project_configuration.HasTests():
       self._GenerateSection('tests.txt', template_mappings, output_writer)
 
       if project_configuration.tests_profiles:
@@ -862,7 +862,7 @@ class TestingPageGenerator(WikiPageGenerator):
     Returns:
       bool: True if the generator will generate content.
     """
-    if project_configuration.supports_tests:
+    if project_configuration.HasTests():
       return True
 
     return False

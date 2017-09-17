@@ -2,14 +2,15 @@
 To build a 64-bit version of ${project_name} with Microsoft Visual Studio
 express you'll need at least the 2010 version.
 
-### Microsoft Visual Studio 2010
+### Microsoft Visual Studio 2010 and later
 First make sure to enabling 64-bit compilation support on Microsoft Visual
-Studio 2010 express. Since this can be a tedious process, some relevant links:
+Studio. For Visual Studio 2010 this can be a tedious process, some relevant
+links:
 
 * http://msdn.microsoft.com/en-us/library/vstudio/9yb4317s(v=vs.100).aspx
 * http://support.microsoft.com/kb/2519277
 
-If you have set it up correctly the following should work:
+If you have set up Visual Studio correctly the following should work:
 
 Go to:
 ```
@@ -29,13 +30,15 @@ Configuration Properties -> General -> Platform Toolset
 
 Into "Windows7.1SDK"
 
+#### msvscpp-convert script
+
 If you've Python installed on your Visual Studio build machine you can try
-running [msvscpp-convert](https://github.com/libyal/libyal/wiki/msvscpp-convert)
+running [msvscpp-convert](https://github.com/libyal/vstools/wiki/msvscpp-convert-script)
 to convert the Visual Studio 2008 solution files to 2010 format and add the x64
-settings for you.
+settings for you with the option `--extend-with-x64`.
 
 ```
-msvscpp-convert.py --to 2010 msvscpp\${project_name}.sln
+msvscpp-convert.py --extend-with-x64 --output-format 2010 msvscpp\${project_name}.sln
 ```
 
 This will create a subdirectory named vs2010 which contains the Visual Studio

@@ -50,7 +50,6 @@ class ProjectConfiguration(object):
     python_module_year_of_creation (str): year the Python module was created.
     rpm_build_dependencies (str): rpm build dependencies.
     supports_debug_output (bool): True if the project supports debug output.
-    supports_tests (bool): True if the project provides tests.
     tests_authors (str): authors of the test files.
     tests_example_filename1 (str): name of the first test example filename.
     tests_example_filename2 (str): name of the second test example filename.
@@ -67,9 +66,11 @@ class ProjectConfiguration(object):
   def __init__(self):
     """Initializes a project configuation."""
     super(ProjectConfiguration, self).__init__()
+    self._configuration_file_path = None
     self._has_dpkg = None
     self._has_rpm = None
     self._has_python_module = None
+    self._has_tests = None
     self._has_tools = None
 
     # Project configuration.
@@ -84,8 +85,6 @@ class ProjectConfiguration(object):
 
     # Functionality the project offsers.
     self.supports_debug_output = False
-    # TODO: deprecate these supports, derive from project sources.
-    self.supports_tests = False
 
     # Library configuration.
     self.library_build_dependencies = None
@@ -235,7 +234,7 @@ class ProjectConfiguration(object):
       return
 
     features = self._GetOptionalConfigValue(
-        config_parser, 'development', 'features')
+        config_parser, 'development', 'features', default_value=[])
 
     if features:
       self.development_glob = 'glob' in features
@@ -418,8 +417,8 @@ class ProjectConfiguration(object):
           'Invalid project year of creation: {0!s}'.format(
               self.project_year_of_creation))
 
-    features = self._GetConfigValue(
-        config_parser, u'project', u'features')
+    features = self._GetOptionalConfigValue(
+        config_parser, u'project', u'features', default_value=[])
 
     self.supports_debug_output = 'debug_output' in features
 
@@ -470,19 +469,14 @@ class ProjectConfiguration(object):
     Args:
       config_parser (ConfigParser): configuration file parser.
     """
-    self.supports_tests = config_parser.has_section('tests')
-
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, 'tests', 'authors', default_value=self.project_authors)
-
-    if not self.supports_tests:
-      return
 
     self.tests_options = self._GetOptionalConfigValue(
         config_parser, 'tests', 'options', default_value=[])
 
-    tests_features = self._GetConfigValue(
-        config_parser, 'tests', 'features')
+    tests_features = self._GetOptionalConfigValue(
+        config_parser, 'tests', 'features', default_value=[])
 
     self.tests_supports_valgrind = 'valgrind' in tests_features
 
@@ -568,7 +562,8 @@ class ProjectConfiguration(object):
       bool: True if the dpkg directory exits.
     """
     if self._has_dpkg is None:
-      self._has_dpkg = os.path.exists('dpkg')
+      path = os.path.join(self._configuration_file_path, 'dpkg')
+      self._has_dpkg = os.path.exists(path)
 
     return self._has_dpkg
 
@@ -579,7 +574,9 @@ class ProjectConfiguration(object):
       bool: True if the a Python module directory exits.
     """
     if self._has_python_module is None:
-      self._has_python_module = os.path.exists(self.python_module_name)
+      path = os.path.join(
+          self._configuration_file_path, self.python_module_name)
+      self._has_python_module = os.path.exists(path)
 
     return self._has_python_module
 
@@ -591,9 +588,22 @@ class ProjectConfiguration(object):
     """
     if self._has_rpm is None:
       spec_filename = '{0:s}.spec.in'.format(self.project_name)
-      self._has_rpm = os.path.exists(spec_filename)
+      path = os.path.join(self._configuration_file_path, spec_filename)
+      self._has_rpm = os.path.exists(path)
 
     return self._has_rpm
+
+  def HasTests(self):
+    """Determines if the project provides tests.
+
+    Returns:
+      bool: True if the tests directory exits.
+    """
+    if self._has_tests is None:
+      path = os.path.join(self._configuration_file_path, 'tests')
+      self._has_tests = os.path.exists(path)
+
+    return self._has_tests
 
   def HasTools(self):
     """Determines if the project provides tools.
@@ -602,7 +612,8 @@ class ProjectConfiguration(object):
       bool: True if the tools directory exits.
     """
     if self._has_tools is None:
-      self._has_tools = os.path.exists(self.tools_directory)
+      path = os.path.join(self._configuration_file_path, self.tools_directory)
+      self._has_tools = os.path.exists(path)
 
     return self._has_tools
 
@@ -616,6 +627,8 @@ class ProjectConfiguration(object):
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
     config_parser.read([filename])
+
+    self._configuration_file_path = os.path.dirname(filename)
 
     self._ReadProjectConfiguration(config_parser)
 

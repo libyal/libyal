@@ -1,5 +1,5 @@
 ## Source distribution package
-To retrieve the source distribution package go to the [downloads](${project_download_url}) page and download the file named:
+To retrieve the source distribution package go to the [downloads](${project_downloads_url}) page and download the file named:
 ```
 ${project_name}${project_status}-<version>.tar.gz
 ```
