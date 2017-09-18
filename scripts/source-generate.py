@@ -1906,12 +1906,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'appveyor.yml')
 
-    # TODO: improve check
-    have_lex_yacc = False
-    if (os.path.exists('syncwinflexbison.ps1') or
-        os.path.exists('syncwinflexbison.sh')):
-      have_lex_yacc = True
-
     template_filename = os.path.join(
         template_directory, 'environment-header.yml')
     self._GenerateSection(
@@ -1930,27 +1924,42 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if have_lex_yacc:
-      template_filename = os.path.join(
-          template_directory, 'install-winflexbison.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    if 'zlib' in project_configuration.msvscpp_build_dependencies:
-      template_filename = os.path.join(template_directory, 'install-zlib.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
     if project_configuration.HasDependencyDokan():
       template_filename = os.path.join(template_directory, 'install-dokan.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    if (project_configuration.HasDependencyLex() or
+        project_configuration.HasDependencyYacc()):
+      template_filename = os.path.join(
+          template_directory, 'install-winflexbison.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.HasDependencyZlib():
+      template_filename = os.path.join(template_directory, 'install-zlib.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: move into a sub method.
     cygwin_build_dependencies = list(
         project_configuration.cygwin_build_dependencies)
+
+    if project_configuration.HasDependencyYacc():
+      cygwin_build_dependencies.append('bison')
+    if project_configuration.HasDependencyLex():
+      cygwin_build_dependencies.append('flex')
+
+    if project_configuration.HasDependencyZlib():
+      cygwin_build_dependencies.append('zlib-devel')
+    if project_configuration.HasDependencyBzip2():
+      cygwin_build_dependencies.append('bzip2-devel')
+    if project_configuration.HasDependencyCrypto():
+      cygwin_build_dependencies.append('openssl-devel')
+
     if project_configuration.HasPythonModule():
       cygwin_build_dependencies.append('python2-devel')
       cygwin_build_dependencies.append('python3-devel')
@@ -1967,8 +1976,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['cygwin_build_dependencies']
 
+    # TODO: move into a sub method.
     mingw_msys_build_dependencies = list(
         project_configuration.mingw_msys_build_dependencies)
+
+    # TODO: add support for other dependencies.
+    if project_configuration.HasDependencyZlib():
+      mingw_msys_build_dependencies.append('libz-dev')
 
     if mingw_msys_build_dependencies:
       mingw_msys_build_dependencies = ' '.join([
@@ -2116,6 +2130,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     # TODO: add java bindings support (check_java_support.ac)
+    # TODO: add .net bindings support (check_dotnet_support.ac)
 
     if project_configuration.HasTools():
       tools_dependencies = list(makefile_am_file.tools_dependencies)
@@ -2254,6 +2269,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    # TODO: add java bindings support (config_files_java.ac)
+    # TODO: add .net bindings support (config_files_dotnet.ac)
+
     if project_configuration.HasTools():
       if makefile_am_file.tools_dependencies:
         for name in makefile_am_file.tools_dependencies:
@@ -2274,6 +2292,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           output_filename, access_mode='ab')
 
     # TODO: add support for Makefile in documents (libuna)
+    # TODO: add support for dotnet rc.in
 
     template_filename = os.path.join(template_directory, 'config_files_end.ac')
     self._GenerateSection(
@@ -2542,7 +2561,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     # TODO: add java bindings support (java_binding)
-    # TODO: add .net bindings support
+    # TODO: add .net bindings support (dotnet_binding)
 
     if project_configuration.HasTools():
       tools_executables = []

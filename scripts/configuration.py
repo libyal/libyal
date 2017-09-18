@@ -327,6 +327,19 @@ class ProjectConfiguration(object):
     self.mingw_build_dependencies = [
         name.split(' ')[0] for name in self.mingw_build_dependencies]
 
+  def _ReadMinGWMSYSConfiguration(self, config_parser):
+    """Reads the MinGW-MSYS configuration.
+
+    Args:
+      config_parser (ConfigParser): configuration file parser.
+    """
+    self.mingw_msys_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'mingw_msys', 'build_dependencies', default_value=[])
+
+    # Remove trailing comments.
+    self.mingw_msys_build_dependencies = [
+        name.split(' ')[0] for name in self.mingw_msys_build_dependencies]
+
   def _ReadMountToolConfiguration(self, config_parser):
     """Reads the mount tool configuration.
 
@@ -531,6 +544,14 @@ class ProjectConfiguration(object):
     self.msvscpp_build_dependencies = [
         name.split(' ')[0] for name in self.msvscpp_build_dependencies]
 
+  def HasDependencyBzip2(self):
+    """Determines if the project depends on bzip2.
+
+    Returns:
+      bool: True if the project depends on bzip2.
+    """
+    return 'bzip2' in self.library_build_dependencies
+
   def HasDependencyCrypto(self):
     """Determines if the project depends on a crypto library.
 
@@ -555,6 +576,22 @@ class ProjectConfiguration(object):
       bool: True if the project depends on fuse.
     """
     return 'fuse' in self.tools_build_dependencies
+
+  def HasDependencyLex(self):
+    """Determines if the project depends on lex.
+
+    Returns:
+      bool: True if the project depends on lex.
+    """
+    return 'lex' in self.library_build_dependencies
+
+  def HasDependencyYacc(self):
+    """Determines if the project depends on yacc.
+
+    Returns:
+      bool: True if the project depends on yacc.
+    """
+    return 'yacc' in self.library_build_dependencies
 
   def HasDependencyZlib(self):
     """Determines if the project depends on zlib.
@@ -652,17 +689,11 @@ class ProjectConfiguration(object):
     self._ReadCygwinConfiguration(config_parser)
     self._ReadGCCConfiguration(config_parser)
     self._ReadMinGWConfiguration(config_parser)
+    self._ReadMinGWMSYSConfiguration(config_parser)
     self._ReadVisualStudioConfiguration(config_parser)
 
     self._ReadDPKGConfiguration(config_parser)
     self._ReadRPMConfiguration(config_parser)
-
-    self.mingw_msys_build_dependencies = self._GetOptionalConfigValue(
-        config_parser, 'mingw_msys', 'build_dependencies', default_value=[])
-
-    # Remove trailing comments.
-    self.mingw_msys_build_dependencies = [
-        name.split(' ')[0] for name in self.mingw_msys_build_dependencies]
 
     self.coverty_scan_token = self._GetOptionalConfigValue(
         config_parser, 'coverty', 'scan_token', default_value='')
