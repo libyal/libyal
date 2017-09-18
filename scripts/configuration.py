@@ -36,7 +36,6 @@ class ProjectConfiguration(object):
     mingw_msys_build_dependencies (str): MinGW-MSYS build dependencies.
     msvscpp_build_dependencies (str): Visual Studio build dependencies.
     msvscpp_dll_dependencies (list[str]): Visual Studio DLL dependencies.
-    msvscpp_zlib_dependency (str): name of the Visual Studio DLL file.
     project_authors (str): authors of the project.
     project_description (str): description of the project.
     project_documenation_url (str): URL of the documentation of the project.
@@ -55,7 +54,6 @@ class ProjectConfiguration(object):
     tests_example_filename2 (str): name of the second test example filename.
     tests_options (str): option sets used by the tests.
     tests_profiles (list[str]): names of the test profiles.
-    tests_supports_valgrind (boot): True if the tests support valgrind.
     tools_authors (str): authors of the tools.
     tools_build_dependencies (str): tools build dependencies.
     tools_description (str): description of the tools.
@@ -109,7 +107,6 @@ class ProjectConfiguration(object):
     # Tests configuration.
     self.tests_authors = None
     self.tests_options = None
-    self.tests_supports_valgrind = None
     self.tests_profiles = None
     self.tests_example_filename1 = None
     self.tests_example_filename2 = None
@@ -137,7 +134,6 @@ class ProjectConfiguration(object):
     # Visual Studio specific configuration.
     self.msvscpp_build_dependencies = None
     self.msvscpp_dll_dependencies = None
-    self.msvscpp_zlib_dependency = None
 
     # RPM specific configuration.
     self.rpm_build_dependencies = None
@@ -471,14 +467,10 @@ class ProjectConfiguration(object):
     """
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, 'tests', 'authors', default_value=self.project_authors)
-
-    self.tests_options = self._GetOptionalConfigValue(
-        config_parser, 'tests', 'options', default_value=[])
-
     tests_features = self._GetOptionalConfigValue(
         config_parser, 'tests', 'features', default_value=[])
-
-    self.tests_supports_valgrind = 'valgrind' in tests_features
+    self.tests_options = self._GetOptionalConfigValue(
+        config_parser, 'tests', 'options', default_value=[])
 
     if 'profiles' in tests_features:
       self.tests_profiles = self._GetConfigValue(
@@ -539,13 +531,22 @@ class ProjectConfiguration(object):
     self.msvscpp_build_dependencies = [
         name.split(' ')[0] for name in self.msvscpp_build_dependencies]
 
+  def HasDependencyCrypto(self):
+    """Determines if the project depends on a crypto library.
+
+    Returns:
+      bool: True if the project depends on a crypto library.
+    """
+    return 'crypto' in self.library_build_dependencies
+
   def HasDependencyDokan(self):
     """Determines if the project depends on Dokan.
 
     Returns:
       bool: True if the project depends on Dokan.
     """
-    return 'dokan' in self.msvscpp_build_dependencies
+    return (self.HasDependencyFuse() or
+            'dokan' in self.msvscpp_build_dependencies)
 
   def HasDependencyFuse(self):
     """Determines if the project depends on fuse.
@@ -554,6 +555,14 @@ class ProjectConfiguration(object):
       bool: True if the project depends on fuse.
     """
     return 'fuse' in self.tools_build_dependencies
+
+  def HasDependencyZlib(self):
+    """Determines if the project depends on zlib.
+
+    Returns:
+      bool: True if the project depends on zlib.
+    """
+    return 'zlib' in self.library_build_dependencies
 
   def HasDpkg(self):
     """Determines if the project provides dpkg configuration files.
@@ -658,13 +667,4 @@ class ProjectConfiguration(object):
     self.coverty_scan_token = self._GetOptionalConfigValue(
         config_parser, 'coverty', 'scan_token', default_value='')
 
-    if config_parser.has_section('mount_tool'):
-      self.dpkg_build_dependencies.append('libfuse-dev')
-      self.msvscpp_build_dependencies.append('dokan')
-
     self._ReadMountToolConfiguration(config_parser)
-
-    self.msvscpp_zlib_dependency = False
-    for dependency in self.msvscpp_build_dependencies:
-      if dependency.startswith('zlib '):
-        self.msvscpp_zlib_dependency = True

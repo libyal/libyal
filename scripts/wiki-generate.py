@@ -140,10 +140,19 @@ class WikiPageGenerator(object):
           'Also make sure to have the following dependencies including '
           'source headers installed:\n')
 
+      if project_configuration.HasDependencyCrypto():
+        gcc_build_dependencies += (
+            '* libcrypto (part of OpenSSL) (optional but recommended)\n')
+
       for dependency in project_configuration.gcc_build_dependencies:
         gcc_build_dependencies += '* {0:s}\n'.format(dependency)
 
     if project_configuration.gcc_static_build_dependencies:
+      if project_configuration.HasDependencyCrypto():
+        gcc_static_build_dependencies += (
+            '* libcrypto (part of OpenSSL) (optional but recommended, can be '
+            'disabled by --with-openssl=no)\n')
+
       for dependency in project_configuration.gcc_static_build_dependencies:
         gcc_static_build_dependencies += '* {0:s}\n'.format(dependency)
 
@@ -153,6 +162,10 @@ class WikiPageGenerator(object):
 
     # Cygwin support.
     building_table_of_contents += '  * [Using Cygwin](Building#cygwin)\n'
+
+    if project_configuration.HasDependencyCrypto():
+      cygwin_build_dependencies += (
+          '* openssl-devel (optional but recommended)\n')
 
     if project_configuration.cygwin_build_dependencies:
       for dependency in project_configuration.cygwin_build_dependencies:
@@ -192,6 +205,10 @@ class WikiPageGenerator(object):
         '* [Using Minimalist GNU for Windows (MinGW)]'
         '(Building#using-minimalist-gnu-for-windows-mingw)\n')
 
+    if project_configuration.HasDependencyCrypto():
+      mingw_build_dependencies += (
+          '* Windows Crypto API (libadvapi32) (optional but recommended)\n')
+
     if project_configuration.mingw_build_dependencies:
       for dependency in project_configuration.mingw_build_dependencies:
         mingw_build_dependencies += '* {0:s}\n'.format(dependency)
@@ -225,6 +242,10 @@ class WikiPageGenerator(object):
           'To compile {0:s} using Microsoft Visual Studio you\'ll '
           'need:\n'
           '\n').format(project_configuration.project_name)
+
+      if project_configuration.HasDependencyCrypto():
+        msvscpp_build_dependencies += (
+            '* Windows Crypto API (libadvapi32) (optional but recommended)\n')
 
       for dependency in project_configuration.msvscpp_build_dependencies:
         msvscpp_build_dependencies += '* {0:s}\n'.format(dependency)
@@ -273,6 +294,9 @@ class WikiPageGenerator(object):
         dpkg_build_dependencies = list(
             project_configuration.dpkg_build_dependencies)
 
+      if project_configuration.HasDependencyCrypto():
+        dpkg_build_dependencies.append('libssl-dev')
+
       if project_configuration.HasDependencyFuse():
         dpkg_build_dependencies.append('libfuse-dev')
 
@@ -310,6 +334,9 @@ class WikiPageGenerator(object):
       else:
         rpm_build_dependencies = list(
             project_configuration.rpm_build_dependencies)
+
+      if project_configuration.HasDependencyCrypto():
+        rpm_build_dependencies.append('openssl-devel')
 
       if project_configuration.HasDependencyFuse():
         rpm_build_dependencies.append('fuse-devel')
@@ -569,7 +596,7 @@ class BuildingPageGenerator(WikiPageGenerator):
       self._GenerateSection(
           'msvscpp_debug.txt', template_mappings, output_writer)
 
-    if project_configuration.msvscpp_zlib_dependency:
+    if project_configuration.HasDependencyZlib():
       self._GenerateSection(
           'msvscpp_zlib.txt', template_mappings, output_writer)
 
@@ -849,9 +876,10 @@ class TestingPageGenerator(WikiPageGenerator):
           self._GenerateSection(
               'tests_profiles_files.txt', template_mappings, output_writer)
 
-      if project_configuration.tests_supports_valgrind:
-        self._GenerateSection(
-            'tests_valgrind.txt', template_mappings, output_writer)
+      # TODO: add section about ASAN
+
+      self._GenerateSection(
+          'tests_valgrind.txt', template_mappings, output_writer)
 
   def HasContent(self, project_configuration):
     """Determines if the generator will generate content.

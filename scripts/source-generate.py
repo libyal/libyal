@@ -2164,10 +2164,21 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if makefile_am_file.library_dependencies:
+    library_dependencies = list(makefile_am_file.library_dependencies)
+
+    if project_configuration.HasDependencyCrypto():
+      library_dependencies.append('libcrypto')
+    if project_configuration.HasDependencyZlib():
+      library_dependencies.append('zlib')
+
+    if library_dependencies:
       local_library_tests = []
-      for name in makefile_am_file.library_dependencies:
-        local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
+      for name in library_dependencies:
+        if name in ('libcrypto', 'zlib'):
+          local_library_test = 'test "x$ac_cv_{0:s}" != xno'.format(name)
+        else:
+          local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
+
         local_library_tests.append(local_library_test)
 
       template_mappings['local_library_tests'] = ' || '.join(
@@ -2182,9 +2193,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       del template_mappings['local_library_tests']
 
     if project_configuration.HasTools():
-      # TODO: add support for libcrypto for libcaes
-      #  || test "x$ac_cv_libcrypto" = xyes
-
       tools_dependencies = list(makefile_am_file.tools_dependencies)
       if project_configuration.HasDependencyFuse():
         tools_dependencies.append('libfuse')
@@ -2192,7 +2200,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       if tools_dependencies:
         local_library_tests = []
         for name in tools_dependencies:
-          if name in ('libcrypto', 'libfuse', 'zlib'):
+          if name == 'libfuse':
             local_library_test = 'test "x$ac_cv_{0:s}" != xno'.format(name)
           else:
             local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
@@ -2283,8 +2291,19 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       maximum_description_length = max(
           maximum_description_length, len(description))
 
-      # TODO: add support for
-      # AES support: $ac_cv_libcaes_aes
+      if name == 'libcaes':
+        description = 'AES support'
+        build_information.append((description, '$ac_cv_libcaes_aes'))
+
+        maximum_description_length = max(
+            maximum_description_length, len(description))
+
+      elif name == 'libhmac':
+        description = 'SHA256 support'
+        build_information.append((description, '$ac_cv_libhmac_sha256'))
+
+        maximum_description_length = max(
+            maximum_description_length, len(description))
 
     if project_configuration.HasDependencyFuse():
       description = 'FUSE support'
@@ -2438,13 +2457,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-    dpkg_build_dependencies = ['debhelper (>= 9)', 'dh-autoreconf', 'pkg-config']
-
-    if project_configuration.dpkg_build_dependencies:
-      dpkg_build_dependencies.extend(project_configuration.dpkg_build_dependencies)
-
-    if project_configuration.HasPythonModule():
-      dpkg_build_dependencies.extend(['python-dev', 'python3-dev'])
+    dpkg_build_dependencies = self._GetDpkgBuildDependenciesDpkgControl(
+        project_configuration)
 
     template_mappings['dpkg_build_dependencies'] = ', '.join(dpkg_build_dependencies)
 
@@ -2585,6 +2599,57 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['local_libraries']
 
+  def _GetDpkgBuildDependencies(self, project_configuration):
+    """Retrieves the dpkg build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: dpkg build dependencies.
+    """
+    dpkg_build_dependencies = ['autopoint']
+
+    if project_configuration.HasDependencyCrypto():
+      dpkg_build_dependencies.append('libssl-dev')
+    if project_configuration.HasDependencyZlib():
+      dpkg_build_dependencies.append('zlib1g-dev')
+
+    if project_configuration.HasDependencyFuse():
+      dpkg_build_dependencies.append('libfuse-dev')
+
+    dpkg_build_dependencies.extend(
+        project_configuration.dpkg_build_dependencies)
+
+    return dpkg_build_dependencies
+
+  def _GetDpkgBuildDependenciesDpkgControl(self, project_configuration):
+    """Retrieves the dpkg build dependencies for the dpkg/control file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: dpkg build dependencies.
+    """
+    dpkg_build_dependencies = ['debhelper (>= 9)', 'dh-autoreconf', 'pkg-config']
+
+    if project_configuration.HasDependencyCrypto():
+      dpkg_build_dependencies.append('libssl-dev')
+    if project_configuration.HasDependencyZlib():
+      dpkg_build_dependencies.append('zlib1g-dev')
+
+    if project_configuration.HasPythonModule():
+      dpkg_build_dependencies.extend(['python-dev', 'python3-dev'])
+
+    if project_configuration.HasDependencyFuse():
+      dpkg_build_dependencies.append('libfuse-dev')
+
+    if project_configuration.dpkg_build_dependencies:
+      dpkg_build_dependencies.extend(project_configuration.dpkg_build_dependencies)
+
+    return dpkg_build_dependencies
+
   def Generate(self, project_configuration, output_writer):
     """Generates configuration files.
 
@@ -2602,9 +2667,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               self._library_makefile_am_path))
       return
 
-    dpkg_build_dependencies = ['autopoint']
-    dpkg_build_dependencies.extend(
-        project_configuration.dpkg_build_dependencies)
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
 
     pc_libs_private = []
     for library in sorted(makefile_am_file.libraries):
@@ -2647,6 +2711,10 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
+
+    del template_mappings['coverty_scan_token']
+    del template_mappings['dpkg_build_dependencies']
+    del template_mappings['pc_libs_private']
 
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer,
