@@ -1938,31 +1938,14 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if project_configuration.HasDependencyZlib():
+    if 'zlib' in project_configuration.library_build_dependencies:
       template_filename = os.path.join(template_directory, 'install-zlib.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    # TODO: move into a sub method.
-    cygwin_build_dependencies = list(
-        project_configuration.cygwin_build_dependencies)
-
-    if project_configuration.HasDependencyYacc():
-      cygwin_build_dependencies.append('bison')
-    if project_configuration.HasDependencyLex():
-      cygwin_build_dependencies.append('flex')
-
-    if project_configuration.HasDependencyZlib():
-      cygwin_build_dependencies.append('zlib-devel')
-    if project_configuration.HasDependencyBzip2():
-      cygwin_build_dependencies.append('bzip2-devel')
-    if project_configuration.HasDependencyCrypto():
-      cygwin_build_dependencies.append('openssl-devel')
-
-    if project_configuration.HasPythonModule():
-      cygwin_build_dependencies.append('python2-devel')
-      cygwin_build_dependencies.append('python3-devel')
+    cygwin_build_dependencies = self._GetCygwinBuildDependencies(
+        project_configuration)
 
     if cygwin_build_dependencies:
       cygwin_build_dependencies = ' '.join([
@@ -1976,13 +1959,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['cygwin_build_dependencies']
 
-    # TODO: move into a sub method.
-    mingw_msys_build_dependencies = list(
-        project_configuration.mingw_msys_build_dependencies)
-
-    # TODO: add support for other dependencies.
-    if project_configuration.HasDependencyZlib():
-      mingw_msys_build_dependencies.append('libz-dev')
+    mingw_msys_build_dependencies = self._GetMinGWMSYSBuildDependencies(
+        project_configuration)
 
     if mingw_msys_build_dependencies:
       mingw_msys_build_dependencies = ' '.join([
@@ -2134,7 +2112,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     if project_configuration.HasTools():
       tools_dependencies = list(makefile_am_file.tools_dependencies)
-      if project_configuration.HasDependencyFuse():
+      if 'fuse' in project_configuration.tools_build_dependencies:
         tools_dependencies.append('libfuse')
 
       if tools_dependencies:
@@ -2157,7 +2135,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
 
-    if project_configuration.supports_debug_output:
+    if project_configuration.HasDebugOutput():
       template_filename = os.path.join(
           template_directory, 'check_debug_output.ac')
       self._GenerateSection(
@@ -2181,9 +2159,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     library_dependencies = list(makefile_am_file.library_dependencies)
 
-    if project_configuration.HasDependencyCrypto():
+    if 'crypto' in project_configuration.library_build_dependencies:
       library_dependencies.append('libcrypto')
-    if project_configuration.HasDependencyZlib():
+    if 'zlib' in project_configuration.library_build_dependencies:
       library_dependencies.append('zlib')
 
     if library_dependencies:
@@ -2209,7 +2187,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     if project_configuration.HasTools():
       tools_dependencies = list(makefile_am_file.tools_dependencies)
-      if project_configuration.HasDependencyFuse():
+      if 'fuse' in project_configuration.tools_build_dependencies:
         tools_dependencies.append('libfuse')
 
       if tools_dependencies:
@@ -2324,7 +2302,14 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         maximum_description_length = max(
             maximum_description_length, len(description))
 
-    if project_configuration.HasDependencyFuse():
+    if 'zlib' in project_configuration.library_build_dependencies:
+      description = 'DEFLATE compression support'
+      build_information.append((description, '$ac_cv_inflate'))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+    if 'fuse' in project_configuration.tools_build_dependencies:
       description = 'FUSE support'
       build_information.append((description, '$ac_cv_libfuse'))
 
@@ -2384,7 +2369,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       maximum_description_length = max(
           maximum_description_length, len(description))
 
-    if project_configuration.supports_debug_output:
+    if project_configuration.HasDebugOutput():
       description = 'Verbose output'
       value = '$ac_cv_enable_verbose_output'
       features_information.append((description, value))
@@ -2554,6 +2539,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    # TODO: add support for lex yacc BUILT_SOURCES
+
     if project_configuration.HasPythonModule():
       template_filename = os.path.join(template_directory, 'python_module')
       self._GenerateSection(
@@ -2629,12 +2616,14 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     dpkg_build_dependencies = ['autopoint']
 
-    if project_configuration.HasDependencyCrypto():
-      dpkg_build_dependencies.append('libssl-dev')
-    if project_configuration.HasDependencyZlib():
+    if 'zlib' in project_configuration.library_build_dependencies:
       dpkg_build_dependencies.append('zlib1g-dev')
 
-    if project_configuration.HasDependencyFuse():
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      dpkg_build_dependencies.append('libssl-dev')
+
+    if 'fuse' in project_configuration.tools_build_dependencies:
       dpkg_build_dependencies.append('libfuse-dev')
 
     dpkg_build_dependencies.extend(
@@ -2653,21 +2642,65 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     dpkg_build_dependencies = ['debhelper (>= 9)', 'dh-autoreconf', 'pkg-config']
 
-    if project_configuration.HasDependencyCrypto():
-      dpkg_build_dependencies.append('libssl-dev')
-    if project_configuration.HasDependencyZlib():
+    if 'zlib' in project_configuration.library_build_dependencies:
       dpkg_build_dependencies.append('zlib1g-dev')
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      dpkg_build_dependencies.append('libssl-dev')
 
     if project_configuration.HasPythonModule():
       dpkg_build_dependencies.extend(['python-dev', 'python3-dev'])
 
-    if project_configuration.HasDependencyFuse():
+    if 'fuse' in project_configuration.tools_build_dependencies:
       dpkg_build_dependencies.append('libfuse-dev')
 
     if project_configuration.dpkg_build_dependencies:
       dpkg_build_dependencies.extend(project_configuration.dpkg_build_dependencies)
 
     return dpkg_build_dependencies
+
+  def _GetCygwinBuildDependencies(self, project_configuration):
+    """Retrieves the Cygwin build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+    """
+    cygwin_build_dependencies = list(
+        project_configuration.cygwin_build_dependencies)
+
+    if project_configuration.HasDependencyYacc():
+      cygwin_build_dependencies.append('bison')
+    if project_configuration.HasDependencyLex():
+      cygwin_build_dependencies.append('flex')
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      cygwin_build_dependencies.append('zlib-devel')
+    if project_configuration.HasDependencyBzip2():
+      cygwin_build_dependencies.append('bzip2-devel')
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      cygwin_build_dependencies.append('openssl-devel')
+
+    if project_configuration.HasPythonModule():
+      cygwin_build_dependencies.append('python2-devel')
+      cygwin_build_dependencies.append('python3-devel')
+
+    return cygwin_build_dependencies
+
+  def _GetMinGWMSYSBuildDependencies(self, project_configuration):
+    """Retrieves the MinGW-MSYS build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+    """
+    mingw_msys_build_dependencies = list(
+        project_configuration.mingw_msys_build_dependencies)
+
+    # TODO: add support for other dependencies.
+    if 'zlib' in project_configuration.library_build_dependencies:
+      mingw_msys_build_dependencies.append('libz-dev')
+
+    return mingw_msys_build_dependencies
 
   def Generate(self, project_configuration, output_writer):
     """Generates configuration files.

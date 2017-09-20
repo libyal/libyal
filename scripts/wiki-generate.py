@@ -140,7 +140,7 @@ class WikiPageGenerator(object):
           'Also make sure to have the following dependencies including '
           'source headers installed:\n')
 
-      if project_configuration.HasDependencyZlib():
+      if 'zlib' in project_configuration.library_build_dependencies:
         gcc_build_dependencies += (
             '* zlib (required for DEFLATE compression support)\n')
 
@@ -148,7 +148,8 @@ class WikiPageGenerator(object):
         gcc_build_dependencies += (
             '* bzip2 (required for bzip2 compression support)\n')
 
-      if project_configuration.HasDependencyCrypto():
+      if ('crypto' in project_configuration.library_build_dependencies or
+          'crypto' in project_configuration.tools_build_dependencies):
         gcc_build_dependencies += (
             '* libcrypto (part of OpenSSL) (optional but recommended)\n')
 
@@ -156,7 +157,7 @@ class WikiPageGenerator(object):
         gcc_build_dependencies += '* {0:s}\n'.format(dependency)
 
     if project_configuration.gcc_static_build_dependencies:
-      if project_configuration.HasDependencyZlib():
+      if 'zlib' in project_configuration.library_build_dependencies:
         gcc_static_build_dependencies += (
             '* zlib (required for DEFLATE compression support)\n')
 
@@ -164,7 +165,8 @@ class WikiPageGenerator(object):
         gcc_static_build_dependencies += (
             '* bzip2 (required for bzip2 compression support)\n')
 
-      if project_configuration.HasDependencyCrypto():
+      if ('crypto' in project_configuration.library_build_dependencies or
+          'crypto' in project_configuration.tools_build_dependencies):
         gcc_static_build_dependencies += (
             '* libcrypto (part of OpenSSL) (optional but recommended, can be '
             'disabled by --with-openssl=no)\n')
@@ -172,14 +174,14 @@ class WikiPageGenerator(object):
       for dependency in project_configuration.gcc_static_build_dependencies:
         gcc_static_build_dependencies += '* {0:s}\n'.format(dependency)
 
-    if project_configuration.HasDependencyFuse():
+    if 'fuse' in project_configuration.tools_build_dependencies:
       gcc_static_build_dependencies += (
           '* fuse (optional, can be disabled by --with-libfuse=no)\n')
 
     # Cygwin support.
     building_table_of_contents += '  * [Using Cygwin](Building#cygwin)\n'
 
-    if project_configuration.HasDependencyZlib():
+    if 'zlib' in project_configuration.library_build_dependencies:
       cygwin_build_dependencies += (
           '* zlib-devel (required for DEFLATE compression support)\n')
 
@@ -187,7 +189,8 @@ class WikiPageGenerator(object):
       cygwin_build_dependencies += (
           '* bzip2-devel (required for bzip2 compression support)\n')
 
-    if project_configuration.HasDependencyCrypto():
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
       cygwin_build_dependencies += (
           '* openssl-devel (optional but recommended)\n')
 
@@ -213,7 +216,7 @@ class WikiPageGenerator(object):
           '```\n')
 
     # Fuse support.
-    if project_configuration.HasDependencyFuse():
+    if 'fuse' in project_configuration.tools_build_dependencies:
       gcc_mount_tool += (
           '\n'
           'If you want to be able to use {0:s}, make sure that:\n'
@@ -229,7 +232,7 @@ class WikiPageGenerator(object):
         '* [Using Minimalist GNU for Windows (MinGW)]'
         '(Building#using-minimalist-gnu-for-windows-mingw)\n')
 
-    if project_configuration.HasDependencyZlib():
+    if 'zlib' in project_configuration.library_build_dependencies:
       mingw_build_dependencies += (
           '* MinGW build of zlib library and source headers (required for '
           'DEFLATE compression support)\n')
@@ -239,7 +242,8 @@ class WikiPageGenerator(object):
           '* MinGW build of bzip2 library and source headers (required for '
           'bzip2 compression support)\n')
 
-    if project_configuration.HasDependencyCrypto():
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
       mingw_build_dependencies += (
           '* Windows Crypto API (libadvapi32) (optional but recommended)\n')
 
@@ -277,7 +281,7 @@ class WikiPageGenerator(object):
           'need:\n'
           '\n').format(project_configuration.project_name)
 
-      if project_configuration.HasDependencyZlib():
+      if 'zlib' in project_configuration.library_build_dependencies:
         msvscpp_build_dependencies += (
             '* zlib (required for DEFLATE compression support)\n')
 
@@ -285,7 +289,8 @@ class WikiPageGenerator(object):
         msvscpp_build_dependencies += (
             '* bzip2 (required for bzip2 compression support)\n')
 
-      if project_configuration.HasDependencyCrypto():
+      if ('crypto' in project_configuration.library_build_dependencies or
+          'crypto' in project_configuration.tools_build_dependencies):
         msvscpp_build_dependencies += (
             '* Windows Crypto API (libadvapi32) (optional but recommended)\n')
 
@@ -296,7 +301,7 @@ class WikiPageGenerator(object):
       msvscpp_dll_dependencies = '{0:s}.dll is dependent on:\n'.format(
           project_configuration.project_name)
 
-      if project_configuration.HasDependencyZlib():
+      if 'zlib' in project_configuration.library_build_dependencies:
         msvscpp_dll_dependencies += '* zlib.dll\n'
 
       if project_configuration.HasDependencyBzip2():
@@ -342,16 +347,17 @@ class WikiPageGenerator(object):
         dpkg_build_dependencies = list(
             project_configuration.dpkg_build_dependencies)
 
-      if project_configuration.HasDependencyZlib():
+      if 'zlib' in project_configuration.library_build_dependencies:
         dpkg_build_dependencies.append('zlib1g-dev')
 
       if project_configuration.HasDependencyBzip2():
         dpkg_build_dependencies.append('bzip2-dev')
 
-      if project_configuration.HasDependencyCrypto():
+      if ('crypto' in project_configuration.library_build_dependencies or
+          'crypto' in project_configuration.tools_build_dependencies):
         dpkg_build_dependencies.append('libssl-dev')
 
-      if project_configuration.HasDependencyFuse():
+      if 'fuse' in project_configuration.tools_build_dependencies:
         dpkg_build_dependencies.append('libfuse-dev')
 
       if project_configuration.HasPythonModule():
@@ -389,16 +395,17 @@ class WikiPageGenerator(object):
         rpm_build_dependencies = list(
             project_configuration.rpm_build_dependencies)
 
-      if project_configuration.HasDependencyZlib():
+      if 'zlib' in project_configuration.library_build_dependencies:
         rpm_build_dependencies.append('zlib-devel')
 
       if project_configuration.HasDependencyBzip2():
         rpm_build_dependencies.append('bzip2-devel')
 
-      if project_configuration.HasDependencyCrypto():
+      if ('crypto' in project_configuration.library_build_dependencies or
+          'crypto' in project_configuration.tools_build_dependencies):
         rpm_build_dependencies.append('openssl-devel')
 
-      if project_configuration.HasDependencyFuse():
+      if 'fuse' in project_configuration.tools_build_dependencies:
         rpm_build_dependencies.append('fuse-devel')
 
       if project_configuration.HasPythonModule():
@@ -617,7 +624,7 @@ class BuildingPageGenerator(WikiPageGenerator):
 
     self._GenerateSection('gcc.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_debug_output:
+    if project_configuration.HasDebugOutput():
       self._GenerateSection(
           'gcc_debug_output.txt', template_mappings, output_writer)
 
@@ -652,11 +659,11 @@ class BuildingPageGenerator(WikiPageGenerator):
     # Visual Studio support.
     self._GenerateSection('msvscpp.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_debug_output:
+    if project_configuration.HasDebugOutput():
       self._GenerateSection(
           'msvscpp_debug.txt', template_mappings, output_writer)
 
-    if project_configuration.HasDependencyZlib():
+    if 'zlib' in project_configuration.library_build_dependencies:
       self._GenerateSection(
           'msvscpp_zlib.txt', template_mappings, output_writer)
 
@@ -844,7 +851,7 @@ class MountingPageGenerator(WikiPageGenerator):
     """
     template_mappings = self._GetTemplateMappings(project_configuration)
     if (project_configuration.HasDependencyDokan() or
-        project_configuration.HasDependencyFuse()):
+        'fuse' in project_configuration.tools_build_dependencies):
       self._GenerateSection(
           'introduction.txt', template_mappings, output_writer)
 
@@ -901,7 +908,7 @@ class MountingPageGenerator(WikiPageGenerator):
       bool: True if the generator will generate content.
     """
     if (project_configuration.HasDependencyDokan() or
-        project_configuration.HasDependencyFuse()):
+        'fuse' in project_configuration.tools_build_dependencies):
       return True
 
     return False
@@ -974,7 +981,7 @@ class TroubleshootingPageGenerator(WikiPageGenerator):
     self._GenerateSection(
         'runtime_errors.txt', template_mappings, output_writer)
 
-    if project_configuration.supports_debug_output:
+    if project_configuration.HasDebugOutput():
       self._GenerateSection(
           'format_errors.txt', template_mappings, output_writer)
 

@@ -544,6 +544,14 @@ class ProjectConfiguration(object):
     self.msvscpp_build_dependencies = [
         name.split(' ')[0] for name in self.msvscpp_build_dependencies]
 
+  def HasDebugOutput(self):
+    """Determines if the project provides debug output.
+
+    Returns:
+      bool: True if the project provides debug output.
+    """
+    return self.supports_debug_output
+
   def HasDependencyBzip2(self):
     """Determines if the project depends on bzip2.
 
@@ -551,14 +559,6 @@ class ProjectConfiguration(object):
       bool: True if the project depends on bzip2.
     """
     return 'bzip2' in self.library_build_dependencies
-
-  def HasDependencyCrypto(self):
-    """Determines if the project depends on a crypto library.
-
-    Returns:
-      bool: True if the project depends on a crypto library.
-    """
-    return 'crypto' in self.library_build_dependencies
 
   def HasDependencyDokan(self):
     """Determines if the project depends on Dokan.
@@ -593,14 +593,6 @@ class ProjectConfiguration(object):
     """
     return 'yacc' in self.library_build_dependencies
 
-  def HasDependencyZlib(self):
-    """Determines if the project depends on zlib.
-
-    Returns:
-      bool: True if the project depends on zlib.
-    """
-    return 'zlib' in self.library_build_dependencies
-
   def HasDpkg(self):
     """Determines if the project provides dpkg configuration files.
 
@@ -613,11 +605,27 @@ class ProjectConfiguration(object):
 
     return self._has_dpkg
 
+  def HasDotNetBinding(self):
+    """Determines if the project provides a .net binding.
+
+    Returns:
+      bool: True if the .net binding directory exits.
+    """
+    return False
+
+  def HasJavaBinding(self):
+    """Determines if the project provides a Java binding.
+
+    Returns:
+      bool: True if the Java binding directory exits.
+    """
+    return False
+
   def HasPythonModule(self):
     """Determines if the project provides a Python module.
 
     Returns:
-      bool: True if the a Python module directory exits.
+      bool: True if the Python module directory exits.
     """
     if self._has_python_module is None:
       path = os.path.join(
