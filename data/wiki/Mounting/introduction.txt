@@ -3,6 +3,9 @@ To mount ${mount_tool_source_description_long} you can use ${mount_tool_name}.
 
 There is support for the following back-ends:
 
-${mount_tool_supported_backends}
+* Dokan library
+* fuse
+* OSXFuse
+
 To build ${mount_tool_name} see [Building](https://github.com/libyal/${project_name}/wiki/Building).
 

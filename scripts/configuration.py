@@ -167,7 +167,6 @@ class ProjectConfiguration(object):
     self.mount_tool_source_description = None
     self.mount_tool_source_description_long = None
     self.mount_tool_source_type = None
-    self.mount_tool_supported_backends = None
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
@@ -380,9 +379,6 @@ class ProjectConfiguration(object):
           'unsupported mount tool source type: {0:s}'.format(
               self.mount_tool_source_type))
 
-    self.mount_tool_supported_backends = self._GetConfigValue(
-        config_parser, 'mount_tool', 'supported_backends')
-
   def _ReadProjectConfiguration(self, config_parser):
     """Reads the project configuration.
 
@@ -480,18 +476,14 @@ class ProjectConfiguration(object):
     """
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, 'tests', 'authors', default_value=self.project_authors)
-    tests_features = self._GetOptionalConfigValue(
-        config_parser, 'tests', 'features', default_value=[])
     self.tests_options = self._GetOptionalConfigValue(
         config_parser, 'tests', 'options', default_value=[])
-
-    if 'profiles' in tests_features:
-      self.tests_profiles = self._GetConfigValue(
-          config_parser, 'tests', 'profiles')
-      self.tests_example_filename1 = self._GetOptionalConfigValue(
-          config_parser, 'tests', 'example_filename1')
-      self.tests_example_filename2 = self._GetOptionalConfigValue(
-          config_parser, 'tests', 'example_filename2')
+    self.tests_profiles = self._GetOptionalConfigValue(
+        config_parser, 'tests', 'profiles', default_value=[])
+    self.tests_example_filename1 = self._GetOptionalConfigValue(
+        config_parser, 'tests', 'example_filename1')
+    self.tests_example_filename2 = self._GetOptionalConfigValue(
+        config_parser, 'tests', 'example_filename2')
 
   def _ReadToolsConfiguration(self, config_parser):
     """Reads the tools configuration.

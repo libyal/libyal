@@ -97,7 +97,6 @@ class WikiPageGenerator(object):
 
     mount_tool_additional_arguments = ''
     mount_tool_source_description_long = ''
-    mount_tool_supported_backends = ''
 
     development_prefix = project_configuration.project_name[3:]
     python_bindings_name = 'py{0:s}'.format(
@@ -483,10 +482,6 @@ class WikiPageGenerator(object):
     else:
       mount_tool_source_description_long = project_configuration.mount_tool_source_description
 
-    if project_configuration.mount_tool_supported_backends:
-      for backend in project_configuration.mount_tool_supported_backends:
-        mount_tool_supported_backends += '* {0:s}\n'.format(backend)
-
     template_mappings = {
         'building_table_of_contents': building_table_of_contents,
 
@@ -564,7 +559,6 @@ class WikiPageGenerator(object):
         'mount_tool_source_description': project_configuration.mount_tool_source_description,
         'mount_tool_source_description_long': (
             mount_tool_source_description_long),
-        'mount_tool_supported_backends': mount_tool_supported_backends,
     }
     return template_mappings
 

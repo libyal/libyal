@@ -2081,7 +2081,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if makefile_am_file.library_dependencies:
+    library_dependencies = list(makefile_am_file.library_dependencies)
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      library_dependencies.append('zlib')
+
+    if library_dependencies:
       for name in makefile_am_file.library_dependencies:
         template_mappings['local_library_name'] = name
         template_mappings['local_library_name_upper_case'] = name.upper()
@@ -2091,6 +2096,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_writer,
             output_filename, access_mode='ab')
+
+      # TODO: add additional zlib checks
 
       del template_mappings['local_library_name']
       del template_mappings['local_library_name_upper_case']
@@ -2605,6 +2612,40 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['local_libraries']
 
+  def _GenerateRpmSpec(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the RPM spec file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(
+        self._template_directory, 'libyal.spec.in')
+
+    template_filename = os.path.join(template_directory, 'header.in')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'build.in')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'files.in')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'changelog.in')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
   def _GetDpkgBuildDependencies(self, project_configuration):
     """Retrieves the dpkg build dependencies.
 
@@ -2783,6 +2824,11 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         project_configuration, template_mappings, output_writer,
         '.gitignore')
 
+    output_filename = '{0:s}.spec.in'.format(project_configuration.library_name)
+    self._GenerateRpmSpec(
+        project_configuration, template_mappings, output_writer,
+        output_filename)
+
 
 class IncludeSourceFileGenerator(SourceFileGenerator):
   """Include source files generator."""
@@ -2905,6 +2951,7 @@ class IncludeSourceFileGenerator(SourceFileGenerator):
         self._template_directory, 'libyal', 'types.h.in')
 
     type_definitions = []
+    # TODO: deprecate project_configuration.library_public_types ?
     for type_name in sorted(project_configuration.library_public_types):
       type_definition = 'typedef intptr_t {0:s}_{1:s}_t;'.format(
           project_configuration.library_name, type_name)
@@ -6113,7 +6160,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
     """
     # TODO: compare handle fdata and cdata differences, and includes
-    # TODO: deprecate project_configuration.library_public_types ?
     # TODO: weave existing test files?
     # TODO: use data files to generate test data tests/input/.data/<name>
     # TODO: add support for options in configuration file to set option sets.
