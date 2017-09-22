@@ -2636,10 +2636,24 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    # TODO: add build requirements
+
+    if project_configuration.HasTools():
+      template_filename = os.path.join(template_directory, 'tools.in')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     template_filename = os.path.join(template_directory, 'files.in')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    if project_configuration.HasTools():
+      template_filename = os.path.join(template_directory, 'files-tools.in')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     template_filename = os.path.join(template_directory, 'changelog.in')
     self._GenerateSection(

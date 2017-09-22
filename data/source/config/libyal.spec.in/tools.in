@@ -1,0 +1,8 @@
+%package tools
+Summary: ${tools_description}
+Group: Applications/System
+Requires: ${library_name} = %{version}-%{release}
+
+%description tools
+${tools_description}
+
