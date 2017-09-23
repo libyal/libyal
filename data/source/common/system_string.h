@@ -143,6 +143,9 @@ extern "C" {
 
 #endif /* defined( HAVE_WIDE_SYSTEM_CHARACTER ) */
 
+/* For backwards compatibility */
+#define system_string_vsprintf system_string_vsnprintf
+
 #if defined( _cplusplus )
 }
 #endif
