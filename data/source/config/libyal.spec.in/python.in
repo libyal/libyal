@@ -1,0 +1,18 @@
+%package python
+Summary: Python 2 bindings for ${library_name}
+Group: System Environment/Libraries
+Requires: ${library_name} = %{version}-%{release} python
+BuildRequires: python-devel
+
+%description python
+Python 2 bindings for ${library_name}
+
+%package python3
+Summary: Python 3 bindings for ${library_name}
+Group: System Environment/Libraries
+Requires: ${library_name} = %{version}-%{release} python3
+BuildRequires: python3-devel
+
+%description python3
+Python 3 bindings for ${library_name}
+
