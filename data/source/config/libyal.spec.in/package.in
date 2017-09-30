@@ -1,0 +1,12 @@
+
+%description
+${library_description}
+
+%package devel
+Summary: Header files and libraries for developing applications for ${library_name}
+Group: Development/Libraries
+Requires: ${library_name} = %{version}-%{release}
+
+%description devel
+Header files and libraries for developing applications for ${library_name}.
+

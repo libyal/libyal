@@ -2624,6 +2624,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
+    makefile_am_file = self._GetMainMakefileAM(project_configuration)
+
     template_directory = os.path.join(
         self._template_directory, 'libyal.spec.in')
 
@@ -2631,24 +2633,61 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    # TODO: add build requirements
+    library_dependencies = list(makefile_am_file.library_dependencies)
+
+    if 'crypto' in project_configuration.library_build_dependencies:
+      library_dependencies.append('libcrypto')
+    if 'zlib' in project_configuration.library_build_dependencies:
+      library_dependencies.append('zlib')
+
+    if library_dependencies:
+      spec_requires = []
+      spec_build_requires = []
+
+      # TODO: set up spec_requires and spec_build_requires
+
+      template_mappings['spec_requires'] = spec_requires
+      template_mappings['spec_build_requires'] = spec_build_requires
+
+      template_filename = os.path.join(template_directory, 'requires.in')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['spec_requires']
+      del template_mappings['spec_build_requires']
+
+    template_filename = os.path.join(template_directory, 'package.in')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(template_directory, 'python.in')
+      template_filename = os.path.join(template_directory, 'package-python.in')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
     if project_configuration.HasTools():
-      template_filename = os.path.join(template_directory, 'tools.in')
+      template_filename = os.path.join(template_directory, 'package-tools.in')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'prep.in')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
 
     if project_configuration.HasPythonModule():
       template_filename = os.path.join(template_directory, 'build-python.in')
     else:
       template_filename = os.path.join(template_directory, 'build.in')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'install.in')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')

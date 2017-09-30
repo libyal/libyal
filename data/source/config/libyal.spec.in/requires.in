@@ -1,0 +1,2 @@
+@${library_name}_spec_requires@ ${spec_requires}
+@${library_name}_spec_build_requires@ ${spec_build_requires}

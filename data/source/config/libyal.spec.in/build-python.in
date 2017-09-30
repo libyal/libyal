@@ -1,18 +1,4 @@
-%prep
-%setup -q
-
 %build
 %configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir} --enable-python2 --enable-python3
 make %{?_smp_mflags}
-
-%install
-rm -rf %{buildroot}
-%make_install
-
-%clean
-rm -rf %{buildroot}
-
-%post -p /sbin/ldconfig
-
-%postun -p /sbin/ldconfig
 
