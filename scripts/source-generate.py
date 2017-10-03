@@ -2083,11 +2083,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     library_dependencies = list(makefile_am_file.library_dependencies)
 
+    if 'crypto' in project_configuration.library_build_dependencies:
+      library_dependencies.append('libcrypto')
     if 'zlib' in project_configuration.library_build_dependencies:
       library_dependencies.append('zlib')
 
     if library_dependencies:
-      for name in makefile_am_file.library_dependencies:
+      for name in library_dependencies:
         template_mappings['local_library_name'] = name
         template_mappings['local_library_name_upper_case'] = name.upper()
 
@@ -2643,11 +2645,15 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     if library_dependencies:
       spec_requires = []
       spec_build_requires = []
+      for name in sorted(library_dependencies):
+        requires = '@ax_{0:s}_spec_requires@'.format(name)
+        spec_requires.append(requires)
 
-      # TODO: set up spec_requires and spec_build_requires
+        build_requires = '@ax_{0:s}_spec_build_requires@'.format(name)
+        spec_build_requires.append(build_requires)
 
-      template_mappings['spec_requires'] = spec_requires
-      template_mappings['spec_build_requires'] = spec_build_requires
+      template_mappings['spec_requires'] = ' '.join(spec_requires)
+      template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
 
       template_filename = os.path.join(template_directory, 'requires.in')
       self._GenerateSection(
