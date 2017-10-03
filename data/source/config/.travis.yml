@@ -53,7 +53,7 @@ before_install:
 install:
   - if test $${TRAVIS_OS_NAME} = "osx"; then export SED="/usr/local/bin/gsed"; fi
   - if test $${TARGET} = "shared"; then ./syncsharedlibs.sh; fi
-  - ./synclibs.sh && ./autogen.sh
+  - ./synclibs.sh --use-head && ./autogen.sh
   - if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
 script:
   - if test $${TRAVIS_OS_NAME} = "linux"; then export PATH=$$(echo $$PATH | tr ":" "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s/::/:/g"); fi

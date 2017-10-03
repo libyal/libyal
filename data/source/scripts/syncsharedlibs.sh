@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the shared library dependencies
 #
-# Version: 20170903
+# Version: 20171003
 
 GIT_URL_PREFIX="https://github.com/libyal";
 SHARED_LIBS="${shared_libs}";
@@ -25,7 +25,7 @@ do
 		continue
 	fi
 
-	(cd $${SHARED_LIB}-$$$$ && ./synclibs.sh && ./autogen.sh && ./configure --prefix=/usr && make && sudo make install);
+	(cd $${SHARED_LIB}-$$$$ && ./synclibs.sh --use-head && ./autogen.sh && ./configure --prefix=/usr && make && sudo make install);
 
 	rm -rf $${SHARED_LIB}-$$$$;
 done
