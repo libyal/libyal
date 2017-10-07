@@ -2014,6 +2014,11 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    template_filename = os.path.join(template_directory, 'after_test.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
     # TODO: make this configuration driven
     if project_configuration.library_name == 'libevt':
       template_filename = os.path.join(template_directory, 'deploy.yml')
@@ -5208,9 +5213,9 @@ class ScriptFileGenerator(SourceFileGenerator):
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
     template_mappings = self._GetTemplateMappings(project_configuration)
-    libraries = ' '.join(sorted(makefile_am_file.libraries))
-    template_mappings['local_libs'] = libraries
-    template_mappings['shared_libs'] = libraries
+    template_mappings['local_libs'] = ' '.join(
+        sorted(makefile_am_file.libraries))
+    template_mappings['shared_libs'] = ' '.join(makefile_am_file.libraries)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(

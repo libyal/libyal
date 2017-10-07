@@ -4,4 +4,5 @@
   - TARGET: mingw-w64
 
 install:
+- cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash
 - cmd: git clone https://github.com/libyal/vstools.git ..\vstools

@@ -3,20 +3,20 @@ build_script:
 - ps: .\synclibs.ps1
 - ps: .\autogen.ps1
 - cmd: if [%TARGET%]==[vs2008] (
-    msbuild msvscpp\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet msvscpp\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2010] (
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --no-python-dll --output-format 2010 msvscpp\${library_name}.sln &&
-    msbuild vs2010\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet vs2010\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2012] (
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --output-format 2012 --python-path "C:\\Python27-x64" msvscpp\${library_name}.sln &&
-    msbuild vs2012\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet vs2012\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2013] (
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2013 msvscpp\${library_name}.sln &&
-    msbuild vs2013\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet vs2013\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2015] (
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2015 msvscpp\${library_name}.sln &&
-    msbuild vs2015\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet vs2015\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
