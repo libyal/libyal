@@ -1963,8 +1963,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         project_configuration)
 
     if mingw_msys_build_dependencies:
-      mingw_msys_build_dependencies = ' '.join([
-          '-P {0:s}'.format(name) for name in mingw_msys_build_dependencies])
+      mingw_msys_build_dependencies = ' '.join(mingw_msys_build_dependencies)
       template_mappings['mingw_msys_build_dependencies'] = (
           mingw_msys_build_dependencies)
 
@@ -2121,8 +2120,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    # TODO: add java bindings support (check_java_support.ac)
-    # TODO: add .net bindings support (check_dotnet_support.ac)
+    if project_configuration.HasJavaBindings():
+      template_filename = os.path.join(
+          template_directory, 'check_java_support.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     if project_configuration.HasTools():
       tools_dependencies = list(makefile_am_file.tools_dependencies)
@@ -2261,8 +2264,19 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    # TODO: add java bindings support (config_files_java.ac)
-    # TODO: add .net bindings support (config_files_dotnet.ac)
+    if project_configuration.HasDotNetBindings():
+      template_filename = os.path.join(
+          template_directory, 'config_files_dotnet.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.HasJavaBindings():
+      template_filename = os.path.join(
+          template_directory, 'config_files_java.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     if project_configuration.HasTools():
       if makefile_am_file.tools_dependencies:
@@ -2284,7 +2298,19 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           output_filename, access_mode='ab')
 
     # TODO: add support for Makefile in documents (libuna)
-    # TODO: add support for dotnet rc.in
+
+    template_filename = os.path.join(
+        template_directory, 'config_files_common.ac')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if project_configuration.HasDotNetBindings():
+      template_filename = os.path.join(
+          template_directory, 'config_files_dotnet_rc.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     template_filename = os.path.join(template_directory, 'config_files_end.ac')
     self._GenerateSection(
@@ -2561,8 +2587,17 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    # TODO: add java bindings support (java_binding)
-    # TODO: add .net bindings support (dotnet_binding)
+    if project_configuration.HasDotNetBindings():
+      template_filename = os.path.join(template_directory, 'dotnet_bindings')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.HasJavaBindings():
+      template_filename = os.path.join(template_directory, 'java_bindings')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     if project_configuration.HasTools():
       tools_executables = []
@@ -2680,7 +2715,44 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     if project_configuration.HasTools():
-      template_filename = os.path.join(template_directory, 'package-tools.in')
+      requires_library = '{0:s} = %{{version}}-%{{release}}'.format(
+          project_configuration.library_name)
+
+      tools_dependencies = list(makefile_am_file.tools_dependencies)
+      if 'fuse' in project_configuration.tools_build_dependencies:
+        tools_dependencies.append('libfuse')
+
+      spec_requires = [requires_library]
+      spec_build_requires = []
+      for name in sorted(tools_dependencies):
+        requires = '@ax_{0:s}_spec_requires@'.format(name)
+        spec_requires.append(requires)
+
+        build_requires = '@ax_{0:s}_spec_build_requires@'.format(name)
+        spec_build_requires.append(build_requires)
+
+      template_mappings['spec_requires'] = ' '.join(spec_requires)
+
+      template_filename = os.path.join(
+          template_directory, 'package-tools-header.in')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['spec_requires']
+
+      template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
+
+      template_filename = os.path.join(
+          template_directory, 'package-tools-requires.in')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['spec_build_requires']
+
+      template_filename = os.path.join(
+          template_directory, 'package-tools-footer.in')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')

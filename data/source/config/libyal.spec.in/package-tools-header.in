@@ -1,0 +1,4 @@
+%package tools
+Summary: ${tools_description}
+Group: Applications/System
+Requires: ${spec_requires}

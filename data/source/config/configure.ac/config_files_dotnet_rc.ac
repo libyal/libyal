@@ -1,0 +1,1 @@
+AC_CONFIG_FILES([${library_name_suffix}.net/${library_name_suffix}.net.rc])

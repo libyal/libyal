@@ -22,9 +22,11 @@ class ProjectConfiguration(object):
     coverty_scan_token (str): scan token for Coverty Scan (scan.coverity.com).
     cygwin_build_dependencies (str): Cygwin build dependencies.
     dpkg_build_dependencies (str): dpkg build dependencies.
+    dotnet_bindings_name (str): name of the .Net bindings.
     gcc_build_dependencies (list[str]): GCC build dependencies.
     gcc_static_build_dependencies (list[str]): GCC build dependencies for
         building static binaries.
+    java_bindings_name (str): name of the Java bindings.
     library_build_dependencies (str): library build dependencies.
     library_description (str): description of the library.
     library_name (str): name of the library.
@@ -66,8 +68,10 @@ class ProjectConfiguration(object):
     super(ProjectConfiguration, self).__init__()
     self._configuration_file_path = None
     self._has_dpkg = None
-    self._has_rpm = None
+    self._has_dotnet_bindings = None
+    self._has_java_bindings = None
     self._has_python_module = None
+    self._has_rpm = None
     self._has_tests = None
     self._has_tools = None
 
@@ -96,6 +100,12 @@ class ProjectConfiguration(object):
     self.python_module_authors = None
     self.python_module_name = None
     self.python_module_year_of_creation = None
+
+    # .Net bindings configuration.
+    self.dotnet_bindings_name = None
+
+    # Java bindings configuration.
+    self.java_bindings_name = None
 
     # Tools configuration.
     self.tools_authors = None
@@ -270,6 +280,14 @@ class ProjectConfiguration(object):
     self.dpkg_build_dependencies = [
         name.split(' ')[0] for name in self.dpkg_build_dependencies]
 
+  def _ReadDotNetBindingsConfiguration(self, unused_config_parser):
+    """Reads the .Net bindings configuration.
+
+    Args:
+      config_parser (ConfigParser): configuration file parser.
+    """
+    self.dotnet_bindings_name = '{0:s}.net'.format(self.library_name_suffix)
+
   def _ReadGCCConfiguration(self, config_parser):
     """Reads the GCC configuration.
 
@@ -286,6 +304,14 @@ class ProjectConfiguration(object):
         name.split(' ')[0] for name in self.gcc_build_dependencies]
     self.gcc_static_build_dependencies = [
         name.split(' ')[0] for name in self.gcc_static_build_dependencies]
+
+  def _ReadJavaBindingsConfiguration(self, unused_config_parser):
+    """Reads the Java bindings configuration.
+
+    Args:
+      config_parser (ConfigParser): configuration file parser.
+    """
+    self.java_bindings_name = 'j{0:s}'.format(self.library_name_suffix)
 
   def _ReadLibraryConfiguration(self, config_parser):
     """Reads the library configuration.
@@ -597,21 +623,31 @@ class ProjectConfiguration(object):
 
     return self._has_dpkg
 
-  def HasDotNetBinding(self):
-    """Determines if the project provides a .net binding.
+  def HasDotNetBindings(self):
+    """Determines if the project provides .Net bindings.
 
     Returns:
-      bool: True if the .net binding directory exits.
+      bool: True if the .Net binding directory exits.
     """
-    return False
+    if self._has_dotnet_bindings is None:
+      path = os.path.join(
+          self._configuration_file_path, self.dotnet_bindings_name)
+      self._has_dotnet_bindings = os.path.exists(path)
 
-  def HasJavaBinding(self):
-    """Determines if the project provides a Java binding.
+    return self._has_dotnet_bindings
+
+  def HasJavaBindings(self):
+    """Determines if the project provides Java bindings.
 
     Returns:
       bool: True if the Java binding directory exits.
     """
-    return False
+    if self._has_java_bindings is None:
+      path = os.path.join(
+          self._configuration_file_path, self.java_bindings_name)
+      self._has_java_bindings = os.path.exists(path)
+
+    return self._has_java_bindings
 
   def HasPythonModule(self):
     """Determines if the project provides a Python module.
@@ -680,6 +716,8 @@ class ProjectConfiguration(object):
 
     self._ReadLibraryConfiguration(config_parser)
     self._ReadPythonModuleConfiguration(config_parser)
+    self._ReadDotNetBindingsConfiguration(config_parser)
+    self._ReadJavaBindingsConfiguration(config_parser)
     self._ReadToolsConfiguration(config_parser)
     self._ReadTestsConfiguration(config_parser)
 
