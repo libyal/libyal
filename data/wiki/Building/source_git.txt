@@ -23,8 +23,8 @@ On Debian based Linux distributions such as Ubuntu install the following package
 sudo apt install autoconf automake autopoint libtool pkg-config
 ```
 
-### Mac OS X
-On Mac OS X the XCode command line tools no longer provide the autotools you can obtain them e.g. via [MacPorts](https://www.macports.org/).
+### macOS
+On macOS the XCode command line tools no longer provide the autotools you can obtain them e.g. via [MacPorts](https://www.macports.org/).
 Install the following packages:
 ```
 sudo port install autoconf automake gettext libtool pkgconfig

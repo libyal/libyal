@@ -311,11 +311,6 @@ class WikiPageGenerator(object):
     msvscpp_build_git = ''
     msvscpp_mount_tool = ''
 
-    dpkg_filenames = ''
-
-    macosx_pkg_configure_options = ''
-
-    rpm_filenames = ''
     rpm_rename_source_package = ''
 
     mount_tool_additional_arguments = ''
@@ -448,7 +443,7 @@ class WikiPageGenerator(object):
           '\n'
           '* on a Linux system you have libfuse-dev (Debian-based) or '
           'fuse-devel (RedHat-based) installed.\n'
-          '* on a Mac OS X system, you have OSXFuse '
+          '* on a macOS system, you have OSXFuse '
           '(http://osxfuse.github.com/) installed.\n').format(
               mount_tool_name)
 
@@ -539,6 +534,7 @@ class WikiPageGenerator(object):
     building_table_of_contents += (
         'Or directly packaged with different package managers:\n\n')
 
+    # Dpkg support.
     if project_configuration.HasDpkg():
       building_table_of_contents += (
           '* [Using Debian package tools (DEB)]'
@@ -551,6 +547,7 @@ class WikiPageGenerator(object):
       dpkg_filenames = self._GetDpkgFilenames(project_configuration)
       dpkg_filenames = '\n'.join(dpkg_filenames)
 
+    # Rpm support.
     if project_configuration.HasRpm():
       building_table_of_contents += (
           '* [Using RedHat package tools (RPM)]'
@@ -560,7 +557,7 @@ class WikiPageGenerator(object):
           project_configuration)
       rpm_build_dependencies = ' '.join(rpm_build_dependencies)
 
-      if project_configuration.project_status:
+      if project_configuration.project_status != 'stable':
         rpm_rename_source_package += (
             'mv {0:s}-{1:s}-<version>.tar.gz {0:s}-<version>.tar.gz\n'.format(
                 project_configuration.project_name,
@@ -569,11 +566,13 @@ class WikiPageGenerator(object):
       rpm_filenames = self._GetRpmFilenames(project_configuration)
       rpm_filenames = '\n'.join(rpm_filenames)
 
+    # macOS pkgbuild support.
     building_table_of_contents += (
-        '* [Using Mac OS X pkgbuild](Building#using-mac-os-x-pkgbuild)\n')
+        '* [Using macOS pkgbuild](Building#using-macos-pkgbuild)\n')
 
+    macos_pkg_configure_options = ''
     if project_configuration.HasPythonModule():
-      macosx_pkg_configure_options = ' --enable-python --with-pyprefix'
+      macos_pkg_configure_options = ' --enable-python --with-pyprefix'
 
     if project_configuration.HasPythonModule():
       building_table_of_contents += (
@@ -672,7 +671,7 @@ class WikiPageGenerator(object):
         'dpkg_build_dependencies': dpkg_build_dependencies,
         'dpkg_filenames': dpkg_filenames,
 
-        'macosx_pkg_configure_options': macosx_pkg_configure_options,
+        'macos_pkg_configure_options': macos_pkg_configure_options,
 
         'rpm_build_dependencies': rpm_build_dependencies,
         'rpm_filenames': rpm_filenames,
@@ -813,11 +812,11 @@ class BuildingPageGenerator(WikiPageGenerator):
           'gcc_python.txt', template_mappings, output_writer)
 
     self._GenerateSection('cygwin.txt', template_mappings, output_writer)
-    self._GenerateSection('gcc_macosx.txt', template_mappings, output_writer)
+    self._GenerateSection('gcc_macos.txt', template_mappings, output_writer)
 
     if project_configuration.HasPythonModule():
       self._GenerateSection(
-          'gcc_macosx_python.txt', template_mappings, output_writer)
+          'gcc_macos_python.txt', template_mappings, output_writer)
 
     self._GenerateSection(
         'gcc_solaris.txt', template_mappings, output_writer)
@@ -862,7 +861,7 @@ class BuildingPageGenerator(WikiPageGenerator):
     if project_configuration.HasRpm():
       self._GenerateSection('rpm.txt', template_mappings, output_writer)
 
-    self._GenerateSection('macosx_pkg.txt', template_mappings, output_writer)
+    self._GenerateSection('macos_pkg.txt', template_mappings, output_writer)
 
     if project_configuration.HasPythonModule():
       self._GenerateSection('setup_py.txt', template_mappings, output_writer)

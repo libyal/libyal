@@ -1,5 +1,5 @@
 ### Python-bindings
-Mac OS X comes with multiple platform specific build Python versions. If you install a different version of Python on Mac OS X make sure that when building and running the Python-bindings you're using the correct version otherwise it will likely result in one of the following errors:
+macOS comes with multiple platform specific build Python versions. If you install a different version of Python on macOS make sure that when building and running the Python-bindings you're using the correct version otherwise it will likely result in one of the following errors:
 ```
 Fatal Python error: Interpreter not initialized (version mismatch?)
 ```

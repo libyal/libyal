@@ -3,7 +3,7 @@
 Before you build the ${project_name} source code using the GNU Compiler Collection (GCC) you'll need to have compilation and build tools installed.
 
 * On a Linux system make sure you have build-essential (Debian-based) or the Development Tools (RedHat-based) packages installed.
-* On a Mac OS X system make sure you have XCode (with command line tools) or MacPorts (or equivalent) installed.
+* On a macOS system make sure you have XCode (with command line tools) or MacPorts (or equivalent) installed.
 ${gcc_build_dependencies}${gcc_mount_tool}
 To build the ${project_name} source code change into the source directory and run the following commands:
 ```
