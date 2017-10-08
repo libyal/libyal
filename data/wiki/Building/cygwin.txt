@@ -1,15 +1,6 @@
 ## Cygwin
 If you want to use Cygwin to build ${project_name} make sure to have the following packages installed:
 
-* autoconf
-* automake
-* binutils
-* gcc-core
-* gettext
-* libiconv
-* libtool
-* make
-* pkg-config
 ${cygwin_build_dependencies}
 
 After following the GNU Compiler Collection (GCC) build instructions you should end up with the following DLL:
@@ -23,5 +14,5 @@ Make sure you use define ${project_name_upper_case}_DLL_IMPORT before including 
 
 To be able to use the DLL on other systems than the build system you'll also need to provide:
 
-* cygwin1.dll
 ${cygwin_dll_dependencies}
+

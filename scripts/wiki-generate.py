@@ -41,6 +41,239 @@ class WikiPageGenerator(object):
     output_data = template_string.substitute(template_mappings)
     output_writer.Write(output_data)
 
+  def _GetCygwinBuildDependencies(self, project_configuration):
+    """Retrieves the Cygwin build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: Cygwin build dependencies.
+    """
+    dependencies = [
+        'autoconf', 'automake', 'binutils', 'gcc-core', 'gettext', 'libiconv',
+        'libtool', 'make', 'pkg-config']
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      dependencies.append(
+          'zlib-devel (for DEFLATE compression support) (optional but '
+          'recommended, can be disabled by --with-zlib=no)')
+
+    if project_configuration.HasDependencyBzip2():
+      dependencies.append(
+          'bzip2-devel (required for bzip2 compression support)')
+
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      dependencies.append(
+          'openssl-devel (optional but recommended, can be disabled by '
+          '--with-openssl=no)')
+
+    dependencies.extend(project_configuration.cygwin_build_dependencies)
+
+    return dependencies
+
+  def _GetCygwinDLLDependencies(self, project_configuration):
+    """Retrieves the Cygwin DLL dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: Cygwin DLL dependencies.
+    """
+    dependencies = ['cygwin1.dll']
+
+    dependencies.extend(project_configuration.cygwin_dll_dependencies)
+
+    return dependencies
+
+  def _GetDpkgBuildDependencies(self, project_configuration):
+    """Retrieves the dpkg build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: dpkg build dependencies.
+    """
+    dependencies = list(project_configuration.dpkg_build_dependencies)
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      dependencies.append('zlib1g-dev')
+
+    if project_configuration.HasDependencyBzip2():
+      dependencies.append('bzip2-dev')
+
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      dependencies.append('libssl-dev')
+
+    if 'fuse' in project_configuration.tools_build_dependencies:
+      dependencies.append('libfuse-dev')
+
+    if project_configuration.HasPythonModule():
+      dependencies.append('python-all-dev')
+      dependencies.append('python3-all-dev')
+
+    return dependencies
+
+  def _GetDpkgFilenames(self, project_configuration):
+    """Retrieves the dpkg filenames.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: dpkg filenames.
+    """
+    filenames = []
+
+    dpkg_library_filename = '{0:s}_<version>-1_<arch>.deb'.format(
+        project_configuration.project_name)
+    filenames.append(dpkg_library_filename)
+
+    dpkg_development_filename = '{0:s}-dev_<version>-1_<arch>.deb'.format(
+        project_configuration.project_name)
+    filenames.append(dpkg_development_filename)
+
+    if project_configuration.HasPythonModule():
+      dpkg_python2_filename = '{0:s}-python_<version>-1_<arch>.deb'.format(
+          project_configuration.project_name)
+      filenames.append(dpkg_python2_filename)
+
+      dpkg_python3_filename = '{0:s}-python3_<version>-1_<arch>.deb'.format(
+          project_configuration.project_name)
+      filenames.append(dpkg_python3_filename)
+
+    if project_configuration.HasTools():
+      dpkg_tools_filename = '{0:s}-tools_<version>-1_<arch>.deb'.format(
+          project_configuration.project_name)
+      filenames.append(dpkg_tools_filename)
+
+    return filenames
+
+  def _GetMinGWBuildDependencies(self, project_configuration):
+    """Retrieves the MinGW build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: MinGW build dependencies.
+    """
+    dependencies = []
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      dependencies.append(
+          'MinGW build of zlib library and source headers (for DEFLATE '
+          'compression support) (optional but recommended, can be disabled '
+          'by --with-zlib=no)')
+
+    if project_configuration.HasDependencyBzip2():
+      dependencies.append(
+          'MinGW build of bzip2 library and source headers (required for '
+          'bzip2 compression support)')
+
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      # TODO: describe how to disable.
+      dependencies.append(
+          'Windows Crypto API (libadvapi32) (optional but recommended)')
+
+    dependencies.extend(project_configuration.mingw_build_dependencies)
+
+    return dependencies
+
+  def _GetMinGWDLLDependencies(self, project_configuration):
+    """Retrieves the MinGW DLL dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: MinGW DLL dependencies.
+    """
+    dependencies = ['libgcc_s_dw2-1.dll (or equivalent)']
+
+    dependencies.extend(project_configuration.mingw_dll_dependencies)
+
+    return dependencies
+
+  def _GetRpmBuildDependencies(self, project_configuration):
+    """Retrieves the rpm build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: rpm build dependencies.
+    """
+    dependencies = list(project_configuration.rpm_build_dependencies)
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      dependencies.append('zlib-devel')
+
+    if project_configuration.HasDependencyBzip2():
+      dependencies.append('bzip2-devel')
+
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      dependencies.append('openssl-devel')
+
+    if 'fuse' in project_configuration.tools_build_dependencies:
+      dependencies.append('fuse-devel')
+
+    if project_configuration.HasPythonModule():
+      dependencies.append('python-devel')
+      dependencies.append('python3-devel')
+
+    return dependencies
+
+  def _GetRpmFilenames(self, project_configuration):
+    """Retrieves the rpm filenames.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: rpm filenames.
+    """
+    filenames = []
+
+    rpm_library_filename = (
+        '~/rpmbuild/RPMS/<arch>/{0:s}-<version>-1.<arch>.rpm').format(
+            project_configuration.project_name)
+    filenames.append(rpm_library_filename)
+
+    rpm_development_filename = (
+        '~/rpmbuild/RPMS/<arch>/{0:s}-devel-<version>-1.<arch>.rpm').format(
+            project_configuration.project_name)
+    filenames.append(rpm_development_filename)
+
+    if project_configuration.HasPythonModule():
+      rpm_python2_filename = (
+          '~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>.rpm').format(
+              project_configuration.project_name)
+      filenames.append(rpm_python2_filename)
+
+      rpm_python3_filename = (
+          '~/rpmbuild/RPMS/<arch>/{0:s}-python3-<version>-1.<arch>.rpm').format(
+              project_configuration.project_name)
+      filenames.append(rpm_python3_filename)
+
+    if project_configuration.HasTools():
+      rpm_tools_filename = (
+          '~/rpmbuild/RPMS/<arch>/{0:s}-tools-<version>-1.<arch>.rpm').format(
+              project_configuration.project_name)
+      filenames.append(rpm_tools_filename)
+
+    rpm_source_filename = '~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm'.format(
+        project_configuration.project_name)
+    filenames.append(rpm_source_filename)
+
+    return filenames
+
   def _GetTemplateMappings(self, project_configuration):
     """Retrieves the template mappings.
 
@@ -69,29 +302,19 @@ class WikiPageGenerator(object):
 
     troubleshooting_example = ''
 
-    cygwin_build_dependencies = ''
-    cygwin_dll_dependencies = ''
     cygwin_executables = ''
 
-    gcc_build_dependencies = ''
-    gcc_static_build_dependencies = ''
     gcc_mount_tool = ''
 
-    mingw_build_dependencies = ''
-    mingw_dll_dependencies = ''
     mingw_executables = ''
 
-    msvscpp_build_dependencies = ''
     msvscpp_build_git = ''
-    msvscpp_dll_dependencies = ''
     msvscpp_mount_tool = ''
 
-    dpkg_build_dependencies = ''
     dpkg_filenames = ''
 
     macosx_pkg_configure_options = ''
 
-    rpm_build_dependencies = ''
     rpm_filenames = ''
     rpm_rename_source_package = ''
 
@@ -128,78 +351,81 @@ class WikiPageGenerator(object):
         'The {0:s} source code can be build with different compilers:\n'
         '\n').format(project_configuration.project_name)
 
+    # Git support.
+    git_build_dependencies = [
+        'git', 'aclocal', 'autoconf', 'automake', 'autopoint or gettextize',
+        'libtoolize', 'pkg-config']
+
+    git_build_dependencies = '\n'.join([
+        '* {0:s}'.format(dependency) for dependency in git_build_dependencies])
+
     # GCC support.
     building_table_of_contents += (
         '* [Using GNU Compiler Collection (GCC)]'
         '(Building#using-gnu-compiler-collection-gcc)\n')
 
-    if project_configuration.gcc_build_dependencies:
+    gcc_build_dependencies = []
+    gcc_static_build_dependencies = []
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      gcc_build_dependencies.append(
+          'zlib (for DEFLATE compression support) (optional but recommended, '
+          'can be disabled by --with-zlib=no)')
+      gcc_static_build_dependencies.append(
+          'zlib (for DEFLATE compression support) (optional but recommended, '
+          'can be disabled by --with-zlib=no)')
+
+    if project_configuration.HasDependencyBzip2():
+      gcc_build_dependencies.append(
+          'bzip2 (required for bzip2 compression support)')
+      gcc_static_build_dependencies.append(
+          'bzip2 (required for bzip2 compression support)')
+
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      gcc_build_dependencies.append(
+          'libcrypto (part of OpenSSL) (optional but recommended, can be '
+          'disabled by --with-openssl=no)')
+      gcc_static_build_dependencies.append(
+          'libcrypto (part of OpenSSL) (optional but recommended, can be '
+          'disabled by --with-openssl=no)')
+
+    if 'fuse' in project_configuration.tools_build_dependencies:
+      gcc_static_build_dependencies.append(
+          'fuse (optional, can be disabled by --with-libfuse=no)')
+
+    gcc_build_dependencies.extend(project_configuration.gcc_build_dependencies)
+    gcc_static_build_dependencies.extend(
+        project_configuration.gcc_build_dependencies)
+
+    gcc_build_dependencies = '\n'.join([
+        '* {0:s}'.format(dependency) for dependency in gcc_build_dependencies])
+
+    if gcc_build_dependencies:
       gcc_build_dependencies = (
           '\n'
           'Also make sure to have the following dependencies including '
-          'source headers installed:\n')
+          'source headers installed:\n'
+          '{0:s}\n').format(gcc_build_dependencies)
 
-      if 'zlib' in project_configuration.library_build_dependencies:
-        gcc_build_dependencies += (
-            '* zlib (required for DEFLATE compression support)\n')
-
-      if project_configuration.HasDependencyBzip2():
-        gcc_build_dependencies += (
-            '* bzip2 (required for bzip2 compression support)\n')
-
-      if ('crypto' in project_configuration.library_build_dependencies or
-          'crypto' in project_configuration.tools_build_dependencies):
-        gcc_build_dependencies += (
-            '* libcrypto (part of OpenSSL) (optional but recommended)\n')
-
-      for dependency in project_configuration.gcc_build_dependencies:
-        gcc_build_dependencies += '* {0:s}\n'.format(dependency)
-
-    if project_configuration.gcc_static_build_dependencies:
-      if 'zlib' in project_configuration.library_build_dependencies:
-        gcc_static_build_dependencies += (
-            '* zlib (required for DEFLATE compression support)\n')
-
-      if project_configuration.HasDependencyBzip2():
-        gcc_static_build_dependencies += (
-            '* bzip2 (required for bzip2 compression support)\n')
-
-      if ('crypto' in project_configuration.library_build_dependencies or
-          'crypto' in project_configuration.tools_build_dependencies):
-        gcc_static_build_dependencies += (
-            '* libcrypto (part of OpenSSL) (optional but recommended, can be '
-            'disabled by --with-openssl=no)\n')
-
-      for dependency in project_configuration.gcc_static_build_dependencies:
-        gcc_static_build_dependencies += '* {0:s}\n'.format(dependency)
-
-    if 'fuse' in project_configuration.tools_build_dependencies:
-      gcc_static_build_dependencies += (
-          '* fuse (optional, can be disabled by --with-libfuse=no)\n')
+    gcc_static_build_dependencies = '\n'.join([
+        '* {0:s}'.format(dependency)
+        for dependency in gcc_static_build_dependencies])
 
     # Cygwin support.
     building_table_of_contents += '  * [Using Cygwin](Building#cygwin)\n'
 
-    if 'zlib' in project_configuration.library_build_dependencies:
-      cygwin_build_dependencies += (
-          '* zlib-devel (required for DEFLATE compression support)\n')
+    cygwin_build_dependencies = self._GetCygwinBuildDependencies(
+        project_configuration)
+    cygwin_build_dependencies = '\n'.join([
+        '* {0:s}'.format(dependency)
+        for dependency in cygwin_build_dependencies])
 
-    if project_configuration.HasDependencyBzip2():
-      cygwin_build_dependencies += (
-          '* bzip2-devel (required for bzip2 compression support)\n')
-
-    if ('crypto' in project_configuration.library_build_dependencies or
-        'crypto' in project_configuration.tools_build_dependencies):
-      cygwin_build_dependencies += (
-          '* openssl-devel (optional but recommended)\n')
-
-    if project_configuration.cygwin_build_dependencies:
-      for dependency in project_configuration.cygwin_build_dependencies:
-        cygwin_build_dependencies += '* {0:s}\n'.format(dependency)
-
-    if project_configuration.cygwin_dll_dependencies:
-      for dependency in project_configuration.cygwin_dll_dependencies:
-        cygwin_dll_dependencies += '* {0:s}\n'.format(dependency)
+    cygwin_dll_dependencies = self._GetCygwinDLLDependencies(
+        project_configuration)
+    cygwin_dll_dependencies = '\n'.join([
+        '* {0:s}'.format(dependency)
+        for dependency in cygwin_dll_dependencies])
 
     if project_configuration.HasTools():
       cygwin_executables += (
@@ -231,28 +457,17 @@ class WikiPageGenerator(object):
         '* [Using Minimalist GNU for Windows (MinGW)]'
         '(Building#using-minimalist-gnu-for-windows-mingw)\n')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
-      mingw_build_dependencies += (
-          '* MinGW build of zlib library and source headers (required for '
-          'DEFLATE compression support)\n')
+    mingw_build_dependencies = self._GetMinGWBuildDependencies(
+        project_configuration)
+    mingw_build_dependencies = '\n'.join([
+        '* {0:s}'.format(dependency)
+        for dependency in mingw_build_dependencies])
 
-    if project_configuration.HasDependencyBzip2():
-      mingw_build_dependencies += (
-          '* MinGW build of bzip2 library and source headers (required for '
-          'bzip2 compression support)\n')
-
-    if ('crypto' in project_configuration.library_build_dependencies or
-        'crypto' in project_configuration.tools_build_dependencies):
-      mingw_build_dependencies += (
-          '* Windows Crypto API (libadvapi32) (optional but recommended)\n')
-
-    if project_configuration.mingw_build_dependencies:
-      for dependency in project_configuration.mingw_build_dependencies:
-        mingw_build_dependencies += '* {0:s}\n'.format(dependency)
-
-    if project_configuration.mingw_dll_dependencies:
-      for dependency in project_configuration.mingw_dll_dependencies:
-        mingw_dll_dependencies += '* {0:s}\n'.format(dependency)
+    mingw_dll_dependencies = self._GetMinGWDLLDependencies(
+        project_configuration)
+    mingw_dll_dependencies = '\n'.join([
+        '* {0:s}'.format(dependency)
+        for dependency in mingw_dll_dependencies])
 
     if project_configuration.HasTools():
       mingw_executables += (
@@ -273,46 +488,35 @@ class WikiPageGenerator(object):
         '* [Using Microsoft Visual Studio]'
         '(Building#using-microsoft-visual-studio)\n')
 
-    if project_configuration.msvscpp_build_dependencies:
+    msvscpp_build_dependencies = self._GetVisualStudioBuildDependencies(
+        project_configuration)
+    msvscpp_build_dependencies = '\n'.join([
+        '* {0:s}'.format(dependency)
+        for dependency in msvscpp_build_dependencies])
+
+    if msvscpp_build_dependencies:
       msvscpp_build_dependencies = (
           '\n'
           'To compile {0:s} using Microsoft Visual Studio you\'ll '
           'need:\n'
-          '\n').format(project_configuration.project_name)
+          '\n'
+          '{1:s}\n').format(
+              project_configuration.project_name, msvscpp_build_dependencies)
 
-      if 'zlib' in project_configuration.library_build_dependencies:
-        msvscpp_build_dependencies += (
-            '* zlib (required for DEFLATE compression support)\n')
+    msvscpp_dll_dependencies = self._GetVisualStudioDLLDependencies(
+        project_configuration)
+    msvscpp_dll_dependencies = '\n'.join([
+        '* {0:s}'.format(dependency)
+        for dependency in msvscpp_dll_dependencies])
 
-      if project_configuration.HasDependencyBzip2():
-        msvscpp_build_dependencies += (
-            '* bzip2 (required for bzip2 compression support)\n')
-
-      if ('crypto' in project_configuration.library_build_dependencies or
-          'crypto' in project_configuration.tools_build_dependencies):
-        msvscpp_build_dependencies += (
-            '* Windows Crypto API (libadvapi32) (optional but recommended)\n')
-
-      for dependency in project_configuration.msvscpp_build_dependencies:
-        msvscpp_build_dependencies += '* {0:s}\n'.format(dependency)
-
-    if project_configuration.msvscpp_dll_dependencies:
-      msvscpp_dll_dependencies = '{0:s}.dll is dependent on:\n'.format(
-          project_configuration.project_name)
-
-      if 'zlib' in project_configuration.library_build_dependencies:
-        msvscpp_dll_dependencies += '* zlib.dll\n'
-
-      if project_configuration.HasDependencyBzip2():
-        msvscpp_dll_dependencies += '* bzip2.dll\n'
-
-      for dependency in project_configuration.msvscpp_dll_dependencies:
-        msvscpp_dll_dependencies += '* {0:s}\n'.format(dependency)
-
-      msvscpp_dll_dependencies += (
+    if msvscpp_dll_dependencies:
+      msvscpp_dll_dependencies = (
+          '{0:s}.dll is dependent on:\n'
+          '{1:s}\n'
           '\n'
           'These DLLs can be found in the same directory as '
-          '{0:s}.dll.\n').format(project_configuration.project_name)
+          '{0:s}.dll.\n').format(
+              project_configuration.project_name, msvscpp_dll_dependencies)
 
     msvscpp_build_git = (
         '\n'
@@ -340,77 +544,20 @@ class WikiPageGenerator(object):
           '* [Using Debian package tools (DEB)]'
           '(Building#using-debian-package-tools-deb)\n')
 
-      if project_configuration.dpkg_build_dependencies is None:
-        dpkg_build_dependencies = []
-      else:
-        dpkg_build_dependencies = list(
-            project_configuration.dpkg_build_dependencies)
-
-      if 'zlib' in project_configuration.library_build_dependencies:
-        dpkg_build_dependencies.append('zlib1g-dev')
-
-      if project_configuration.HasDependencyBzip2():
-        dpkg_build_dependencies.append('bzip2-dev')
-
-      if ('crypto' in project_configuration.library_build_dependencies or
-          'crypto' in project_configuration.tools_build_dependencies):
-        dpkg_build_dependencies.append('libssl-dev')
-
-      if 'fuse' in project_configuration.tools_build_dependencies:
-        dpkg_build_dependencies.append('libfuse-dev')
-
-      if project_configuration.HasPythonModule():
-        dpkg_build_dependencies.append('python-all-dev')
-        dpkg_build_dependencies.append('python3-all-dev')
-
+      dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+          project_configuration)
       dpkg_build_dependencies = ' '.join(dpkg_build_dependencies)
 
-      dpkg_filenames += (
-          '{0:s}_<version>-1_<arch>.deb\n'
-          '{0:s}-dev_<version>-1_<arch>.deb').format(
-              project_configuration.project_name)
-
-      if project_configuration.HasPythonModule():
-        dpkg_filenames += (
-            '\n{0:s}-python_<version>-1_<arch>.deb').format(
-                project_configuration.project_name)
-        dpkg_filenames += (
-            '\n{0:s}-python3_<version>-1_<arch>.deb').format(
-                project_configuration.project_name)
-
-      if project_configuration.HasTools():
-        dpkg_filenames += (
-            '\n{0:s}-tools_<version>-1_<arch>.deb').format(
-                project_configuration.project_name)
+      dpkg_filenames = self._GetDpkgFilenames(project_configuration)
+      dpkg_filenames = '\n'.join(dpkg_filenames)
 
     if project_configuration.HasRpm():
       building_table_of_contents += (
           '* [Using RedHat package tools (RPM)]'
           '(Building#using-redhat-package-tools-rpm)\n')
 
-      if project_configuration.rpm_build_dependencies is None:
-        rpm_build_dependencies = []
-      else:
-        rpm_build_dependencies = list(
-            project_configuration.rpm_build_dependencies)
-
-      if 'zlib' in project_configuration.library_build_dependencies:
-        rpm_build_dependencies.append('zlib-devel')
-
-      if project_configuration.HasDependencyBzip2():
-        rpm_build_dependencies.append('bzip2-devel')
-
-      if ('crypto' in project_configuration.library_build_dependencies or
-          'crypto' in project_configuration.tools_build_dependencies):
-        rpm_build_dependencies.append('openssl-devel')
-
-      if 'fuse' in project_configuration.tools_build_dependencies:
-        rpm_build_dependencies.append('fuse-devel')
-
-      if project_configuration.HasPythonModule():
-        rpm_build_dependencies.append('python-devel')
-        rpm_build_dependencies.append('python3-devel')
-
+      rpm_build_dependencies = self._GetRpmBuildDependencies(
+          project_configuration)
       rpm_build_dependencies = ' '.join(rpm_build_dependencies)
 
       if project_configuration.project_status:
@@ -419,27 +566,8 @@ class WikiPageGenerator(object):
                 project_configuration.project_name,
                 project_configuration.project_status))
 
-      rpm_filenames += (
-          '~/rpmbuild/RPMS/<arch>/{0:s}-<version>-1.<arch>.rpm\n'
-          '~/rpmbuild/RPMS/<arch>/{0:s}-devel-<version>-1.<arch>'
-          '.rpm\n').format(project_configuration.project_name)
-
-      if project_configuration.HasPythonModule():
-        rpm_filenames += (
-            '~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>'
-            '.rpm\n').format(project_configuration.project_name)
-        rpm_filenames += (
-            '~/rpmbuild/RPMS/<arch>/{0:s}-python3-<version>-1.<arch>'
-            '.rpm\n').format(project_configuration.project_name)
-
-      if project_configuration.HasTools():
-        rpm_filenames += (
-            '~/rpmbuild/RPMS/<arch>/{0:s}-tools-<version>-1.<arch>'
-            '.rpm\n').format(project_configuration.project_name)
-
-      rpm_filenames += (
-          '~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm').format(
-              project_configuration.project_name)
+      rpm_filenames = self._GetRpmFilenames(project_configuration)
+      rpm_filenames = '\n'.join(rpm_filenames)
 
     building_table_of_contents += (
         '* [Using Mac OS X pkgbuild](Building#using-mac-os-x-pkgbuild)\n')
@@ -529,6 +657,8 @@ class WikiPageGenerator(object):
         'gcc_static_build_dependencies': gcc_static_build_dependencies,
         'gcc_mount_tool': gcc_mount_tool,
 
+        'git_build_dependencies': git_build_dependencies,
+
         'mingw_build_dependencies': mingw_build_dependencies,
         'mingw_dll_dependencies': mingw_dll_dependencies,
         'mingw_dll_filename': project_configuration.mingw_dll_filename,
@@ -561,6 +691,55 @@ class WikiPageGenerator(object):
             mount_tool_source_description_long),
     }
     return template_mappings
+
+  def _GetVisualStudioBuildDependencies(self, project_configuration):
+    """Retrieves the Visual Studio build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: Visual Studio build dependencies.
+    """
+    dependencies = []
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      dependencies.append(
+          'zlib (for DEFLATE compression support)')
+
+    if project_configuration.HasDependencyBzip2():
+      dependencies.append(
+          'bzip2 (required for bzip2 compression support)')
+
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      dependencies.append(
+          'Windows Crypto API (libadvapi32)')
+
+    dependencies.extend(project_configuration.msvscpp_build_dependencies)
+
+    return dependencies
+
+  def _GetVisualStudioDLLDependencies(self, project_configuration):
+    """Retrieves the Visual Studio DLL dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: Visual Studio DLL dependencies.
+    """
+    dependencies = []
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      dependencies.append('zlib.dll')
+
+    if project_configuration.HasDependencyBzip2():
+      dependencies.append('bzip2.dll')
+
+    dependencies.extend(project_configuration.msvscpp_dll_dependencies)
+
+    return dependencies
 
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.

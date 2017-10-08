@@ -5,14 +5,7 @@
 
 To retrieve the source from the git repository make sure to install:
 
-* git
-* aclocal
-* autoconf
-* automake
-* autopoint or gettextize
-* libtoolize
-* pkg-config
-${build_dependencies}
+${git_build_dependencies}
 
 To download and prepare the source for building run:
 ```

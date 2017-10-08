@@ -3,5 +3,5 @@ Make sure you use define ${project_name_upper_case}_DLL_IMPORT before including 
 
 To be able to use the DLL on other systems than the build system you'll also need to provide:
 
-* libgcc_s_dw2-1.dll (or equivalent)
 ${mingw_dll_dependencies}
+
