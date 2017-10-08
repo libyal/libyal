@@ -2741,15 +2741,16 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['spec_requires']
 
-      template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
+      if tools_dependencies:
+        template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
 
-      template_filename = os.path.join(
-          template_directory, 'package-tools-requires.in')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+        template_filename = os.path.join(
+            template_directory, 'package-tools-requires.in')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
 
-      del template_mappings['spec_build_requires']
+        del template_mappings['spec_build_requires']
 
       template_filename = os.path.join(
           template_directory, 'package-tools-footer.in')
