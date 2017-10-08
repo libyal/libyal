@@ -2719,6 +2719,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           project_configuration.library_name)
 
       tools_dependencies = list(makefile_am_file.tools_dependencies)
+      if 'crypto' in project_configuration.tools_build_dependencies:
+        tools_dependencies.append('libcrypto')
       if 'fuse' in project_configuration.tools_build_dependencies:
         tools_dependencies.append('libfuse')
 

@@ -3,3 +3,4 @@
 %doc AUTHORS COPYING NEWS README
 %attr(755,root,root) %{_bindir}/*
 %{_mandir}/man1/*
+
