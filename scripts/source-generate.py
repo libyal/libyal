@@ -2044,6 +2044,15 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
+    library_dependencies = list(makefile_am_file.library_dependencies)
+
+    if 'crypto' in project_configuration.library_build_dependencies:
+      library_dependencies.append('libcrypto')
+    if 'sgutils' in project_configuration.library_build_dependencies:
+      library_dependencies.append('sgutils2')
+    if 'zlib' in project_configuration.library_build_dependencies:
+      library_dependencies.append('zlib')
+
     template_directory = os.path.join(self._template_directory, 'configure.ac')
 
     template_filename = os.path.join(template_directory, 'header.ac')
@@ -2084,13 +2093,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
-
-    library_dependencies = list(makefile_am_file.library_dependencies)
-
-    if 'crypto' in project_configuration.library_build_dependencies:
-      library_dependencies.append('libcrypto')
-    if 'zlib' in project_configuration.library_build_dependencies:
-      library_dependencies.append('zlib')
 
     if library_dependencies:
       for name in library_dependencies:
@@ -2174,20 +2176,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    library_dependencies = list(makefile_am_file.library_dependencies)
-
-    if 'crypto' in project_configuration.library_build_dependencies:
-      library_dependencies.append('libcrypto')
-    if 'zlib' in project_configuration.library_build_dependencies:
-      library_dependencies.append('zlib')
-
     if library_dependencies:
       local_library_tests = []
       for name in library_dependencies:
-        if name in ('libcrypto', 'zlib'):
-          local_library_test = 'test "x$ac_cv_{0:s}" != xno'.format(name)
-        else:
+        if name in makefile_am_file.library_dependencies:
           local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
+        else:
+          local_library_test = 'test "x$ac_cv_{0:s}" != xno'.format(name)
 
         local_library_tests.append(local_library_test)
 
