@@ -1,0 +1,26 @@
+  - env: TARGET="linux-clang"
+    compiler: clang
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - env: TARGET="linux-gcc"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - env: TARGET="macos-clang"
+    compiler: clang
+    os: osx
+    osx_image: xcode8.1
+  - env: TARGET="macos-gcc"
+    compiler: gcc
+    os: osx
+    osx_image: xcode8.1
+  - env: TARGET="shared"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge

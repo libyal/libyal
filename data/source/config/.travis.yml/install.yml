@@ -1,0 +1,5 @@
+install:
+  - if test $${TRAVIS_OS_NAME} = "osx"; then export SED="/usr/local/bin/gsed"; fi
+  - if test $${TARGET} = "shared"; then ./syncsharedlibs.sh --use-head; fi
+  - ./synclibs.sh --use-head && ./autogen.sh
+  - if test -x "synctestdata.sh"; then ./synctestdata.sh; fi

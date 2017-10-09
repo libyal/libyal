@@ -2800,6 +2800,92 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+  def _GenerateTravisYML(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the .travis.yml configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, '.travis.yml')
+
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
+    template_filename = os.path.join(
+        template_directory, 'header.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    if project_configuration.coverty_scan_token:
+      template_mappings['coverty_scan_token'] = (
+          project_configuration.coverty_scan_token)
+
+      template_filename = os.path.join(template_directory, 'env.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['coverty_scan_token']
+
+    template_filename = os.path.join(template_directory, 'matrix-header.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if project_configuration.coverty_scan_token:
+      template_filename = os.path.join(template_directory, 'matrix-coverty.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'matrix-footer.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_mappings['dpkg_build_dependencies'] = ' '.join(
+        dpkg_build_dependencies)
+
+    template_filename = os.path.join(template_directory, 'before_install.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['dpkg_build_dependencies']
+
+    if project_configuration.coverty_scan_token:
+      template_filename = os.path.join(
+          template_directory, 'before_install-coverity.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'install.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if project_configuration.coverty_scan_token:
+      template_filename = 'script-coverity.yml'
+    else:
+      template_filename = 'script.yml'
+
+    template_filename = os.path.join(template_directory, template_filename)
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'after_success.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
   def _GetDpkgBuildDependencies(self, project_configuration):
     """Retrieves the dpkg build dependencies.
 
@@ -2914,9 +3000,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               self._library_makefile_am_path))
       return
 
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
-
     pc_libs_private = []
     for library in sorted(makefile_am_file.libraries):
       if library == 'libdl':
@@ -2930,12 +3013,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         authors_separator=',\n *                          ')
 
     template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
-
-    template_mappings['coverty_scan_token'] = (
-        project_configuration.coverty_scan_token)
-
-    template_mappings['dpkg_build_dependencies'] = ' '.join(
-        dpkg_build_dependencies)
 
     template_mappings['pc_libs_private'] = ' '.join(pc_libs_private)
 
@@ -2959,24 +3036,22 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-    del template_mappings['coverty_scan_token']
-    del template_mappings['dpkg_build_dependencies']
     del template_mappings['pc_libs_private']
 
+    self._GenerateGitignore(
+        project_configuration, template_mappings, output_writer, '.gitignore')
+
+    self._GenerateTravisYML(
+        project_configuration, template_mappings, output_writer, '.travis.yml')
+
     self._GenerateAppVeyorYML(
-        project_configuration, template_mappings, output_writer,
-        'appveyor.yml')
+        project_configuration, template_mappings, output_writer, 'appveyor.yml')
 
     self._GenerateConfigureAC(
-        project_configuration, template_mappings, output_writer,
-        'configure.ac')
+        project_configuration, template_mappings, output_writer, 'configure.ac')
 
     self._GenerateDpkg(
         project_configuration, template_mappings, output_writer, 'dpkg')
-
-    self._GenerateGitignore(
-        project_configuration, template_mappings, output_writer,
-        '.gitignore')
 
     output_filename = '{0:s}.spec.in'.format(project_configuration.library_name)
     self._GenerateRpmSpec(

@@ -1,0 +1,15 @@
+  - env: TARGET="coverity"
+    compiler: clang
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+    addons:
+      coverity_scan:
+        project:
+          name: "libyal/${library_name}"
+          description: "Build submitted via Travis CI"
+        notification_email: joachim.metz@gmail.com
+        build_command_prepend: "./synclibs.sh && ./autogen.sh && ./configure"
+        build_command: "make -j4"
+        branch_pattern: master

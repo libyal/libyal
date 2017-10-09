@@ -1,0 +1,3 @@
+script:
+  - if test $${TRAVIS_OS_NAME} = "linux"; then export PATH=$$(echo $$PATH | tr ":" "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s/::/:/g"); fi
+  - ./runtests.sh
