@@ -1507,6 +1507,35 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+  def _GenerateCodecovYML(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the .codecov.yml configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, '.codecov.yml')
+
+    makefile_am_file = self._GetMainMakefileAM(project_configuration)
+
+    ignore_paths = list(makefile_am_file.libraries)
+    ignore_paths.append('tests')
+
+    template_mappings['codecov_ignore'] = '\n'.join([
+        '    - "{0:s}/*"'.format(path) for path in sorted(ignore_paths)])
+
+    template_filename = os.path.join(
+        template_directory, 'body.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    del template_mappings['codecov_ignore']
+
   def _GenerateConfigureAC(
       self, project_configuration, template_mappings, output_writer,
       output_filename):
@@ -2514,6 +2543,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
     del template_mappings['pc_libs_private']
+
+    self._GenerateCodecovYML(
+        project_configuration, template_mappings, output_writer, '.codecov.yml')
 
     self._GenerateGitignore(
         project_configuration, template_mappings, output_writer, '.gitignore')

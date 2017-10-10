@@ -7,4 +7,4 @@ coverage:
     patch: true
     changes: false
   ignore:
-    - "tests/*"
+${codecov_ignore}
