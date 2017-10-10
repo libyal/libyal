@@ -21,6 +21,7 @@ import time
 
 import configuration
 import source_formatter
+import sources
 
 
 DATA_TYPE_BOOLEAN = 'boolean'
@@ -64,128 +65,6 @@ FUNCTION_TYPE_SEEK = 'seek'
 FUNCTION_TYPE_SET = 'set'
 FUNCTION_TYPE_UTILITY = 'utility'
 FUNCTION_TYPE_WRITE = 'write'
-
-
-class EnumDeclaration(object):
-  """Enumeration type declaration.
-
-  Attributes:
-    name (str): name.
-    constants (dict[str, str]): constant values per name.
-  """
-
-  def __init__(self, name):
-    """Initializes an enumeration type declaration.
-
-    Args:
-      name (str): name.
-    """
-    super(EnumDeclaration, self).__init__()
-    self.constants = collections.OrderedDict()
-    self.name = name
-
-
-class FunctionArgument(object):
-  """Function argument."""
-
-  def __init__(self, argument_string):
-    """Initializes a function argument.
-
-    Args:
-      argument_string (str): function argument.
-    """
-    super(FunctionArgument, self).__init__()
-    self._strings = [argument_string]
-
-  def AddArgumentString(self, argument_string):
-    """Adds an argument string to the function argument.
-
-    Args:
-      argument_string (str): function argument.
-    """
-    self._strings.append(argument_string)
-
-  def CopyToString(self):
-    """Copies the function argument to a string.
-
-    Returns:
-      str: function argument.
-    """
-    number_of_strings = len(self._strings)
-
-    argument_string = ''
-    if number_of_strings == 1:
-      argument_string = self._strings[0]
-
-    elif number_of_strings > 1:
-      argument_string = '{0:s}{1:s}'.format(
-          self._strings[0], ', '.join(self._strings[1:]))
-
-    return argument_string
-
-
-class FunctionPrototype(object):
-  """Function prototype.
-
-  Attributes:
-    arguments (list[FunctionArgument]): function arguments.
-    have_bfio (bool): True if the function prototype is defined if BFIO is
-        defined.
-    have_debug_output (bool): True if the function prototype is defined if
-        debug output is defined.
-    have_extern (bool): True if the function prototype is defined as
-        externally available (API).
-    have_wide_character_type (bool): True if the function prototype is
-        defined if the wide character type is defined.
-    name (str): name.
-    return_type (str): return type.
-  """
-
-  def __init__(self, name, return_type):
-    """Initializes a function prototype.
-
-    Args:
-      name (str): name.
-      return_type (str): return type.
-    """
-    super(FunctionPrototype, self).__init__()
-    self.arguments = []
-    self.have_bfio = False
-    self.have_debug_output = False
-    self.have_extern = False
-    self.have_wide_character_type = False
-    self.name = name
-    self.return_type = return_type
-
-  def AddArgument(self, argument):
-    """Adds an argument to the function prototype.
-
-    Args:
-      argument (FunctionArgument): function argument.
-    """
-    self.arguments.append(argument)
-
-  def AddArgumentString(self, argument_string):
-    """Adds an argument string to the function prototype.
-
-    Args:
-      argument_string (str): function argument.
-    """
-    function_argument = FunctionArgument(argument_string)
-    self.arguments.append(function_argument)
-
-  def CopyToString(self):
-    """Copies the function prototype to a string.
-
-    Returns:
-      str: function prototype.
-    """
-    argument_strings = []
-    for function_argument in self.arguments:
-      argument_string = function_argument.CopyToString()
-      argument_strings.append(argument_string)
-
-    return ', '.join(argument_strings)
 
 
 class PythonTypeObjectFunctionPrototype(object):
@@ -606,7 +485,7 @@ class DefinitionsIncludeHeaderFile(object):
 
         if line.startswith(enum_prefix):
           in_enum = True
-          enum_declaration = EnumDeclaration(line[enum_prefix_length:])
+          enum_declaration = sources.EnumDeclaration(line[enum_prefix_length:])
 
 
 class LibraryHeaderFile(object):
@@ -615,6 +494,8 @@ class LibraryHeaderFile(object):
   Attributes:
     functions_per_name (dict[str, list[FunctionPrototype]]): function
         prototypes per name.
+    have_internal_functions (bool): True if the header defines internal, non
+        extern, functions.
     path (str): path of the header file.
     types (list[str]): type names.
   """
@@ -628,6 +509,7 @@ class LibraryHeaderFile(object):
     super(LibraryHeaderFile, self).__init__()
     self._library_name = None
     self.functions_per_name = collections.OrderedDict()
+    self.have_internal_functions = False
     self.path = path
     self.types = []
 
@@ -685,7 +567,7 @@ class LibraryHeaderFile(object):
           # Check if we have a callback function argument.
           if line.endswith('('):
             argument_string = '{0:s} '.format(line)
-            function_argument = FunctionArgument(argument_string)
+            function_argument = sources.FunctionArgument(argument_string)
 
           else:
             if line.endswith(' );'):
@@ -724,11 +606,14 @@ class LibraryHeaderFile(object):
           # Get the part of the remainder of the line before the '('.
           name, _, _ = line.partition('(')
 
-          function_prototype = FunctionPrototype(name, data_type)
+          function_prototype = sources.FunctionPrototype(name, data_type)
           function_prototype.have_extern = have_extern
           function_prototype.have_debug_output = have_debug_output
           function_prototype.have_wide_character_type = (
               have_wide_character_type)
+
+          if not have_extern:
+            self.have_internal_functions = True
 
           in_function_prototype = True
 
@@ -1024,7 +909,7 @@ class LibraryIncludeHeaderFile(object):
             # Check if we have a callback function argument.
             if line.endswith('('):
               argument_string = '{0:s} '.format(line)
-              function_argument = FunctionArgument(argument_string)
+              function_argument = sources.FunctionArgument(argument_string)
 
             else:
               if line.endswith(' );'):
@@ -1072,7 +957,7 @@ class LibraryIncludeHeaderFile(object):
             # Get the part of the remainder of the line before the '('.
             name, _, _ = line.partition('(')
 
-            function_prototype = FunctionPrototype(name, data_type)
+            function_prototype = sources.FunctionPrototype(name, data_type)
             function_prototype.have_bfio = have_bfio
             function_prototype.have_extern = have_extern
             function_prototype.have_debug_output = have_debug_output
@@ -5802,8 +5687,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if not function_prototype:
       return function_name, None, last_have_extern
 
-    template_directory = os.path.join(
-        self._template_directory, 'yal_test_type')
+    template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
     template_filename = None
     value_name = None
@@ -5897,6 +5781,94 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     return function_name, test_function_name, function_prototype.have_extern
 
+  def _GenerateTypeTestClone(
+      self, project_configuration, template_mappings, type_name,
+      have_extern, header_file, output_writer, output_filename,
+      function_names, tests_to_run, with_input=False):
+    """Generates a clone type test within the type tests source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      have_extern (bool): True if the previous function prototype was
+          externally available.
+      header_file (LibraryHeaderFile): library header file.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+      function_names (list[str]): function names.
+      tests_to_run (list[tuple[str, str]]): pairs of the function name and
+          corresponding test function name that need to be run.
+      with_input (Optional[bool]): True if the type is to be tested with
+          input data.
+
+    Returns:
+      bool: True if the function prototype was externally available.
+    """
+    # TODO: add support for clone_function.
+
+    function_prototype = header_file.GetTypeFunction(type_name, 'clone')
+    if function_prototype:
+      function_name, test_function_name, have_extern = self._GenerateTypeTest(
+          project_configuration, template_mappings, type_name, 'clone',
+          have_extern, header_file, output_writer, output_filename,
+          with_input=with_input)
+
+      tests_to_run.append((function_name, test_function_name))
+      function_names.remove(function_name)
+
+    return have_extern
+
+  def _GenerateTypeTestFree(
+      self, project_configuration, template_mappings, type_name,
+      have_extern, header_file, output_writer, output_filename,
+      function_names, tests_to_run, initialize_is_internal=False,
+      with_input=False):
+    """Generates a free type test within the type tests source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      have_extern (bool): True if the previous function prototype was
+          externally available.
+      header_file (LibraryHeaderFile): library header file.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+      function_names (list[str]): function names.
+      tests_to_run (list[tuple[str, str]]): pairs of the function name and
+          corresponding test function name that need to be run.
+      initialize_is_internal (Optional[bool]): True if the initialize function
+          is not externally available.
+      with_input (Optional[bool]): True if the type is to be tested with
+          input data.
+
+    Returns:
+      bool: True if the function prototype was externally available.
+    """
+    # TODO: add support for free_function.
+
+    function_prototype = header_file.GetTypeFunction(type_name, 'free')
+    if function_prototype:
+      function_name, test_function_name, have_extern = self._GenerateTypeTest(
+          project_configuration, template_mappings, type_name, 'free',
+          have_extern, header_file, output_writer, output_filename,
+          with_input=with_input)
+
+      tests_to_run.append((function_name, test_function_name))
+      function_names.remove(function_name)
+
+      if initialize_is_internal and have_extern:
+        template_filename = os.path.join(
+            template_directory, 'define_internal_start.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
+
+    return have_extern
+
   def _GenerateTypeTests(
       self, project_configuration, template_mappings, type_name, output_writer,
       is_internal=False, with_input=False):
@@ -5955,24 +5927,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: treat external functions as internal when initialize_is_internal
-    # except for free.
-    have_extern = True
-    initialize_is_internal = False
-    initialize_number_of_arguments = None
+    if header_file.have_internal_functions:
+      template_filename = os.path.join(
+          template_directory, 'includes_internal.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
-    function_prototype = header_file.GetTypeFunction(type_name, 'initialize')
-    if function_prototype:
-      initialize_is_internal = not function_prototype.have_extern
-      initialize_number_of_arguments = len(function_prototype.arguments)
-
-      if is_internal or initialize_is_internal:
-        template_filename = os.path.join(
-            template_directory, 'includes_internal.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
-
+    # Generate test data.
     test_data_directory = os.path.join('tests', 'data')
     if os.path.exists(test_data_directory):
       for directory_entry in sorted(os.listdir(test_data_directory)):
@@ -5998,6 +5960,61 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
+    # Generate a clone, compare and/or free test function if necessary.
+    clone_function = None
+    compare_function = None
+    free_function = None
+
+    for function_prototype in header_file.functions_per_name.values():
+      for argument in function_prototype.arguments:
+        argument_string = argument.CopyToString()
+
+        if '_clone_function' in argument_string:
+          _, _, clone_function = argument_string.partition('*')
+          clone_function, _, _ = clone_function.partition(')')
+
+        elif '_compare_function' in argument_string:
+          _, _, compare_function = argument_string.partition('*')
+          compare_function, _, _ = compare_function.partition(')')
+
+        elif '_free_function' in argument_string:
+          _, _, free_function = argument_string.partition('*')
+          free_function, _, _ = free_function.partition(')')
+
+    if free_function:
+      value_name, _, _ = free_function.rpartition('_free_function')
+      self._SetValueNameInTemplateMappings(template_mappings, value_name)
+
+      template_filename = os.path.join(template_directory, 'free_function.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if clone_function:
+      value_name, _, _ = clone_function.rpartition('_clone_function')
+      self._SetValueNameInTemplateMappings(template_mappings, value_name)
+
+      template_filename = os.path.join(template_directory, 'clone_function.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if compare_function:
+      value_name, _, _ = compare_function.rpartition('_compare_function')
+      self._SetValueNameInTemplateMappings(template_mappings, value_name)
+
+      template_filename = os.path.join(template_directory, 'compare_function.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: treat external functions as internal when initialize_is_internal
+    # except for free.
+    have_extern = True
+
+    initialize_is_internal = False
+    initialize_number_of_arguments = None
+
     function_prototype = header_file.GetTypeFunction(type_name, 'initialize')
     if function_prototype:
       initialize_is_internal = not function_prototype.have_extern
@@ -6016,22 +6033,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
 
-    function_prototype = header_file.GetTypeFunction(type_name, 'free')
-    if function_prototype:
-      function_name, test_function_name, have_extern = self._GenerateTypeTest(
-          project_configuration, template_mappings, type_name, 'free',
-          have_extern, header_file, output_writer, output_filename,
-          with_input=with_input)
+    have_extern = self._GenerateTypeTestFree(
+        project_configuration, template_mappings, type_name, have_extern,
+        header_file, output_writer, output_filename, function_names,
+        tests_to_run, initialize_is_internal=initialize_is_internal,
+        with_input=with_input)
 
-      tests_to_run.append((function_name, test_function_name))
-      function_names.remove(function_name)
-
-      if initialize_is_internal and have_extern:
-        template_filename = os.path.join(
-            template_directory, 'define_internal_start.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
+    have_extern = self._GenerateTypeTestClone(
+        project_configuration, template_mappings, type_name, have_extern,
+        header_file, output_writer, output_filename, function_names,
+        tests_to_run, with_input=with_input)
 
     # TODO: fix libbfio having no open wide.
     # TODO: make handling open close more generic for libpff attachment handle.
