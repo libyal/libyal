@@ -20,51 +20,9 @@ import sys
 import time
 
 import configuration
+import definitions
 import source_formatter
 import sources
-
-
-DATA_TYPE_BOOLEAN = 'boolean'
-DATA_TYPE_BINARY_DATA = 'binary_data'
-DATA_TYPE_DOUBLE = 'double'
-DATA_TYPE_FAT_DATE_TIME = 'fat_date_time'
-DATA_TYPE_FILETIME = 'filetime'
-DATA_TYPE_FLOAT = 'float'
-DATA_TYPE_FLOATINGTIME = 'floatingtime'
-DATA_TYPE_GUID = 'guid'
-DATA_TYPE_INT = 'int'
-DATA_TYPE_INT32 = 'int32'
-DATA_TYPE_NARROW_STRING = 'narrow_string'
-DATA_TYPE_NONE = 'none'
-DATA_TYPE_OBJECT = 'object'
-DATA_TYPE_OFF64 = 'off64'
-DATA_TYPE_POSIX_TIME = 'posix_time'
-DATA_TYPE_SIZE32 = 'size32'
-DATA_TYPE_SIZE64 = 'size64'
-DATA_TYPE_STRING = 'string'
-DATA_TYPE_UINT8 = 'uint8'
-DATA_TYPE_UINT16 = 'uint16'
-DATA_TYPE_UINT32 = 'uint32'
-DATA_TYPE_UINT64 = 'uint64'
-
-FUNCTION_TYPE_CLOSE = 'close'
-FUNCTION_TYPE_COPY = 'copy'
-FUNCTION_TYPE_COPY_FROM = 'copy_from'
-FUNCTION_TYPE_COPY_TO = 'copy_to'
-FUNCTION_TYPE_FREE = 'free'
-FUNCTION_TYPE_GET = 'get'
-FUNCTION_TYPE_GET_BY_INDEX = 'get_by_index'
-FUNCTION_TYPE_GET_BY_IDENTIFIER = 'get_by_identifier'
-FUNCTION_TYPE_GET_BY_NAME = 'get_by_name'
-FUNCTION_TYPE_GET_BY_PATH = 'get_by_path'
-FUNCTION_TYPE_INITIALIZE = 'initialize'
-FUNCTION_TYPE_IS = 'is'
-FUNCTION_TYPE_OPEN = 'open'
-FUNCTION_TYPE_READ = 'read'
-FUNCTION_TYPE_SEEK = 'seek'
-FUNCTION_TYPE_SET = 'set'
-FUNCTION_TYPE_UTILITY = 'utility'
-FUNCTION_TYPE_WRITE = 'write'
 
 
 class PythonTypeObjectFunctionPrototype(object):
@@ -96,7 +54,7 @@ class PythonTypeObjectFunctionPrototype(object):
     self._type_name = type_name
     self._value_name = None
     self.arguments = []
-    self.data_type = DATA_TYPE_NONE
+    self.data_type = definitions.DATA_TYPE_NONE
     self.function_type = None
     self.object_type = None
     self.value_type = None
@@ -164,18 +122,20 @@ class PythonTypeObjectFunctionPrototype(object):
     """str: value name."""
     if self._value_name is None:
       # TODO: make overrides more generic.
-      if self.function_type == FUNCTION_TYPE_COPY:
+      if self.function_type == definitions.FUNCTION_TYPE_COPY:
         if self._type_function.startswith('copy_'):
           self._value_name = self._type_function[5:]
 
-      elif self.function_type == FUNCTION_TYPE_COPY_FROM:
+      elif self.function_type == definitions.FUNCTION_TYPE_COPY_FROM:
         if self._type_function.startswith('copy_from_'):
           self._value_name = self._type_function[10:]
 
       elif self.function_type in (
-          FUNCTION_TYPE_GET, FUNCTION_TYPE_GET_BY_IDENTIFIER,
-          FUNCTION_TYPE_GET_BY_INDEX, FUNCTION_TYPE_GET_BY_NAME,
-          FUNCTION_TYPE_GET_BY_PATH):
+          definitions.FUNCTION_TYPE_GET,
+          definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
+          definitions.FUNCTION_TYPE_GET_BY_INDEX,
+          definitions.FUNCTION_TYPE_GET_BY_NAME,
+          definitions.FUNCTION_TYPE_GET_BY_PATH):
         type_function_prefix, _, _ = self._type_function.partition('_by_')
 
         if type_function_prefix.startswith('get_'):
@@ -186,11 +146,11 @@ class PythonTypeObjectFunctionPrototype(object):
 
         self._value_name = type_function_prefix
 
-      elif self.function_type == FUNCTION_TYPE_IS:
+      elif self.function_type == definitions.FUNCTION_TYPE_IS:
         if self._type_function.startswith('is_'):
           self._value_name = self._type_function[3:]
 
-      elif self.function_type == FUNCTION_TYPE_SET:
+      elif self.function_type == definitions.FUNCTION_TYPE_SET:
         if self._type_function.startswith('set_utf8_'):
           self._value_name = self._type_function[9:]
 
@@ -206,8 +166,10 @@ class PythonTypeObjectFunctionPrototype(object):
       bool: True if the data type is a datetime type.
     """
     return self.data_type in (
-        DATA_TYPE_FAT_DATE_TIME, DATA_TYPE_FILETIME,
-        DATA_TYPE_FLOATINGTIME, DATA_TYPE_POSIX_TIME)
+        definitions.DATA_TYPE_FAT_DATE_TIME,
+        definitions.DATA_TYPE_FILETIME,
+        definitions.DATA_TYPE_FLOATINGTIME,
+        definitions.DATA_TYPE_POSIX_TIME)
 
   def DataTypeIsFloat(self):
     """Determines if the data type is a floating-point type.
@@ -215,7 +177,9 @@ class PythonTypeObjectFunctionPrototype(object):
     Returns:
       bool: True if the data type is a floating-point type.
     """
-    return self.data_type in (DATA_TYPE_FLOAT, DATA_TYPE_DOUBLE)
+    return self.data_type in (
+        definitions.DATA_TYPE_FLOAT, 
+        definitions.DATA_TYPE_DOUBLE)
 
   def DataTypeIsInteger(self):
     """Determines if the data type is an integer type.
@@ -224,9 +188,15 @@ class PythonTypeObjectFunctionPrototype(object):
       bool: True if the data type is an integer type.
     """
     return self.data_type in (
-        DATA_TYPE_INT, DATA_TYPE_INT32, DATA_TYPE_OFF64,
-        DATA_TYPE_SIZE32, DATA_TYPE_SIZE64, DATA_TYPE_UINT8,
-        DATA_TYPE_UINT16, DATA_TYPE_UINT32, DATA_TYPE_UINT64)
+        definitions.DATA_TYPE_INT,
+        definitions.DATA_TYPE_INT32,
+        definitions.DATA_TYPE_OFF64,
+        definitions.DATA_TYPE_SIZE32,
+        definitions.DATA_TYPE_SIZE64,
+        definitions.DATA_TYPE_UINT8,
+        definitions.DATA_TYPE_UINT16,
+        definitions.DATA_TYPE_UINT32,
+        definitions.DATA_TYPE_UINT64)
 
   def GetAttributeDescription(self):
     """Retrieves the fuction as attribute description.
@@ -261,7 +231,7 @@ class PythonTypeObjectFunctionPrototype(object):
     elif type_function == 'get_data_as_string':
       description = 'The data as a string.'
 
-    elif self.function_type == FUNCTION_TYPE_IS:
+    elif self.function_type == definitions.FUNCTION_TYPE_IS:
       type_name = self._type_name
       if type_name:
         type_name = type_name.replace('_', ' ')
@@ -280,16 +250,16 @@ class PythonTypeObjectFunctionPrototype(object):
     Returns:
       str: data type description.
     """
-    if self.data_type == DATA_TYPE_BINARY_DATA:
+    if self.data_type == definitions.DATA_TYPE_BINARY_DATA:
       return 'Binary string or None'
 
-    if self.data_type == DATA_TYPE_BOOLEAN:
+    if self.data_type == definitions.DATA_TYPE_BOOLEAN:
       return 'Boolean'
 
     if self.DataTypeIsDatetime():
       return 'Datetime or None'
 
-    if self.data_type == DATA_TYPE_OBJECT:
+    if self.data_type == definitions.DATA_TYPE_OBJECT:
       return 'Object or None'
 
     if self.DataTypeIsFloat():
@@ -298,13 +268,15 @@ class PythonTypeObjectFunctionPrototype(object):
     if self.DataTypeIsInteger():
       return 'Integer or None'
 
-    if self.data_type in (DATA_TYPE_GUID, DATA_TYPE_STRING):
+    if self.data_type in (
+        definitions.DATA_TYPE_GUID,
+        definitions.DATA_TYPE_STRING):
       return 'Unicode string or None'
 
-    if self.data_type == DATA_TYPE_NARROW_STRING:
+    if self.data_type == definitions.DATA_TYPE_NARROW_STRING:
       return 'String or None'
 
-    if self.data_type == DATA_TYPE_NONE:
+    if self.data_type == definitions.DATA_TYPE_NONE:
       return 'None'
 
     return self.data_type
@@ -375,19 +347,20 @@ class PythonTypeObjectFunctionPrototype(object):
       description = ['Signals the {0:s} to abort the current activity.'.format(
           self._type_name)]
 
-    elif self.function_type == FUNCTION_TYPE_GET_BY_INDEX:
+    elif self.function_type == definitions.FUNCTION_TYPE_GET_BY_INDEX:
       _, _, argument_suffix = self.arguments[0].rpartition('_')
       description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
           value_name, argument_suffix)]
 
     elif self.function_type in (
-        FUNCTION_TYPE_GET_BY_IDENTIFIER, FUNCTION_TYPE_GET_BY_NAME,
-        FUNCTION_TYPE_GET_BY_PATH):
+        definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
+        definitions.FUNCTION_TYPE_GET_BY_NAME,
+        definitions.FUNCTION_TYPE_GET_BY_PATH):
       _, _, type_function_suffix = type_function.partition('_by_')
       description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
           value_name, type_function_suffix)]
 
-    elif self.function_type == FUNCTION_TYPE_COPY_FROM:
+    elif self.function_type == definitions.FUNCTION_TYPE_COPY_FROM:
       type_name = self._type_name
       if type_name:
         type_name = type_name.replace('_', ' ')
@@ -396,10 +369,11 @@ class PythonTypeObjectFunctionPrototype(object):
       description = ['Copies the the {0:s} from the {1:s}'.format(
           type_name, value_name)]
 
-    elif self.function_type in (FUNCTION_TYPE_COPY, FUNCTION_TYPE_GET):
+    elif self.function_type in (
+        definitions.FUNCTION_TYPE_COPY, definitions.FUNCTION_TYPE_GET):
       description = ['Retrieves the {0:s}.'.format(value_name)]
 
-    elif self.function_type == FUNCTION_TYPE_IS:
+    elif self.function_type == definitions.FUNCTION_TYPE_IS:
       type_name = self._type_name
       if type_name:
         type_name = type_name.replace('_', ' ')
@@ -408,7 +382,7 @@ class PythonTypeObjectFunctionPrototype(object):
       description = ['Determines if the {0:s} is {1:s}.'.format(
           type_name, value_name)]
 
-    elif self.function_type == FUNCTION_TYPE_SET:
+    elif self.function_type == definitions.FUNCTION_TYPE_SET:
       value_name = value_name.replace('_', ' ')
       description = ['Sets the {0:s}.'.format(value_name)]
 
@@ -3844,13 +3818,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
       if not os.path.exists(template_filename):
         template_filename = None
-        if python_function_prototype.function_type == FUNCTION_TYPE_GET:
+        if python_function_prototype.function_type == (
+            definitions.FUNCTION_TYPE_GET):
 
           if python_function_prototype.DataTypeIsDatetime():
             template_filename = 'get_datetime_value.h'
 
         elif python_function_prototype.function_type == (
-            FUNCTION_TYPE_GET_BY_INDEX):
+            definitions.FUNCTION_TYPE_GET_BY_INDEX):
 
           value_name_prefix = ''
           if value_name.startswith('recovered_'):
@@ -3943,32 +3918,36 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     for python_function_prototype in python_function_prototypes.values():
       if python_function_prototype.data_type in (
-          DATA_TYPE_FAT_DATE_TIME, DATA_TYPE_POSIX_TIME):
+          definitions.DATA_TYPE_FAT_DATE_TIME,
+          definitions.DATA_TYPE_POSIX_TIME):
         python_module_include_names.update(set(['datetime']))
 
       if python_function_prototype.data_type in (
-          DATA_TYPE_FILETIME, DATA_TYPE_FLOATINGTIME):
+          definitions.DATA_TYPE_FILETIME,
+          definitions.DATA_TYPE_FLOATINGTIME):
         python_module_include_names.update(set(['datetime', 'integer']))
 
-      elif python_function_prototype.data_type == DATA_TYPE_GUID:
+      elif python_function_prototype.data_type == definitions.DATA_TYPE_GUID:
         python_module_include_names.add('guid')
 
       elif python_function_prototype.data_type in (
-          DATA_TYPE_SIZE64, DATA_TYPE_OFF64, DATA_TYPE_UINT64):
+          definitions.DATA_TYPE_SIZE64,
+          definitions.DATA_TYPE_OFF64,
+          definitions.DATA_TYPE_UINT64):
         python_module_include_names.add('integer')
 
-      elif python_function_prototype.data_type == DATA_TYPE_OBJECT:
+      elif python_function_prototype.data_type == definitions.DATA_TYPE_OBJECT:
         python_module_include_names.add(python_function_prototype.object_type)
 
         if python_function_prototype.function_type == (
-            FUNCTION_TYPE_GET_BY_INDEX):
+            definitions.FUNCTION_TYPE_GET_BY_INDEX):
           sequence_type_name = self._GetSequenceName(
               python_function_prototype.object_type)
           python_module_include_names.add(sequence_type_name)
 
-      elif python_function_prototype.data_type == DATA_TYPE_STRING:
+      elif python_function_prototype.data_type == definitions.DATA_TYPE_STRING:
         if python_function_prototype.function_type == (
-            FUNCTION_TYPE_GET_BY_INDEX):
+            definitions.FUNCTION_TYPE_GET_BY_INDEX):
           sequence_type_name = python_function_prototype.arguments[0]
 
           sequence_type_prefix, _, sequence_type_suffix = (
@@ -4113,18 +4092,22 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         elif type_function == 'set_password':
           template_filename = 'set_{0:s}_value.c'.format('string')
 
-        elif python_function_prototype.function_type == FUNCTION_TYPE_COPY_FROM:
+        elif python_function_prototype.function_type == (
+            definitions.FUNCTION_TYPE_COPY_FROM):
           template_filename = 'copy_from_{0:s}_value.c'.format(
               python_function_prototype.data_type)
 
-        elif python_function_prototype.function_type == FUNCTION_TYPE_COPY:
+        elif python_function_prototype.function_type == (
+            definitions.FUNCTION_TYPE_COPY):
           template_filename = 'copy_{0:s}_value.c'.format(
               python_function_prototype.data_type)
 
         elif python_function_prototype.function_type in (
-            FUNCTION_TYPE_GET, FUNCTION_TYPE_GET_BY_IDENTIFIER,
-            FUNCTION_TYPE_GET_BY_INDEX, FUNCTION_TYPE_GET_BY_NAME,
-            FUNCTION_TYPE_GET_BY_PATH):
+            definitions.FUNCTION_TYPE_GET,
+            definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
+            definitions.FUNCTION_TYPE_GET_BY_INDEX,
+            definitions.FUNCTION_TYPE_GET_BY_NAME,
+            definitions.FUNCTION_TYPE_GET_BY_PATH):
 
           if value_name.startswith('recovered_'):
             value_name_prefix = 'recovered_'
@@ -4136,7 +4119,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           else:
             value_name_prefix = ''
 
-          if python_function_prototype.function_type == FUNCTION_TYPE_GET:
+          if python_function_prototype.function_type == (
+              definitions.FUNCTION_TYPE_GET):
             if not python_function_prototype.arguments:
               if value_name.startswith('number_of_recovered_'):
                 value_name = value_name[20:]
@@ -4148,7 +4132,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                     value_name_prefix, python_function_prototype.data_type)
 
           elif python_function_prototype.function_type == (
-              FUNCTION_TYPE_GET_BY_INDEX):
+              definitions.FUNCTION_TYPE_GET_BY_INDEX):
 
             template_filename = 'get_{0:s}{1:s}_value_by_index.c'.format(
                 value_name_prefix, python_function_prototype.data_type)
@@ -4164,8 +4148,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 template_mappings, sequence_value_name)
 
           elif python_function_prototype.function_type in (
-              FUNCTION_TYPE_GET_BY_IDENTIFIER, FUNCTION_TYPE_GET_BY_NAME,
-              FUNCTION_TYPE_GET_BY_PATH):
+              definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
+              definitions.FUNCTION_TYPE_GET_BY_NAME,
+              definitions.FUNCTION_TYPE_GET_BY_PATH):
 
             _, _, type_function_suffix = type_function.partition('_by_')
 
@@ -4173,7 +4158,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 value_name_prefix, python_function_prototype.data_type,
                 type_function_suffix)
 
-          if python_function_prototype.data_type == DATA_TYPE_OBJECT:
+          if python_function_prototype.data_type == (
+              definitions.DATA_TYPE_OBJECT):
             if value_name_prefix != 'root_':
               value_name_prefix = ''
 
@@ -4185,7 +4171,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             self._SetValueTypeInTemplateMappings(
                 template_mappings, python_function_prototype.object_type)
 
-        elif python_function_prototype.function_type == FUNCTION_TYPE_IS:
+        elif python_function_prototype.function_type == (
+            definitions.FUNCTION_TYPE_IS):
           template_filename = 'is_value.c'
 
         if template_filename:
@@ -4347,22 +4334,26 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                 type_function, arguments_string),
             '\t  "\\n"'])
 
-        if python_function_prototype.data_type == DATA_TYPE_FAT_DATE_TIME:
+        if python_function_prototype.data_type == (
+            definitions.DATA_TYPE_FAT_DATE_TIME):
           description[0] = (
               '{0:s} as a 32-bit integer containing a FAT date time '
               'value.').format(description[0][:-1])
 
-        elif python_function_prototype.data_type == DATA_TYPE_FILETIME:
+        elif python_function_prototype.data_type == (
+            definitions.DATA_TYPE_FILETIME):
           description[0] = (
               '{0:s} as a 64-bit integer containing a FILETIME value.').format(
                   description[0][:-1])
 
-        elif python_function_prototype.data_type == DATA_TYPE_FLOATINGTIME:
+        elif python_function_prototype.data_type == (
+            definitions.DATA_TYPE_FLOATINGTIME):
           description[0] = (
               '{0:s} as a 64-bit integer containing a floatingtime value.').format(
                   description[0][:-1])
 
-        elif python_function_prototype.data_type == DATA_TYPE_POSIX_TIME:
+        elif python_function_prototype.data_type == (
+            definitions.DATA_TYPE_POSIX_TIME):
           description[0] = (
               '{0:s} as a 32-bit integer containing a POSIX timestamp '
               'value.').format(description[0][:-1])
@@ -4375,7 +4366,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       elif (python_function_prototype.arguments and
             python_function_prototype.data_type in (
-                DATA_TYPE_OBJECT, DATA_TYPE_STRING)):
+                definitions.DATA_TYPE_OBJECT,
+                definitions.DATA_TYPE_STRING)):
           # TODO: add method for the sequence object.
         pass
 
@@ -4416,9 +4408,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         python_function_prototypes.items()):
 
       if python_function_prototype.function_type not in (
-          FUNCTION_TYPE_COPY, FUNCTION_TYPE_GET,
-          FUNCTION_TYPE_GET_BY_IDENTIFIER, FUNCTION_TYPE_GET_BY_INDEX,
-          FUNCTION_TYPE_GET_BY_NAME, FUNCTION_TYPE_GET_BY_PATH):
+          definitions.FUNCTION_TYPE_COPY,
+          definitions.FUNCTION_TYPE_GET,
+          definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
+          definitions.FUNCTION_TYPE_GET_BY_INDEX,
+          definitions.FUNCTION_TYPE_GET_BY_NAME,
+          definitions.FUNCTION_TYPE_GET_BY_PATH):
         continue
 
       if (type_function.endswith('_by_name') or
@@ -4455,7 +4450,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       if (python_function_prototype.arguments and
           python_function_prototype.data_type in (
-              DATA_TYPE_OBJECT, DATA_TYPE_STRING)):
+              definitions.DATA_TYPE_OBJECT,
+              definitions.DATA_TYPE_STRING)):
 
         sequence_type_function = self._GetSequenceName(type_function[4:])
         sequence_type_getter = self._GetSequenceName(
@@ -4552,7 +4548,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     arguments = []
     function_type = None
     object_type = None
-    data_type = DATA_TYPE_NONE
+    data_type = definitions.DATA_TYPE_NONE
     value_type = None
 
     # TODO: add override for
@@ -4564,14 +4560,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       type_function = 'get_cache_directory'
 
       arguments = ['cache_directory_index']
-      function_type = FUNCTION_TYPE_GET_BY_INDEX
-      data_type = DATA_TYPE_NARROW_STRING
+      function_type = definitions.FUNCTION_TYPE_GET_BY_INDEX
+      data_type = definitions.DATA_TYPE_NARROW_STRING
 
     elif type_function == 'close':
-      function_type = FUNCTION_TYPE_CLOSE
+      function_type = definitions.FUNCTION_TYPE_CLOSE
 
     elif type_function.startswith('copy_from'):
-      function_type = FUNCTION_TYPE_COPY_FROM
+      function_type = definitions.FUNCTION_TYPE_COPY_FROM
 
       value_argument_index = 1
 
@@ -4588,33 +4584,33 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       if (value_argument_string == 'const uint8_t *byte_stream' and
           value_size_argument_string == 'size_t byte_stream_size'):
-        data_type = DATA_TYPE_BINARY_DATA
+        data_type = definitions.DATA_TYPE_BINARY_DATA
 
       elif (value_argument_string == 'const uint8_t *data' and
             value_size_argument_string == 'size_t data_size'):
-        data_type = DATA_TYPE_BINARY_DATA
+        data_type = definitions.DATA_TYPE_BINARY_DATA
 
     elif type_function.startswith('copy_'):
-      function_type = FUNCTION_TYPE_COPY
-      data_type = DATA_TYPE_BINARY_DATA
+      function_type = definitions.FUNCTION_TYPE_COPY
+      data_type = definitions.DATA_TYPE_BINARY_DATA
 
       # TODO: change copy to or add copy_to
 
     elif type_function == 'free':
-      function_type = FUNCTION_TYPE_FREE
+      function_type = definitions.FUNCTION_TYPE_FREE
 
     elif type_function.startswith('get_'):
-      function_type = FUNCTION_TYPE_GET
+      function_type = definitions.FUNCTION_TYPE_GET
 
       if type_function == 'get_ascii_codepage':
-        # TODO: replace this by DATA_TYPE_NARROW_STRING ?
+        # TODO: replace this by definitions.DATA_TYPE_NARROW_STRING ?
         data_type = 'String'
 
       elif type_function == 'get_format_version':
         function_argument = function_prototype.arguments[1]
         value_argument_string = function_argument.CopyToString()
 
-        data_type = DATA_TYPE_STRING
+        data_type = definitions.DATA_TYPE_STRING
         value_type, _, _ = value_argument_string.partition(' ')
 
       else:
@@ -4632,7 +4628,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         # to detect them based on the function arguments.
         if (value_argument_string.startswith('int ') and
             value_argument_suffix in ('entry', 'index')):
-          function_type = FUNCTION_TYPE_GET_BY_INDEX
+          function_type = definitions.FUNCTION_TYPE_GET_BY_INDEX
 
           _, _, argument_name = value_argument_string.rpartition(' ')
 
@@ -4640,7 +4636,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           value_argument_index = 2
 
         elif type_function_suffix == 'identifier':
-          function_type = FUNCTION_TYPE_GET_BY_IDENTIFIER
+          function_type = definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER
 
           arguments.append(type_function_suffix)
           value_argument_index = 2
@@ -4662,9 +4658,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             return
 
           if type_function_suffix == 'name':
-            function_type = FUNCTION_TYPE_GET_BY_NAME
+            function_type = definitions.FUNCTION_TYPE_GET_BY_NAME
           else:
-            function_type = FUNCTION_TYPE_GET_BY_PATH
+            function_type = definitions.FUNCTION_TYPE_GET_BY_PATH
 
           arguments.append(type_function_suffix)
           value_argument_index = 3
@@ -4679,83 +4675,83 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           value_size_argument_string = function_argument.CopyToString()
 
           if value_argument_string == 'uint64_t *filetime':
-            data_type = DATA_TYPE_FILETIME
+            data_type = definitions.DATA_TYPE_FILETIME
 
           elif value_argument_string == 'uint64_t *floatingtime':
-            data_type = DATA_TYPE_FLOATINGTIME
+            data_type = definitions.DATA_TYPE_FLOATINGTIME
 
           elif value_argument_string == 'uint32_t *fat_date_time':
-            data_type = DATA_TYPE_FAT_DATE_TIME
+            data_type = definitions.DATA_TYPE_FAT_DATE_TIME
 
           elif value_argument_string == 'uint32_t *posix_time':
-            data_type = DATA_TYPE_POSIX_TIME
+            data_type = definitions.DATA_TYPE_POSIX_TIME
 
           elif (value_argument_string == 'uint8_t *data' and
                 value_size_argument_string == 'size_t data_size'):
-            data_type = DATA_TYPE_BINARY_DATA
+            data_type = definitions.DATA_TYPE_BINARY_DATA
 
           elif (value_argument_string == 'uint8_t *guid_data' and
                 value_size_argument_string == 'size_t guid_data_size'):
-            data_type = DATA_TYPE_GUID
+            data_type = definitions.DATA_TYPE_GUID
 
           elif (value_argument_string == 'uint8_t *utf8_string' and
                 value_size_argument_string == 'size_t utf8_string_size'):
-            data_type = DATA_TYPE_STRING
+            data_type = definitions.DATA_TYPE_STRING
 
           elif (value_argument_string == 'char *string' and
                 value_size_argument_string == 'size_t string_size'):
-            data_type = DATA_TYPE_NARROW_STRING
+            data_type = definitions.DATA_TYPE_NARROW_STRING
 
           elif value_argument_string.startswith('double *'):
-            data_type = DATA_TYPE_DOUBLE
+            data_type = definitions.DATA_TYPE_DOUBLE
 
           elif value_argument_string.startswith('float *'):
-            data_type = DATA_TYPE_FLOAT
+            data_type = definitions.DATA_TYPE_FLOAT
 
           elif value_argument_string.startswith('int *'):
-            data_type = DATA_TYPE_INT
+            data_type = definitions.DATA_TYPE_INT
 
           elif value_argument_string.startswith('int32_t *'):
-            data_type = DATA_TYPE_INT32
+            data_type = definitions.DATA_TYPE_INT32
 
           elif value_argument_string.startswith('off64_t *'):
-            data_type = DATA_TYPE_OFF64
+            data_type = definitions.DATA_TYPE_OFF64
 
           elif value_argument_string.startswith('size32_t *'):
-            data_type = DATA_TYPE_SIZE32
+            data_type = definitions.DATA_TYPE_SIZE32
 
           elif value_argument_string.startswith('size64_t *'):
-            data_type = DATA_TYPE_SIZE64
+            data_type = definitions.DATA_TYPE_SIZE64
 
           elif value_argument_string.startswith('uint8_t *'):
-            data_type = DATA_TYPE_UINT8
+            data_type = definitions.DATA_TYPE_UINT8
 
           elif value_argument_string.startswith('uint16_t *'):
-            data_type = DATA_TYPE_UINT16
+            data_type = definitions.DATA_TYPE_UINT16
 
           elif value_argument_string.startswith('uint32_t *'):
-            data_type = DATA_TYPE_UINT32
+            data_type = definitions.DATA_TYPE_UINT32
 
           elif value_argument_string.startswith('uint64_t *'):
-            data_type = DATA_TYPE_UINT64
+            data_type = definitions.DATA_TYPE_UINT64
 
           elif value_argument_string.startswith(
               project_configuration.library_name):
-            data_type = DATA_TYPE_OBJECT
+            data_type = definitions.DATA_TYPE_OBJECT
 
             object_type, _, _ = value_argument_string.partition(' ')
             _, _, object_type = object_type.partition('_')
             object_type = object_type[:-2]
 
     elif type_function == 'initialize':
-      function_type = FUNCTION_TYPE_INITIALIZE
+      function_type = definitions.FUNCTION_TYPE_INITIALIZE
 
     elif type_function.startswith('is_'):
-      function_type = FUNCTION_TYPE_IS
-      data_type = DATA_TYPE_BOOLEAN
+      function_type = definitions.FUNCTION_TYPE_IS
+      data_type = definitions.DATA_TYPE_BOOLEAN
 
     elif type_function == 'open' or type_function.startswith('open_'):
-      function_type = FUNCTION_TYPE_OPEN
+      function_type = definitions.FUNCTION_TYPE_OPEN
 
       if type_function == 'open':
         arguments = ['filename', 'mode=\'r\'']
@@ -4764,24 +4760,24 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         arguments = ['file_object', 'mode=\'r\'']
 
     elif type_function.startswith('read_'):
-      function_type = FUNCTION_TYPE_READ
+      function_type = definitions.FUNCTION_TYPE_READ
 
       if type_function == 'read_buffer':
-        data_type = DATA_TYPE_BINARY_DATA
+        data_type = definitions.DATA_TYPE_BINARY_DATA
         arguments = ['size']
 
       elif type_function == 'read_buffer_at_offset':
-        data_type = DATA_TYPE_BINARY_DATA
+        data_type = definitions.DATA_TYPE_BINARY_DATA
         arguments = ['size', 'offset']
 
     elif type_function.startswith('seek_'):
-      function_type = FUNCTION_TYPE_SEEK
+      function_type = definitions.FUNCTION_TYPE_SEEK
 
       if type_function == 'seek_offset':
         arguments = ['offset', 'whence']
 
     elif type_function.startswith('set_'):
-      function_type = FUNCTION_TYPE_SET
+      function_type = definitions.FUNCTION_TYPE_SET
 
       # TODO: make more generic.
       if type_function == 'set_ascii_codepage':
@@ -4816,29 +4812,29 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
         if (value_argument_string == 'uint8_t *data' and
             value_size_argument_string == 'size_t data_size'):
-          data_type = DATA_TYPE_BINARY_DATA
+          data_type = definitions.DATA_TYPE_BINARY_DATA
 
         elif (value_argument_string == 'uint8_t *utf8_string' and
               value_size_argument_string == 'size_t utf8_string_size'):
-          data_type = DATA_TYPE_STRING
+          data_type = definitions.DATA_TYPE_STRING
 
         elif (value_argument_string == 'char *string' and
               value_size_argument_string == 'size_t string_size'):
-          data_type = DATA_TYPE_NARROW_STRING
+          data_type = definitions.DATA_TYPE_NARROW_STRING
 
         elif value_argument_string.startswith(
             project_configuration.library_name):
-          data_type = DATA_TYPE_OBJECT
+          data_type = definitions.DATA_TYPE_OBJECT
 
           object_type, _, _ = value_argument_string.partition(' ')
           _, _, object_type = object_type.partition('_')
           object_type = object_type[:-2]
 
     elif type_function == 'signal_abort':
-      function_type = FUNCTION_TYPE_UTILITY
+      function_type = definitions.FUNCTION_TYPE_UTILITY
 
     # elif type_function.startswith('write_'):
-    #   function_type = FUNCTION_TYPE_WRITE
+    #   function_type = definitions.FUNCTION_TYPE_WRITE
 
     python_function_prototype = PythonTypeObjectFunctionPrototype(
         project_configuration.python_module_name, type_name, type_function)
@@ -5002,15 +4998,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       return None, None
 
     if python_function_prototype.function_type not in (
-        FUNCTION_TYPE_GET, FUNCTION_TYPE_GET_BY_IDENTIFIER,
-        FUNCTION_TYPE_GET_BY_INDEX, FUNCTION_TYPE_GET_BY_NAME,
-        FUNCTION_TYPE_GET_BY_PATH):
+        definitions.FUNCTION_TYPE_GET,
+        definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
+        definitions.FUNCTION_TYPE_GET_BY_INDEX,
+        definitions.FUNCTION_TYPE_GET_BY_NAME,
+        definitions.FUNCTION_TYPE_GET_BY_PATH):
       return None, None
 
-    if python_function_prototype.data_type == DATA_TYPE_OBJECT:
+    if python_function_prototype.data_type == definitions.DATA_TYPE_OBJECT:
       return python_function_prototype.object_type, True
 
-    elif python_function_prototype.data_type == DATA_TYPE_STRING:
+    elif python_function_prototype.data_type == definitions.DATA_TYPE_STRING:
       return python_function_prototype.value_name, False
 
     return None, None
@@ -5680,8 +5678,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         str: name of the test function corresponding to the library type function.
         bool: True if the function prototype was externally available.
     """
-    function_name = '{0:s}_{1:s}_{2:s}'.format(
-        project_configuration.library_name, type_name, type_function)
+    function_name = self._GetFunctionName(
+        project_configuration, type_name, type_function)
 
     function_prototype = header_file.GetTypeFunction(type_name, type_function)
     if not function_prototype:
@@ -5775,9 +5773,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    test_function_name = '{0:s}_test_{1:s}_{2:s}'.format(
-        project_configuration.library_name_suffix, type_name,
-        type_function)
+    test_function_name = self._GetTestFunctionName(
+        project_configuration, type_name, type_function)
 
     return function_name, test_function_name, function_prototype.have_extern
 
@@ -5823,8 +5820,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   def _GenerateTypeTestFree(
       self, project_configuration, template_mappings, type_name,
       have_extern, header_file, output_writer, output_filename,
-      function_names, tests_to_run, initialize_is_internal=False,
-      with_input=False):
+      function_names, tests_to_run, free_function=None,
+      initialize_is_internal=False):
     """Generates a free type test within the type tests source file.
 
     Args:
@@ -5840,22 +5837,31 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       function_names (list[str]): function names.
       tests_to_run (list[tuple[str, str]]): pairs of the function name and
           corresponding test function name that need to be run.
+      free_function (Optional[str]): name of the free function.
       initialize_is_internal (Optional[bool]): True if the initialize function
           is not externally available.
-      with_input (Optional[bool]): True if the type is to be tested with
-          input data.
 
     Returns:
       bool: True if the function prototype was externally available.
     """
-    # TODO: add support for free_function.
+    template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
     function_prototype = header_file.GetTypeFunction(type_name, 'free')
     if function_prototype:
-      function_name, test_function_name, have_extern = self._GenerateTypeTest(
-          project_configuration, template_mappings, type_name, 'free',
-          have_extern, header_file, output_writer, output_filename,
-          with_input=with_input)
+      if free_function:
+        template_filename = 'free_with_function.c'
+      else:
+        template_filename = 'free.c'
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      function_name = self._GetFunctionName(
+          project_configuration, type_name, 'free')
+      test_function_name = self._GetTestFunctionName(
+          project_configuration, type_name, 'free')
 
       tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
@@ -6036,8 +6042,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     have_extern = self._GenerateTypeTestFree(
         project_configuration, template_mappings, type_name, have_extern,
         header_file, output_writer, output_filename, function_names,
-        tests_to_run, initialize_is_internal=initialize_is_internal,
-        with_input=with_input)
+        tests_to_run, free_function=free_function,
+        initialize_is_internal=initialize_is_internal)
 
     have_extern = self._GenerateTypeTestClone(
         project_configuration, template_mappings, type_name, have_extern,
@@ -6267,6 +6273,21 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
+  def _GetFunctionName(
+      self, project_configuration, type_name, type_function):
+    """Retrieves the function name.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      type_name (str): name of type.
+      type_function (str): type function.
+
+    Returns:
+      str: function name.
+    """
+    return '{0:s}_{1:s}_{2:s}'.format(
+        project_configuration.library_name, type_name, type_function)
+
   def _GetLibraryTypes(self, project_configuration, makefile_am_file):
     """Determines the types defined in the library sources.
 
@@ -6348,6 +6369,21 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         ' ' * len(project_configuration.library_name_suffix))
 
     return template_mappings
+
+  def _GetTestFunctionName(
+      self, project_configuration, type_name, type_function):
+    """Retrieves the test function name.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      type_name (str): name of type.
+      type_function (str): type function.
+
+    Returns:
+      str: test function name.
+    """
+    return '{0:s}_test_{1:s}_{2:s}'.format(
+        project_configuration.library_name_suffix, type_name, type_function)
 
   def _SortSources(self, output_filename):
     """Sorts the sources.
