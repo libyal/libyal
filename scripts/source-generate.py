@@ -25,383 +25,6 @@ import source_formatter
 import sources
 
 
-class PythonTypeObjectFunctionPrototype(object):
-  """Python type object function prototype.
-
-  Attributes:
-    arguments (list[str]): arguments.
-    data_type (str): data type.
-    function_type (str): function type.
-    object_type (str): object type.
-    value_type (str): value type.
-  """
-
-  def __init__(self, python_module_name, type_name, type_function):
-    """Initializes a Python type object function prototype.
-
-    Args:
-      python_module_name (str): python module name.
-      type_name (str): type name.
-      type_function (str): type function.
-    """
-    if type_function == 'open_file_io_handle':
-      type_function = 'open_file_object'
-
-    super(PythonTypeObjectFunctionPrototype, self).__init__()
-    self._name = None
-    self._python_module_name = python_module_name
-    self._type_function = type_function
-    self._type_name = type_name
-    self._value_name = None
-    self.arguments = []
-    self.data_type = definitions.DATA_TYPE_NONE
-    self.function_type = None
-    self.object_type = None
-    self.value_type = None
-
-  @property
-  def name(self):
-    """str: name."""
-    if self._name is None:
-      self._name = '{0:s}_{1:s}_{2:s}'.format(
-          self._python_module_name, self._type_name, self.type_function)
-
-    return self._name
-
-  @property
-  def type_function(self):
-    """str: type function."""
-    # TODO: make overrides more generic.
-    if self._type_function == 'set_parent_file':
-      return 'set_parent'
-
-    if (self._type_function.startswith('copy_') and
-        not self._type_function.startswith('copy_from_')):
-      return 'get_{0:s}'.format(self._type_function[5:])
-
-    if (self._type_function.startswith('get_utf8_') or
-        self._type_function.startswith('set_utf8_')):
-      return ''.join([self._type_function[:4], self._type_function[9:]])
-
-    if self._type_function.startswith('get_data_as_'):
-      _, _, type_function_suffix = self._type_function.partition('_data_as_')
-
-      if type_function_suffix in (
-          '16bit_integer', '32bit_integer', '64bit_integer'):
-        return 'get_data_as_integer'
-
-      elif type_function_suffix in ('filetime', 'floatingtime'):
-        return 'get_data_as_datetime'
-
-      elif type_function_suffix == 'utf8_string':
-        return 'get_data_as_string'
-
-      else:
-        return self._type_function
-
-    if self._type_function.startswith('get_'):
-      type_function_prefix, _, type_function_suffix = (
-          self._type_function.partition('_by_'))
-
-      if type_function_suffix in ('entry', 'index'):
-        return type_function_prefix
-
-      if type_function_suffix in ('utf8_name', 'utf8_path'):
-        return ''.join([self._type_function[:-10], self._type_function[-5:]])
-
-      if self._type_function.endswith('_utf8_string'):
-        return ''.join([self._type_function[:-12], self._type_function[-7:]])
-
-      if self._type_function.endswith('_utf8_string_size'):
-        return ''.join([self._type_function[:-17], self._type_function[-12:]])
-
-    return self._type_function
-
-  @property
-  def value_name(self):
-    """str: value name."""
-    if self._value_name is None:
-      # TODO: make overrides more generic.
-      if self.function_type == definitions.FUNCTION_TYPE_COPY:
-        if self._type_function.startswith('copy_'):
-          self._value_name = self._type_function[5:]
-
-      elif self.function_type == definitions.FUNCTION_TYPE_COPY_FROM:
-        if self._type_function.startswith('copy_from_'):
-          self._value_name = self._type_function[10:]
-
-      elif self.function_type in (
-          definitions.FUNCTION_TYPE_GET,
-          definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
-          definitions.FUNCTION_TYPE_GET_BY_INDEX,
-          definitions.FUNCTION_TYPE_GET_BY_NAME,
-          definitions.FUNCTION_TYPE_GET_BY_PATH):
-        type_function_prefix, _, _ = self._type_function.partition('_by_')
-
-        if type_function_prefix.startswith('get_'):
-          type_function_prefix = type_function_prefix[4:]
-
-        if type_function_prefix.startswith('utf8_'):
-          type_function_prefix = type_function_prefix[5:]
-
-        self._value_name = type_function_prefix
-
-      elif self.function_type == definitions.FUNCTION_TYPE_IS:
-        if self._type_function.startswith('is_'):
-          self._value_name = self._type_function[3:]
-
-      elif self.function_type == definitions.FUNCTION_TYPE_SET:
-        if self._type_function.startswith('set_utf8_'):
-          self._value_name = self._type_function[9:]
-
-        elif self._type_function.startswith('set_'):
-          self._value_name = self._type_function[4:]
-
-    return self._value_name
-
-  def DataTypeIsDatetime(self):
-    """Determines if the data type is a datetime type.
-
-    Returns:
-      bool: True if the data type is a datetime type.
-    """
-    return self.data_type in (
-        definitions.DATA_TYPE_FAT_DATE_TIME,
-        definitions.DATA_TYPE_FILETIME,
-        definitions.DATA_TYPE_FLOATINGTIME,
-        definitions.DATA_TYPE_POSIX_TIME)
-
-  def DataTypeIsFloat(self):
-    """Determines if the data type is a floating-point type.
-
-    Returns:
-      bool: True if the data type is a floating-point type.
-    """
-    return self.data_type in (
-        definitions.DATA_TYPE_FLOAT, 
-        definitions.DATA_TYPE_DOUBLE)
-
-  def DataTypeIsInteger(self):
-    """Determines if the data type is an integer type.
-
-    Returns:
-      bool: True if the data type is an integer type.
-    """
-    return self.data_type in (
-        definitions.DATA_TYPE_INT,
-        definitions.DATA_TYPE_INT32,
-        definitions.DATA_TYPE_OFF64,
-        definitions.DATA_TYPE_SIZE32,
-        definitions.DATA_TYPE_SIZE64,
-        definitions.DATA_TYPE_UINT8,
-        definitions.DATA_TYPE_UINT16,
-        definitions.DATA_TYPE_UINT32,
-        definitions.DATA_TYPE_UINT64)
-
-  def GetAttributeDescription(self):
-    """Retrieves the fuction as attribute description.
-
-    Returns:
-      str: function as attribute description.
-    """
-    description = ''
-
-    type_function = self.type_function
-    value_name = self.value_name
-    if value_name:
-      value_name = value_name.replace('_', ' ')
-
-    if type_function == 'get_ascii_codepage':
-      description = (
-          'The codepage used for ASCII strings in the {0:s}.').format(
-              self._type_name)
-
-    elif type_function == 'get_data_as_boolean':
-      description = 'The data as a boolean.'
-
-    elif type_function == 'get_data_as_datetime':
-      description = 'The data as a datetime object.'
-
-    elif type_function == 'get_data_as_integer':
-      description = 'The data as an integer.'
-
-    elif type_function == 'get_data_as_floating_point':
-      description = 'The data as a floating point.'
-
-    elif type_function == 'get_data_as_string':
-      description = 'The data as a string.'
-
-    elif self.function_type == definitions.FUNCTION_TYPE_IS:
-      type_name = self._type_name
-      if type_name:
-        type_name = type_name.replace('_', ' ')
-
-      description = 'Indicates the {0:s} is {1:s}.'.format(
-          type_name, value_name)
-
-    elif value_name:
-      description = 'The {0:s}.'.format(value_name)
-
-    return description
-
-  def GetDataTypeDescription(self):
-    """Retrieves the data type description.
-
-    Returns:
-      str: data type description.
-    """
-    if self.data_type == definitions.DATA_TYPE_BINARY_DATA:
-      return 'Binary string or None'
-
-    if self.data_type == definitions.DATA_TYPE_BOOLEAN:
-      return 'Boolean'
-
-    if self.DataTypeIsDatetime():
-      return 'Datetime or None'
-
-    if self.data_type == definitions.DATA_TYPE_OBJECT:
-      return 'Object or None'
-
-    if self.DataTypeIsFloat():
-      return 'Float or None'
-
-    if self.DataTypeIsInteger():
-      return 'Integer or None'
-
-    if self.data_type in (
-        definitions.DATA_TYPE_GUID,
-        definitions.DATA_TYPE_STRING):
-      return 'Unicode string or None'
-
-    if self.data_type == definitions.DATA_TYPE_NARROW_STRING:
-      return 'String or None'
-
-    if self.data_type == definitions.DATA_TYPE_NONE:
-      return 'None'
-
-    return self.data_type
-
-  def GetDescription(self):
-    """Retrieves the description.
-
-    Returns:
-      list[str]: lines of the description.
-    """
-    description = ['']
-
-    type_function = self.type_function
-    value_name = self.value_name
-    if value_name:
-      value_name = value_name.replace('_', ' ')
-
-    if type_function == 'close':
-      description = ['Closes a {0:s}.'.format(self._type_name)]
-
-    elif type_function == 'get_ascii_codepage':
-      description = [(
-          'Retrieves the codepage for ASCII strings used in '
-          'the {0:s}.').format(self._type_name)]
-
-    elif type_function == 'get_data_as_boolean':
-      description = ['Retrieves the data as a boolean.']
-
-    elif type_function == 'get_data_as_datetime':
-      description = ['Retrieves the data as a datetime object.']
-
-    elif type_function == 'get_data_as_integer':
-      description = ['Retrieves the data as an integer.']
-
-    elif type_function == 'get_data_as_floating_point':
-      description = ['Retrieves the data as a floating point.']
-
-    elif type_function == 'get_data_as_string':
-      description = ['Retrieves the data as a string.']
-
-    elif type_function == 'open':
-      description = ['Opens a {0:s}.'.format(self._type_name)]
-
-    elif type_function == 'open_file_object':
-      description = [(
-          'Opens a {0:s} using a file-like object.').format(self._type_name)]
-
-    elif type_function == 'read_buffer':
-      description = ['Reads a buffer of data.']
-
-    elif type_function == 'read_buffer_at_offset':
-      description = ['Reads a buffer of data at a specific offset.']
-
-    elif type_function == 'seek_offset':
-      description = ['Seeks an offset within the data.']
-
-    elif type_function == 'set_ascii_codepage':
-      description = [
-          ('Sets the codepage for ASCII strings used in the '
-           '{0:s}.').format(self._type_name),
-          ('Expects the codepage to be a string containing a Python '
-           'codec definition.')]
-
-    elif type_function == 'set_parent':
-      description = ['Sets the parent file.']
-
-    elif type_function == 'signal_abort':
-      description = ['Signals the {0:s} to abort the current activity.'.format(
-          self._type_name)]
-
-    elif self.function_type == definitions.FUNCTION_TYPE_GET_BY_INDEX:
-      _, _, argument_suffix = self.arguments[0].rpartition('_')
-      description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
-          value_name, argument_suffix)]
-
-    elif self.function_type in (
-        definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
-        definitions.FUNCTION_TYPE_GET_BY_NAME,
-        definitions.FUNCTION_TYPE_GET_BY_PATH):
-      _, _, type_function_suffix = type_function.partition('_by_')
-      description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
-          value_name, type_function_suffix)]
-
-    elif self.function_type == definitions.FUNCTION_TYPE_COPY_FROM:
-      type_name = self._type_name
-      if type_name:
-        type_name = type_name.replace('_', ' ')
-
-      # TODO: fix value name.
-      description = ['Copies the the {0:s} from the {1:s}'.format(
-          type_name, value_name)]
-
-    elif self.function_type in (
-        definitions.FUNCTION_TYPE_COPY, definitions.FUNCTION_TYPE_GET):
-      description = ['Retrieves the {0:s}.'.format(value_name)]
-
-    elif self.function_type == definitions.FUNCTION_TYPE_IS:
-      type_name = self._type_name
-      if type_name:
-        type_name = type_name.replace('_', ' ')
-
-      value_name = value_name.replace('_', ' ')
-      description = ['Determines if the {0:s} is {1:s}.'.format(
-          type_name, value_name)]
-
-    elif self.function_type == definitions.FUNCTION_TYPE_SET:
-      value_name = value_name.replace('_', ' ')
-      description = ['Sets the {0:s}.'.format(value_name)]
-
-    return description
-
-  def GetValueNameAndPrefix(self):
-    """Determines the value name and its prefix.
-
-    Returns:
-      tuple[str, str]: value name and prefix.
-    """
-    if self.value_name:
-      value_name_prefix, _, value_name = self.value_name.partition('_')
-      if value_name_prefix in ('root', 'sub'):
-        return value_name, value_name_prefix
-
-    return self.value_name, None
-
-
 class DefinitionsIncludeHeaderFile(object):
   """Definitions include header file.
 
@@ -4836,7 +4459,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     # elif type_function.startswith('write_'):
     #   function_type = definitions.FUNCTION_TYPE_WRITE
 
-    python_function_prototype = PythonTypeObjectFunctionPrototype(
+    python_function_prototype = sources.PythonTypeObjectFunctionPrototype(
         project_configuration.python_module_name, type_name, type_function)
 
     python_function_prototype.arguments = arguments
@@ -5654,7 +5277,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       self, project_configuration, template_mappings, type_name, type_function,
       last_have_extern, header_file, output_writer, output_filename,
       initialize_is_internal=False, with_input=False):
-    """Generates a type test within the type tests source file.
+    """Generates a test for a type function.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
@@ -5778,17 +5401,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     return function_name, test_function_name, function_prototype.have_extern
 
-  def _GenerateTypeTestClone(
-      self, project_configuration, template_mappings, type_name,
+  def _GenerateTypeTestWithCloneFunction(
+      self, project_configuration, template_mappings, type_name, type_function,
       have_extern, header_file, output_writer, output_filename,
-      function_names, tests_to_run, with_input=False):
-    """Generates a clone type test within the type tests source file.
+      function_names, tests_to_run, clone_function=None, free_function=None):
+    """Generates a test for a type function with clone function.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       type_name (str): name of type.
+      type_function (str): type function.
       have_extern (bool): True if the previous function prototype was
           externally available.
       header_file (LibraryHeaderFile): library header file.
@@ -5797,38 +5421,51 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       function_names (list[str]): function names.
       tests_to_run (list[tuple[str, str]]): pairs of the function name and
           corresponding test function name that need to be run.
-      with_input (Optional[bool]): True if the type is to be tested with
-          input data.
+      clone_function (Optional[str]): name of the clone function.
+      free_function (Optional[str]): name of the free function.
 
     Returns:
       bool: True if the function prototype was externally available.
     """
-    # TODO: add support for clone_function.
+    template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
-    function_prototype = header_file.GetTypeFunction(type_name, 'clone')
+    function_prototype = header_file.GetTypeFunction(type_name, type_function)
     if function_prototype:
-      function_name, test_function_name, have_extern = self._GenerateTypeTest(
-          project_configuration, template_mappings, type_name, 'clone',
-          have_extern, header_file, output_writer, output_filename,
-          with_input=with_input)
+      if clone_function:
+        value_name, _, _ = clone_function.rpartition('_clone_function')
+        self._SetValueNameInTemplateMappings(template_mappings, value_name)
+
+        template_filename = '{0:s}_with_clone_function.c'.format(type_function)
+      else:
+        template_filename = '{0:s}.c'.format(type_function)
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      function_name = self._GetFunctionName(
+          project_configuration, type_name, type_function)
+      test_function_name = self._GetTestFunctionName(
+          project_configuration, type_name, type_function)
 
       tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
 
     return have_extern
 
-  def _GenerateTypeTestFree(
-      self, project_configuration, template_mappings, type_name,
+  def _GenerateTypeTestWithFreeFunction(
+      self, project_configuration, template_mappings, type_name, type_function,
       have_extern, header_file, output_writer, output_filename,
-      function_names, tests_to_run, free_function=None,
-      initialize_is_internal=False):
-    """Generates a free type test within the type tests source file.
+      function_names, tests_to_run, free_function=None):
+    """Generates a test for a type function with free function.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       type_name (str): name of type.
+      type_function (str): type function.
       have_extern (bool): True if the previous function prototype was
           externally available.
       header_file (LibraryHeaderFile): library header file.
@@ -5838,20 +5475,21 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       tests_to_run (list[tuple[str, str]]): pairs of the function name and
           corresponding test function name that need to be run.
       free_function (Optional[str]): name of the free function.
-      initialize_is_internal (Optional[bool]): True if the initialize function
-          is not externally available.
 
     Returns:
       bool: True if the function prototype was externally available.
     """
     template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
-    function_prototype = header_file.GetTypeFunction(type_name, 'free')
+    function_prototype = header_file.GetTypeFunction(type_name, type_function)
     if function_prototype:
       if free_function:
-        template_filename = 'free_with_function.c'
+        value_name, _, _ = free_function.rpartition('_free_function')
+        self._SetValueNameInTemplateMappings(template_mappings, value_name)
+
+        template_filename = '{0:s}_with_free_function.c'.format(type_function)
       else:
-        template_filename = 'free.c'
+        template_filename = '{0:s}.c'.format(type_function)
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -5859,19 +5497,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
       function_name = self._GetFunctionName(
-          project_configuration, type_name, 'free')
+          project_configuration, type_name, type_function)
       test_function_name = self._GetTestFunctionName(
-          project_configuration, type_name, 'free')
+          project_configuration, type_name, type_function)
 
       tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
-
-      if initialize_is_internal and have_extern:
-        template_filename = os.path.join(
-            template_directory, 'define_internal_start.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
 
     return have_extern
 
@@ -6039,16 +5670,35 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
 
-    have_extern = self._GenerateTypeTestFree(
-        project_configuration, template_mappings, type_name, have_extern,
-        header_file, output_writer, output_filename, function_names,
-        tests_to_run, free_function=free_function,
-        initialize_is_internal=initialize_is_internal)
+    have_extern = self._GenerateTypeTestWithFreeFunction(
+        project_configuration, template_mappings, type_name, 'free',
+        have_extern, header_file, output_writer, output_filename,
+        function_names, tests_to_run, free_function=free_function)
 
-    have_extern = self._GenerateTypeTestClone(
-        project_configuration, template_mappings, type_name, have_extern,
-        header_file, output_writer, output_filename, function_names,
-        tests_to_run, with_input=with_input)
+    function_prototype = header_file.GetTypeFunction(type_name, 'free')
+    if function_prototype and initialize_is_internal and have_extern:
+      template_filename = os.path.join(
+          template_directory, 'define_internal_start.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    for type_function in ('empty', 'clear'):
+      have_extern = self._GenerateTypeTestWithFreeFunction(
+          project_configuration, template_mappings, type_name, type_function,
+          have_extern, header_file, output_writer, output_filename,
+          function_names, tests_to_run, free_function=free_function)
+
+    have_extern = self._GenerateTypeTestWithCloneFunction(
+        project_configuration, template_mappings, type_name, 'clone',
+        have_extern, header_file, output_writer, output_filename,
+        function_names, tests_to_run, clone_function=clone_function,
+        free_function=free_function)
+
+    have_extern = self._GenerateTypeTestWithFreeFunction(
+        project_configuration, template_mappings, type_name, 'resize',
+        have_extern, header_file, output_writer, output_filename,
+        function_names, tests_to_run, free_function=free_function)
 
     # TODO: fix libbfio having no open wide.
     # TODO: make handling open close more generic for libpff attachment handle.

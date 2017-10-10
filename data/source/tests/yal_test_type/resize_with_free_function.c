@@ -1,7 +1,7 @@
-/* Tests the lib${library_name_suffix}_${type_name}_empty function
+/* Tests the lib${library_name_suffix}_${type_name}_resize function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_${type_name}_empty(
+int ${library_name_suffix}_test_${type_name}_resize(
      void )
 {
 	libcerror_error_t *error                               = NULL;
@@ -12,6 +12,7 @@ int ${library_name_suffix}_test_${type_name}_empty(
 	 */
 	result = lib${library_name_suffix}_${type_name}_initialize(
 	          &${type_name},
+	          2,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -27,10 +28,11 @@ int ${library_name_suffix}_test_${type_name}_empty(
 	 "error",
 	 error );
 
-	/* Test to empty an ${type_name} with a free function
+	/* Test lib${library_name_suffix}_${type_name}_resize to resize to a larger number of entries
 	 */
-	result = lib${library_name_suffix}_${type_name}_empty(
+	result = lib${library_name_suffix}_${type_name}_resize(
 	          ${type_name},
+	          35,
 	          &${library_name_suffix}_test_${type_name}_${value_name}_free_function,
 	          &error );
 
@@ -43,11 +45,12 @@ int ${library_name_suffix}_test_${type_name}_empty(
 	 "error",
 	 error );
 
-	/* Test to empty an ${type_name} without a free function
+	/* Test lib${library_name_suffix}_${type_name}_resize to resize to a smaller number of entries
 	 */
-	result = lib${library_name_suffix}_${type_name}_empty(
+	result = lib${library_name_suffix}_${type_name}_resize(
 	          ${type_name},
-	          NULL,
+	          4,
+	          &${library_name_suffix}_test_${type_name}_${value_name}_free_function,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -61,8 +64,9 @@ int ${library_name_suffix}_test_${type_name}_empty(
 
 	/* Test error cases
 	 */
-	result = lib${library_name_suffix}_${type_name}_empty(
+	result = lib${library_name_suffix}_${type_name}_resize(
 	          NULL,
+	          10,
 	          NULL,
 	          &error );
 
@@ -77,6 +81,46 @@ int ${library_name_suffix}_test_${type_name}_empty(
 
 	libcerror_error_free(
 	 &error );
+
+	result = lib${library_name_suffix}_${type_name}_resize(
+	          ${type_name},
+	          -10,
+	          NULL,
+	          &error );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#if INT_MAX == SSIZE_MAX
+
+	result = lib${library_name_suffix}_${type_name}_resize(
+	          NULL,
+	          INT_MAX,
+	          NULL,
+	          &error );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#endif /* INT_MAX == SSIZE_MAX */
 
 	/* Clean up
 	 */
