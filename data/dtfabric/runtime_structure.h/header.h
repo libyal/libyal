@@ -1,5 +1,5 @@
 /*
- * ${structure_description}
+ * ${structure_description_title} functions
  *
  * Copyright (C) ${copyright}, ${authors}
  *
@@ -19,26 +19,16 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${prefix_upper_case}_${structure_name_upper_case}_H )
-#define _${prefix_upper_case}_${structure_name_upper_case}_H
+#if !defined( _${library_name_upper_case}_${structure_name_upper_case}_H )
+#define _${library_name_upper_case}_${structure_name_upper_case}_H
 
 #include <common.h>
 #include <types.h>
 
+#include "${library_name}_libbfio.h"
+#include "${library_name}_libcerror.h"
+
 #if defined( __cplusplus )
 extern "C" {
 #endif
-
-typedef struct ${prefix}_${structure_name} ${prefix}_${structure_name}_t;
-
-struct ${prefix}_${structure_name}
-{
-${structure_members}
-};
-
-#if defined( __cplusplus )
-}
-#endif
-
-#endif /* !defined( _${prefix_upper_case}_${structure_name_upper_case}_H ) */
 

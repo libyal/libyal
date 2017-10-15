@@ -22,9 +22,7 @@ import template_string
 class SourceGenerator(object):
   """Generates source based on dtFabric format definitions."""
 
-  _RUNTIME_STRUCTURE_HEADER_TEMPLATE_FILE = 'runtime_structure.h'
   _RUNTIME_STRUCTURE_SOURCE_TEMPLATE_FILE = 'runtime_structure.c'
-  _STORED_STRUCTURE_HEADER_TEMPLATE_FILE = 'stored_structure.h'
 
   _CHARACTER_DATA_TYPES = {
       1: 'char',
@@ -84,62 +82,17 @@ class SourceGenerator(object):
     self._templates_path = templates_path
     self._template_string_generator = template_string.TemplateStringGenerator()
 
-  def _GenerateStoredStructureHeader(self, data_type_definition):
-    """Generates a stored structure header.
+  def _GenerateRuntimeStructure(
+      self, data_type_definition, data_type_definition_name, output_file):
+    """Generates a runtime structure.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
-    """
-    format_definition = self._GetFormatDefinitions()
-
-    template_mappings = self._GetTemplateMappings()
-
-    structure_description = self._GetStructureDescription(data_type_definition)
-    structure_description_title = '{0:s}{1:s}'.format(
-        structure_description[0].upper(), structure_description[1:])
-
-    if format_definition.description:
-      structure_description = '{0:s} of a {1:s}'.format(
-          structure_description_title, format_definition.description)
-
-    structure_members = self._GetStoredStructureHeaderMembers(
-        data_type_definition)
-
-    template_mappings['structure_description'] = structure_description
-    template_mappings['structure_description_title'] = structure_description_title
-    template_mappings['structure_members'] = structure_members
-    template_mappings['structure_name'] = data_type_definition.name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition.name.upper())
-
-    template_filename = os.path.join(
-        self._templates_path, self._STORED_STRUCTURE_HEADER_TEMPLATE_FILE)
-
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
-
-    if self._prefix:
-      output_file = os.path.join(
-          'lib{0:s}'.format(self._prefix),
-          '{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
-    else:
-      output_file = self._STORED_STRUCTURE_HEADER_TEMPLATE_FILE
-
-    logging.info('Writing: {0:s}'.format(output_file))
-    with open(output_file, 'wb') as file_object:
-      file_object.write(output_data)
-
-  def _GenerateRuntimeStructureHeader(self, data_type_definition):
-    """Generates a runtime structure header.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
+      data_type_definition_name (str): name of the structure data type
+          definition.
+      output_file (str): path of the file output file.
     """
     template_mappings = self._GetTemplateMappings()
-
-    structure_description = self._GetStructureDescription(data_type_definition)
-    structure_description_title = '{0:s}{1:s}'.format(
-        structure_description[0].upper(), structure_description[1:])
 
     structure_members = self._GetRuntimeStructureHeaderMembers(
         data_type_definition)
@@ -149,32 +102,86 @@ class SourceGenerator(object):
     template_mappings['library_name'] = library_name
     template_mappings['library_name_upper_case'] = library_name.upper()
 
-    template_mappings['structure_description'] = structure_description
-    template_mappings['structure_description_title'] = structure_description_title
     template_mappings['structure_members'] = structure_members
+    template_mappings['structure_name'] = data_type_definition_name
+    template_mappings['structure_name_upper_case'] = (
+        data_type_definition_name.upper())
+
+    template_filename = os.path.join(
+        self._templates_path, 'runtime_structure.h', 'structure.h')
+    output_data = self._template_string_generator.Generate(
+        template_filename, template_mappings)
+
+    del template_mappings['structure_members']
+
+    with open(output_file, 'ab') as file_object:
+      file_object.write(output_data)
+
+  def _GenerateRuntimeStructureHeaderFile(self, data_type_definition):
+    """Generates a runtime structure header file.
+
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+    """
+    template_directory = os.path.join(
+        self._templates_path, 'runtime_structure.h')
+
+    template_mappings = self._GetTemplateMappings()
+
+    if not self._prefix:
+      output_file = 'runtime_structure.h'
+    else:
+      output_file = os.path.join(
+          'lib{0:s}'.format(self._prefix),
+          'lib{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
+
+    logging.info('Writing: {0:s}'.format(output_file))
+
+    structure_description = self._GetStructureDescription(data_type_definition)
+    structure_description_title = '{0:s}{1:s}'.format(
+        structure_description[0].upper(), structure_description[1:])
+
+    library_name = 'lib{0:s}'.format(self._prefix)
+
+    template_mappings['library_name'] = library_name
+    template_mappings['library_name_upper_case'] = library_name.upper()
+
+    template_mappings['structure_description_title'] = structure_description_title
     template_mappings['structure_name'] = data_type_definition.name
     template_mappings['structure_name_upper_case'] = (
         data_type_definition.name.upper())
 
-    template_filename = os.path.join(
-        self._templates_path, self._RUNTIME_STRUCTURE_HEADER_TEMPLATE_FILE)
-
+    template_filename = os.path.join(template_directory, 'header.h')
     output_data = self._template_string_generator.Generate(
         template_filename, template_mappings)
 
-    if self._prefix:
-      output_file = os.path.join(
-          'lib{0:s}'.format(self._prefix),
-          'lib{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
-    else:
-      output_file = self._RUNTIME_STRUCTURE_HEADER_TEMPLATE_FILE
+    del template_mappings['structure_description_title']
 
-    logging.info('Writing: {0:s}'.format(output_file))
     with open(output_file, 'wb') as file_object:
       file_object.write(output_data)
 
-  def _GenerateRuntimeStructureSource(self, data_type_definition):
-    """Generates a runtime structure source.
+    if data_type_definition.TYPE_INDICATOR == (
+        definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
+      structure_definition = data_type_definition.runtime
+    else:
+      structure_definition = data_type_definition
+
+    self._GenerateRuntimeStructure(
+        structure_definition, data_type_definition.name, output_file)
+
+    template_mappings['structure_name'] = data_type_definition.name
+    template_mappings['structure_name_upper_case'] = (
+        data_type_definition.name.upper())
+
+    template_filename = os.path.join(template_directory, 'footer.h')
+    output_data = self._template_string_generator.Generate(
+        template_filename, template_mappings)
+
+    with open(output_file, 'ab') as file_object:
+      file_object.write(output_data)
+
+  def _GenerateRuntimeStructureSourceFile(self, data_type_definition):
+    """Generates a runtime structure source file.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
@@ -223,6 +230,97 @@ class SourceGenerator(object):
 
     logging.info('Writing: {0:s}'.format(output_file))
     with open(output_file, 'wb') as file_object:
+      file_object.write(output_data)
+
+  def _GenerateStoredStructure(self, data_type_definition, output_file):
+    """Generates a stored structure.
+
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+      output_file (str): path of the file output file.
+    """
+    template_mappings = self._GetTemplateMappings()
+
+    structure_members = self._GetStoredStructureHeaderMembers(
+        data_type_definition)
+
+    template_mappings['structure_members'] = structure_members
+    template_mappings['structure_name'] = data_type_definition.name
+    template_mappings['structure_name_upper_case'] = (
+        data_type_definition.name.upper())
+
+    template_filename = os.path.join(
+        self._templates_path, 'stored_structure.h', 'structure.h')
+    output_data = self._template_string_generator.Generate(
+        template_filename, template_mappings)
+
+    del template_mappings['structure_members']
+
+    with open(output_file, 'ab') as file_object:
+      file_object.write(output_data)
+
+  def _GenerateStoredStructureHeaderFile(self, data_type_definition):
+    """Generates a stored structure header file.
+
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+    """
+    format_definition = self._GetFormatDefinitions()
+
+    template_directory = os.path.join(
+        self._templates_path, 'stored_structure.h')
+
+    template_mappings = self._GetTemplateMappings()
+
+    if not self._prefix:
+      output_file = 'stored_structure.h'
+    else:
+      output_file = os.path.join(
+          'lib{0:s}'.format(self._prefix),
+          '{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
+
+    logging.info('Writing: {0:s}'.format(output_file))
+
+    structure_description = self._GetStructureDescription(data_type_definition)
+    structure_description_title = '{0:s}{1:s}'.format(
+        structure_description[0].upper(), structure_description[1:])
+
+    if format_definition.description:
+      structure_description = '{0:s} of a {1:s}'.format(
+          structure_description_title, format_definition.description)
+
+    template_mappings['structure_description'] = structure_description
+    template_mappings['structure_name'] = data_type_definition.name
+    template_mappings['structure_name_upper_case'] = (
+        data_type_definition.name.upper())
+
+    template_filename = os.path.join(template_directory, 'header.h')
+    output_data = self._template_string_generator.Generate(
+        template_filename, template_mappings)
+
+    del template_mappings['structure_description']
+
+    with open(output_file, 'wb') as file_object:
+      file_object.write(output_data)
+
+    if data_type_definition.TYPE_INDICATOR == (
+        definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
+      structure_definitions = data_type_definition.members
+    else:
+      structure_definitions = [data_type_definition]
+
+    for structure_definition in structure_definitions:
+      self._GenerateStoredStructure(structure_definition, output_file)
+
+    template_mappings['structure_name'] = data_type_definition.name
+    template_mappings['structure_name_upper_case'] = (
+        data_type_definition.name.upper())
+
+    template_filename = os.path.join(template_directory, 'footer.h')
+    output_data = self._template_string_generator.Generate(
+        template_filename, template_mappings)
+
+    with open(output_file, 'ab') as file_object:
       file_object.write(output_data)
 
   def _GetRuntimeDataType(self, data_type_definition):
@@ -582,17 +680,26 @@ class SourceGenerator(object):
   def Generate(self):
     """Generates source code from the data type definitions."""
     for data_type_definition in self._definitions_registry.GetDefinitions():
-      if data_type_definition.TYPE_INDICATOR != (
+      if data_type_definition.TYPE_INDICATOR not in (
+          definitions.TYPE_INDICATOR_STRUCTURE,
+          definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
+        continue
+
+      if data_type_definition.TYPE_INDICATOR == (
           definitions.TYPE_INDICATOR_STRUCTURE):
-        continue
 
-      byte_size = data_type_definition.GetByteSize()
-      if byte_size is None:
-        continue
+        # Skip structures that are part of a type family.
+        if data_type_definition.family_definition:
+          continue
 
-      self._GenerateRuntimeStructureHeader(data_type_definition)
-      self._GenerateRuntimeStructureSource(data_type_definition)
-      self._GenerateStoredStructureHeader(data_type_definition)
+        byte_size = data_type_definition.GetByteSize()
+        if byte_size is None:
+          continue
+
+        self._GenerateRuntimeStructureSourceFile(data_type_definition)
+
+      self._GenerateRuntimeStructureHeaderFile(data_type_definition)
+      self._GenerateStoredStructureHeaderFile(data_type_definition)
 
   def ReadDefinitions(self, path):
     """Reads the definitions form file or directory.
