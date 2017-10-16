@@ -7,13 +7,11 @@ int ${library_name}_${structure_name}_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function                 = "${library_name}_${structure_name}_read_data";
-	uint16_t number_of_relocation_entries = 0;
-	uint16_t relocation_table_offset      = 0;
+	static char *function = "${library_name}_${structure_name}_read_data";
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint32_t value_32bit                  = 0;
-	uint16_t value_16bit                  = 0;
+	uint32_t value_32bit  = 0;
+	uint16_t value_16bit  = 0;
 #endif
 
 	if( ${structure_name} == NULL )
