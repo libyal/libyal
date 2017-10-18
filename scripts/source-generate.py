@@ -6345,6 +6345,174 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 class ToolsSourceFileGenerator(SourceFileGenerator):
   """Tools source files generator."""
 
+  def _GenerateMountHandleHeaderFile(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates a mount handle header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'mount_handle')
+
+    template_filename = os.path.join(template_directory, 'header.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'includes.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_mappings['mount_tool_source_type'] = (
+        project_configuration.mount_tool_source_type)
+
+    for template_name in (
+        'struct.h', 'initialize.h', 'free.h', 'signal_abort.h'):
+      template_filename = os.path.join(template_directory, template_name)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.mount_tool_has_keys_option:
+      template_filename = os.path.join(template_directory, 'set_keys.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.mount_tool_has_password_option:
+      template_filename = os.path.join(template_directory, 'set_password.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'open.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: improve this check.
+    if project_configuration.library_name == 'libvhdi':
+      template_filename = os.path.join(template_directory, 'open_parent.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    for template_name in ('close.h', 'read.h', 'seek.h'):
+      template_filename = os.path.join(template_directory, template_name)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: split in individual functions.
+    template_filename = os.path.join(template_directory, 'body.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['mount_tool_source_type']
+
+    template_filename = os.path.join(template_directory, 'footer.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+  def _GenerateMountHandleSourceFile(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates a mount handle source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'mount_handle')
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'includes.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_mappings['mount_tool_source_type'] = (
+        project_configuration.mount_tool_source_type)
+
+    template_filename = os.path.join(template_directory, 'initialize.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if project_configuration.mount_tool_has_keys_option:
+      template_filename = os.path.join(template_directory, 'free_with_keys.c')
+    else:
+      template_filename = os.path.join(template_directory, 'free.c')
+
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'signal_abort.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if project_configuration.mount_tool_has_keys_option:
+      template_filename = os.path.join(template_directory, 'set_keys.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.mount_tool_has_password_option:
+      template_filename = os.path.join(template_directory, 'set_password.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: improve this check.
+    if project_configuration.library_name == 'libvhdi':
+      template_filename = os.path.join(template_directory, 'open_with_parent.c')
+    else:
+      template_filename = os.path.join(template_directory, 'open.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: improve this check.
+    if project_configuration.library_name == 'libvhdi':
+      template_filename = os.path.join(template_directory, 'open_parent.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    for template_name in ('close.c', 'read.c', 'seek.c'):
+      template_filename = os.path.join(template_directory, template_name)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: split in individual functions.
+    template_filename = os.path.join(template_directory, 'body.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'set_basename.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['mount_tool_source_type']
+
   def _GenerateMountToolSourceFile(
       self, project_configuration, template_mappings, mount_tool_name,
       output_writer, output_filename):
@@ -6502,7 +6670,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, 'main-open_input.c')
+    template_filename = os.path.join(template_directory, 'main-open.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -6693,14 +6861,26 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     mount_tool_name = '{0:s}mount'.format(
         project_configuration.library_name_suffix)
 
-    output_filename = '{0:s}.c'.format(mount_tool_name)
-    output_filename = os.path.join(
-        project_configuration.tools_directory, output_filename)
+    mount_tool_filename = '{0:s}.c'.format(mount_tool_name)
+    mount_tool_filename = os.path.join(
+        project_configuration.tools_directory, mount_tool_filename)
 
-    if os.path.exists(output_filename):
+    if os.path.exists(mount_tool_filename):
+      output_filename = os.path.join(
+          project_configuration.tools_directory, 'mount_handle.h')
+      self._GenerateMountHandleHeaderFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+      output_filename = os.path.join(
+          project_configuration.tools_directory, 'mount_handle.c')
+      self._GenerateMountHandleSourceFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
       self._GenerateMountToolSourceFile(
           project_configuration, template_mappings, mount_tool_name,
-          output_writer, output_filename)
+          output_writer, mount_tool_filename)
 
 
 class FileWriter(object):

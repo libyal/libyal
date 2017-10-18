@@ -250,7 +250,7 @@ int __stdcall ${mount_tool_name}_dokan_ReadFile(
 	static char *function    = "${mount_tool_name}_dokan_ReadFile";
 	size_t path_length       = 0;
 	ssize_t read_count       = 0;
-	int input_file_index     = 0;
+	int ${mount_tool_source_type}_index          = 0;
 	int result               = 0;
 	int string_index         = 0;
 
@@ -319,23 +319,23 @@ int __stdcall ${mount_tool_name}_dokan_ReadFile(
 	}
 	string_index = (int) ${mount_tool_name}_dokan_path_prefix_length;
 
-	input_file_index = path[ string_index++ ] - (wchar_t) '0';
+	${mount_tool_source_type}_index = path[ string_index++ ] - (wchar_t) '0';
 
 	if( string_index < (int) path_length )
 	{
-		input_file_index *= 10;
-		input_file_index += path[ string_index++ ] - (wchar_t) '0';
+		${mount_tool_source_type}_index *= 10;
+		${mount_tool_source_type}_index += path[ string_index++ ] - (wchar_t) '0';
 	}
 	if( string_index < (int) path_length )
 	{
-		input_file_index *= 10;
-		input_file_index += path[ string_index++ ] - (wchar_t) '0';
+		${mount_tool_source_type}_index *= 10;
+		${mount_tool_source_type}_index += path[ string_index++ ] - (wchar_t) '0';
 	}
-	input_file_index -= 1;
+	${mount_tool_source_type}_index -= 1;
 
 	if( mount_handle_seek_offset(
 	     ${mount_tool_name}_mount_handle,
-	     input_file_index,
+	     ${mount_tool_source_type}_index,
 	     (off64_t) offset,
 	     SEEK_SET,
 	     &error ) == -1 )
@@ -353,7 +353,7 @@ int __stdcall ${mount_tool_name}_dokan_ReadFile(
 	}
 	read_count = mount_handle_read_buffer(
 		      ${mount_tool_name}_mount_handle,
-		      input_file_index,
+		      ${mount_tool_source_type}_index,
 		      (uint8_t *) buffer,
 		      (size_t) number_of_bytes_to_read,
 		      &error );
@@ -453,7 +453,7 @@ int ${mount_tool_name}_dokan_filldir(
      size_t name_size,
      WIN32_FIND_DATAW *find_data,
      mount_handle_t *mount_handle,
-     int input_file_index,
+     int ${mount_tool_source_type}_index,
      uint8_t use_mount_time,
      libcerror_error_t **error )
 {
@@ -502,7 +502,7 @@ int ${mount_tool_name}_dokan_filldir(
 	{
 		if( mount_handle_get_media_size(
 		     mount_handle,
-		     input_file_index,
+		     ${mount_tool_source_type}_index,
 		     &media_size,
 		     error ) != 1 )
 		{
@@ -605,13 +605,13 @@ int __stdcall ${mount_tool_name}_dokan_FindFiles(
 
 	wchar_t ${mount_tool_name}_dokan_path[ 10 ];
 
-	libcerror_error_t *error  = NULL;
-	static char *function     = "${mount_tool_name}_dokan_FindFiles";
-	size_t path_length        = 0;
-	int input_file_index      = 0;
-	int number_of_input_files = 0;
-	int result                = 0;
-	int string_index          = 0;
+	libcerror_error_t *error = NULL;
+	static char *function    = "${mount_tool_name}_dokan_FindFiles";
+	size_t path_length       = 0;
+	int ${mount_tool_source_type}_index          = 0;
+	int number_of_${mount_tool_source_type}s     = 0;
+	int result               = 0;
+	int string_index         = 0;
 
 	if( path == NULL )
 	{
@@ -660,30 +660,30 @@ int __stdcall ${mount_tool_name}_dokan_FindFiles(
 
 		goto on_error;
 	}
-	if( mount_handle_get_number_of_input_files(
+	if( mount_handle_get_number_of_${mount_tool_source_type}s(
 	     ${mount_tool_name}_mount_handle,
-	     &number_of_input_files,
+	     &number_of_${mount_tool_source_type}s,
 	     &error ) != 1 )
 	{
 		libcerror_error_set(
 		 &error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of input files.",
+		 "%s: unable to retrieve number of ${mount_tool_source_type}s.",
 		 function );
 
 		result = -ERROR_GEN_FAILURE;
 
 		goto on_error;
 	}
-	if( ( number_of_input_files < 0 )
-	 || ( number_of_input_files > 99 ) )
+	if( ( number_of_${mount_tool_source_type}s < 0 )
+	 || ( number_of_${mount_tool_source_type}s > 99 ) )
 	{
 		libcerror_error_set(
 		 &error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported number of input files.",
+		 "%s: unsupported number of ${mount_tool_source_type}s.",
 		 function );
 
 		result = -ERROR_GEN_FAILURE;
@@ -734,37 +734,23 @@ int __stdcall ${mount_tool_name}_dokan_FindFiles(
 
 		goto on_error;
 	}
-	for( input_file_index = 1;
-	     input_file_index <= number_of_input_files;
-	     input_file_index++ )
+	for( ${mount_tool_source_type}_index = 1;
+	     ${mount_tool_source_type}_index <= number_of_${mount_tool_source_type}s;
+	     ${mount_tool_source_type}_index++ )
 	{
 		string_index = (int) ${mount_tool_name}_dokan_path_prefix_length;
 
-		if( input_file_index >= 100 )
+		if( ${mount_tool_source_type}_index >= 100 )
 		{
-			${mount_tool_name}_dokan_path[ string_index++ ] = (wchar_t) ( '0' + ( input_file_index / 100 ) );
+			${mount_tool_name}_dokan_path[ string_index++ ] = (wchar_t) ( '0' + ( ${mount_tool_source_type}_index / 100 ) );
 		}
-		if( input_file_index >= 10 )
+		if( ${mount_tool_source_type}_index >= 10 )
 		{
-			${mount_tool_name}_dokan_path[ string_index++ ] = (wchar_t) ( '0' + ( input_file_index / 10 ) );
+			${mount_tool_name}_dokan_path[ string_index++ ] = (wchar_t) ( '0' + ( ${mount_tool_source_type}_index / 10 ) );
 		}
-		${mount_tool_name}_dokan_path[ string_index++ ] = (wchar_t) ( '0' + ( input_file_index % 10 ) );
+		${mount_tool_name}_dokan_path[ string_index++ ] = (wchar_t) ( '0' + ( ${mount_tool_source_type}_index % 10 ) );
 		${mount_tool_name}_dokan_path[ string_index++ ] = 0;
 
-/* TODO add support for multiple input files ? */
-		if( input_file_index != 1 )
-		{
-			libcerror_error_set(
-			 &error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid input file index value out of bounds.",
-			 function );
-
-			result = -ERROR_BAD_ARGUMENTS;
-
-			goto on_error;
-		}
 		if( ${mount_tool_name}_dokan_filldir(
 		     fill_find_data,
 		     file_info,
@@ -772,7 +758,7 @@ int __stdcall ${mount_tool_name}_dokan_FindFiles(
 		     string_index - 1,
 		     &find_data,
 		     ${mount_tool_name}_mount_handle,
-		     input_file_index - 1,
+		     ${mount_tool_source_type}_index - 1,
 		     1,
 		     &error ) != 1 )
 		{
@@ -855,7 +841,7 @@ int __stdcall ${mount_tool_name}_dokan_GetFileInformation(
 	static char *function    = "${mount_tool_name}_dokan_GetFileInformation";
 	size64_t media_size      = 0;
 	size_t path_length       = 0;
-	int input_file_index     = 0;
+	int ${mount_tool_source_type}_index          = 0;
 	int number_of_sub_items  = 0;
 	int result               = 0;
 	int string_index         = 0;
@@ -932,37 +918,23 @@ int __stdcall ${mount_tool_name}_dokan_GetFileInformation(
 		}
 		string_index = (int) ${mount_tool_name}_dokan_path_prefix_length;
 
-		input_file_index = path[ string_index++ ] - (wchar_t) '0';
+		${mount_tool_source_type}_index = path[ string_index++ ] - (wchar_t) '0';
 
 		if( string_index < (int) path_length )
 		{
-			input_file_index *= 10;
-			input_file_index += path[ string_index++ ] - (wchar_t) '0';
+			${mount_tool_source_type}_index *= 10;
+			${mount_tool_source_type}_index += path[ string_index++ ] - (wchar_t) '0';
 		}
 		if( string_index < (int) path_length )
 		{
-			input_file_index *= 10;
-			input_file_index += path[ string_index++ ] - (wchar_t) '0';
+			${mount_tool_source_type}_index *= 10;
+			${mount_tool_source_type}_index += path[ string_index++ ] - (wchar_t) '0';
 		}
-		input_file_index -= 1;
+		${mount_tool_source_type}_index -= 1;
 
-/* TODO add support for multiple input files ? */
-		if( input_file_index != 0 )
-		{
-			libcerror_error_set(
-			 &error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid input file index value out of bounds.",
-			 function );
-
-			result = -ERROR_BAD_ARGUMENTS;
-
-			goto on_error;
-		}
 		if( mount_handle_get_media_size(
 		     ${mount_tool_name}_mount_handle,
-		     input_file_index,
+		     ${mount_tool_source_type}_index,
 		     &media_size,
 		     &error ) != 1 )
 		{
