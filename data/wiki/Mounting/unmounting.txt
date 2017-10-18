@@ -1,11 +1,11 @@
 # Unmounting
-You can unmount ${mount_tool_mount_point} using umount:
+You can unmount /mnt/fuse using umount:
 ```
-umount ${mount_tool_mount_point}
+umount /mnt/fuse
 ```
 
 Or fusermount:
 ```
-fusermount -u ${mount_tool_mount_point}
+fusermount -u /mnt/fuse
 ```
 

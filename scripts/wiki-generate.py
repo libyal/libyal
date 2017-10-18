@@ -678,14 +678,11 @@ class WikiPageGenerator(object):
         'rpm_rename_source_package': rpm_rename_source_package,
 
         'mount_tool_additional_arguments': mount_tool_additional_arguments,
-        'mount_tool_missing_backend_error': (
-            project_configuration.mount_tool_missing_backend_error),
-        'mount_tool_mount_point': project_configuration.mount_tool_mount_point,
-        'mount_tool_mounted_description': project_configuration.mount_tool_mounted_description,
-        'mount_tool_mounted_dokan': project_configuration.mount_tool_mounted_dokan,
-        'mount_tool_mounted_fuse': project_configuration.mount_tool_mounted_fuse,
+        'mount_tool_mounted_description': (
+            project_configuration.mount_tool_mounted_description),
         'mount_tool_source': project_configuration.mount_tool_source,
-        'mount_tool_source_description': project_configuration.mount_tool_source_description,
+        'mount_tool_source_description': (
+            project_configuration.mount_tool_source_description),
         'mount_tool_source_description_long': (
             mount_tool_source_description_long),
     }

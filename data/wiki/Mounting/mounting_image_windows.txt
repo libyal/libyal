@@ -8,6 +8,6 @@ At the moment the ${mount_tool_name} keeps a hold on the console.
 
 This will expose ${mount_tool_mounted_description}.
 ```
-${mount_tool_mounted_dokan}
+X:\${library_name_suffix_upper_case}1
 ```
 

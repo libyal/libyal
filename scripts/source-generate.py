@@ -17,6 +17,7 @@ import shutil
 import stat
 import string
 import sys
+import textwrap
 import time
 
 import configuration
@@ -1557,12 +1558,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     library_dependencies = list(makefile_am_file.library_dependencies)
 
+    # Have zlib checked before libcrypto.
+    if 'zlib' in project_configuration.library_build_dependencies:
+      library_dependencies.append('zlib')
     if 'crypto' in project_configuration.library_build_dependencies:
       library_dependencies.append('libcrypto')
     if 'sgutils' in project_configuration.library_build_dependencies:
       library_dependencies.append('sgutils2')
-    if 'zlib' in project_configuration.library_build_dependencies:
-      library_dependencies.append('zlib')
 
     template_directory = os.path.join(self._template_directory, 'configure.ac')
 
@@ -6343,6 +6345,300 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 class ToolsSourceFileGenerator(SourceFileGenerator):
   """Tools source files generator."""
 
+  def _GenerateMountToolSourceFile(
+      self, project_configuration, template_mappings, mount_tool_name,
+      output_writer, output_filename):
+    """Generates a mount tool source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      mount_tool_name (str): name of the mount tool.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'yalmount')
+
+    mount_tool_options = self._GetMountToolOptions(
+        project_configuration, mount_tool_name)
+
+    template_mappings['mount_tool_name'] = mount_tool_name
+    template_mappings['mount_tool_source_description'] = (
+        project_configuration.mount_tool_source_description)
+    template_mappings['mount_tool_source_description_long'] = (
+        project_configuration.mount_tool_source_description_long)
+    template_mappings['mount_tool_source_type'] = (
+        project_configuration.mount_tool_source_type)
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'includes.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    self._GenerateMountToolSourceUsageFunction(
+        project_configuration, template_mappings, mount_tool_name,
+        mount_tool_options, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'signal_handler.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'fuse.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'dokan.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    self._GenerateMountToolSourceMainFunction(
+        project_configuration, template_mappings, mount_tool_name,
+        mount_tool_options, output_writer, output_filename)
+
+    del template_mappings['mount_tool_name']
+    del template_mappings['mount_tool_source_description']
+    del template_mappings['mount_tool_source_description_long']
+    del template_mappings['mount_tool_source_type']
+
+  def _GenerateMountToolSourceMainFunction(
+      self, project_configuration, template_mappings, mount_tool_name,
+      mount_tool_options, output_writer, output_filename):
+    """Generates a mount tool source main function.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      mount_tool_name (str): name of the mount tool.
+      mount_tool_options (list[tuple[str, str, st]])): mount tool options.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'yalmount')
+
+    mount_tool_getopt_string = []
+    mount_tool_options_variable_declarations = []
+    # TODO: move mount_tool_options_switch into templates.
+    mount_tool_options_switch = []
+    for option, argument, _ in mount_tool_options:
+      if mount_tool_options_switch:
+        mount_tool_options_switch.append('')
+
+      getopt_string = option
+      if argument:
+        getopt_string = '{0:s}:'.format(getopt_string)
+
+        alignment_padding = ' ' * (len('extended_options') - len(argument))
+        variable_declaration = (
+            '\tsystem_character_t *option_{0:s}{1:s} = NULL;').format(
+                argument, alignment_padding)
+        mount_tool_options_variable_declarations.append(variable_declaration)
+
+        mount_tool_options_switch.extend([
+            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
+            '\t\t\t\toption_{0:s} = optarg;'.format(argument),
+            '',
+            '\t\t\t\tbreak;'])
+
+      elif option == 'h':
+        mount_tool_options_switch.extend([
+            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
+            '\t\t\t\tusage_fprint(',
+            '\t\t\t\t stdout );',
+            '',
+            '\t\t\t\treturn( EXIT_SUCCESS );'])
+
+      elif option == 'v':
+        mount_tool_options_switch.extend([
+            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
+            '\t\t\t\tverbose = 1;',
+            '',
+            '\t\t\t\tbreak;'])
+
+      elif option == 'V':
+        mount_tool_options_switch.extend([
+            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
+            '\t\t\t\t{0:s}_output_copyright_fprint('.format(
+                project_configuration.tools_directory),
+            '\t\t\t\t stdout );',
+            '',
+            '\t\t\t\treturn( EXIT_SUCCESS );'])
+
+      mount_tool_getopt_string.append(getopt_string)
+
+    template_mappings['mount_tool_getopt_string'] = ''.join(mount_tool_getopt_string)
+    template_mappings['mount_tool_options_variable_declarations'] = '\n'.join(
+        sorted(mount_tool_options_variable_declarations))
+    template_mappings['mount_tool_options_switch'] = '\n'.join(
+        mount_tool_options_switch)
+
+    template_filename = os.path.join(template_directory, 'main-start.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['mount_tool_getopt_string']
+    del template_mappings['mount_tool_options_variable_declarations']
+    del template_mappings['mount_tool_options_switch']
+
+    if project_configuration.mount_tool_has_keys_option:
+      template_filename = os.path.join(template_directory, 'main-option_keys.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.mount_tool_has_password_option:
+      template_filename = os.path.join(
+          template_directory, 'main-option_password.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'main-open_input.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'main-fuse.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'main-dokan.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'main-end.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+  def _GenerateMountToolSourceUsageFunction(
+      self, project_configuration, template_mappings, mount_tool_name,
+      mount_tool_options, output_writer, output_filename):
+    """Generates a mount tool source usage function.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      mount_tool_name (str): name of the mount tool.
+      mount_tool_options (list[tuple[str, str, st]])): mount tool options.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'yalmount')
+
+    alignment_padding = '          '
+    width = 80 - len(alignment_padding)
+    text_wrapper = textwrap.TextWrapper(width=width)
+
+    options_details = []
+    options_usage = []
+    options_without_arguments = []
+    for option, argument, description in mount_tool_options:
+      description_lines = text_wrapper.wrap(description)
+
+      description_line = description_lines.pop(0)
+      details = '\tfprintf( stream, "\\t-{0:s}:{1:s}{2:s}\\n"'.format(
+          option, alignment_padding, description_line)
+
+      for description_line in description_lines:
+        options_details.append(details)
+        details = '\t                 "\\t   {0:s}{1:s}\\n"'.format(
+            alignment_padding, description_line)
+
+      details = '{0:s} );'.format(details)
+      options_details.append(details)
+
+      if not argument:
+        options_without_arguments.append(option)
+      else:
+        usage = '[ -{0:s} {1:s} ]'.format(option, argument)
+        options_usage.append(usage)
+
+    usage = '[ -{0:s} ]'.format(''.join(options_without_arguments))
+    options_usage.append(usage)
+
+    options_usage.extend([
+        project_configuration.mount_tool_source_type, 'mount_point'])
+
+    mount_tool_source_alignment = ' ' *(
+        len('mount_point') - len(project_configuration.mount_tool_source_type))
+
+    usage = 'Usage: {0:s} '.format(mount_tool_name)
+    usage_length = len(usage)
+    alignment_padding = ' ' * usage_length
+    options_usage = ' '.join(options_usage)
+
+    width = 80 - usage_length
+    text_wrapper = textwrap.TextWrapper(width=width)
+
+    usage_lines = text_wrapper.wrap(options_usage)
+
+    mount_tool_usage = []
+    usage_line = usage_lines.pop(0)
+    usage = '\tfprintf( stream, "{0:s}{1:s}\\n"'.format(usage, usage_line)
+
+    for usage_line in usage_lines:
+      mount_tool_usage.append(usage)
+      usage = '\t                 "{0:s}{1:s}\\n"'.format(
+          alignment_padding, usage_line)
+
+    usage = '{0:s}\\n" );'.format(usage[:-1])
+    mount_tool_usage.append(usage)
+
+    template_mappings['mount_tool_options'] = '\n'.join(options_details)
+    template_mappings['mount_tool_source_alignment'] = mount_tool_source_alignment
+    template_mappings['mount_tool_usage'] = '\n'.join(mount_tool_usage)
+
+    template_filename = os.path.join(template_directory, 'usage.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['mount_tool_options']
+    del template_mappings['mount_tool_source_alignment']
+    del template_mappings['mount_tool_usage']
+
+  def _GetMountToolOptions(self, project_configuration, mount_tool_name):
+    """Retrieves the mount tool option.s
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      mount_tool_name (str): name of the mount tool.
+
+    Returns:
+      list[tuple[str, str, str]]: mount tool options.
+    """
+    # TODO: sort options with lower case before upper case.
+    mount_tool_options = [('h', '', 'shows this help')]
+
+    if project_configuration.mount_tool_has_keys_option:
+      mount_tool_options.append(
+          ('k', 'keys', 'the key formatted in base16'))
+
+    if project_configuration.mount_tool_has_password_option:
+      mount_tool_options.append(
+          ('p', 'password', 'specify the password/passphrase'))
+
+    mount_tool_options.extend([
+        ('v', '', ('verbose output to stderr, while {0:s} will remain '
+                    'running in the foreground').format(mount_tool_name)),
+        ('V', '', 'print version'),
+        ('X', 'extended_options', 'extended options to pass to sub system')])
+
+    return mount_tool_options
+
   def Generate(self, project_configuration, output_writer):
     """Generates tools source files.
 
@@ -6393,6 +6689,18 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
+
+    mount_tool_name = '{0:s}mount'.format(
+        project_configuration.library_name_suffix)
+
+    output_filename = '{0:s}.c'.format(mount_tool_name)
+    output_filename = os.path.join(
+        project_configuration.tools_directory, output_filename)
+
+    if os.path.exists(output_filename):
+      self._GenerateMountToolSourceFile(
+          project_configuration, template_mappings, mount_tool_name,
+          output_writer, output_filename)
 
 
 class FileWriter(object):

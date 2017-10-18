@@ -1,6 +1,6 @@
 If you get the error:
 ```
-${mount_tool_missing_backend_error}
+No sub system to mount ${library_name_suffix_upper_case}.
 ```
 
 That means fuse was not detected when building the ${tools_name}, check if you have fuse-dev installed and if ./configure is able to detect it.

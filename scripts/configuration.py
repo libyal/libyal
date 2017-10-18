@@ -36,6 +36,19 @@ class ProjectConfiguration(object):
     mingw_dll_dependencies (list[str]): MinGW DLL dependencies.
     mingw_dll_filename (str): name of the MinGW DLL file.
     mingw_msys_build_dependencies (str): MinGW-MSYS build dependencies.
+    mount_tool_additional_arguments (str): additional arguments of
+        the mount tool.
+    mount_tool_has_keys_option (bool): True if the mount tool has a keys option.
+    mount_tool_has_password_option (bool): True if the mount tool has
+        a password option.
+    mount_tool_mounted_description (str): description what is mounted by
+        the mount tool.
+    mount_tool_source_description_long (str): long description of the input
+        source.
+    mount_tool_source_description (str): description of the input source.
+    mount_tool_source (str): short description of the input source.
+    mount_tool_source_type (str): input source type, such as file, image
+        or volume.
     msvscpp_build_dependencies (str): Visual Studio build dependencies.
     msvscpp_dll_dependencies (list[str]): Visual Studio DLL dependencies.
     project_authors (str): authors of the project.
@@ -114,6 +127,16 @@ class ProjectConfiguration(object):
     self.tools_directory = None
     self.tools_names = []
 
+    # Mount tool configuration.
+    self.mount_tool_additional_arguments = None
+    self.mount_tool_has_keys_option = False
+    self.mount_tool_has_password_option = False
+    self.mount_tool_mounted_description = None
+    self.mount_tool_source_description_long = None
+    self.mount_tool_source_description = None
+    self.mount_tool_source = None
+    self.mount_tool_source_type = None
+
     # Tests configuration.
     self.tests_authors = None
     self.tests_options = None
@@ -165,18 +188,6 @@ class ProjectConfiguration(object):
 
     # Troubleshooting configuration.
     self.troubleshooting_example = None
-
-    # Mount tool configuration.
-    self.mount_tool_additional_arguments = None
-    self.mount_tool_missing_backend_error = None
-    self.mount_tool_mount_point = None
-    self.mount_tool_mounted_description = None
-    self.mount_tool_mounted_dokan = None
-    self.mount_tool_mounted_fuse = None
-    self.mount_tool_source = None
-    self.mount_tool_source_description = None
-    self.mount_tool_source_description_long = None
-    self.mount_tool_source_type = None
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
@@ -370,26 +381,24 @@ class ProjectConfiguration(object):
 
     Args:
       config_parser (ConfigParser): configuration file parser.
+
+    Raises:
+      ConfigurationError: if the mount tool source type is not supported.
     """
-    if not config_parser.has_section('mount_tool'):
-      return
+    features = self._GetOptionalConfigValue(
+        config_parser, 'mount_tool', 'features', default_value=[])
+
+    if features:
+      self.mount_tool_has_keys_option = 'keys' in features
+      self.mount_tool_has_password_option = 'password' in features
 
     self.mount_tool_additional_arguments = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'additional_arguments')
-
-    self.mount_tool_missing_backend_error = self._GetConfigValue(
-        config_parser, 'mount_tool', 'missing_backend_error')
-    self.mount_tool_mount_point = self._GetConfigValue(
-        config_parser, 'mount_tool', 'mount_point')
-    self.mount_tool_mounted_description = self._GetConfigValue(
+    self.mount_tool_mounted_description = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'mounted_description')
-    self.mount_tool_mounted_dokan = self._GetConfigValue(
-        config_parser, 'mount_tool', 'mounted_dokan')
-    self.mount_tool_mounted_fuse = self._GetConfigValue(
-        config_parser, 'mount_tool', 'mounted_fuse')
-    self.mount_tool_source = self._GetConfigValue(
+    self.mount_tool_source = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'source')
-    self.mount_tool_source_description = self._GetConfigValue(
+    self.mount_tool_source_description = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'source_description')
 
     # If the long source description is not set it will default to
@@ -397,10 +406,11 @@ class ProjectConfiguration(object):
     self.mount_tool_source_description_long = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'source_description_long')
 
-    self.mount_tool_source_type = self._GetConfigValue(
+    self.mount_tool_source_type = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'source_type')
 
-    if self.mount_tool_source_type not in ['image', 'volume']:
+    if (self.mount_tool_source_type and 
+        self.mount_tool_source_type not in ('file', 'image', 'volume')):
       raise errors.ConfigurationError(
           'unsupported mount tool source type: {0:s}'.format(
               self.mount_tool_source_type))
