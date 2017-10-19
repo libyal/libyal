@@ -2132,7 +2132,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       tests_files.append('/tests/input')
 
     for source_file in sorted(glob.glob(source_glob)):
-      if source_file.endswith('_getopt.c') or source_file.endswith('_memory.c'):
+      if (source_file.endswith('_functions.c') or
+          source_file.endswith('_getopt.c') or
+          source_file.endswith('_memory.c')):
         continue
 
       source_file = '/{0:s}'.format(source_file[:-2])
@@ -5602,6 +5604,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if header_file.have_internal_functions:
       template_filename = os.path.join(
           template_directory, 'includes_internal.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if with_input:
+      template_filename = os.path.join(
+          template_directory, 'start_with_input.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')

@@ -10,11 +10,13 @@ int main(
      char * const argv[] )
 #endif
 {
-	libcerror_error_t *error = NULL;
-	system_character_t *source = NULL;
+	libbfio_handle_t *file_io_handle             = NULL;
+	libcerror_error_t *error                     = NULL;
 	${library_name}_${type_name}_t *${type_name} = NULL;
-	system_integer_t option = 0;
-	int result = 0;
+	system_character_t *source                   = NULL;
+	system_integer_t option                      = 0;
+	size_t string_length                         = 0;
+	int result                                   = 0;
 
 	while( ( option = ${library_name_suffix}_test_getopt(
 	                   argc,

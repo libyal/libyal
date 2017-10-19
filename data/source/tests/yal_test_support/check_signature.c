@@ -11,7 +11,7 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 
 	/* Initialize test
 	 */
-	result = ${library_name_suffix}_test_support_get_narrow_source(
+	result = ${library_name_suffix}_test_get_narrow_source(
 	          source,
 	          narrow_source,
 	          256,
@@ -85,7 +85,7 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 
 	/* Initialize test
 	 */
-	result = ${library_name_suffix}_test_support_get_wide_source(
+	result = ${library_name_suffix}_test_get_wide_source(
 	          source,
 	          wide_source,
 	          256,

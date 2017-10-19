@@ -8,8 +8,14 @@ on_error:
 	}
 	if( ${type_name} != NULL )
 	{
-		${library_name_suffix}_test_${type_name}_close_source(
+		${library_name}_${type_name}_free(
 		 &${type_name},
+		 NULL );
+	}
+	if( file_io_handle != NULL )
+	{
+		libbfio_handle_free(
+		 &file_io_handle,
 		 NULL );
 	}
 	return( EXIT_FAILURE );

@@ -53,9 +53,51 @@
 
 		/* Initialize test
 		 */
+		result = libbfio_file_initialize(
+		          &file_io_handle,
+		          &error );
+
+		LNK_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        LNK_TEST_ASSERT_IS_NOT_NULL(
+	         "file_io_handle",
+	         file_io_handle );
+
+	        LNK_TEST_ASSERT_IS_NULL(
+	         "error",
+	         error );
+
+		string_length = system_string_length(
+		                 source );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbfio_file_set_name_wide(
+		          file_io_handle,
+		          source,
+		          string_length,
+		          &error );
+#else
+		result = libbfio_file_set_name(
+		          file_io_handle,
+		          source,
+		          string_length,
+		          &error );
+#endif
+		LNK_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        LNK_TEST_ASSERT_IS_NULL(
+	         "error",
+	         error );
+
 		result = ${library_name_suffix}_test_${type_name}_open_source(
 		          &${type_name},
-		          source,
+		          file_io_handle,
 		          &error );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(

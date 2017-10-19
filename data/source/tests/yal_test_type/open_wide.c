@@ -14,7 +14,7 @@ int ${library_name_suffix}_test_${type_name}_open_wide(
 
 	/* Initialize test
 	 */
-	result = ${library_name_suffix}_test_${type_name}_get_wide_source(
+	result = ${library_name_suffix}_test_get_wide_source(
 	          source,
 	          wide_source,
 	          256,

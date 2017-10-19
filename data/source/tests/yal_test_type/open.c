@@ -12,7 +12,7 @@ int ${library_name_suffix}_test_${type_name}_open(
 
 	/* Initialize test
 	 */
-	result = ${library_name_suffix}_test_${type_name}_get_narrow_source(
+	result = ${library_name_suffix}_test_get_narrow_source(
 	          source,
 	          narrow_source,
 	          256,
