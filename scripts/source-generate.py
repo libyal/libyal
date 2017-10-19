@@ -3551,6 +3551,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
+    lines = []
     if os.path.exists(output_filename):
       with open(output_filename, 'rb') as file_object:
         lines = file_object.readlines()
@@ -6048,6 +6049,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         sorted(python_functions))
     template_mappings['test_python_functions_with_input'] = ' '.join(
         sorted(python_functions_with_input))
+
+    template_mappings['tests_option_sets'] = ' '.join(
+        sorted(project_configuration.tests_option_sets))
 
     template_mappings['alignment_padding'] = (
         ' ' * len(project_configuration.library_name_suffix))

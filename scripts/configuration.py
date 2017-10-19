@@ -67,7 +67,7 @@ class ProjectConfiguration(object):
     tests_authors (str): authors of the test files.
     tests_example_filename1 (str): name of the first test example filename.
     tests_example_filename2 (str): name of the second test example filename.
-    tests_options (str): option sets used by the tests.
+    tests_option_sets (str): option sets used by the tests.
     tests_profiles (list[str]): names of the test profiles.
     tools_authors (str): authors of the tools.
     tools_build_dependencies (str): tools build dependencies.
@@ -139,7 +139,7 @@ class ProjectConfiguration(object):
 
     # Tests configuration.
     self.tests_authors = None
-    self.tests_options = None
+    self.tests_option_sets = None
     self.tests_profiles = None
     self.tests_example_filename1 = None
     self.tests_example_filename2 = None
@@ -512,8 +512,8 @@ class ProjectConfiguration(object):
     """
     self.tests_authors = self._GetOptionalConfigValue(
         config_parser, 'tests', 'authors', default_value=self.project_authors)
-    self.tests_options = self._GetOptionalConfigValue(
-        config_parser, 'tests', 'options', default_value=[])
+    self.tests_option_sets = self._GetOptionalConfigValue(
+        config_parser, 'tests', 'option_sets', default_value=[])
     self.tests_profiles = self._GetOptionalConfigValue(
         config_parser, 'tests', 'profiles', default_value=[])
     self.tests_example_filename1 = self._GetOptionalConfigValue(

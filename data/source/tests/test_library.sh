@@ -9,7 +9,7 @@ EXIT_IGNORE=77;
 
 LIBRARY_TESTS="${library_tests}";
 LIBRARY_TESTS_WITH_INPUT="${library_tests_with_input}";
-OPTION_SETS="";
+OPTION_SETS="${tests_option_sets}";
 
 INPUT_GLOB="*";
 
