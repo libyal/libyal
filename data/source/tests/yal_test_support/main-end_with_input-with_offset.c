@@ -1,27 +1,6 @@
-		}
-	}
-	if( optind < argc )
-	{
-		source = argv[ optind ];
-	}
-	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library_name}_get_version",
-	 ${library_name_suffix}_test_get_version );
-
-	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library_name}_get_access_flags_read",
-	 ${library_name_suffix}_test_get_access_flags_read );
-
-	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library_name}_get_codepage",
-	 ${library_name_suffix}_test_get_codepage );
-
-	${library_name_suffix_upper_case}_TEST_RUN(
-	 "${library_name}_set_codepage",
-	 ${library_name_suffix}_test_set_codepage );
-
 #if !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 )
-	if( source != NULL )
+	if( ( source != NULL )
+	 && ( ${signature_type}_offset == 0 ) )
 	{
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
 		 "${library_name}_check_${signature_type}_signature",
@@ -47,6 +26,11 @@
 	return( EXIT_SUCCESS );
 
 on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
 	return( EXIT_FAILURE );
 }
 

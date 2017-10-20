@@ -5059,9 +5059,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
         if argument == 'offset': 
           test_options_variable_declarations.extend([
+              '\tlibcerror_error_t *error = NULL;',
               '\tsystem_character_t *option_{0:s} = NULL;'.format(argument),
               '\toff64_t {0:s}_offset = 0;'.format(signature_type),
-              '\tsize_t string_length = 0;'])
+              '\tsize_t string_length = 0;',
+              '\tint result = 0;'])
 
       variable_declaration = '\tsystem_character_t *source = NULL;'
       test_options_variable_declarations.append(variable_declaration)
@@ -5071,7 +5073,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           sorted(test_options_variable_declarations))
 
       template_filename = os.path.join(
-          template_directory, 'main-with_input-start.c')
+          template_directory, 'main-start_with_input-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -5086,7 +5088,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_mappings['test_option_argument'] = argument
 
           template_filename = os.path.join(
-              template_directory, 'main-with_input-switch_case.c')
+              template_directory, 'main-start_with_input-switch_case.c')
           self._GenerateSection(
               template_filename, template_mappings, output_writer, output_filename,
               access_mode='ab')
@@ -5103,7 +5105,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             switch_case_unused)
 
         template_filename = os.path.join(
-            template_directory, 'main-with_input-switch_case_unused.c')
+            template_directory, 'main-start_with_input-switch_case_unused.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
@@ -5111,7 +5113,31 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         del template_mappings['test_options_switch_case_unused']
 
       template_filename = os.path.join(
-          template_directory, 'main-with_input-end.c')
+          template_directory, 'main-start_with_input-end.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      if 'offset' in [argument for _, argument in test_options]:
+        template_filename = os.path.join(
+            template_directory, 'main-option_offset.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+      template_filename = os.path.join(
+          template_directory, 'main-body_with_input.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      if 'offset' in [argument for _, argument in test_options]:
+        template_filename = os.path.join(
+            template_directory, 'main-end_with_input-with_offset.c')
+      else:
+        template_filename = os.path.join(
+            template_directory, 'main-end_with_input.c')
+
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')

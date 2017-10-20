@@ -22,13 +22,13 @@
 		                 source );
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libbfio_file_set_name_wide(
+		result = libbfio_file_range_set_name_wide(
 		          file_io_handle,
 		          source,
 		          string_length,
 		          &error );
 #else
-		result = libbfio_file_set_name(
+		result = libbfio_file_range_set_name(
 		          file_io_handle,
 		          source,
 		          string_length,
