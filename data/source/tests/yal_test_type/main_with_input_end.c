@@ -21,16 +21,16 @@
 		          &file_io_handle,
 		          &error );
 
-		LNK_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		LNK_TEST_ASSERT_IS_NULL(
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	         "file_io_handle",
 	         file_io_handle );
 
-	        LNK_TEST_ASSERT_IS_NULL(
+	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	         "error",
 	         error );
 	}
