@@ -6134,16 +6134,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer,
             output_filename, access_mode='ab')
 
+      template_filename = os.path.join(template_directory, 'main-notify_set.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     else:
       template_filename = os.path.join(template_directory, 'main-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'main-notify_set.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
 
     self._GenerateTypeTestsMainTestsToRun(
         project_configuration, template_mappings, type_name, tests_to_run,
@@ -6450,16 +6450,26 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if (type_name == 'volume' and
         project_configuration.library_name == 'libbde'):
+      # TODO: add support for startup key option
+      # TODO: add support for keys option
       test_options.append(('o', 'offset'))
       test_options.append(('p', 'password'))
       test_options.append(('r', 'recovery_password'))
 
     elif (type_name == 'volume' and
+        project_configuration.library_name == 'libfvde'):
+      # TODO: add support for keys option
+      test_options.append(('o', 'offset'))
+      test_options.append(('p', 'password'))
+
+    elif (type_name == 'volume' and
         project_configuration.library_name == 'libluksde'):
+      # TODO: add support for keys option
       test_options.append(('p', 'password'))
 
     elif (type_name == 'file' and
           project_configuration.library_name == 'libqcow'):
+      # TODO: add support for keys option
       test_options.append(('p', 'password'))
 
     return test_options
