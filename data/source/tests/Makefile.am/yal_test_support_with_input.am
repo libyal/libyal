@@ -1,4 +1,5 @@
 ${library_name_suffix}_test_support_SOURCES = \
+	${library_name_suffix}_test_functions.c ${library_name_suffix}_test_functions.h \
 	${library_name_suffix}_test_getopt.c ${library_name_suffix}_test_getopt.h \
 	${library_name_suffix}_test_libbfio.h \
 	${library_name_suffix}_test_libcerror.h \
@@ -7,7 +8,8 @@ ${library_name_suffix}_test_support_SOURCES = \
 	${library_name_suffix}_test_${library_name}.h \
 	${library_name_suffix}_test_libuna.h \
 	${library_name_suffix}_test_macros.h \
-	${library_name_suffix}_test_support.c
+	${library_name_suffix}_test_support.c \
+	${library_name_suffix}_test_unused.h
 
 ${library_name_suffix}_test_support_LDADD = \
 	@LIBBFIO_LIBADD@ \

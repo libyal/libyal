@@ -5034,7 +5034,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   def _GenerateMakefileAM(
       self, project_configuration, template_mappings, include_header_file,
       makefile_am_file, api_functions, api_functions_with_input, api_types,
-      api_types_with_input, api_pseudo_types, internal_types, output_writer):
+      api_types_with_input, api_pseudo_types, internal_types,
+      python_module_types, output_writer):
     """Generates a tests Makefile.am file.
 
     Args:
@@ -5052,6 +5053,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           input data.
       api_pseudo_types (list[str]): names of API pseudo types to test.
       internal_types (list[str]): names of internal types to test.
+      python_module_types (list[str]): names of Python module types to test.
       output_writer (OutputWriter): output writer.
     """
     tests = set(api_functions).union(set(api_functions_with_input))
@@ -5082,17 +5084,24 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       test_script = 'test_{0:s}.sh'.format(tool_name)
       test_scripts.append(test_script)
 
+    check_scripts = ['test_runner.sh']
+    check_scripts.extend(test_scripts)
+
     python_scripts = []
     python_test_scripts = ['test_python_module.sh']
 
-    check_scripts = ['test_runner.sh']
-    check_scripts.extend(test_scripts)
     if project_configuration.HasPythonModule():
+      for python_module_type in python_module_types:
+        test_script = '{0:s}_test_{1:s}.py'.format(
+            project_configuration.python_module_name, python_module_type)
+        python_scripts.append(test_script)
+
+      test_script = '{0:s}_test_support.py'.format(
+          project_configuration.python_module_name)
+      python_scripts.append(test_script)
+
       check_scripts.extend(python_scripts)
       check_scripts.extend(python_test_scripts)
-      check_scripts.extend([
-          '{0:s}_test_support.py'.format(
-              project_configuration.python_module_name)])
 
     check_scripts = sorted(check_scripts)
 
@@ -5746,7 +5755,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     # TODO: fix libbfio having no open wide.
     # TODO: make handling open close more generic for libpff attachment handle.
-    for type_function in ('open', 'open_wide', 'close'):
+    for type_function in ('open', 'open_wide', 'open_file_io_handle', 'close'):
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, type_function,
           have_extern, header_file, output_writer, output_filename,
@@ -6302,6 +6311,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           project_configuration, template_mappings, include_header_file,
           output_writer)
 
+    python_module_types = []
+
     for type_name in api_types:
       if (type_name == 'error' and
           project_configuration.library_name == 'libcerror'):
@@ -6313,6 +6324,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         api_types.remove(type_name)
 
       if project_configuration.HasPythonModule():
+        python_module_types.append(type_name)
         self._GeneratePythonModuleTypeTests(
             project_configuration, template_mappings, type_name, output_writer)
 
@@ -6324,6 +6336,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         api_types_with_input.remove(type_name)
 
       if project_configuration.HasPythonModule():
+        python_module_types.append(type_name)
         self._GeneratePythonModuleTypeTests(
             project_configuration, template_mappings, type_name, output_writer,
             with_input=True)
@@ -6352,7 +6365,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateMakefileAM(
         project_configuration, template_mappings, include_header_file,
         makefile_am_file, api_functions, api_functions_with_input, api_types,
-        api_types_with_input, api_pseudo_types, internal_types, output_writer)
+        api_types_with_input, api_pseudo_types, internal_types,
+        python_module_types, output_writer)
 
 
 class ToolsSourceFileGenerator(SourceFileGenerator):
