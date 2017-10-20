@@ -5702,7 +5702,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       logging.warning('Skipping: {0:s}'.format(header_file.path))
       return False
 
-    # TODO: determine test options based on function prototypes
+    # TODO: determine type_size_name based on function prototypes
+    if project_configuration.library_name in (
+        'libewf', 'libqcow', 'libvhdi', 'libvmdk'):
+      type_size_name = 'media_size'
+    else:
+      type_size_name = 'size'
+
+    # TODO: determine test_options based on function prototypes
     test_options = []
 
     if (type_name == 'volume' and
@@ -5945,7 +5952,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if function_name in function_names:
         function_names.remove(function_name)
 
-      # TODO: remove open_read?
+    template_mappings['type_size_name'] = type_size_name
 
     function_name_prefix = '{0:s}_{1:s}_'.format(
         project_configuration.library_name, type_name)
@@ -5969,6 +5976,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         tests_to_run_with_args.append((function_name, test_function_name))
       else:
         tests_to_run.append((function_name, test_function_name))
+
+    del template_mappings['type_size_name']
 
     if initialize_is_internal or not have_extern:
       template_filename = os.path.join(

@@ -6,33 +6,30 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 {
 	uint8_t buffer[ 16 ];
 
-	libcerror_error_t *error = NULL;
-	size64_t size            = 0;
-	ssize_t read_count       = 0;
-	off64_t offset           = 0;
+	libcerror_error_t *error   = NULL;
+	size64_t ${type_size_name} = 0;
+	ssize_t read_count         = 0;
+	int result                 = 0;
 
 	/* Determine size
 	 */
-	offset = ${library_name}_${type_name}_seek_offset(
+	result = ${library_name}_${type_name}_get_${type_size_name}(
 	          ${type_name},
-	          0,
-	          SEEK_END,
+	          &${type_size_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT64(
-	 "offset",
-	 offset,
-	 (int64_t) -1 );
+	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	size = (size64_t) offset;
-
 	/* Test regular cases
 	 */
-	if( size > 16 )
+	if( ${type_size_name} > 16 )
 	{
 		read_count = ${library_name}_${type_name}_read_buffer_at_offset(
 		              ${type_name},
@@ -50,13 +47,13 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 		 "error",
 		 error );
 
-		/* Read buffer on size boundary
+		/* Read buffer on ${type_size_name} boundary
 		 */
 		read_count = ${library_name}_${type_name}_read_buffer_at_offset(
 		              ${type_name},
 		              buffer,
 		              16,
-		              size - 8,
+		              ${type_size_name} - 8,
 		              &error );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
@@ -68,13 +65,13 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 		 "error",
 		 error );
 
-		/* Read buffer beyond size boundary
+		/* Read buffer beyond ${type_size_name} boundary
 		 */
-		read_count = ${library_name}_${type_name}_read_buffer(
+		read_count = ${library_name}_${type_name}_read_buffer_at_offset(
 		              ${type_name},
 		              buffer,
 		              16,
-		              size + 8,
+		              ${type_size_name} + 8,
 		              &error );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
