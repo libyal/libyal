@@ -1556,15 +1556,35 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
+    libraries = list(makefile_am_file.libraries)
     library_dependencies = list(makefile_am_file.library_dependencies)
+
+    libcrypto_index = len(library_dependencies)
+    if 'libcaes' in library_dependencies:
+      libcrypto_index = min(
+          libcrypto_index, library_dependencies.index('libcaes'))
+
+    if 'libhmac' in library_dependencies:
+      libcrypto_index = min(
+          libcrypto_index, library_dependencies.index('libhmac'))
+
+    if 'crypto' in project_configuration.library_build_dependencies:
+      if libcrypto_index == len(library_dependencies):
+        libraries.append('libcrypto')
+        library_dependencies.append('libcrypto')
+
+    if 'sgutils' in project_configuration.library_build_dependencies:
+      libraries.append('sgutils2')
+      library_dependencies.append('sgutils2')
 
     # Have zlib checked before libcrypto.
     if 'zlib' in project_configuration.library_build_dependencies:
-      library_dependencies.append('zlib')
-    if 'crypto' in project_configuration.library_build_dependencies:
-      library_dependencies.append('libcrypto')
-    if 'sgutils' in project_configuration.library_build_dependencies:
-      library_dependencies.append('sgutils2')
+      if libcrypto_index < len(library_dependencies):
+        libraries.insert(libcrypto_index, 'zlib')
+        library_dependencies.insert(libcrypto_index, 'zlib')
+      else:
+        libraries.append('zlib')
+        library_dependencies.append('zlib')
 
     template_directory = os.path.join(self._template_directory, 'configure.ac')
 
@@ -1699,6 +1719,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
         local_library_tests.append(local_library_test)
 
+      if 'libcaes' in library_dependencies or 'libhmac' in library_dependencies:
+        local_library_tests.append('test "x$ac_cv_libcrypto" != xno')
+
       template_mappings['local_library_tests'] = ' || '.join(
           local_library_tests)
 
@@ -1828,13 +1851,14 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     maximum_description_length = 0
 
     build_information = []
-    for name in makefile_am_file.libraries:
-      description = '{0:s} support'.format(name)
-      value = '$ac_cv_{0:s}'.format(name)
-      build_information.append((description, value))
+    for name in libraries:
+      if name not in ('libcrypto', 'zlib'):
+        description = '{0:s} support'.format(name)
+        value = '$ac_cv_{0:s}'.format(name)
+        build_information.append((description, value))
 
-      maximum_description_length = max(
-          maximum_description_length, len(description))
+        maximum_description_length = max(
+            maximum_description_length, len(description))
 
       if name == 'libcaes':
         description = 'AES support'
@@ -1850,12 +1874,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         maximum_description_length = max(
             maximum_description_length, len(description))
 
-    if 'zlib' in project_configuration.library_build_dependencies:
-      description = 'DEFLATE compression support'
-      build_information.append((description, '$ac_cv_inflate'))
+      elif name == 'zlib':
+        description = 'DEFLATE compression support'
+        build_information.append((description, '$ac_cv_inflate'))
 
-      maximum_description_length = max(
-          maximum_description_length, len(description))
+        maximum_description_length = max(
+            maximum_description_length, len(description))
 
     if 'fuse' in project_configuration.tools_build_dependencies:
       description = 'FUSE support'

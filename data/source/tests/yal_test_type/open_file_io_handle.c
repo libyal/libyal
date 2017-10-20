@@ -1,14 +1,14 @@
-/* Tests the ${library_name}_file_open_file_io_handle function
+/* Tests the ${library_name}_${type_name}_open_file_io_handle function
  * Returns 1 if successful or 0 if not
  */
-int ${library_name_suffix}_test_file_open_file_io_handle(
+int ${library_name_suffix}_test_${type_name}_open_file_io_handle(
      const system_character_t *source )
 {
-	libbfio_handle_t *file_io_handle = NULL;
-	libcerror_error_t *error         = NULL;
-	${library_name}_file_t *file     = NULL;
-	size_t source_length             = 0;
-	int result                       = 0;
+	${library_name}_${type_name}_t *${type_name} = NULL;
+	libbfio_handle_t *file_io_handle             = NULL;
+	libcerror_error_t *error                     = NULL;
+	size_t source_length                         = 0;
+	int result                                   = 0;
 
 	/* Initialize test
 	 */
@@ -54,8 +54,8 @@ int ${library_name_suffix}_test_file_open_file_io_handle(
          "error",
          error );
 
-	result = ${library_name}_file_initialize(
-	          &file,
+	result = ${library_name}_${type_name}_initialize(
+	          &${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -64,8 +64,8 @@ int ${library_name_suffix}_test_file_open_file_io_handle(
 	 1 );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-	 "file",
-	 file );
+	 "${type_name}",
+	 ${type_name} );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -73,8 +73,8 @@ int ${library_name_suffix}_test_file_open_file_io_handle(
 
 	/* Test open
 	 */
-	result = ${library_name}_file_open_file_io_handle(
-	          file,
+	result = ${library_name}_${type_name}_open_file_io_handle(
+	          ${type_name},
 	          file_io_handle,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
@@ -90,7 +90,7 @@ int ${library_name_suffix}_test_file_open_file_io_handle(
 
 	/* Test error cases
 	 */
-	result = ${library_name}_file_open_file_io_handle(
+	result = ${library_name}_${type_name}_open_file_io_handle(
 	          NULL,
 	          file_io_handle,
 	          ${library_name_upper_case}_OPEN_READ,
@@ -108,8 +108,8 @@ int ${library_name_suffix}_test_file_open_file_io_handle(
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_file_open_file_io_handle(
-	          file,
+	result = ${library_name}_${type_name}_open_file_io_handle(
+	          ${type_name},
 	          NULL,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
@@ -126,8 +126,8 @@ int ${library_name_suffix}_test_file_open_file_io_handle(
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_file_open_file_io_handle(
-	          file,
+	result = ${library_name}_${type_name}_open_file_io_handle(
+	          ${type_name},
 	          file_io_handle,
 	          -1,
 	          &error );
@@ -146,8 +146,8 @@ int ${library_name_suffix}_test_file_open_file_io_handle(
 
 	/* Test open when already opened
 	 */
-	result = ${library_name}_file_open_file_io_handle(
-	          file,
+	result = ${library_name}_${type_name}_open_file_io_handle(
+	          ${type_name},
 	          file_io_handle,
 	          ${library_name_upper_case}_OPEN_READ,
 	          &error );
@@ -166,8 +166,8 @@ int ${library_name_suffix}_test_file_open_file_io_handle(
 
 	/* Clean up
 	 */
-	result = ${library_name}_file_free(
-	          &file,
+	result = ${library_name}_${type_name}_free(
+	          &${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -176,8 +176,8 @@ int ${library_name_suffix}_test_file_open_file_io_handle(
 	 1 );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	 "file",
-	 file );
+	 "${type_name}",
+	 ${type_name} );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -208,10 +208,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( file != NULL )
+	if( ${type_name} != NULL )
 	{
-		${library_name}_file_free(
-		 &file,
+		${library_name}_${type_name}_free(
+		 &${type_name},
 		 NULL );
 	}
 	if( file_io_handle != NULL )
