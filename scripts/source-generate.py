@@ -5000,6 +5000,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           file.
       output_writer (OutputWriter): output writer.
     """
+    signature_type = include_header_file.GetCheckSignatureType()
+
+    test_options = self._GetTestOptions(project_configuration, signature_type)
+
     template_directory = os.path.join(
         self._template_directory, 'yal_test_support')
 
@@ -5011,15 +5015,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    signature_type = include_header_file.GetCheckSignatureType()
-
     # TODO: add check for has codepage function for libsigscan and include
     # libcerror.
     if signature_type:
-      template_filename = os.path.join(
-          template_directory, 'includes_with_input.c')
-
       template_mappings['signature_type'] = signature_type
+
+    if signature_type:
+      template_filename = os.path.join(
+          template_directory, 'includes-with_input.c')
     else:
       template_filename = os.path.join(template_directory, 'includes.c')
 
@@ -5045,15 +5048,85 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      template_filename = os.path.join(template_directory, 'main_with_input.c')
+      test_getopt_string = []
+      test_options_variable_declarations = []
+      for option, argument in test_options:
+        getopt_string = option
+        if argument:
+          getopt_string = '{0:s}:'.format(getopt_string)
+
+        test_getopt_string.append(getopt_string)
+
+        if argument == 'offset': 
+          test_options_variable_declarations.extend([
+              '\tsystem_character_t *option_{0:s} = NULL;'.format(argument),
+              '\toff64_t {0:s}_offset = 0;'.format(signature_type),
+              '\tsize_t string_length = 0;'])
+
+      variable_declaration = '\tsystem_character_t *source = NULL;'
+      test_options_variable_declarations.append(variable_declaration)
+
+      template_mappings['test_getopt_string'] = ''.join(test_getopt_string)
+      template_mappings['test_options_variable_declarations'] = '\n'.join(
+          sorted(test_options_variable_declarations))
+
+      template_filename = os.path.join(
+          template_directory, 'main-with_input-start.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['test_getopt_string']
+      del template_mappings['test_options_variable_declarations']
+
+      switch_case_unused = []
+      for option, argument in test_options:
+        if argument == 'offset': 
+          template_mappings['test_option'] = option
+          template_mappings['test_option_argument'] = argument
+
+          template_filename = os.path.join(
+              template_directory, 'main-with_input-switch_case.c')
+          self._GenerateSection(
+              template_filename, template_mappings, output_writer, output_filename,
+              access_mode='ab')
+
+          del template_mappings['test_option']
+          del template_mappings['test_option_argument']
+
+        else:
+          switch_case_unused.append(
+              '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option))
+
+      if switch_case_unused:
+        template_mappings['test_options_switch_case_unused'] = '\n'.join(
+            switch_case_unused)
+
+        template_filename = os.path.join(
+            template_directory, 'main-with_input-switch_case_unused.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
+
+        del template_mappings['test_options_switch_case_unused']
+
+      template_filename = os.path.join(
+          template_directory, 'main-with_input-end.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     else:
       template_filename = os.path.join(template_directory, 'main.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    if signature_type:
+      del template_mappings['signature_type']
 
     self._SortIncludeHeaders(project_configuration, output_filename)
+    self._SortVariableDeclarations(output_filename)
 
   def _GenerateMakefileAM(
       self, project_configuration, template_mappings, include_header_file,
@@ -5525,9 +5598,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
     function_arguments = ['     const system_character_t *source']
-    function_arguments.extend([
-        '     const system_character_t *{0:s}'.format(argument)
-        for _, argument in test_options])
+    for _, argument in test_options:
+      if argument != 'offset':
+        function_arguments.append(
+            '     const system_character_t *{0:s}'.format(argument))
 
     function_arguments = ',\n'.join(function_arguments)
 
@@ -5550,11 +5624,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     del template_mappings['test_options_function_variables']
 
     for _, argument in test_options:
-      template_filename = '{0:s}-set_{1:s}.c'.format(test_name, argument)
-      template_filename = os.path.join(template_directory, template_filename)
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      if argument != 'offset':
+        template_filename = '{0:s}-set_{1:s}.c'.format(test_name, argument)
+        template_filename = os.path.join(template_directory, template_filename)
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
 
     template_filename = '{0:s}-end.c'.format(test_name)
     template_filename = os.path.join(template_directory, template_filename)
@@ -5702,31 +5777,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       logging.warning('Skipping: {0:s}'.format(header_file.path))
       return False
 
-    # TODO: determine type_size_name based on function prototypes
-    if project_configuration.library_name in (
-        'libewf', 'libqcow', 'libvhdi', 'libvmdk'):
-      type_size_name = 'media_size'
-    else:
-      type_size_name = 'size'
+    type_size_name = self._GetTypeSizeName(project_configuration, type_name)
+    test_options = self._GetTestOptions(project_configuration, type_name)
 
-    # TODO: determine test_options based on function prototypes
-    test_options = []
-
-    if (type_name == 'volume' and
-        project_configuration.library_name == 'libbde'):
-      test_options.append(('p', 'password'))
-      test_options.append(('r', 'recovery_password'))
-
-    elif (type_name == 'volume' and
-        project_configuration.library_name == 'libluksde'):
-      test_options.append(('p', 'password'))
-
-    elif (type_name == 'file' and
-          project_configuration.library_name == 'libqcow'):
-      test_options.append(('p', 'password'))
-
-    template_directory = os.path.join(
-        self._template_directory, 'yal_test_type')
+    template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
     function_names = list(header_file.functions_per_name.keys())
     tests_to_run = []
@@ -5757,9 +5811,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if with_input:
       function_arguments = ['     libbfio_handle_t *file_io_handle']
-      function_arguments.extend([
-          '     const system_character_t *{0:s}'.format(argument)
-          for _, argument in test_options])
+      for _, argument in test_options:
+        if argument != 'offset':
+          function_arguments.append(
+              '     const system_character_t *{0:s}'.format(argument))
 
       function_arguments = ',\n'.join(function_arguments)
 
@@ -5782,11 +5837,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       del template_mappings['test_options_function_variables']
 
       for _, argument in test_options:
-        template_filename = 'start_with_input-set_{0:s}.c'.format(argument)
-        template_filename = os.path.join(template_directory, template_filename)
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
+        if argument != 'offset':
+          template_filename = 'start_with_input-set_{0:s}.c'.format(argument)
+          template_filename = os.path.join(
+              template_directory, template_filename)
+          self._GenerateSection(
+              template_filename, template_mappings, output_writer,
+              output_filename, access_mode='ab')
 
       template_filename = os.path.join(
           template_directory, 'start_with_input-end.c')
@@ -5992,27 +6049,22 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if with_input:
       test_getopt_string = []
       test_options_variable_declarations = []
-      # TODO: move test_options_switch into templates.
-      test_options_switch = []
       for option, argument in test_options:
-        if test_options_switch:
-          test_options_switch.append('')
-
         getopt_string = option
         if argument:
           getopt_string = '{0:s}:'.format(getopt_string)
 
+        test_getopt_string.append(getopt_string)
+
+        if argument == 'offset': 
+          test_options_variable_declarations.extend([
+              '\tsystem_character_t *option_{0:s} = NULL;'.format(argument),
+              '\toff64_t {0:s}_offset = 0;'.format(type_name)])
+
+        else:
           variable_declaration = (
               '\tsystem_character_t *option_{0:s} = NULL;').format(argument)
           test_options_variable_declarations.append(variable_declaration)
-
-          test_options_switch.extend([
-              '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
-              '\t\t\t\toption_{0:s} = optarg;'.format(argument),
-              '',
-              '\t\t\t\tbreak;'])
-
-        test_getopt_string.append(getopt_string)
 
       variable_declaration = '\tsystem_character_t *source = NULL;'
       test_options_variable_declarations.append(variable_declaration)
@@ -6020,24 +6072,52 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       template_mappings['test_getopt_string'] = ''.join(test_getopt_string)
       template_mappings['test_options_variable_declarations'] = '\n'.join(
           sorted(test_options_variable_declarations))
-      template_mappings['test_options_switch'] = '\n'.join(
-          test_options_switch)
 
       template_filename = os.path.join(
-          template_directory, 'main-start_with_input.c')
+          template_directory, 'main-start_with_input-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
       del template_mappings['test_getopt_string']
       del template_mappings['test_options_variable_declarations']
-      del template_mappings['test_options_switch']
+
+      for option, argument in test_options:
+        template_mappings['test_option'] = option
+        template_mappings['test_option_argument'] = argument
+
+        template_filename = os.path.join(
+            template_directory, 'main-start_with_input-switch_case.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+        del template_mappings['test_option']
+        del template_mappings['test_option_argument']
+
+      template_filename = os.path.join(
+          template_directory, 'main-start_with_input-end.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      if 'offset' in [argument for _, argument in test_options]:
+        template_filename = os.path.join(
+            template_directory, 'main-option_offset.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
 
     else:
       template_filename = os.path.join(template_directory, 'main-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'main-notify_set.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
 
     self._GenerateTypeTestsMainTestsToRun(
         project_configuration, template_mappings, type_name, tests_to_run,
@@ -6046,20 +6126,26 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if with_input:
       macro_arguments = ['\t\t source']
-      macro_arguments.extend([
-          '\t\t option_{0:s}'.format(argument) for _, argument in test_options])
-
       open_source_arguments = ['\t\t          file_io_handle']
-      open_source_arguments.extend([
-          '\t\t          option_{0:s}'.format(argument) for _, argument in test_options])
+      for _, argument in test_options:
+        if argument != 'offset':
+          macro_arguments.append(
+              '\t\t option_{0:s}'.format(argument))
+          open_source_arguments.append(
+              '\t\t          option_{0:s}'.format(argument))
 
       template_mappings['test_options_macro_arguments'] = ',\n'.join(
           macro_arguments)
       template_mappings['test_options_open_source_arguments'] = ',\n'.join(
           open_source_arguments)
 
-      template_filename = os.path.join(
-          template_directory, 'main-with_input_start.c')
+      if 'offset' in [argument for _, argument in test_options]:
+        template_filename = os.path.join(
+            template_directory, 'main-with_input-start_with_offset.c')
+      else:
+        template_filename = os.path.join(
+            template_directory, 'main-with_input-start.c')
+
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -6074,7 +6160,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if with_input:
       template_filename = os.path.join(
-          template_directory, 'main-with_input_end.c')
+          template_directory, 'main-with_input-end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -6322,6 +6408,52 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     """
     return '{0:s}_test_{1:s}_{2:s}'.format(
         project_configuration.library_name_suffix, type_name, type_function)
+
+  def _GetTestOptions(self, project_configuration, type_name):
+    """Retrieves the test options.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      type_name (str): name of type.
+
+    Returns:
+      list[tuple[str, str]]: test options.
+    """
+    # TODO: determine test_options based on function prototypes
+    test_options = []
+
+    if (type_name == 'volume' and
+        project_configuration.library_name == 'libbde'):
+      test_options.append(('o', 'offset'))
+      test_options.append(('p', 'password'))
+      test_options.append(('r', 'recovery_password'))
+
+    elif (type_name == 'volume' and
+        project_configuration.library_name == 'libluksde'):
+      test_options.append(('p', 'password'))
+
+    elif (type_name == 'file' and
+          project_configuration.library_name == 'libqcow'):
+      test_options.append(('p', 'password'))
+
+    return test_options
+
+  def _GetTypeSizeName(self, project_configuration, type_name):
+    """Retrieves the test size name.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      type_name (str): name of type.
+
+    Returns:
+      str: type size name.
+    """
+    # TODO: determine type_size_name based on function prototypes
+    if project_configuration.library_name in (
+        'libewf', 'libqcow', 'libvhdi', 'libvmdk'):
+      return 'media_size'
+
+    return 'size'
 
   def _SortSources(self, output_filename):
     """Sorts the sources.
@@ -6863,6 +6995,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       if argument:
         getopt_string = '{0:s}:'.format(getopt_string)
 
+      mount_tool_getopt_string.append(getopt_string)
+
+      if argument:
         alignment_padding = ' ' * (len('extended_options') - len(argument))
         variable_declaration = (
             '\tsystem_character_t *option_{0:s}{1:s} = NULL;').format(
@@ -6898,8 +7033,6 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
             '\t\t\t\t stdout );',
             '',
             '\t\t\t\treturn( EXIT_SUCCESS );'])
-
-      mount_tool_getopt_string.append(getopt_string)
 
     template_mappings['mount_tool_getopt_string'] = ''.join(mount_tool_getopt_string)
     template_mappings['mount_tool_options_variable_declarations'] = '\n'.join(
