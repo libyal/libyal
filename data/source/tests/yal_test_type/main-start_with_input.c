@@ -13,7 +13,7 @@ int main(
 	libbfio_handle_t *file_io_handle             = NULL;
 	libcerror_error_t *error                     = NULL;
 	${library_name}_${type_name}_t *${type_name} = NULL;
-	system_character_t *source                   = NULL;
+${test_options_variable_declarations}
 	system_integer_t option                      = 0;
 	size_t string_length                         = 0;
 	int result                                   = 0;
@@ -21,7 +21,7 @@ int main(
 	while( ( option = ${library_name_suffix}_test_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "${test_getopt_string}" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -33,6 +33,7 @@ int main(
 				 argv[ optind - 1 ] );
 
 				return( EXIT_FAILURE );
+${test_options_switch}
 		}
 	}
 	if( optind < argc )

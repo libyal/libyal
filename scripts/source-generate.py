@@ -5471,6 +5471,97 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     return function_name, test_function_name, function_prototype.have_extern
 
+  def _GenerateTypeTestOpenFunction(
+      self, project_configuration, template_mappings, type_name, type_function,
+      test_options, have_extern, header_file, output_writer, output_filename,
+      function_names):
+    """Generates a test for a type open function.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      type_function (str): type function.
+      test_options (list[tuple[str, str]]): test options.
+      have_extern (bool): True if the previous function prototype was
+          externally available.
+      header_file (LibraryHeaderFile): library header file.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+      function_names (list[str]): function names.
+
+    Returns:
+      bool: True if the function prototype was externally available.
+    """
+    function_prototype = header_file.GetTypeFunction(type_name, type_function)
+    if function_prototype:
+      self._GenerateTypeTestOpen(
+          project_configuration, template_mappings, type_name, type_function,
+          test_options, output_writer, output_filename)
+
+      function_name = self._GetFunctionName(
+          project_configuration, type_name, type_function)
+
+      function_names.remove(function_name)
+
+    return have_extern
+
+  def _GenerateTypeTestOpen(
+      self, project_configuration, template_mappings, type_name, test_name,
+      test_options, output_writer, output_filename):
+    """Generates an open test for a type.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      type_name (str): name of type.
+      test_name (str): name of test.
+      test_options (list[tuple[str, str]]): test options.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'yal_test_type')
+
+    function_arguments = ['     const system_character_t *source']
+    function_arguments.extend([
+        '     const system_character_t *{0:s}'.format(argument)
+        for _, argument in test_options])
+
+    function_arguments = ',\n'.join(function_arguments)
+
+    function_variables = ['\tint result = 0;']
+    if test_options:
+      function_variables.insert(0, '\tsize_t string_length = 0;')
+
+    function_variables = '\n'.join(function_variables)
+
+    template_mappings['test_options_function_arguments'] = function_arguments
+    template_mappings['test_options_function_variables'] = function_variables
+
+    template_filename = '{0:s}-start.c'.format(test_name)
+    template_filename = os.path.join(template_directory, template_filename)
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['test_options_function_arguments']
+    del template_mappings['test_options_function_variables']
+
+    for _, argument in test_options:
+      template_filename = '{0:s}-set_{1:s}.c'.format(test_name, argument)
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = '{0:s}-end.c'.format(test_name)
+    template_filename = os.path.join(template_directory, template_filename)
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
   def _GenerateTypeTestWithCloneFunction(
       self, project_configuration, template_mappings, type_name, type_function,
       have_extern, header_file, output_writer, output_filename,
@@ -5611,6 +5702,22 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       logging.warning('Skipping: {0:s}'.format(header_file.path))
       return False
 
+    # TODO: determine test options based on function prototypes
+    test_options = []
+
+    if (type_name == 'volume' and
+        project_configuration.library_name == 'libbde'):
+      test_options.append(('p', 'password'))
+      test_options.append(('r', 'recovery_password'))
+
+    elif (type_name == 'volume' and
+        project_configuration.library_name == 'libluksde'):
+      test_options.append(('p', 'password'))
+
+    elif (type_name == 'file' and
+          project_configuration.library_name == 'libqcow'):
+      test_options.append(('p', 'password'))
+
     template_directory = os.path.join(
         self._template_directory, 'yal_test_type')
 
@@ -5642,8 +5749,40 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     if with_input:
+      function_arguments = ['     libbfio_handle_t *file_io_handle']
+      function_arguments.extend([
+          '     const system_character_t *{0:s}'.format(argument)
+          for _, argument in test_options])
+
+      function_arguments = ',\n'.join(function_arguments)
+
+      function_variables = ['\tint result = 0;']
+      if test_options:
+        function_variables.insert(0, '\tsize_t string_length = 0;')
+
+      function_variables = '\n'.join(function_variables)
+
+      template_mappings['test_options_function_arguments'] = function_arguments
+      template_mappings['test_options_function_variables'] = function_variables
+
       template_filename = os.path.join(
-          template_directory, 'start_with_input.c')
+          template_directory, 'start_with_input-start.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['test_options_function_arguments']
+      del template_mappings['test_options_function_variables']
+
+      for _, argument in test_options:
+        template_filename = 'start_with_input-set_{0:s}.c'.format(argument)
+        template_filename = os.path.join(template_directory, template_filename)
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
+
+      template_filename = os.path.join(
+          template_directory, 'start_with_input-end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -5777,22 +5916,26 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         have_extern, header_file, output_writer, output_filename,
         function_names, tests_to_run, free_function=free_function)
 
-    # TODO: fix libbfio having no open wide.
-    # TODO: make handling open close more generic for libpff attachment handle.
-    for type_function in ('open', 'open_wide', 'open_file_io_handle', 'close'):
+    if with_input:
+      # TODO: fix libbfio having no open wide.
+      # TODO: make handling open close more generic for libpff attachment handle.
+      for type_function in ('open', 'open_wide', 'open_file_io_handle'):
+        have_extern = self._GenerateTypeTestOpenFunction(
+            project_configuration, template_mappings, type_name, type_function,
+            test_options, have_extern, header_file, output_writer,
+            output_filename, function_names)
+
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
-          project_configuration, template_mappings, type_name, type_function,
+          project_configuration, template_mappings, type_name, 'close',
           have_extern, header_file, output_writer, output_filename,
           initialize_is_internal=initialize_is_internal, with_input=with_input)
 
       if test_function_name:
         function_names.remove(function_name)
 
-    if with_input:
-      template_filename = os.path.join(template_directory, 'open_close.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      self._GenerateTypeTestOpen(
+          project_configuration, template_mappings, type_name, 'open_close',
+          test_options, output_writer, output_filename)
 
       # The open, close and open-close functions are defined in the template
       # so no need to add them to tests_to_run or tests_to_run_with_args.
@@ -5838,14 +5981,54 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: generate run test macros.
 
     if with_input:
-      template_filename = 'main_start_with_input.c'
-    else:
-      template_filename = 'main_start.c'
+      test_getopt_string = []
+      test_options_variable_declarations = []
+      # TODO: move test_options_switch into templates.
+      test_options_switch = []
+      for option, argument in test_options:
+        if test_options_switch:
+          test_options_switch.append('')
 
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        getopt_string = option
+        if argument:
+          getopt_string = '{0:s}:'.format(getopt_string)
+
+          variable_declaration = (
+              '\tsystem_character_t *option_{0:s} = NULL;').format(argument)
+          test_options_variable_declarations.append(variable_declaration)
+
+          test_options_switch.extend([
+              '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
+              '\t\t\t\toption_{0:s} = optarg;'.format(argument),
+              '',
+              '\t\t\t\tbreak;'])
+
+        test_getopt_string.append(getopt_string)
+
+      variable_declaration = '\tsystem_character_t *source = NULL;'
+      test_options_variable_declarations.append(variable_declaration)
+
+      template_mappings['test_getopt_string'] = ''.join(test_getopt_string)
+      template_mappings['test_options_variable_declarations'] = '\n'.join(
+          sorted(test_options_variable_declarations))
+      template_mappings['test_options_switch'] = '\n'.join(
+          test_options_switch)
+
+      template_filename = os.path.join(
+          template_directory, 'main-start_with_input.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['test_getopt_string']
+      del template_mappings['test_options_variable_declarations']
+      del template_mappings['test_options_switch']
+
+    else:
+      template_filename = os.path.join(template_directory, 'main-start.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     self._GenerateTypeTestsMainTestsToRun(
         project_configuration, template_mappings, type_name, tests_to_run,
@@ -5853,11 +6036,27 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         initialize_is_internal=initialize_is_internal)
 
     if with_input:
+      macro_arguments = ['\t\t source']
+      macro_arguments.extend([
+          '\t\t option_{0:s}'.format(argument) for _, argument in test_options])
+
+      open_source_arguments = ['\t\t          file_io_handle']
+      open_source_arguments.extend([
+          '\t\t          option_{0:s}'.format(argument) for _, argument in test_options])
+
+      template_mappings['test_options_macro_arguments'] = ',\n'.join(
+          macro_arguments)
+      template_mappings['test_options_open_source_arguments'] = ',\n'.join(
+          open_source_arguments)
+
       template_filename = os.path.join(
-          template_directory, 'main_with_input_start.c')
+          template_directory, 'main-with_input_start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
+
+      del template_mappings['test_options_macro_arguments']
+      del template_mappings['test_options_open_source_arguments']
 
     self._GenerateTypeTestsMainTestsToRun(
         project_configuration, template_mappings, type_name,
@@ -5866,14 +6065,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if with_input:
       template_filename = os.path.join(
-          template_directory, 'main_with_input_end.c')
+          template_directory, 'main-with_input_end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      template_filename = 'main_end_with_input.c'
+      template_filename = 'main-end_with_input.c'
     else:
-      template_filename = 'main_end.c'
+      template_filename = 'main-end.c'
 
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(

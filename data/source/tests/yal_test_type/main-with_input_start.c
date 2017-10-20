@@ -25,21 +25,21 @@
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
 		 "${library_name}_${type_name}_open",
 		 ${library_name_suffix}_test_${type_name}_open,
-		 source );
+${test_options_macro_arguments} );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
 		 "${library_name}_${type_name}_open_wide",
 		 ${library_name_suffix}_test_${type_name}_open_wide,
-		 source );
+${test_options_macro_arguments} );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
 		 "${library_name}_${type_name}_open_file_io_handle",
 		 ${library_name_suffix}_test_${type_name}_open_file_io_handle,
-		 source );
+${test_options_macro_arguments} );
 
 		${library_name_suffix_upper_case}_TEST_RUN(
 		 "${library_name}_${type_name}_close",
@@ -48,7 +48,7 @@
 		${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS(
 		 "${library_name}_${type_name}_open_close",
 		 ${library_name_suffix}_test_${type_name}_open_close,
-		 source );
+${test_options_macro_arguments} );
 
 		/* Initialize test
 		 */
@@ -96,7 +96,7 @@
 
 		result = ${library_name_suffix}_test_${type_name}_open_source(
 		          &${type_name},
-		          file_io_handle,
+${test_options_open_source_arguments},
 		          &error );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
