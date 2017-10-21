@@ -5823,6 +5823,15 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     tests_to_run_with_args = []
     tests_to_run_with_input = []
 
+    function_prototype = header_file.GetTypeFunction(
+        type_name, 'open_file_io_pool')
+    if function_prototype:
+      bfio_type = 'pool'
+    else:
+      bfio_type = 'handle'
+
+    template_mappings['bfio_type'] = bfio_type
+
     self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
     template_filename = os.path.join(template_directory, 'header.c')
@@ -5847,7 +5856,22 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     if with_input:
-      function_arguments = ['     libbfio_handle_t *file_io_handle']
+      if bfio_type == 'pool':
+        template_filename = 'start_with_input-bfio_pool.c'
+      else:
+        template_filename = 'start_with_input-bfio_handle.c'
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      function_arguments = []
+      if bfio_type == 'pool':
+        function_arguments.append('     libbfio_pool_t *file_io_pool')
+      else:
+        function_arguments.append('     libbfio_handle_t *file_io_handle')
+
       for _, argument in test_options:
         if argument != 'offset':
           function_arguments.append(
@@ -6020,7 +6044,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if with_input:
       # TODO: fix libbfio having no open wide.
       # TODO: make handling open close more generic for libpff attachment handle.
-      for type_function in ('open', 'open_wide', 'open_file_io_handle'):
+      for type_function in (
+          'open', 'open_wide', 'open_file_io_handle', 'open_file_io_pool'):
         have_extern = self._GenerateTypeTestOpenFunction(
             project_configuration, template_mappings, type_name, type_function,
             test_options, have_extern, header_file, output_writer,
@@ -6163,12 +6188,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if with_input:
       if 'offset' in [argument for _, argument in test_options]:
-        template_filename = os.path.join(
-            template_directory, 'main-with_input-start_with_offset.c')
+        template_filename = 'main-with_input-start_with_offset.c'
       else:
-        template_filename = os.path.join(
-            template_directory, 'main-with_input-start.c')
+        template_filename = 'main-with_input-start.c'
 
+      template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -6178,32 +6202,25 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           tests_to_run_with_input, header_file, output_writer, output_filename,
           initialize_is_internal=initialize_is_internal, with_input=True)
 
-      macro_arguments = ['\t\t source']
       open_source_arguments = ['\t\t          file_io_handle']
       for _, argument in test_options:
         if argument != 'offset':
-          macro_arguments.append(
-              '\t\t option_{0:s}'.format(argument))
           open_source_arguments.append(
               '\t\t          option_{0:s}'.format(argument))
 
-      template_mappings['test_options_macro_arguments'] = ',\n'.join(
-          macro_arguments)
       template_mappings['test_options_open_source_arguments'] = ',\n'.join(
           open_source_arguments)
 
       if 'offset' in [argument for _, argument in test_options]:
-        template_filename = os.path.join(
-            template_directory, 'main-with_input-tests_with_offset.c')
+        template_filename = 'main-with_input-tests_with_offset.c'
       else:
-        template_filename = os.path.join(
-            template_directory, 'main-with_input-tests.c')
+        template_filename = 'main-with_input-tests.c'
 
+      template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      del template_mappings['test_options_macro_arguments']
       del template_mappings['test_options_open_source_arguments']
 
     self._GenerateTypeTestsMainTestsToRun(
@@ -6226,6 +6243,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    del template_mappings['bfio_type']
 
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
@@ -6296,14 +6315,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
                 template_filename, template_mappings, output_writer,
                 output_filename, access_mode='ab')
 
-          if not have_extern and last_have_extern:
+          if have_extern and not last_have_extern:
             template_filename = os.path.join(
                 template_directory, 'define_internal-end.c')
             self._GenerateSection(
                 template_filename, template_mappings, output_writer,
                 output_filename, access_mode='ab')
 
-          if have_extern and not last_have_extern:
+          if not have_extern and last_have_extern:
             template_filename = os.path.join(
                 template_directory, 'define_internal-start.c')
             self._GenerateSection(
@@ -6386,7 +6405,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer,
             output_filename, access_mode='ab')
 
-      if not have_extern and last_have_extern:
+      if have_extern and not last_have_extern:
         template_filename = os.path.join(
             template_directory, 'define_internal-end.c')
         self._GenerateSection(

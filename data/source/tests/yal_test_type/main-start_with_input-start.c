@@ -10,7 +10,7 @@ int main(
      char * const argv[] )
 #endif
 {
-	libbfio_handle_t *file_io_handle             = NULL;
+	libbfio_${bfio_type}_t *file_io_${bfio_type} = NULL;
 	libcerror_error_t *error                     = NULL;
 	${library_name}_${type_name}_t *${type_name} = NULL;
 ${test_options_variable_declarations}

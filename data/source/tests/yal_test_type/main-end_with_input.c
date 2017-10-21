@@ -12,10 +12,10 @@ on_error:
 		 &${type_name},
 		 NULL );
 	}
-	if( file_io_handle != NULL )
+	if( file_io_${bfio_type} != NULL )
 	{
-		libbfio_handle_free(
-		 &file_io_handle,
+		libbfio_${bfio_type}_free(
+		 &file_io_${bfio_type},
 		 NULL );
 	}
 	return( EXIT_FAILURE );

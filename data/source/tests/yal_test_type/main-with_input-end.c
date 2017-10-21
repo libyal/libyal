@@ -17,8 +17,8 @@
 		 "error",
 		 error );
 
-		result = libbfio_handle_free(
-		          &file_io_handle,
+		result = libbfio_${bfio_type}_free(
+		          &file_io_${bfio_type},
 		          &error );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -27,8 +27,8 @@
 		 1 );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	         "file_io_handle",
-	         file_io_handle );
+	         "file_io_${bfio_type}",
+	         file_io_${bfio_type} );
 
 	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	         "error",
