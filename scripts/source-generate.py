@@ -5195,17 +5195,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       test_script = 'test_library.sh'
       test_scripts.append(test_script)
 
-    tool_name = '{0:s}info'.format(
-        project_configuration.library_name_suffix)
-    if tool_name in project_configuration.tools_names:
-      test_script = 'test_{0:s}.sh'.format(tool_name)
-      test_scripts.append(test_script)
-
-    tool_name = '{0:s}export'.format(
-        project_configuration.library_name_suffix)
-    if tool_name in project_configuration.tools_names:
-      test_script = 'test_{0:s}.sh'.format(tool_name)
-      test_scripts.append(test_script)
+    for tool_name_suffix in ('export', 'info', 'verify'):
+      tool_name = '{0:s}{1:s}'.format(
+          project_configuration.library_name_suffix, tool_name_suffix)
+      if tool_name in project_configuration.tools_names:
+        test_script = 'test_{0:s}.sh'.format(tool_name)
+        test_scripts.append(test_script)
 
     check_scripts = ['test_runner.sh']
     check_scripts.extend(test_scripts)
@@ -5549,14 +5544,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if not initialize_is_internal:
       if not function_prototype.have_extern and last_have_extern:
         internal_template_filename = os.path.join(
-            template_directory, 'define_internal_start.c')
+            template_directory, 'define_internal-start.c')
         self._GenerateSection(
             internal_template_filename, template_mappings, output_writer,
             output_filename, access_mode='ab')
 
       elif function_prototype.have_extern and not last_have_extern:
         internal_template_filename = os.path.join(
-            template_directory, 'define_internal_end.c')
+            template_directory, 'define_internal-end.c')
         self._GenerateSection(
             internal_template_filename, template_mappings, output_writer,
             output_filename, access_mode='ab')
@@ -5573,7 +5568,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   def _GenerateTypeTestOpenFunction(
       self, project_configuration, template_mappings, type_name, type_function,
       test_options, have_extern, header_file, output_writer, output_filename,
-      function_names):
+      function_names, tests_to_run):
     """Generates a test for a type open function.
 
     Args:
@@ -5589,6 +5584,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
       function_names (list[str]): function names.
+      tests_to_run (list[tuple[str, str]]): pairs of the function name and
+          corresponding test function name that need to be run.
 
     Returns:
       bool: True if the function prototype was externally available.
@@ -5601,7 +5598,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       function_name = self._GetFunctionName(
           project_configuration, type_name, type_function)
+      test_function_name = self._GetTestFunctionName(
+          project_configuration, type_name, type_function)
 
+      tests_to_run.append((function_name, test_function_name))
       function_names.remove(function_name)
 
     return have_extern
@@ -5623,6 +5623,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
+    needs_glob = self._NeedsGlob(project_configuration, type_name)
+
     function_arguments = ['     const system_character_t *source']
     for _, argument in test_options:
       if argument != 'offset':
@@ -5633,14 +5635,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     function_variables = ['\tint result = 0;']
     if test_options:
-      function_variables.insert(0, '\tsize_t string_length = 0;')
+      function_variables.append('\tsize_t string_length = 0;')
 
     function_variables = '\n'.join(function_variables)
 
     template_mappings['test_options_function_arguments'] = function_arguments
     template_mappings['test_options_function_variables'] = function_variables
 
-    template_filename = '{0:s}-start.c'.format(test_name)
+    if needs_glob:
+      template_filename = '{0:s}-start-with_glob.c'.format(test_name)
+    else:
+      template_filename = '{0:s}-start.c'.format(test_name)
+
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
@@ -5657,7 +5663,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
-    template_filename = '{0:s}-end.c'.format(test_name)
+    if needs_glob:
+      template_filename = '{0:s}-end-with_glob.c'.format(test_name)
+    else:
+      template_filename = '{0:s}-end.c'.format(test_name)
+
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
@@ -5811,6 +5821,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     function_names = list(header_file.functions_per_name.keys())
     tests_to_run = []
     tests_to_run_with_args = []
+    tests_to_run_with_input = []
 
     self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
@@ -5984,7 +5995,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     function_prototype = header_file.GetTypeFunction(type_name, 'free')
     if function_prototype and initialize_is_internal and have_extern:
       template_filename = os.path.join(
-          template_directory, 'define_internal_start.c')
+          template_directory, 'define_internal-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -6013,7 +6024,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         have_extern = self._GenerateTypeTestOpenFunction(
             project_configuration, template_mappings, type_name, type_function,
             test_options, have_extern, header_file, output_writer,
-            output_filename, function_names)
+            output_filename, function_names, tests_to_run_with_input)
 
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, 'close',
@@ -6021,19 +6032,19 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           initialize_is_internal=initialize_is_internal, with_input=with_input)
 
       if test_function_name:
+        tests_to_run_with_input.append((function_name, test_function_name))
         function_names.remove(function_name)
 
       self._GenerateTypeTestOpen(
           project_configuration, template_mappings, type_name, 'open_close',
           test_options, output_writer, output_filename)
 
-      # The open, close and open-close functions are defined in the template
-      # so no need to add them to tests_to_run or tests_to_run_with_args.
-      function_name = '{0:s}_{1:s}_open_file_io_handle'.format(
-          project_configuration.library_name, type_name)
+      function_name = self._GetFunctionName(
+          project_configuration, type_name, 'open_close')
+      test_function_name = self._GetTestFunctionName(
+          project_configuration, type_name, 'open_close')
 
-      if function_name in function_names:
-        function_names.remove(function_name)
+      tests_to_run_with_input.append((function_name, test_function_name))
 
     template_mappings['type_size_name'] = type_size_name
 
@@ -6064,7 +6075,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if initialize_is_internal or not have_extern:
       template_filename = os.path.join(
-          template_directory, 'define_internal_end.c')
+          template_directory, 'define_internal-end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -6146,11 +6157,27 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     self._GenerateTypeTestsMainTestsToRun(
-        project_configuration, template_mappings, type_name, tests_to_run,
-        header_file, output_writer, output_filename,
+        project_configuration, template_mappings, type_name, test_options,
+        tests_to_run, header_file, output_writer, output_filename,
         initialize_is_internal=initialize_is_internal)
 
     if with_input:
+      if 'offset' in [argument for _, argument in test_options]:
+        template_filename = os.path.join(
+            template_directory, 'main-with_input-start_with_offset.c')
+      else:
+        template_filename = os.path.join(
+            template_directory, 'main-with_input-start.c')
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      self._GenerateTypeTestsMainTestsToRun(
+          project_configuration, template_mappings, type_name, test_options,
+          tests_to_run_with_input, header_file, output_writer, output_filename,
+          initialize_is_internal=initialize_is_internal, with_input=True)
+
       macro_arguments = ['\t\t source']
       open_source_arguments = ['\t\t          file_io_handle']
       for _, argument in test_options:
@@ -6167,10 +6194,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       if 'offset' in [argument for _, argument in test_options]:
         template_filename = os.path.join(
-            template_directory, 'main-with_input-start_with_offset.c')
+            template_directory, 'main-with_input-tests_with_offset.c')
       else:
         template_filename = os.path.join(
-            template_directory, 'main-with_input-start.c')
+            template_directory, 'main-with_input-tests.c')
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -6180,7 +6207,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       del template_mappings['test_options_open_source_arguments']
 
     self._GenerateTypeTestsMainTestsToRun(
-        project_configuration, template_mappings, type_name,
+        project_configuration, template_mappings, type_name, test_options,
         tests_to_run_with_args, header_file, output_writer, output_filename,
         initialize_is_internal=initialize_is_internal, with_args=True)
 
@@ -6206,9 +6233,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     return True
 
   def _GenerateTypeTestsMainTestsToRun(
-      self, project_configuration, template_mappings, type_name, tests_to_run,
-      header_file, output_writer, output_filename, initialize_is_internal=False,
-      with_args=False):
+      self, project_configuration, template_mappings, type_name, test_options,
+      tests_to_run, header_file, output_writer, output_filename,
+      initialize_is_internal=False, with_args=False, with_input=False):
     """Generates a type tests source file.
 
     Args:
@@ -6216,6 +6243,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       type_name (str): name of type.
+      test_options (list[tuple[str, str]]): test options.
       tests_to_run (list[tuple[str, str]]): names of the library type function
           and its corresponding test function.
       header_file (LibraryHeaderFile): library header file.
@@ -6224,49 +6252,72 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       initialize_is_internal (Optional[bool]): True if the initialize function
           is not externally available.
       with_args (Optional[bool]): True if the tests to run have arguments.
+      with_input (Optional[bool]): True if the tests to run have input.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'yal_test_type')
+    template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
     library_name_suffix = project_configuration.library_name_suffix.upper()
 
     last_have_extern = not initialize_is_internal
+    last_have_wide_character_type = False
     tests_to_run_mappings = []
     for function_name, test_function_name in tests_to_run:
       function_prototype = header_file.functions_per_name.get(
           function_name, None)
 
-      if function_prototype.name.endswith('_free'):
-        have_extern = function_prototype.have_extern
+      if not function_prototype:
+        have_wide_character_type = False
+        have_extern = last_have_extern
       else:
-        have_extern = (
-            not initialize_is_internal and function_prototype.have_extern)
+        have_wide_character_type = function_prototype.have_wide_character_type
+        if function_prototype.name.endswith('_free'):
+          have_extern = function_prototype.have_extern
+        else:
+          have_extern = (
+              not initialize_is_internal and function_prototype.have_extern)
 
-      if have_extern != last_have_extern:
+      if (have_wide_character_type != last_have_wide_character_type or
+          have_extern != last_have_extern):
+
         if tests_to_run_mappings:
-          if not last_have_extern:
-            template_filename = os.path.join(
-                template_directory, 'define_internal_start.c')
-            self._GenerateSection(
-                template_filename, template_mappings, output_writer, output_filename,
-                access_mode='ab')
-
           template_mappings['tests_to_run'] = '\n'.join(tests_to_run_mappings)
           tests_to_run_mappings = []
 
           template_filename = os.path.join(
-              template_directory, 'main_tests_to_run.c')
+              template_directory, 'main-tests_to_run.c')
           self._GenerateSection(
-              template_filename, template_mappings, output_writer, output_filename,
-              access_mode='ab')
+              template_filename, template_mappings, output_writer,
+              output_filename, access_mode='ab')
 
-          if not last_have_extern:
+          if not have_wide_character_type and last_have_wide_character_type:
             template_filename = os.path.join(
-                template_directory, 'define_internal_end.c')
+                template_directory, 'define_wide_character_type-end.c')
             self._GenerateSection(
-                template_filename, template_mappings, output_writer, output_filename,
-                access_mode='ab')
+                template_filename, template_mappings, output_writer,
+                output_filename, access_mode='ab')
 
+          if not have_extern and last_have_extern:
+            template_filename = os.path.join(
+                template_directory, 'define_internal-end.c')
+            self._GenerateSection(
+                template_filename, template_mappings, output_writer,
+                output_filename, access_mode='ab')
+
+          if have_extern and not last_have_extern:
+            template_filename = os.path.join(
+                template_directory, 'define_internal-start.c')
+            self._GenerateSection(
+                template_filename, template_mappings, output_writer,
+                output_filename, access_mode='ab')
+
+          if have_wide_character_type and not last_have_wide_character_type:
+            template_filename = os.path.join(
+                template_directory, 'define_wide_character_type-start.c')
+            self._GenerateSection(
+                template_filename, template_mappings, output_writer,
+                output_filename, access_mode='ab')
+
+        last_have_wide_character_type = have_wide_character_type
         last_have_extern = have_extern
 
       if tests_to_run_mappings:
@@ -6288,6 +6339,28 @@ class TestsSourceFileGenerator(SourceFileGenerator):
               '\t\t {0:s},'.format(test_function_name),
               '\t\t {0:s} );'.format(type_name)]
 
+        elif with_input:
+          if (function_name.endswith('_close') and
+              not function_name.endswith('_open_close')):
+            test_to_run_mappings = [
+                '\t\t{0:s}_TEST_RUN('.format(library_name_suffix),
+                '\t\t "{0:s}",'.format(function_name),
+                '\t\t {0:s} );'.format(test_function_name)]
+
+          else:
+            test_to_run_mappings = [
+                '\t\t{0:s}_TEST_RUN_WITH_ARGS('.format(library_name_suffix),
+                '\t\t "{0:s}",'.format(function_name),
+                '\t\t {0:s},'.format(test_function_name),
+                '\t\t source' ]
+
+            for _, argument in test_options:
+              if argument != 'offset':
+                test_to_run_mappings[-1] = '{0:s},'.format(test_to_run_mappings[-1])
+                test_to_run_mappings.append('\t\t option_{0:s}'.format(argument))
+
+            test_to_run_mappings[-1] = '{0:s} );'.format(test_to_run_mappings[-1])
+
         else:
           test_to_run_mappings = [
               '\t{0:s}_TEST_RUN('.format(library_name_suffix),
@@ -6297,28 +6370,28 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         tests_to_run_mappings.extend(test_to_run_mappings)
 
     if tests_to_run_mappings:
-      if not last_have_extern:
-        template_filename = os.path.join(
-            template_directory, 'define_internal_start.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
-
       template_mappings['tests_to_run'] = '\n'.join(tests_to_run_mappings)
       tests_to_run_mappings = []
 
       template_filename = os.path.join(
-          template_directory, 'main_tests_to_run.c')
+          template_directory, 'main-tests_to_run.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      if not last_have_extern:
+      if not have_wide_character_type and last_have_wide_character_type:
         template_filename = os.path.join(
-            template_directory, 'define_internal_end.c')
+            template_directory, 'define_wide_character_type-end.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+      if not have_extern and last_have_extern:
+        template_filename = os.path.join(
+            template_directory, 'define_internal-end.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
 
   def _GetFunctionName(
       self, project_configuration, type_name, type_function):
@@ -6474,6 +6547,23 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     return test_options
 
+  def _NeedsGlob(self, project_configuration, type_name):
+    """Determines if the type needs a glob function for source files.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      type_name (str): name of type.
+
+    Returns:
+      bool: True if the type needs a glob function.
+    """
+    # TODO: determine test_options based on function prototypes
+    if (type_name == 'handle' and project_configuration.library_name in (
+        'libewf', 'libsmraw')):
+      return True
+
+    return False
+
   def _GetTypeSizeName(self, project_configuration, type_name):
     """Retrieves the test size name.
 
@@ -6485,8 +6575,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       str: type size name.
     """
     # TODO: determine type_size_name based on function prototypes
-    if project_configuration.library_name in (
-        'libewf', 'libqcow', 'libvhdi', 'libvmdk'):
+    # TODO: add support libfvde and libvslvm
+    if (type_name == 'file' and project_configuration.library_name in (
+        'libqcow', 'libvhdi')):
+      return 'media_size'
+
+    if (type_name == 'handle' and project_configuration.library_name in (
+        'libewf', 'libsmraw', 'libvmdk')):
       return 'media_size'
 
     return 'size'
