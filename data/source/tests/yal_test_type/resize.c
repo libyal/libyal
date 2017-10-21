@@ -33,7 +33,6 @@ int ${library_name_suffix}_test_${type_name}_resize(
 	result = lib${library_name_suffix}_${type_name}_resize(
 	          ${type_name},
 	          35,
-	          &${library_name_suffix}_test_${type_name}_${value_name}_free_function,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -50,7 +49,6 @@ int ${library_name_suffix}_test_${type_name}_resize(
 	result = lib${library_name_suffix}_${type_name}_resize(
 	          ${type_name},
 	          4,
-	          &${library_name_suffix}_test_${type_name}_${value_name}_free_function,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -67,7 +65,6 @@ int ${library_name_suffix}_test_${type_name}_resize(
 	result = lib${library_name_suffix}_${type_name}_resize(
 	          NULL,
 	          10,
-	          NULL,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -85,7 +82,6 @@ int ${library_name_suffix}_test_${type_name}_resize(
 	result = lib${library_name_suffix}_${type_name}_resize(
 	          ${type_name},
 	          -10,
-	          NULL,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -105,7 +101,6 @@ int ${library_name_suffix}_test_${type_name}_resize(
 	result = lib${library_name_suffix}_${type_name}_resize(
 	          NULL,
 	          INT_MAX,
-	          NULL,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -126,7 +121,6 @@ int ${library_name_suffix}_test_${type_name}_resize(
 	 */
 	result = lib${library_name_suffix}_${type_name}_free(
 	          &${type_name},
-	          &${library_name_suffix}_test_${type_name}_${value_name}_free_function,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -154,7 +148,6 @@ on_error:
 	{
 		lib${library_name_suffix}_${type_name}_free(
 		 &${type_name},
-		 &${library_name_suffix}_test_${type_name}_${value_name}_free_function,
 		 NULL );
 	}
 	return( 0 );

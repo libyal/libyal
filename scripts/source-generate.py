@@ -6242,8 +6242,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         initialize_is_internal=initialize_is_internal, with_args=True)
 
     if with_input:
-      template_filename = os.path.join(
-          template_directory, 'main-with_input-end.c')
+      if needs_glob:
+        template_filename = 'main-with_glob-end.c'
+      else:
+        template_filename = 'main-with_input-end.c'
+
+      template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -6295,6 +6299,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     last_have_extern = not initialize_is_internal
     last_have_wide_character_type = False
+
+    if not last_have_extern:
+      template_filename = os.path.join(
+          template_directory, 'define_internal-start.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer,
+          output_filename, access_mode='ab')
+
     tests_to_run_mappings = []
     for function_name, test_function_name in tests_to_run:
       function_prototype = header_file.functions_per_name.get(
@@ -6421,12 +6433,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer,
             output_filename, access_mode='ab')
 
-      if have_extern and not last_have_extern:
-        template_filename = os.path.join(
-            template_directory, 'define_internal-end.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
+    if not last_have_extern:
+      template_filename = os.path.join(
+          template_directory, 'define_internal-end.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer,
+          output_filename, access_mode='ab')
 
   def _GetFunctionName(
       self, project_configuration, type_name, type_function):
