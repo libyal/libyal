@@ -28,13 +28,13 @@ ${test_options_function_variables}
 
 		return( -1 );
 	}
-	if( file_io_handle == NULL )
+	if( file_io_${bfio_type} == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file IO handle.",
+		 "%s: invalid file IO ${bfio_type}.",
 		 function );
 
 		return( -1 );

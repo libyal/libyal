@@ -162,6 +162,12 @@ on_error:
 		 &${type_name},
 		 NULL );
 	}
+	if( file_io_handle != NULL )
+	{
+		libbfio_handle_free(
+		 &file_io_handle,
+		 NULL );
+	}
 	if( file_io_pool != NULL )
 	{
 		libbfio_pool_free(

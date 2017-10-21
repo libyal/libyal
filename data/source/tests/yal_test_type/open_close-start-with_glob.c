@@ -16,7 +16,7 @@ ${test_options_function_variables}
 	source_length = system_string_length(
 	                 source );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = ${library_name}_glob_wide(
 	          source,
 	          source_length,

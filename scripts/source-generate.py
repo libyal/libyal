@@ -5132,12 +5132,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
       if 'offset' in [argument for _, argument in test_options]:
-        template_filename = os.path.join(
-            template_directory, 'main-end_with_input-with_offset.c')
+        template_filename = 'main-end_with_offset.c'
       else:
-        template_filename = os.path.join(
-            template_directory, 'main-end_with_input.c')
+        template_filename = 'main-end_with_input.c'
 
+      template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -5832,6 +5831,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     template_mappings['bfio_type'] = bfio_type
 
+    needs_glob = self._NeedsGlob(project_configuration, type_name)
+
     self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
     template_filename = os.path.join(template_directory, 'header.c')
@@ -6128,6 +6129,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
               '\tsystem_character_t *option_{0:s} = NULL;').format(argument)
           test_options_variable_declarations.append(variable_declaration)
 
+      if needs_glob:
+        test_options_variable_declarations.extend([
+            '\tlibbfio_handle_t *file_io_handle = NULL;',
+            '\tsystem_character_t **filenames = NULL;',
+            '\tint filename_index = 0;',
+            '\tint number_of_filenames = 0;'])
+
       variable_declaration = '\tsystem_character_t *source = NULL;'
       test_options_variable_declarations.append(variable_declaration)
 
@@ -6187,8 +6195,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         initialize_is_internal=initialize_is_internal)
 
     if with_input:
-      if 'offset' in [argument for _, argument in test_options]:
-        template_filename = 'main-with_input-start_with_offset.c'
+      if needs_glob:
+        template_filename = 'main-with_glob-start.c'
+      elif 'offset' in [argument for _, argument in test_options]:
+        template_filename = 'main-with_offset-start.c'
       else:
         template_filename = 'main-with_input-start.c'
 
@@ -6202,7 +6212,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           tests_to_run_with_input, header_file, output_writer, output_filename,
           initialize_is_internal=initialize_is_internal, with_input=True)
 
-      open_source_arguments = ['\t\t          file_io_handle']
+      if needs_glob:
+        open_source_arguments = ['\t\t          file_io_pool']
+      else:
+        open_source_arguments = ['\t\t          file_io_handle']
       for _, argument in test_options:
         if argument != 'offset':
           open_source_arguments.append(
@@ -6235,7 +6248,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      template_filename = 'main-end_with_input.c'
+    if needs_glob:
+      template_filename = 'main-end-with_glob.c'
+    elif with_input:
+      template_filename = 'main-end-with_input.c'
     else:
       template_filename = 'main-end.c'
 

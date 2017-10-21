@@ -97,7 +97,7 @@
 	 "error",
 	 error );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = ${library_name}_glob_wide_free(
 	          filenames,
 	          number_of_filenames,
@@ -135,7 +135,7 @@ on_error:
 	}
 	if( filenames != NULL )
 	{
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		${library_name}_glob_wide_free(
 		 filenames,
 		 number_of_filenames,
