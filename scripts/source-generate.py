@@ -5867,6 +5867,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+      template_filename = os.path.join(template_directory, 'start_with_input.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
       function_arguments = []
       if bfio_type == 'pool':
         function_arguments.append('     libbfio_pool_t *file_io_pool')
@@ -5890,7 +5895,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       template_mappings['test_options_function_variables'] = function_variables
 
       template_filename = os.path.join(
-          template_directory, 'start_with_input-start.c')
+          template_directory, 'open_source-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -5900,15 +5905,33 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       for _, argument in test_options:
         if argument != 'offset':
-          template_filename = 'start_with_input-set_{0:s}.c'.format(argument)
+          template_filename = 'open_source-set_{0:s}.c'.format(argument)
           template_filename = os.path.join(
               template_directory, template_filename)
           self._GenerateSection(
               template_filename, template_mappings, output_writer,
               output_filename, access_mode='ab')
 
-      template_filename = os.path.join(
-          template_directory, 'start_with_input-end.c')
+      template_filename = os.path.join(template_directory, 'open_source-body.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      function_prototype = header_file.GetTypeFunction(
+          type_name, 'open_extent_data_files')
+      if function_prototype:
+        template_filename = os.path.join(
+            template_directory, 'open_source-extend_data_files.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+      template_filename = os.path.join(template_directory, 'open_source-end.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      template_filename = os.path.join(template_directory, 'close_source.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
