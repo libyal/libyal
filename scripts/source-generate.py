@@ -5751,7 +5751,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         output_filename)
 
     template_directory = os.path.join(self._template_directory, 'yal_test_type')
-    template_filename = os.path.join(template_directory, template_filename)
+    if template_filename:
+      # os.path.join will fail if template_filename is None.
+      template_filename = os.path.join(template_directory, template_filename)
     if not template_filename or not os.path.exists(template_filename):
       logging.warning((
           'Unable to generate test type source code for type function: '
@@ -5887,6 +5889,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     Returns:
       bool: True if the function prototype was externally available.
     """
+    library_type_prefix = '{0:s}_'.format(project_configuration.library_name)
+
     function_prototype = header_file.GetTypeFunction(type_name, type_function)
     if not function_prototype:
       return last_have_extern
@@ -5898,10 +5902,19 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       template_filename = '{0:s}.c'.format(type_function)
 
     elif number_of_arguments == 3:
-      # TODO: determine value type and name
       template_filename = '{0:s}-with_value.c'.format(type_function)
-      value_name = 'io_handle'
-      value_type = 'io_handle'
+
+      function_argument = function_prototype.arguments[1]
+      function_argument_string = function_argument.CopyToString()
+
+      value_type, _, value_name = function_argument_string.partition(' ')
+      value_name = value_name.lstrip('*')
+
+      if not value_type.startswith(library_type_prefix):
+        return last_have_extern
+
+      _, _, value_type = value_type.partition('_')
+      value_type, _, _ = value_type.rpartition('_')
 
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
       self._SetValueTypeInTemplateMappings(template_mappings, value_type)
