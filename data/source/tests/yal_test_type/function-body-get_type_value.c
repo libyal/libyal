@@ -1,14 +1,3 @@
-/* Tests the ${library_name}_${type_name}_get_${value_name} function
- * Returns 1 if successful or 0 if not
- */
-int ${library_name_suffix}_test_${type_name}_get_${value_name}(
-     ${library_name}_${type_name}_t *${type_name} )
-{
-	libcerror_error_t *error       = NULL;
-	${value_type}_t *${value_name} = 0;
-	int ${value_name}_is_set       = 0;
-	int result                     = 0;
-
 	/* Test regular cases
 	 */
 	result = ${library_name}_${type_name}_get_${value_name}(
@@ -92,20 +81,3 @@ int ${library_name_suffix}_test_${type_name}_get_${value_name}(
 		libcerror_error_free(
 		 &error );
 	}
-	return( 1 );
-
-on_error:
-	if( error != NULL )
-	{
-		libcerror_error_free(
-		 &error );
-	}
-	if( ${value_name} != NULL )
-	{
-		${value_type}_free(
-		 &${value_name},
-		 NULL );
-	}
-	return( 0 );
-}
-
