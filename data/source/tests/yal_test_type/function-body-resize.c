@@ -1,33 +1,3 @@
-/* Tests the lib${library_name_suffix}_${type_name}_resize function
- * Returns 1 if successful or 0 if not
- */
-int ${library_name_suffix}_test_${type_name}_resize(
-     void )
-{
-	libcerror_error_t *error                               = NULL;
-	lib${library_name_suffix}_${type_name}_t *${type_name} = NULL;
-	int result                                             = 0;
-
-	/* Initialize test
-	 */
-	result = lib${library_name_suffix}_${type_name}_initialize(
-	          &${type_name},
-	          2,
-	          &error );
-
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-	 "${type_name}",
-	 ${type_name} );
-
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
 	/* Test lib${library_name_suffix}_${type_name}_resize to resize to a larger number of entries
 	 */
 	result = lib${library_name_suffix}_${type_name}_resize(
@@ -99,7 +69,7 @@ int ${library_name_suffix}_test_${type_name}_resize(
 #if INT_MAX == SSIZE_MAX
 
 	result = lib${library_name_suffix}_${type_name}_resize(
-	          NULL,
+	          ${type_name},
 	          INT_MAX,
 	          &error );
 
@@ -116,40 +86,4 @@ int ${library_name_suffix}_test_${type_name}_resize(
 	 &error );
 
 #endif /* INT_MAX == SSIZE_MAX */
-
-	/* Clean up
-	 */
-	result = lib${library_name_suffix}_${type_name}_free(
-	          &${type_name},
-	          &error );
-
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	 "${type_name}",
-	 ${type_name} );
-
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	return( 1 );
-
-on_error:
-	if( error != NULL )
-	{
-		libcerror_error_free(
-		 &error );
-	}
-	if( ${type_name} != NULL )
-	{
-		lib${library_name_suffix}_${type_name}_free(
-		 &${type_name},
-		 NULL );
-	}
-	return( 0 );
-}
 

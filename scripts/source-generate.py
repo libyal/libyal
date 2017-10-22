@@ -5501,6 +5501,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     function_name = self._GetFunctionName(
         project_configuration, type_name, type_function)
 
+    library_type_prefix = '{0:s}_'.format(project_configuration.library_name)
+
     function_prototype = header_file.GetTypeFunction(type_name, type_function)
     if not function_prototype:
       return function_name, None, last_have_extern
@@ -5521,6 +5523,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       initialize_value_type, _, initialize_value_name = (
           function_argument_string.partition(' '))
       initialize_value_name = initialize_value_name.lstrip('*')
+
+      if not initialize_value_type.startswith(library_type_prefix):
+        return function_name, None, last_have_extern
+
       _, _, initialize_value_type = initialize_value_type.partition('_')
       initialize_value_type, _, _ = initialize_value_type.rpartition('_')
 
@@ -5591,100 +5597,109 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     body_template_filename = os.path.join(
         template_directory, body_template_filename)
     if not body_template_filename or not os.path.exists(body_template_filename):
-      logging.warning((
-          'Unable to generate test type source code for type function: '
-          '{0:s} with error: missing template').format(type_function))
-      return function_name, None, have_extern
+      template_filename = '{0:s}.c'.format(function_template)
 
-    self._SetValueNameInTemplateMappings(template_mappings, value_name)
-    self._SetValueTypeInTemplateMappings(template_mappings, value_type)
+      template_filename = os.path.join(template_directory, template_filename)
+      if not template_filename or not os.path.exists(template_filename):
+        logging.warning((
+            'Unable to generate test type source code for type function: '
+            '{0:s} with error: missing template').format(type_function))
+        return function_name, None, have_extern
 
-    function_variables = []
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
-    if function_template == 'get_binary_data_value':
-      function_variables.extend([
-          '\t{0:s} {1:s}[ 4096 ];'.format(value_type, value_name),
-          ''])
-
-    elif function_template == 'get_guid_value':
-      function_variables.extend([
-          '\tuint8_t guid_data[ 16 ];',
-          ''])
-
-    elif function_template == 'get_string_value':
-      function_variables.extend([
-          '\t{0:s} {1:s}[ 512 ];'.format(value_type, value_name),
-          '',
-          '\tint {0:s}_is_set = 0;'.format(value_name)])
-
-    elif function_template == 'get_type_value':
-      function_variables.extend([
-          '\t{0:s} *{1:s} = 0;'.format(value_type, value_name),
-          '\tint {0:s}_is_set = 0;'.format(value_name)])
-
-    elif function_template == 'get_value':
-      function_variables.extend([
-          '\t{0:s} {1:s} = 0;'.format(value_type, value_name),
-          '\tint {0:s}_is_set = 0;'.format(value_name)])
-
-    function_variables.extend([
-        '\tlibcerror_error_t *error = NULL;',
-        '\t{0:s}_{1:s}_t *{1:s} = NULL;'.format(
-            project_configuration.library_name, type_name),
-        '\tint result = 0;'])
-
-    if function_template in (
-        'get_binary_data_value', 'get_guid_value', 'get_string_value',
-        'get_type_value', 'get_value'):
-      function_template = 'get_{0:s}'.format(value_name)
-
-    if initialize_number_of_arguments == 3:
-      function_variable = '\t{0:s}_{1:s}_t *{2:s} = NULL;'.format(
-          project_configuration.library_name, initialize_value_type,
-          initialize_value_name)
-      function_variables.append(function_variable)
-
-    template_mappings['function_name'] = function_template
-    template_mappings['function_variables'] = '\n'.join(function_variables)
-    template_mappings['initialize_value_name'] = initialize_value_name
-    template_mappings['initialize_value_type'] = initialize_value_type
-
-    template_filename = os.path.join(template_directory, 'function-start.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    del template_mappings['function_name']
-    del template_mappings['function_variables']
-
-    if initialize_number_of_arguments == 3:
-      template_filename = 'function-initialize-with_value.c'
     else:
-      template_filename = 'function-initialize.c'
+      self._SetValueNameInTemplateMappings(template_mappings, value_name)
+      self._SetValueTypeInTemplateMappings(template_mappings, value_type)
 
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+      function_variables = []
 
-    self._GenerateSection(
-        body_template_filename, template_mappings, output_writer,
-        output_filename, access_mode='ab')
+      if function_template == 'get_binary_data_value':
+        function_variables.extend([
+            '\t{0:s} {1:s}[ 4096 ];'.format(value_type, value_name),
+            ''])
 
-    if free_function:
-      template_filename = 'function-end-with_free_function.c'
-    elif initialize_number_of_arguments == 3:
-      template_filename = 'function-end-with_value.c'
-    else:
-      template_filename = 'function-end.c'
+      elif function_template == 'get_guid_value':
+        function_variables.extend([
+            '\tuint8_t guid_data[ 16 ];',
+            ''])
 
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+      elif function_template == 'get_string_value':
+        function_variables.extend([
+            '\t{0:s} {1:s}[ 512 ];'.format(value_type, value_name),
+            '',
+            '\tint {0:s}_is_set = 0;'.format(value_name)])
 
-    del template_mappings['initialize_value_name']
-    del template_mappings['initialize_value_type']
+      elif function_template == 'get_type_value':
+        function_variables.extend([
+            '\t{0:s} *{1:s} = 0;'.format(value_type, value_name),
+            '\tint {0:s}_is_set = 0;'.format(value_name)])
+
+      elif function_template == 'get_value':
+        function_variables.extend([
+            '\t{0:s} {1:s} = 0;'.format(value_type, value_name),
+            '\tint {0:s}_is_set = 0;'.format(value_name)])
+
+      function_variables.extend([
+          '\tlibcerror_error_t *error = NULL;',
+          '\t{0:s}_{1:s}_t *{1:s} = NULL;'.format(
+              project_configuration.library_name, type_name),
+          '\tint result = 0;'])
+
+      if function_template in (
+          'get_binary_data_value', 'get_guid_value', 'get_string_value',
+          'get_type_value', 'get_value'):
+        function_template = 'get_{0:s}'.format(value_name)
+
+      if initialize_number_of_arguments == 3:
+        function_variable = '\t{0:s}_{1:s}_t *{2:s} = NULL;'.format(
+            project_configuration.library_name, initialize_value_type,
+            initialize_value_name)
+        function_variables.append(function_variable)
+
+      template_mappings['function_name'] = function_template
+      template_mappings['function_variables'] = '\n'.join(function_variables)
+      template_mappings['initialize_value_name'] = initialize_value_name
+      template_mappings['initialize_value_type'] = initialize_value_type
+
+      template_filename = os.path.join(template_directory, 'function-start.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['function_name']
+      del template_mappings['function_variables']
+
+      if initialize_number_of_arguments == 3:
+        template_filename = 'function-initialize-with_value.c'
+      else:
+        template_filename = 'function-initialize.c'
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      self._GenerateSection(
+          body_template_filename, template_mappings, output_writer,
+          output_filename, access_mode='ab')
+
+      if free_function:
+        template_filename = 'function-end-with_free_function.c'
+      elif initialize_number_of_arguments == 3:
+        template_filename = 'function-end-with_value.c'
+      else:
+        template_filename = 'function-end.c'
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['initialize_value_name']
+      del template_mappings['initialize_value_type']
 
     test_function_name = self._GetTestFunctionName(
         project_configuration, type_name, type_function)
@@ -6409,10 +6424,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         function_names, tests_to_run, clone_function=clone_function,
         free_function=free_function)
 
-    have_extern = self._GenerateTypeTestWithFreeFunction(
-        project_configuration, template_mappings, type_name, 'resize',
-        have_extern, header_file, output_writer, output_filename,
-        function_names, tests_to_run, free_function=free_function)
+    function_name, test_function_name, have_extern = (
+        self._GenerateTypeTestFunction(
+            project_configuration, template_mappings, type_name, 'resize',
+            have_extern, header_file, output_writer, output_filename))
+
+    if test_function_name:
+      tests_to_run.append((function_name, test_function_name))
+      function_names.remove(function_name)
 
     if with_input:
       # TODO: fix libbfio having no open wide.
