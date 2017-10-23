@@ -20,6 +20,9 @@ from dtfabric import registry
 import template_string
 
 
+# TODO: put signature into constants: libyal_constants.[ch]
+
+
 class SourceGenerator(object):
   """Generates source based on dtFabric format definitions."""
 

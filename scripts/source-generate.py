@@ -5512,6 +5512,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     have_extern = function_prototype.have_extern
 
+    number_of_arguments = len(function_prototype.arguments)
+
     initialize_number_of_arguments = None
     initialize_value_name = None
     initialize_value_type = None
@@ -5543,40 +5545,53 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     value_name = None
     value_type = None
 
+    with_index = False
+    index_argument = function_prototype.arguments[1]
+    index_argument_string = index_argument.CopyToString()
+
+    if (index_argument_string.startswith('int ') and
+        index_argument_string.endswith('_index')):
+      with_index = True
+
+    if with_index:
+      function_argument_index = 2
+    else:
+      function_argument_index = 1
+
     if (type_function.startswith('get_utf8_') or
         type_function.startswith('get_utf16_')):
-      function_argument = function_prototype.arguments[1]
+      function_argument = function_prototype.arguments[function_argument_index]
       function_argument_string = function_argument.CopyToString()
 
       value_name = type_function[4:]
       value_type, _, _ = function_argument_string.partition(' ')
 
-      if type_function.endswith('_size'):
-        if len(function_prototype.arguments) == 3:
+      if (number_of_arguments == function_argument_index + 2 and
+          type_function.endswith('_size')):
+        function_template = 'get_value'
+      elif number_of_arguments == function_argument_index + 3:
+        function_template = 'get_string_value'
+
+    elif type_function.startswith('get_'):
+      function_argument = function_prototype.arguments[function_argument_index]
+      function_argument_string = function_argument.CopyToString()
+
+      value_name = type_function[4:]
+      value_type, _, _ = function_argument_string.partition(' ')
+
+      if function_argument_string == 'uint8_t *guid_data':
+        function_template = 'get_guid_value'
+
+      elif number_of_arguments == function_argument_index + 2:
+        if not value_type.startswith(library_type_prefix):
           function_template = 'get_value'
+        else:
+          function_template = 'get_type_value'
 
-      else:
-        if len(function_prototype.arguments) == 4:
-          function_template = 'get_string_value'
-
-    elif (type_function.startswith('get_') and
-          len(function_prototype.arguments) in (3, 4)):
-      function_argument = function_prototype.arguments[1]
-      function_argument_string = function_argument.CopyToString()
-
-      value_name = type_function[4:]
-      value_type, _, _ = function_argument_string.partition(' ')
-
-      if len(function_prototype.arguments) == 3:
-        if value_type.startswith(project_configuration.library_name):
           value_type = value_type[:-2]
 
-          function_template = 'get_type_value'
-        else:
-          function_template = 'get_value'
-
-      elif function_argument_string == 'uint8_t *guid_data':
-        function_template = 'get_guid_value'
+    if function_template and with_index:
+      function_template = '{0:s}-with_index'.format(function_template)
 
     if not function_template:
       function_template = type_function
@@ -5622,6 +5637,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       function_variables = []
 
+      function_template, _, _ = function_template.partition('-')
+
       if function_template == 'get_binary_data_value':
         function_variables.extend([
             '\t{0:s} {1:s}[ 4096 ];'.format(value_type, value_name),
@@ -5635,18 +5652,27 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       elif function_template == 'get_string_value':
         function_variables.extend([
             '\t{0:s} {1:s}[ 512 ];'.format(value_type, value_name),
-            '',
-            '\tint {0:s}_is_set = 0;'.format(value_name)])
+            ''])
+
+        if not with_index:
+          function_variables.append(
+              '\tint {0:s}_is_set = 0;'.format(value_name))
 
       elif function_template == 'get_type_value':
-        function_variables.extend([
-            '\t{0:s} *{1:s} = 0;'.format(value_type, value_name),
-            '\tint {0:s}_is_set = 0;'.format(value_name)])
+        function_variables.append(
+            '\t{0:s}_t *{1:s} = 0;'.format(value_type, value_name))
+
+        if not with_index:
+          function_variables.append(
+              '\tint {0:s}_is_set = 0;'.format(value_name))
 
       elif function_template == 'get_value':
-        function_variables.extend([
-            '\t{0:s} {1:s} = 0;'.format(value_type, value_name),
-            '\tint {0:s}_is_set = 0;'.format(value_name)])
+        function_variables.append(
+            '\t{0:s} {1:s} = 0;'.format(value_type, value_name))
+
+        if not with_index:
+          function_variables.append(
+              '\tint {0:s}_is_set = 0;'.format(value_name))
 
       function_variables.extend([
           '\tlibcerror_error_t *error = NULL;',
