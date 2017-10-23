@@ -5477,7 +5477,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateTypeTestFunction(
       self, project_configuration, template_mappings, type_name, type_function,
-      last_have_extern, header_file, output_writer, output_filename):
+      last_have_extern, header_file, output_writer, output_filename,
+      with_input=False):
     """Generates a test for a type function.
 
     Args:
@@ -5491,6 +5492,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       header_file (LibraryHeaderFile): library header file.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
+      with_input (Optional[bool]): True if the type is to be tested with
+          input data.
 
     Returns:
       tuple: contains:
@@ -5517,21 +5520,24 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if intialize_function_prototype:
       initialize_number_of_arguments = len(
           intialize_function_prototype.arguments)
+
+    if initialize_number_of_arguments not in (2, 3):
+      return function_name, None, last_have_extern
+
+    if initialize_number_of_arguments == 3:
       function_argument = intialize_function_prototype.arguments[1]
       function_argument_string = function_argument.CopyToString()
 
       initialize_value_type, _, initialize_value_name = (
           function_argument_string.partition(' '))
-      initialize_value_name = initialize_value_name.lstrip('*')
 
       if not initialize_value_type.startswith(library_type_prefix):
-        return function_name, None, last_have_extern
-
-      _, _, initialize_value_type = initialize_value_type.partition('_')
-      initialize_value_type, _, _ = initialize_value_type.rpartition('_')
-
-    if initialize_number_of_arguments not in (2, 3):
-      return function_name, None, last_have_extern
+        initialize_value_type = None
+        initialize_value_name = None
+      else:
+        initialize_value_name = initialize_value_name.lstrip('*')
+        _, _, initialize_value_type = initialize_value_type.partition('_')
+        initialize_value_type, _, _ = initialize_value_type.rpartition('_')
 
     function_template = None
     value_name = None
@@ -5644,9 +5650,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       function_variables.extend([
           '\tlibcerror_error_t *error = NULL;',
-          '\t{0:s}_{1:s}_t *{1:s} = NULL;'.format(
-              project_configuration.library_name, type_name),
           '\tint result = 0;'])
+
+      if not with_input:
+        function_variables.append(
+            '\t{0:s}_{1:s}_t *{1:s} = NULL;'.format(
+                project_configuration.library_name, type_name))
 
       if function_template in (
           'get_binary_data_value', 'get_guid_value', 'get_string_value',
@@ -5664,7 +5673,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       template_mappings['initialize_value_name'] = initialize_value_name
       template_mappings['initialize_value_type'] = initialize_value_type
 
-      template_filename = os.path.join(template_directory, 'function-start.c')
+      if with_input:
+        template_filename = 'function-start-with_input.c'
+      else:
+        template_filename = 'function-start.c'
+
+      template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -5672,15 +5686,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       del template_mappings['function_name']
       del template_mappings['function_variables']
 
-      if initialize_number_of_arguments == 3:
-        template_filename = 'function-initialize-with_value.c'
-      else:
-        template_filename = 'function-initialize.c'
+      if not with_input:
+        if initialize_number_of_arguments == 3:
+          template_filename = 'function-initialize-with_value.c'
+        else:
+          template_filename = 'function-initialize.c'
 
-      template_filename = os.path.join(template_directory, template_filename)
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+        template_filename = os.path.join(template_directory, template_filename)
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
 
       self._GenerateSection(
           body_template_filename, template_mappings, output_writer,
@@ -5690,6 +5705,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename = 'function-end-with_free_function.c'
       elif initialize_number_of_arguments == 3:
         template_filename = 'function-end-with_value.c'
+      elif with_input:
+        template_filename = 'function-end-with_input.c'
       else:
         template_filename = 'function-end.c'
 
@@ -6425,7 +6442,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           self._GenerateTypeTestFunction(
               project_configuration, template_mappings, type_name,
               type_function, have_extern, header_file, output_writer,
-              output_filename))
+              output_filename, with_input=with_input))
 
       if test_function_name:
         tests_to_run.append((function_name, test_function_name))
@@ -6440,7 +6457,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     function_name, test_function_name, have_extern = (
         self._GenerateTypeTestFunction(
             project_configuration, template_mappings, type_name, 'resize',
-            have_extern, header_file, output_writer, output_filename))
+            have_extern, header_file, output_writer, output_filename,
+            with_input=with_input))
 
     if test_function_name:
       tests_to_run.append((function_name, test_function_name))
@@ -6490,7 +6508,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       _, test_function_name, have_extern = self._GenerateTypeTestFunction(
           project_configuration, template_mappings, type_name, type_function,
-          have_extern, header_file, output_writer, output_filename)
+          have_extern, header_file, output_writer, output_filename,
+          with_input=with_input)
 
       if with_input:
         tests_to_run_with_args.append((function_name, test_function_name))
@@ -6503,7 +6522,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_mappings, have_extern, True, output_writer, output_filename)
 
     # TODO: create generic test for get_number_of_X API functions.
-    # TODO: generate run test macros.
+    # TODO: make tests condition for type with read_data on availability of data.
 
     if with_input:
       test_getopt_string = []
