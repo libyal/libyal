@@ -5593,7 +5593,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if function_template and with_index:
       function_template = '{0:s}-with_index'.format(function_template)
 
-    if not function_template:
+    if type_function == 'read_data':
+      # TODO: add support for read data with value.
+      if number_of_arguments == 4:
+        function_template = 'read_data'
+
+    elif not function_template:
       function_template = type_function
 
     free_function = None
@@ -5694,6 +5699,17 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             initialize_value_name)
         function_variables.append(function_variable)
 
+      test_data_size = None
+      if function_template == 'read_data':
+        test_data_filename = '{0:s}.1'.format(type_name)
+        test_data_file = os.path.join('tests', 'data', test_data_filename)
+
+        with open(test_data_file, 'rb') as file_object:
+          test_data = file_object.read()
+
+        test_data_size = len(test_data)
+
+      template_mappings['test_data_size'] = test_data_size
       template_mappings['function_name'] = function_template
       template_mappings['function_variables'] = '\n'.join(function_variables)
       template_mappings['initialize_value_name'] = initialize_value_name
@@ -5741,6 +5757,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+      del template_mappings['test_data_size']
       del template_mappings['initialize_value_name']
       del template_mappings['initialize_value_type']
 
