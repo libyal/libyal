@@ -5704,10 +5704,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         test_data_filename = '{0:s}.1'.format(type_name)
         test_data_file = os.path.join('tests', 'data', test_data_filename)
 
-        with open(test_data_file, 'rb') as file_object:
-          test_data = file_object.read()
+        if os.path.exists(test_data_file):
+          with open(test_data_file, 'rb') as file_object:
+            test_data = file_object.read()
 
-        test_data_size = len(test_data)
+          test_data_size = len(test_data)
 
       template_mappings['test_data_size'] = test_data_size
       template_mappings['function_name'] = function_template

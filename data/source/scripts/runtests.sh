@@ -176,7 +176,7 @@ run_setup_py_tests()
 {
 	PYTHON=$$1;
 
-	if test -n $${CHECK_WITH_STRACE};
+	if test $${CHECK_WITH_STRACE} -eq 1;
 	then
 		strace $${PYTHON} setup.py build;
 	else
