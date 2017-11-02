@@ -6220,7 +6220,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     try:
       header_file.Read(project_configuration)
     except IOError:
-      logging.warning('Skipping: {0:s}'.format(header_file.path))
+      logging.warning('Unable to read header file: {0:s}'.format(
+          header_file.path))
       return False
 
     type_size_name = self._GetTypeSizeName(project_configuration, type_name)
@@ -7389,7 +7390,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     python_module_types = []
 
-    for type_name in api_types:
+    # Making a copy since the list is changed in the loop.
+    for type_name in list(api_types):
       if (type_name == 'error' and
           project_configuration.library_name == 'libcerror'):
         continue
@@ -7403,13 +7405,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           output_writer)
       if not result:
         api_types.remove(type_name)
+        logging.warning('Unable to generate tests for API type: {0:s}'.format(
+            type_name))
 
       if project_configuration.HasPythonModule():
         python_module_types.append(type_name)
         self._GeneratePythonModuleTypeTests(
             project_configuration, template_mappings, type_name, output_writer)
 
-    for type_name in api_types_with_input:
+    # Making a copy since the list is changed in the loop.
+    for type_name in list(api_types_with_input):
       test_options = self._GetTestOptions(project_configuration, type_name)
       if 'offset' in [argument for _, argument in test_options]:
         with_offset = True
@@ -7419,6 +7424,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           output_writer, with_input=True)
       if not result:
         api_types_with_input.remove(type_name)
+        logging.warning('Unable to generate tests for API type: {0:s}'.format(
+            type_name))
 
       if project_configuration.HasPythonModule():
         python_module_types.append(type_name)
@@ -7426,7 +7433,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             project_configuration, template_mappings, type_name, output_writer,
             with_input=True)
 
-    for type_name in api_pseudo_types:
+    # Making a copy since the list is changed in the loop.
+    for type_name in list(api_pseudo_types):
       if (type_name == 'error' and
           project_configuration.library_name == 'libcerror'):
         continue
@@ -7440,12 +7448,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           output_writer)
       if not result:
         api_pseudo_types.remove(type_name)
+        logging.warning(
+            'Unable to generate tests for API pseudo type: {0:s}'.format(
+                type_name))
 
       if project_configuration.HasPythonModule():
         self._GeneratePythonModuleTypeTests(
             project_configuration, template_mappings, type_name, output_writer)
 
-    for type_name in internal_types:
+    # Making a copy since the list is changed in the loop.
+    for type_name in list(internal_types):
       test_options = self._GetTestOptions(project_configuration, type_name)
       if 'offset' in [argument for _, argument in test_options]:
         with_offset = True
@@ -7455,6 +7467,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           output_writer, is_internal=True)
       if not result:
         internal_types.remove(type_name)
+        logging.warning(
+            'Unable to generate tests for internal type: {0:s}'.format(
+                type_name))
 
     output_filename = '{0:s}_test_functions.h'.format(
         project_configuration.library_name_suffix)
