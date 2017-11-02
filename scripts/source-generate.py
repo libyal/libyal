@@ -5611,10 +5611,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     value_name = None
     value_type = None
 
-    with_index = False
+    codepage_argument = function_prototype.arguments[-2]
+    codepage_argument_string = codepage_argument.CopyToString()
+
+    with_codepage = False
+    if (codepage_argument_string.startswith('int ') and
+        codepage_argument_string.endswith('codepage')):
+      with_codepage = True
+
     index_argument = function_prototype.arguments[1]
     index_argument_string = index_argument.CopyToString()
 
+    with_index = False
     if (index_argument_string.startswith('int ') and
         index_argument_string.endswith('_index')):
       with_index = True
@@ -5661,7 +5669,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if type_function == 'read_data':
       # TODO: add support for read data with value.
-      if number_of_arguments == 4:
+      if (number_of_arguments == 4 or (
+         number_of_arguments == 5 and with_codepage)):
         function_template = 'read_data'
 
     elif not function_template:
@@ -5682,6 +5691,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if free_function:
       body_template_filename = 'function-body-{0:s}-with_free_function.c'.format(
+          function_template)
+    elif with_codepage:
+      body_template_filename = 'function-body-{0:s}-with_codepage.c'.format(
           function_template)
     else:
       body_template_filename = 'function-body-{0:s}.c'.format(function_template)
@@ -6255,6 +6267,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     if with_input:
+      include_header_file = self._GetLibraryIncludeHeaderFile(
+          project_configuration)
+
+      signature_type = include_header_file.GetCheckSignatureType()
+
+      template_mappings['signature_type'] = signature_type
+
       if bfio_type == 'pool':
         template_filename = 'start_with_input-bfio_pool.c'
       else:
@@ -6264,6 +6283,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
+
+      del template_mappings['signature_type']
 
       template_filename = os.path.join(template_directory, 'start_with_input.c')
       self._GenerateSection(
@@ -7069,29 +7090,33 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # TODO: determine test_options based on function prototypes
     test_options = []
 
-    if (type_name == 'volume' and
-        project_configuration.library_name == 'libbde'):
+    if (project_configuration.library_name == 'libbde' and
+        type_name == 'volume'):
       # TODO: add support for startup key option
       # TODO: add support for keys option
       test_options.append(('o', 'offset'))
       test_options.append(('p', 'password'))
       test_options.append(('r', 'recovery_password'))
 
-    elif (type_name == 'volume' and
-        project_configuration.library_name == 'libfvde'):
+    elif (project_configuration.library_name == 'libfvde' and
+          type_name == 'volume'):
       # TODO: add support for keys option
       test_options.append(('o', 'offset'))
       test_options.append(('p', 'password'))
 
-    elif (type_name == 'volume' and
-        project_configuration.library_name == 'libluksde'):
+    elif (project_configuration.library_name == 'libluksde' and
+          type_name == 'volume'):
       # TODO: add support for keys option
       test_options.append(('p', 'password'))
 
-    elif (type_name == 'file' and
-          project_configuration.library_name == 'libqcow'):
+    elif (project_configuration.library_name == 'libqcow' and
+          type_name == 'file'):
       # TODO: add support for keys option
       test_options.append(('p', 'password'))
+
+    elif (project_configuration.library_name == 'libvshadow' and
+          type_name == 'volume'):
+      test_options.append(('o', 'offset'))
 
     return test_options
 

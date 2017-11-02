@@ -152,7 +152,7 @@ on_error:
 int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle(
      const system_character_t *source )
 {
-	uint8_t empty_block[ 4096 ];
+	uint8_t empty_block[ 8192 ];
 
 	libbfio_handle_t *file_io_handle = NULL;
 	libcerror_error_t *error         = NULL;
@@ -288,7 +288,7 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	memset_result = memory_set(
 	                 empty_block,
 	                 0,
-	                 sizeof( uint8_t ) * 4096 );
+	                 sizeof( uint8_t ) * 8192 );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "memset_result",
@@ -314,7 +314,7 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	result = libbfio_memory_range_set(
 	          file_io_handle,
 	          empty_block,
-	          sizeof( uint8_t ) * 4096,
+	          sizeof( uint8_t ) * 8192,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(

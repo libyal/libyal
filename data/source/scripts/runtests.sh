@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script that runs the tests
 #
-# Version: 20171026
+# Version: 20171102
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -176,9 +176,12 @@ run_setup_py_tests()
 {
 	PYTHON=$$1;
 
-	if test $${CHECK_WITH_STRACE} -eq 1;
+	if test -n $${CHECK_WITH_STRACE} && test $${CHECK_WITH_STRACE} -eq 1;
 	then
-		strace $${PYTHON} setup.py build;
+		# strace on Cygwin will fail if it is run on a symbolic link.
+		PYTHON=`readlink -f $${PYTHON}`;
+
+		strace -o strace.log $${PYTHON} setup.py build;
 	else
 		$${PYTHON} setup.py build;
 	fi
