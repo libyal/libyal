@@ -2457,6 +2457,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     if 'fuse' in project_configuration.tools_build_dependencies:
       dpkg_build_dependencies.append('libfuse-dev')
 
+    if 'sgutils' in project_configuration.library_build_dependencies:
+      dpkg_build_dependencies.append('libsgutils2-dev')
+
     dpkg_build_dependencies.extend(
         project_configuration.dpkg_build_dependencies)
 
@@ -2484,6 +2487,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     if 'fuse' in project_configuration.tools_build_dependencies:
       dpkg_build_dependencies.append('libfuse-dev')
+
+    if 'sgutils' in project_configuration.library_build_dependencies:
+      dpkg_build_dependencies.append('libsgutils2-dev')
 
     if project_configuration.dpkg_build_dependencies:
       dpkg_build_dependencies.extend(project_configuration.dpkg_build_dependencies)
