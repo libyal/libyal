@@ -5176,7 +5176,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateTestFunctionsHeader(
       self, project_configuration, template_mappings, output_writer,
-      output_filename, with_offset=False):
+      output_filename, with_input=False, with_offset=False):
     """Generates the test functions header file.
 
     Args:
@@ -5185,8 +5185,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           maps to the name of a template variable.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
+      with_input (Optional[bool]): True if tests require input data.
       with_offset (Optional[bool]): True if tests require offset support.
     """
+    if not with_input:
+      return
+
     template_directory = os.path.join(
         self._template_directory, 'yal_test_functions')
 
@@ -5207,7 +5211,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateTestFunctionsSource(
       self, project_configuration, template_mappings, output_writer,
-      output_filename, with_offset=False):
+      output_filename, with_input=False, with_offset=False):
     """Generates the test functions source file.
 
     Args:
@@ -5216,8 +5220,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           maps to the name of a template variable.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
+      with_input (Optional[bool]): True if tests require input data.
       with_offset (Optional[bool]): True if tests require offset support.
     """
+    if not with_input:
+      return
+
     template_directory = os.path.join(
         self._template_directory, 'yal_test_functions')
 
@@ -5682,11 +5690,22 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     elif not function_template:
       function_template = type_function
 
+    clone_function = None
+    compare_function = None
     free_function = None
+
     for argument in function_prototype.arguments:
       argument_string = argument.CopyToString()
 
-      if '_free_function' in argument_string:
+      if '_clone_function' in argument_string:
+        _, _, clone_function = argument_string.partition('*')
+        clone_function, _, _ = clone_function.partition(')')
+
+      elif '_compare_function' in argument_string:
+        _, _, compare_function = argument_string.partition('*')
+        compare_function, _, _ = compare_function.partition(')')
+
+      elif '_free_function' in argument_string:
         _, _, free_function = argument_string.partition('*')
         free_function, _, _ = free_function.partition(')')
 
@@ -5695,12 +5714,15 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
-    if free_function:
-      body_template_filename = 'function-body-{0:s}-with_free_function.c'.format(
-          function_template)
+    if clone_function:
+      body_template_filename = (
+          'function-body-{0:s}-with_clone_function.c').format(function_template)
+    elif free_function:
+      body_template_filename = (
+          'function-body-{0:s}-with_free_function.c').format(function_template)
     elif with_codepage:
-      body_template_filename = 'function-body-{0:s}-with_codepage.c'.format(
-          function_template)
+      body_template_filename = (
+          'function-body-{0:s}-with_codepage.c').format(function_template)
     else:
       body_template_filename = 'function-body-{0:s}.c'.format(function_template)
 
@@ -5712,8 +5734,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
       if not template_filename or not os.path.exists(template_filename):
         logging.warning((
-            'Unable to generate test type source code for type function: '
-            '{0:s} with error: missing template').format(type_function))
+            'Unable to generate tests source code for type: "{0:s}" function: '
+            '"{1:s}" with error: missing template').format(
+                type_name, type_function))
         return function_name, None, have_extern
 
       self._GenerateSection(
@@ -5767,7 +5790,15 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           '\tlibcerror_error_t *error = NULL;',
           '\tint result = 0;'])
 
-      if not with_input:
+      if clone_function:
+        function_variables.append(
+            '\t{0:s}_{1:s}_t *destination_{1:s} = NULL;'.format(
+                project_configuration.library_name, type_name))
+        function_variables.append(
+            '\t{0:s}_{1:s}_t *source_{1:s} = NULL;'.format(
+                project_configuration.library_name, type_name))
+
+      elif not with_input:
         function_variables.append(
             '\t{0:s}_{1:s}_t *{1:s} = NULL;'.format(
                 project_configuration.library_name, type_name))
@@ -5793,6 +5824,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             test_data = file_object.read()
 
           test_data_size = len(test_data)
+
+        if not test_data_size:
+          logging.warning((
+              'Unable to generate tests source code for type: "{0:s}" '
+              'function: "{1:s}" with error: missing test data').format(
+                  type_name, type_function))
+          return function_name, None, last_have_extern
 
       template_mappings['test_data_size'] = test_data_size
       template_mappings['function_name'] = function_template
@@ -5901,8 +5939,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
     if not template_filename or not os.path.exists(template_filename):
       logging.warning((
-          'Unable to generate test type source code for type function: '
-          '{0:s} with error: missing template').format(type_function))
+          'Unable to generate tests source code for type: "{0:s}" function: '
+          '"{1:s}" with error: missing template').format(
+              type_name, type_function))
       return function_name, None, have_extern
 
     self._GenerateSection(
@@ -6446,7 +6485,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         have_extern, header_file, output_writer, output_filename,
         function_names, tests_to_run, free_function=free_function)
 
-    for type_function in ('empty', 'clear'):
+    for type_function in ('empty', 'clear', 'clone', 'resize'):
       function_name, test_function_name, have_extern = (
           self._GenerateTypeTestFunction(
               project_configuration, template_mappings, type_name,
@@ -6456,22 +6495,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if test_function_name:
         tests_to_run.append((function_name, test_function_name))
         function_names.remove(function_name)
-
-    have_extern = self._GenerateTypeTestWithCloneFunction(
-        project_configuration, template_mappings, type_name, 'clone',
-        have_extern, header_file, output_writer, output_filename,
-        function_names, tests_to_run, clone_function=clone_function,
-        free_function=free_function)
-
-    function_name, test_function_name, have_extern = (
-        self._GenerateTypeTestFunction(
-            project_configuration, template_mappings, type_name, 'resize',
-            have_extern, header_file, output_writer, output_filename,
-            with_input=with_input))
-
-    if test_function_name:
-      tests_to_run.append((function_name, test_function_name))
-      function_names.remove(function_name)
 
     if with_input:
       # TODO: fix libbfio having no open wide.
@@ -6839,71 +6862,6 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     self._GenerateTypeTestDefineInternalEnd(
         template_mappings, have_extern, True, output_writer, output_filename)
-
-  def _GenerateTypeTestWithCloneFunction(
-      self, project_configuration, template_mappings, type_name, type_function,
-      last_have_extern, header_file, output_writer, output_filename,
-      function_names, tests_to_run, clone_function=None, free_function=None):
-    """Generates a test for a type function with clone function.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      type_name (str): name of type.
-      type_function (str): type function.
-      last_have_extern (bool): True if the previous function prototype was
-          externally available.
-      header_file (LibraryHeaderFile): library header file.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
-      function_names (list[str]): function names.
-      tests_to_run (list[tuple[str, str]]): pairs of the function name and
-          corresponding test function name that need to be run.
-      clone_function (Optional[str]): name of the clone function.
-      free_function (Optional[str]): name of the free function.
-
-    Returns:
-      bool: True if the function prototype was externally available.
-    """
-    function_prototype = header_file.GetTypeFunction(type_name, type_function)
-    if not function_prototype:
-      return last_have_extern
-
-    have_extern = function_prototype.have_extern
-
-    self._GenerateTypeTestDefineInternalEnd(
-        template_mappings, last_have_extern, have_extern, output_writer,
-        output_filename)
-
-    self._GenerateTypeTestDefineInternalStart(
-        template_mappings, last_have_extern, have_extern, output_writer,
-        output_filename)
-
-    template_directory = os.path.join(self._template_directory, 'yal_test_type')
-
-    if clone_function:
-      value_name, _, _ = clone_function.rpartition('_clone_function')
-      self._SetValueNameInTemplateMappings(template_mappings, value_name)
-
-      template_filename = '{0:s}_with_clone_function.c'.format(type_function)
-    else:
-      template_filename = '{0:s}.c'.format(type_function)
-
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    function_name = self._GetFunctionName(
-        project_configuration, type_name, type_function)
-    test_function_name = self._GetTestFunctionName(
-        project_configuration, type_name, type_function)
-
-    tests_to_run.append((function_name, test_function_name))
-    function_names.remove(function_name)
-
-    return have_extern
 
   def _GenerateTypeTestWithFreeFunction(
       self, project_configuration, template_mappings, type_name, type_function,
@@ -7477,19 +7435,21 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             'Unable to generate tests for internal type: {0:s}'.format(
                 type_name))
 
+    with_input = bool(api_types_with_input)
+
     output_filename = '{0:s}_test_functions.h'.format(
         project_configuration.library_name_suffix)
     output_filename = os.path.join('tests', output_filename)
     self._GenerateTestFunctionsHeader(
         project_configuration, template_mappings, output_writer, output_filename,
-        with_offset=with_offset)
+        with_input=with_input, with_offset=with_offset)
 
     output_filename = '{0:s}_test_functions.c'.format(
         project_configuration.library_name_suffix)
     output_filename = os.path.join('tests', output_filename)
     self._GenerateTestFunctionsSource(
         project_configuration, template_mappings, output_writer, output_filename,
-        with_offset=with_offset)
+        with_input=with_input, with_offset=with_offset)
 
     self._GenerateMakefileAM(
         project_configuration, template_mappings, include_header_file,
