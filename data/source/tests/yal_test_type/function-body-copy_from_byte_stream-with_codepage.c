@@ -1,6 +1,6 @@
 	/* Test regular cases
 	 */
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          ${test_data_size},
@@ -18,7 +18,7 @@
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          NULL,
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          ${test_data_size},
@@ -37,7 +37,7 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          NULL,
 	          ${test_data_size},
@@ -56,7 +56,7 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          (size_t) SSIZE_MAX + 1,
@@ -75,7 +75,7 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          0,
@@ -94,7 +94,7 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          ${test_data_size} / 2,

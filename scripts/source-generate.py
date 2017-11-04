@@ -5002,7 +5002,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           '0x{0:02x}'.format(ord(byte_value))
           for byte_value in data_string[0:16]])
 
-      if len(data_string) < 16:
+      if len(data_string) < 16 or block_index + 16 == data_size:
         hexadecimal_lines.append('\t{0:s}'.format(hexadecimal_string))
       else:
         hexadecimal_lines.append('\t{0:s},'.format(hexadecimal_string))
@@ -5681,11 +5681,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if function_template and with_index:
       function_template = '{0:s}-with_index'.format(function_template)
 
-    if type_function == 'read_data':
+    if type_function in ('copy_from_byte_stream', 'read_data'):
       # TODO: add support for read data with value.
       if (number_of_arguments == 4 or (
          number_of_arguments == 5 and with_codepage)):
-        function_template = 'read_data'
+        function_template = type_function
 
     elif not function_template:
       function_template = type_function
@@ -5790,7 +5790,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           '\tlibcerror_error_t *error = NULL;',
           '\tint result = 0;'])
 
-      if clone_function:
+      if function_template == 'clone':
         function_variables.append(
             '\t{0:s}_{1:s}_t *destination_{1:s} = NULL;'.format(
                 project_configuration.library_name, type_name))
@@ -5814,8 +5814,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             initialize_value_name)
         function_variables.append(function_variable)
 
+      # TODO: add support for multiple test data files.
       test_data_size = None
-      if function_template == 'read_data':
+      if function_template in ('copy_from_byte_stream', 'read_data'):
         test_data_filename = '{0:s}.1'.format(type_name)
         test_data_file = os.path.join('tests', 'data', test_data_filename)
 
@@ -6091,10 +6092,20 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       function_argument = function_prototype.arguments[1]
       function_argument_string = function_argument.CopyToString()
 
+      # TODO: add support for non pointer value types.
       value_type, _, value_name = function_argument_string.partition(' ')
+      if not value_name.startswith('*'):
+        function_name = self._GetFunctionName(
+            project_configuration, type_name, type_function)
+        function_names.remove(function_name)
+        return last_have_extern
+
       value_name = value_name.lstrip('*')
 
       if not value_type.startswith(library_type_prefix):
+        function_name = self._GetFunctionName(
+            project_configuration, type_name, type_function)
+        function_names.remove(function_name)
         return last_have_extern
 
       _, _, value_type = value_type.partition('_')

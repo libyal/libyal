@@ -1,10 +1,9 @@
 	/* Test regular cases
 	 */
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          ${test_data_size},
-	          ${library_name_upper_case}_CODEPAGE_WINDOWS_1252,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -18,11 +17,10 @@
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          NULL,
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          ${test_data_size},
-	          ${library_name_upper_case}_CODEPAGE_WINDOWS_1252,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -37,11 +35,10 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          NULL,
 	          ${test_data_size},
-	          ${library_name_upper_case}_CODEPAGE_WINDOWS_1252,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -56,11 +53,10 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          (size_t) SSIZE_MAX + 1,
-	          ${library_name_upper_case}_CODEPAGE_WINDOWS_1252,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -75,11 +71,10 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          0,
-	          ${library_name_upper_case}_CODEPAGE_WINDOWS_1252,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -94,11 +89,10 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_read_data(
+	result = ${library_name}_${type_name}_copy_from_byte_stream(
 	          ${type_name},
 	          ${library_name_suffix}_test_${type_name}_data1,
 	          ${test_data_size} / 2,
-	          ${library_name_upper_case}_CODEPAGE_WINDOWS_1252,
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -112,6 +106,4 @@
 
 	libcerror_error_free(
 	 &error );
-
-	/* TODO: test with invalid codepage */
 
