@@ -7315,7 +7315,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       return 'media_size'
 
     if (type_name == 'handle' and project_configuration.library_name in (
-        'libewf', 'libmodi', 'libsmraw', 'libvmdk')):
+        'libewf', 'libmodi', 'libodraw', 'libphdi', 'libsmraw', 'libvmdk')):
       return 'media_size'
 
     return 'size'
