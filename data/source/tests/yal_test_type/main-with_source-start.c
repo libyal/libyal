@@ -43,7 +43,7 @@
 	         "error",
 	         error );
 
-		result = ${library_name}_check_${type_name}_signature_file_io_handle(
+		result = ${library_name}_check_${signature_type}_signature_file_io_handle(
 		          file_io_handle,
 		          &error );
 

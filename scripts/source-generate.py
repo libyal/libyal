@@ -1069,9 +1069,9 @@ class SourceFileGenerator(object):
     Returns:
       string.Template: template string.
     """
-    file_object = open(filename, 'rb')
-    file_data = file_object.read()
-    file_object.close()
+    with open(filename, 'rb') as file_object:
+      file_data = file_object.read()
+
     return string.Template(file_data)
 
   def _SetSequenceTypeNameInTemplateMappings(
@@ -5084,8 +5084,8 @@ class ScriptFileGenerator(SourceFileGenerator):
 
       output_filename = directory_entry
 
-      if (directory_entry in ('syncwinflexbison.ps1', 'synczlib.ps1') and
-          not os.path.exists(output_filename)):
+      if (not os.path.exists(output_filename) and directory_entry in (
+          'syncbzip2.ps1', 'syncwinflexbison.ps1', 'synczlib.ps1')):
         continue
 
       self._GenerateSection(
@@ -5976,6 +5976,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         else:
           template_filename = 'function-initialize.c'
 
+        if function_template == 'clone':
+          template_filename = '{0:s}-clone.c'.format(template_filename[:-2])
+
         template_filename = os.path.join(template_directory, template_filename)
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
@@ -5987,10 +5990,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       if free_function:
         template_filename = 'function-end-with_free_function.c'
+      elif initialize_number_of_arguments == 3 and function_template == 'clone':
+        template_filename = 'function-end-with_value-clone.c'
       elif initialize_number_of_arguments == 3:
         template_filename = 'function-end-with_value.c'
       elif with_input:
         template_filename = 'function-end-with_input.c'
+      elif function_template == 'clone':
+        template_filename = 'function-end-clone.c'
+      elif function_template == 'get_type_value':
+        template_filename = 'function-end-type_value.c'
       else:
         template_filename = 'function-end.c'
 
@@ -6617,7 +6626,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           self._GenerateTypeTestFunction(
               project_configuration, template_mappings, type_name,
               type_function, have_extern, header_file, output_writer,
-              output_filename, with_input=with_input))
+              output_filename))
 
       if test_function_name:
         tests_to_run.append((function_name, test_function_name))
@@ -6830,8 +6839,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       template_filename = None
 
     if template_filename:
+      include_header_file = self._GetLibraryIncludeHeaderFile(
+          project_configuration)
+
+      signature_type = include_header_file.GetCheckSignatureType()
+
       test_data = self._ReadTestDataFile(type_name)
 
+      template_mappings['signature_type'] = signature_type
       template_mappings['test_data_size'] = len(test_data)
 
       template_filename = os.path.join(template_directory, template_filename)
@@ -6839,13 +6854,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+      del template_mappings['signature_type']
       del template_mappings['test_data_size']
 
     if tests_to_run_with_source:
       self._GenerateTypeTestsMainTestsToRun(
           project_configuration, template_mappings, type_name, test_options,
           tests_to_run_with_source, header_file, output_writer, output_filename,
-          with_input=True)
+          indentation_level=2, with_input=True)
 
       if needs_glob:
         open_source_arguments = ['\t\t          file_io_pool']
@@ -7025,7 +7041,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
                     indentation, library_name_suffix),
                 '{0:s} "{1:s}",'.format(indentation, function_name),
                 '{0:s} {1:s},'.format(indentation, test_function_name),
-                '{0:s} source' ]
+                '{0:s} source'.format(indentation) ]
 
             for _, argument in test_options:
               if argument != 'offset':
@@ -7299,7 +7315,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       return 'media_size'
 
     if (type_name == 'handle' and project_configuration.library_name in (
-        'libewf', 'libsmraw', 'libvmdk')):
+        'libewf', 'libmodi', 'libsmraw', 'libvmdk')):
       return 'media_size'
 
     return 'size'
