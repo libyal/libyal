@@ -3320,6 +3320,124 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._SortVariableDeclarations(output_filename)
     self._VerticalAlignFunctionArguments(output_filename)
 
+  def _GenerateModuleHeaderFile(
+      self, project_configuration, template_mappings, output_writer):
+    """Generates a Python module header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    template_directory = os.path.join(self._template_directory, 'pyyal_module')
+
+    output_filename = '{0:s}.h'.format(project_configuration.python_module_name)
+    output_filename = os.path.join(
+        project_configuration.python_module_name, output_filename)
+
+    template_filename = os.path.join(template_directory, 'header.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'includes.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'get_version.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: add support for signature type
+    # TODO: add condition
+    template_filename = os.path.join(template_directory, 'check_signature.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: add condition
+    template_filename = os.path.join(template_directory, 'glob.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'init.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'footer.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+  def _GenerateModuleSourceFile(
+      self, project_configuration, template_mappings, output_writer):
+    """Generates a Python module source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    template_directory = os.path.join(self._template_directory, 'pyyal_module')
+
+    output_filename = '{0:s}.c'.format(project_configuration.python_module_name)
+    output_filename = os.path.join(
+        project_configuration.python_module_name, output_filename)
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'includes.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: add support for signature type
+    # TODO: add condition
+    template_filename = os.path.join(template_directory, 'bfio.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'module_methods.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'get_version.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: add support for signature type
+    # TODO: add condition
+    template_filename = os.path.join(template_directory, 'check_signature.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: add condition
+    template_filename = os.path.join(template_directory, 'glob.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'module_definition.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'init.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
   def _GenerateSequenceTypeHeaderFile(
       self, project_configuration, template_mappings, type_name, output_writer):
     """Generates a Python sequence type object header file.
@@ -4805,7 +4923,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     # TODO: add support for pyolecf_property_value
     # TODO: sequence object rename ${type_name}_index to item_index
     # TODO: generate non type files.
-    # TODO: generate pyyal.c
     # TODO: generate pyyal/Makefile.am
     # TODO: generate pyyal-python2/Makefile.am
     # TODO: generate pyyal-python3/Makefile.am
@@ -4932,6 +5049,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         self._GenerateDefinitionsHeaderFile(
             project_configuration, template_mappings, definitions_name,
             enum_declaration, output_writer)
+
+    # TODO: implement
+    # self._GenerateModuleHeaderFile(
+    #     project_configuration, template_mappings, output_writer)
+
+    # TODO: implement
+    # self._GenerateModuleSourceFile(
+    #     project_configuration, template_mappings, output_writer)
 
 
 class ScriptFileGenerator(SourceFileGenerator):
