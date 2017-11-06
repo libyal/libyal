@@ -188,25 +188,6 @@ run_setup_py_tests()
 	return $${EXIT_SUCCESS};
 }
 
-run_setup_py_tests_with_strace()
-{
-	PYTHON=$$1;
-
-	# strace on Cygwin will fail if it is run on a symbolic link.
-	PYTHON=`readlink -f $${PYTHON}`;
-
-	strace -o strace.log $${PYTHON} setup.py build;
-	RESULT=$$?;
-
-	if test $${RESULT} -ne $${EXIT_SUCCESS};
-	then
-		echo "Running: 'setup.py build' failed";
-
-		return $${RESULT};
-	fi
-	return $${EXIT_SUCCESS};
-}
-
 CONFIGURE_HELP=`./configure --help`;
 
 echo "$${CONFIGURE_HELP}" | grep -- '--enable-wide-character-type' > /dev/null;
@@ -300,7 +281,7 @@ then
 			exit $${EXIT_FAILURE};
 		fi
 
-		if test -f "setup.py" && ! run_setup_py_tests_with_strace $${PYTHON2};
+		if test -f "setup.py" && ! run_setup_py_tests $${PYTHON2};
 		then
 			exit $${EXIT_FAILURE};
 		fi

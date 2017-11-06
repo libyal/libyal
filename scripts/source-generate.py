@@ -8029,6 +8029,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       details = '\tfprintf( stream, "\\t-{0:s}:{1:s}{2:s}\\n"'.format(
           option, alignment_padding, description_line)
 
+      # TODO: determine indentation size
       for description_line in description_lines:
         options_details.append(details)
         details = '\t                 "\\t   {0:s}{1:s}\\n"'.format(
