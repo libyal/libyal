@@ -1,7 +1,7 @@
 mount_handle_t *${mount_tool_name}_mount_handle = NULL;
 int ${mount_tool_name}_abort                    = 0;
 
-/* Prints the executable usage information
+/* Prints usage information
  */
 void usage_fprint(
       FILE *stream )

@@ -26,6 +26,9 @@ class ProjectConfiguration(object):
     gcc_build_dependencies (list[str]): GCC build dependencies.
     gcc_static_build_dependencies (list[str]): GCC build dependencies for
         building static binaries.
+    info_tool_source_description (str): description of the input source.
+    info_tool_source_type (str): input source type, such as file, image
+        or volume.
     java_bindings_name (str): name of the Java bindings.
     library_build_dependencies (str): library build dependencies.
     library_description (str): description of the library.
@@ -126,6 +129,10 @@ class ProjectConfiguration(object):
     self.tools_description = None
     self.tools_directory = None
     self.tools_names = []
+
+    # Info tool configuration.
+    self.info_tool_source_description = None
+    self.info_tool_source_type = None
 
     # Mount tool configuration.
     self.mount_tool_additional_arguments = None
@@ -315,6 +322,27 @@ class ProjectConfiguration(object):
         name.split(' ')[0] for name in self.gcc_build_dependencies]
     self.gcc_static_build_dependencies = [
         name.split(' ')[0] for name in self.gcc_static_build_dependencies]
+
+  def _ReadInfoToolConfiguration(self, config_parser):
+    """Reads the info tool configuration.
+
+    Args:
+      config_parser (ConfigParser): configuration file parser.
+
+    Raises:
+      ConfigurationError: if the info tool source type is not supported.
+    """
+    self.info_tool_source_description = self._GetOptionalConfigValue(
+        config_parser, 'info_tool', 'source_description')
+
+    self.info_tool_source_type = self._GetOptionalConfigValue(
+        config_parser, 'info_tool', 'source_type')
+
+    if (self.info_tool_source_type and 
+        self.info_tool_source_type not in ('file', 'image', 'volume')):
+      raise errors.ConfigurationError(
+          'unsupported info tool source type: {0:s}'.format(
+              self.info_tool_source_type))
 
   def _ReadJavaBindingsConfiguration(self, unused_config_parser):
     """Reads the Java bindings configuration.
@@ -746,4 +774,5 @@ class ProjectConfiguration(object):
     self.coverty_scan_token = self._GetOptionalConfigValue(
         config_parser, 'coverty', 'scan_token', default_value='')
 
+    self._ReadInfoToolConfiguration(config_parser)
     self._ReadMountToolConfiguration(config_parser)

@@ -8,21 +8,21 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
-	${library_name}_error_t *error                      = NULL;
-	system_character_t *mount_point             = NULL;
+	${library_name}_error_t *error                     = NULL;
+	system_character_t *mount_point                    = NULL;
+	system_character_t *source                         = NULL;
+	char *program                                      = "${mount_tool_name}";
 ${mount_tool_options_variable_declarations}
-	system_character_t *source                  = NULL;
-	char *program                               = "${mount_tool_name}";
-	system_integer_t option                     = 0;
-	int result                                  = 0;
-	int verbose                                 = 0;
+	system_integer_t option                            = 0;
+	int result                                         = 0;
+	int verbose                                        = 0;
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations ${mount_tool_name}_fuse_operations;
 
-	struct fuse_args ${mount_tool_name}_fuse_arguments   = FUSE_ARGS_INIT(0, NULL);
-	struct fuse_chan *${mount_tool_name}_fuse_channel    = NULL;
-	struct fuse *${mount_tool_name}_fuse_handle          = NULL;
+	struct fuse_args ${mount_tool_name}_fuse_arguments = FUSE_ARGS_INIT(0, NULL);
+	struct fuse_chan *${mount_tool_name}_fuse_channel  = NULL;
+	struct fuse *${mount_tool_name}_fuse_handle        = NULL;
 
 #elif defined( HAVE_LIBDOKAN )
 	DOKAN_OPERATIONS ${mount_tool_name}_dokan_operations;

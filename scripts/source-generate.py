@@ -7693,6 +7693,418 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 class ToolsSourceFileGenerator(SourceFileGenerator):
   """Tools source files generator."""
 
+  def _GenerateGetoptString(self, tool_options):
+    """Generates a getopt string.
+
+    Args:
+      tool_options (list[tuple[str, str, st]])): tool options.
+
+    Returns:
+      str: getopt string.
+    """
+    getopt_string_segments = []
+
+    for option, argument, _ in tool_options:
+      getopt_string = option
+      if argument:
+        getopt_string = '{0:s}:'.format(getopt_string)
+
+      getopt_string_segments.append(getopt_string)
+
+    return ''.join(getopt_string_segments)
+
+  def _GenerateGetoptSwitch(self, project_configuration, tool_options):
+    """Generates a getopt switch.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      tool_options (list[tuple[str, str, st]])): tool options.
+
+    Returns:
+      str: getopt switch.
+    """
+    largest_argument_length = 0
+    for _, argument, _ in tool_options:
+      largest_argument_length = max(largest_argument_length, len(argument))
+
+    # TODO: move getopt_switch into templates.
+    getopt_switch = []
+    for option, argument, _ in tool_options:
+      if getopt_switch:
+        getopt_switch.append('')
+
+      if argument:
+        getopt_switch.extend([
+            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
+            '\t\t\t\toption_{0:s} = optarg;'.format(argument),
+            '',
+            '\t\t\t\tbreak;'])
+
+      elif option == 'h':
+        getopt_switch.extend([
+            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
+            '\t\t\t\tusage_fprint(',
+            '\t\t\t\t stdout );',
+            '',
+            '\t\t\t\treturn( EXIT_SUCCESS );'])
+
+      elif option == 'v':
+        getopt_switch.extend([
+            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
+            '\t\t\t\tverbose = 1;',
+            '',
+            '\t\t\t\tbreak;'])
+
+      elif option == 'V':
+        getopt_switch.extend([
+            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
+            '\t\t\t\t{0:s}_output_copyright_fprint('.format(
+                project_configuration.tools_directory),
+            '\t\t\t\t stdout );',
+            '',
+            '\t\t\t\treturn( EXIT_SUCCESS );'])
+
+    return '\n'.join(getopt_switch)
+
+  def _GenerateInfoHandleHeaderFile(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates an info handle header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'info_handle')
+
+    template_filename = os.path.join(template_directory, 'header.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'includes.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_mappings['info_tool_source_type'] = (
+        project_configuration.info_tool_source_type)
+
+    for template_name in (
+        'struct.h', 'initialize.h', 'free.h', 'signal_abort.h'):
+      template_filename = os.path.join(template_directory, template_name)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: add condition
+    template_filename = os.path.join(template_directory, 'set_ascii_codepage.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    for template_name in ('open.h', 'close.h'):
+      template_filename = os.path.join(template_directory, template_name)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    del template_mappings['info_tool_source_type']
+
+    template_filename = os.path.join(template_directory, 'footer.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+  def _GenerateInfoHandleSourceFile(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates an info handle source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'info_handle')
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'includes.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_mappings['info_tool_source_type'] = (
+        project_configuration.info_tool_source_type)
+
+    for template_name in ('initialize.c', 'free.c', 'signal_abort.c'):
+      template_filename = os.path.join(template_directory, template_name)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: add condition
+    template_filename = os.path.join(template_directory, 'set_ascii_codepage.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    for template_name in ('open.c', 'close.c'):
+      template_filename = os.path.join(template_directory, template_name)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    del template_mappings['info_tool_source_type']
+
+  def _GenerateInfoTool(
+      self, project_configuration, template_mappings, output_writer):
+    """Generates an info tool.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    info_tool_name = '{0:s}info'.format(
+        project_configuration.library_name_suffix)
+
+    info_tool_filename = '{0:s}.c'.format(info_tool_name)
+    info_tool_filename = os.path.join(
+        project_configuration.tools_directory, info_tool_filename)
+
+    if os.path.exists(info_tool_filename):
+      output_filename = os.path.join(
+          project_configuration.tools_directory, 'info_handle.h')
+      self._GenerateInfoHandleHeaderFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+      output_filename = os.path.join(
+          project_configuration.tools_directory, 'info_handle.c')
+      self._GenerateInfoHandleSourceFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+      self._GenerateInfoToolSourceFile(
+          project_configuration, template_mappings, info_tool_name,
+          output_writer, info_tool_filename)
+
+  def _GenerateInfoToolSourceFile(
+      self, project_configuration, template_mappings, info_tool_name,
+      output_writer, output_filename):
+    """Generates an info tool source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      info_tool_name (str): name of the info tool.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'yalinfo')
+
+    info_tool_options = self._GetInfoToolOptions(
+        project_configuration, info_tool_name)
+
+    template_mappings['info_tool_name'] = info_tool_name
+    template_mappings['info_tool_source_description'] = (
+        project_configuration.info_tool_source_description)
+    template_mappings['info_tool_source_type'] = (
+        project_configuration.info_tool_source_type)
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'includes.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    self._GenerateInfoToolSourceUsageFunction(
+        project_configuration, template_mappings, info_tool_name,
+        info_tool_options, output_writer, output_filename)
+
+    template_filename = os.path.join(template_directory, 'signal_handler.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    self._GenerateInfoToolSourceMainFunction(
+        project_configuration, template_mappings, info_tool_name,
+        info_tool_options, output_writer, output_filename)
+
+    del template_mappings['info_tool_name']
+    del template_mappings['info_tool_source_description']
+    del template_mappings['info_tool_source_type']
+
+    self._SortIncludeHeaders(project_configuration, output_filename)
+    self._SortVariableDeclarations(output_filename)
+
+  def _GenerateInfoToolSourceMainFunction(
+      self, project_configuration, template_mappings, info_tool_name,
+      info_tool_options, output_writer, output_filename):
+    """Generates an info tool source main function.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      info_tool_name (str): name of the info tool.
+      info_tool_options (list[tuple[str, str, st]])): info tool options.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'yalinfo')
+
+    variable_declarations = self._GenerateMainFunctionVariableDeclarations(
+        info_tool_options)
+    getopt_string = self._GenerateGetoptString(info_tool_options)
+    getopt_switch = self._GenerateGetoptSwitch(
+        project_configuration, info_tool_options)
+
+    template_mappings['info_tool_getopt_string'] = getopt_string
+    template_mappings['info_tool_options_switch'] = getopt_switch
+    template_mappings['info_tool_options_variable_declarations'] = (
+        variable_declarations)
+
+    template_filename = os.path.join(template_directory, 'main-start.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['info_tool_getopt_string']
+    del template_mappings['info_tool_options_switch']
+    del template_mappings['info_tool_options_variable_declarations']
+
+    # TODO: add condition
+    template_filename = os.path.join(
+        template_directory, 'main-option_codepage.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'main-end.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+  def _GenerateInfoToolSourceUsageFunction(
+      self, project_configuration, template_mappings, info_tool_name,
+      info_tool_options, output_writer, output_filename):
+    """Generates an info tool source usage function.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      info_tool_name (str): name of the info tool.
+      info_tool_options (list[tuple[str, str, st]])): info tool options.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'yalinfo')
+
+    alignment_padding = '          '
+    width = 80 - len(alignment_padding)
+    text_wrapper = textwrap.TextWrapper(width=width)
+
+    options_details = []
+    options_usage = []
+    options_without_arguments = []
+    for option, argument, description in info_tool_options:
+      description_lines = text_wrapper.wrap(description)
+
+      description_line = description_lines.pop(0)
+      details = '\tfprintf( stream, "\\t-{0:s}:{1:s}{2:s}\\n"'.format(
+          option, alignment_padding, description_line)
+
+      for description_line in description_lines:
+        options_details.append(details)
+        details = '\t                 "\\t   {0:s}{1:s}\\n"'.format(
+            alignment_padding, description_line)
+
+      details = '{0:s} );'.format(details)
+      options_details.append(details)
+
+      if not argument:
+        options_without_arguments.append(option)
+      else:
+        usage = '[ -{0:s} {1:s} ]'.format(option, argument)
+        options_usage.append(usage)
+
+    usage = '[ -{0:s} ]'.format(''.join(options_without_arguments))
+    options_usage.append(usage)
+
+    options_usage.append(project_configuration.info_tool_source_type)
+
+    usage = 'Usage: {0:s} '.format(info_tool_name)
+    usage_length = len(usage)
+    alignment_padding = ' ' * usage_length
+    options_usage = ' '.join(options_usage)
+
+    width = 80 - usage_length
+    text_wrapper = textwrap.TextWrapper(width=width)
+
+    usage_lines = text_wrapper.wrap(options_usage)
+
+    info_tool_usage = []
+    usage_line = usage_lines.pop(0)
+    usage = '\tfprintf( stream, "{0:s}{1:s}\\n"'.format(usage, usage_line)
+
+    for usage_line in usage_lines:
+      info_tool_usage.append(usage)
+      usage = '\t                 "{0:s}{1:s}\\n"'.format(
+          alignment_padding, usage_line)
+
+    usage = '{0:s}\\n" );'.format(usage[:-1])
+    info_tool_usage.append(usage)
+
+    template_mappings['info_tool_options'] = '\n'.join(options_details)
+    template_mappings['info_tool_usage'] = '\n'.join(info_tool_usage)
+
+    template_filename = os.path.join(template_directory, 'usage.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['info_tool_options']
+    del template_mappings['info_tool_usage']
+
+  def _GenerateMainFunctionVariableDeclarations(self, tool_options):
+    """Generates the variable declarations of the main function.
+
+    Args:
+      tool_options (list[tuple[str, str, st]])): tool options.
+
+    Returns:
+      str: variable declarations.
+    """
+    largest_argument_length = 0
+    for _, argument, _ in tool_options:
+      largest_argument_length = max(largest_argument_length, len(argument))
+
+    variable_declarations = []
+    for _, argument, _ in tool_options:
+      if argument:
+        alignment_padding = ' ' * (largest_argument_length - len(argument))
+        variable_declaration = (
+            '\tsystem_character_t *option_{0:s}{1:s} = NULL;').format(
+                argument, alignment_padding)
+        variable_declarations.append(variable_declaration)
+
+    return '\n'.join(sorted(variable_declarations))
+
   def _GenerateMountHandleHeaderFile(
       self, project_configuration, template_mappings, output_writer,
       output_filename):
@@ -7861,6 +8273,40 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     del template_mappings['mount_tool_source_type']
 
+  def _GenerateMountTool(
+      self, project_configuration, template_mappings, output_writer):
+    """Generates a mount tool.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    mount_tool_name = '{0:s}mount'.format(
+        project_configuration.library_name_suffix)
+
+    mount_tool_filename = '{0:s}.c'.format(mount_tool_name)
+    mount_tool_filename = os.path.join(
+        project_configuration.tools_directory, mount_tool_filename)
+
+    if os.path.exists(mount_tool_filename):
+      output_filename = os.path.join(
+          project_configuration.tools_directory, 'mount_handle.h')
+      self._GenerateMountHandleHeaderFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+      output_filename = os.path.join(
+          project_configuration.tools_directory, 'mount_handle.c')
+      self._GenerateMountHandleSourceFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+      self._GenerateMountToolSourceFile(
+          project_configuration, template_mappings, mount_tool_name,
+          output_writer, mount_tool_filename)
+
   def _GenerateMountToolSourceFile(
       self, project_configuration, template_mappings, mount_tool_name,
       output_writer, output_filename):
@@ -7924,6 +8370,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     del template_mappings['mount_tool_source_description_long']
     del template_mappings['mount_tool_source_type']
 
+    self._SortIncludeHeaders(project_configuration, output_filename)
+    self._SortVariableDeclarations(output_filename)
+
   def _GenerateMountToolSourceMainFunction(
       self, project_configuration, template_mappings, mount_tool_name,
       mount_tool_options, output_writer, output_filename):
@@ -7940,62 +8389,16 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'yalmount')
 
-    mount_tool_getopt_string = []
-    mount_tool_options_variable_declarations = []
-    # TODO: move mount_tool_options_switch into templates.
-    mount_tool_options_switch = []
-    for option, argument, _ in mount_tool_options:
-      if mount_tool_options_switch:
-        mount_tool_options_switch.append('')
+    variable_declarations = self._GenerateMainFunctionVariableDeclarations(
+        mount_tool_options)
+    getopt_string = self._GenerateGetoptString(mount_tool_options)
+    getopt_switch = self._GenerateGetoptSwitch(
+        project_configuration, mount_tool_options)
 
-      getopt_string = option
-      if argument:
-        getopt_string = '{0:s}:'.format(getopt_string)
-
-      mount_tool_getopt_string.append(getopt_string)
-
-      if argument:
-        alignment_padding = ' ' * (len('extended_options') - len(argument))
-        variable_declaration = (
-            '\tsystem_character_t *option_{0:s}{1:s} = NULL;').format(
-                argument, alignment_padding)
-        mount_tool_options_variable_declarations.append(variable_declaration)
-
-        mount_tool_options_switch.extend([
-            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
-            '\t\t\t\toption_{0:s} = optarg;'.format(argument),
-            '',
-            '\t\t\t\tbreak;'])
-
-      elif option == 'h':
-        mount_tool_options_switch.extend([
-            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
-            '\t\t\t\tusage_fprint(',
-            '\t\t\t\t stdout );',
-            '',
-            '\t\t\t\treturn( EXIT_SUCCESS );'])
-
-      elif option == 'v':
-        mount_tool_options_switch.extend([
-            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
-            '\t\t\t\tverbose = 1;',
-            '',
-            '\t\t\t\tbreak;'])
-
-      elif option == 'V':
-        mount_tool_options_switch.extend([
-            '\t\t\tcase (system_integer_t) \'{0:s}\':'.format(option),
-            '\t\t\t\t{0:s}_output_copyright_fprint('.format(
-                project_configuration.tools_directory),
-            '\t\t\t\t stdout );',
-            '',
-            '\t\t\t\treturn( EXIT_SUCCESS );'])
-
-    template_mappings['mount_tool_getopt_string'] = ''.join(mount_tool_getopt_string)
-    template_mappings['mount_tool_options_variable_declarations'] = '\n'.join(
-        sorted(mount_tool_options_variable_declarations))
-    template_mappings['mount_tool_options_switch'] = '\n'.join(
-        mount_tool_options_switch)
+    template_mappings['mount_tool_getopt_string'] = getopt_string
+    template_mappings['mount_tool_options_switch'] = getopt_switch
+    template_mappings['mount_tool_options_variable_declarations'] = (
+        variable_declarations)
 
     template_filename = os.path.join(template_directory, 'main-start.c')
     self._GenerateSection(
@@ -8003,8 +8406,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     del template_mappings['mount_tool_getopt_string']
-    del template_mappings['mount_tool_options_variable_declarations']
     del template_mappings['mount_tool_options_switch']
+    del template_mappings['mount_tool_options_variable_declarations']
 
     if project_configuration.mount_tool_has_keys_option:
       template_filename = os.path.join(template_directory, 'main-option_keys.c')
@@ -8127,8 +8530,37 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     del template_mappings['mount_tool_source_alignment']
     del template_mappings['mount_tool_usage']
 
+  def _GetInfoToolOptions(self, project_configuration, info_tool_name):
+    """Retrieves the info tool options.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      info_tool_name (str): name of the info tool.
+
+    Returns:
+      list[tuple[str, str, str]]: info tool options.
+    """
+    # TODO: sort options with lower case before upper case.
+    info_tool_options = []
+
+    # TODO: add condition
+    info_tool_options.append(
+        ('c', 'codepage', (
+            'codepage of ASCII strings, options: ascii, windows-874, '
+            'windows-932, windows-936, windows-949, windows-950, '
+            'windows-1250, windows-1251, windows-1252 (default), '
+            'windows-1253, windows-1254, windows-1255, windows-1256, '
+            'windows-1257 or windows-1258 ')))
+
+    info_tool_options.extend([
+        ('h', '', 'shows this help'),
+        ('v', '', 'verbose output to stderr'),
+        ('V', '', 'print version')])
+
+    return info_tool_options
+
   def _GetMountToolOptions(self, project_configuration, mount_tool_name):
-    """Retrieves the mount tool option.s
+    """Retrieves the mount tool options.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
@@ -8207,29 +8639,11 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-    mount_tool_name = '{0:s}mount'.format(
-        project_configuration.library_name_suffix)
+    self._GenerateInfoTool(
+        project_configuration, template_mappings, output_writer)
 
-    mount_tool_filename = '{0:s}.c'.format(mount_tool_name)
-    mount_tool_filename = os.path.join(
-        project_configuration.tools_directory, mount_tool_filename)
-
-    if os.path.exists(mount_tool_filename):
-      output_filename = os.path.join(
-          project_configuration.tools_directory, 'mount_handle.h')
-      self._GenerateMountHandleHeaderFile(
-          project_configuration, template_mappings, output_writer,
-          output_filename)
-
-      output_filename = os.path.join(
-          project_configuration.tools_directory, 'mount_handle.c')
-      self._GenerateMountHandleSourceFile(
-          project_configuration, template_mappings, output_writer,
-          output_filename)
-
-      self._GenerateMountToolSourceFile(
-          project_configuration, template_mappings, mount_tool_name,
-          output_writer, mount_tool_filename)
+    self._GenerateMountTool(
+        project_configuration, template_mappings, output_writer)
 
 
 class FileWriter(object):
