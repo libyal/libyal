@@ -5299,6 +5299,34 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
 
+  def _GenerateTestFunctions(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename, with_input=False, with_offset=False):
+    """Generates the test functions.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+      with_input (Optional[bool]): True if tests require input data.
+      with_offset (Optional[bool]): True if tests require offset support.
+    """
+    output_filename = '{0:s}_test_functions.h'.format(
+        project_configuration.library_name_suffix)
+    output_filename = os.path.join('tests', output_filename)
+    self._GenerateTestFunctionsHeader(
+        project_configuration, template_mappings, output_writer, output_filename,
+        with_input=with_input, with_offset=with_offset)
+
+    output_filename = '{0:s}_test_functions.c'.format(
+        project_configuration.library_name_suffix)
+    output_filename = os.path.join('tests', output_filename)
+    self._GenerateTestFunctionsSource(
+        project_configuration, template_mappings, output_writer, output_filename,
+        with_input=with_input, with_offset=with_offset)
+
   def _GenerateTestFunctionsHeader(
       self, project_configuration, template_mappings, output_writer,
       output_filename, with_input=False, with_offset=False):
@@ -5367,8 +5395,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
   def _GenerateMakefileAM(
       self, project_configuration, template_mappings, include_header_file,
       makefile_am_file, api_functions, api_functions_with_input, api_types,
-      api_types_with_input, api_pseudo_types, internal_types,
-      python_module_types, output_writer):
+      api_types_with_input, api_pseudo_types, internal_functions,
+      internal_types, python_module_types, output_writer):
     """Generates a tests Makefile.am file.
 
     Args:
@@ -5385,14 +5413,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       api_types_with_input (list[str]): names of API types to test with
           input data.
       api_pseudo_types (list[str]): names of API pseudo types to test.
+      internal_functions (list[str]): names of internal functions to test.
       internal_types (list[str]): names of internal types to test.
       python_module_types (list[str]): names of Python module types to test.
       output_writer (OutputWriter): output writer.
     """
-    tests = set(api_functions).union(set(api_functions_with_input))
-    tests.update(set(api_types).union(set(api_types_with_input)))
-    tests.update(set(api_pseudo_types))
-    tests.update(set(internal_types))
+    tests = set(api_functions)
+    tests = tests.union(set(api_functions_with_input))
+    tests = tests.union(set(api_types))
+    tests = tests.union(set(api_types_with_input))
+    tests = tests.union(set(api_pseudo_types))
+    tests = tests.union(set(internal_functions))
+    tests = tests.union(set(internal_types))
     tests = sorted(tests)
 
     template_directory = os.path.join(
@@ -5487,7 +5519,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     for group_name in tests:
-      if group_name in api_functions:
+      if group_name in api_functions or group_name in internal_functions:
         has_error_argument = include_header_file.HasErrorArgument(group_name)
         if (project_configuration.library_name != 'libcerror' and
             group_name not in ('error', 'notify') and has_error_argument):
@@ -5518,6 +5550,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename = 'yal_test_type_with_input.am'
 
         self._SetTypeNameInTemplateMappings(template_mappings, group_name)
+
+      else:
+        logging.warning((
+            'Unable to generate tests Makefile.am entry for: "{0:s}" with '
+            'error: missing template').format(group_name))
+        continue
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -7163,7 +7201,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       makefile_am_file (MainMakefileAMFile): project main Makefile.am file.
 
     Returns:
-      types (list[str]): type names.
+      tuple: contains:
+        list[str]: type names.
+        list[str]: function names.
     """
     library_path = os.path.join(
         self._projects_directory, project_configuration.library_name,
@@ -7173,6 +7213,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     type_name_prefix_length = len(type_name_prefix)
 
     types = []
+    functions = []
     for source_file in makefile_am_file.sources:
       if not source_file.endswith('.h'):
         continue
@@ -7181,6 +7222,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       header_file = LibraryHeaderFile(header_file_path)
       header_file.Read(project_configuration)
 
+      if not header_file.types:
+        _, _, source_file = source_file[:-2].partition('_')
+        if source_file not in ('definitions', 'extern', 'support', 'unused'):
+          functions.append(source_file)
+        continue
+
       for type_name in header_file.types:
         if not type_name.startswith(type_name_prefix):
           continue
@@ -7188,12 +7235,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         type_name = type_name[type_name_prefix_length:]
         types.append(type_name)
 
-    return types
+    return types, functions
 
   def _GetTemplateMappings(
       self, project_configuration, api_functions, api_functions_with_input,
-      api_types, api_types_with_input, api_pseudo_types, internal_types,
-      python_functions, python_functions_with_input):
+      api_types, api_types_with_input, api_pseudo_types, internal_functions,
+      internal_types, python_functions, python_functions_with_input):
     """Retrieves the template mappings.
 
     Args:
@@ -7205,6 +7252,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       api_types_with_input (list[str]): names of API types to test with
           input data.
       api_pseudo_types (list[str]): names of API pseudo types to test.
+      internal_functions (list[str]): names of internal functions to test.
       internal_types (list[str]): names of internal types to test.
       python_functions (list[str]): names of Python functions to test.
       python_functions_with_input (list[str]): names of Python functions to
@@ -7218,10 +7266,16 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         TestsSourceFileGenerator, self)._GetTemplateMappings(
             project_configuration)
 
-    test_api_types = set(api_types).union(set(internal_types))
-    library_tests = sorted(set(api_functions).union(test_api_types))
-    library_tests_with_input = sorted(
-        set(api_functions_with_input).union(set(api_types_with_input)))
+    library_tests = set(api_functions)
+    library_tests = library_tests.union(set(api_types))
+    library_tests = library_tests.union(set(internal_functions))
+    library_tests = library_tests.union(set(internal_types))
+    library_tests = sorted(library_tests)
+
+    library_tests_with_input = set(api_types_with_input)
+    library_tests_with_input = library_tests_with_input.union(
+        set(api_functions_with_input))
+    library_tests_with_input = sorted(library_tests_with_input)
 
     template_mappings['library_tests'] = ' '.join(library_tests)
     template_mappings['library_tests_with_input'] = ' '.join(
@@ -7440,8 +7494,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     api_pseudo_types = include_header_file.GetAPIPseudoTypeTestGroups()
 
-    # TODO: handle internal functions
-    types = self._GetLibraryTypes(project_configuration, makefile_am_file)
+    types, internal_functions = self._GetLibraryTypes(
+        project_configuration, makefile_am_file)
 
     public_functions = set(api_functions).union(set(api_functions_with_input))
     public_types = set(api_types).union(set(api_types_with_input))
@@ -7463,6 +7517,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     logging.info('Found public types: {0:s}'.format(', '.join(public_types)))
     logging.info('Found public pseudo types: {0:s}'.format(
         ', '.join(api_pseudo_types)))
+    logging.info('Found internal functions: {0:s}'.format(
+        ', '.join(internal_functions)))
     logging.info('Found internal types: {0:s}'.format(
         ', '.join(internal_types)))
 
@@ -7490,8 +7546,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     template_mappings = self._GetTemplateMappings(
         project_configuration, api_functions, api_functions_with_input,
-        api_types, api_types_with_input, api_pseudo_types, internal_types,
-        test_python_functions, test_python_functions_with_input)
+        api_types, api_types_with_input, api_pseudo_types, internal_functions,
+        internal_types, test_python_functions, test_python_functions_with_input)
 
     for directory_entry in os.listdir(self._template_directory):
       # Ignore yal_test_library.h in favor of yal_test_libyal.h
@@ -7667,27 +7723,19 @@ class TestsSourceFileGenerator(SourceFileGenerator):
             'Unable to generate tests for internal type: {0:s}'.format(
                 type_name))
 
+    # TODO: generate tests for internal functions
+
     with_input = bool(api_types_with_input)
 
-    output_filename = '{0:s}_test_functions.h'.format(
-        project_configuration.library_name_suffix)
-    output_filename = os.path.join('tests', output_filename)
-    self._GenerateTestFunctionsHeader(
-        project_configuration, template_mappings, output_writer, output_filename,
-        with_input=with_input, with_offset=with_offset)
-
-    output_filename = '{0:s}_test_functions.c'.format(
-        project_configuration.library_name_suffix)
-    output_filename = os.path.join('tests', output_filename)
-    self._GenerateTestFunctionsSource(
+    self._GenerateTestFunctions(
         project_configuration, template_mappings, output_writer, output_filename,
         with_input=with_input, with_offset=with_offset)
 
     self._GenerateMakefileAM(
         project_configuration, template_mappings, include_header_file,
         makefile_am_file, api_functions, api_functions_with_input, api_types,
-        api_types_with_input, api_pseudo_types, internal_types,
-        python_module_types, output_writer)
+        api_types_with_input, api_pseudo_types, internal_functions,
+        internal_types, python_module_types, output_writer)
 
 
 class ToolsSourceFileGenerator(SourceFileGenerator):
