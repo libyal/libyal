@@ -8095,7 +8095,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     usage = '[ -{0:s} ]'.format(''.join(options_without_arguments))
     options_usage.append(usage)
 
-    options_usage.append(project_configuration.info_tool_source_type)
+    if project_configuration.info_tool_source_type:
+      options_usage.append(project_configuration.info_tool_source_type)
 
     usage = 'Usage: {0:s} '.format(info_tool_name)
     usage_length = len(usage)
