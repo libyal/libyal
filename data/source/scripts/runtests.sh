@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script that runs the tests
 #
-# Version: 20171106
+# Version: 20171127
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -174,6 +174,13 @@ run_configure_make_check_python()
 
 run_setup_py_tests()
 {
+	# Skip this test when running Cygwin on AppVeyor.
+	if test -n "$${APPVEYOR}" && test $${TARGET} = "cygwin";
+	then
+		echo "Running: 'setup.py build' skipped";
+
+		return $${EXIT_SUCCESS};
+	fi
 	PYTHON=$$1;
 
 	$${PYTHON} setup.py build;
