@@ -13,11 +13,11 @@
   - env: TARGET="macos-clang"
     compiler: clang
     os: osx
-    osx_image: xcode8.1
+    osx_image: xcode8.3
   - env: TARGET="macos-gcc"
     compiler: gcc
     os: osx
-    osx_image: xcode8.1
+    osx_image: xcode8.3
   - env: TARGET="shared"
     compiler: gcc
     os: linux
