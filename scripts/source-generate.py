@@ -6026,16 +6026,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           body_template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
 
-      if free_function:
+      if function_template == 'clone':
+        if initialize_number_of_arguments == 3:
+          template_filename = 'function-end-with_value-clone.c'
+        else:
+          template_filename = 'function-end-clone.c'
+
+      elif free_function:
         template_filename = 'function-end-with_free_function.c'
-      elif initialize_number_of_arguments == 3 and function_template == 'clone':
-        template_filename = 'function-end-with_value-clone.c'
       elif initialize_number_of_arguments == 3:
         template_filename = 'function-end-with_value.c'
       elif with_input:
         template_filename = 'function-end-with_input.c'
-      elif function_template == 'clone':
-        template_filename = 'function-end-clone.c'
       elif function_template == 'get_type_value':
         template_filename = 'function-end-type_value.c'
       else:
@@ -7212,10 +7214,17 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     type_name_prefix = '{0:s}_'.format(project_configuration.library_name)
     type_name_prefix_length = len(type_name_prefix)
 
+    include_file_prefix = '{0:s}_lib'.format(project_configuration.library_name)
+
     types = []
     functions = []
     for source_file in makefile_am_file.sources:
       if not source_file.endswith('.h'):
+        continue
+
+      # Skip library include header files.
+      # TODO: check if library name matches local libraries.
+      if source_file.startswith(include_file_prefix):
         continue
 
       header_file_path = os.path.join(library_path, source_file)
@@ -7335,6 +7344,30 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       # TODO: add support for keys option
       test_options.append(('o', 'offset'))
       test_options.append(('p', 'password'))
+
+    elif (project_configuration.library_name == 'libfsapfs' and
+          type_name == 'volume'):
+      test_options.append(('o', 'offset'))
+
+    elif (project_configuration.library_name == 'libfsext' and
+          type_name == 'volume'):
+      test_options.append(('o', 'offset'))
+
+    elif (project_configuration.library_name == 'libfsfat' and
+          type_name == 'volume'):
+      test_options.append(('o', 'offset'))
+
+    elif (project_configuration.library_name == 'libfshfs' and
+          type_name == 'volume'):
+      test_options.append(('o', 'offset'))
+
+    elif (project_configuration.library_name == 'libfsntfs' and
+          type_name == 'volume'):
+      test_options.append(('o', 'offset'))
+
+    elif (project_configuration.library_name == 'libfsrefs' and
+          type_name == 'volume'):
+      test_options.append(('o', 'offset'))
 
     elif (project_configuration.library_name == 'libluksde' and
           type_name == 'volume'):
