@@ -6,6 +6,6 @@ ${mount_tool_name}${mount_tool_additional_arguments} ${mount_tool_source} /mnt/f
 
 This will expose ${mount_tool_mounted_description}.
 ```
-/mnt/fuse/${library_name_suffix}1
+/mnt/fuse/${project_name_suffix}1
 ```
 

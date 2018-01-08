@@ -20,14 +20,14 @@ The source from the git repository will not work without synchronizing the libra
 ### Debian/Ubuntu
 On Debian based Linux distributions such as Ubuntu install the following packages:
 ```
-sudo apt install autoconf automake autopoint libtool pkg-config
+sudo apt install ${git_apt_dependencies}
 ```
 
 ### macOS
 On macOS the XCode command line tools no longer provide the autotools you can obtain them e.g. via [MacPorts](https://www.macports.org/).
 Install the following packages:
 ```
-sudo port install autoconf automake gettext libtool pkgconfig
+sudo port install ${git_macports_dependencies}
 ```
 
 ### Microsoft Visual Studio
@@ -35,9 +35,7 @@ Since Microsoft Visual Studio does not come with a Unix shell or equivalent you'
 ```
 git clone ${project_git_url}
 cd ${project_name}\
-.\synclibs.ps1
+${git_msvscpp_dependencies}
 .\autogen.ps1
 ```
-
-Check "appveyor.yml" to make sure there are additional PowerShell scripts you need to run.
 

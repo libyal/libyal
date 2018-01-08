@@ -21,6 +21,6 @@ ${mount_tool_name}${mount_tool_additional_arguments} -o $$(( 1024 * 512 )) ${mou
 
 This will expose ${mount_tool_mounted_description}.
 ```
-/mnt/fuse/${library_name_suffix}1
+/mnt/fuse/${project_name_suffix}1
 ```
 

@@ -1,6 +1,6 @@
 If you get the error:
 ```
-No sub system to mount ${library_name_suffix_upper_case}.
+No sub system to mount ${project_name_suffix_upper_case}.
 ```
 
 That means fuse was not detected when building the ${tools_name}, check if you have fuse-dev installed and if ./configure is able to detect it.

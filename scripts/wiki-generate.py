@@ -54,6 +54,12 @@ class WikiPageGenerator(object):
         'autoconf', 'automake', 'binutils', 'gcc-core', 'gettext', 'libiconv',
         'libtool', 'make', 'pkg-config']
 
+    if 'lex' in project_configuration.library_build_dependencies:
+      dependencies.append('flex')
+
+    if 'yacc' in project_configuration.library_build_dependencies:
+      dependencies.append('byacc')
+
     if 'zlib' in project_configuration.library_build_dependencies:
       dependencies.append(
           'zlib-devel (for DEFLATE compression support) (optional but '
@@ -98,6 +104,12 @@ class WikiPageGenerator(object):
       list[str]: dpkg build dependencies.
     """
     dependencies = list(project_configuration.dpkg_build_dependencies)
+
+    if 'lex' in project_configuration.library_build_dependencies:
+      dependencies.append('flex')
+
+    if 'yacc' in project_configuration.library_build_dependencies:
+      dependencies.append('byacc')
 
     if 'zlib' in project_configuration.library_build_dependencies:
       dependencies.append('zlib1g-dev')
@@ -164,6 +176,12 @@ class WikiPageGenerator(object):
     """
     dependencies = []
 
+    if 'lex' in project_configuration.library_build_dependencies:
+      dependencies.append('flex')
+
+    if 'yacc' in project_configuration.library_build_dependencies:
+      dependencies.append('byacc')
+
     if 'zlib' in project_configuration.library_build_dependencies:
       dependencies.append(
           'MinGW build of zlib library and source headers (for DEFLATE '
@@ -210,6 +228,12 @@ class WikiPageGenerator(object):
       list[str]: rpm build dependencies.
     """
     dependencies = list(project_configuration.rpm_build_dependencies)
+
+    if 'lex' in project_configuration.library_build_dependencies:
+      dependencies.append('flex')
+
+    if 'yacc' in project_configuration.library_build_dependencies:
+      dependencies.append('byacc')
 
     if 'zlib' in project_configuration.library_build_dependencies:
       dependencies.append('zlib-devel')
@@ -347,12 +371,51 @@ class WikiPageGenerator(object):
         '\n').format(project_configuration.project_name)
 
     # Git support.
+    git_apt_dependencies = [
+        'git', 'autoconf', 'automake', 'autopoint', 'libtool', 'pkg-config']
+
+    if 'lex' in project_configuration.library_build_dependencies:
+      git_apt_dependencies.append('flex')
+
+    if 'yacc' in project_configuration.library_build_dependencies:
+      git_apt_dependencies.append('byacc')
+
+    git_apt_dependencies = ' '.join(git_apt_dependencies)
+
     git_build_dependencies = [
         'git', 'aclocal', 'autoconf', 'automake', 'autopoint or gettextize',
         'libtoolize', 'pkg-config']
 
+    if 'lex' in project_configuration.library_build_dependencies:
+      git_build_dependencies.append('flex')
+
+    if 'yacc' in project_configuration.library_build_dependencies:
+      git_build_dependencies.append('byacc')
+
     git_build_dependencies = '\n'.join([
         '* {0:s}'.format(dependency) for dependency in git_build_dependencies])
+
+    git_macports_dependencies = [
+        'git', 'autoconf', 'automake', 'gettext', 'libtool', 'pkgconfig']
+
+    if 'lex' in project_configuration.library_build_dependencies:
+      git_macports_dependencies.append('flex')
+
+    if 'yacc' in project_configuration.library_build_dependencies:
+      git_macports_dependencies.append('byacc')
+
+    git_macports_dependencies = ' '.join(git_macports_dependencies)
+
+    git_msvscpp_dependencies = ['.\synclibs.ps1']
+
+    if ('lex' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.library_build_dependencies):
+      git_msvscpp_dependencies.append('.\syncwinflexbison.ps1')
+
+    if 'zlib' in project_configuration.library_build_dependencies:
+      git_msvscpp_dependencies.append('.\synczlib.ps1')
+
+    git_msvscpp_dependencies = '\n'.join(git_msvscpp_dependencies)
 
     # GCC support.
     building_table_of_contents += (
@@ -361,6 +424,12 @@ class WikiPageGenerator(object):
 
     gcc_build_dependencies = []
     gcc_static_build_dependencies = []
+
+    if 'lex' in project_configuration.library_build_dependencies:
+      gcc_build_dependencies.append('flex')
+
+    if 'yacc' in project_configuration.library_build_dependencies:
+      gcc_build_dependencies.append('byacc')
 
     if 'zlib' in project_configuration.library_build_dependencies:
       gcc_build_dependencies.append(
@@ -613,6 +682,9 @@ class WikiPageGenerator(object):
         'building_table_of_contents': building_table_of_contents,
 
         'project_name': project_configuration.project_name,
+        'project_name_suffix': project_configuration.project_name[3:],
+        'project_name_suffix_upper_case': (
+            project_configuration.project_name[3:].upper()),
         'project_name_upper_case': project_configuration.project_name.upper(),
         'project_status': project_status,
         'project_description': project_configuration.project_description,
@@ -656,7 +728,10 @@ class WikiPageGenerator(object):
         'gcc_static_build_dependencies': gcc_static_build_dependencies,
         'gcc_mount_tool': gcc_mount_tool,
 
+        'git_apt_dependencies': git_apt_dependencies,
         'git_build_dependencies': git_build_dependencies,
+        'git_macports_dependencies': git_macports_dependencies,
+        'git_msvscpp_dependencies': git_msvscpp_dependencies,
 
         'mingw_build_dependencies': mingw_build_dependencies,
         'mingw_dll_dependencies': mingw_dll_dependencies,
