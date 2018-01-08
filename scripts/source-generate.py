@@ -5680,10 +5680,61 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    test_options = self._GetTestOptions(project_configuration, type_name)
+    test_options = [argument for _, argument in test_options]
+
+    argument_parser_options = []
+    unittest_options = []
+
+    if 'offset' in test_options:
+      argument_parser_options.extend([
+          '  argument_parser.add_argument(',
+          ('      "-o", "--offset", dest="offset", action="store", '
+           'default=None,'),
+          '      type=int, help="offset of the source file.")',
+          ''])
+      unittest_options.append('  setattr(unittest, "offset", options.offset)')
+
+    if 'password' in test_options:
+      argument_parser_options.extend([
+          '  argument_parser.add_argument(',
+          ('      "-p", "--password", dest="password", action="store", '
+           'default=None,'),
+          '      type=str, help="password to unlock the source file.")',
+          ''])
+      unittest_options.append(
+          '  setattr(unittest, "password", options.password)')
+
+    if 'recovery_password' in test_options:
+      argument_parser_options.extend([
+          '  argument_parser.add_argument(',
+          '      "-r", "--recovery-password", "--recovery_password",',
+          ('      dest="recovery_password", action="store", default=None, '
+           'type=str,'),
+          '      help="recovery password to unlock the source file.")',
+          ''])
+      unittest_options.append(
+          '  setattr(unittest, "recovery_password", options.recovery_password)')
+
+    if header_file.GetTypeFunction(type_name, 'open'):
+      argument_parser_options.extend([
+          '  argument_parser.add_argument(',
+          '      "source", nargs="?", action="store", metavar="PATH",',
+          '      default=None, help="path of the source file.")',
+          ''])
+      unittest_options.append('  setattr(unittest, "source", options.source)')
+
+    template_mappings['argument_parser_options'] = '\n'.join(
+        argument_parser_options)
+    template_mappings['unittest_options'] = '\n'.join(unittest_options)
+
     template_filename = os.path.join(template_directory, 'main.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    del template_mappings['argument_parser_options']
+    del template_mappings['unittest_options']
 
   def _GenerateTypeTest(
       self, project_configuration, template_mappings, type_name, type_function,

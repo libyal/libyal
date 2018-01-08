@@ -16,7 +16,9 @@
 		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
-
+	}
+	if( file_io_${bfio_type} != NULL )
+	{
 		result = libbfio_${bfio_type}_free(
 		          &file_io_${bfio_type},
 		          &error );
