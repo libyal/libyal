@@ -7275,7 +7275,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       # Skip library include header files.
       # TODO: check if library name matches local libraries.
-      if source_file.startswith(include_file_prefix):
+      if (source_file.startswith(include_file_prefix) or
+          source_file.endswith('_debug.h')):
         continue
 
       header_file_path = os.path.join(library_path, source_file)
