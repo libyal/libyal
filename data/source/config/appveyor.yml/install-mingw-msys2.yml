@@ -1,0 +1,2 @@
+- cmd: if [%TARGET%]==[mingw-w64] (
+    C:\msys64\usr\bin\pacman -S --noconfirm --needed ${mingw_msys2_build_dependencies} )

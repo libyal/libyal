@@ -1468,6 +1468,22 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['mingw_msys_build_dependencies']
 
+    mingw_msys2_build_dependencies = self._GetMinGWMSYS2BuildDependencies(
+        project_configuration)
+
+    if mingw_msys2_build_dependencies:
+      mingw_msys2_build_dependencies = ' '.join(mingw_msys2_build_dependencies)
+      template_mappings['mingw_msys2_build_dependencies'] = (
+          mingw_msys2_build_dependencies)
+
+      template_filename = os.path.join(
+          template_directory, 'install-mingw-msys2.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['mingw_msys2_build_dependencies']
+
     template_filename = os.path.join(
         template_directory, 'build_script-header.yml')
     self._GenerateSection(
@@ -2538,6 +2554,26 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       mingw_msys_build_dependencies.append('libz-dev')
 
     return mingw_msys_build_dependencies
+
+  def _GetMinGWMSYS2BuildDependencies(self, project_configuration):
+    """Retrieves the MinGW-MSYS2 build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+    """
+    mingw_msys2_build_dependencies = list(
+        project_configuration.mingw_msys2_build_dependencies)
+
+    if project_configuration.HasDependencyYacc():
+      mingw_msys2_build_dependencies.append('msys/bison')
+    if project_configuration.HasDependencyLex():
+      mingw_msys2_build_dependencies.append('msys/flex')
+
+    # TODO: add support for other dependencies.
+    if 'zlib' in project_configuration.library_build_dependencies:
+      mingw_msys2_build_dependencies.append('msys/zlib-devel')
+
+    return mingw_msys2_build_dependencies
 
   def Generate(self, project_configuration, output_writer):
     """Generates configuration files.
