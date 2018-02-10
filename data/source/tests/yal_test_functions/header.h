@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "${library_name_suffix}_test_libbfio.h"
 #include "${library_name_suffix}_test_libcerror.h"
 
 #if defined( __cplusplus )

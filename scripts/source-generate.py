@@ -5428,6 +5428,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    template_filename = os.path.join(template_directory, 'footer.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
   def _GenerateMakefileAM(
       self, project_configuration, template_mappings, include_header_file,
       makefile_am_file, api_functions, api_functions_with_input, api_types,

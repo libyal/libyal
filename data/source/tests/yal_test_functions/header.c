@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #endif
 
+#include "${library_name_suffix}_test_libbfio.h"
 #include "${library_name_suffix}_test_libcerror.h"
 #include "${library_name_suffix}_test_libclocale.h"
 #include "${library_name_suffix}_test_libuna.h"
