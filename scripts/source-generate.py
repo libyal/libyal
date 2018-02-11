@@ -5942,6 +5942,10 @@ class TestsSourceFileGenerator(SourceFileGenerator):
          number_of_arguments == 5 and with_codepage)):
         function_template = type_function
 
+    elif type_function == 'read_file_io_handle':
+      if number_of_arguments == 3:
+        function_template = type_function
+
     elif not function_template:
       function_template = type_function
 
@@ -6008,54 +6012,58 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       if function_template == 'get_binary_data_value':
         function_variables.extend([
-            '\t{0:s} {1:s}[ 4096 ];'.format(value_type, value_name),
+            '{0:s} {1:s}[ 4096 ];'.format(value_type, value_name),
             ''])
 
       elif function_template == 'get_guid_value':
         function_variables.extend([
-            '\tuint8_t guid_data[ 16 ];',
+            'uint8_t guid_data[ 16 ];',
             ''])
 
       elif function_template == 'get_string_value':
         function_variables.extend([
-            '\t{0:s} {1:s}[ 512 ];'.format(value_type, value_name),
+            '{0:s} {1:s}[ 512 ];'.format(value_type, value_name),
             ''])
 
         if not with_index:
           function_variables.append(
-              '\tint {0:s}_is_set = 0;'.format(value_name))
+              'int {0:s}_is_set = 0;'.format(value_name))
 
       elif function_template == 'get_type_value':
         function_variables.append(
-            '\t{0:s}_t *{1:s} = 0;'.format(value_type, value_name))
+            '{0:s}_t *{1:s} = 0;'.format(value_type, value_name))
 
         if not with_index:
           function_variables.append(
-              '\tint {0:s}_is_set = 0;'.format(value_name))
+              'int {0:s}_is_set = 0;'.format(value_name))
 
       elif function_template == 'get_value':
         function_variables.append(
-            '\t{0:s} {1:s} = 0;'.format(value_type, value_name))
+            '{0:s} {1:s} = 0;'.format(value_type, value_name))
 
         if not with_index:
           function_variables.append(
-              '\tint {0:s}_is_set = 0;'.format(value_name))
+              'int {0:s}_is_set = 0;'.format(value_name))
+
+      elif function_template == 'read_file_io_handle':
+          function_variables.append(
+              'libbfio_handle_t *file_io_handle = NULL;')
 
       function_variables.extend([
-          '\tlibcerror_error_t *error = NULL;',
-          '\tint result = 0;'])
+          'libcerror_error_t *error = NULL;',
+          'int result = 0;'])
 
       if function_template == 'clone':
         function_variables.append(
-            '\t{0:s}_{1:s}_t *destination_{1:s} = NULL;'.format(
+            '{0:s}_{1:s}_t *destination_{1:s} = NULL;'.format(
                 project_configuration.library_name, type_name))
         function_variables.append(
-            '\t{0:s}_{1:s}_t *source_{1:s} = NULL;'.format(
+            '{0:s}_{1:s}_t *source_{1:s} = NULL;'.format(
                 project_configuration.library_name, type_name))
 
       elif not with_input:
         function_variables.append(
-            '\t{0:s}_{1:s}_t *{1:s} = NULL;'.format(
+            '{0:s}_{1:s}_t *{1:s} = NULL;'.format(
                 project_configuration.library_name, type_name))
 
       if function_template in (
@@ -6064,7 +6072,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         function_template = 'get_{0:s}'.format(value_name)
 
       if initialize_number_of_arguments == 3:
-        function_variable = '\t{0:s}_{1:s}_t *{2:s} = NULL;'.format(
+        function_variable = '{0:s}_{1:s}_t *{2:s} = NULL;'.format(
             project_configuration.library_name, initialize_value_type,
             initialize_value_name)
         function_variables.append(function_variable)
@@ -6083,7 +6091,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       template_mappings['test_data_size'] = test_data_size
       template_mappings['function_name'] = function_template
-      template_mappings['function_variables'] = '\n'.join(function_variables)
+      template_mappings['function_variables'] = '\n'.join([
+          '\t{0:s}'.format(variable) for variable in function_variables])
       template_mappings['initialize_value_name'] = initialize_value_name
       template_mappings['initialize_value_type'] = initialize_value_type
 
@@ -6118,6 +6127,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           body_template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
 
+      # TODO: refactor to have unified function end handling
       if function_template == 'clone':
         if initialize_number_of_arguments == 3:
           template_filename = 'function-end-with_value-clone.c'
@@ -6135,10 +6145,49 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       else:
         template_filename = 'function-end.c'
 
-      template_filename = os.path.join(template_directory, template_filename)
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      if template_filename != 'function-end.c':
+        template_filename = os.path.join(template_directory, template_filename)
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
+
+      else:
+        template_filename = os.path.join(
+            template_directory, 'function-end-header.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+        template_filename = os.path.join(
+            template_directory, 'function-end-free_type.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+        template_filename = os.path.join(
+            template_directory, 'function-end-on_error.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+        if 'libbfio_handle_t *file_io_handle = NULL;' in function_variables:
+          template_filename = os.path.join(
+              template_directory, 'function-end-on_error-free_file_io_handle.c')
+          self._GenerateSection(
+              template_filename, template_mappings, output_writer,
+              output_filename, access_mode='ab')
+
+        template_filename = os.path.join(
+            template_directory, 'function-end-on_error-free_type.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
+
+        template_filename = os.path.join(
+            template_directory, 'function-end-footer.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='ab')
 
       del template_mappings['test_data_size']
       del template_mappings['initialize_value_name']
