@@ -5563,7 +5563,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if group_name in api_functions or group_name in internal_functions:
         has_error_argument = include_header_file.HasErrorArgument(group_name)
         if (project_configuration.library_name != 'libcerror' and
-            group_name not in ('error', 'notify') and has_error_argument):
+            group_name != 'error' and has_error_argument):
           template_filename = 'yal_test_function.am'
         else:
           template_filename = 'yal_test_function_no_error.am'
