@@ -61,6 +61,54 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 	libcerror_error_free(
 	 &error );
 
+	result = ${library_name}_check_${signature_type}_signature(
+	          "",
+	          &error );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	if( source != NULL )
+	{
+#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+
+		/* Test ${library_name}_check_file_signature with malloc failing in libbfio_file_initialize
+		 */
+		${library_name_suffix}_test_malloc_attempts_before_fail = 0;
+
+		result = ${library_name}_check_file_signature(
+		          narrow_source,
+		          &error );
+
+		if( ${library_name_suffix}_test_malloc_attempts_before_fail != -1 )
+		{
+			${library_name_suffix}_test_malloc_attempts_before_fail = -1;
+		}
+		else
+		{
+			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			 "result",
+			 result,
+			 -1 );
+
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			 "error",
+			 error );
+
+			libcerror_error_free(
+			 &error );
+		}
+#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+	}
 	return( 1 );
 
 on_error:
@@ -137,6 +185,54 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 	libcerror_error_free(
 	 &error );
 
+	result = ${library_name}_check_${signature_type}_signature_wide(
+	          L"",
+	          &error );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	if( source != NULL )
+	{
+#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+
+		/* Test ${library_name}_check_file_signature_wide with malloc failing in libbfio_file_initialize
+		 */
+		${library_name_suffix}_test_malloc_attempts_before_fail = 0;
+
+		result = ${library_name}_check_file_signature_wide(
+		          wide_source,
+		          &error );
+
+		if( ${library_name_suffix}_test_malloc_attempts_before_fail != -1 )
+		{
+			${library_name_suffix}_test_malloc_attempts_before_fail = -1;
+		}
+		else
+		{
+			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			 "result",
+			 result,
+			 -1 );
+
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			 "error",
+			 error );
+
+			libcerror_error_free(
+			 &error );
+		}
+#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+	}
 	return( 1 );
 
 on_error:

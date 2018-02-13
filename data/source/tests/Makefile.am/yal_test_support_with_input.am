@@ -8,6 +8,7 @@ ${library_name_suffix}_test_support_SOURCES = \
 	${library_name_suffix}_test_${library_name}.h \
 	${library_name_suffix}_test_libuna.h \
 	${library_name_suffix}_test_macros.h \
+	${library_name_suffix}_test_memory.c ${library_name_suffix}_test_memory.h \
 	${library_name_suffix}_test_support.c \
 	${library_name_suffix}_test_unused.h
 
