@@ -1,6 +1,6 @@
-dnl Check if ${library_name} should be build with verbose output
+dnl Check if verbose output should be enabled
 AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT
 
-dnl Check if ${library_name} should be build with debug output
+dnl Check if debug output should be enabled
 AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT
 

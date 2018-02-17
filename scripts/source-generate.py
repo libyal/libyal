@@ -1641,6 +1641,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    if project_configuration.HasDebugOutput():
+      template_filename = os.path.join(
+          template_directory, 'check_debug_output.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     template_filename = os.path.join(
         template_directory, 'check_types_support.ac')
     self._GenerateSection(
@@ -1714,13 +1721,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
-
-    if project_configuration.HasDebugOutput():
-      template_filename = os.path.join(
-          template_directory, 'check_debug_output.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
 
     template_filename = os.path.join( template_directory, 'check_tests_support.ac')
     self._GenerateSection(

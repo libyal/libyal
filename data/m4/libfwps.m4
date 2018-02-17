@@ -1,6 +1,6 @@
 dnl Functions for libfwps
 dnl
-dnl Version: 20170909
+dnl Version: 20180217
 
 dnl Function to detect if libfwps is available
 dnl ac_libfwps_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -48,7 +48,7 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
           [ac_cv_libfwps_dummy=yes],
           [ac_cv_libfwps=no])
 
-        dnl store functions
+        dnl Store functions
         AC_CHECK_LIB(
           fwps,
           libfwps_store_initialize,
@@ -68,6 +68,22 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
         ac_cv_libfwps_LIBADD="-lfwps"
         ])
       ])
+    ])
+
+  dnl Check for debug functions
+  AS_IF(
+    [test "x$ac_cv_libfwps" = xyes && test "x$ac_cv_enable_debug_output" != xno],
+    [AC_CHECK_LIB(
+      fwps,
+      libfwps_property_identifier_get_description,
+      [ac_cv_libfwps_dummy=yes],
+      [ac_cv_libfwps=no])
+
+    AC_CHECK_LIB(
+      fwps,
+      libfwps_property_identifier_get_identifier,
+      [ac_cv_libfwps_dummy=yes],
+      [ac_cv_libfwps=no])
     ])
 
   AS_IF(
