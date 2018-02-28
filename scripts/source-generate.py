@@ -2190,7 +2190,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     for source_file in sorted(glob.glob(source_glob)):
       if (source_file.endswith('_functions.c') or
           source_file.endswith('_getopt.c') or
-          source_file.endswith('_memory.c')):
+          source_file.endswith('_memory.c') or
+          source_file.endswith('_rwlock.c')):
         continue
 
       source_file = '/{0:s}'.format(source_file[:-2])
@@ -5559,6 +5560,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    # TODO: add support for read_file_io_handle tests
+    # TODO: add support for rwlock tests
     for group_name in tests:
       if group_name in api_functions or group_name in internal_functions:
         has_error_argument = include_header_file.HasErrorArgument(group_name)
@@ -5901,6 +5904,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     else:
       function_argument_index = 1
 
+    file_offset_argument = function_prototype.arguments[-2]
+    file_offset_argument_string = codepage_argument.CopyToString()
+
+    with_file_offset = False
+    if (file_offset_argument_string.startswith('off64_t ') and
+        file_offset_argument_string.endswith('_offset')):
+      with_file_offset = True
+
     if (type_function.startswith('get_utf8_') or
         type_function.startswith('get_utf16_')):
       function_argument = function_prototype.arguments[function_argument_index]
@@ -5943,7 +5954,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         function_template = type_function
 
     elif type_function == 'read_file_io_handle':
-      if number_of_arguments == 3:
+      if (number_of_arguments == 3 or (
+         number_of_arguments == 4 and with_file_offset)):
         function_template = type_function
 
     elif not function_template:
@@ -6402,22 +6414,23 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       # TODO: add support for non pointer value types.
       value_type, _, value_name = function_argument_string.partition(' ')
-      if not value_name.startswith('*'):
+      if value_name.startswith('*'):
+        value_name = value_name.lstrip('*')
+
+        if not value_type.startswith(library_type_prefix):
+          function_name = self._GetFunctionName(
+              project_configuration, type_name, type_function)
+          function_names.remove(function_name)
+          return last_have_extern
+
+        _, _, value_type = value_type.partition('_')
+        value_type, _, _ = value_type.rpartition('_')
+
+      else:
         function_name = self._GetFunctionName(
             project_configuration, type_name, type_function)
         function_names.remove(function_name)
         return last_have_extern
-
-      value_name = value_name.lstrip('*')
-
-      if not value_type.startswith(library_type_prefix):
-        function_name = self._GetFunctionName(
-            project_configuration, type_name, type_function)
-        function_names.remove(function_name)
-        return last_have_extern
-
-      _, _, value_type = value_type.partition('_')
-      value_type, _, _ = value_type.rpartition('_')
 
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
       self._SetValueTypeInTemplateMappings(template_mappings, value_type)
