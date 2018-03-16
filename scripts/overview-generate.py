@@ -532,11 +532,16 @@ class StatusWikiPageGenerator(WikiPageGenerator):
               configuration_version: [ project_name, ... ], ... },
               ... }
     """
+    versions_per_configuration = {}
+
+    # TODO: define list of auto-generated configs to gather versions of.
+    configs_directory = os.path.join(self._data_directory, 'configs')
+    if not os.path.isdir(configs_directory):
+      return versions_per_configuration
+
     projects_path = os.path.dirname(self._data_directory)
     projects_path = os.path.dirname(projects_path)
 
-    configs_directory = os.path.join(self._data_directory, 'configs')
-    versions_per_configuration = {}
     for directory_entry in os.listdir(configs_directory):
       path = os.path.join(configs_directory, directory_entry)
       configuration_file = ScriptFile(path)

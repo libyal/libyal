@@ -2,5 +2,5 @@
 # ${category_title}
 ${category_description}.
 
-Project | Description | [Travis-CI](https://travis-ci.org/) | [AppVeyor](https://ci.appveyor.com) | [Codecov](https://codecov.io/) | [Coverity](https://scan.coverity.com/)
---- | --- | --- | --- | --- | ---
+Project | Description | [Travis-CI](https://travis-ci.org/) | [AppVeyor](https://ci.appveyor.com) | [Codecov](https://codecov.io/)
+--- | --- | --- | --- | ---

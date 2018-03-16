@@ -2619,6 +2619,11 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         output_filename = '{0:s}.nuspec'.format(
             project_configuration.library_name)
 
+        # TODO: for now only generate a nuspec file when exists.
+        if not os.path.isfile(output_filename):
+          logging.warning('Skipping: {0:s}'.format(output_filename))
+          continue
+
       elif directory_entry == 'libyal.pc.in':
         output_filename = '{0:s}.pc.in'.format(
             project_configuration.library_name)
@@ -2653,6 +2658,32 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateRpmSpec(
         project_configuration, template_mappings, output_writer,
         output_filename)
+
+
+class DocumentsFileGenerator(SourceFileGenerator):
+  """Documents files generator."""
+
+  def Generate(self, project_configuration, output_writer):
+    """Generates configuration files.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      output_writer (OutputWriter): output writer.
+    """
+    template_mappings = self._GetTemplateMappings(
+        project_configuration,
+        authors_separator=',\n                            ')
+    template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
+    template_mappings['project_status'] = project_configuration.project_status
+
+    for directory_entry in os.listdir(self._template_directory):
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, directory_entry)
 
 
 class IncludeSourceFileGenerator(SourceFileGenerator):
@@ -8999,7 +9030,6 @@ def Main():
     projects_directory = os.path.dirname(libyal_directory)
 
   # TODO: generate more source files.
-  # AUTHORS, NEWS
   # include headers
   # yal.net files
 
@@ -9011,6 +9041,7 @@ def Main():
   SOURCE_GENERATORS = [
       ('common', CommonSourceFileGenerator),
       ('config', ConfigurationFileGenerator),
+      ('documents', DocumentsFileGenerator),
       ('include', IncludeSourceFileGenerator),
       ('libyal', LibrarySourceFileGenerator),
       ('pyyal', PythonModuleSourceFileGenerator),
