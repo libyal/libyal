@@ -2,7 +2,6 @@
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_new(
-           PyTypeObject *type_object,
            ${library_name}_${type_name}_t *${type_name},
            PyObject *parent_object )
 {
@@ -18,21 +17,13 @@ PyObject *${python_module_name}_${type_name}_new(
 
 		return( NULL );
 	}
+	/* PyObject_New does not invoke tp_init
+	 */
 	${python_module_name}_${type_name} = PyObject_New(
 	                                      struct ${python_module_name}_${type_name},
-	                                      type_object );
+	                                      &${python_module_name}_${type_name}_type_object );
 
 	if( ${python_module_name}_${type_name} == NULL )
-	{
-		PyErr_Format(
-		 PyExc_MemoryError,
-		 "%s: unable to initialize ${type_description}.",
-		 function );
-
-		goto on_error;
-	}
-	if( ${python_module_name}_${type_name}_init(
-	     ${python_module_name}_${type_name} ) != 0 )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,

@@ -19,6 +19,11 @@ int ${python_module_name}_${type_name}_init(
 	 */
 	${python_module_name}_${type_name}->${type_name} = NULL;
 
-	return( 0 );
+	PyErr_Format(
+	 PyExc_NotImplementedError,
+	 "%s: initialize of ${type_description} not supported.",
+	 function );
+
+	return( -1 );
 }
 

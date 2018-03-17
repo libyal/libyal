@@ -6,6 +6,7 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_index(
            int sub_${value_name}_index )
 {
 	PyObject *${value_name}_object                     = NULL;
+	PyTypeObject *type_object                          = NULL;
 	libcerror_error_t *error                           = NULL;
 	${library_name}_${value_type}_t *sub_${value_name} = NULL;
 	static char *function                              = "${python_module_name}_${type_name}_get_sub_${value_name}_by_index";
@@ -44,7 +45,20 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_index(
 
 		goto on_error;
 	}
+	type_object = ${python_module_name}_${base_type_name}_get_${value_type}_type_object(
+	               sub_${value_name} );
+
+	if( type_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to retrieve ${base_type_description} type object.",
+		 function );
+
+		goto on_error;
+	}
 	${value_name}_object = ${python_module_name}_${value_type}_new(
+	                        type_object,
 	                        sub_${value_name},
 	                        ( (${python_module_name}_${base_type_name}_t *) ${python_module_name}_${base_type_name} )->parent_object );
 

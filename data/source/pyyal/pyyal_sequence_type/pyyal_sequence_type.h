@@ -69,23 +69,23 @@ PyObject *${python_module_name}_${sequence_type_name}_new(
            int number_of_items );
 
 int ${python_module_name}_${sequence_type_name}_init(
-     ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
+     ${python_module_name}_${sequence_type_name}_t *sequence_object );
 
 void ${python_module_name}_${sequence_type_name}_free(
-      ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
+      ${python_module_name}_${sequence_type_name}_t *sequence_object );
 
 Py_ssize_t ${python_module_name}_${sequence_type_name}_len(
-            ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
+            ${python_module_name}_${sequence_type_name}_t *sequence_object );
 
 PyObject *${python_module_name}_${sequence_type_name}_getitem(
-           ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object,
+           ${python_module_name}_${sequence_type_name}_t *sequence_object,
            Py_ssize_t item_index );
 
 PyObject *${python_module_name}_${sequence_type_name}_iter(
-           ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
+           ${python_module_name}_${sequence_type_name}_t *sequence_object );
 
 PyObject *${python_module_name}_${sequence_type_name}_iternext(
-           ${python_module_name}_${sequence_type_name}_t *${sequence_type_name}_object );
+           ${python_module_name}_${sequence_type_name}_t *sequence_object );
 
 #if defined( __cplusplus )
 }

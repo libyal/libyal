@@ -17,15 +17,6 @@ void ${python_module_name}_${type_name}_free(
 
 		return;
 	}
-	if( ${python_module_name}_${type_name}->${type_name} == NULL )
-	{
-		PyErr_Format(
-		 PyExc_ValueError,
-		 "%s: invalid ${type_description} - missing ${library_name} ${type_description}.",
-		 function );
-
-		return;
-	}
 	ob_type = Py_TYPE(
 	           ${python_module_name}_${type_name} );
 
@@ -47,24 +38,27 @@ void ${python_module_name}_${type_name}_free(
 
 		return;
 	}
-	Py_BEGIN_ALLOW_THREADS
-
-	result = ${library_name}_${type_name}_free(
-	          &( ${python_module_name}_${type_name}->${type_name} ),
-	          &error );
-
-	Py_END_ALLOW_THREADS
-
-	if( result != 1 )
+	if( ${python_module_name}_${type_name}->${type_name} != NULL )
 	{
-		${python_module_name}_error_raise(
-		 error,
-		 PyExc_IOError,
-		 "%s: unable to free ${library_name} ${type_description}.",
-		 function );
+		Py_BEGIN_ALLOW_THREADS
 
-		libcerror_error_free(
-		 &error );
+		result = ${library_name}_${type_name}_free(
+		          &( ${python_module_name}_${type_name}->${type_name} ),
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result != 1 )
+		{
+			${python_module_name}_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to free ${library_name} ${type_description}.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+		}
 	}
 	if( ${python_module_name}_${type_name}->parent_object != NULL )
 	{

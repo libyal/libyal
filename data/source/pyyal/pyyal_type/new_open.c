@@ -10,7 +10,8 @@ PyObject *${python_module_name}_${type_name}_new_open(
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( self )
 
-	${python_module_name}_${type_name} = ${python_module_name}_${type_name}_new();
+	${python_module_name}_${type_name}_init(
+	 (${python_module_name}_${type_name}_t *) ${python_module_name}_${type_name} );
 
 	${python_module_name}_${type_name}_open(
 	 (${python_module_name}_${type_name}_t *) ${python_module_name}_${type_name},
@@ -32,7 +33,8 @@ PyObject *${python_module_name}_${type_name}_new_open_file_object(
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( self )
 
-	${python_module_name}_${type_name} = ${python_module_name}_${type_name}_new();
+	${python_module_name}_${type_name}_init(
+	 (${python_module_name}_${type_name}_t *) ${python_module_name}_${type_name} );
 
 	${python_module_name}_${type_name}_open_file_object(
 	 (${python_module_name}_${type_name}_t *) ${python_module_name}_${type_name},

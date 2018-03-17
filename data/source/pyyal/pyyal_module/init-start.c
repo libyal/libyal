@@ -8,9 +8,8 @@ PyMODINIT_FUNC init${python_module_name}(
                 void )
 #endif
 {
-	PyObject *module                 = NULL;
-	PyTypeObject *handle_type_object = NULL;
-	PyGILState_STATE gil_state       = 0;
+	PyObject *module           = NULL;
+	PyGILState_STATE gil_state = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	${library_name}_notify_set_stream(
@@ -44,43 +43,4 @@ PyMODINIT_FUNC init${python_module_name}(
 	PyEval_InitThreads();
 
 	gil_state = PyGILState_Ensure();
-
-	/* Setup the handle type object
-	 */
-	${python_module_name}_handle_type_object.tp_new = PyType_GenericNew;
-
-	if( PyType_Ready(
-	     &${python_module_name}_handle_type_object ) < 0 )
-	{
-		goto on_error;
-	}
-	Py_IncRef(
-	 (PyObject * ) &${python_module_name}_handle_type_object );
-
-	handle_type_object = &${python_module_name}_handle_type_object;
-
-	PyModule_AddObject(
-	 module,
-	 "handle",
-	 (PyObject *) handle_type_object );
-
-	PyGILState_Release(
-	 gil_state );
-
-#if PY_MAJOR_VERSION >= 3
-	return( module );
-#else
-	return;
-#endif
-
-on_error:
-	PyGILState_Release(
-	 gil_state );
-
-#if PY_MAJOR_VERSION >= 3
-	return( NULL );
-#else
-	return;
-#endif
-}
 
