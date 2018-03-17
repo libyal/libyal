@@ -1,4 +1,4 @@
-/* Checks if the file has an Expert Witness Compression Format (EWF) signature
+/* Checks if the file has TODO signature
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_check_file_signature(
@@ -194,7 +194,7 @@ PyObject *${python_module_name}_check_file_signature(
 	return( NULL );
 }
 
-/* Checks if the file has an Expert Witness Compression Format (EWF) signature using a file-like object
+/* Checks if the file has TODO signature using a file-like object
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_check_file_signature_file_object(

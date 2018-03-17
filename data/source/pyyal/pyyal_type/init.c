@@ -20,6 +20,21 @@ int ${python_module_name}_${type_name}_init(
 	 */
 	${python_module_name}_${type_name}->${type_name} = NULL;
 
+	if( ${library_name}_${type_name}_initialize(
+	     &( ${python_module_name}_${type_name}->${type_name} ),
+	     &error ) != 1 )
+	{
+		${python_module_name}_error_raise(
+		 error,
+		 PyExc_MemoryError,
+		 "%s: unable to initialize ${type_description}.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( -1 );
+	}
 	return( 0 );
 }
 

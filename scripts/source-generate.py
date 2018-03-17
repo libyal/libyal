@@ -3510,6 +3510,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    if signature_type:
+      template_filename = os.path.join(
+          template_directory, 'includes-file_object_io_handle.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     for type_name in sorted(python_module_types):
       self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
