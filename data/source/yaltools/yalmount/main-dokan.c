@@ -35,6 +35,8 @@
 /* This will only affect the drive properties
 	${mount_tool_name}_dokan_options.Options |= DOKAN_OPTION_REMOVABLE;
 */
+
+#if ( DOKAN_VERSION >= 600 ) && ( DOKAN_VERSION < 800 )
 	${mount_tool_name}_dokan_options.Options |= DOKAN_OPTION_KEEP_ALIVE;
 
 	${mount_tool_name}_dokan_operations.CreateFile           = &${mount_tool_name}_dokan_CreateFile;
@@ -62,6 +64,8 @@
 	${mount_tool_name}_dokan_operations.GetDiskFreeSpace     = NULL;
 	${mount_tool_name}_dokan_operations.GetVolumeInformation = &${mount_tool_name}_dokan_GetVolumeInformation;
 	${mount_tool_name}_dokan_operations.Unmount              = &${mount_tool_name}_dokan_Unmount;
+
+#endif /* ( DOKAN_VERSION >= 600 ) && ( DOKAN_VERSION < 800 ) */
 
 	result = DokanMain(
 	          &${mount_tool_name}_dokan_options,

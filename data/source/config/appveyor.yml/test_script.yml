@@ -1,16 +1,6 @@
 test_script:
 - cmd: rem Run tests
-- ps: if ($$env:TARGET -eq "vs2008") {
-    .\runtests.ps1 }
-- ps: if ($$env:TARGET -eq "vs2010") {
-    .\runtests.ps1 }
-- ps: if ($$env:TARGET -eq "vs2012") {
-    .\runtests.ps1 }
-- ps: if ($$env:TARGET -eq "vs2013") {
-    .\runtests.ps1 }
-- ps: if ($$env:TARGET -eq "vs2015") {
-    .\runtests.ps1 }
-- ps: if ($$env:TARGET -eq "vs2017") {
+- ps: If ($$env:TARGET -eq "vs2008" -or $$env:TARGET -eq "vs2010" -or $$env:TARGET -eq "vs2012" -or $$env:TARGET -eq "vs2013" -or $$env:TARGET -eq "vs2015" -or $$env:TARGET -eq "vs2017") {
     .\runtests.ps1 }
 - cmd: if [%TARGET%]==[cygwin] (
     C:\cygwin\bin\bash -e -l -c "cd ${library_name} && ./runtests.sh" )

@@ -470,6 +470,9 @@ class ProjectConfiguration(object):
       ConfigurationError: if the project year of creation cannot
           be converted to a base 10 integer value.
     """
+    self.project_description = self._GetOptionalConfigValue(
+        config_parser, 'project', 'description')
+
     self.project_name = self._GetConfigValue(
         config_parser, 'project', 'name')
 

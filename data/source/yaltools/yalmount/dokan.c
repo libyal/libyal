@@ -1088,3 +1088,5 @@ int __stdcall ${mount_tool_name}_dokan_Unmount(
 	return( 0 );
 }
 
+#elif defined( HAVE_LIBDOKAN )
+

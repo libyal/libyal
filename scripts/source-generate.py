@@ -1447,12 +1447,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if project_configuration.HasDependencyDokan():
-      template_filename = os.path.join(template_directory, 'install-dokan.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
     if (project_configuration.HasDependencyLex() or
         project_configuration.HasDependencyYacc()):
       template_filename = os.path.join(
@@ -1463,6 +1457,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     if 'zlib' in project_configuration.library_build_dependencies:
       template_filename = os.path.join(template_directory, 'install-zlib.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.HasDependencyDokan():
+      template_filename = os.path.join(template_directory, 'install-dokan.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -2704,6 +2704,7 @@ class DocumentsFileGenerator(SourceFileGenerator):
         project_configuration,
         authors_separator=',\n                            ')
     template_mappings['authors'] = 'Joachim Metz <joachim.metz@gmail.com>'
+    template_mappings['project_description'] = project_configuration.project_description
     template_mappings['project_status'] = project_configuration.project_status
 
     for directory_entry in os.listdir(self._template_directory):
@@ -2714,6 +2715,9 @@ class DocumentsFileGenerator(SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, directory_entry)
+
+    del template_mappings['project_description']
+    del template_mappings['project_status']
 
 
 class IncludeSourceFileGenerator(SourceFileGenerator):
@@ -5265,7 +5269,8 @@ class ScriptFileGenerator(SourceFileGenerator):
       output_filename = directory_entry
 
       if (not os.path.exists(output_filename) and directory_entry in (
-          'syncbzip2.ps1', 'syncwinflexbison.ps1', 'synczlib.ps1')):
+          'builddokan.ps1', 'syncbzip2.ps1', 'syncdokan.ps1',
+          'syncwinflexbison.ps1', 'synczlib.ps1')):
         continue
 
       self._GenerateSection(
