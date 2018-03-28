@@ -5,7 +5,7 @@ The following instructions show how to build ${project_name}.pkg and ${project_n
 
 First build ${project_name}:
 ```
-./configure --prefix=/usr${macos_pkg_configure_options}
+./configure --prefix=/usr/local${macos_pkg_configure_options}
 make
 ```
 
