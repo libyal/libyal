@@ -6,6 +6,8 @@
 #include <types.h>
 #include <wide_string.h>
 
+#include <stdio.h>
+
 #if defined( HAVE_ERRNO_H ) || defined( WINAPI )
 #include <errno.h>
 #endif
@@ -16,6 +18,10 @@
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
+#endif
+
+#if defined( HAVE_UNISTD_H )
+#include <unistd.h>
 #endif
 
 #if !defined( WINAPI )

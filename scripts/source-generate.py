@@ -5542,6 +5542,13 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    # TODO: make check more generic based on the source itself.
+    if project_configuration.library_name != 'libtableau':
+      template_filename = os.path.join(template_directory, 'file_io_handle.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
@@ -5577,10 +5584,12 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, 'footer.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    # TODO: make check more generic based on the source itself.
+    if project_configuration.library_name != 'libtableau':
+      template_filename = os.path.join(template_directory, 'file_io_handle.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
   def _GenerateMakefileAM(
       self, project_configuration, template_mappings, include_header_file,

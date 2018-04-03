@@ -81,11 +81,11 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 	{
 #if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
 
-		/* Test ${library_name}_check_file_signature with malloc failing in libbfio_file_initialize
+		/* Test ${library_name}_check_${signature_type}_signature with malloc failing in libbfio_file_initialize
 		 */
 		${library_name_suffix}_test_malloc_attempts_before_fail = 0;
 
-		result = ${library_name}_check_file_signature(
+		result = ${library_name}_check_${signature_type}_signature(
 		          narrow_source,
 		          &error );
 
@@ -205,11 +205,11 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 	{
 #if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
 
-		/* Test ${library_name}_check_file_signature_wide with malloc failing in libbfio_file_initialize
+		/* Test ${library_name}_check_${signature_type}_signature_wide with malloc failing in libbfio_file_initialize
 		 */
 		${library_name_suffix}_test_malloc_attempts_before_fail = 0;
 
-		result = ${library_name}_check_file_signature_wide(
+		result = ${library_name}_check_${signature_type}_signature_wide(
 		          wide_source,
 		          &error );
 

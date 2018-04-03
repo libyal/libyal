@@ -1,14 +1,14 @@
-/* Checks if the file has TODO signature
+/* Checks if the ${signature_type} has ${signature_desription} signature
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_check_file_signature(
+PyObject *${python_module_name}_check_${signature_type}_signature(
            PyObject *self ${python_module_name_upper_case}_ATTRIBUTE_UNUSED,
            PyObject *arguments,
            PyObject *keywords )
 {
 	PyObject *string_object      = NULL;
 	libcerror_error_t *error     = NULL;
-	static char *function        = "${python_module_name}_check_file_signature";
+	static char *function        = "${python_module_name}_check_${signature_type}_signature";
 	static char *keyword_list[]  = { "filename", NULL };
 	const char *filename_narrow  = NULL;
 	int result                   = 0;
@@ -59,7 +59,7 @@ PyObject *${python_module_name}_check_file_signature(
 		                             string_object );
 		Py_BEGIN_ALLOW_THREADS
 
-		result = ${library_name}_check_file_signature_wide(
+		result = ${library_name}_check_${signature_type}_signature_wide(
 		          filename_wide,
 		          &error );
 
@@ -86,7 +86,7 @@ PyObject *${python_module_name}_check_file_signature(
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
-		result = ${library_name}_check_file_signature(
+		result = ${library_name}_check_${signature_type}_signature(
 		          filename_narrow,
 		          &error );
 
@@ -102,7 +102,7 @@ PyObject *${python_module_name}_check_file_signature(
 			${python_module_name}_error_raise(
 			 error,
 			 PyExc_IOError,
-			 "%s: unable to check file signature.",
+			 "%s: unable to check ${signature_type} signature.",
 			 function );
 
 			libcerror_error_free(
@@ -155,7 +155,7 @@ PyObject *${python_module_name}_check_file_signature(
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
-		result = ${library_name}_check_file_signature(
+		result = ${library_name}_check_${signature_type}_signature(
 		          filename_narrow,
 		          &error );
 
@@ -166,7 +166,7 @@ PyObject *${python_module_name}_check_file_signature(
 			${python_module_name}_error_raise(
 			 error,
 			 PyExc_IOError,
-			 "%s: unable to check file signature.",
+			 "%s: unable to check ${signature_type} signature.",
 			 function );
 
 			libcerror_error_free(
@@ -194,10 +194,10 @@ PyObject *${python_module_name}_check_file_signature(
 	return( NULL );
 }
 
-/* Checks if the file has TODO signature using a file-like object
+/* Checks if the ${signature_type} has ${signature_desription} signature using a file-like object
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_check_file_signature_file_object(
+PyObject *${python_module_name}_check_${signature_type}_signature_file_object(
            PyObject *self ${python_module_name_upper_case}_ATTRIBUTE_UNUSED,
            PyObject *arguments,
            PyObject *keywords )
@@ -205,7 +205,7 @@ PyObject *${python_module_name}_check_file_signature_file_object(
 	libcerror_error_t *error         = NULL;
 	libbfio_handle_t *file_io_handle = NULL;
 	PyObject *file_object            = NULL;
-	static char *function            = "${python_module_name}_check_file_signature_file_object";
+	static char *function            = "${python_module_name}_check_${signature_type}_signature_file_object";
 	static char *keyword_list[]      = { "file_object", NULL };
 	int result                       = 0;
 
@@ -238,7 +238,7 @@ PyObject *${python_module_name}_check_file_signature_file_object(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_check_file_signature_file_io_handle(
+	result = ${library_name}_check_${signature_type}_signature_file_io_handle(
 	          file_io_handle,
 	          &error );
 
@@ -249,7 +249,7 @@ PyObject *${python_module_name}_check_file_signature_file_object(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to check file signature.",
+		 "%s: unable to check ${signature_type} signature.",
 		 function );
 
 		libcerror_error_free(
