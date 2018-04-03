@@ -1,0 +1,4 @@
+dnl Check if ${local_library_name} or required headers and functions are available
+AX_${local_library_name_upper_case}_CHECK_ENABLE
+AX_ZLIB_CHECK_INFLATE
+

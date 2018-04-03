@@ -1695,15 +1695,20 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_mappings['local_library_name'] = name
         template_mappings['local_library_name_upper_case'] = name.upper()
 
-        template_filename = os.path.join(
-            template_directory, 'check_dependency_support.ac')
+        if name != 'zlib':
+          template_filename = 'check_dependency_support.ac'
+
+        # TODO: make check more generic based on the source itself.
+        elif project_configuration.library_name == 'libvmdk':
+          template_filename = 'check_zlib_uncompress.ac'
+
+        else:
+          template_filename = 'check_zlib_inflate.ac'
+
+        template_filename = os.path.join(template_directory, template_filename)
         self._GenerateSection(
             template_filename, template_mappings, output_writer,
             output_filename, access_mode='ab')
-
-      # TODO: add additional zlib checks
-      # if project_configuration.library_name == 'libvmdk':
-      #   AX_ZLIB_CHECK_UNCOMPRESS
 
       del template_mappings['local_library_name']
       del template_mappings['local_library_name_upper_case']
@@ -1926,6 +1931,20 @@ class ConfigurationFileGenerator(SourceFileGenerator):
             maximum_description_length, len(description))
 
       elif name == 'libhmac':
+        # TODO: make check more generic based on the source itself.
+        if project_configuration.library_name in ('libodraw', 'libsmraw'):
+          description = 'MD5 support'
+          build_information.append((description, '$ac_cv_libhmac_md5'))
+
+          maximum_description_length = max(
+              maximum_description_length, len(description))
+
+          description = 'SHA1_support'
+          build_information.append((description, '$ac_cv_libhmac_sha1'))
+
+          maximum_description_length = max(
+              maximum_description_length, len(description))
+
         description = 'SHA256 support'
         build_information.append((description, '$ac_cv_libhmac_sha256'))
 
@@ -2220,6 +2239,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     for source_file in sorted(glob.glob(source_glob)):
       if (source_file.endswith('_functions.c') or
           source_file.endswith('_getopt.c') or
+          source_file.endswith('_i18n.c') or
           source_file.endswith('_memory.c') or
           source_file.endswith('_rwlock.c')):
         continue
@@ -5543,7 +5563,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     # TODO: make check more generic based on the source itself.
-    if project_configuration.library_name != 'libtableau':
+    if project_configuration.library_name not in ('libsmdev', 'libtableau'):
       template_filename = os.path.join(template_directory, 'file_io_handle.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -5585,7 +5605,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     # TODO: make check more generic based on the source itself.
-    if project_configuration.library_name != 'libtableau':
+    if project_configuration.library_name not in ('libsmdev', 'libtableau'):
       template_filename = os.path.join(template_directory, 'file_io_handle.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
