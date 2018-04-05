@@ -189,12 +189,22 @@ class LibraryHeaderFile(object):
         name, _, _ = line.partition('(')
 
         return_values = None
+        value_description = None
         if source_file_object:
           ascii_name = name.encode('ascii')
 
           source_line = source_file_object.readline()
           while source_line:
-            if source_line.startswith(b' * Returns '):
+            if source_line.startswith(b'/* Retrieves a '):
+              _, _, value_description = source_line.strip().rpartition(' a ')
+
+            elif source_line.startswith(b'/* Retrieves an '):
+              _, _, value_description = source_line.strip().rpartition(' an ')
+
+            elif source_line.startswith(b'/* Retrieves the '):
+              _, _, value_description = source_line.strip().rpartition(' the ')
+
+            elif source_line.startswith(b' * Returns '):
               return_values = set()
               if b' -1 ' in source_line:
                 return_values.add('-1')
@@ -216,6 +226,7 @@ class LibraryHeaderFile(object):
         function_prototype.have_wide_character_type = (
             have_wide_character_type)
         function_prototype.return_values = return_values
+        function_prototype.value_description = value_description
 
         if not have_extern:
           self.have_internal_functions = True
@@ -4216,8 +4227,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                   template_filename = 'get_{0:s}{1:s}_value.c'.format(
                       value_name_prefix, python_function_prototype.data_type)
 
-                print("T", python_function_prototype.name, template_filename)
-
           elif python_function_prototype.function_type == (
               definitions.FUNCTION_TYPE_GET_BY_INDEX):
 
@@ -4250,6 +4259,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             if value_name_prefix != 'root_':
               value_name_prefix = ''
 
+            # TODO: add support to detect pseudo value type objects.
             if python_function_prototype.value_type not in value_type_objects:
               generate_get_value_type_object = True
               value_type_objects.add(python_function_prototype.value_type)
@@ -4371,6 +4381,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         description = python_function_prototype.GetDescription()
 
       for index, line in enumerate(description):
+        # Expand acl => access control list (ACL) for pyfwnt.
+        line = line.replace(' acl.', ' access control list (ACL).')
+
         # Correct xml => XML in description for pyevtx.
         line = line.replace(' xml ', ' XML ')
 
@@ -4938,6 +4951,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     python_function_prototype.function_type = function_type
     python_function_prototype.object_type = object_type
     python_function_prototype.return_values = return_values
+    python_function_prototype.value_description = (
+        function_prototype.value_description)
     python_function_prototype.value_type = value_type
 
     return python_function_prototype

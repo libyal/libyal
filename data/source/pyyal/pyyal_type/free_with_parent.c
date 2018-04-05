@@ -63,7 +63,7 @@ void ${python_module_name}_${type_name}_free(
 	if( ${python_module_name}_${type_name}->parent_object != NULL )
 	{
 		Py_DecRef(
-		 (PyObject *) ${python_module_name}_${type_name}->parent_object );
+		 ${python_module_name}_${type_name}->parent_object );
 	}
 	ob_type->tp_free(
 	 (PyObject*) ${python_module_name}_${type_name} );

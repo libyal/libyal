@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+
+            # -*- coding: utf-8 -*-
 """The C sources classes."""
 
 from __future__ import unicode_literals
@@ -83,6 +84,7 @@ class FunctionPrototype(object):
     return_type (str): return type.
     return_values (set[str]): return values or None if the function does not
         return values.
+    value_description (str): description of the value.
   """
 
   def __init__(self, name, return_type):
@@ -101,6 +103,7 @@ class FunctionPrototype(object):
     self.name = name
     self.return_type = return_type
     self.return_values = None
+    self.value_description = None
 
   def AddArgument(self, argument):
     """Adds an argument to the function prototype.
@@ -143,6 +146,7 @@ class PythonTypeObjectFunctionPrototype(object):
     object_type (str): object type.
     return_values (set[str]): return values or None if the function does not
         return values.
+    value_description (str): description of the value.
     value_type (str): value type.
   """
 
@@ -168,6 +172,7 @@ class PythonTypeObjectFunctionPrototype(object):
     self.function_type = None
     self.object_type = None
     self.return_values = None
+    self.value_description = None
     self.value_type = None
 
   @property
@@ -489,7 +494,10 @@ class PythonTypeObjectFunctionPrototype(object):
 
     elif self.function_type in (
         definitions.FUNCTION_TYPE_COPY, definitions.FUNCTION_TYPE_GET):
-      description = ['Retrieves the {0:s}.'.format(value_name)]
+      if self.value_description:
+        description = ['Retrieves the {0:s}.'.format(self.value_description)]
+      else:
+        description = ['Retrieves the {0:s}.'.format(value_name)]
 
     elif self.function_type == definitions.FUNCTION_TYPE_IS:
       type_name = self._type_name
