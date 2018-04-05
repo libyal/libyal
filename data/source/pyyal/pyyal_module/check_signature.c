@@ -1,4 +1,4 @@
-/* Checks if the ${signature_type} has ${signature_desription} signature
+/* Checks if a ${signature_type} has a ${signature_desription} signature
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_check_${signature_type}_signature(
@@ -194,7 +194,7 @@ PyObject *${python_module_name}_check_${signature_type}_signature(
 	return( NULL );
 }
 
-/* Checks if the ${signature_type} has ${signature_desription} signature using a file-like object
+/* Checks if a ${signature_type} has a ${signature_desription} signature using a file-like object
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_check_${signature_type}_signature_file_object(

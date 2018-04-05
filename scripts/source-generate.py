@@ -1699,6 +1699,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename = 'check_dependency_support.ac'
 
         # TODO: make check more generic based on the source itself.
+        elif project_configuration.library_name == 'libewf':
+          template_filename = 'check_zlib_compress.ac'
+
         elif project_configuration.library_name == 'libvmdk':
           template_filename = 'check_zlib_uncompress.ac'
 
@@ -1932,7 +1935,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       elif name == 'libhmac':
         # TODO: make check more generic based on the source itself.
-        if project_configuration.library_name in ('libodraw', 'libsmraw'):
+        if project_configuration.library_name in (
+            'libewf', 'libodraw', 'libsmraw'):
           description = 'MD5 support'
           build_information.append((description, '$ac_cv_libhmac_md5'))
 
@@ -3465,6 +3469,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
+    if signature_type:
+      template_mappings['signature_type'] = signature_type
+
     template_filename = os.path.join(template_directory, 'header.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
@@ -3491,6 +3498,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    if signature_type:
+      template_filename = os.path.join(template_directory, 'open_new.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
     template_filename = os.path.join(template_directory, 'init.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
@@ -3500,6 +3513,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    if signature_type:
+      del template_mappings['signature_type']
 
   def _GenerateModuleSourceFile(
       self, project_configuration, template_mappings, include_header_file,
@@ -3524,6 +3540,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     output_filename = '{0:s}.c'.format(project_configuration.python_module_name)
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
+
+    if signature_type:
+      template_mappings['signature_type'] = signature_type
+      template_mappings['signature_desription'] = (
+          project_configuration.project_data_format or 'TODO')
 
     template_filename = os.path.join(template_directory, 'header.c')
     self._GenerateSection(
@@ -3581,12 +3602,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    # TODO: add condition
-    #  template_filename = os.path.join(
-    #      template_directory, 'module_methods-open.c')
-    #  self._GenerateSection(
-    #      template_filename, template_mappings, output_writer, output_filename,
-    #      access_mode='ab')
+    # TODO: add multi-file open support if glob is present.
+    if signature_type:
+      template_filename = os.path.join(
+          template_directory, 'module_methods-open_new.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     template_filename = os.path.join(template_directory, 'module_methods-end.c')
     self._GenerateSection(
@@ -3610,11 +3632,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     #     template_filename, template_mappings, output_writer, output_filename,
     #     access_mode='ab')
 
-    # TODO: add condition
-    # template_filename = os.path.join(template_directory, 'open.c')
-    # self._GenerateSection(
-    #     template_filename, template_mappings, output_writer, output_filename,
-    #     access_mode='ab')
+    if signature_type:
+      template_filename = os.path.join(template_directory, 'open_new.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     template_filename = os.path.join(template_directory, 'module_definition.c')
     self._GenerateSection(
@@ -3638,6 +3660,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    if signature_type:
+      del template_mappings['signature_type']
+      del template_mappings['signature_desription']
 
     self._SortIncludeHeaders(project_configuration, output_filename)
 
@@ -3803,12 +3829,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     if not is_pseudo_type:
       if with_parent:
         template_filename = os.path.join(template_directory, 'new_with_parent.h')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
-
-      if open_support:
-        template_filename = os.path.join(template_directory, 'new_open.h')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
@@ -4045,13 +4065,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
-      if open_support:
-        template_filename = os.path.join(template_directory, 'new_open.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
-
-      if with_parent:
+      if bfio_support:
+        template_filename = 'init_with_input.c'
+      elif with_parent:
         template_filename = 'init_with_parent.c'
       else:
         template_filename = 'init.c'
@@ -5362,14 +5378,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         project_configuration.library_name_suffix)
     output_filename = os.path.join('tests', output_filename)
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
-
     # TODO: add check for has codepage function for libsigscan and include
     # libcerror.
     if signature_type:
       template_mappings['signature_type'] = signature_type
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
 
     if signature_type:
       template_filename = os.path.join(

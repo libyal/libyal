@@ -56,6 +56,7 @@ class ProjectConfiguration(object):
     msvscpp_build_dependencies (str): Visual Studio build dependencies.
     msvscpp_dll_dependencies (list[str]): Visual Studio DLL dependencies.
     project_authors (str): authors of the project.
+    project_data_format (str): data format supported by the project.
     project_description (str): description of the project.
     project_documenation_url (str): URL of the documentation of the project.
     project_downloads_url (str): URL of the downloads of the project.
@@ -94,6 +95,7 @@ class ProjectConfiguration(object):
 
     # Project configuration.
     self.project_authors = None
+    self.project_data_format = None
     self.project_description = None
     self.project_documentation_url = None
     self.project_downloads_url = None
@@ -362,8 +364,14 @@ class ProjectConfiguration(object):
     Args:
       config_parser (ConfigParser): configuration file parser.
     """
-    self.library_description = self._GetConfigValue(
-        config_parser, 'library', 'description')
+    library_description = ''
+    if self.project_data_format:
+      library_description = 'Library to access the {0:s} format'.format(
+          self.project_data_format)
+    self.library_description = self._GetOptionalConfigValue(
+        config_parser, 'library', 'description',
+        default_value=library_description)
+
     self.library_build_dependencies = self._GetOptionalConfigValue(
         config_parser, 'library', 'build_dependencies', default_value=[])
     self.library_name = self.project_name
@@ -470,11 +478,20 @@ class ProjectConfiguration(object):
       ConfigurationError: if the project year of creation cannot
           be converted to a base 10 integer value.
     """
-    self.project_description = self._GetOptionalConfigValue(
-        config_parser, 'project', 'description')
-
     self.project_name = self._GetConfigValue(
         config_parser, 'project', 'name')
+
+    self.project_data_format = self._GetOptionalConfigValue(
+        config_parser, 'project', 'data_format', default_value='')
+
+    project_description = ''
+    if self.project_data_format:
+      project_description = (
+          '{0:s} is a library to access the {1:s} format.'.format(
+              self.project_name, self.project_data_format))
+    self.project_description = self._GetOptionalConfigValue(
+        config_parser, 'project', 'description',
+        default_value=project_description)
 
     project_authors = ['Joachim Metz <joachim.metz@gmail.com>']
     self.project_authors = self._GetOptionalConfigValue(

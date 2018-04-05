@@ -1,6 +1,6 @@
 dnl Functions for libfwps
 dnl
-dnl Version: 20180217
+dnl Version: 20180404
 
 dnl Function to detect if libfwps is available
 dnl ac_libfwps_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
