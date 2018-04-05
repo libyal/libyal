@@ -55,7 +55,7 @@ PyObject *${python_module_name}_${type_name}_close(
 		{
 			${python_module_name}_error_raise(
 			 error,
-			 PyExc_IOError,
+			 PyExc_MemoryError,
 			 "%s: unable to free libbfio file IO handle.",
 			 function );
 

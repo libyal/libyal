@@ -111,26 +111,15 @@ class LibraryHeaderFile(object):
     self.path = path
     self.types = []
 
-  def GetTypeFunction(self, type_name, type_function):
-    """Retrieves the function prototype of a specific type function.
-
-    Args:
-      type_name (str): type name.
-      type_function (str): type function.
-
-    Returns:
-      FunctionPrototype: function prototype of the type function or None
-          if no such function.
-    """
-    function_name = '{0:s}_{1:s}_{2:s}'.format(
-        self._library_name, type_name, type_function)
-    return self.functions_per_name.get(function_name, None)
-
-  def Read(self, project_configuration):
-    """Reads the header file.
+  def _ReadFileObject(
+      self, project_configuration, header_file_object, source_file_object):
+    """Reads a header file-like object.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
+      header_file_object (file): header file-like object.
+      source_file_object (file): source file-like object or None if not
+          available.
     """
     self._library_name = project_configuration.library_name
 
@@ -151,88 +140,150 @@ class LibraryHeaderFile(object):
     have_wide_character_type = False
     in_function_prototype = False
 
-    # TODO: use .h.in or run configure?
-    if not os.path.exists(self.path):
-      raise IOError('Missing include header file: {0:s}'.format(self.path))
+    for line in header_file_object.readlines():
+      line = line.strip()
 
-    with open(self.path, 'rb') as file_object:
-      for line in file_object.readlines():
-        line = line.strip()
+      if in_function_prototype:
+        line = line.decode('ascii')
 
-        if in_function_prototype:
-          line = line.decode('ascii')
+        # Check if we have a callback function argument.
+        if line.endswith('('):
+          argument_string = '{0:s} '.format(line)
+          function_argument = sources.FunctionArgument(argument_string)
 
-          # Check if we have a callback function argument.
-          if line.endswith('('):
-            argument_string = '{0:s} '.format(line)
-            function_argument = sources.FunctionArgument(argument_string)
+        else:
+          if line.endswith(' );'):
+            argument_string = line[:-3]
 
           else:
-            if line.endswith(' );'):
-              argument_string = line[:-3]
+            # Get the part of the line before the ','.
+            argument_string, _, _ = line.partition(',')
 
-            else:
-              # Get the part of the line before the ','.
-              argument_string, _, _ = line.partition(',')
+          if not function_argument:
+            function_prototype.AddArgumentString(argument_string)
 
-            if not function_argument:
-              function_prototype.AddArgumentString(argument_string)
+          else:
+            function_argument.AddArgumentString(argument_string)
 
-            else:
-              function_argument.AddArgumentString(argument_string)
+        if function_argument and line.endswith(' ),'):
+          function_prototype.AddArgument(function_argument)
+          function_argument = None
 
-          if function_argument and line.endswith(' ),'):
-            function_prototype.AddArgument(function_argument)
-            function_argument = None
+        elif line.endswith(' );'):
+          self.functions_per_name[function_prototype.name] = (
+              function_prototype)
 
-          elif line.endswith(' );'):
-            self.functions_per_name[function_prototype.name] = (
-                function_prototype)
+          function_prototype = None
+          in_function_prototype = False
+          have_extern = False
 
-            function_prototype = None
-            in_function_prototype = False
-            have_extern = False
+      elif line.endswith(b'('):
+        # Get the part of the line before the library name.
+        data_type, _, _ = line.partition(self._library_name)
 
-        elif line.endswith(b'('):
-          # Get the part of the line before the library name.
-          data_type, _, _ = line.partition(self._library_name)
+        # Get the part of the line after the data type.
+        line = line[len(data_type):]
+        data_type = data_type.strip()
 
-          # Get the part of the line after the data type.
-          line = line[len(data_type):]
-          data_type = data_type.strip()
+        # Get the part of the remainder of the line before the '('.
+        name, _, _ = line.partition('(')
 
-          # Get the part of the remainder of the line before the '('.
-          name, _, _ = line.partition('(')
+        return_values = None
+        if source_file_object:
+          ascii_name = name.encode('ascii')
 
-          function_prototype = sources.FunctionPrototype(name, data_type)
-          function_prototype.have_extern = have_extern
-          function_prototype.have_debug_output = have_debug_output
-          function_prototype.have_wide_character_type = (
-              have_wide_character_type)
+          source_line = source_file_object.readline()
+          while source_line:
+            if source_line.startswith(b' * Returns '):
+              return_values = set()
+              if b' -1 ' in source_line:
+                return_values.add('-1')
+              if b' 0 ' in source_line:
+                return_values.add('0')
+              if b' 1 ' in source_line:
+                return_values.add('1')
+              if b' NULL ' in source_line:
+                return_values.add('NULL')
 
-          if not have_extern:
-            self.have_internal_functions = True
+            elif ascii_name in source_line:
+              break
 
-          in_function_prototype = True
+            source_line = source_file_object.readline()
 
-        elif line.startswith(define_extern):
-          have_extern = True
+        function_prototype = sources.FunctionPrototype(name, data_type)
+        function_prototype.have_extern = have_extern
+        function_prototype.have_debug_output = have_debug_output
+        function_prototype.have_wide_character_type = (
+            have_wide_character_type)
+        function_prototype.return_values = return_values
 
-        elif line.startswith(define_have_debug_output):
-          have_debug_output = True
+        if not have_extern:
+          self.have_internal_functions = True
 
-        elif line.startswith(define_have_wide_character_type):
-          have_wide_character_type = True
+        in_function_prototype = True
 
-        elif line.startswith(b'#endif'):
-          have_debug_output = False
-          have_wide_character_type = False
+      elif line.startswith(define_extern):
+        have_extern = True
 
-        elif line.startswith(b'typedef struct '):
-          type_name = line.split(b' ')[2]
-          self.types.append(type_name)
+      elif line.startswith(define_have_debug_output):
+        have_debug_output = True
+
+      elif line.startswith(define_have_wide_character_type):
+        have_wide_character_type = True
+
+      elif line.startswith(b'#endif'):
+        have_debug_output = False
+        have_wide_character_type = False
+
+      elif line.startswith(b'typedef struct '):
+        type_name = line.split(b' ')[2]
+        self.types.append(type_name)
 
     self.types = sorted(self.types)
+
+  def GetTypeFunction(self, type_name, type_function):
+    """Retrieves the function prototype of a specific type function.
+
+    Args:
+      type_name (str): type name.
+      type_function (str): type function.
+
+    Returns:
+      FunctionPrototype: function prototype of the type function or None
+          if no such function.
+    """
+    function_name = '{0:s}_{1:s}_{2:s}'.format(
+        self._library_name, type_name, type_function)
+    return self.functions_per_name.get(function_name, None)
+
+  def Read(self, project_configuration):
+    """Reads a header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+    """
+    header_file_path = self.path
+    if not os.path.exists(header_file_path):
+      # Fallback to .h.in file if available.
+      header_file_path = '{0:s}.in'.format(self.path)
+
+    if not os.path.exists(header_file_path):
+      raise IOError('Missing include header file: {0:s}'.format(self.path))
+
+    source_file_path = '{0:s}.c'.format(self.path[:-2])
+    with open(header_file_path, 'rb') as header_file_object:
+      if os.path.exists(source_file_path):
+        source_file_object = open(source_file_path, 'rb')
+      else:
+        source_file_object = None
+
+      try:
+        self._ReadFileObject(
+            project_configuration, header_file_object, source_file_object)
+
+      finally:
+        if source_file_object:
+          source_file_object.close()
 
 
 class LibraryIncludeHeaderFile(object):
@@ -4157,8 +4208,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                     python_function_prototype.data_type)
 
               else:
-                template_filename = 'get_{0:s}{1:s}_value.c'.format(
-                    value_name_prefix, python_function_prototype.data_type)
+                if (python_function_prototype.return_values and
+                    'None' in python_function_prototype.return_values):
+                  template_filename = 'get_{0:s}{1:s}_value-with_none.c'.format(
+                      value_name_prefix, python_function_prototype.data_type)
+                else:
+                  template_filename = 'get_{0:s}{1:s}_value.c'.format(
+                      value_name_prefix, python_function_prototype.data_type)
+
+                print("T", python_function_prototype.name, template_filename)
 
           elif python_function_prototype.function_type == (
               definitions.FUNCTION_TYPE_GET_BY_INDEX):
@@ -4578,6 +4636,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     function_type = None
     object_type = None
     data_type = definitions.DATA_TYPE_NONE
+    return_values = None
     value_type = None
 
     # TODO: add override for
@@ -4865,6 +4924,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     # elif type_function.startswith('write_'):
     #   function_type = definitions.FUNCTION_TYPE_WRITE
 
+    if function_prototype.return_values:
+      return_values = set()
+      if ('0' in function_prototype.return_values or
+          'NULL' in function_prototype.return_values):
+        return_values.add('None')
+
     python_function_prototype = sources.PythonTypeObjectFunctionPrototype(
         project_configuration.python_module_name, type_name, type_function)
 
@@ -4872,6 +4937,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     python_function_prototype.data_type = data_type
     python_function_prototype.function_type = function_type
     python_function_prototype.object_type = object_type
+    python_function_prototype.return_values = return_values
     python_function_prototype.value_type = value_type
 
     return python_function_prototype

@@ -81,6 +81,8 @@ class FunctionPrototype(object):
         defined if the wide character type is defined.
     name (str): name.
     return_type (str): return type.
+    return_values (set[str]): return values or None if the function does not
+        return values.
   """
 
   def __init__(self, name, return_type):
@@ -98,6 +100,7 @@ class FunctionPrototype(object):
     self.have_wide_character_type = False
     self.name = name
     self.return_type = return_type
+    self.return_values = None
 
   def AddArgument(self, argument):
     """Adds an argument to the function prototype.
@@ -138,6 +141,8 @@ class PythonTypeObjectFunctionPrototype(object):
     data_type (str): data type.
     function_type (str): function type.
     object_type (str): object type.
+    return_values (set[str]): return values or None if the function does not
+        return values.
     value_type (str): value type.
   """
 
@@ -162,6 +167,7 @@ class PythonTypeObjectFunctionPrototype(object):
     self.data_type = definitions.DATA_TYPE_NONE
     self.function_type = None
     self.object_type = None
+    self.return_values = None
     self.value_type = None
 
   @property
@@ -356,35 +362,42 @@ class PythonTypeObjectFunctionPrototype(object):
       str: data type description.
     """
     if self.data_type == definitions.DATA_TYPE_BINARY_DATA:
-      return 'Binary string or None'
+      data_type_description = 'Binary string'
 
-    if self.data_type == definitions.DATA_TYPE_BOOLEAN:
-      return 'Boolean'
+    elif self.data_type == definitions.DATA_TYPE_BOOLEAN:
+      data_type_description = 'Boolean'
 
-    if self.DataTypeIsDatetime():
-      return 'Datetime or None'
+    elif self.DataTypeIsDatetime():
+      data_type_description = 'Datetime'
 
-    if self.data_type == definitions.DATA_TYPE_OBJECT:
-      return 'Object or None'
+    elif self.data_type == definitions.DATA_TYPE_OBJECT:
+      data_type_description = 'Object'
 
-    if self.DataTypeIsFloat():
-      return 'Float or None'
+    elif self.DataTypeIsFloat():
+      data_type_description = 'Float'
 
-    if self.DataTypeIsInteger():
-      return 'Integer or None'
+    elif self.DataTypeIsInteger():
+      data_type_description = 'Integer'
 
-    if self.data_type in (
+    elif self.data_type in (
         definitions.DATA_TYPE_GUID,
         definitions.DATA_TYPE_STRING):
-      return 'Unicode string or None'
+      data_type_description = 'Unicode string'
 
-    if self.data_type == definitions.DATA_TYPE_NARROW_STRING:
-      return 'String or None'
+    elif self.data_type == definitions.DATA_TYPE_NARROW_STRING:
+      data_type_description = 'String'
 
-    if self.data_type == definitions.DATA_TYPE_NONE:
-      return 'None'
+    elif self.data_type == definitions.DATA_TYPE_NONE:
+      data_type_description = 'None'
 
-    return self.data_type
+    else:
+      data_type_description = self.data_type
+
+    if (data_type_description != 'None' and self.return_values and
+        'None' in self.return_values):
+      data_type_description = '{0:s} or None'.format(data_type_description)
+
+    return data_type_description
 
   def GetDescription(self):
     """Retrieves the description.

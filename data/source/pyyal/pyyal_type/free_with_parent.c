@@ -52,7 +52,7 @@ void ${python_module_name}_${type_name}_free(
 		{
 			${python_module_name}_error_raise(
 			 error,
-			 PyExc_IOError,
+			 PyExc_MemoryError,
 			 "%s: unable to free ${library_name} ${type_description}.",
 			 function );
 
