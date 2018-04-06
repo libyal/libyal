@@ -355,6 +355,9 @@ class PythonTypeObjectFunctionPrototype(object):
       description = 'Indicates the {0:s} is {1:s}.'.format(
           type_name, value_name)
 
+    elif self.value_description:
+      description = 'The {0:s}.'.format(self.value_description)
+
     elif value_name:
       description = 'The {0:s}.'.format(value_name)
 
@@ -472,16 +475,24 @@ class PythonTypeObjectFunctionPrototype(object):
 
     elif self.function_type == definitions.FUNCTION_TYPE_GET_BY_INDEX:
       _, _, argument_suffix = self.arguments[0].rpartition('_')
-      description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
-          value_name, argument_suffix)]
+      if self.value_description:
+        description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
+            self.value_description, argument_suffix)]
+      else:
+        description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
+            value_name, argument_suffix)]
 
     elif self.function_type in (
         definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
         definitions.FUNCTION_TYPE_GET_BY_NAME,
         definitions.FUNCTION_TYPE_GET_BY_PATH):
       _, _, type_function_suffix = type_function.partition('_by_')
-      description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
-          value_name, type_function_suffix)]
+      if self.value_description:
+        description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
+            self.value_description, type_function_suffix)]
+      else:
+        description = ['Retrieves the {0:s} specified by the {1:s}.'.format(
+            value_name, type_function_suffix)]
 
     elif self.function_type == definitions.FUNCTION_TYPE_COPY_FROM:
       type_name = self._type_name

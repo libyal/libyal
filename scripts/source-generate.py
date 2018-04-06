@@ -195,14 +195,21 @@ class LibraryHeaderFile(object):
 
           source_line = source_file_object.readline()
           while source_line:
-            if source_line.startswith(b'/* Retrieves a '):
-              _, _, value_description = source_line.strip().rpartition(' a ')
+            if source_line.startswith(b'/* Retrieves '):
+              value_description = source_line.strip()
+              value_description = value_description[13:]
 
-            elif source_line.startswith(b'/* Retrieves an '):
-              _, _, value_description = source_line.strip().rpartition(' an ')
+              if value_description.startswith(b'a '):
+                value_description = value_description[2:]
 
-            elif source_line.startswith(b'/* Retrieves the '):
-              _, _, value_description = source_line.strip().rpartition(' the ')
+              elif value_description.startswith(b'an '):
+                value_description = value_description[3:]
+
+              elif value_description.startswith(b'the '):
+                value_description = value_description[4:]
+
+              if value_description.startswith(b'specific '):
+                value_description = value_description[9:]
 
             elif source_line.startswith(b' * Returns '):
               return_values = set()
@@ -4282,8 +4289,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             if value_name_prefix != 'root_':
               value_name_prefix = ''
 
-            # TODO: add support to detect pseudo value type objects.
-            if python_function_prototype.value_type not in value_type_objects:
+            if (has_pseudo_sub_types and
+                python_function_prototype.value_type not in value_type_objects):
               generate_get_value_type_object = True
               value_type_objects.add(python_function_prototype.value_type)
 
@@ -4404,9 +4411,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         description = python_function_prototype.GetDescription()
 
       for index, line in enumerate(description):
-        # Expand acl => access control list (ACL) for pyfwnt.
-        line = line.replace(' acl.', ' access control list (ACL).')
-
         # Correct xml => XML in description for pyevtx.
         line = line.replace(' xml ', ' XML ')
 
