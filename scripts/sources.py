@@ -500,7 +500,7 @@ class PythonTypeObjectFunctionPrototype(object):
         type_name = type_name.replace('_', ' ')
 
       # TODO: fix value name.
-      description = ['Copies the the {0:s} from the {1:s}'.format(
+      description = ['Copies the {0:s} from the {1:s}.'.format(
           type_name, value_name)]
 
     elif self.function_type in (

@@ -4391,16 +4391,30 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       else:
         arguments_flags = 'METH_VARARGS | METH_KEYWORDS'
 
-      arguments_string = ', '.join(python_function_prototype.arguments)
+      arguments_string = ', '.join([
+          argument.lstrip('*')
+          for argument in python_function_prototype.arguments])
       data_type = python_function_prototype.GetDataTypeDescription()
-      python_type_object_methods.extend([
-          '',
-          '\t{{ "{0:s}",'.format(type_function),
-          '\t  (PyCFunction) {0:s},'.format(python_function_prototype.name),
-          '\t  {0:s},'.format(arguments_flags),
-          '\t  "{0:s}({1:s}) -> {2:s}\\n"'.format(
-              type_function, arguments_string, data_type),
-          '\t  "\\n"'])
+
+      if type_function == 'copy_from_byte_stream':
+        python_type_object_method = [
+            '',
+            '\t{{ "{0:s}",'.format(type_function),
+            '\t  (PyCFunction) {0:s},'.format(python_function_prototype.name),
+            '\t  {0:s},'.format(arguments_flags),
+            '\t  "{0:s}({1:s})\\n"'.format(type_function, arguments_string),
+            '\t  "\\n"']
+      else:
+        python_type_object_method = [
+            '',
+            '\t{{ "{0:s}",'.format(type_function),
+            '\t  (PyCFunction) {0:s},'.format(python_function_prototype.name),
+            '\t  {0:s},'.format(arguments_flags),
+            '\t  "{0:s}({1:s}) -> {2:s}\\n"'.format(
+                type_function, arguments_string, data_type),
+            '\t  "\\n"']
+
+      python_type_object_methods.extend(python_type_object_method)
 
       if (type_function == 'get_offset' and
           'read_buffer' in python_function_prototypes and
