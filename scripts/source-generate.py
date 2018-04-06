@@ -3821,7 +3821,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateTypeHeaderFile(
       self, project_configuration, template_mappings, type_name,
-      python_function_prototypes, output_writer, is_pseudo_type=False):
+      python_function_prototypes, output_writer, has_pseudo_sub_types=False,
+      is_pseudo_type=False):
     """Generates a Python type object header file.
 
     Args:
@@ -3833,6 +3834,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           (dict[str, PythonTypeObjectFunctionPrototype]): Python type object
           function prototypes per name.
       output_writer (OutputWriter): output writer.
+      has_pseudo_sub_types (Optional[bool]): True if type has pseudo sub types.
       is_pseudo_type (Optional[bool]): True if type is a pseudo type.
     """
     output_filename = '{0:s}_{1:s}.h'.format(
@@ -3889,14 +3891,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         project_configuration.python_module_name, type_name)
 
     if not is_pseudo_type:
-      if with_parent:
-        template_filename = os.path.join(template_directory, 'new_with_parent.h')
+      if has_pseudo_sub_types:
+        template_filename = os.path.join(
+            template_directory, 'new-with_type_object.h')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
-      # TODO: make open with file object object generated conditionally?
-      # if 'open_file_object' in python_function_prototypes:
+      elif with_parent:
+        template_filename = os.path.join(
+            template_directory, 'new-with_parent.h')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
 
       template_filename = os.path.join(template_directory, 'init.h')
       self._GenerateSection(
@@ -3977,7 +3984,8 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
   def _GenerateTypeSourceFile(
       self, project_configuration, template_mappings, type_name,
-      python_function_prototypes, output_writer, is_pseudo_type=False):
+      python_function_prototypes, output_writer, has_pseudo_sub_types=False,
+      is_pseudo_type=False):
     """Generates a Python type object source file.
 
     Args:
@@ -3989,6 +3997,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           (dict[str, PythonTypeObjectFunctionPrototype]): Python type object
           function prototypes per name.
       output_writer (OutputWriter): output writer.
+      has_pseudo_sub_types (Optional[bool]): True if type has pseudo sub types.
       is_pseudo_type (Optional[bool]): True if type is a pseudo type.
     """
     output_filename = '{0:s}_{1:s}.c'.format(
@@ -4121,16 +4130,24 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
     if not is_pseudo_type:
-      if with_parent:
-        template_filename = os.path.join(template_directory, 'new_with_parent.c')
+      if has_pseudo_sub_types:
+        template_filename = os.path.join(
+            template_directory, 'new-with_type_object.c')
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='ab')
+
+      elif with_parent:
+        template_filename = os.path.join(
+            template_directory, 'new-with_parent.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
             access_mode='ab')
 
       if bfio_support:
-        template_filename = 'init_with_input.c'
+        template_filename = 'init-with_file_io_handle.c'
       elif with_parent:
-        template_filename = 'init_with_parent.c'
+        template_filename = 'init-with_parent.c'
       else:
         template_filename = 'init.c'
 
@@ -4223,6 +4240,12 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
                     'None' in python_function_prototype.return_values):
                   template_filename = 'get_{0:s}{1:s}_value-with_none.c'.format(
                       value_name_prefix, python_function_prototype.data_type)
+
+                elif has_pseudo_sub_types:
+                  template_filename = (
+                      'get_{0:s}{1:s}_value-with_type_object.c').format(
+                          value_name_prefix, python_function_prototype.data_type)
+
                 else:
                   template_filename = 'get_{0:s}{1:s}_value.c'.format(
                       value_name_prefix, python_function_prototype.data_type)
@@ -5293,14 +5316,19 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           if sequence_type_name:
             types_with_sequence_types.add((sequence_type_name, type_is_object))
 
+        # TODO: determine value based on actual code.
+        has_pseudo_sub_types = type_name == 'item' and api_pseudo_types
+
         self._GenerateTypeSourceFile(
             project_configuration, template_mappings, type_name,
             python_function_prototypes, output_writer,
+            has_pseudo_sub_types=has_pseudo_sub_types,
             is_pseudo_type=is_pseudo_type)
 
         self._GenerateTypeHeaderFile(
             project_configuration, template_mappings, type_name,
             python_function_prototypes, output_writer,
+            has_pseudo_sub_types=has_pseudo_sub_types,
             is_pseudo_type=is_pseudo_type)
 
       for sequence_type_name, type_is_object in types_with_sequence_types:

@@ -1,18 +1,19 @@
-/* Retrieves the sub ${value_description} specified by the name
+/* Retrieves the sub ${value_description} specified by the path
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_name(
+PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_path(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments,
            PyObject *keywords )
 {
 	PyObject *${value_name}_object                     = NULL;
+	PyTypeObject *type_object                          = NULL;
 	libcerror_error_t *error                           = NULL;
 	${library_name}_${value_type}_t *sub_${value_name} = NULL;
-	static char *function                              = "${python_module_name}_${type_name}_get_sub_${value_name}_by_name";
-	static char *keyword_list[]                        = { "name", NULL };
-	char *utf8_name                                    = NULL;
-	size_t utf8_name_length                            = 0;
+	static char *function                              = "${python_module_name}_${type_name}_get_sub_${value_name}_by_path";
+	static char *keyword_list[]                        = { "path", NULL };
+	char *utf8_path                                    = NULL;
+	size_t utf8_path_length                            = 0;
 	int result                                         = 0;
 
 	if( ${python_module_name}_${type_name} == NULL )
@@ -29,19 +30,19 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_name(
 	     keywords,
 	     "s",
 	     keyword_list,
-	     &utf8_name ) == 0 )
+	     &utf8_path ) == 0 )
 	{
 		goto on_error;
 	}
-	utf8_name_length = narrow_string_length(
-	                    utf8_name );
+	utf8_path_length = narrow_string_length(
+	                    utf8_path );
 
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_sub_${value_name}_by_utf8_name(
+	result = ${library_name}_${type_name}_get_sub_${value_name}_by_utf8_path(
 	           ${python_module_name}_${type_name}->${type_name},
-	           (uint8_t *) utf8_name,
-	           utf8_name_length,
+	           (uint8_t *) utf8_path,
+	           utf8_path_length,
 	           &sub_${value_name},
 	           &error );
 
@@ -67,7 +68,20 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_name(
 
 		return( Py_None );
 	}
+	type_object = ${python_module_name}_${type_name}_get_${value_type}_type_object(
+	               sub_${value_name} );
+
+	if( type_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to retrieve ${value_type_description} type object.",
+		 function );
+
+		goto on_error;
+	}
 	${value_name}_object = ${python_module_name}_${value_type}_new(
+	                        type_object,
 	                        sub_${value_name},
 	                        ${python_module_name}_${value_name}->parent_object );
 

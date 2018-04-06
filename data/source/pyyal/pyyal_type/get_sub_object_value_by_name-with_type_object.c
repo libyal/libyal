@@ -7,6 +7,7 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_name(
            PyObject *keywords )
 {
 	PyObject *${value_name}_object                     = NULL;
+	PyTypeObject *type_object                          = NULL;
 	libcerror_error_t *error                           = NULL;
 	${library_name}_${value_type}_t *sub_${value_name} = NULL;
 	static char *function                              = "${python_module_name}_${type_name}_get_sub_${value_name}_by_name";
@@ -67,7 +68,20 @@ PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_name(
 
 		return( Py_None );
 	}
+	type_object = ${python_module_name}_${type_name}_get_${value_type}_type_object(
+	               sub_${value_name} );
+
+	if( type_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to retrieve ${value_type_description} type object.",
+		 function );
+
+		goto on_error;
+	}
 	${value_name}_object = ${python_module_name}_${value_type}_new(
+	                        type_object,
 	                        sub_${value_name},
 	                        ${python_module_name}_${value_name}->parent_object );
 
