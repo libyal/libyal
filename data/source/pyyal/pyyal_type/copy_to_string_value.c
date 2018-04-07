@@ -10,7 +10,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	char *utf8_string            = NULL;
 	const char *errors           = NULL;
 	static char *function        = "${python_module_name}_${type_name}_get_${value_name}";
-	size_t utf8_string_size      = 0;
+	size_t string_size           = 0;
 	uint32_t string_format_flags = 0;
 	int result                   = 0;
 
@@ -27,9 +27,9 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_utf8_${value_name}_size(
+	result = ${library_name}_${type_name}_get_${value_name}_size(
 	          ${python_module_name}_${type_name}->${type_name},
-	          &utf8_string_size,
+	          &string_size,
 	          string_format_flags,
 	          &error );
 
@@ -40,7 +40,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to determine size of ${value_description} as UTF-8 string.",
+		 "%s: unable to determine size of ${value_description} as string.",
 		 function );
 
 		libcerror_error_free(
@@ -49,7 +49,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 		goto on_error;
 	}
 	else if( ( result == 0 )
-	      || ( utf8_string_size == 0 ) )
+	      || ( string_size == 0 ) )
 	{
 		Py_IncRef(
 		 Py_None );
@@ -57,7 +57,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 		return( Py_None );
 	}
 	utf8_string = (char *) PyMem_Malloc(
-	                        sizeof( char ) * utf8_string_size );
+	                        sizeof( char ) * string_size );
 
 	if( utf8_string == NULL )
 	{
@@ -73,7 +73,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	result = ${library_name}_${type_name}_copy_to_utf8_string(
 		  ${python_module_name}_${type_name}->${type_name},
 		  (uint8_t *) utf8_string,
-		  utf8_string_size,
+		  string_size,
 		  string_format_flags,
 		  &error );
 
@@ -97,7 +97,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	 */
 	string_object = PyUnicode_DecodeUTF8(
 	                 utf8_string,
-	                 (Py_ssize_t) utf8_string_size - 1,
+	                 (Py_ssize_t) string_size - 1,
 	                 errors );
 
 	if( string_object == NULL )

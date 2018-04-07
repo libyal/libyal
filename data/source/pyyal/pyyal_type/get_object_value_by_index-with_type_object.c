@@ -158,7 +158,7 @@ PyObject *${python_module_name}_${type_name}_get_${sequence_value_name}(
 		return( NULL );
 	}
 	sequence_object = ${python_module_name}_${sequence_type_name}_new(
-	                   ${python_module_name}_${type_name},
+	                   (PyObject *) ${python_module_name}_${type_name},
 	                   &${python_module_name}_${type_name}_get_${value_name}_by_index,
 	                   number_of_${sequence_value_name} );
 
