@@ -1,17 +1,18 @@
-/* Retrieves the data as a string
+/* Retrieves the ${value_description_long}
  * Returns a Python object if successful or NULL on error
  */
-PyObject *${python_module_name}_${type_name}_get_data_as_string(
+PyObject *${python_module_name}_${type_name}_get_${value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	PyObject *string_object  = NULL;
-	libcerror_error_t *error = NULL;
-	const char *errors       = NULL;
-	static char *function    = "${python_module_name}_value_get_data_as_string";
-	char *utf8_string        = NULL;
-	size_t utf8_string_size  = 0;
-	int result               = 0;
+	PyObject *string_object      = NULL;
+	libcerror_error_t *error     = NULL;
+	char *utf8_string            = NULL;
+	const char *errors           = NULL;
+	static char *function        = "${python_module_name}_${type_name}_get_${value_name}";
+	size_t utf8_string_size      = 0;
+	uint32_t string_format_flags = 0;
+	int result                   = 0;
 
 	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
 
@@ -26,9 +27,10 @@ PyObject *${python_module_name}_${type_name}_get_data_as_string(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_data_as_utf8_string_size(
+	result = ${library_name}_${type_name}_get_utf8_${value_name}_size(
 	          ${python_module_name}_${type_name}->${type_name},
 	          &utf8_string_size,
+	          string_format_flags,
 	          &error );
 
 	Py_END_ALLOW_THREADS
@@ -38,7 +40,7 @@ PyObject *${python_module_name}_${type_name}_get_data_as_string(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to determine size of data as UTF-8 string.",
+		 "%s: unable to determine size of ${value_description} as UTF-8 string.",
 		 function );
 
 		libcerror_error_free(
@@ -68,10 +70,11 @@ PyObject *${python_module_name}_${type_name}_get_data_as_string(
 	}
 	Py_BEGIN_ALLOW_THREADS
 
-	result = ${library_name}_${type_name}_get_data_as_utf8_string(
+	result = ${library_name}_${type_name}_copy_to_utf8_string(
 		  ${python_module_name}_${type_name}->${type_name},
 		  (uint8_t *) utf8_string,
 		  utf8_string_size,
+		  string_format_flags,
 		  &error );
 
 	Py_END_ALLOW_THREADS
@@ -81,7 +84,7 @@ PyObject *${python_module_name}_${type_name}_get_data_as_string(
 		${python_module_name}_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve data as UTF-8 string.",
+		 "%s: unable to retrieve ${value_description} as UTF-8 string.",
 		 function );
 
 		libcerror_error_free(

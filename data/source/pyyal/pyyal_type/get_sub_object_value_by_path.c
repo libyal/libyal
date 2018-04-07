@@ -1,4 +1,4 @@
-/* Retrieves the sub ${value_description} specified by the path
+/* Retrieves the sub ${value_description_long} specified by the path
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_sub_${value_name}_by_path(

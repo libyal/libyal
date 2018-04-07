@@ -1,4 +1,4 @@
-/* Retrieves the ${value_description} specified by the path
+/* Retrieves the ${value_description_long} specified by the path
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_${value_name}_by_path(

@@ -1,4 +1,4 @@
-/* Retrieves a specific ${value_description} by index
+/* Retrieves a specific ${value_description_long} by index
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
@@ -92,7 +92,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
 		goto on_error;
 	}
 	/* Pass the string length to PyUnicode_DecodeUTF8 otherwise it makes
-	 * the end of string character is part of the string
+	 * the end of string character is part of the string.
 	 */
 	string_object = PyUnicode_DecodeUTF8(
 	                 (char *) utf8_string,

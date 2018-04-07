@@ -1,4 +1,4 @@
-/* Retrieves the root ${value_description}
+/* Retrieves the root ${value_description_long}
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_root_${value_name}(

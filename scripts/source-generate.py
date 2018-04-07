@@ -3850,9 +3850,16 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         project_configuration.python_module_name, output_filename)
 
     open_support = 'open' in python_function_prototypes
-    with_parent = (
+    without_initialize_and_with_free = (
         'initialize' not in python_function_prototypes and
         'free' in python_function_prototypes)
+
+    # TODO: make check more generic based on the source itself.
+    if (project_configuration.library_name == 'libfwnt' and
+        type_name == 'security_identifier'):
+      with_parent = True
+    else:
+      with_parent = without_initialize_and_with_free
 
     if is_pseudo_type:
       template_directory = os.path.join(
@@ -4020,9 +4027,17 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     bfio_support = 'open_file_object' in python_function_prototypes
     codepage_support = 'get_ascii_codepage' in python_function_prototypes
     open_support = 'open' in python_function_prototypes
-    with_parent = (
+
+    without_initialize_and_with_free = (
         'initialize' not in python_function_prototypes and
         'free' in python_function_prototypes)
+
+    # TODO: make check more generic based on the source itself.
+    if (project_configuration.library_name == 'libfwnt' and
+        type_name == 'security_identifier'):
+      with_parent = True
+    else:
+      with_parent = without_initialize_and_with_free
 
     python_module_include_names = set([
         project_configuration.library_name, type_name, 'error', 'libcerror',
@@ -4153,7 +4168,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       if bfio_support:
         template_filename = 'init-with_file_io_handle.c'
-      elif with_parent:
+      elif with_parent and without_initialize_and_with_free:
         template_filename = 'init-with_parent.c'
       else:
         template_filename = 'init.c'
@@ -4208,13 +4223,18 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           template_filename = 'set_{0:s}_value.c'.format('string')
 
         elif python_function_prototype.function_type == (
+            definitions.FUNCTION_TYPE_COPY):
+          template_filename = 'copy_{0:s}_value.c'.format(
+              python_function_prototype.data_type)
+
+        elif python_function_prototype.function_type == (
             definitions.FUNCTION_TYPE_COPY_FROM):
           template_filename = 'copy_from_{0:s}_value.c'.format(
               python_function_prototype.data_type)
 
         elif python_function_prototype.function_type == (
-            definitions.FUNCTION_TYPE_COPY):
-          template_filename = 'copy_{0:s}_value.c'.format(
+            definitions.FUNCTION_TYPE_COPY_TO):
+          template_filename = 'copy_to_{0:s}_value.c'.format(
               python_function_prototype.data_type)
 
         elif python_function_prototype.function_type in (
@@ -4313,6 +4333,11 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         continue
 
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
+      if python_function_prototype.value_description:
+        value_description_long = python_function_prototype.value_description
+        value_description, _, _ = value_description_long.partition('(')
+        template_mappings['value_description'] = value_description.strip()
+        template_mappings['value_description_long'] = value_description_long
 
       if generate_get_value_type_object:
         search_string = (
@@ -4550,6 +4575,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       if python_function_prototype.function_type not in (
           definitions.FUNCTION_TYPE_COPY,
+          definitions.FUNCTION_TYPE_COPY_TO,
           definitions.FUNCTION_TYPE_GET,
           definitions.FUNCTION_TYPE_GET_BY_IDENTIFIER,
           definitions.FUNCTION_TYPE_GET_BY_INDEX,
@@ -4654,7 +4680,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     if len(function_prototype.arguments) < 2:
       logging.warning('Unsupported function prototype: {0:s}'.format(
           function_prototype.name))
-      return
+      return None
 
     if type_function in ('free', 'initialize'):
       self_argument = '{0:s}_{1:s}_t **{1:s}'.format(
@@ -4674,28 +4700,33 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     if function_argument_string != self_argument:
       logging.warning('Unsupported function prototype: {0:s}'.format(
           function_prototype.name))
-      return
+      return None
 
     function_argument = function_prototype.arguments[-1]
     function_argument_string = function_argument.CopyToString()
     if function_argument_string != 'libcerror_error_t **error':
       logging.warning('Unsupported function prototype: {0:s}'.format(
           function_prototype.name))
-      return
+      return None
 
     # TODO: add support for glob functions
     # TODO: add support for has, is functions
 
     arguments = []
     function_type = None
+    python_type_function = type_function
     object_type = None
     data_type = definitions.DATA_TYPE_NONE
     return_values = None
+    value_description = function_prototype.value_description
     value_type = None
 
     # TODO: add override for
     # if (type_function == 'copy_link_target_identifier_data' and
     #    project_configuration.library_name == 'liblnk'):
+
+    if type_function == 'get_string_size':
+      return None
 
     if (type_function == 'get_cache_directory_name' and
         project_configuration.library_name == 'libmsiecf'):
@@ -4732,11 +4763,18 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             value_size_argument_string == 'size_t data_size'):
         data_type = definitions.DATA_TYPE_BINARY_DATA
 
+    elif type_function.startswith('copy_to_utf'):
+      if 'utf16' in type_function or 'utf32' in type_function:
+        return None
+
+      function_type = definitions.FUNCTION_TYPE_COPY_TO
+      python_type_function = 'get_string'
+      data_type = definitions.DATA_TYPE_STRING
+      value_description = 'string'
+
     elif type_function.startswith('copy_'):
       function_type = definitions.FUNCTION_TYPE_COPY
       data_type = definitions.DATA_TYPE_BINARY_DATA
-
-      # TODO: change copy to or add copy_to
 
     elif type_function == 'free':
       function_type = definitions.FUNCTION_TYPE_FREE
@@ -4789,7 +4827,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           if value_argument_string != 'const uint8_t *utf8_string':
             logging.warning('Unsupported function prototype: {0:s}'.format(
                 function_prototype.name))
-            return
+            return None
 
           function_argument = function_prototype.arguments[2]
           function_argument_string = function_argument.CopyToString()
@@ -4797,7 +4835,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           if function_argument_string != 'size_t utf8_string_length':
             logging.warning('Unsupported function prototype: {0:s}'.format(
                 function_prototype.name))
-            return
+            return None
 
           if type_function_suffix == 'name':
             function_type = definitions.FUNCTION_TYPE_GET_BY_NAME
@@ -4899,6 +4937,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         arguments = ['filename', 'mode=\'r\'']
 
       elif type_function == 'open_file_io_handle':
+        python_type_function = 'open_file_object'
         arguments = ['file_object', 'mode=\'r\'']
 
     elif type_function.startswith('read_'):
@@ -4985,15 +5024,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
         return_values.add('None')
 
     python_function_prototype = sources.PythonTypeObjectFunctionPrototype(
-        project_configuration.python_module_name, type_name, type_function)
+        project_configuration.python_module_name, type_name,
+        python_type_function)
 
     python_function_prototype.arguments = arguments
     python_function_prototype.data_type = data_type
     python_function_prototype.function_type = function_type
     python_function_prototype.object_type = object_type
     python_function_prototype.return_values = return_values
-    python_function_prototype.value_description = (
-        function_prototype.value_description)
+    python_function_prototype.value_description = value_description
     python_function_prototype.value_type = value_type
 
     return python_function_prototype

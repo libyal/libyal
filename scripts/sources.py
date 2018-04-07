@@ -158,9 +158,6 @@ class PythonTypeObjectFunctionPrototype(object):
       type_name (str): type name.
       type_function (str): type function.
     """
-    if type_function == 'open_file_io_handle':
-      type_function = 'open_file_object'
-
     super(PythonTypeObjectFunctionPrototype, self).__init__()
     self._name = None
     self._python_module_name = python_module_name
@@ -245,6 +242,10 @@ class PythonTypeObjectFunctionPrototype(object):
       elif self.function_type == definitions.FUNCTION_TYPE_COPY_FROM:
         if self._type_function.startswith('copy_from_'):
           self._value_name = self._type_function[10:]
+
+      elif self.function_type == definitions.FUNCTION_TYPE_COPY_TO:
+        if self._type_function.startswith('get_'):
+          self._value_name = self._type_function[4:]
 
       elif self.function_type in (
           definitions.FUNCTION_TYPE_GET,
@@ -416,17 +417,22 @@ class PythonTypeObjectFunctionPrototype(object):
     description = ['']
 
     type_function = self.type_function
+
+    type_name = self._type_name
+    if type_name:
+      type_name = type_name.replace('_', ' ')
+
     value_name = self.value_name
     if value_name:
       value_name = value_name.replace('_', ' ')
 
     if type_function == 'close':
-      description = ['Closes a {0:s}.'.format(self._type_name)]
+      description = ['Closes a {0:s}.'.format(type_name)]
 
     elif type_function == 'get_ascii_codepage':
       description = [(
           'Retrieves the codepage for ASCII strings used in '
-          'the {0:s}.').format(self._type_name)]
+          'the {0:s}.').format(type_name)]
 
     elif type_function == 'get_data_as_boolean':
       description = ['Retrieves the data as a boolean.']
@@ -443,12 +449,16 @@ class PythonTypeObjectFunctionPrototype(object):
     elif type_function == 'get_data_as_string':
       description = ['Retrieves the data as a string.']
 
+    elif type_function == 'get_string':
+      description = ['Retrieves the {0:s} formatted as a string.'.format(
+          type_name)]
+
     elif type_function == 'open':
-      description = ['Opens a {0:s}.'.format(self._type_name)]
+      description = ['Opens a {0:s}.'.format(type_name)]
 
     elif type_function == 'open_file_object':
       description = [(
-          'Opens a {0:s} using a file-like object.').format(self._type_name)]
+          'Opens a {0:s} using a file-like object.').format(type_name)]
 
     elif type_function == 'read_buffer':
       description = ['Reads a buffer of data.']
@@ -462,7 +472,7 @@ class PythonTypeObjectFunctionPrototype(object):
     elif type_function == 'set_ascii_codepage':
       description = [
           ('Sets the codepage for ASCII strings used in the '
-           '{0:s}.').format(self._type_name),
+           '{0:s}.').format(type_name),
           ('Expects the codepage to be a string containing a Python '
            'codec definition.')]
 
@@ -471,7 +481,7 @@ class PythonTypeObjectFunctionPrototype(object):
 
     elif type_function == 'signal_abort':
       description = ['Signals the {0:s} to abort the current activity.'.format(
-          self._type_name)]
+          type_name)]
 
     elif self.function_type == definitions.FUNCTION_TYPE_GET_BY_INDEX:
       _, _, argument_suffix = self.arguments[0].rpartition('_')
@@ -495,9 +505,6 @@ class PythonTypeObjectFunctionPrototype(object):
             value_name, type_function_suffix)]
 
     elif self.function_type == definitions.FUNCTION_TYPE_COPY_FROM:
-      type_name = self._type_name
-      if type_name:
-        type_name = type_name.replace('_', ' ')
 
       # TODO: fix value name.
       description = ['Copies the {0:s} from the {1:s}.'.format(
@@ -511,16 +518,10 @@ class PythonTypeObjectFunctionPrototype(object):
         description = ['Retrieves the {0:s}.'.format(value_name)]
 
     elif self.function_type == definitions.FUNCTION_TYPE_IS:
-      type_name = self._type_name
-      if type_name:
-        type_name = type_name.replace('_', ' ')
-
-      value_name = value_name.replace('_', ' ')
       description = ['Determines if the {0:s} is {1:s}.'.format(
           type_name, value_name)]
 
     elif self.function_type == definitions.FUNCTION_TYPE_SET:
-      value_name = value_name.replace('_', ' ')
       description = ['Sets the {0:s}.'.format(value_name)]
 
     return description

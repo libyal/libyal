@@ -35,9 +35,11 @@ PyObject *${python_module_name}_${type_name}_new(
 	${python_module_name}_${type_name}->${type_name}  = ${type_name};
 	${python_module_name}_${type_name}->parent_object = parent_object;
 
-	Py_IncRef(
-	 ${python_module_name}_${type_name}->parent_object );
-
+	if( ${python_module_name}_${type_name}->parent_object != NULL )
+	{
+		Py_IncRef(
+		 ${python_module_name}_${type_name}->parent_object );
+	}
 	return( (PyObject *) ${python_module_name}_${type_name} );
 
 on_error:

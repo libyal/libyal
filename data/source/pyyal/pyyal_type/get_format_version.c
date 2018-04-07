@@ -73,7 +73,7 @@ PyObject *${python_module_name}_${type_name}_get_format_version(
 	utf8_string[ 3 ] = 0;
 
 	/* Pass the string length to PyUnicode_DecodeUTF8 otherwise it makes
-	 * the end of string character is part of the string
+	 * the end of string character is part of the string.
 	 */
 	string_object = PyUnicode_DecodeUTF8(
 	                 utf8_string,

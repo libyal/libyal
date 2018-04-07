@@ -1,4 +1,4 @@
-/* Retrieves a specific recovered ${value_description} by index
+/* Retrieves a specific recovered ${value_description_long} by index
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_recovered_${value_name}_by_index(

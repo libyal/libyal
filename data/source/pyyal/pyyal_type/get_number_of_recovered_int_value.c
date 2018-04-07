@@ -1,4 +1,4 @@
-/* Retrieves the number of recovered ${value_description}
+/* Retrieves the number of recovered ${value_description_long}
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_number_of_recovered_${value_name}(

@@ -1,4 +1,4 @@
-/* Retrieves the ${value_description}
+/* Retrieves the ${value_description_long}
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_${type_name}_get_${value_name}(
