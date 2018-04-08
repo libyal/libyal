@@ -33,7 +33,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		${python_module_name}_error_raise(
 		 error,
@@ -45,6 +45,13 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 		 &error );
 
 		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
 	}
 	string_object = ${python_module_name}_string_new_from_guid(
 			 guid_data,

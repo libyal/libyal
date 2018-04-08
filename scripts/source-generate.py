@@ -384,8 +384,12 @@ class LibraryIncludeHeaderFile(object):
             self._api_functions_group[group_name] = section_name
 
         else:
+          # TODO: improve pseudo type detection.
+          if group_name.endswith('_item'):
+            group_name = group_name[:-5]
+
           function_name_prefix = '{0:s}_{1:s}_'.format(
-              self._library_name, section_name)
+              self._library_name, group_name)
 
           found_match = False
           for function_prototype in functions:
@@ -394,10 +398,6 @@ class LibraryIncludeHeaderFile(object):
               break
 
           if found_match:
-            # TODO: improve pseudo type detection.
-            if group_name.endswith('_item'):
-              group_name = group_name[:-5]
-
             self._api_pseudo_types_group[group_name] = section_name
 
       elif self._library_name != 'libcerror' and group_name == 'error':
@@ -3868,12 +3868,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       template_directory = os.path.join(self._template_directory, 'pyyal_type')
 
     if is_pseudo_type:
-      # TODO: determine base type.
-      template_mappings['base_type_name'] = 'item'
-      # TODO: determine base type.
-      template_mappings['base_type_description'] = 'item'
-      # TODO: determine base indicator.
-      template_mappings['base_type_indicator'] = ''
+      base_type_name = 'item'
+      base_type_indicator = '{0:s}_{1:s}_TYPE_{2:s}'.format(
+          project_configuration.library_name, base_type_name, type_name)
+      base_type_indicator = base_type_indicator.upper()
+
+      template_mappings['base_type_name'] = base_type_name
+      template_mappings['base_type_description'] = base_type_name
+      template_mappings['base_type_indicator'] = base_type_indicator
 
     template_filename = os.path.join(template_directory, 'header.h')
     self._GenerateSection(
@@ -4100,12 +4102,14 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       template_directory = os.path.join(self._template_directory, 'pyyal_type')
 
     if is_pseudo_type:
-      # TODO: determine base type.
-      template_mappings['base_type_name'] = 'item'
-      # TODO: determine base type.
-      template_mappings['base_type_description'] = 'item'
-      # TODO: determine base indicator.
-      template_mappings['base_type_indicator'] = ''
+      base_type_name = 'item'
+      base_type_indicator = '{0:s}_{1:s}_TYPE_{2:s}'.format(
+          project_configuration.library_name, base_type_name, type_name)
+      base_type_indicator = base_type_indicator.upper()
+
+      template_mappings['base_type_name'] = base_type_name
+      template_mappings['base_type_description'] = base_type_name
+      template_mappings['base_type_indicator'] = base_type_indicator
 
     template_filename = os.path.join(template_directory, 'header.c')
     self._GenerateSection(
@@ -4698,8 +4702,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     function_argument = function_prototype.arguments[0]
     function_argument_string = function_argument.CopyToString()
     if function_argument_string != self_argument:
-      logging.warning('Unsupported function prototype: {0:s}'.format(
-          function_prototype.name))
+      logging.warning((
+          'Unsupported function prototype: {0:s} - unsupported self '
+          'argument: {1:s}').format(
+              function_prototype.name, function_argument_string))
       return None
 
     function_argument = function_prototype.arguments[-1]
