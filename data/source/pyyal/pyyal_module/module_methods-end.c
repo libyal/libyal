@@ -1,7 +1,4 @@
 	/* Sentinel */
-	{ NULL,
-	  NULL,
-	  0,
-	  NULL}
+	{ NULL, NULL, 0, NULL }
 };
 
