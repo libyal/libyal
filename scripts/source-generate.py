@@ -4340,8 +4340,13 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       if python_function_prototype.value_description:
         value_description_long = python_function_prototype.value_description
         value_description, _, _ = value_description_long.partition('(')
-        template_mappings['value_description'] = value_description.strip()
-        template_mappings['value_description_long'] = value_description_long
+        value_description = value_description.strip()
+      else:
+        value_description = ''
+        value_description_long = ''
+
+      template_mappings['value_description'] = value_description
+      template_mappings['value_description_long'] = value_description_long
 
       if generate_get_value_type_object:
         search_string = (
