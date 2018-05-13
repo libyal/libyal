@@ -1,5 +1,5 @@
 /*
- * The internal libcpath header
+ * The libcpath header wrapper
  *
  * Copyright (C) ${copyright}, ${tools_authors}
  *

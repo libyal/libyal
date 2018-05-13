@@ -1,5 +1,5 @@
 /*
- * The internal libfcache header
+ * The libfcache header wrapper
  *
  * Copyright (C) ${copyright}, ${authors}
  *

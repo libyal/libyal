@@ -1,5 +1,5 @@
 /*
- * The internal libcdata header
+ * The libcdata header wrapper
  *
  * Copyright (C) ${copyright}, ${authors}
  *

@@ -1,5 +1,5 @@
 /*
- * The internal libfole header
+ * The libfole header wrapper
  *
  * Copyright (C) ${copyright}, ${tools_authors}
  *

@@ -1,5 +1,5 @@
 /*
- * The internal libclocale header
+ * The libclocale header wrapper
  *
  * Copyright (C) ${copyright}, ${tests_authors}
  *

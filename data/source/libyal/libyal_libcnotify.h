@@ -1,5 +1,5 @@
 /*
- * The internal libcnotify header
+ * The libcnotify header wrapper
  *
  * Copyright (C) ${copyright}, ${authors}
  *

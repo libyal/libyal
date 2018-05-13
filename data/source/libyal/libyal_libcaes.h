@@ -1,5 +1,5 @@
 /*
- * The internal libcaes header
+ * The libcaes header wrapper
  *
  * Copyright (C) ${copyright}, ${authors}
  *

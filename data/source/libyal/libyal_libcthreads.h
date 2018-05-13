@@ -1,5 +1,5 @@
 /*
- * The internal libcthreads header
+ * The libcthreads header wrapper
  *
  * Copyright (C) ${copyright}, ${authors}
  *

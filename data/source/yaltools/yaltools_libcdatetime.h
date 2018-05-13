@@ -1,5 +1,5 @@
 /*
- * The internal libcdatetime header
+ * The libcdatetime header wrapper
  *
  * Copyright (C) ${copyright}, ${tools_authors}
  *

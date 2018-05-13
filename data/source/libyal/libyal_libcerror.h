@@ -1,5 +1,5 @@
 /*
- * The internal libcerror header
+ * The libcerror header wrapper
  *
  * Copyright (C) ${copyright}, ${authors}
  *

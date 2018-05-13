@@ -1,5 +1,5 @@
 /*
- * The internal ${library_name} header
+ * The ${library_name} header wrapper
  *
  * Copyright (C) ${copyright}, ${tools_authors}
  *

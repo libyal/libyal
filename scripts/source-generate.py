@@ -1771,7 +1771,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         elif project_configuration.library_name == 'libewf':
           template_filename = 'check_zlib_compress.ac'
 
-        elif project_configuration.library_name == 'libvmdk':
+        elif project_configuration.library_name in ('libfvde', 'libvmdk'):
           template_filename = 'check_zlib_uncompress.ac'
 
         else:
@@ -6324,6 +6324,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         function_template = type_function
 
     elif type_function == 'read_file_io_handle':
+      # TODO: add support for io_handle argument
       if (number_of_arguments == 3 or (
          number_of_arguments == 4 and with_file_offset)):
         function_template = type_function
@@ -6471,10 +6472,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
                   type_name, type_function))
           return function_name, None, last_have_extern
 
+      function_variable_strings = []
+      for variable in function_variables:
+        # Do not indent empty lines of function_variables.
+        if variable:
+          variable = '\t{0:s}'.format(variable)
+
+        function_variable_strings.append(variable)
+
       template_mappings['test_data_size'] = test_data_size
       template_mappings['function_name'] = function_template
-      template_mappings['function_variables'] = '\n'.join([
-          '\t{0:s}'.format(variable) for variable in function_variables])
+      template_mappings['function_variables'] = '\n'.join(
+          function_variable_strings)
       template_mappings['initialize_value_name'] = initialize_value_name
       template_mappings['initialize_value_type'] = initialize_value_type
 

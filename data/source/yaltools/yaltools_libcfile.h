@@ -1,5 +1,5 @@
 /*
- * The internal libcfile header
+ * The libcfile header wrapper
  *
  * Copyright (C) ${copyright}, ${tools_authors}
  *

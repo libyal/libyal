@@ -1,5 +1,5 @@
 /*
- * The internal libhmac header
+ * The libhmac header wrapper
  *
  * Copyright (C) ${copyright}, ${tests_authors}
  *

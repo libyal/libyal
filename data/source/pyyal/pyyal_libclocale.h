@@ -1,5 +1,5 @@
 /*
- * The internal libclocale header
+ * The libclocale header wrapper
  *
  * Copyright (C) ${python_module_copyright}, ${python_module_authors}
  *
