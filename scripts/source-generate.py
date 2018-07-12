@@ -1771,7 +1771,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         elif project_configuration.library_name == 'libewf':
           template_filename = 'check_zlib_compress.ac'
 
-        elif project_configuration.library_name in ('libfvde', 'libvmdk'):
+        elif project_configuration.library_name in (
+            'libfvde', 'libpff', 'libvmdk'):
           template_filename = 'check_zlib_uncompress.ac'
 
         else:
