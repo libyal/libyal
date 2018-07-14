@@ -1771,6 +1771,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         elif project_configuration.library_name == 'libewf':
           template_filename = 'check_zlib_compress.ac'
 
+        # TODO: determine deflate function via configuration setting? 
         elif project_configuration.library_name in (
             'libfvde', 'libpff', 'libvmdk'):
           template_filename = 'check_zlib_uncompress.ac'
@@ -2028,7 +2029,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       elif name == 'zlib':
         description = 'DEFLATE compression support'
         # TODO: determine deflate function via configuration setting? 
-        if project_configuration.library_name == 'libvmdk':
+        if project_configuration.library_name in (
+            'libfvde', 'libpff', 'libvmdk'):
           build_information.append((description, '$ac_cv_uncompress'))
         else:
           build_information.append((description, '$ac_cv_inflate'))

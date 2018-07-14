@@ -1,7 +1,7 @@
 /*
  * Internationalization (i18n) functions
  *
- * Copyright (C) 2012-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) ${copyright}, ${authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *
