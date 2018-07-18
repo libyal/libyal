@@ -8,7 +8,7 @@
 		goto on_error;
 	}
 	Py_IncRef(
-	 (PyObject * ) &${python_module_name}_${type_name}_type_object );
+	 (PyObject *) &${python_module_name}_${type_name}_type_object );
 
 	PyModule_AddObject(
 	 module,

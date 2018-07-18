@@ -79,6 +79,8 @@
 	          source_${type_name},
 	          &error );
 
+	destination_${type_name} = NULL;
+
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -90,8 +92,6 @@
 
 	libcerror_error_free(
 	 &error );
-
-	destination_${type_name} = NULL;
 
 #if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
 

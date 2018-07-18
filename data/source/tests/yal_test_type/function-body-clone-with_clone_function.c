@@ -94,6 +94,8 @@
 	          &${library_name_suffix}_test_${type_name}_${value_name}_clone_function,
 	          &error );
 
+	destination_${type_name} = NULL;
+
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -105,8 +107,6 @@
 
 	libcerror_error_free(
 	 &error );
-
-	destination_${type_name} = NULL;
 
 	result = lib${library_name_suffix}_${type_name}_clone(
 	          &destination_${type_name},

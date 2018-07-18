@@ -74,6 +74,8 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	          &${type_name},
 	          &error );
 
+	${type_name} = NULL;
+
 	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -85,8 +87,6 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	${type_name} = NULL;
 
 #if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
 
