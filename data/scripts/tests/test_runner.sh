@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20170827
+# Version: 20180719
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -468,7 +468,7 @@ run_test_with_arguments()
 
 					exit ${EXIT_FAILURE};
 				fi
-				LIBASAN=`${LDCONFIG} -p | grep libasan | sed 's/^.* => //'`;
+				LIBASAN=`${LDCONFIG} -p | grep libasan | sed 's/^.* => //' | sort | tail -n 1`;
 
 				if ! test -f ${LIBASAN};
 				then
@@ -789,7 +789,7 @@ run_test_with_input_and_arguments()
 
 					exit ${EXIT_FAILURE};
 				fi
-				LIBASAN=`${LDCONFIG} -p | grep libasan | sed 's/^.* => //'`;
+				LIBASAN=`${LDCONFIG} -p | grep libasan | sed 's/^.* => //' | sort | tail -n 1`;
 
 				if ! test -f ${LIBASAN};
 				then

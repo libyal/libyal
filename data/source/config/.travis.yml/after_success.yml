@@ -1,2 +1,2 @@
 after_success:
-  - if test $${TARGET} = "linux-gcc"; then curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh; fi
+  - if test $${TARGET} = "linux-gcc"; then curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh -y .codecov.yml; fi

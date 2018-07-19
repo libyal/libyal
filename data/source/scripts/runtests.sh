@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script that runs the tests
 #
-# Version: 20180214
+# Version: 20180719
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -77,7 +77,7 @@ run_configure_make_check_with_asan()
 	then
 		return $${EXIT_SUCCESS};
 	fi
-	local LIBASAN=`ldconfig -p | grep libasan | sed 's/^.* => //'`;
+	local LIBASAN=`ldconfig -p | grep libasan | sed 's/^.* => //' | sort | tail -n 1`;
 
 	if test -z $${LIBASAN} || test ! -f $${LIBASAN};
 	then

@@ -2014,7 +2014,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           maximum_description_length = max(
               maximum_description_length, len(description))
 
-          description = 'SHA1_support'
+          description = 'SHA1 support'
           build_information.append((description, '$ac_cv_libhmac_sha1'))
 
           maximum_description_length = max(
