@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20180719
+# Version: 20180721
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -1236,7 +1236,7 @@ run_test_on_input_directory()
 
 	local IGNORE_LIST=$(read_ignore_list "${TEST_PROFILE_DIRECTORY}");
 
-	RESULT=${EXIT_SUCCESS};
+	local RESULT=${EXIT_SUCCESS};
 
 	for TEST_SET_INPUT_DIRECTORY in ${TEST_INPUT_DIRECTORY}/*;
 	do
@@ -1251,7 +1251,6 @@ run_test_on_input_directory()
 
 		local TEST_SET_DIRECTORY=$(get_test_set_directory "${TEST_PROFILE_DIRECTORY}" "${TEST_SET_INPUT_DIRECTORY}");
 
-		local INPUT_FILES="";
 		if test -f "${TEST_SET_DIRECTORY}/files";
 		then
 			while read -r INPUT_FILE;

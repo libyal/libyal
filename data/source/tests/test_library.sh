@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests C library functions and types.
 #
-# Version: 20170722
+# Version: 20180721
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -44,8 +44,54 @@ run_test_with_input()
 		TEST_EXECUTABLE="$${TEST_EXECUTABLE}.exe";
 	fi
 
-	run_test_on_input_directory "${library_name}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "input" "$${INPUT_GLOB}";
-	local RESULT=$$?;
+	local TEST_PROFILE_DIRECTORY=$$(get_test_profile_directory "input" "${library_name}");
+
+	local IGNORE_LIST=$$(read_ignore_list "$${TEST_PROFILE_DIRECTORY}");
+
+	local RESULT=$${EXIT_SUCCESS};
+
+	for TEST_SET_INPUT_DIRECTORY in input/*;
+	do
+		if ! test -d "$${TEST_SET_INPUT_DIRECTORY}";
+		then
+			continue;
+		fi
+		if check_for_directory_in_ignore_list "$${TEST_SET_INPUT_DIRECTORY}" "$${IGNORE_LIST}";
+		then
+			continue;
+		fi
+
+		local TEST_SET_DIRECTORY=$$(get_test_set_directory "$${TEST_PROFILE_DIRECTORY}" "$${TEST_SET_INPUT_DIRECTORY}");
+
+		if test -f "$${TEST_SET_DIRECTORY}/files";
+		then
+			while read -r INPUT_FILE;
+			do
+				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+				RESULT=$$?;
+
+				if test $${RESULT} -ne $${EXIT_SUCCESS};
+				then
+					break;
+				fi
+			done < <(cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?");
+		else
+			while read -r INPUT_FILE;
+			do
+				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+				RESULT=$$?;
+
+				if test $${RESULT} -ne $${EXIT_SUCCESS};
+				then
+					break;
+				fi
+			done < <(ls -1 $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB});
+		fi
+		if test $${RESULT} -ne $${EXIT_SUCCESS};
+		then
+			break;
+		fi
+	done
 
 	return $${RESULT};
 }

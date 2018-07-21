@@ -246,7 +246,7 @@ typedef int system_integer_t;
 #define PRIzu	"zu"
 #define PRIzx	"zx"
 
-#elif defined( WINAPI )
+#elif defined( _MSC_VER )
 #define PRIzd	"Id"
 #define PRIzi	"Ii"
 #define PRIzu	"Iu"
