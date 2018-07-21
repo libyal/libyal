@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests C library functions and types.
 #
-# Version: 20180721
+# Version: 20180722
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -63,9 +63,15 @@ run_test_with_input()
 
 		local TEST_SET_DIRECTORY=$$(get_test_set_directory "$${TEST_PROFILE_DIRECTORY}" "$${TEST_SET_INPUT_DIRECTORY}");
 
+		local OLDIFS=${IFS};
+
+		# IFS="\n"; is not supported by all platforms.
+		IFS="
+";
+
 		if test -f "$${TEST_SET_DIRECTORY}/files";
 		then
-			while read -r INPUT_FILE;
+			for INPUT_FILE in `cat ${TEST_SET_DIRECTORY}/files | sed "s?^?${TEST_SET_INPUT_DIRECTORY}/?"`;
 			do
 				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
 				RESULT=$$?;
@@ -74,9 +80,9 @@ run_test_with_input()
 				then
 					break;
 				fi
-			done < <(cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?");
+			done
 		else
-			while read -r INPUT_FILE;
+			for INPUT_FILE in `ls -1 ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
 			do
 				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
 				RESULT=$$?;
@@ -85,8 +91,10 @@ run_test_with_input()
 				then
 					break;
 				fi
-			done < <(ls -1 $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB});
+			done
 		fi
+		IFS=${OLDIFS};
+
 		if test $${RESULT} -ne $${EXIT_SUCCESS};
 		then
 			break;
