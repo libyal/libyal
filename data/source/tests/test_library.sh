@@ -44,11 +44,26 @@ run_test_with_input()
 		TEST_EXECUTABLE="$${TEST_EXECUTABLE}.exe";
 	fi
 
+	if ! test -d "input";
+	then
+		echo "Test input directory: input not found.";
+
+		return $${EXIT_IGNORE};
+	fi
+	local RESULT=`ls input/* | tr ' ' '\n' | wc -l`;
+
+	if test $${RESULT} -eq $${EXIT_SUCCESS};
+	then
+		echo "No files or directories found in the test input directory: input";
+
+		return $${EXIT_IGNORE};
+	fi
+
 	local TEST_PROFILE_DIRECTORY=$$(get_test_profile_directory "input" "${library_name}");
 
 	local IGNORE_LIST=$$(read_ignore_list "$${TEST_PROFILE_DIRECTORY}");
 
-	local RESULT=$${EXIT_SUCCESS};
+	RESULT=$${EXIT_SUCCESS};
 
 	for TEST_SET_INPUT_DIRECTORY in input/*;
 	do
@@ -63,7 +78,7 @@ run_test_with_input()
 
 		local TEST_SET_DIRECTORY=$$(get_test_set_directory "$${TEST_PROFILE_DIRECTORY}" "$${TEST_SET_INPUT_DIRECTORY}");
 
-		local OLDIFS=${IFS};
+		local OLDIFS=$${IFS};
 
 		# IFS="\n"; is not supported by all platforms.
 		IFS="
@@ -71,7 +86,7 @@ run_test_with_input()
 
 		if test -f "$${TEST_SET_DIRECTORY}/files";
 		then
-			for INPUT_FILE in `cat ${TEST_SET_DIRECTORY}/files | sed "s?^?${TEST_SET_INPUT_DIRECTORY}/?"`;
+			for INPUT_FILE in `cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?"`;
 			do
 				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
 				RESULT=$$?;
@@ -82,7 +97,7 @@ run_test_with_input()
 				fi
 			done
 		else
-			for INPUT_FILE in `ls -1 ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
+			for INPUT_FILE in `ls -1 $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB}`;
 			do
 				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
 				RESULT=$$?;
@@ -93,7 +108,7 @@ run_test_with_input()
 				fi
 			done
 		fi
-		IFS=${OLDIFS};
+		IFS=$${OLDIFS};
 
 		if test $${RESULT} -ne $${EXIT_SUCCESS};
 		then
