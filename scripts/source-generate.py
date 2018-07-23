@@ -5759,6 +5759,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     # TODO: make check more generic based on the source itself.
+    if project_configuration.library_name == 'libcfile':
+      template_filename = os.path.join(
+          template_directory, 'get_temporary_filename.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: make check more generic based on the source itself.
     if project_configuration.library_name not in ('libsmdev', 'libtableau'):
       template_filename = os.path.join(template_directory, 'file_io_handle.h')
       self._GenerateSection(
@@ -5796,6 +5804,14 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     if with_offset:
       template_filename = os.path.join(template_directory, 'with_offset.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    # TODO: make check more generic based on the source itself.
+    if project_configuration.library_name == 'libcfile':
+      template_filename = os.path.join(
+          template_directory, 'get_temporary_filename.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
