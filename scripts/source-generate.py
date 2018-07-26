@@ -2038,6 +2038,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         maximum_description_length = max(
             maximum_description_length, len(description))
 
+    if project_configuration.library_name == 'libcaes':
+      description = 'AES support'
+      build_information.append((description, '$ac_cv_libcaes_aes'))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
     if 'fuse' in project_configuration.tools_build_dependencies:
       description = 'FUSE support'
       build_information.append((description, '$ac_cv_libfuse'))
@@ -2515,32 +2522,72 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    if project_configuration.coverty_scan_token:
-      template_mappings['coverty_scan_token'] = (
-          project_configuration.coverty_scan_token)
+    if project_configuration.coverity_scan_token:
+      template_mappings['coverity_scan_token'] = (
+          project_configuration.coverity_scan_token)
 
       template_filename = os.path.join(template_directory, 'env.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      del template_mappings['coverty_scan_token']
+      del template_mappings['coverity_scan_token']
 
     template_filename = os.path.join(template_directory, 'matrix-header.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if project_configuration.coverty_scan_token:
-      template_filename = os.path.join(template_directory, 'matrix-coverty.yml')
+    if project_configuration.coverity_scan_token:
+      template_filename = os.path.join(template_directory, 'matrix-coverity.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    template_filename = os.path.join(template_directory, 'matrix-footer.yml')
+    template_filename = os.path.join(template_directory, 'matrix-linux.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    # TODO: make conditional
+    # template_filename = os.path.join(
+    #     template_directory, 'matrix-linux-wide_character_type.yml')
+    # self._GenerateSection(
+    #     template_filename, template_mappings, output_writer, output_filename,
+    #     access_mode='ab')
+
+    # TODO: make conditional
+    # template_filename = os.path.join(
+    #     template_directory, 'matrix-linux-debug_output.yml')
+    # self._GenerateSection(
+    #     template_filename, template_mappings, output_writer, output_filename,
+    #     access_mode='ab')
+
+    if 'crypto' in project_configuration.library_build_dependencies:
+      template_filename = os.path.join(
+          template_directory, 'matrix-linux-openssl.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.HasPythonModule():
+      template_filename = os.path.join(
+          template_directory, 'matrix-linux-python.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'matrix-macos.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if project_configuration.HasPythonModule():
+      template_filename = os.path.join(
+          template_directory, 'matrix-macos-python.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
@@ -2552,7 +2599,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     del template_mappings['dpkg_build_dependencies']
 
-    if project_configuration.coverty_scan_token:
+    if project_configuration.coverity_scan_token:
       template_filename = os.path.join(
           template_directory, 'before_install-coverity.yml')
       self._GenerateSection(
@@ -2564,7 +2611,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if project_configuration.coverty_scan_token:
+    if project_configuration.coverity_scan_token:
       template_filename = 'script-coverity.yml'
     else:
       template_filename = 'script.yml'
@@ -8024,6 +8071,7 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
       output_writer (OutputWriter): output writer.
     """
+    # TODO: fix fcache support of maximum_cache_entries
     # TODO: compare handle fdata and cdata differences, and includes
     # TODO: weave existing test files?
     # TODO: use data files to generate test data tests/input/.data/<name>

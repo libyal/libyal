@@ -26,7 +26,7 @@ class Project(object):
   Attributes:
     appveyor_identifier (str): AppVeyor identifier.
     category (str): category.
-    coverty_badge (int): Coverty badge identifier.
+    coverity_badge (int): Coverity badge identifier.
     description (str): description.
     display_name (str): display name.
     documentation_only (bool): True if the project only contains documentation.
@@ -43,7 +43,7 @@ class Project(object):
     super(Project, self).__init__()
     self.appveyor_identifier = None
     self.category = None
-    self.coverty_badge = None
+    self.coverity_badge = None
     self.description = None
     self.display_name = name
     self.documentation_only = False
@@ -97,8 +97,8 @@ class ProjectsReader(object):
       project.category = self._GetConfigValue(project_name, 'category')
 
       try:
-        project.coverty_badge = self._GetConfigValue(
-            project_name, 'coverty_badge')
+        project.coverity_badge = self._GetConfigValue(
+            project_name, 'coverity_badge')
       except configparser.NoOptionError:
         pass
 
@@ -451,11 +451,11 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
               'graph/badge.svg)](https://codecov.io/gh/libyal/{0:s})').format(
                   project.name)
 
-          if project.coverty_badge:
+          if project.coverity_badge:
             coverity_status = (
                 '[![Coverity Scan Build Status](https://scan.coverity.com/'
                 'projects/{0:d}/badge.svg)](https://scan.coverity.com/projects/'
-                'libyal-{1:s})').format(project.coverty_badge, project.name)
+                'libyal-{1:s})').format(project.coverity_badge, project.name)
 
           travis_build_status = (
               '[![Build status]'

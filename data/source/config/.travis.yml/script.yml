@@ -1,3 +1,3 @@
 script:
   - if test $${TRAVIS_OS_NAME} = "linux"; then export PATH=$$(echo $$PATH | tr ":" "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s/::/:/g"); fi
-  - ./runtests.sh
+  - ./configure $${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1; if test $$? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi

@@ -1,0 +1,9 @@
+  - name: "Linux with gcc and wide character type (wchar_t) support"
+    env:
+    - CONFIGURE_OPTIONS="--enable-wide-character-type"
+    - TARGET="linux-gcc"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge

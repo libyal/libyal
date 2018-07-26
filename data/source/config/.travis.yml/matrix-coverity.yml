@@ -1,4 +1,7 @@
-  - env: TARGET="coverity"
+  - name: "Coverity"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - TARGET="coverity"
     compiler: clang
     os: linux
     dist: trusty

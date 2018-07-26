@@ -1,0 +1,15 @@
+  - name: "MacOS with clang"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - TARGET="macos-clang"
+    compiler: clang
+    os: osx
+    osx_image: xcode8.3
+  - name: "MacOS with gcc"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - TARGET="macos-gcc"
+    compiler: clang
+    compiler: gcc
+    os: osx
+    osx_image: xcode8.3

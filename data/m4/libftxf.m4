@@ -1,6 +1,6 @@
 dnl Functions for libftxf
 dnl
-dnl Version: 20170907
+dnl Version: 20180725
 
 dnl Function to detect if libftxf is available
 dnl ac_libftxf_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -24,7 +24,7 @@ AC_DEFUN([AX_LIBFTXF_CHECK_LIB],
       [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
       [PKG_CHECK_MODULES(
         [libftxf],
-        [libftxf >= 20120527],
+        [libftxf >= 20180725],
         [ac_cv_libftxf=yes],
         [ac_cv_libftxf=no])
       ])
@@ -48,7 +48,23 @@ AC_DEFUN([AX_LIBFTXF_CHECK_LIB],
           [ac_cv_libftxf_dummy=yes],
           [ac_cv_libftxf=no])
 
-        dnl TODO add functions
+        dnl Record functions
+        AC_CHECK_LIB(
+          ftxf,
+          libftxf_record_initialize,
+          [ac_cv_libftxf_dummy=yes],
+          [ac_cv_libftxf=no])
+        AC_CHECK_LIB(
+          ftxf,
+          libftxf_record_free,
+          [ac_cv_libftxf_dummy=yes],
+          [ac_cv_libftxf=no])
+
+        AC_CHECK_LIB(
+          ftxf,
+          libftxf_record_copy_from_byte_stream,
+          [ac_cv_libftxf_dummy=yes],
+          [ac_cv_libftxf=no])
 
         ac_cv_libftxf_LIBADD="-lftxf"
         ])

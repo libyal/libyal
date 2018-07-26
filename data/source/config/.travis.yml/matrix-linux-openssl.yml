@@ -1,0 +1,33 @@
+  - name: "Linux with gcc without OpenSSL"
+    env:
+    - CONFIGURE_OPTIONS="--with-openssl=no"
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-no-openssl"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc with OpenSSL EVP"
+    env:
+    - CONFIGURE_OPTIONS="--enable-openssl-evp-cipher=yes --enable-openssl-evp-md=yes"
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-openssl-evp"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc with OpenSSL non-EVP"
+    env:
+    - CONFIGURE_OPTIONS="--enable-openssl-evp-cipher=no --enable-openssl-evp-md=no"
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-openssl"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script that runs the tests
 #
-# Version: 20180719
+# Version: 20180726
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -276,9 +276,19 @@ then
 		exit $${EXIT_FAILURE};
 	fi
 
-	# Test "./configure && make && make check" with non-EVP openssl implementation.
+	# Test "./configure && make && make check" with OpenSSL non-EVP implementation.
 
 	run_configure_make_check "--enable-openssl-evp-cipher=no --enable-openssl-evp-md=no";
+	RESULT=$$?;
+
+	if test $${RESULT} -ne $${EXIT_SUCCESS};
+	then
+		exit $${EXIT_FAILURE};
+	fi
+
+	# Test "./configure && make && make check" with OpenSSL EVP implementation.
+
+	run_configure_make_check "--enable-openssl-evp-cipher=yes --enable-openssl-evp-md=yes";
 	RESULT=$$?;
 
 	if test $${RESULT} -ne $${EXIT_SUCCESS};
@@ -393,6 +403,10 @@ CONFIGURE_OPTIONS="--enable-shared=no";
 if test $${HAVE_ENABLE_WIDE_CHARACTER_TYPE} -eq 0;
 then
 	CONFIGURE_OPTIONS="$${CONFIGURE_OPTIONS} --enable-wide-character-type";
+fi
+if test $${HAVE_WITH_OPENSSL} -eq 0;
+then
+	CONFIGURE_OPTIONS="$${CONFIGURE_OPTIONS} --with-openssl=no";
 fi
 
 run_configure_make_check_with_coverage $${CONFIGURE_OPTIONS};

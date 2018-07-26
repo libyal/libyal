@@ -19,7 +19,7 @@ class ProjectConfiguration(object):
   """Project configuration.
 
   Attributes:
-    coverty_scan_token (str): scan token for Coverty Scan (scan.coverity.com).
+    coverity_scan_token (str): scan token for Coverity Scan (scan.coverity.com).
     cygwin_build_dependencies (str): Cygwin build dependencies.
     dpkg_build_dependencies (str): dpkg build dependencies.
     dotnet_bindings_name (str): name of the .Net bindings.
@@ -184,8 +184,8 @@ class ProjectConfiguration(object):
     # RPM specific configuration.
     self.rpm_build_dependencies = None
 
-    # Coverty configuration.
-    self.coverty_scan_token = None
+    # Coverity configuration.
+    self.coverity_scan_token = None
 
     # TODO: add attributes below to docstring.
 
@@ -809,8 +809,8 @@ class ProjectConfiguration(object):
     self._ReadDPKGConfiguration(config_parser)
     self._ReadRPMConfiguration(config_parser)
 
-    self.coverty_scan_token = self._GetOptionalConfigValue(
-        config_parser, 'coverty', 'scan_token', default_value='')
+    self.coverity_scan_token = self._GetOptionalConfigValue(
+        config_parser, 'coverity', 'scan_token', default_value='')
 
     self._ReadInfoToolConfiguration(config_parser)
     self._ReadMountToolConfiguration(config_parser)

@@ -1,0 +1,9 @@
+  - name: "Linux with gcc and debug output"
+    env:
+    - CONFIGURE_OPTIONS="--enable-verbose-output --enable-debug-output"
+    - TARGET="linux-gcc"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
