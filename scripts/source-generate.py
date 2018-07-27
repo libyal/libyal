@@ -2611,8 +2611,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if project_configuration.coverity_scan_token:
-      template_filename = 'script-coverity.yml'
+    if project_configuration.HasPythonModule():
+      template_filename = 'script-python.yml'
     else:
       template_filename = 'script.yml'
 

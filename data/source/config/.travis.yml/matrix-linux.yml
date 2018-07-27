@@ -23,8 +23,8 @@
   - name: "Linux with gcc without optimization"
     env:
     - CONFIGURE_OPTIONS="--enable-shared=no"
-    - CPPFLAGS="-DOPTIMIZATION_DISABLED"
     - CFLAGS="--coverage -O0"
+    - CPPFLAGS="-DOPTIMIZATION_DISABLED"
     - LDFLAGS="--coverage"
     - TARGET="linux-gcc-no-optimization"
     compiler: gcc

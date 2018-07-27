@@ -1,2 +1,4 @@
 after_success:
-  - if test $${TRAVIS_OS_NAME} = "linux"; then curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh -n $${TARGET} -y .codecov.yml; fi
+  - if test $${TARGET} = "linux-gcc-no-optimization"; then
+      curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh -n $${TARGET} -y .codecov.yml;
+    fi

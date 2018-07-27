@@ -1,0 +1,14 @@
+after_test:
+- cmd: if [%TARGET%]==[cygwin] (
+    copy C:\projects\codecov-bash\codecov C:\cygwin\home\appveyor\${library_name}\codecov.sh &&
+    C:\cygwin\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n cygwin -y .codecov.yml" )
+- cmd: if [%TARGET%]==[cygwin64] (
+    copy C:\projects\codecov-bash\codecov C:\cygwin64\home\appveyor\${library_name}\codecov.sh &&
+    C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n cygwin64 -y .codecov.yml" )
+- cmd: if [%TARGET%]==[mingw] (
+    copy C:\projects\codecov-bash\codecov C:\MinGW\msys\1.0\home\appveyor\${library_name}\codecov.sh &&
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n mingw -y .codecov.yml" )
+- cmd: if [%TARGET%]==[mingw-w64] (
+    copy C:\projects\codecov-bash\codecov C:\msys64\home\appveyor\${library_name}\codecov.sh &&
+    C:\msys64\usr\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n mingw-w64 -y .codecov.yml" )
+
