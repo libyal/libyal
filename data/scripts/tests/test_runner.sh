@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20180722
+# Version: 20180727
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -82,7 +82,7 @@ assert_availability_binaries()
 check_for_directory_in_ignore_list()
 {
 	local INPUT_DIRECTORY=$1;
-	local IGNORE_LIST=$@;
+	local IGNORE_LIST=$2;
 
 	local INPUT_BASENAME=`basename ${INPUT_DIRECTORY}`;
 
@@ -388,7 +388,7 @@ run_test_with_arguments()
 	local TEST_DESCRIPTION=$1;
 	local TEST_EXECUTABLE=$2;
 	shift 2;
-	local ARGUMENTS=$@;
+	local ARGUMENTS=("$@");
 
 	if ! test -f "${TEST_EXECUTABLE}";
 	then
@@ -708,7 +708,7 @@ run_test_with_input_and_arguments()
 	local TEST_EXECUTABLE=$1;
 	local INPUT_FILE=$2;
 	shift 2;
-	local ARGUMENTS=$@;
+	local ARGUMENTS=("$@");
 
 	if ! test -f "${TEST_EXECUTABLE}";
 	then
@@ -1022,7 +1022,7 @@ run_test_on_input_file()
 	local TEST_EXECUTABLE=$5;
 	local INPUT_FILE=$6;
 	shift 6;
-	local ARGUMENTS=$@;
+	local ARGUMENTS=("$@");
 
 	local INPUT_NAME=`basename "${INPUT_FILE}"`;
 	local OPTIONS=();
@@ -1044,7 +1044,7 @@ run_test_on_input_file()
 
 	if test "${TEST_MODE}" = "with_callback";
 	then
-		test_callback "${TMPDIR}" "${TEST_SET_DIRECTORY}" "${TEST_OUTPUT}" "${TEST_EXECUTABLE}" "${TEST_INPUT}" ${ARGUMENTS[@]} ${OPTIONS[@]};
+		test_callback "${TMPDIR}" "${TEST_SET_DIRECTORY}" "${TEST_OUTPUT}" "${TEST_EXECUTABLE}" "${TEST_INPUT}" ${ARGUMENTS[@]} "${OPTIONS[@]}";
 		RESULT=$?;
 
 	elif test "${TEST_MODE}" = "with_stdout_reference";
@@ -1061,7 +1061,7 @@ run_test_on_input_file()
 		local INPUT_FILE_FULL_PATH=$( readlink_f "${INPUT_FILE}" );
 		local TEST_LOG="${TEST_OUTPUT}.log";
 
-		(cd ${TMPDIR} && run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE_FULL_PATH}" ${ARGUMENTS[@]} ${OPTIONS[@]} | sed '1,2d' > "${TEST_LOG}");
+		(cd ${TMPDIR} && run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE_FULL_PATH}" ${ARGUMENTS[@]} "${OPTIONS[@]}" | sed '1,2d' > "${TEST_LOG}");
 		RESULT=$?;
 
 		local TEST_RESULTS="${TMPDIR}/${TEST_LOG}";
@@ -1080,7 +1080,7 @@ run_test_on_input_file()
 		fi
 
 	else
-		run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]} ${OPTIONS[@]};
+		run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]} "${OPTIONS[@]}";
 		RESULT=$?;
 	fi
 
@@ -1131,7 +1131,7 @@ run_test_on_input_file_with_options()
 	local TEST_EXECUTABLE=$5;
 	local INPUT_FILE=$6;
 	shift 6;
-	local ARGUMENTS=$@;
+	local ARGUMENTS=("$@");
 
 	local RESULT=${EXIT_SUCCESS};
 	local TESTED_WITH_OPTIONS=0;

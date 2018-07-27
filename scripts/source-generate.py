@@ -2045,6 +2045,37 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       maximum_description_length = max(
           maximum_description_length, len(description))
 
+    elif project_configuration.library_name == 'libhmac':
+      description = 'MD5 support'
+      build_information.append((description, '$ac_cv_libhmac_md5'))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+      description = 'SHA1 support'
+      build_information.append((description, '$ac_cv_libhmac_sha1'))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+      description = 'SHA224 support'
+      build_information.append((description, '$ac_cv_libhmac_sha224'))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+      description = 'SHA256 support'
+      build_information.append((description, '$ac_cv_libhmac_sha256'))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
+      description = 'SHA512 support'
+      build_information.append((description, '$ac_cv_libhmac_sha512'))
+
+      maximum_description_length = max(
+          maximum_description_length, len(description))
+
     if 'fuse' in project_configuration.tools_build_dependencies:
       description = 'FUSE support'
       build_information.append((description, '$ac_cv_libfuse'))
@@ -2501,14 +2532,16 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         access_mode='ab')
 
   def _GenerateTravisYML(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
+      self, project_configuration, template_mappings, include_header_file,
+      output_writer, output_filename):
     """Generates the .travis.yml configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
+      include_header_file (LibraryIncludeHeaderFile): library include header
+          file.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
@@ -2549,12 +2582,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: make conditional
-    # template_filename = os.path.join(
-    #     template_directory, 'matrix-linux-wide_character_type.yml')
-    # self._GenerateSection(
-    #     template_filename, template_mappings, output_writer, output_filename,
-    #     access_mode='ab')
+    if include_header_file.have_wide_character_type:
+      template_filename = os.path.join(
+          template_directory, 'matrix-linux-wide_character_type.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
 
     # TODO: make conditional
     # template_filename = os.path.join(
@@ -2562,6 +2595,20 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     # self._GenerateSection(
     #     template_filename, template_mappings, output_writer, output_filename,
     #     access_mode='ab')
+
+    configure_options = ['--enable-shared=no']
+    if include_header_file.have_wide_character_type:
+      configure_options.append('--enable-wide-character-type')
+
+    template_mappings['configure_options'] = ' '.join(configure_options)
+
+    template_filename = os.path.join(
+        template_directory, 'matrix-linux-no_optimization.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['configure_options']
 
     if 'crypto' in project_configuration.library_build_dependencies:
       template_filename = os.path.join(
@@ -2573,6 +2620,19 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     if project_configuration.HasPythonModule():
       template_filename = os.path.join(
           template_directory, 'matrix-linux-python.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'matrix-linux-shared.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    if include_header_file.have_wide_character_type:
+      template_filename = os.path.join(
+          template_directory, 'matrix-linux-shared-wide_character_type.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -2758,6 +2818,15 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     # TODO: generate spec file, what about Python versus non-Python?
 
+    include_header_file = self._GetLibraryIncludeHeaderFile(
+        project_configuration)
+
+    if not include_header_file:
+      logging.warning(
+          'Missing: {0:s} skipping generation of configuration files.'.format(
+              self._library_include_header_path))
+      return
+
     makefile_am_file = self._GetLibraryMakefileAM(project_configuration)
 
     if not makefile_am_file:
@@ -2816,7 +2885,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         project_configuration, template_mappings, output_writer, '.gitignore')
 
     self._GenerateTravisYML(
-        project_configuration, template_mappings, output_writer, '.travis.yml')
+        project_configuration, template_mappings, include_header_file,
+        output_writer, '.travis.yml')
 
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer, 'appveyor.yml')
