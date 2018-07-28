@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the local library dependencies
 #
-# Version: 20171003
+# Version: 20180728
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -65,7 +65,20 @@ SED_SCRIPT="/AM_CPPFLAGS = / {
 if HAVE_LOCAL_$${LOCAL_LIB_UPPER}
 }
 
-/lib_LTLIBRARIES/ {
+/AM_CPPFLAGS = /,/lib_LTLIBRARIES = / {
+:loop1
+        N
+        /lib_LTLIBRARIES = / !{
+                b loop1
+        }
+	/@$${LOCAL_LIB_UPPER}_DLL_EXPORT@/ {
+	        s/ \\\\\n\t@$${LOCAL_LIB_UPPER}_DLL_EXPORT@//
+	}
+	P
+	D
+}
+
+/lib_LTLIBRARIES = / {
 	s/lib_LTLIBRARIES/noinst_LTLIBRARIES/
 }
 
@@ -74,7 +87,7 @@ if HAVE_LOCAL_$${LOCAL_LIB_UPPER}
 }
 
 /$${LOCAL_LIB}_la_LIBADD/ {
-:loop1
+:loop2
 	/$${LOCAL_LIB}_la_LDFLAGS/ {
 		N
 		i\\
@@ -83,7 +96,7 @@ endif
 	}
 	/$${LOCAL_LIB}_la_LDFLAGS/ !{
 		N
-		b loop1
+		b loop2
 	}
 }
 
