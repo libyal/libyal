@@ -337,6 +337,18 @@ typedef int system_integer_t;
 #define UINT_MAX UINT32_MAX
 #endif
 
+/* The maximum signed long integer
+ */
+#if !defined( LONG_MAX )
+#define LONG_MAX INT32_MAX
+#endif
+
+/* The maximum unsigned long integer
+ */
+#if !defined( ULONG_MAX )
+#define ULONG_MAX UINT32_MAX
+#endif
+
 /* The maximum signed size type is platform dependent
  */
 #if !defined( SSIZE_MAX )

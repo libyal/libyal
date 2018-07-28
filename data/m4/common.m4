@@ -1,6 +1,6 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20170903
+dnl Version: 20180728
 
 dnl Function to test if a certain feature was enabled
 AC_DEFUN([AX_COMMON_ARG_ENABLE],
@@ -78,7 +78,8 @@ AC_DEFUN([AX_COMMON_CHECK_ENABLE_STATIC_EXECUTABLES],
     AC_SUBST(
       [STATIC_LDFLAGS])
 
-    ac_cv_enable_static_executables=yes])
+    ac_cv_enable_static_executables=yes
+    enable_shared=no])
 ])
 
 dnl Function to detect whether static executables support should be enabled

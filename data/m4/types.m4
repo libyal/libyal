@@ -1,6 +1,6 @@
 dnl Functions for type definitions
 dnl
-dnl Version: 20161004
+dnl Version: 20180727
 
 dnl Function to detect if type definitions are available
 AC_DEFUN([AX_TYPES_CHECK_LOCAL],
@@ -122,6 +122,7 @@ AC_DEFUN([AX_TYPES_CHECK_LOCAL],
  AC_CHECK_TYPE([u64])
 
  AC_CHECK_SIZEOF([int])
+ AC_CHECK_SIZEOF([long])
  AC_CHECK_SIZEOF([off_t])
  AC_CHECK_SIZEOF([size_t])
 

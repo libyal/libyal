@@ -1787,7 +1787,15 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       del template_mappings['local_library_name']
       del template_mappings['local_library_name_upper_case']
 
-    template_filename = os.path.join( template_directory, 'check_library_support.ac')
+    if project_configuration.library_name in ('libcaes', 'libhmac'):
+      template_filename = os.path.join(
+          template_directory, 'check_wincrypt_support.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'check_library_support.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -1831,7 +1839,8 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
 
-    template_filename = os.path.join( template_directory, 'check_tests_support.ac')
+    template_filename = os.path.join(
+        template_directory, 'check_tests_support.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -2630,9 +2639,17 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    if include_header_file.have_wide_character_type:
+    if (include_header_file and include_header_file.have_wide_character_type or
+        project_configuration.HasTools()):
       template_filename = os.path.join(
           template_directory, 'matrix-linux-shared-wide_character_type.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.HasTools():
+      template_filename = os.path.join(
+          template_directory, 'matrix-linux-static-executables.yml')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
@@ -5884,7 +5901,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     # TODO: make check more generic based on the source itself.
-    if project_configuration.library_name not in ('libsmdev', 'libtableau'):
+    if project_configuration.library_name not in (
+        'libcfile', 'libsmdev', 'libtableau'):
       template_filename = os.path.join(template_directory, 'file_io_handle.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -5934,7 +5952,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     # TODO: make check more generic based on the source itself.
-    if project_configuration.library_name not in ('libsmdev', 'libtableau'):
+    if project_configuration.library_name not in (
+        'libcfile', 'libsmdev', 'libtableau'):
       template_filename = os.path.join(template_directory, 'file_io_handle.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,

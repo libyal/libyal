@@ -17,7 +17,6 @@
   - name: "MacOS with gcc and Python 2 module"
     env:
     - CONFIGURE_OPTIONS="--enable-python2"
-    - PYTHON_VERSION=2
     - TARGET="macos-gcc-python2"
     compiler: clang
     compiler: gcc

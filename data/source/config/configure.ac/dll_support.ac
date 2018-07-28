@@ -12,7 +12,10 @@ AS_IF(
    [HAVE_DLLMAIN],
    [1])
 
-  dnl Used in tests
+  AC_SUBST(
+   [${library_name_upper_case}_DLL_EXPORT],
+   ["-D${library_name_upper_case}_DLL_EXPORT"])
+
   AC_SUBST(
    [${library_name_upper_case}_DLL_IMPORT],
    ["-D${library_name_upper_case}_DLL_IMPORT"])

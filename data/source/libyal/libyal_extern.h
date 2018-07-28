@@ -28,13 +28,6 @@
  */
 #if !defined( HAVE_LOCAL_${library_name_upper_case} )
 
-/* If libtool DLL support is enabled set ${library_name_upper_case}_DLL_EXPORT
- * before including ${library_name}/extern.h
- */
-#if defined( _WIN32 ) && defined( DLL_EXPORT )
-#define ${library_name_upper_case}_DLL_EXPORT
-#endif
-
 #include <${library_name}/extern.h>
 
 #define ${library_name_upper_case}_EXTERN_VARIABLE	${library_name_upper_case}_EXTERN

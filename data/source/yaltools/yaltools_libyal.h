@@ -24,13 +24,6 @@
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled set ${library_name_upper_case}_DLL_IMPORT
- * before including ${library_name}.h
- */
-#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
-#define ${library_name_upper_case}_DLL_IMPORT
-#endif
-
 #include <${library_name}.h>
 
 #endif /* !defined( _${tools_name_upper_case}_${library_name_upper_case}_H ) */
