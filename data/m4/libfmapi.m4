@@ -1,4 +1,4 @@
-dnl Functions for libfmapi
+dnl Checks for libfmapi required headers and functions
 dnl
 dnl Version: 20180714
 

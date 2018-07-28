@@ -1,4 +1,4 @@
-dnl Checks for libclocale or required headers and functions
+dnl Checks for libclocale required headers and functions
 dnl
 dnl Version: 20180407
 

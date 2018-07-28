@@ -1,4 +1,4 @@
-dnl Functions for libmapidb
+dnl Checks for libmapidb required headers and functions
 dnl
 dnl Version: 20120414
 

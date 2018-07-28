@@ -1,4 +1,4 @@
-dnl Checks for libcaes or required headers and functions
+dnl Checks for libcaes required headers and functions
 dnl
 dnl Version: 20180728
 

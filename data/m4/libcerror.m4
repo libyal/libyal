@@ -1,4 +1,4 @@
-dnl Checks for libcerror or required headers and functions
+dnl Checks for libcerror required headers and functions
 dnl
 dnl Version: 20170904
 

@@ -1,4 +1,4 @@
-dnl Functions for libftxr
+dnl Checks for libftxr required headers and functions
 dnl
 dnl Version: 20170907
 

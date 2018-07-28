@@ -1,4 +1,4 @@
-dnl Checks for libcdatetime or required headers and functions
+dnl Checks for libcdatetime required headers and functions
 dnl
 dnl Version: 20170908
 

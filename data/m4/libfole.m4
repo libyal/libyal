@@ -1,4 +1,4 @@
-dnl Functions for libfole
+dnl Checks for libfole required headers and functions
 dnl
 dnl Version: 20170909
 

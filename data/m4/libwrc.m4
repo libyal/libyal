@@ -1,4 +1,4 @@
-dnl Functions for libwrc
+dnl Checks for libwrc required headers and functions
 dnl
 dnl Version: 20120501
 

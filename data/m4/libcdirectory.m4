@@ -1,4 +1,4 @@
-dnl Checks for libcdirectory or required headers and functions
+dnl Checks for libcdirectory required headers and functions
 dnl
 dnl Version: 20180407
 

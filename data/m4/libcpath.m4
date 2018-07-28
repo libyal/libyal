@@ -1,4 +1,4 @@
-dnl Checks for libcpath or required headers and functions
+dnl Checks for libcpath required headers and functions
 dnl
 dnl Version: 20180716
 

@@ -1,4 +1,4 @@
-dnl Functions for libfwps
+dnl Checks for libfwps required headers and functions
 dnl
 dnl Version: 20180404
 

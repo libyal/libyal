@@ -1,4 +1,4 @@
-dnl Checks for libcnotify or required headers and functions
+dnl Checks for libcnotify required headers and functions
 dnl
 dnl Version: 20170904
 

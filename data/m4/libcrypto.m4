@@ -1,4 +1,4 @@
-dnl Checks for libcrypto or required headers and functions
+dnl Checks for libcrypto required headers and functions
 dnl
 dnl Version: 20180727
 

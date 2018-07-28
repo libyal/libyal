@@ -1,4 +1,4 @@
-dnl Functions for libfwevt
+dnl Checks for libfwevt required headers and functions
 dnl
 dnl Version: 20180404
 

@@ -1,4 +1,4 @@
-dnl Functions for libexe
+dnl Checks for libexe required headers and functions
 dnl
 dnl Version: 20120501
 

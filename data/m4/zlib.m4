@@ -1,4 +1,4 @@
-dnl Checks for zlib or required headers and functions
+dnl Checks for zlib required headers and functions
 dnl
 dnl Version: 20171008
 

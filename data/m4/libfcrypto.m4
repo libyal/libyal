@@ -1,6 +1,6 @@
-dnl Functions for libfcrypto
+dnl Checks for libfcrypto required headers and functions
 dnl
-dnl Version: 20170905
+dnl Version: 20180728
 
 dnl Function to detect if libfcrypto is available
 dnl ac_libfcrypto_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments

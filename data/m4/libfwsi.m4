@@ -1,4 +1,4 @@
-dnl Functions for libfwsi
+dnl Checks for libfwsi required headers and functions
 dnl
 dnl Version: 20170909
 

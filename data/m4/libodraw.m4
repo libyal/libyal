@@ -1,4 +1,4 @@
-dnl Functions for libodraw
+dnl Checks for libodraw required headers and functions
 dnl
 dnl Version: 20120630
 

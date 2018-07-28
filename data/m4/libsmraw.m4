@@ -1,4 +1,4 @@
-dnl Functions for libsmraw
+dnl Checks for libsmraw required headers and functions
 dnl
 dnl Version: 20140406
 

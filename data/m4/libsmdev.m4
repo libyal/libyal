@@ -1,4 +1,4 @@
-dnl Functions for libsmdev
+dnl Checks for libsmdev required headers and functions
 dnl
 dnl Version: 20140406
 

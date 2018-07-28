@@ -1,4 +1,4 @@
-dnl Checks for libcsplit or required headers and functions
+dnl Checks for libcsplit required headers and functions
 dnl
 dnl Version: 20180407
 

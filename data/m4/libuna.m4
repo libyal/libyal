@@ -1,4 +1,4 @@
-dnl Checks for libuna or required headers and functions
+dnl Checks for libuna required headers and functions
 dnl
 dnl Version: 20170903
 

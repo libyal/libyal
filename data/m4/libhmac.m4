@@ -1,4 +1,4 @@
-dnl Functions for libhmac
+dnl Checks for libhmac required headers and functions
 dnl
 dnl Version: 20180728
 

@@ -1,4 +1,4 @@
-dnl Checks for libcthreads or required headers and functions
+dnl Checks for libcthreads required headers and functions
 dnl
 dnl Version: 20170904
 

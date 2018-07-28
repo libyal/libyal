@@ -1,4 +1,4 @@
-dnl Functions for libfuse
+dnl Checks for libfuse required headers and functions
 dnl
 dnl Version: 20180403
 

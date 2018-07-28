@@ -1,4 +1,4 @@
-dnl Functions for libfplist
+dnl Checks for libfplist required headers and functions
 dnl
 dnl Version: 20190919
 

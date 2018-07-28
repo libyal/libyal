@@ -1,4 +1,4 @@
-dnl Functions for libfwnt
+dnl Checks for libfwnt required headers and functions
 dnl
 dnl Version: 20170908
 

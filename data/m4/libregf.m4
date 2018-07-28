@@ -1,4 +1,4 @@
-dnl Functions for libregf
+dnl Checks for libregf required headers and functions
 dnl
 dnl Version: 20120501
 

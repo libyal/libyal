@@ -1,4 +1,4 @@
-dnl Checks for libbfio or required headers and functions
+dnl Checks for libbfio required headers and functions
 dnl
 dnl Version: 20180407
 

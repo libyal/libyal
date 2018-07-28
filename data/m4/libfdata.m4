@@ -1,4 +1,4 @@
-dnl Functions for libfdata
+dnl Checks for libfdata required headers and functions
 dnl
 dnl Version: 20180316
 

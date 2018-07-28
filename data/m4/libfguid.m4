@@ -1,4 +1,4 @@
-dnl Functions for libfguid
+dnl Checks for libfguid required headers and functions
 dnl
 dnl Version: 20170906
 
