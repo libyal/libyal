@@ -5462,8 +5462,15 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
       force_create = False
 
-      output_filename = '{0:s}_{1:s}'.format(
-          project_configuration.python_module_name, directory_entry[6:])
+      if directory_entry == 'pyyal_libyal.h':
+        output_filename = '{0:s}_{1:s}.h'.format(
+            project_configuration.python_module_name,
+            project_configuration.library_name)
+
+      else:
+        output_filename = '{0:s}_{1:s}'.format(
+            project_configuration.python_module_name, directory_entry[6:])
+
       output_filename = os.path.join(
           project_configuration.python_module_name, output_filename)
       if not force_create and not os.path.exists(output_filename):

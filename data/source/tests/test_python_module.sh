@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests Python module functions and types.
 #
-# Version: 20180721
+# Version: 20180728
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -78,7 +78,7 @@ test_python_function_with_input()
 		then
 			for INPUT_FILE in `cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?"`;
 			do
-				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_SCRIPT}" "$${INPUT_FILE}";
 				RESULT=$$?;
 
 				if test $${RESULT} -ne $${EXIT_SUCCESS};
@@ -89,7 +89,7 @@ test_python_function_with_input()
 		else
 			for INPUT_FILE in `ls -1 $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB}`;
 			do
-				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_SCRIPT}" "$${INPUT_FILE}";
 				RESULT=$$?;
 
 				if test $${RESULT} -ne $${EXIT_SUCCESS};

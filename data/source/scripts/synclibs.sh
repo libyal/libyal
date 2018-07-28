@@ -65,19 +65,6 @@ SED_SCRIPT="/AM_CPPFLAGS = / {
 if HAVE_LOCAL_$${LOCAL_LIB_UPPER}
 }
 
-/AM_CPPFLAGS = /,/lib_LTLIBRARIES = / {
-:loop1
-        N
-        /lib_LTLIBRARIES = / !{
-                b loop1
-        }
-	/@$${LOCAL_LIB_UPPER}_DLL_EXPORT@/ {
-	        s/ \\\\\n\t@$${LOCAL_LIB_UPPER}_DLL_EXPORT@//
-	}
-	P
-	D
-}
-
 /lib_LTLIBRARIES = / {
 	s/lib_LTLIBRARIES/noinst_LTLIBRARIES/
 }
@@ -87,7 +74,7 @@ if HAVE_LOCAL_$${LOCAL_LIB_UPPER}
 }
 
 /$${LOCAL_LIB}_la_LIBADD/ {
-:loop2
+:loop1
 	/$${LOCAL_LIB}_la_LDFLAGS/ {
 		N
 		i\\
@@ -96,7 +83,7 @@ endif
 	}
 	/$${LOCAL_LIB}_la_LDFLAGS/ !{
 		N
-		b loop2
+		b loop1
 	}
 }
 
@@ -116,6 +103,7 @@ endif
 	sed -i'~' -f $${LOCAL_LIB}-$$$$.sed $${LOCAL_LIB_MAKEFILE_AM};
 	rm -f $${LOCAL_LIB}-$$$$.sed;
 
+	sed -i'~' "/AM_CPPFLAGS = /,/noinst_LTLIBRARIES = / { N; s/\\\\\\n.@$${LOCAL_LIB_UPPER}_DLL_EXPORT@//; P; D; }" $${LOCAL_LIB_MAKEFILE_AM};
 	sed -i'~' "/$${LOCAL_LIB}_definitions.h.in/d" $${LOCAL_LIB_MAKEFILE_AM};
 	sed -i'~' "/$${LOCAL_LIB}.rc/d" $${LOCAL_LIB_MAKEFILE_AM};
 
