@@ -7,4 +7,11 @@ script:
       if test $$? -ne 0 && test -f tests/test-suite.log; then
         cat tests/test-suite.log;
       fi;
+      if test $${TARGET} = "macos-gcc-pkgbuild"; then
+        VERSION=`sed '5!d; s/^ \[//;s/\],$$//' configure.ac` &&
+        make install DESTDIR=$${PWD}/osx-pkg &&
+        mkdir -p $${PWD}/osx-pkg/usr/share/doc/libcerror &&
+        cp LICENSE $${PWD}/osx-pkg/usr/share/doc/libcerror &&
+        pkgbuild --root osx-pkg --identifier com.github.libyal.libcerror --version $${VERSION} --ownership recommended ../libcerror-$${VERSION}.pkg;
+      fi
     fi

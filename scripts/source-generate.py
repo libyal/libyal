@@ -2650,6 +2650,20 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    configure_options = ['--disable-dependency-tracking', '--prefix=/usr/local']
+    if project_configuration.HasPythonModule():
+      configure_options.extend(['--enable-python', '--with-pyprefix'])
+
+    template_mappings['configure_options'] = ' '.join(configure_options)
+
+    template_filename = os.path.join(
+        template_directory, 'matrix-macos-pkgbuild.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    del template_mappings['configure_options']
+
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
 

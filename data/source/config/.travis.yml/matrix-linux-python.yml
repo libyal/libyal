@@ -14,6 +14,7 @@
     - CONFIGURE_OPTIONS="--enable-python2"
     - CFLAGS="--coverage"
     - LDFLAGS="--coverage"
+    - PYTHON_VERSION=2
     - TARGET="linux-gcc-python2"
     compiler: gcc
     os: linux
@@ -25,6 +26,7 @@
     - CONFIGURE_OPTIONS="--enable-python3"
     - CFLAGS="--coverage"
     - LDFLAGS="--coverage"
+    - PYTHON_VERSION=3
     - TARGET="linux-gcc-python3"
     compiler: gcc
     os: linux

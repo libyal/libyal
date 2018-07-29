@@ -556,15 +556,18 @@ AC_DEFUN([AX_PYTHON_CHECK_ENABLE],
   AS_IF(
     [test "x${ac_cv_enable_python}" = xno],
     [AS_IF(
-      [test "x${ac_cv_enable_python2}" != xno],
-      [ac_cv_enable_python=${ac_cv_enable_python2}],
-      [ac_cv_enable_python=""])
-    AS_IF(
-      [test "x${ac_cv_enable_python3}" != xno],
+      [test "x${ac_cv_enable_python2}" != xno || test "x${ac_cv_enable_python3}" != xno],
       [AS_IF(
-        [test "x${ac_cv_enable_python}" != x],
-        [ac_cv_enable_python="${ac_cv_enable_python}, "])
-      ac_cv_enable_python="${ac_cv_enable_python}${ac_cv_enable_python3}"])
+        [test "x${ac_cv_enable_python2}" != xno],
+        [ac_cv_enable_python=${ac_cv_enable_python2}],
+        [ac_cv_enable_python=""])
+      AS_IF(
+        [test "x${ac_cv_enable_python3}" != xno],
+        [AS_IF(
+          [test "x${ac_cv_enable_python}" != x],
+          [ac_cv_enable_python="${ac_cv_enable_python}, "])
+        ac_cv_enable_python="${ac_cv_enable_python}${ac_cv_enable_python3}"])
+      ])
     ])
   ])
 ])
