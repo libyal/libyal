@@ -2129,22 +2129,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       maximum_description_length = max(
           maximum_description_length, len(description))
 
-      description = 'Python version 2 ({0:s}) support'.format(
-          project_configuration.python_module_name)
-      value = '$ac_cv_enable_python2'
-      features_information.append((description, value))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
-
-      description = 'Python version 3 ({0:s}) support'.format(
-          project_configuration.python_module_name)
-      value = '$ac_cv_enable_python3'
-      features_information.append((description, value))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
-
     if project_configuration.HasDebugOutput():
       description = 'Verbose output'
       value = '$ac_cv_enable_verbose_output'
