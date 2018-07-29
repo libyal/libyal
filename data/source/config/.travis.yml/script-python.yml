@@ -12,8 +12,8 @@ script:
       if test $${TARGET} = "macos-gcc-pkgbuild"; then
         VERSION=`sed '5!d; s/^ \[//;s/\],$$//' configure.ac` &&
         make install DESTDIR=$${PWD}/osx-pkg &&
-        mkdir -p $${PWD}/osx-pkg/usr/share/doc/libcerror &&
-        cp LICENSE $${PWD}/osx-pkg/usr/share/doc/libcerror &&
-        pkgbuild --root osx-pkg --identifier com.github.libyal.libcerror --version $${VERSION} --ownership recommended ../libcerror-$${VERSION}.pkg;
+        mkdir -p $${PWD}/osx-pkg/usr/share/doc/${library_name} &&
+        cp AUTHORS COPYING NEWS README $${PWD}/osx-pkg/usr/share/doc/${library_name} &&
+        pkgbuild --root osx-pkg --identifier com.github.libyal.${library_name} --version $${VERSION} --ownership recommended ../${library_name}-$${VERSION}.pkg;
       fi
     fi
