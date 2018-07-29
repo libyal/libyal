@@ -6,18 +6,17 @@
     compiler: gcc
     os: osx
     osx_image: xcode8.3
-  - name: "MacOS with gcc and Python module (setup.py)"
-    env:
-    - CONFIGURE_OPTIONS="--enable-python"
-    - TARGET="macos-gcc-python-setup-py"
-    compiler: clang
-    compiler: gcc
-    os: osx
-    osx_image: xcode8.3
   - name: "MacOS with gcc and Python 2 module"
     env:
     - CONFIGURE_OPTIONS="--enable-python2"
     - TARGET="macos-gcc-python2"
+    compiler: clang
+    compiler: gcc
+    os: osx
+    osx_image: xcode8.3
+  - name: "MacOS with gcc and Python 2 module (setup.py)"
+    env:
+    - TARGET="macos-gcc-python-setup-py"
     compiler: clang
     compiler: gcc
     os: osx

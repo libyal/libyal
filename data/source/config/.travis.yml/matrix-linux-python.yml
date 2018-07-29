@@ -9,17 +9,6 @@
     dist: trusty
     sudo: required
     group: edge
-  - name: "Linux with gcc and Python module (setup.py)"
-    env:
-    - CONFIGURE_OPTIONS="--enable-python"
-    - CFLAGS="--coverage"
-    - LDFLAGS="--coverage"
-    - TARGET="linux-gcc-python-setup-py"
-    compiler: gcc
-    os: linux
-    dist: trusty
-    sudo: required
-    group: edge
   - name: "Linux with gcc and Python 2 module"
     env:
     - CONFIGURE_OPTIONS="--enable-python2"
@@ -42,3 +31,21 @@
     dist: trusty
     sudo: required
     group: edge
+  - name: "Linux with gcc and Python 2 module (setup.py)"
+    env:
+    - TARGET="linux-gcc-python-setup-py"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+    python: 2.7
+  - name: "Linux with gcc and Python 3 module (setup.py)"
+    env:
+    - TARGET="linux-gcc-python-setup-py"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+    python: 3.4
