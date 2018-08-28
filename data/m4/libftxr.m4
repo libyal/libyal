@@ -1,6 +1,6 @@
-dnl Checks for libftxr required headers and functions
+dnl Functions for libftxr
 dnl
-dnl Version: 20170907
+dnl Version: 20180726
 
 dnl Function to detect if libftxr is available
 dnl ac_libftxr_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -24,7 +24,7 @@ AC_DEFUN([AX_LIBFTXR_CHECK_LIB],
       [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
       [PKG_CHECK_MODULES(
         [libftxr],
-        [libftxr >= 20120527],
+        [libftxr >= 20180726],
         [ac_cv_libftxr=yes],
         [ac_cv_libftxr=no])
       ])
@@ -48,7 +48,23 @@ AC_DEFUN([AX_LIBFTXR_CHECK_LIB],
           [ac_cv_libftxr_dummy=yes],
           [ac_cv_libftxr=no])
 
-        dnl TODO add functions
+        dnl Record functions
+        AC_CHECK_LIB(
+          ftxr,
+          libftxr_record_initialize,
+          [ac_cv_libftxr_dummy=yes],
+          [ac_cv_libftxr=no])
+        AC_CHECK_LIB(
+          ftxr,
+          libftxr_record_free,
+          [ac_cv_libftxr_dummy=yes],
+          [ac_cv_libftxr=no])
+
+        AC_CHECK_LIB(
+          ftxr,
+          libftxr_record_copy_from_byte_stream,
+          [ac_cv_libftxr_dummy=yes],
+          [ac_cv_libftxr=no])
 
         ac_cv_libftxr_LIBADD="-lftxr"
         ])

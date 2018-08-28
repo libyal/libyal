@@ -1,3 +1,0 @@
-dnl Check for Windows crypto API support
-AX_WINCRYPT_CHECK_LIB
-

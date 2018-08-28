@@ -1787,13 +1787,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       del template_mappings['local_library_name']
       del template_mappings['local_library_name_upper_case']
 
-    if project_configuration.library_name in ('libcaes', 'libhmac'):
-      template_filename = os.path.join(
-          template_directory, 'check_wincrypt_support.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
     template_filename = os.path.join(
         template_directory, 'check_library_support.ac')
     self._GenerateSection(
