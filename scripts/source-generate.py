@@ -2399,7 +2399,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     if 'zlib' in project_configuration.library_build_dependencies:
       library_dependencies.append('zlib')
 
-    if library_dependencies:
+    if not library_dependencies:
+      template_filename = os.path.join(template_directory, 'build_requires.in')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    else:
       spec_requires = []
       spec_build_requires = []
       for name in sorted(library_dependencies):

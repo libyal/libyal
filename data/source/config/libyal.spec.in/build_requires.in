@@ -1,0 +1,1 @@
+BuildRequires: gcc
