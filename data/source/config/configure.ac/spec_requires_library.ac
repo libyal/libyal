@@ -4,8 +4,5 @@ AS_IF(
  [AC_SUBST(
   [${library_name}_spec_requires],
   [Requires:])
- AC_SUBST(
-  [${library_name}_spec_build_requires],
-  [BuildRequires:])
  ])
 
