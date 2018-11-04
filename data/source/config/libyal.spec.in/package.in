@@ -1,12 +1,12 @@
 
-%description
+%description -n ${library_name}
 ${library_description}
 
-%package devel
+%package -n ${library_name}-devel
 Summary: Header files and libraries for developing applications for ${library_name}
 Group: Development/Libraries
 Requires: ${library_name} = %{version}-%{release}
 
-%description devel
+%description -n ${library_name}-devel
 Header files and libraries for developing applications for ${library_name}.
 

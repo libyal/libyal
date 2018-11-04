@@ -1,10 +1,10 @@
-%files
+%files -n ${library_name}
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
-%files devel
+%files -n ${library_name}-devel
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README ChangeLog

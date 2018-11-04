@@ -390,7 +390,8 @@ class PythonTypeObjectFunctionPrototype(object):
 
     elif self.data_type in (
         definitions.DATA_TYPE_GUID,
-        definitions.DATA_TYPE_STRING):
+        definitions.DATA_TYPE_STRING,
+        definitions.DATA_TYPE_UUID):
       data_type_description = 'Unicode string'
 
     elif self.data_type == definitions.DATA_TYPE_NARROW_STRING:

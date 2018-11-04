@@ -4200,6 +4200,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
       elif python_function_prototype.data_type == definitions.DATA_TYPE_GUID:
         python_module_include_names.add('guid')
 
+      elif python_function_prototype.data_type == definitions.DATA_TYPE_UUID:
+        python_module_include_names.add('uuid')
+
       elif python_function_prototype.data_type in (
           definitions.DATA_TYPE_SIZE64,
           definitions.DATA_TYPE_OFF64,
@@ -4611,7 +4614,7 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
             '\t  (PyCFunction) {0:s}_{1:s}_read_buffer,'.format(
                 project_configuration.python_module_name, type_name),
             '\t  METH_VARARGS | METH_KEYWORDS,',
-            '\t  "read(size) -> String\\n"',
+            '\t  "read(size) -> Binary string\\n"',
             '\t  "\\n"',
             '\t  "Reads a buffer of data." },',
             '',
@@ -5022,6 +5025,10 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           elif (value_argument_string == 'uint8_t *utf8_string' and
                 value_size_argument_string == 'size_t utf8_string_size'):
             data_type = definitions.DATA_TYPE_STRING
+
+          elif (value_argument_string == 'uint8_t *uuid_data' and
+                value_size_argument_string == 'size_t uuid_data_size'):
+            data_type = definitions.DATA_TYPE_UUID
 
           elif (value_argument_string == 'char *string' and
                 value_size_argument_string == 'size_t string_size'):
@@ -6465,6 +6472,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       if function_argument_string == 'uint8_t *guid_data':
         function_template = 'get_guid_value'
 
+      if function_argument_string == 'uint8_t *uuid_data':
+        function_template = 'get_uuid_value'
+
       elif number_of_arguments == function_argument_index + 2:
         if not value_type.startswith(library_type_prefix):
           function_template = 'get_value'
@@ -6514,6 +6524,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       value_name, _, _ = free_function.rpartition('_free_function')
 
     template_directory = os.path.join(self._template_directory, 'yal_test_type')
+
+    # TODO: add support for functions that don't return 0 to not use is_set in tests.
+    # if function_prototype.return_values:
 
     if clone_function:
       body_template_filename = (
@@ -6579,6 +6592,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
           function_variables.append(
               'int {0:s}_is_set = 0;'.format(value_name))
 
+      elif function_template == 'get_uuid_value':
+        function_variables.extend([
+            'uint8_t uuid_data[ 16 ];',
+            ''])
+
       elif function_template == 'get_value':
         function_variables.append(
             '{0:s} {1:s} = 0;'.format(value_type, value_name))
@@ -6609,8 +6627,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
                 project_configuration.library_name, type_name))
 
       if function_template in (
-          'get_binary_data_value', 'get_guid_value', 'get_string_value',
-          'get_type_value', 'get_value'):
+          'get_binary_data_value', 'get_guid_value', 'get_uuid_value',
+          'get_string_value', 'get_type_value', 'get_value'):
         function_template = 'get_{0:s}'.format(value_name)
 
       if initialize_number_of_arguments == 3:
@@ -8039,8 +8057,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       test_options.append(('p', 'password'))
 
     elif (project_configuration.library_name == 'libfsapfs' and
-          type_name == 'volume'):
+          type_name == 'container'):
       test_options.append(('o', 'offset'))
+      test_options.append(('p', 'password'))
 
     elif (project_configuration.library_name == 'libfsext' and
           type_name == 'volume'):

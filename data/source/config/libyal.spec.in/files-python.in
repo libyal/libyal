@@ -1,4 +1,4 @@
-%files python
+%files -n ${library_name}-python2
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README
@@ -6,7 +6,7 @@
 %{_libdir}/python2*/site-packages/*.la
 %{_libdir}/python2*/site-packages/*.so
 
-%files python3
+%files -n ${library_name}-python3
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README

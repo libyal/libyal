@@ -65,7 +65,7 @@ PyObject *${python_module_name}_${type_name}_open(
 	{
 		${python_module_name}_error_fetch_and_raise(
 	         PyExc_RuntimeError,
-	         "%s: unable to determine if string object is of type unicode.",
+	         "%s: unable to determine if string object is of type Unicode.",
 	         function );
 
 		return( NULL );
@@ -94,7 +94,7 @@ PyObject *${python_module_name}_${type_name}_open(
 		{
 			${python_module_name}_error_fetch_and_raise(
 			 PyExc_RuntimeError,
-			 "%s: unable to convert unicode string to UTF-8.",
+			 "%s: unable to convert Unicode string to UTF-8.",
 			 function );
 
 			return( NULL );
