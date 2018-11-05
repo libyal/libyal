@@ -1,7 +1,11 @@
   - TARGET: cygwin
+    BUILD_ENVIRONMENT: cygwin
   - TARGET: cygwin64
+    BUILD_ENVIRONMENT: cygwin64
   - TARGET: mingw
+    BUILD_ENVIRONMENT: mingw
   - TARGET: mingw-w64
+    BUILD_ENVIRONMENT: mingw-w64
 
 install:
 - cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash

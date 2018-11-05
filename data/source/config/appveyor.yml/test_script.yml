@@ -1,13 +1,13 @@
 test_script:
 - cmd: rem Run tests
-- ps: If ($$env:TARGET -eq "vs2008" -or $$env:TARGET -eq "vs2010" -or $$env:TARGET -eq "vs2012" -or $$env:TARGET -eq "vs2013" -or $$env:TARGET -eq "vs2015" -or $$env:TARGET -eq "vs2017") {
+- ps: If ($$env:BUILD_ENVIRONMENT -eq "vs2008" -or $$env:BUILD_ENVIRONMENT -eq "vs2010" -or $$env:BUILD_ENVIRONMENT -eq "vs2012" -or $$env:BUILD_ENVIRONMENT -eq "vs2013" -or $$env:BUILD_ENVIRONMENT -eq "vs2015" -or $$env:BUILD_ENVIRONMENT -eq "vs2017") {
     .\runtests.ps1 }
-- cmd: if [%TARGET%]==[cygwin] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     C:\cygwin\bin\bash -e -l -c "cd ${library_name} && ./runtests.sh" )
-- cmd: if [%TARGET%]==[cygwin64] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && ./runtests.sh" )
-- cmd: if [%TARGET%]==[mingw] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
     C:\MinGW\msys\1.0\bin\bash -e -l -c "cd ${library_name} && ./runtests.sh" )
-- cmd: if [%TARGET%]==[mingw-w64] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     C:\msys64\usr\bin\bash -e -l -c "cd ${library_name} && ./runtests.sh" )
 

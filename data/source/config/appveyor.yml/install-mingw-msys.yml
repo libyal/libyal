@@ -1,2 +1,2 @@
-- cmd: if [%TARGET%]==[mingw] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
     C:\MinGW\bin\mingw-get install ${mingw_msys_build_dependencies} )

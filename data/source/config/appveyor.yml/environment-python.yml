@@ -1,2 +1,4 @@
   - TARGET: python27
+    BUILD_ENVIRONMENT: python
   - TARGET: python36
+    BUILD_ENVIRONMENT: python

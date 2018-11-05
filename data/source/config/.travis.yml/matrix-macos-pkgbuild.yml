@@ -2,7 +2,6 @@
     env:
     - CONFIGURE_OPTIONS="${configure_options}"
     - TARGET="macos-gcc-pkgbuild"
-    compiler: clang
     compiler: gcc
     os: osx
     osx_image: xcode8.3

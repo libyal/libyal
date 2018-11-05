@@ -1,31 +1,37 @@
 environment:
   matrix:
   - TARGET: vs2008
+    BUILD_ENVIRONMENT: vs2008
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 9.0
     platform: Win32
     configuration: Release
   - TARGET: vs2010
+    BUILD_ENVIRONMENT: vs2010
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 10.0
     platform: Win32
     configuration: VSDebug
   - TARGET: vs2012
+    BUILD_ENVIRONMENT: vs2012
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 11.0
     platform: x64
     configuration: Release
   - TARGET: vs2013
+    BUILD_ENVIRONMENT: vs2013
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 12.0
     platform: Win32
     configuration: Release
   - TARGET: vs2015
+    BUILD_ENVIRONMENT: vs2015
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     VisualStudioVersion: 14.0
     platform: Win32
     configuration: Release
   - TARGET: vs2017
+    BUILD_ENVIRONMENT: vs2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     VisualStudioVersion: 15.0
     configuration: Release

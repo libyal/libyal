@@ -9,7 +9,6 @@
     env:
     - CONFIGURE_OPTIONS=""
     - TARGET="macos-gcc"
-    compiler: clang
     compiler: gcc
     os: osx
     osx_image: xcode8.3
