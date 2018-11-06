@@ -1,0 +1,11 @@
+  - TARGET: cygwin-gcc
+    BUILD_ENVIRONMENT: cygwin
+    CONFIGURE_OPTIONS: ""
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin-gcc-no-optimization
+    BUILD_ENVIRONMENT: cygwin
+    CONFIGURE_OPTIONS: "--enable-shared=no"
+    CFLAGS: "--coverage -O0"
+    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
+    LDFLAGS: "--coverage"

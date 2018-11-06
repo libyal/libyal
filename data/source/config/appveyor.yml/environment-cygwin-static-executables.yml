@@ -1,0 +1,5 @@
+  - TARGET: cygwin-gcc-static-executables
+    BUILD_ENVIRONMENT: cygwin
+    CONFIGURE_OPTIONS: "--enable-static-executables"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"

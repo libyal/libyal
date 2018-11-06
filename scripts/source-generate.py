@@ -1511,7 +1511,64 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           access_mode='ab')
 
     template_filename = os.path.join(
-        template_directory, 'environment-footer.yml')
+        template_directory, 'environment-cygwin.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # if 'crypto' in project_configuration.library_build_dependencies:
+    # TODO: add environment-cygwin-openssl.yml
+
+    if project_configuration.HasPythonModule():
+      template_filename = os.path.join(
+          template_directory, 'environment-cygwin-python.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.HasTools():
+      template_filename = os.path.join(
+          template_directory, 'environment-cygwin-static-executables.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'environment-cygwin64.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # if 'crypto' in project_configuration.library_build_dependencies:
+    # TODO: add environment-cygwin64-openssl.yml
+
+    if project_configuration.HasPythonModule():
+      template_filename = os.path.join(
+          template_directory, 'environment-cygwin64-python.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    if project_configuration.HasTools():
+      template_filename = os.path.join(
+          template_directory, 'environment-cygwin64-static-executables.yml')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'environment-mingw.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(
+        template_directory, 'environment-mingw-w64.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'install-header.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
@@ -1773,7 +1830,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
         # TODO: determine deflate function via configuration setting? 
         elif project_configuration.library_name in (
-            'libfvde', 'libpff', 'libvmdk'):
+            'libfsapfs', 'libfvde', 'libpff', 'libvmdk'):
           template_filename = 'check_zlib_uncompress.ac'
 
         else:
@@ -2032,7 +2089,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         description = 'DEFLATE compression support'
         # TODO: determine deflate function via configuration setting? 
         if project_configuration.library_name in (
-            'libfvde', 'libpff', 'libvmdk'):
+            'libfsapfs', 'libfvde', 'libpff', 'libvmdk'):
           build_information.append((description, '$ac_cv_uncompress'))
         else:
           build_information.append((description, '$ac_cv_inflate'))

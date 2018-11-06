@@ -1,0 +1,15 @@
+  - TARGET: cygwin64-gcc-python
+    BUILD_ENVIRONMENT: cygwin64
+    CONFIGURE_OPTIONS: "--enable-python"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin64-gcc-python2
+    BUILD_ENVIRONMENT: cygwin64
+    CONFIGURE_OPTIONS: "--enable-python2"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin64-gcc-python3
+    BUILD_ENVIRONMENT: cygwin64
+    CONFIGURE_OPTIONS: "--enable-python3"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"

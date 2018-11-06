@@ -1,5 +1,5 @@
 after_test:
-- cmd: if [%TARGET%]==[mingw] (
+- cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (
     copy C:\projects\codecov-bash\codecov C:\MinGW\msys\1.0\home\appveyor\${library_name}\codecov.sh &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n mingw -y .codecov.yml" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n $${TARGET} -y .codecov.yml" )
 

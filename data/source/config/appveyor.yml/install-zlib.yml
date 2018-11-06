@@ -1,1 +1,2 @@
-- ps: .\synczlib.ps1
+- ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild") {
+    .\synczlib.ps1 }
