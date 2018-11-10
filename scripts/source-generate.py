@@ -1568,6 +1568,11 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+    template_filename = os.path.join(template_directory, 'allow-failures.yml')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
     template_filename = os.path.join(template_directory, 'install-header.yml')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
