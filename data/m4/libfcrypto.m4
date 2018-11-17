@@ -1,42 +1,46 @@
 dnl Checks for libfcrypto required headers and functions
 dnl
-dnl Version: 20180728
+dnl Version: 20181117
 
 dnl Function to detect if libfcrypto is available
 dnl ac_libfcrypto_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBFCRYPTO_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libfcrypto" != x && test "x$ac_cv_with_libfcrypto" != xno && test "x$ac_cv_with_libfcrypto" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libfcrypto"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libfcrypto}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libfcrypto}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libfcrypto])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libfcrypto" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libfcrypto" = xno],
     [ac_cv_libfcrypto=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libfcrypto],
-        [libfcrypto >= 20161103],
-        [ac_cv_libfcrypto=yes],
-        [ac_cv_libfcrypto=no])
+      [test "x$ac_cv_with_libfcrypto" != x && test "x$ac_cv_with_libfcrypto" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libfcrypto"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libfcrypto}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libfcrypto}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libfcrypto],
+          [1])
+        ])
+        ac_cv_libfcrypto=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libfcrypto],
+          [libfcrypto >= 20161103],
+          [ac_cv_libfcrypto=yes],
+          [ac_cv_libfcrypto=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libfcrypto" = xyes],
+        [ac_cv_libfcrypto_CPPFLAGS="$pkg_cv_libfcrypto_CFLAGS"
+        ac_cv_libfcrypto_LIBADD="$pkg_cv_libfcrypto_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libfcrypto" = xyes],
-      [ac_cv_libfcrypto_CPPFLAGS="$pkg_cv_libfcrypto_CFLAGS"
-      ac_cv_libfcrypto_LIBADD="$pkg_cv_libfcrypto_LIBS"],
+      [test "x$ac_cv_libfcrypto" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libfcrypto.h])
 
-    AS_IF(
+      AS_IF(
         [test "x$ac_cv_header_libfcrypto_h" = xno],
         [ac_cv_libfcrypto=no],
         [dnl Check for the individual functions
@@ -72,8 +76,13 @@ AC_DEFUN([AX_LIBFCRYPTO_CHECK_LIB],
           [ac_cv_libfcrypto_dummy=yes],
           [ac_cv_libfcrypto=no])
 
-        ac_cv_libfcrypto_LIBADD="-lfcrypto"
-        ])
+        ac_cv_libfcrypto_LIBADD="-lfcrypto"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libfcrypto" != x && test "x$ac_cv_with_libfcrypto" != xauto-detect && test "x$ac_cv_libfcrypto" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libfcrypto in directory: $ac_cv_with_libfcrypto],
+        [1])
       ])
     ])
 

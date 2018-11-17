@@ -1,38 +1,42 @@
 dnl Checks for libfole required headers and functions
 dnl
-dnl Version: 20170909
+dnl Version: 20181117
 
 dnl Function to detect if libfole is available
 dnl ac_libfole_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBFOLE_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libfole" != x && test "x$ac_cv_with_libfole" != xno && test "x$ac_cv_with_libfole" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libfole"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libfole}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libfole}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libfole])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libfole" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libfole" = xno],
     [ac_cv_libfole=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libfole],
-        [libfole >= 20120426],
-        [ac_cv_libfole=yes],
-        [ac_cv_libfole=no])
+      [test "x$ac_cv_with_libfole" != x && test "x$ac_cv_with_libfole" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libfole"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libfole}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libfole}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libfole],
+          [1])
+        ])
+        ac_cv_libfole=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libfole],
+          [libfole >= 20120426],
+          [ac_cv_libfole=yes],
+          [ac_cv_libfole=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libfole" = xyes],
+        [ac_cv_libfole_CPPFLAGS="$pkg_cv_libfole_CFLAGS"
+        ac_cv_libfole_LIBADD="$pkg_cv_libfole_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libfole" = xyes],
-      [ac_cv_libfole_CPPFLAGS="$pkg_cv_libfole_CFLAGS"
-      ac_cv_libfole_LIBADD="$pkg_cv_libfole_LIBS"],
+      [test "x$ac_cv_libfole" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libfole.h])
 
@@ -50,8 +54,13 @@ AC_DEFUN([AX_LIBFOLE_CHECK_LIB],
 
         dnl TODO add functions
 
-        ac_cv_libfole_LIBADD="-lfole"
-        ])
+        ac_cv_libfole_LIBADD="-lfole"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libfole" != x && test "x$ac_cv_with_libfole" != xauto-detect && test "x$ac_cv_libfole" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libfole in directory: $ac_cv_with_libfole],
+        [1])
       ])
     ])
 
