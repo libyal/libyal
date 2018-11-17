@@ -1,42 +1,46 @@
 dnl Functions for libftxr
 dnl
-dnl Version: 20180726
+dnl Version: 20181117
 
 dnl Function to detect if libftxr is available
 dnl ac_libftxr_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBFTXR_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libftxr" != x && test "x$ac_cv_with_libftxr" != xno && test "x$ac_cv_with_libftxr" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libftxr"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libftxr}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libftxr}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libftxr])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libftxr" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libftxr" = xno],
     [ac_cv_libftxr=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libftxr],
-        [libftxr >= 20180726],
-        [ac_cv_libftxr=yes],
-        [ac_cv_libftxr=no])
+      [test "x$ac_cv_with_libftxr" != x && test "x$ac_cv_with_libftxr" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libftxr"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libftxr}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libftxr}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libftxr],
+          [1])
+        ])
+        ac_cv_libftxr=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libftxr],
+          [libftxr >= 20180726],
+          [ac_cv_libftxr=yes],
+          [ac_cv_libftxr=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libftxr" = xyes],
+        [ac_cv_libftxr_CPPFLAGS="$pkg_cv_libftxr_CFLAGS"
+        ac_cv_libftxr_LIBADD="$pkg_cv_libftxr_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libftxr" = xyes],
-      [ac_cv_libftxr_CPPFLAGS="$pkg_cv_libftxr_CFLAGS"
-      ac_cv_libftxr_LIBADD="$pkg_cv_libftxr_LIBS"],
+      [test "x$ac_cv_libftxr" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libftxr.h])
 
-    AS_IF(
+      AS_IF(
         [test "x$ac_cv_header_libftxr_h" = xno],
         [ac_cv_libftxr=no],
         [dnl Check for the individual functions
@@ -66,8 +70,13 @@ AC_DEFUN([AX_LIBFTXR_CHECK_LIB],
           [ac_cv_libftxr_dummy=yes],
           [ac_cv_libftxr=no])
 
-        ac_cv_libftxr_LIBADD="-lftxr"
-        ])
+        ac_cv_libftxr_LIBADD="-lftxr"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libftxr" != x && test "x$ac_cv_with_libftxr" != xauto-detect && test "x$ac_cv_libftxr" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libftxr in directory: $ac_cv_with_libftxr],
+        [1])
       ])
     ])
 

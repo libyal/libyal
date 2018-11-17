@@ -1,37 +1,42 @@
 dnl Checks for libfwsi required headers and functions
 dnl
-dnl Version: 20170909
+dnl Version: 20181117
 
 dnl Function to detect if libfwsi is available
+dnl ac_libfwsi_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBFWSI_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test x"$ac_cv_with_libfwsi" != x && test "x$ac_cv_with_libfwsi" != xno && test "x$ac_cv_with_libfwsi" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libfwsi"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libfwsi}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libfwsi}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libfwsi])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libfwsi" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libfwsi" = xno],
     [ac_cv_libfwsi=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libfwsi],
-        [libfwsi >= 20140827],
-        [ac_cv_libfwsi=yes],
-        [ac_cv_libfwsi=no])
+      [test "x$ac_cv_with_libfwsi" != x && test "x$ac_cv_with_libfwsi" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libfwsi"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libfwsi}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libfwsi}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libfwsi],
+          [1])
+        ])
+        ac_cv_libfwsi=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libfwsi],
+          [libfwsi >= 20140827],
+          [ac_cv_libfwsi=yes],
+          [ac_cv_libfwsi=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libfwsi" = xyes],
+        [ac_cv_libfwsi_CPPFLAGS="$pkg_cv_libfwsi_CFLAGS"
+        ac_cv_libfwsi_LIBADD="$pkg_cv_libfwsi_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libfwsi" = xyes],
-      [ac_cv_libfwsi_CPPFLAGS="$pkg_cv_libfwsi_CFLAGS"
-      ac_cv_libfwsi_LIBADD="$pkg_cv_libfwsi_LIBS"],
+      [test "x$ac_cv_libfwsi" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libfwsi.h])
 
@@ -81,8 +86,13 @@ AC_DEFUN([AX_LIBFWSI_CHECK_LIB],
           [ac_cv_libfwsi_dummy=yes],
           [ac_cv_libfwsi=no])
 
-        ac_cv_libfwsi_LIBADD="-lfwsi"
-        ])
+        ac_cv_libfwsi_LIBADD="-lfwsi"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libfwsi" != x && test "x$ac_cv_with_libfwsi" != xauto-detect && test "x$ac_cv_libfwsi" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libfwsi in directory: $ac_cv_with_libfwsi],
+        [1])
       ])
     ])
 

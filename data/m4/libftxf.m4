@@ -1,42 +1,46 @@
 dnl Checks for libftxf required headers and functions
 dnl
-dnl Version: 20180725
+dnl Version: 20181117
 
 dnl Function to detect if libftxf is available
 dnl ac_libftxf_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBFTXF_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libftxf" != x && test "x$ac_cv_with_libftxf" != xno && test "x$ac_cv_with_libftxf" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libftxf"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libftxf}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libftxf}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libftxf])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libftxf" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libftxf" = xno],
     [ac_cv_libftxf=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libftxf],
-        [libftxf >= 20180725],
-        [ac_cv_libftxf=yes],
-        [ac_cv_libftxf=no])
+      [test "x$ac_cv_with_libftxf" != x && test "x$ac_cv_with_libftxf" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libftxf"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libftxf}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libftxf}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libftxf],
+          [1])
+        ])
+        ac_cv_libftxf=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libftxf],
+          [libftxf >= 20180725],
+          [ac_cv_libftxf=yes],
+          [ac_cv_libftxf=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libftxf" = xyes],
+        [ac_cv_libftxf_CPPFLAGS="$pkg_cv_libftxf_CFLAGS"
+        ac_cv_libftxf_LIBADD="$pkg_cv_libftxf_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libftxf" = xyes],
-      [ac_cv_libftxf_CPPFLAGS="$pkg_cv_libftxf_CFLAGS"
-      ac_cv_libftxf_LIBADD="$pkg_cv_libftxf_LIBS"],
+      [test "x$ac_cv_libftxf" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libftxf.h])
 
-    AS_IF(
+      AS_IF(
         [test "x$ac_cv_header_libftxf_h" = xno],
         [ac_cv_libftxf=no],
         [dnl Check for the individual functions
@@ -66,8 +70,13 @@ AC_DEFUN([AX_LIBFTXF_CHECK_LIB],
           [ac_cv_libftxf_dummy=yes],
           [ac_cv_libftxf=no])
 
-        ac_cv_libftxf_LIBADD="-lftxf"
-        ])
+        ac_cv_libftxf_LIBADD="-lftxf"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libftxf" != x && test "x$ac_cv_with_libftxf" != xauto-detect && test "x$ac_cv_libftxf" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libftxf in directory: $ac_cv_with_libftxf],
+        [1])
       ])
     ])
 

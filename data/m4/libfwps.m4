@@ -1,38 +1,42 @@
 dnl Checks for libfwps required headers and functions
 dnl
-dnl Version: 20180404
+dnl Version: 20181117
 
 dnl Function to detect if libfwps is available
 dnl ac_libfwps_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libfwps" != x && test "x$ac_cv_with_libfwps" != xno && test "x$ac_cv_with_libfwps" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libfwps"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libfwps}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libfwps}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libfwps])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libfwps" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libfwps" = xno],
     [ac_cv_libfwps=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libfwps],
-        [libfwps >= 20140622],
-        [ac_cv_libfwps=yes],
-        [ac_cv_libfwps=no])
+      [test "x$ac_cv_with_libfwps" != x && test "x$ac_cv_with_libfwps" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libfwps"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libfwps}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libfwps}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libfwps],
+          [1])
+        ])
+        ac_cv_libfwps=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libfwps],
+          [libfwps >= 20140622],
+          [ac_cv_libfwps=yes],
+          [ac_cv_libfwps=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libfwps" = xyes],
+        [ac_cv_libfwps_CPPFLAGS="$pkg_cv_libfwps_CFLAGS"
+        ac_cv_libfwps_LIBADD="$pkg_cv_libfwps_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libfwps" = xyes],
-      [ac_cv_libfwps_CPPFLAGS="$pkg_cv_libfwps_CFLAGS"
-      ac_cv_libfwps_LIBADD="$pkg_cv_libfwps_LIBS"],
+      [test "x$ac_cv_libfwps" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libfwps.h])
 
@@ -65,8 +69,13 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
           [ac_cv_libfwps_dummy=yes],
           [ac_cv_libfwps=no])
 
-        ac_cv_libfwps_LIBADD="-lfwps"
-        ])
+        ac_cv_libfwps_LIBADD="-lfwps"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libfwps" != x && test "x$ac_cv_with_libfwps" != xauto-detect && test "x$ac_cv_libfwps" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libfwps in directory: $ac_cv_with_libfwps],
+        [1])
       ])
     ])
 
