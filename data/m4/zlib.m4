@@ -6,7 +6,7 @@ dnl Function to detect if zlib is available
 AC_DEFUN([AX_ZLIB_CHECK_LIB],
   [AS_IF(
     [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_zlib" = xno],
-    [ac_cv_libcrypto=no],
+    [ac_cv_zlib=no],
     [dnl Check if the directory provided as parameter exists
     AS_IF(
       [test "x$ac_cv_with_zlib" != x && test "x$ac_cv_with_zlib" != xauto-detect],
@@ -28,13 +28,13 @@ AC_DEFUN([AX_ZLIB_CHECK_LIB],
           [ac_cv_zlib=no])
         ])
       AS_IF(
-        [test "x$ac_cv_libcrypto" = xyes],
+        [test "x$ac_cv_zlib" = xzlib],
         [ac_cv_zlib_CPPFLAGS="$pkg_cv_zlib_CFLAGS"
         ac_cv_zlib_LIBADD="$pkg_cv_zlib_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_zlib" != xzlib],
+      [test "x$ac_cv_zlib" = xno],
       [dnl Check for headers
       AC_CHECK_HEADERS([zlib.h])
 
