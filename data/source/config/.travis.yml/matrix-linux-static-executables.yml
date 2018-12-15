@@ -6,6 +6,6 @@
     - TARGET="linux-gcc-static-executables"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge

@@ -443,7 +443,7 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
             appveyor_build_status = (
                 '[![Build status]'
                 '(https://ci.appveyor.com/api/projects/status/{0:s}?svg=true)]'
-                '(https://ci.appveyor.com/project/joachimmetz/{1:s})').format(
+                '(https://ci.appveyor.com/project/libyal/{1:s})').format(
                     project.appveyor_identifier, project.name)
 
           codecov_status = (

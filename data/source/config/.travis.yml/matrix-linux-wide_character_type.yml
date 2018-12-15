@@ -6,6 +6,6 @@
     - TARGET="linux-gcc-wide-character-type"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge

@@ -1,6 +1,6 @@
 dnl Checks for libsmdev required headers and functions
 dnl
-dnl Version: 20181117
+dnl Version: 20181215
 
 dnl Function to detect if libsmdev is available
 dnl ac_libsmdev_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -278,7 +278,7 @@ AC_DEFUN([AX_LIBSMDEV_CHECK_LOCAL],
   dnl Headers included in libsmdev/libsmdev_usb.c
   AS_IF(
     [test "x$ac_cv_enable_winapi" = xno],
-    [AC_CHECK_HEADERS([linux/usbdevice_fs.h linux/usb/ch9.h])
+    [AC_CHECK_HEADERS([linux/usbdevice_fs.h linux/usb/ch9.h sys/ioctl.h])
   ])
 
   dnl File input/output functions used in libbfio/libbfio_file.h

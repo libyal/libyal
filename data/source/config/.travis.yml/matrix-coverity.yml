@@ -4,7 +4,7 @@
     - TARGET="coverity"
     compiler: clang
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
     addons:

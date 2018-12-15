@@ -6,7 +6,7 @@
     - TARGET="linux-clang"
     compiler: clang
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
   - name: "Linux with gcc"
@@ -17,6 +17,6 @@
     - TARGET="linux-gcc"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge

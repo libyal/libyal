@@ -6,7 +6,7 @@
     - TARGET="linux-gcc-no-openssl"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
   - name: "Linux with gcc with OpenSSL EVP"
@@ -17,7 +17,7 @@
     - TARGET="linux-gcc-openssl-evp"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
   - name: "Linux with gcc with OpenSSL non-EVP"
@@ -28,6 +28,6 @@
     - TARGET="linux-gcc-openssl"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge

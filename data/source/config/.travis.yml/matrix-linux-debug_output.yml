@@ -4,6 +4,6 @@
     - TARGET="linux-gcc"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge

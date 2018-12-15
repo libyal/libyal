@@ -8946,6 +8946,78 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     return '\n'.join(sorted(variable_declarations))
 
+  def _GenerateMountDokanHeaderFile(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates a mount dokan header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'mount_dokan')
+
+    template_filename = os.path.join(template_directory, 'header.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+  def _GenerateMountDokanSourceFile(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates a mount dokan source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'mount_dokan')
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+  def _GenerateMountFuseHeaderFile(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates a mount fuse header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'mount_fuse')
+
+    template_filename = os.path.join(template_directory, 'header.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+  def _GenerateMountFuseSourceFile(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates a mount fuse source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'mount_fuse')
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
   def _GenerateMountHandleHeaderFile(
       self, project_configuration, template_mappings, output_writer,
       output_filename):
@@ -9133,6 +9205,30 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     if os.path.exists(mount_tool_filename):
       output_filename = os.path.join(
+          project_configuration.tools_directory, 'mount_dokan.h')
+      self._GenerateMountDokanHeaderFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+      output_filename = os.path.join(
+          project_configuration.tools_directory, 'mount_dokan.c')
+      self._GenerateMountDokanSourceFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+      output_filename = os.path.join(
+          project_configuration.tools_directory, 'mount_fuse.h')
+      self._GenerateMountFuseHeaderFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+      output_filename = os.path.join(
+          project_configuration.tools_directory, 'mount_fuse.c')
+      self._GenerateMountFuseSourceFile(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+      output_filename = os.path.join(
           project_configuration.tools_directory, 'mount_handle.h')
       self._GenerateMountHandleHeaderFile(
           project_configuration, template_mappings, output_writer,
@@ -9192,15 +9288,15 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(template_directory, 'fuse.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    # template_filename = os.path.join(template_directory, 'fuse.c')
+    # self._GenerateSection(
+    #     template_filename, template_mappings, output_writer, output_filename,
+    #     access_mode='ab')
 
-    template_filename = os.path.join(template_directory, 'dokan.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    # template_filename = os.path.join(template_directory, 'dokan.c')
+    # self._GenerateSection(
+    #     template_filename, template_mappings, output_writer, output_filename,
+    #     access_mode='ab')
 
     self._GenerateMountToolSourceMainFunction(
         project_configuration, template_mappings, mount_tool_name,
