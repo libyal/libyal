@@ -1,16 +1,16 @@
 #!/bin/bash
 # Info tool testing script
 #
-# Version: 20181111
+# Version: 20181221
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-OPTION_SETS="${tests_option_sets}";
-OPTIONS=();
+OPTION_SETS="${tests_info_tool_option_sets}";
+OPTIONS=(${tests_info_tool_options});
 
-INPUT_GLOB="*";
+INPUT_GLOB="${tests_input_glob}";
 
 if ! test -z $${SKIP_TOOLS_TESTS};
 then

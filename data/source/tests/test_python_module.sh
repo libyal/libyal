@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests Python module functions and types.
 #
-# Version: 20180728
+# Version: 20181221
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -12,7 +12,7 @@ TEST_FUNCTIONS_WITH_INPUT="${test_python_functions_with_input}";
 OPTION_SETS="${tests_option_sets}";
 
 TEST_TOOL_DIRECTORY=".";
-INPUT_GLOB="*";
+INPUT_GLOB="${tests_input_glob}";
 
 test_python_function()
 {

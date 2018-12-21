@@ -8069,7 +8069,20 @@ class TestsSourceFileGenerator(SourceFileGenerator):
         sorted(python_functions_with_input))
 
     template_mappings['tests_option_sets'] = ' '.join(
-        sorted(project_configuration.tests_option_sets))
+        project_configuration.tests_option_sets)
+
+    template_mappings['tests_input_glob'] = (
+        project_configuration.tests_input_glob)
+
+    template_mappings['tests_export_tool_option_sets'] = ' '.join(
+        project_configuration.tests_export_tool_option_sets)
+    template_mappings['tests_export_tool_options'] = (
+        project_configuration.tests_export_tool_options)
+
+    template_mappings['tests_info_tool_option_sets'] = ' '.join(
+        project_configuration.tests_info_tool_option_sets)
+    template_mappings['tests_info_tool_options'] = (
+        project_configuration.tests_info_tool_options)
 
     template_mappings['alignment_padding'] = (
         ' ' * len(project_configuration.library_name_suffix))

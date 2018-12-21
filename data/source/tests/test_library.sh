@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests C library functions and types.
 #
-# Version: 20180907
+# Version: 20181221
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -11,7 +11,7 @@ LIBRARY_TESTS="${library_tests}";
 LIBRARY_TESTS_WITH_INPUT="${library_tests_with_input}";
 OPTION_SETS="${tests_option_sets}";
 
-INPUT_GLOB="*";
+INPUT_GLOB="${tests_input_glob}";
 
 run_test()
 {

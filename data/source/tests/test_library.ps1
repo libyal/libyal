@@ -1,6 +1,6 @@
 # Tests C library functions and types.
 #
-# Version: 20180805
+# Version: 20181221
 
 $$ExitSuccess = 0
 $$ExitFailure = 1
@@ -9,7 +9,7 @@ $$ExitIgnore = 77
 $$LibraryTests = "${library_tests}"
 $$LibraryTestsWithInput = "${library_tests_with_input}"
 
-$$InputGlob = "*"
+$$InputGlob = "${tests_input_glob}"
 
 Function GetTestProfileDirectory
 {
