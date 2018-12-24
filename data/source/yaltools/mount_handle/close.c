@@ -6,9 +6,9 @@ int mount_handle_close(
      libcerror_error_t **error )
 {
 	${library_name}_file_t *${mount_tool_source_type} = NULL;
-	static char *function = "mount_handle_close";
-	int ${mount_tool_source_type}_index       = 0;
-	int number_of_${mount_tool_source_type}s  = 0;
+	static char *function                             = "mount_handle_close";
+	int ${mount_tool_source_type}_index               = 0;
+	int number_of_${mount_tool_source_type}s          = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -21,8 +21,8 @@ int mount_handle_close(
 
 		return( -1 );
 	}
-	if( libcdata_array_get_number_of_entries(
-	     mount_handle->${mount_tool_source_type}s_array,
+	if( mount_file_system_get_number_of_${mount_tool_source_type}s(
+	     mount_handle->file_system,
 	     &number_of_${mount_tool_source_type}s,
 	     error ) != 1 )
 	{
@@ -39,10 +39,10 @@ int mount_handle_close(
 	     ${mount_tool_source_type}_index > 0;
 	     ${mount_tool_source_type}_index-- )
 	{
-		if( libcdata_array_get_entry_by_index(
-		     mount_handle->${mount_tool_source_type}s_array,
+		if( mount_file_system_get_${mount_tool_source_type}_by_index(
+		     mount_handle->file_system,
 		     ${mount_tool_source_type}_index,
-		     (intptr_t **) &${mount_tool_source_type},
+		     &${mount_tool_source_type},
 		     error ) != 1 )
 		{
 			libcerror_error_set(

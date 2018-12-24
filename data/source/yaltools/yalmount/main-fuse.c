@@ -1,15 +1,4 @@
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
-	if( memory_set(
-	     &${mount_tool_name}_fuse_operations,
-	     0,
-	     sizeof( struct fuse_operations ) ) == NULL )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to clear fuse operations.\n" );
-
-		goto on_error;
-	}
 	if( option_extended_options != NULL )
 	{
 		/* This argument is required but ignored
@@ -45,11 +34,25 @@
 			goto on_error;
 		}
 	}
-	${mount_tool_name}_fuse_operations.open    = &${mount_tool_name}_fuse_open;
-	${mount_tool_name}_fuse_operations.read    = &${mount_tool_name}_fuse_read;
-	${mount_tool_name}_fuse_operations.readdir = &${mount_tool_name}_fuse_readdir;
-	${mount_tool_name}_fuse_operations.getattr = &${mount_tool_name}_fuse_getattr;
-	${mount_tool_name}_fuse_operations.destroy = &${mount_tool_name}_fuse_destroy;
+	if( memory_set(
+	     &${mount_tool_name}_fuse_operations,
+	     0,
+	     sizeof( struct fuse_operations ) ) == NULL )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to clear fuse operations.\n" );
+
+		goto on_error;
+	}
+	${mount_tool_name}_fuse_operations.open       = &mount_fuse_open;
+	${mount_tool_name}_fuse_operations.read       = &mount_fuse_read;
+	${mount_tool_name}_fuse_operations.release    = &mount_fuse_release;
+	${mount_tool_name}_fuse_operations.opendir    = &mount_fuse_opendir;
+	${mount_tool_name}_fuse_operations.readdir    = &mount_fuse_readdir;
+	${mount_tool_name}_fuse_operations.releasedir = &mount_fuse_releasedir;
+	${mount_tool_name}_fuse_operations.getattr    = &mount_fuse_getattr;
+	${mount_tool_name}_fuse_operations.destroy    = &mount_fuse_destroy;
 
 	${mount_tool_name}_fuse_channel = fuse_mount(
 	                          mount_point,

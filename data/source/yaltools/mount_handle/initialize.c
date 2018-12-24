@@ -1,3 +1,4 @@
+
 /* Creates a mount handle
  * Make sure the value mount_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
@@ -58,16 +59,15 @@ int mount_handle_initialize(
 
 		goto on_error;
 	}
-	if( libcdata_array_initialize(
-	     &( ( *mount_handle )->${mount_tool_source_type}s_array ),
-	     0,
+	if( mount_file_system_initialize(
+	     &( ( *mount_handle )->file_system ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize ${mount_tool_source_type}s array.",
+		 "%s: unable to initialize file system.",
 		 function );
 
 		goto on_error;

@@ -1,39 +1,44 @@
-- ps: If ($$env:BUILD_ENVIRONMENT -eq "vs2008" -or $$env:BUILD_ENVIRONMENT -eq "vs2010" -or $$env:BUILD_ENVIRONMENT -eq "vs2012" -or $$env:BUILD_ENVIRONMENT -eq "vs2013" -or $$env:BUILD_ENVIRONMENT -eq "vs2015") {
-    .\syncdokan.ps1 -UseLegacyVersion }
-- ps: If ($$env:BUILD_ENVIRONMENT -eq "vs2017") {
-    .\syncdokan.ps1 }
-- cmd: if [%BUILD_ENVIRONMENT%]==[vs2010] (
+- ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild") {
+    If ($$env:TARGET -eq "vs2017") {
+      .\syncdokan.ps1 }
+    Else {
+      .\syncdokan.ps1 -UseLegacyVersion }
+    }
+- cmd: if [%TARGET%]==[vs2010] (
     pushd ..\dokan &&
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --no-python-dll --output-format 2010 msvscpp\dokan.sln &&
     rd /q /s msvscpp &&
     ren vs2010 msvscpp &&
     popd )
-- cmd: if [%BUILD_ENVIRONMENT%]==[vs2012] (
+- cmd: if [%TARGET%]==[vs2012] (
     pushd ..\dokan &&
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --no-python-dll --extend-with-x64 --output-format 2012 msvscpp\dokan.sln &&
     rd /q /s msvscpp &&
     ren vs2012 msvscpp &&
     popd )
-- cmd: if [%BUILD_ENVIRONMENT%]==[vs2013] (
+- cmd: if [%TARGET%]==[vs2013] (
     pushd ..\dokan &&
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2013 msvscpp\dokan.sln &&
     rd /q /s msvscpp &&
     ren vs2013 msvscpp &&
     popd )
-- cmd: if [%BUILD_ENVIRONMENT%]==[vs2015] (
+- cmd: if [%TARGET%]==[vs2015] (
     pushd ..\dokan &&
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2015 msvscpp\dokan.sln &&
     rd /q /s msvscpp &&
     ren vs2015 msvscpp &&
     popd )
-- ps: If ($$env:BUILD_ENVIRONMENT -eq "vs2008" -or $$env:BUILD_ENVIRONMENT -eq "vs2010" -or $$env:BUILD_ENVIRONMENT -eq "vs2012" -or $$env:BUILD_ENVIRONMENT -eq "vs2013" -or $$env:BUILD_ENVIRONMENT -eq "vs2015") {
-    .\builddokan.ps1 -UseLegacyVersion }
-- ps: If ($$env:BUILD_ENVIRONMENT -eq "vs2017") {
-    $$Configuration = $$env:CONFIGURATION;
-    If ($${Configuration} -eq "VSDebug") { $$Configuration = "Debug" }
-    .\builddokan.ps1 -Configuration $${Configuration} -Platform "Win32";
-    .\builddokan.ps1 -Configuration $${Configuration} -Platform "x64"; }
+- ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild") {
+    If ($$env:TARGET -eq "vs2017") {
+      $$Configuration = $$env:CONFIGURATION;
+      If ($${Configuration} -eq "VSDebug") {
+        $$Configuration = "Debug" }
+      .\builddokan.ps1 -Configuration $${Configuration} -Platform "Win32";
+      .\builddokan.ps1 -Configuration $${Configuration} -Platform "x64"; }
+    Else {
+      .\builddokan.ps1 -UseLegacyVersion }
+    }

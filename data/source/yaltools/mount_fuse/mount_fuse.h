@@ -37,28 +37,16 @@
 
 #endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
 
+#include "mount_file_entry.h"
+#include "mount_handle.h"
 #include "${tools_name}_libcerror.h"
+#include "${tools_name}_${library_name}.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
-
-int mount_fuse_open(
-     const char *path,
-     struct fuse_file_info *file_info );
-
-int mount_fuse_read(
-     const char *path,
-     char *buffer,
-     size_t size,
-     off_t offset,
-     struct fuse_file_info *file_info );
-
-int mount_fuse_release(
-     const char *path,
-     struct fuse_file_info *file_info );
 
 int mount_fuse_set_stat_info(
      struct stat *stat_info,
@@ -74,8 +62,23 @@ int mount_fuse_filldir(
      fuse_fill_dir_t filler,
      const char *name,
      struct stat *stat_info,
-     ${library_name}_file_entry_t *file_entry,
+     mount_file_entry_t *file_entry,
      libcerror_error_t **error );
+
+int mount_fuse_open(
+     const char *path,
+     struct fuse_file_info *file_info );
+
+int mount_fuse_read(
+     const char *path,
+     char *buffer,
+     size_t size,
+     off_t offset,
+     struct fuse_file_info *file_info );
+
+int mount_fuse_release(
+     const char *path,
+     struct fuse_file_info *file_info );
 
 int mount_fuse_opendir(
      const char *path,
@@ -95,11 +98,6 @@ int mount_fuse_releasedir(
 int mount_fuse_getattr(
      const char *path,
      struct stat *stat_info );
-
-int mount_fuse_readlink(
-     const char *path,
-     char *buffer,
-     size_t size );
 
 void mount_fuse_destroy(
       void *private_data );

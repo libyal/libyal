@@ -8,16 +8,15 @@ int mount_handle_open_parent(
 {
 	uint8_t guid[ 16 ];
 
-	${library_name}_file_t *parent_${mount_tool_source_type}            = NULL;
-	system_character_t *parent_basename_end = NULL;
-	system_character_t *parent_filename     = NULL;
-	system_character_t *parent_path         = NULL;
-	static char *function                   = "mount_handle_open_parent";
-	size_t parent_basename_length           = 0;
-	size_t parent_filename_size             = 0;
-	size_t parent_path_size                 = 0;
-	int entry_index                         = 0;
-	int result                              = 0;
+	${library_name}_file_t *parent_${mount_tool_source_type} = NULL;
+	system_character_t *parent_basename_end                  = NULL;
+	system_character_t *parent_filename                      = NULL;
+	system_character_t *parent_path                          = NULL;
+	static char *function                                    = "mount_handle_open_parent";
+	size_t parent_basename_length                            = 0;
+	size_t parent_filename_size                              = 0;
+	size_t parent_path_size                                  = 0;
+	int result                                               = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -197,13 +196,13 @@ int mount_handle_open_parent(
 	if( ${library_name}_file_open_wide(
 	     parent_${mount_tool_source_type},
 	     parent_path,
-	     ${library_name_upper_case}_OPEN_READ,
+	     LIBVHDI_OPEN_READ,
 	     error ) != 1 )
 #else
 	if( ${library_name}_file_open(
 	     parent_${mount_tool_source_type},
 	     parent_path,
-	     ${library_name_upper_case}_OPEN_READ,
+	     LIBVHDI_OPEN_READ,
 	     error ) != 1 )
 #endif
 	{
@@ -217,7 +216,7 @@ int mount_handle_open_parent(
 
 		goto on_error;
 	}
-	if( mount_handle_open_input_parent_${mount_tool_source_type}(
+	if( mount_handle_open_parent(
 	     mount_handle,
 	     parent_${mount_tool_source_type},
 	     error ) == -1 )
@@ -226,8 +225,9 @@ int mount_handle_open_parent(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open parent ${mount_tool_source_type}.",
-		 function );
+		 "%s: unable to open parent ${mount_tool_source_type}: %" PRIs_SYSTEM ".",
+		 function,
+		 parent_path );
 
 		return( -1 );
 	}
@@ -240,22 +240,21 @@ int mount_handle_open_parent(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set parent file.",
+		 "%s: unable to set parent ${mount_tool_source_type}.",
 		 function );
 
 		goto on_error;
 	}
-	if( libcdata_array_append_entry(
-	     mount_handle->inputs_array,
-	     &entry_index,
-	     (intptr_t *) parent_${mount_tool_source_type},
+	if( mount_file_system_append_${mount_tool_source_type}(
+	     mount_handle->file_system,
+	     ${mount_tool_source_type},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-		 "%s: unable to append parent ${mount_tool_source_type} to array.",
+		 "%s: unable to append parent ${mount_tool_source_type} to file system.",
 		 function );
 
 		goto on_error;

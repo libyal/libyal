@@ -20,6 +20,17 @@ int mount_handle_set_basename(
 
 		return( -1 );
 	}
+	if( mount_handle->basename != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid mount handle - basename value already set.",
+		 function );
+
+		return( -1 );
+	}
 	if( basename == NULL )
 	{
 		libcerror_error_set(
@@ -42,8 +53,7 @@ int mount_handle_set_basename(
 
 		goto on_error;
 	}
-	if( ( basename_size > (size_t) SSIZE_MAX )
-	 || ( ( sizeof( system_character_t ) * basename_size ) > (size_t) SSIZE_MAX ) )
+	if( basename_size > (size_t) ( SSIZE_MAX / sizeof( system_character_t ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -53,14 +63,6 @@ int mount_handle_set_basename(
 		 function );
 
 		goto on_error;
-	}
-	if( mount_handle->basename != NULL )
-	{
-		memory_free(
-		 mount_handle->basename );
-
-		mount_handle->basename      = NULL;
-		mount_handle->basename_size = 0;
 	}
 	mount_handle->basename = system_string_allocate(
 	                          basename_size );

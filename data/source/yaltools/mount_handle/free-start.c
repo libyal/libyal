@@ -26,39 +26,16 @@ int mount_handle_free(
 			memory_free(
 			 ( *mount_handle )->basename );
 		}
-		if( libcdata_array_free(
-		     &( ( *mount_handle )->${mount_tool_source_type}s_array ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &${library_name}_file_free,
+		if( mount_file_system_free(
+		     &( ( *mount_handle )->file_system ),
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free ${mount_tool_source_type}s array.",
+			 "%s: unable to free file system.",
 			 function );
 
 			result = -1;
 		}
-		if( memory_set(
-		     ( *mount_handle )->key_data,
-		     0,
-		     16 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear key data.",
-			 function );
-
-			result = -1;
-		}
-		memory_free(
-		 *mount_handle );
-
-		*mount_handle = NULL;
-	}
-	return( result );
-}
-
