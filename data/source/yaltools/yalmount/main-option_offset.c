@@ -1,7 +1,7 @@
 	if( option_offset != NULL )
 	{
 		if( mount_handle_set_offset(
-		     bdemount_mount_handle,
+		     ${mount_tool_name}_mount_handle,
 		     option_offset,
 		     &error ) != 1 )
 		{
