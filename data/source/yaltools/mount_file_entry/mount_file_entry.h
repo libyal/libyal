@@ -49,15 +49,15 @@ struct mount_file_entry
 	 */
 	size_t name_size;
 
-	/* The image index
+	/* The ${mount_tool_source_type} index
 	 */
-	int image_index;
+	int ${mount_tool_source_type}_index;
 };
 
 int mount_file_entry_initialize(
      mount_file_entry_t **file_entry,
      mount_file_system_t *file_system,
-     int image_index,
+     int ${mount_tool_source_type}_index,
      const system_character_t *name,
      libcerror_error_t **error );
 

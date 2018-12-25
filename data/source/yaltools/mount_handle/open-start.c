@@ -6,11 +6,11 @@ int mount_handle_open(
      const system_character_t *filename,
      libcerror_error_t **error )
 {
-	${library_name}_file_t *${mount_tool_source_type} = NULL;
-	system_character_t *basename_end                  = NULL;
-	static char *function                             = "mount_handle_open";
-	size_t basename_length                            = 0;
-	size_t filename_length                            = 0;
+	${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type} = NULL;
+	system_character_t *basename_end                                        = NULL;
+	static char *function                                                   = "mount_handle_open";
+	size_t basename_length                                                  = 0;
+	size_t filename_length                                                  = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -64,7 +64,7 @@ int mount_handle_open(
 			goto on_error;
 		}
 	}
-	if( ${library_name}_file_initialize(
+	if( ${library_name}_${mount_tool_library_type}_initialize(
 	     &${mount_tool_source_type},
 	     error ) != 1 )
 	{

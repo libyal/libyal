@@ -5,10 +5,10 @@ int mount_handle_close(
      mount_handle_t *mount_handle,
      libcerror_error_t **error )
 {
-	${library_name}_file_t *${mount_tool_source_type} = NULL;
-	static char *function                             = "mount_handle_close";
-	int ${mount_tool_source_type}_index               = 0;
-	int number_of_${mount_tool_source_type}s          = 0;
+	${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type} = NULL;
+	static char *function                                                   = "mount_handle_close";
+	int ${mount_tool_source_type}_index                                     = 0;
+	int number_of_${mount_tool_source_type}s                                = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -55,7 +55,7 @@ int mount_handle_close(
 
 			return( -1 );
 		}
-		if( ${library_name}_file_close(
+		if( ${library_name}_${mount_tool_library_type}_close(
 		     ${mount_tool_source_type},
 		     error ) != 0 )
 		{

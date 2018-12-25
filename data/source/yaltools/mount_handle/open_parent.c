@@ -3,20 +3,20 @@
  */
 int mount_handle_open_parent(
      mount_handle_t *mount_handle,
-     ${library_name}_file_t *${mount_tool_source_type},
+     ${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type},
      libcerror_error_t **error )
 {
 	uint8_t guid[ 16 ];
 
-	${library_name}_file_t *parent_${mount_tool_source_type} = NULL;
-	system_character_t *parent_basename_end                  = NULL;
-	system_character_t *parent_filename                      = NULL;
-	system_character_t *parent_path                          = NULL;
-	static char *function                                    = "mount_handle_open_parent";
-	size_t parent_basename_length                            = 0;
-	size_t parent_filename_size                              = 0;
-	size_t parent_path_size                                  = 0;
-	int result                                               = 0;
+	${library_name}_${mount_tool_library_type}_t *parent_${mount_tool_source_type} = NULL;
+	system_character_t *parent_basename_end                                        = NULL;
+	system_character_t *parent_filename                                            = NULL;
+	system_character_t *parent_path                                                = NULL;
+	static char *function                                                          = "mount_handle_open_parent";
+	size_t parent_basename_length                                                  = 0;
+	size_t parent_filename_size                                                    = 0;
+	size_t parent_path_size                                                        = 0;
+	int result                                                                     = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -29,7 +29,7 @@ int mount_handle_open_parent(
 
 		return( -1 );
 	}
-	result = ${library_name}_file_get_parent_identifier(
+	result = ${library_name}_${mount_tool_library_type}_get_parent_identifier(
 	          ${mount_tool_source_type},
 	          guid,
 	          16,
@@ -51,12 +51,12 @@ int mount_handle_open_parent(
 		return( 0 );
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_file_get_utf16_parent_filename_size(
+	result = ${library_name}_${mount_tool_library_type}_get_utf16_parent_filename_size(
 		  ${mount_tool_source_type},
 		  &parent_filename_size,
 		  error );
 #else
-	result = ${library_name}_file_get_utf8_parent_filename_size(
+	result = ${library_name}_${mount_tool_library_type}_get_utf8_parent_filename_size(
 		  ${mount_tool_source_type},
 		  &parent_filename_size,
 		  error );
@@ -110,13 +110,13 @@ int mount_handle_open_parent(
 		goto on_error;
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_file_get_utf16_parent_filename(
+	result = ${library_name}_${mount_tool_library_type}_get_utf16_parent_filename(
 		  ${mount_tool_source_type},
 		  (uint16_t *) parent_filename,
 		  parent_filename_size,
 		  error );
 #else
-	result = ${library_name}_file_get_utf8_parent_filename(
+	result = ${library_name}_${mount_tool_library_type}_get_utf8_parent_filename(
 		  ${mount_tool_source_type},
 		  (uint8_t *) parent_filename,
 		  parent_filename_size,
@@ -179,7 +179,7 @@ int mount_handle_open_parent(
 			goto on_error;
 		}
 	}
-	if( ${library_name}_file_initialize(
+	if( ${library_name}_${mount_tool_library_type}_initialize(
 	     &parent_${mount_tool_source_type},
 	     error ) != 1 )
 	{
@@ -193,13 +193,13 @@ int mount_handle_open_parent(
 		goto on_error;
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	if( ${library_name}_file_open_wide(
+	if( ${library_name}_${mount_tool_library_type}_open_wide(
 	     parent_${mount_tool_source_type},
 	     parent_path,
 	     LIBVHDI_OPEN_READ,
 	     error ) != 1 )
 #else
-	if( ${library_name}_file_open(
+	if( ${library_name}_${mount_tool_library_type}_open(
 	     parent_${mount_tool_source_type},
 	     parent_path,
 	     LIBVHDI_OPEN_READ,
@@ -231,7 +231,7 @@ int mount_handle_open_parent(
 
 		return( -1 );
 	}
-	if( ${library_name}_file_set_parent_file(
+	if( ${library_name}_${mount_tool_library_type}_set_parent_file(
 	     ${mount_tool_source_type},
 	     parent_${mount_tool_source_type},
 	     error ) != 1 )
@@ -280,7 +280,7 @@ int mount_handle_open_parent(
 on_error:
 	if( parent_${mount_tool_source_type} != NULL )
 	{
-		${library_name}_file_free(
+		${library_name}_${mount_tool_library_type}_free(
 		 &parent_${mount_tool_source_type},
 		 NULL );
 	}

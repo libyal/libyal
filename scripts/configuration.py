@@ -42,9 +42,8 @@ class ProjectConfiguration(object):
     mingw_msys2_build_dependencies (str): MinGW-MSYS2 build dependencies.
     mount_tool_additional_arguments (str): additional arguments of
         the mount tool.
-    mount_tool_has_keys_option (bool): True if the mount tool has a keys option.
-    mount_tool_has_password_option (bool): True if the mount tool has
         a password option.
+    mount_tool_library_type (str): library type used by the mount tool.
     mount_tool_mounted_description (str): description what is mounted by
         the mount tool.
     mount_tool_source_description_long (str): long description of the input
@@ -151,9 +150,9 @@ class ProjectConfiguration(object):
     self.info_tool_source_type = None
 
     # Mount tool configuration.
+    self._mount_tool_features = []
     self.mount_tool_additional_arguments = None
-    self.mount_tool_has_keys_option = False
-    self.mount_tool_has_password_option = False
+    self.mount_tool_library_type = None
     self.mount_tool_mounted_description = None
     self.mount_tool_source_description_long = None
     self.mount_tool_source_description = None
@@ -456,17 +455,30 @@ class ProjectConfiguration(object):
       config_parser (ConfigParser): configuration file parser.
 
     Raises:
-      ConfigurationError: if the mount tool source type is not supported.
+      ConfigurationError: if the mount tool features or source type is not
+          supported.
     """
-    features = self._GetOptionalConfigValue(
+    self._mount_tool_features = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'features', default_value=[])
 
-    if features:
-      self.mount_tool_has_keys_option = 'keys' in features
-      self.mount_tool_has_password_option = 'password' in features
+    if ('offset' in self._mount_tool_features and
+        'parent' in self._mount_tool_features):
+      raise errors.ConfigurationError(
+          'unsupported mount tool features - offset and parent cannot be '
+          'combined.')
 
     self.mount_tool_additional_arguments = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'additional_arguments')
+
+    self.mount_tool_library_type = self._GetOptionalConfigValue(
+        config_parser, 'mount_tool', 'library_type')
+
+    if (self.mount_tool_library_type and 
+        self.mount_tool_library_type not in ('file', 'handle', 'volume')):
+      raise errors.ConfigurationError(
+          'unsupported mount tool library type: {0:s}'.format(
+              self.mount_tool_library_type))
+
     self.mount_tool_mounted_description = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'mounted_description')
     self.mount_tool_source = self._GetOptionalConfigValue(
@@ -761,6 +773,54 @@ class ProjectConfiguration(object):
       self._has_java_bindings = os.path.exists(path)
 
     return self._has_java_bindings
+
+  def HasMountToolsFeatureKeys(self):
+    """Determines if the mount tool has a keys feature.
+
+    Returns:
+      bool: True if the mount tools has a keys feature.
+    """
+    return 'keys' in self._mount_tool_features
+
+  def HasMountToolsFeatureOffset(self):
+    """Determines if the mount tool has an offset feature.
+
+    Returns:
+      bool: True if the mount tools has an offset feature.
+    """
+    return 'offset' in self._mount_tool_features
+
+  def HasMountToolsFeatureParent(self):
+    """Determines if the mount tool has a parent feature.
+
+    Returns:
+      bool: True if the mount tools has a parent feature.
+    """
+    return 'parent' in self._mount_tool_features
+
+  def HasMountToolsFeaturePassword(self):
+    """Determines if the mount tool has a password feature.
+
+    Returns:
+      bool: True if the mount tools has a password feature.
+    """
+    return 'password' in self._mount_tool_features
+
+  def HasMountToolsFeatureRecoveryPassword(self):
+    """Determines if the mount tool has a recovery password feature.
+
+    Returns:
+      bool: True if the mount tools has a recovery password feature.
+    """
+    return 'recovery_password' in self._mount_tool_features
+
+  def HasMountToolsFeatureStartupKey(self):
+    """Determines if the mount tool has a startup key feature.
+
+    Returns:
+      bool: True if the mount tools has a startup key feature.
+    """
+    return 'startup_key' in self._mount_tool_features
 
   def HasPythonModule(self):
     """Determines if the project provides a Python module.

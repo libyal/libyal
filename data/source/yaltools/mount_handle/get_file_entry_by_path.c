@@ -7,12 +7,12 @@ int mount_handle_get_file_entry_by_path(
      mount_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	${library_name}_file_t *${mount_tool_source_type} = NULL;
-	const system_character_t *filename                = NULL;
-	static char *function                             = "mount_handle_get_file_entry_by_path";
-	size_t path_length                                = 0;
-	int ${mount_tool_source_type}_index               = 0;
-	int result                                        = 0;
+	${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type} = NULL;
+	const system_character_t *filename                                      = NULL;
+	static char *function                                                   = "mount_handle_get_file_entry_by_path";
+	size_t path_length                                                      = 0;
+	int ${mount_tool_source_type}_index                                     = 0;
+	int result                                                              = 0;
 
 	if( mount_handle == NULL )
 	{

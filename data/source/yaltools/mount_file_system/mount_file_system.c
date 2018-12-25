@@ -114,7 +114,7 @@ int mount_file_system_initialize(
 		return( -1 );
 	}
 	if( libcdata_array_initialize(
-	     &( ( *file_system )->images_array ),
+	     &( ( *file_system )->${mount_tool_source_type}s_array ),
 	     0,
 	     error ) != 1 )
 	{
@@ -122,7 +122,7 @@ int mount_file_system_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize images array.",
+		 "%s: unable to initialize ${mount_tool_source_type}s array.",
 		 function );
 
 		goto on_error;
@@ -203,15 +203,15 @@ int mount_file_system_free(
 			 ( *file_system )->path_prefix );
 		}
 		if( libcdata_array_free(
-		     &( ( *file_system )->images_array ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &${library_name}_file_free,
+		     &( ( *file_system )->${mount_tool_source_type}s_array ),
+		     (int (*)(intptr_t **, libcerror_error_t **)) &${library_name}_${mount_tool_library_type}_free,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free images array.",
+			 "%s: unable to free ${mount_tool_source_type}s array.",
 			 function );
 
 			result = -1;
@@ -231,10 +231,10 @@ int mount_file_system_signal_abort(
      mount_file_system_t *file_system,
      libcerror_error_t **error )
 {
-	${library_name}_file_t *image = NULL;
-	static char *function = "mount_file_system_signal_abort";
-	int image_index       = 0;
-	int number_of_images  = 0;
+	${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type} = NULL;
+	static char *function                                                   = "mount_file_system_signal_abort";
+	int ${mount_tool_source_type}_index                                     = 0;
+	int number_of_${mount_tool_source_type}s                                = 0;
 
 	if( file_system == NULL )
 	{
@@ -248,50 +248,50 @@ int mount_file_system_signal_abort(
 		return( -1 );
 	}
 	if( libcdata_array_get_number_of_entries(
-	     file_system->images_array,
-	     &number_of_images,
+	     file_system->${mount_tool_source_type}s_array,
+	     &number_of_${mount_tool_source_type}s,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of images.",
+		 "%s: unable to retrieve number of ${mount_tool_source_type}s.",
 		 function );
 
 		return( -1 );
 	}
-	for( image_index = number_of_images - 1;
-	     image_index > 0;
-	     image_index-- )
+	for( ${mount_tool_source_type}_index = number_of_${mount_tool_source_type}s - 1;
+	     ${mount_tool_source_type}_index > 0;
+	     ${mount_tool_source_type}_index-- )
 	{
 		if( libcdata_array_get_entry_by_index(
-		     file_system->images_array,
-		     image_index,
-		     (intptr_t **) &image,
+		     file_system->${mount_tool_source_type}s_array,
+		     ${mount_tool_source_type}_index,
+		     (intptr_t **) &${mount_tool_source_type},
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve image: %d.",
+			 "%s: unable to retrieve ${mount_tool_source_type}: %d.",
 			 function,
-			 image_index );
+			 ${mount_tool_source_type}_index );
 
 			return( -1 );
 		}
-		if( ${library_name}_file_signal_abort(
-		     image,
+		if( ${library_name}_${mount_tool_library_type}_signal_abort(
+		     ${mount_tool_source_type},
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to signal image: %d to abort.",
+			 "%s: unable to signal ${mount_tool_source_type}: %d to abort.",
 			 function,
-			 image_index );
+			 ${mount_tool_source_type}_index );
 
 			return( -1 );
 		}
@@ -412,15 +412,15 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the number of images
+/* Retrieves the number of ${mount_tool_source_type}s
  * Returns 1 if successful or -1 on error
  */
-int mount_file_system_get_number_of_images(
+int mount_file_system_get_number_of_${mount_tool_source_type}s(
      mount_file_system_t *file_system,
-     int *number_of_images,
+     int *number_of_${mount_tool_source_type}s,
      libcerror_error_t **error )
 {
-	static char *function = "mount_file_system_get_number_of_images";
+	static char *function = "mount_file_system_get_number_of_${mount_tool_source_type}s";
 
 	if( file_system == NULL )
 	{
@@ -434,15 +434,15 @@ int mount_file_system_get_number_of_images(
 		return( -1 );
 	}
 	if( libcdata_array_get_number_of_entries(
-	     file_system->images_array,
-	     number_of_images,
+	     file_system->${mount_tool_source_type}s_array,
+	     number_of_${mount_tool_source_type}s,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of images.",
+		 "%s: unable to retrieve number of ${mount_tool_source_type}s.",
 		 function );
 
 		return( -1 );
@@ -488,16 +488,16 @@ int mount_file_system_get_mounted_timestamp(
 	return( 1 );
 }
 
-/* Retrieves a specific image
+/* Retrieves a specific ${mount_tool_source_type}
  * Returns 1 if successful or -1 on error
  */
-int mount_file_system_get_image_by_index(
+int mount_file_system_get_${mount_tool_source_type}_by_index(
      mount_file_system_t *file_system,
-     int image_index,
-     ${library_name}_file_t **image,
+     int ${mount_tool_source_type}_index,
+     ${library_name}_${mount_tool_library_type}_t **${mount_tool_source_type},
      libcerror_error_t **error )
 {
-	static char *function = "mount_file_system_get_image_by_index";
+	static char *function = "mount_file_system_get_${mount_tool_source_type}_by_index";
 
 	if( file_system == NULL )
 	{
@@ -511,33 +511,33 @@ int mount_file_system_get_image_by_index(
 		return( -1 );
 	}
 	if( libcdata_array_get_entry_by_index(
-	     file_system->images_array,
-	     image_index,
-	     (intptr_t **) image,
+	     file_system->${mount_tool_source_type}s_array,
+	     ${mount_tool_source_type}_index,
+	     (intptr_t **) ${mount_tool_source_type},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve image: %d.",
+		 "%s: unable to retrieve ${mount_tool_source_type}: %d.",
 		 function,
-		 image_index );
+		 ${mount_tool_source_type}_index );
 
 		return( -1 );
 	}
 	return( 1 );
 }
 
-/* Append an image to the file system
+/* Appends a ${mount_tool_source_type} to the file system
  * Returns 1 if successful or -1 on error
  */
-int mount_file_system_append_image(
+int mount_file_system_append_${mount_tool_source_type}(
      mount_file_system_t *file_system,
-     ${library_name}_file_t *image,
+     ${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type},
      libcerror_error_t **error )
 {
-	static char *function = "mount_file_system_append_image";
+	static char *function = "mount_file_system_append_${mount_tool_source_type}";
 	int entry_index       = 0;
 
 	if( file_system == NULL )
@@ -552,16 +552,16 @@ int mount_file_system_append_image(
 		return( -1 );
 	}
 	if( libcdata_array_append_entry(
-	     file_system->images_array,
+	     file_system->${mount_tool_source_type}s_array,
 	     &entry_index,
-	     (intptr_t *) image,
+	     (intptr_t *) ${mount_tool_source_type},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-		 "%s: unable to append image to array.",
+		 "%s: unable to append ${mount_tool_source_type} to array.",
 		 function );
 
 		return( -1 );
@@ -569,21 +569,21 @@ int mount_file_system_append_image(
 	return( 1 );
 }
 
-/* Retrieves the image index from a path
- * Returns 1 if successful, 0 if no such image index or -1 on error
+/* Retrieves the ${mount_tool_source_type} index from a path
+ * Returns 1 if successful, 0 if no such ${mount_tool_source_type} index or -1 on error
  */
-int mount_file_system_get_image_index_from_path(
+int mount_file_system_get_${mount_tool_source_type}_index_from_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
-     int *image_index,
+     int *${mount_tool_source_type}_index,
      libcerror_error_t **error )
 {
-	static char *function        = "mount_file_system_get_image_index_from_path";
-	system_character_t character = 0;
-	size_t path_index            = 0;
-	int image_number             = 0;
-	int result                   = 0;
+	static char *function                 = "mount_file_system_get_${mount_tool_source_type}_index_from_path";
+	system_character_t character          = 0;
+	size_t path_index                     = 0;
+	int ${mount_tool_source_type}_number = 0;
+	int result                            = 0;
 
 	if( file_system == NULL )
 	{
@@ -629,13 +629,13 @@ int mount_file_system_get_image_index_from_path(
 
 		return( -1 );
 	}
-	if( image_index == NULL )
+	if( ${mount_tool_source_type}_index == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid image index.",
+		 "%s: invalid ${mount_tool_source_type} index.",
 		 function );
 
 		return( -1 );
@@ -646,7 +646,7 @@ int mount_file_system_get_image_index_from_path(
 	if( ( path_length == 1 )
 	 && ( path[ 0 ] == file_system->path_prefix[ 0 ] ) )
 	{
-		*image_index = -1;
+		*${mount_tool_source_type}_index = -1;
 
 		return( 1 );
 	}
@@ -670,8 +670,9 @@ int mount_file_system_get_image_index_from_path(
 	{
 		return( 0 );
 	}
-	image_number = 0;
-	path_index   = file_system->path_prefix_size - 1;
+	${mount_tool_source_type}_number = 0;
+
+	path_index = file_system->path_prefix_size - 1;
 
 	while( path_index < path_length )
 	{
@@ -682,28 +683,28 @@ int mount_file_system_get_image_index_from_path(
 		{
 			return( 0 );
 		}
-		image_number *= 10;
-		image_number += character - (system_character_t) '0';
+		${mount_tool_source_type}_number *= 10;
+		${mount_tool_source_type}_number += character - (system_character_t) '0';
 	}
-	*image_index = image_number - 1;
+	*${mount_tool_source_type}_index = ${mount_tool_source_type}_number - 1;
 
 	return( 1 );
 }
 
-/* Retrieves the path rrom an image index.
+/* Retrieves the path from a ${mount_tool_source_type} index.
  * Returns 1 if successful or -1 on error
  */
-int mount_file_system_get_path_from_image_index(
+int mount_file_system_get_path_from_${mount_tool_source_type}_index(
      mount_file_system_t *file_system,
-     int image_index,
+     int ${mount_tool_source_type}_index,
      system_character_t *path,
      size_t path_size,
      libcerror_error_t **error )
 {
-	static char *function     = "mount_file_system_get_path_from_image_index";
-	size_t path_index         = 0;
-	size_t required_path_size = 0;
-	int image_number          = 0;
+	static char *function                 = "mount_file_system_get_path_from_${mount_tool_source_type}_index";
+	size_t path_index                     = 0;
+	size_t required_path_size             = 0;
+	int ${mount_tool_source_type}_number = 0;
 
 	if( file_system == NULL )
 	{
@@ -750,13 +751,14 @@ int mount_file_system_get_path_from_image_index(
 		return( -1 );
 	}
         required_path_size = file_system->path_prefix_size;
-	image_number       = image_index + 1;
 
-	while( image_number > 0 )
+	${mount_tool_source_type}_number = ${mount_tool_source_type}_index + 1;
+
+	while( ${mount_tool_source_type}_number > 0 )
 	{
 		required_path_size++;
 
-		image_number /= 10;
+		${mount_tool_source_type}_number /= 10;
 	}
 	if( path_size <= required_path_size )
 	{
@@ -783,16 +785,17 @@ int mount_file_system_get_path_from_image_index(
 
 		return( -1 );
 	}
-	path_index   = required_path_size - 1;
-	image_number = image_index + 1;
+	path_index = required_path_size - 1;
+
+	${mount_tool_source_type}_number = ${mount_tool_source_type}_index + 1;
 
 	path[ path_index-- ] = 0;
 
-	while( image_number > 0 )
+	while( ${mount_tool_source_type}_number > 0 )
 	{
-		path[ path_index-- ] = (system_character_t) '0' + ( image_number % 10 );
+		path[ path_index-- ] = (system_character_t) '0' + ( ${mount_tool_source_type}_number % 10 );
 
-		image_number /= 10;
+		${mount_tool_source_type}_number /= 10;
 	}
 	return( 1 );
 }

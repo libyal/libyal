@@ -21,7 +21,7 @@
 
 		goto on_error;
 	}
-	${mount_tool_name}_dokan_options.Version     = 600;
+	${mount_tool_name}_dokan_options.Version     = DOKAN_VERSION;
 	${mount_tool_name}_dokan_options.ThreadCount = 0;
 	${mount_tool_name}_dokan_options.MountPoint  = mount_point;
 

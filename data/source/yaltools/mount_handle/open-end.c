@@ -17,7 +17,7 @@
 on_error:
 	if( ${mount_tool_source_type} != NULL )
 	{
-		${library_name}_file_free(
+		${library_name}_${mount_tool_library_type}_free(
 		 &${mount_tool_source_type},
 		 NULL );
 	}

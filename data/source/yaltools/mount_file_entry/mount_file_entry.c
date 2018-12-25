@@ -50,7 +50,7 @@
 int mount_file_entry_initialize(
      mount_file_entry_t **file_entry,
      mount_file_system_t *file_system,
-     int image_index,
+     int ${mount_tool_source_type}_index,
      const system_character_t *name,
      libcerror_error_t **error )
 {
@@ -166,7 +166,8 @@ int mount_file_entry_initialize(
 		( *file_entry )->name_size = name_length + 1;
 	}
 	( *file_entry )->file_system = file_system;
-	( *file_entry )->image_index = image_index;
+
+	( *file_entry )->${mount_tool_source_type}_index = ${mount_tool_source_type}_index;
 
 	return( 1 );
 
@@ -264,7 +265,7 @@ int mount_file_entry_get_parent_file_entry(
 
 		return( -1 );
 	}
-	if( file_entry->image_index != -1 )
+	if( file_entry->${mount_tool_source_type}_index != -1 )
 	{
 		if( mount_file_entry_initialize(
 		     parent_file_entry,
@@ -475,7 +476,7 @@ int mount_file_entry_get_file_mode(
 
 		return( -1 );
 	}
-	if( file_entry->image_index == -1 )
+	if( file_entry->${mount_tool_source_type}_index == -1 )
 	{
 		*file_mode = S_IFDIR | 0555;
 	}
@@ -618,8 +619,8 @@ int mount_file_entry_get_number_of_sub_file_entries(
      int *number_of_sub_file_entries,
      libcerror_error_t **error )
 {
-	static char *function = "mount_file_entry_get_number_of_sub_file_entries";
-	int number_of_images  = 0;
+	static char *function                     = "mount_file_entry_get_number_of_sub_file_entries";
+	int number_of_${mount_tool_source_type}s = 0;
 
 	if( file_entry == NULL )
 	{
@@ -643,36 +644,36 @@ int mount_file_entry_get_number_of_sub_file_entries(
 
 		return( -1 );
 	}
-	if( file_entry->image_index == -1 )
+	if( file_entry->${mount_tool_source_type}_index == -1 )
 	{
-		if( mount_file_system_get_number_of_images(
+		if( mount_file_system_get_number_of_${mount_tool_source_type}s(
 		     file_entry->file_system,
-		     &number_of_images,
+		     &number_of_${mount_tool_source_type}s,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of images.",
+			 "%s: unable to retrieve number of ${mount_tool_source_type}s.",
 			 function );
 
 			return( -1 );
 		}
-		if( ( number_of_images < 0 )
-		 || ( number_of_images > 99 ) )
+		if( ( number_of_${mount_tool_source_type}s < 0 )
+		 || ( number_of_${mount_tool_source_type}s > 99 ) )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 			 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported number of images.",
+			 "%s: unsupported number of ${mount_tool_source_type}s.",
 			 function );
 
 			return( -1 );
 		}
 	}
-	*number_of_sub_file_entries = number_of_images;
+	*number_of_sub_file_entries = number_of_${mount_tool_source_type}s;
 
 	return( 1 );
 }
@@ -750,7 +751,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		return( -1 );
 	}
-	if( mount_file_system_get_path_from_image_index(
+	if( mount_file_system_get_path_from_${mount_tool_source_type}_index(
 	     file_entry->file_system,
 	     sub_file_entry_index,
 	     path,
@@ -797,9 +798,9 @@ ssize_t mount_file_entry_read_buffer_at_offset(
          off64_t offset,
          libcerror_error_t **error )
 {
-	${library_name}_file_t *image = NULL;
-	static char *function = "mount_file_entry_read_buffer_at_offset";
-	ssize_t read_count    = 0;
+	${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type} = NULL;
+	static char *function                                                   = "mount_file_entry_read_buffer_at_offset";
+	ssize_t read_count                                                      = 0;
 
 	if( file_entry == NULL )
 	{
@@ -812,24 +813,24 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 
 		return( -1 );
 	}
-	if( mount_file_system_get_image_by_index(
+	if( mount_file_system_get_${mount_tool_source_type}_by_index(
 	     file_entry->file_system,
-	     file_entry->image_index,
-	     &image,
+	     file_entry->${mount_tool_source_type}_index,
+	     &${mount_tool_source_type},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve image: %d from file system.",
+		 "%s: unable to retrieve ${mount_tool_source_type}: %d from file system.",
 		 function,
-		 file_entry->image_index );
+		 file_entry->${mount_tool_source_type}_index );
 
 		return( -1 );
 	}
-	read_count = ${library_name}_file_read_buffer_at_offset(
-	              image,
+	read_count = ${library_name}_${mount_tool_library_type}_read_buffer_at_offset(
+	              ${mount_tool_source_type},
 	              buffer,
 	              buffer_size,
 	              offset,
@@ -841,11 +842,11 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read buffer at offset: %" PRIi64 " (0x%08" PRIx64 ") from image: %d.",
+		 "%s: unable to read buffer at offset: %" PRIi64 " (0x%08" PRIx64 ") from ${mount_tool_source_type}: %d.",
 		 function,
 		 offset,
 		 offset,
-		 file_entry->image_index );
+		 file_entry->${mount_tool_source_type}_index );
 
 		return( -1 );
 	}
@@ -860,8 +861,8 @@ int mount_file_entry_get_size(
      size64_t *size,
      libcerror_error_t **error )
 {
-	${library_name}_file_t *image = NULL;
-	static char *function = "mount_file_entry_get_size";
+	${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type} = NULL;
+	static char *function                                                   = "mount_file_entry_get_size";
 
 	if( file_entry == NULL )
 	{
@@ -874,7 +875,7 @@ int mount_file_entry_get_size(
 
 		return( -1 );
 	}
-	if( file_entry->image_index == -1 )
+	if( file_entry->${mount_tool_source_type}_index == -1 )
 	{
 		if( size == NULL )
 		{
@@ -891,24 +892,24 @@ int mount_file_entry_get_size(
 	}
 	else
 	{
-		if( mount_file_system_get_image_by_index(
+		if( mount_file_system_get_${mount_tool_source_type}_by_index(
 		     file_entry->file_system,
-		     file_entry->image_index,
-		     &image,
+		     file_entry->${mount_tool_source_type}_index,
+		     &${mount_tool_source_type},
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve image: %d from file system.",
+			 "%s: unable to retrieve ${mount_tool_source_type}: %d from file system.",
 			 function,
-			 file_entry->image_index );
+			 file_entry->${mount_tool_source_type}_index );
 
 			return( -1 );
 		}
-		if( ${library_name}_file_get_media_size(
-		     image,
+		if( ${library_name}_${mount_tool_library_type}_get_media_size(
+		     ${mount_tool_source_type},
 		     size,
 		     error ) != 1 )
 		{
@@ -916,9 +917,9 @@ int mount_file_entry_get_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve media size from image: %d.",
+			 "%s: unable to retrieve media size from ${mount_tool_source_type}: %d.",
 			 function,
-			 file_entry->image_index );
+			 file_entry->${mount_tool_source_type}_index );
 
 			return( -1 );
 		}

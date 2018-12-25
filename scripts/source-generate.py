@@ -885,6 +885,28 @@ class SourceFileGenerator(object):
     self._types_include_header_file = None
     self._types_include_header_path = None
 
+  def _CorrectDescriptionSpelling(self, name, output_filename):
+    """Corrects the spelling of a type or value decription.
+
+    Args:
+      name (str): type or value name.
+      output_filename (str): path of the output file.
+    """
+    if not name or name[0] not in ('a', 'e', 'i', 'o', ''):
+      return
+
+    with open(output_filename, 'rb') as file_object:
+      lines = file_object.readlines()
+
+    name = name.replace('_', ' ')
+    description = ' a {0:s}'.format(name)
+    corrected_description = ' an {0:s}'.format(name)
+
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        line = line.replace(description, corrected_description)
+        file_object.write(line)
+
   def _GenerateSection(
       self, template_filename, template_mappings, output_writer,
       output_filename, access_mode='wb'):
@@ -909,6 +931,25 @@ class SourceFileGenerator(object):
 
     output_writer.WriteFile(
         output_filename, output_data, access_mode=access_mode)
+
+  def _GenerateSections(
+      self, template_filenames, template_mappings, output_writer,
+      output_filename, access_mode='wb'):
+    """Generates a section from template filenames.
+
+    Args:
+      template_filenames (list[str])): names of the template files.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): name of the output file.
+      access_mode (Optional[str]): output file access mode.
+    """
+    for template_filename in template_filenames:
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode=access_mode)
+      access_mode = 'ab'
 
   def _GetDefinitionsIncludeHeaderFile(self, project_configuration):
     """Retrieves the definitions include header file.
@@ -3587,28 +3628,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
 
     return True
 
-  def _CorrectDescriptionSpelling(self, name, output_filename):
-    """Corrects the spelling of a type or value decription.
-
-    Args:
-      name (str): type or value name.
-      output_filename (str): path of the output file.
-    """
-    if not name or name[0] not in ('a', 'e', 'i', 'o', ''):
-      return
-
-    with open(output_filename, 'rb') as file_object:
-      lines = file_object.readlines()
-
-    name = name.replace('_', ' ')
-    description = ' a {0:s}'.format(name)
-    corrected_description = ' an {0:s}'.format(name)
-
-    with open(output_filename, 'wb') as file_object:
-      for line in lines:
-        line = line.replace(description, corrected_description)
-        file_object.write(line)
-
   def _GenerateDefinitionsHeaderFile(
       self, project_configuration, template_mappings, definitions_name,
       enum_declaration, output_writer):
@@ -5678,6 +5697,13 @@ class ScriptFileGenerator(SourceFileGenerator):
     """
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
+    mount_tool_name = '{0:s}mount'.format(
+        project_configuration.library_name_suffix)
+
+    mount_tool_filename = '{0:s}.c'.format(mount_tool_name)
+    mount_tool_filename = os.path.join(
+        project_configuration.tools_directory, mount_tool_filename)
+
     template_mappings = self._GetTemplateMappings(project_configuration)
     template_mappings['local_libs'] = ' '.join(
         sorted(makefile_am_file.libraries))
@@ -5691,10 +5717,13 @@ class ScriptFileGenerator(SourceFileGenerator):
 
       output_filename = directory_entry
 
-      if (not os.path.exists(output_filename) and directory_entry in (
-          'builddokan.ps1', 'syncbzip2.ps1', 'syncdokan.ps1',
-          'syncwinflexbison.ps1', 'synczlib.ps1')):
+      if not os.path.exists(output_filename) and directory_entry in (
+          'syncbzip2.ps1', 'syncwinflexbison.ps1', 'synczlib.ps1'):
         continue
+
+      if directory_entry in ('builddokan.ps1', 'syncdokan.ps1'):
+        if not os.path.exists(mount_tool_filename):
+          continue
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
@@ -9015,9 +9044,14 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_entry')
 
+    template_mappings['mount_tool_source_type'] = (
+        project_configuration.mount_tool_source_type)
+
     template_filename = os.path.join(template_directory, 'mount_file_entry.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
+
+    del template_mappings['mount_tool_source_type']
 
   def _GenerateMountFileEntrySourceFile(
       self, project_configuration, template_mappings, output_writer,
@@ -9034,9 +9068,21 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_entry')
 
+    template_mappings['mount_tool_library_type'] = (
+        project_configuration.mount_tool_library_type)
+    template_mappings['mount_tool_source_type'] = (
+        project_configuration.mount_tool_source_type)
+
     template_filename = os.path.join(template_directory, 'mount_file_entry.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
+
+    del template_mappings['mount_tool_library_type']
+    del template_mappings['mount_tool_source_type']
+
+    self._CorrectDescriptionSpelling(
+        project_configuration.mount_tool_source_type, output_filename)
+    self._SortVariableDeclarations(output_filename)
 
   def _GenerateMountFileSystemHeaderFile(
       self, project_configuration, template_mappings, output_writer,
@@ -9053,9 +9099,17 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_system')
 
+    template_mappings['mount_tool_library_type'] = (
+        project_configuration.mount_tool_library_type)
+    template_mappings['mount_tool_source_type'] = (
+        project_configuration.mount_tool_source_type)
+
     template_filename = os.path.join(template_directory, 'mount_file_system.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
+
+    del template_mappings['mount_tool_library_type']
+    del template_mappings['mount_tool_source_type']
 
   def _GenerateMountFileSystemSourceFile(
       self, project_configuration, template_mappings, output_writer,
@@ -9072,9 +9126,21 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_system')
 
+    template_mappings['mount_tool_library_type'] = (
+        project_configuration.mount_tool_library_type)
+    template_mappings['mount_tool_source_type'] = (
+        project_configuration.mount_tool_source_type)
+
     template_filename = os.path.join(template_directory, 'mount_file_system.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
+
+    del template_mappings['mount_tool_library_type']
+    del template_mappings['mount_tool_source_type']
+
+    self._CorrectDescriptionSpelling(
+        project_configuration.mount_tool_source_type, output_filename)
+    self._SortVariableDeclarations(output_filename)
 
   def _GenerateMountFuseHeaderFile(
       self, project_configuration, template_mappings, output_writer,
@@ -9131,87 +9197,62 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_handle')
 
+    template_names = ['header.h', 'includes.h', 'struct-start.h']
+
+    if project_configuration.HasMountToolsFeatureKeys():
+      template_names.append('struct-keys.h')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('struct-offset.h')
+
+    if project_configuration.HasMountToolsFeaturePassword():
+      template_names.append('struct-password.h')
+
+    if project_configuration.HasMountToolsFeatureRecoveryPassword():
+      template_names.append('struct-recovery_password.h')
+
+    if project_configuration.HasMountToolsFeatureStartupKey():
+      template_names.append('struct-startup_key.h')
+
+    template_names.extend([
+        'struct-end.h', 'initialize.h', 'free.h', 'signal_abort.h',
+        'set_basename.h'])
+
+    if project_configuration.HasMountToolsFeatureKeys():
+      template_names.append('set_keys.h')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('set_offset.h')
+
+    if project_configuration.HasMountToolsFeaturePassword():
+      template_names.append('set_password.h')
+
+    if project_configuration.HasMountToolsFeatureRecoveryPassword():
+      template_names.append('set_recovery_password.h')
+
+    if project_configuration.HasMountToolsFeatureStartupKey():
+      template_names.append('set_startup_key.h')
+
+    template_names.extend(['set_path_prefix.h', 'open.h'])
+
+    if project_configuration.HasMountToolsFeatureParent():
+      template_names.append('open_parent.h')
+
+    template_names.extend(['close.h', 'get_file_entry_by_path.h', 'footer.h'])
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    template_mappings['mount_tool_library_type'] = (
+        project_configuration.mount_tool_library_type)
     template_mappings['mount_tool_source_type'] = (
         project_configuration.mount_tool_source_type)
 
-    template_filename = os.path.join(template_directory, 'header.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
-    template_filename = os.path.join(template_directory, 'includes.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'struct-start.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    if project_configuration.mount_tool_has_keys_option:
-      template_filename = os.path.join(template_directory, 'struct-keys.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    if project_configuration.mount_tool_has_password_option:
-      template_filename = os.path.join(template_directory, 'struct-password.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'struct-end.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    for template_name in (
-        'initialize.h', 'free.h', 'signal_abort.h', 'set_basename.h'):
-      template_filename = os.path.join(template_directory, template_name)
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    if project_configuration.mount_tool_has_keys_option:
-      template_filename = os.path.join(template_directory, 'set_keys.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    if project_configuration.mount_tool_has_password_option:
-      template_filename = os.path.join(template_directory, 'set_password.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'set_path_prefix.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'open.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    # TODO: improve check by checking function prototypes.
-    if project_configuration.library_name == 'libvhdi':
-      template_filename = os.path.join(template_directory, 'open_parent.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    for template_name in ('close.h', 'get_file_entry_by_path.h'):
-      template_filename = os.path.join(template_directory, template_name)
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'footer.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
+    del template_mappings['mount_tool_library_type']
     del template_mappings['mount_tool_source_type']
 
   def _GenerateMountHandleSourceFile(
@@ -9228,128 +9269,79 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_handle')
 
+    template_names = ['header.c', 'includes.c']
+
+    if project_configuration.HasMountToolsFeatureKeys():
+      template_names.append('includes-keys.c')
+
+    template_names.extend(['initialize.c', 'free-start.c'])
+
+    if project_configuration.HasMountToolsFeatureKeys():
+      template_names.append('free-keys.c')
+
+    template_names.extend(['free-end.c', 'signal_abort.c', 'set_basename.c'])
+
+    if project_configuration.HasMountToolsFeatureKeys():
+      template_names.append('set_keys.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('set_offset.c')
+
+    if project_configuration.HasMountToolsFeaturePassword():
+      template_names.append('set_password.c')
+
+    if project_configuration.HasMountToolsFeatureRecoveryPassword():
+      template_names.append('set_recovery_password.c')
+
+    if project_configuration.HasMountToolsFeatureStartupKey():
+      template_names.append('set_startup_key.c')
+
+    template_names.extend(['set_path_prefix.c', 'open-start.c'])
+
+    if project_configuration.HasMountToolsFeatureKeys():
+      template_names.append('open-keys.c')
+
+    if project_configuration.HasMountToolsFeaturePassword():
+      template_names.append('open-password.c')
+
+    if project_configuration.HasMountToolsFeatureRecoveryPassword():
+      template_names.append('open-recovery_password.c')
+
+    if project_configuration.HasMountToolsFeatureStartupKey():
+      template_names.append('open-startup_key.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('open-open_with_offset.c')
+    else:
+      template_names.append('open-open.c')
+
+    if project_configuration.HasMountToolsFeatureParent():
+      template_names.append('open-open_parent.c')
+
+    template_names.append('open-end.c')
+
+    if project_configuration.HasMountToolsFeatureParent():
+      template_names.append('open_parent.c')
+
+    template_names.extend(['close.c', 'get_file_entry_by_path.c'])
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    template_mappings['mount_tool_library_type'] = (
+        project_configuration.mount_tool_library_type)
     template_mappings['mount_tool_source_type'] = (
         project_configuration.mount_tool_source_type)
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
-    template_filename = os.path.join(template_directory, 'includes.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    if project_configuration.mount_tool_has_keys_option:
-      template_filename = os.path.join(template_directory, 'includes-keys.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'initialize.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'free-start.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    if project_configuration.mount_tool_has_keys_option:
-      template_filename = os.path.join(template_directory, 'free-keys.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    # TODO: add free-password.c
-
-    template_filename = os.path.join(template_directory, 'free-end.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'signal_abort.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'set_basename.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    if project_configuration.mount_tool_has_keys_option:
-      template_filename = os.path.join(template_directory, 'set_keys.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    if project_configuration.mount_tool_has_password_option:
-      template_filename = os.path.join(template_directory, 'set_password.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'set_path_prefix.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'open-start.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    if project_configuration.mount_tool_has_keys_option:
-      template_filename = os.path.join(template_directory, 'open-keys.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    if project_configuration.mount_tool_has_password_option:
-      template_filename = os.path.join(template_directory, 'open-password.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'open-open.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    # TODO: improve check by checking function prototypes.
-    if project_configuration.library_name == 'libvhdi':
-      template_filename = os.path.join(template_directory, 'open-open_parent.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'open-end.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    # TODO: improve check by checking function prototypes.
-    if project_configuration.library_name == 'libvhdi':
-      template_filename = os.path.join(template_directory, 'open_parent.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'close.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(
-        template_directory, 'get_file_entry_by_path.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
+    del template_mappings['mount_tool_library_type']
     del template_mappings['mount_tool_source_type']
 
+    self._CorrectDescriptionSpelling(
+        project_configuration.mount_tool_source_type, output_filename)
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
 
@@ -9527,13 +9519,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     del template_mappings['mount_tool_options_switch']
     del template_mappings['mount_tool_options_variable_declarations']
 
-    if project_configuration.mount_tool_has_keys_option:
+    if project_configuration.HasMountToolsFeatureKeys():
       template_filename = os.path.join(template_directory, 'main-option_keys.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-    if project_configuration.mount_tool_has_password_option:
+    if project_configuration.HasMountToolsFeaturePassword():
       template_filename = os.path.join(
           template_directory, 'main-option_password.c')
       self._GenerateSection(
@@ -9692,13 +9684,41 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     # TODO: sort options with lower case before upper case.
     mount_tool_options = [('h', '', 'shows this help')]
 
-    if project_configuration.mount_tool_has_keys_option:
-      mount_tool_options.append(
-          ('k', 'keys', 'the key formatted in base16'))
+    if project_configuration.HasMountToolsFeatureKeys():
+      # TODO: set keys option description via configuation
+      if project_configuration.library_name == 'libbde':
+        option = (
+            'k', 'keys', ('the full volume encryption key and tweak key '
+                          'formatted in base16 and separated by a : character '
+                          'e.g. FVEK:TWEAK'))
+      else:
+        option = ('k', 'keys', 'the key formatted in base16')
 
-    if project_configuration.mount_tool_has_password_option:
-      mount_tool_options.append(
-          ('p', 'password', 'specify the password/passphrase'))
+      mount_tool_options.append(option)
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      option = ('o', 'offset', 'specify the {0:s} offset in bytes'.format(
+          project_configuration.mount_tool_source_type))
+
+      mount_tool_options.append(option)
+
+    if project_configuration.HasMountToolsFeaturePassword():
+      option = ('p', 'password', 'specify the password/passphrase')
+
+      mount_tool_options.append(option)
+
+    if project_configuration.HasMountToolsFeatureRecoveryPassword():
+      option = (
+          'r', 'recovey_password', 'specify the recovery password/passphrase')
+
+      mount_tool_options.append(option)
+
+    if project_configuration.HasMountToolsFeatureStartupKey():
+      option = (
+          's', 'filename', ('specify the file containing the startup key. '
+                            'Typically this file has the extension .BEK'))
+
+      mount_tool_options.append(option)
 
     mount_tool_options.extend([
         ('v', '', ('verbose output to stderr, while {0:s} will remain '
