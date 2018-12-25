@@ -7,6 +7,7 @@ int mount_handle_open(
      libcerror_error_t **error )
 {
 	${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type} = NULL;
+	libbfio_handle_t *file_io_handle                                        = NULL;
 	system_character_t *basename_end                                        = NULL;
 	static char *function                                                   = "mount_handle_open";
 	size_t basename_length                                                  = 0;

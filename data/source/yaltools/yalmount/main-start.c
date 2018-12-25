@@ -20,9 +20,9 @@ ${mount_tool_options_variable_declarations}
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations ${mount_tool_name}_fuse_operations;
 
-	struct fuse_args ${mount_tool_name}_fuse_arguments = FUSE_ARGS_INIT(0, NULL);
-	struct fuse_chan *${mount_tool_name}_fuse_channel  = NULL;
-	struct fuse *${mount_tool_name}_fuse_handle        = NULL;
+	struct fuse_args ${mount_tool_name}_fuse_arguments    = FUSE_ARGS_INIT(0, NULL);
+	struct fuse_chan *${mount_tool_name}_fuse_channel     = NULL;
+	struct fuse *${mount_tool_name}_fuse_handle           = NULL;
 
 #elif defined( HAVE_LIBDOKAN )
 	DOKAN_OPERATIONS ${mount_tool_name}_dokan_operations;

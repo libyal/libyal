@@ -44,6 +44,8 @@ class ProjectConfiguration(object):
         the mount tool.
         a password option.
     mount_tool_library_type (str): library type used by the mount tool.
+    mount_tool_library_type_size (str): type of size provided by the library
+        type.
     mount_tool_mounted_description (str): description what is mounted by
         the mount tool.
     mount_tool_source_description_long (str): long description of the input
@@ -153,6 +155,7 @@ class ProjectConfiguration(object):
     self._mount_tool_features = []
     self.mount_tool_additional_arguments = None
     self.mount_tool_library_type = None
+    self.mount_tool_library_type_size = None
     self.mount_tool_mounted_description = None
     self.mount_tool_source_description_long = None
     self.mount_tool_source_description = None
@@ -478,6 +481,9 @@ class ProjectConfiguration(object):
       raise errors.ConfigurationError(
           'unsupported mount tool library type: {0:s}'.format(
               self.mount_tool_library_type))
+
+    self.mount_tool_library_type_size = self._GetOptionalConfigValue(
+        config_parser, 'mount_tool', 'library_type_size', default_value='size')
 
     self.mount_tool_mounted_description = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'mounted_description')
@@ -821,6 +827,18 @@ class ProjectConfiguration(object):
       bool: True if the mount tools has a startup key feature.
     """
     return 'startup_key' in self._mount_tool_features
+
+  def HasMountToolsFeatureUnlock(self):
+    """Determines if the mount tool has a feature to unlock encrypted source.
+
+    Returns:
+      bool: True if the mount tools has a feature to unlock encrypted source.
+    """
+    return(
+        self.HasMountToolsFeatureKeys() or
+        self.HasMountToolsFeaturePassword() or
+        self.HasMountToolsFeatureRecoveryPassword() or
+        self.HasMountToolsFeatureStartupKey())
 
   def HasPythonModule(self):
     """Determines if the project provides a Python module.

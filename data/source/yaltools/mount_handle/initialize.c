@@ -1,4 +1,3 @@
-
 /* Creates a mount handle
  * Make sure the value mount_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error

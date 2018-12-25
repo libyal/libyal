@@ -46,7 +46,7 @@ struct mount_file_system
 
 	/* The mounted timestamp
 	 */
-	int64_t mounted_timestamp;
+	uint64_t mounted_timestamp;
 
 	/* The ${mount_tool_source_type}s array
 	 */
@@ -73,7 +73,7 @@ int mount_file_system_set_path_prefix(
 
 int mount_file_system_get_mounted_timestamp(
      mount_file_system_t *file_system,
-     int64_t *mounted_timestamp,
+     uint64_t *mounted_timestamp,
      libcerror_error_t **error );
 
 int mount_file_system_get_number_of_${mount_tool_source_type}s(

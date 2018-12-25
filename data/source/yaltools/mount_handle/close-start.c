@@ -70,6 +70,3 @@ int mount_handle_close(
 			return( -1 );
 		}
 	}
-	return( 0 );
-}
-

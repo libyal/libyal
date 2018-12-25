@@ -1337,6 +1337,9 @@ class SourceFileGenerator(object):
     test_include_header_start = b'#include "{0:s}_test_'.format(
         project_configuration.library_name_suffix)
 
+    tools_include_header_start = b'#include "{0:s}tools_'.format(
+        project_configuration.library_name_suffix)
+
     include_headers = []
     in_include_headers = False
 
@@ -1344,7 +1347,9 @@ class SourceFileGenerator(object):
       for line in lines:
         if (line.startswith(library_include_header_start) or
             line.startswith(python_module_include_header_start) or
-            line.startswith(test_include_header_start)):
+            line.startswith(test_include_header_start) or
+            line.startswith(tools_include_header_start) or
+            line.startswith('#include "mount_')):
           include_headers.append(line)
           in_include_headers = True
 
@@ -9068,16 +9073,37 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_entry')
 
+    template_names = [
+        'header.c', 'includes.c', 'initialize.c', 'free.c',
+        'get_parent_file_entry.c']
+
+    template_names.append('get_creation_time.c')
+
+    template_names.extend([
+        'get_access_time.c', 'get_modification_time.c',
+        'get_inode_change_time.c', 'get_file_mode.c',
+        'get_name.c', 'get_sub_file_entries.c', 'read_buffer_at_offset.c',
+        'get_size.c'])
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
     template_mappings['mount_tool_library_type'] = (
         project_configuration.mount_tool_library_type)
+    template_mappings['mount_tool_library_type_size'] = (
+        project_configuration.mount_tool_library_type_size)
+    template_mappings['mount_tool_library_type_size_description'] = (
+        project_configuration.mount_tool_library_type_size.replace('_', ' '))
     template_mappings['mount_tool_source_type'] = (
         project_configuration.mount_tool_source_type)
 
-    template_filename = os.path.join(template_directory, 'mount_file_entry.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_library_type']
+    del template_mappings['mount_tool_library_type_size']
+    del template_mappings['mount_tool_library_type_size_description']
     del template_mappings['mount_tool_source_type']
 
     self._CorrectDescriptionSpelling(
@@ -9214,9 +9240,16 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('struct-startup_key.h')
 
+    if project_configuration.HasMountToolsFeatureUnlock():
+      template_names.append('struct-is_locked.h')
+
+    template_names.append('struct-end.h')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('system_string_copy_from_64_bit_in_decimal.h')
+
     template_names.extend([
-        'struct-end.h', 'initialize.h', 'free.h', 'signal_abort.h',
-        'set_basename.h'])
+        'initialize.h', 'free.h', 'signal_abort.h', 'set_basename.h'])
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('set_keys.h')
@@ -9238,7 +9271,12 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open_parent.h')
 
-    template_names.extend(['close.h', 'get_file_entry_by_path.h', 'footer.h'])
+    template_names.append('close.h')
+
+    if project_configuration.HasMountToolsFeatureUnlock():
+      template_names.append('is_locked.h')
+
+    template_names.extend(['get_file_entry_by_path.h', 'footer.h'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -9255,6 +9293,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     del template_mappings['mount_tool_library_type']
     del template_mappings['mount_tool_source_type']
 
+    self._SortIncludeHeaders(project_configuration, output_filename)
+
   def _GenerateMountHandleSourceFile(
       self, project_configuration, template_mappings, output_writer,
       output_filename):
@@ -9269,12 +9309,20 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_handle')
 
-    template_names = ['header.c', 'includes.c']
+    template_names = ['header.c', 'includes-start.c']
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('includes-keys.c')
 
+    template_names.append('includes-end.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('system_string_copy_from_64_bit_in_decimal.c')
+
     template_names.extend(['initialize.c', 'free-start.c'])
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('free-file_io_handle.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('free-keys.c')
@@ -9296,7 +9344,19 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('set_startup_key.c')
 
-    template_names.extend(['set_path_prefix.c', 'open-start.c'])
+    template_names.append('set_path_prefix.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('open-start-file_io_handle.c')
+    else:
+      template_names.append('open-start.c')
+
+    template_names.append('open-basename.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('open-offset.c')
+
+    template_names.append('open-initialize.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('open-keys.c')
@@ -9311,19 +9371,35 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('open-startup_key.c')
 
     if project_configuration.HasMountToolsFeatureOffset():
-      template_names.append('open-open_with_offset.c')
+      template_names.append('open-open_file_io_handle.c')
     else:
       template_names.append('open-open.c')
+
+    if project_configuration.HasMountToolsFeatureUnlock():
+      template_names.append('open-is_locked.c')
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open-open_parent.c')
 
-    template_names.append('open-end.c')
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('open-end-file_io_handle.c')
+    else:
+      template_names.append('open-end.c')
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open_parent.c')
 
-    template_names.extend(['close.c', 'get_file_entry_by_path.c'])
+    template_names.append('close-start.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('close-file_io_handle.c')
+
+    template_names.append('close-end.c')
+
+    if project_configuration.HasMountToolsFeatureUnlock():
+      template_names.append('is_locked.c')
+
+    template_names.append('get_file_entry_by_path.c')
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -9505,52 +9581,42 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     getopt_switch = self._GenerateGetoptSwitch(
         project_configuration, mount_tool_options)
 
+    template_names = ['main-start.c']
+
+    if project_configuration.HasMountToolsFeatureKeys():
+      template_names.append('main-option_keys.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('main-option_offset.c')
+
+    if project_configuration.HasMountToolsFeaturePassword():
+      template_names.append('main-option_password.c')
+
+    if project_configuration.HasMountToolsFeatureRecoveryPassword():
+      template_names.append('main-option_recovery_password.c')
+
+    if project_configuration.HasMountToolsFeatureStartupKey():
+      template_names.append('main-option_startup_key.c')
+
+    template_names.extend([
+        'main-open.c', 'main-fuse.c', 'main-dokan.c', 'main-end.c'])
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
     template_mappings['mount_tool_getopt_string'] = getopt_string
     template_mappings['mount_tool_options_switch'] = getopt_switch
     template_mappings['mount_tool_options_variable_declarations'] = (
         variable_declarations)
 
-    template_filename = os.path.join(template_directory, 'main-start.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
     del template_mappings['mount_tool_getopt_string']
     del template_mappings['mount_tool_options_switch']
     del template_mappings['mount_tool_options_variable_declarations']
-
-    if project_configuration.HasMountToolsFeatureKeys():
-      template_filename = os.path.join(template_directory, 'main-option_keys.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    if project_configuration.HasMountToolsFeaturePassword():
-      template_filename = os.path.join(
-          template_directory, 'main-option_password.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'main-open.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'main-fuse.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'main-dokan.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'main-end.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
 
     self._SortVariableDeclarations(output_filename)
 
@@ -9709,14 +9775,14 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     if project_configuration.HasMountToolsFeatureRecoveryPassword():
       option = (
-          'r', 'recovey_password', 'specify the recovery password/passphrase')
+          'r', 'recovery_password', 'specify the recovery password/passphrase')
 
       mount_tool_options.append(option)
 
     if project_configuration.HasMountToolsFeatureStartupKey():
-      option = (
-          's', 'filename', ('specify the file containing the startup key. '
-                            'Typically this file has the extension .BEK'))
+      option = ('s', 'startup_key_path', (
+          'specify the path of the file containing the startup key. Typically '
+          'this file has the extension .BEK'))
 
       mount_tool_options.append(option)
 

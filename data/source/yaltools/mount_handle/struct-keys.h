@@ -1,8 +1,8 @@
 	/* The key data
 	 */
-	uint8_t key_data[ 16 ];
+	uint8_t key_data[ 64 ];
 
-	/* Value to indicate the key data is set
+	/* The key size
 	 */
-	uint8_t key_data_is_set;
+	uint8_t key_size;
 

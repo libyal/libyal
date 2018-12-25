@@ -1,9 +1,9 @@
-	if( mount_handle->key_data_is_set != 0 )
+	if( mount_handle->key_size > 0 )
 	{
 		if( ${library_name}_${mount_tool_library_type}_set_keys(
 		     ${mount_tool_source_type},
 		     mount_handle->key_data,
-		     16,
+		     mount_handle->key_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

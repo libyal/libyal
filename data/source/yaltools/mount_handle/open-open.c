@@ -1,16 +1,18 @@
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	if( ${library_name}_${mount_tool_library_type}_open_wide(
-	     ${mount_tool_source_type},
-	     filename,
-	     ${library_name_upper_case}_OPEN_READ,
-	     error ) != 1 )
+	result = ${library_name}_${mount_tool_library_type}_open_wide(
+	          ${mount_tool_source_type},
+	          filename,
+	          ${library_name_upper_case}_OPEN_READ,
+	          error );
 #else
-	if( ${library_name}_${mount_tool_library_type}_open(
-	     ${mount_tool_source_type},
-	     filename,
-	     ${library_name_upper_case}_OPEN_READ,
-	     error ) != 1 )
+	result = ${library_name}_${mount_tool_library_type}_open(
+	          ${mount_tool_source_type},
+	          filename,
+	          ${library_name_upper_case}_OPEN_READ,
+	          error );
 #endif
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,

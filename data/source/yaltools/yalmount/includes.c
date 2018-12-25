@@ -18,10 +18,8 @@
 #include <unistd.h>
 #endif
 
-#include "mount_dokan.h"
-#include "mount_fuse.h"
-#include "mount_handle.h"
 #include "${tools_name}_getopt.h"
+#include "${tools_name}_i18n.h"
 #include "${tools_name}_libcerror.h"
 #include "${tools_name}_libclocale.h"
 #include "${tools_name}_libcnotify.h"
@@ -29,4 +27,7 @@
 #include "${tools_name}_output.h"
 #include "${tools_name}_signal.h"
 #include "${tools_name}_unused.h"
+#include "mount_dokan.h"
+#include "mount_fuse.h"
+#include "mount_handle.h"
 

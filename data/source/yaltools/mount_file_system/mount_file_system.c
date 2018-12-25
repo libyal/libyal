@@ -52,11 +52,20 @@ int mount_file_system_initialize(
      mount_file_system_t **file_system,
      libcerror_error_t **error )
 {
-#if defined( HAVE_CLOCK_GETTIME )
+#if defined( WINAPI )
+	SYSTEMTIME systemtime;
+#elif defined( HAVE_CLOCK_GETTIME )
 	struct timespec time_structure;
 #endif
 
 	static char *function = "mount_file_system_initialize";
+
+#if defined( WINAPI )
+	DWORD error_code      = 0;
+	uint64_t timestamp    = 0;
+#else
+	int64_t timestamp     = 0;
+#endif
 
 	if( file_system == NULL )
 	{
@@ -127,7 +136,41 @@ int mount_file_system_initialize(
 
 		goto on_error;
 	}
-#if defined( HAVE_CLOCK_GETTIME )
+#if defined( WINAPI )
+	if( memory_set(
+	     &systemtime,
+	     0,
+	     sizeof( SYSTEMTIME ) ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear systemtime.",
+		 function );
+
+		goto on_error;
+	}
+	GetSystemTime(
+	 &systemtime );
+
+	if( SystemTimeToFileTime(
+	     &systemtime,
+	     &timestamp ) == 0 )
+	{
+		error_code = GetLastError();
+
+		libcerror_system_set_error(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 error_code,
+		 "%s: unable to retrieve FILETIME of current time.",
+		 function );
+
+		goto on_error;
+	}
+#elif defined( HAVE_CLOCK_GETTIME )
 	if( clock_gettime(
 	     CLOCK_REALTIME,
 	     &time_structure ) != 0 )
@@ -141,12 +184,12 @@ int mount_file_system_initialize(
 
 		goto on_error;
 	}
-	( *file_system )->mounted_timestamp = ( (int64_t) time_structure.tv_sec * 1000000000 ) + time_structure.tv_nsec;
+	timestamp = ( (int64_t) time_structure.tv_sec * 1000000000 ) + time_structure.tv_nsec;
 
 #else
-	( *file_system )->mounted_timestamp = (int64_t) time( NULL );
+	timestamp = (int64_t) time( NULL );
 
-	if( ( *file_system )->mounted_timestamp == (time_t) -1 )
+	if( timestamp == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -157,9 +200,11 @@ int mount_file_system_initialize(
 
 		goto on_error;
 	}
-	( *file_system )->mounted_timestamp *= 1000000000;
+	timestamp *= 1000000000;
 
 #endif /* defined( HAVE_CLOCK_GETTIME ) */
+
+	( *file_system )->mounted_timestamp = (uint64_t) timestamp;
 
 	return( 1 );
 
@@ -451,12 +496,13 @@ int mount_file_system_get_number_of_${mount_tool_source_type}s(
 }
 
 /* Retrieves the mounted timestamp
- * The timestamp is a signed 64-bit POSIX date and time value in number of nanoseconds
+ * On Windows the timestamp is an unsigned 64-bit FILETIME timestamp
+ * otherwise the timestamp is a signed 64-bit POSIX date and time value in number of nanoseconds
  * Returns 1 if successful or -1 on error
  */
 int mount_file_system_get_mounted_timestamp(
      mount_file_system_t *file_system,
-     int64_t *mounted_timestamp,
+     uint64_t *mounted_timestamp,
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_system_get_mounted_timestamp";

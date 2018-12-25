@@ -24,7 +24,7 @@ int mount_handle_set_offset(
 	string_length = system_string_length(
 	                 string );
 
-	if( ${tools_name}_system_string_copy_from_64_bit_in_decimal(
+	if( mount_handle_system_string_copy_from_64_bit_in_decimal(
 	     string,
 	     string_length + 1,
 	     &value_64bit,

@@ -1,4 +1,4 @@
-/* Sets the startup key
+/* Sets the startup key (.BEK) filename
  * Returns 1 if successful or -1 on error
  */
 int mount_handle_set_startup_key(
@@ -30,7 +30,7 @@ int mount_handle_set_startup_key(
 
 		return( -1 );
 	}
-	mount_handle->startup_key_filename = string;
+	mount_handle->startup_key_path = string;
 
 	return( 1 );
 }
