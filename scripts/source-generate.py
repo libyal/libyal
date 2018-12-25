@@ -1349,6 +1349,7 @@ class SourceFileGenerator(object):
             line.startswith(python_module_include_header_start) or
             line.startswith(test_include_header_start) or
             line.startswith(tools_include_header_start) or
+            line.startswith('#include "info_') or
             line.startswith('#include "mount_')):
           include_headers.append(line)
           in_include_headers = True
@@ -9049,14 +9050,14 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_entry')
 
-    template_mappings['mount_tool_source_type'] = (
-        project_configuration.mount_tool_source_type)
+    template_mappings['mount_tool_file_entry_type'] = (
+        project_configuration.mount_tool_file_entry_type)
 
     template_filename = os.path.join(template_directory, 'mount_file_entry.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    del template_mappings['mount_tool_source_type']
+    del template_mappings['mount_tool_file_entry_type']
 
   def _GenerateMountFileEntrySourceFile(
       self, project_configuration, template_mappings, output_writer,
@@ -9089,25 +9090,26 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['mount_tool_library_type'] = (
-        project_configuration.mount_tool_library_type)
-    template_mappings['mount_tool_library_type_size'] = (
-        project_configuration.mount_tool_library_type_size)
-    template_mappings['mount_tool_library_type_size_description'] = (
-        project_configuration.mount_tool_library_type_size.replace('_', ' '))
-    template_mappings['mount_tool_source_type'] = (
-        project_configuration.mount_tool_source_type)
+    template_mappings['mount_tool_file_entry_type'] = (
+        project_configuration.mount_tool_file_entry_type)
+    template_mappings['mount_tool_file_entry_type_description'] = (
+        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+    template_mappings['mount_tool_file_entry_type_size_value'] = (
+        project_configuration.mount_tool_file_entry_type_size_value)
+    template_mappings['mount_tool_file_entry_type_size_value_description'] = (
+        project_configuration.mount_tool_file_entry_type_size_value.replace(
+            '_', ' '))
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
-    del template_mappings['mount_tool_library_type']
-    del template_mappings['mount_tool_library_type_size']
-    del template_mappings['mount_tool_library_type_size_description']
-    del template_mappings['mount_tool_source_type']
+    del template_mappings['mount_tool_file_entry_type']
+    del template_mappings['mount_tool_file_entry_type_description']
+    del template_mappings['mount_tool_file_entry_type_size_value']
+    del template_mappings['mount_tool_file_entry_type_size_value_description']
 
     self._CorrectDescriptionSpelling(
-        project_configuration.mount_tool_source_type, output_filename)
+        project_configuration.mount_tool_file_entry_type, output_filename)
     self._SortVariableDeclarations(output_filename)
 
   def _GenerateMountFileSystemHeaderFile(
@@ -9125,17 +9127,14 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_system')
 
-    template_mappings['mount_tool_library_type'] = (
-        project_configuration.mount_tool_library_type)
-    template_mappings['mount_tool_source_type'] = (
-        project_configuration.mount_tool_source_type)
+    template_mappings['mount_tool_file_entry_type'] = (
+        project_configuration.mount_tool_file_entry_type)
 
     template_filename = os.path.join(template_directory, 'mount_file_system.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    del template_mappings['mount_tool_library_type']
-    del template_mappings['mount_tool_source_type']
+    del template_mappings['mount_tool_file_entry_type']
 
   def _GenerateMountFileSystemSourceFile(
       self, project_configuration, template_mappings, output_writer,
@@ -9152,20 +9151,20 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_system')
 
-    template_mappings['mount_tool_library_type'] = (
-        project_configuration.mount_tool_library_type)
-    template_mappings['mount_tool_source_type'] = (
-        project_configuration.mount_tool_source_type)
+    template_mappings['mount_tool_file_entry_type'] = (
+        project_configuration.mount_tool_file_entry_type)
+    template_mappings['mount_tool_file_entry_type_description'] = (
+        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
 
     template_filename = os.path.join(template_directory, 'mount_file_system.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    del template_mappings['mount_tool_library_type']
-    del template_mappings['mount_tool_source_type']
+    del template_mappings['mount_tool_file_entry_type']
+    del template_mappings['mount_tool_file_entry_type_description']
 
     self._CorrectDescriptionSpelling(
-        project_configuration.mount_tool_source_type, output_filename)
+        project_configuration.mount_tool_file_entry_type, output_filename)
     self._SortVariableDeclarations(output_filename)
 
   def _GenerateMountFuseHeaderFile(
@@ -9282,16 +9281,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['mount_tool_library_type'] = (
-        project_configuration.mount_tool_library_type)
-    template_mappings['mount_tool_source_type'] = (
-        project_configuration.mount_tool_source_type)
+    template_mappings['mount_tool_file_entry_type'] = (
+        project_configuration.mount_tool_file_entry_type)
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
-    del template_mappings['mount_tool_library_type']
-    del template_mappings['mount_tool_source_type']
+    del template_mappings['mount_tool_file_entry_type']
 
     self._SortIncludeHeaders(project_configuration, output_filename)
 
@@ -9320,9 +9316,6 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('system_string_copy_from_64_bit_in_decimal.c')
 
     template_names.extend(['initialize.c', 'free-start.c'])
-
-    if project_configuration.HasMountToolsFeatureOffset():
-      template_names.append('free-file_io_handle.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('free-keys.c')
@@ -9405,19 +9398,25 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['mount_tool_library_type'] = (
-        project_configuration.mount_tool_library_type)
+    template_mappings['mount_tool_file_entry_type'] = (
+        project_configuration.mount_tool_file_entry_type)
+    template_mappings['mount_tool_file_entry_type_description'] = (
+        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
     template_mappings['mount_tool_source_type'] = (
         project_configuration.mount_tool_source_type)
+    template_mappings['mount_tool_source_type_description'] = (
+        project_configuration.mount_tool_source_type.replace('_', ' '))
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
-    del template_mappings['mount_tool_library_type']
+    del template_mappings['mount_tool_file_entry_type']
+    del template_mappings['mount_tool_file_entry_type_description']
     del template_mappings['mount_tool_source_type']
+    del template_mappings['mount_tool_source_type_description']
 
     self._CorrectDescriptionSpelling(
-        project_configuration.mount_tool_source_type, output_filename)
+        project_configuration.mount_tool_file_entry_type, output_filename)
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
 
@@ -9521,7 +9520,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     mount_tool_options = self._GetMountToolOptions(
         project_configuration, mount_tool_name)
 
+    template_mappings['mount_tool_indentation'] = ' ' * len(
+        project_configuration.library_name_suffix)
     template_mappings['mount_tool_name'] = mount_tool_name
+    template_mappings['mount_tool_path_prefix'] = (
+        project_configuration.mount_tool_path_prefix)
+    template_mappings['mount_tool_path_prefix_upper_case'] = (
+        project_configuration.mount_tool_path_prefix.upper())
     template_mappings['mount_tool_source_description'] = (
         project_configuration.mount_tool_source_description)
     template_mappings['mount_tool_source_description_long'] = (
@@ -9551,7 +9556,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         project_configuration, template_mappings, mount_tool_name,
         mount_tool_options, output_writer, output_filename)
 
+    del template_mappings['mount_tool_indentation']
     del template_mappings['mount_tool_name']
+    del template_mappings['mount_tool_path_prefix']
+    del template_mappings['mount_tool_path_prefix_upper_case']
     del template_mappings['mount_tool_source_description']
     del template_mappings['mount_tool_source_description_long']
     del template_mappings['mount_tool_source_type']
@@ -9598,8 +9606,16 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('main-option_startup_key.c')
 
+    # TODO: make optional for file systems that don't require a path prefix.
+    template_names.append('main-set_path_prefix.c')
+
+    template_names.append('main-open.c')
+
+    if project_configuration.HasMountToolsFeatureUnlock():
+      template_names.append('main-is_locked.c')
+
     template_names.extend([
-        'main-open.c', 'main-fuse.c', 'main-dokan.c', 'main-end.c'])
+        'main-fuse.c', 'main-dokan.c', 'main-end.c'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)

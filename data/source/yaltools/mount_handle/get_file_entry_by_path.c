@@ -7,12 +7,12 @@ int mount_handle_get_file_entry_by_path(
      mount_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type} = NULL;
-	const system_character_t *filename                                      = NULL;
-	static char *function                                                   = "mount_handle_get_file_entry_by_path";
-	size_t path_length                                                      = 0;
-	int ${mount_tool_source_type}_index                                     = 0;
-	int result                                                              = 0;
+	${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type} = NULL;
+	const system_character_t *filename                                             = NULL;
+	static char *function                                                          = "mount_handle_get_file_entry_by_path";
+	size_t path_length                                                             = 0;
+	int ${mount_tool_file_entry_type}_index                                        = 0;
+	int result                                                                     = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -50,11 +50,11 @@ int mount_handle_get_file_entry_by_path(
 
 		return( -1 );
 	}
-	result = mount_file_system_get_${mount_tool_source_type}_index_from_path(
+	result = mount_file_system_get_${mount_tool_file_entry_type}_index_from_path(
 	          mount_handle->file_system,
 	          path,
 	          path_length,
-	          &${mount_tool_source_type}_index,
+	          &${mount_tool_file_entry_type}_index,
 	          error );
 
 	if( result == -1 )
@@ -63,7 +63,7 @@ int mount_handle_get_file_entry_by_path(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve ${mount_tool_source_type} index.",
+		 "%s: unable to retrieve ${mount_tool_file_entry_type_description} index.",
 		 function );
 
 		return( -1 );
@@ -72,33 +72,33 @@ int mount_handle_get_file_entry_by_path(
 	{
 		return( 0 );
 	}
-	if( ${mount_tool_source_type}_index != -1 )
+	if( ${mount_tool_file_entry_type}_index != -1 )
 	{
-		if( mount_file_system_get_${mount_tool_source_type}_by_index(
+		if( mount_file_system_get_${mount_tool_file_entry_type}_by_index(
 		     mount_handle->file_system,
-		     ${mount_tool_source_type}_index,
-		     &${mount_tool_source_type},
+		     ${mount_tool_file_entry_type}_index,
+		     &${mount_tool_file_entry_type},
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve ${mount_tool_source_type}: %d.",
+			 "%s: unable to retrieve ${mount_tool_file_entry_type_description}: %d.",
 			 function,
-			 ${mount_tool_source_type}_index );
+			 ${mount_tool_file_entry_type}_index );
 
 			return( -1 );
 		}
-		if( ${mount_tool_source_type} == NULL )
+		if( ${mount_tool_file_entry_type} == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing ${mount_tool_source_type}: %d.",
+			 "%s: missing ${mount_tool_file_entry_type_description}: %d.",
 			 function,
-			 ${mount_tool_source_type}_index );
+			 ${mount_tool_file_entry_type}_index );
 
 			return( -1 );
 		}
@@ -107,7 +107,7 @@ int mount_handle_get_file_entry_by_path(
 	if( mount_file_entry_initialize(
 	     file_entry,
 	     mount_handle->file_system,
-	     ${mount_tool_source_type}_index,
+	     ${mount_tool_file_entry_type}_index,
 	     filename,
 	     error ) != 1 )
 	{
@@ -115,9 +115,9 @@ int mount_handle_get_file_entry_by_path(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize file entry for ${mount_tool_source_type}: %d.",
+		 "%s: unable to initialize file entry for ${mount_tool_file_entry_type_description}: %d.",
 		 function,
-		 ${mount_tool_source_type}_index );
+		 ${mount_tool_file_entry_type}_index );
 
 		return( -1 );
 	}

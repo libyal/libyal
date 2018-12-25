@@ -110,13 +110,13 @@ int mount_fuse_set_stat_info(
 #endif
 
 	stat_info->st_atime = access_time / 1000000000;
-	stat_info->st_mtime = modification_time / 1000000000;
 	stat_info->st_ctime = inode_change_time / 1000000000;
+	stat_info->st_mtime = modification_time / 1000000000;
 
 #if defined( STAT_HAVE_NSEC )
 	stat_info->st_atime_nsec = access_time % 1000000000;
-	stat_info->st_mtime_nsec = modification_time % 1000000000;
 	stat_info->st_ctime_nsec = inode_change_time % 1000000000;
+	stat_info->st_mtime_nsec = modification_time % 1000000000;
 #endif
 	return( 1 );
 }
@@ -242,8 +242,8 @@ int mount_fuse_filldir(
 	     file_size,
 	     file_mode,
 	     (int64_t) access_time,
-	     (int64_t) modification_time,
 	     (int64_t) inode_change_time,
+	     (int64_t) modification_time,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1218,8 +1218,8 @@ int mount_fuse_getattr(
 	     file_size,
 	     file_mode,
 	     (int64_t) access_time,
-	     (int64_t) modification_time,
 	     (int64_t) inode_change_time,
+	     (int64_t) modification_time,
 	     &error ) != 1 )
 	{
 		libcerror_error_set(

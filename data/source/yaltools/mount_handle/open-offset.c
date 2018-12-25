@@ -29,14 +29,14 @@
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to set name.",
+		 "%s: unable to set file range name.",
 		 function );
 
 		goto on_error;
 	}
 	if( libbfio_file_range_set(
 	     file_io_handle,
-	     mount_handle->${mount_tool_source_type}_offset,
+	     mount_handle->${mount_tool_file_entry_type}_offset,
 	     0,
 	     error ) != 1 )
 	{
@@ -44,7 +44,7 @@
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to set ${mount_tool_source_type} offset.",
+		 "%s: unable to set file range offset.",
 		 function );
 
 		goto on_error;

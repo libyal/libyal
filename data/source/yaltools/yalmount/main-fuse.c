@@ -55,8 +55,8 @@
 	${mount_tool_name}_fuse_operations.destroy    = &mount_fuse_destroy;
 
 	${mount_tool_name}_fuse_channel = fuse_mount(
-	                          mount_point,
-	                          &${mount_tool_name}_fuse_arguments );
+	                      ${mount_tool_indentation}mount_point,
+	                      ${mount_tool_indentation}&${mount_tool_name}_fuse_arguments );
 
 	if( ${mount_tool_name}_fuse_channel == NULL )
 	{
@@ -67,11 +67,11 @@
 		goto on_error;
 	}
 	${mount_tool_name}_fuse_handle = fuse_new(
-	                         ${mount_tool_name}_fuse_channel,
-	                         &${mount_tool_name}_fuse_arguments,
-	                         &${mount_tool_name}_fuse_operations,
-	                         sizeof( struct fuse_operations ),
-	                         ${mount_tool_name}_mount_handle );
+	                     ${mount_tool_indentation}${mount_tool_name}_fuse_channel,
+	                     ${mount_tool_indentation}&${mount_tool_name}_fuse_arguments,
+	                     ${mount_tool_indentation}&${mount_tool_name}_fuse_operations,
+	                     ${mount_tool_indentation}sizeof( struct fuse_operations ),
+	                     ${mount_tool_indentation}${mount_tool_name}_mount_handle );
 	
 	if( ${mount_tool_name}_fuse_handle == NULL )
 	{

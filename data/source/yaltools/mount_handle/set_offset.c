@@ -1,4 +1,4 @@
-/* Sets the ${mount_tool_source_type} offset
+/* Sets the ${mount_tool_source_type_description} offset
  * Returns 1 if successful or -1 on error
  */
 int mount_handle_set_offset(

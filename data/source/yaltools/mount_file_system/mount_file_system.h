@@ -48,9 +48,9 @@ struct mount_file_system
 	 */
 	uint64_t mounted_timestamp;
 
-	/* The ${mount_tool_source_type}s array
+	/* The ${mount_tool_file_entry_type}s array
 	 */
-	libcdata_array_t *${mount_tool_source_type}s_array;
+	libcdata_array_t *${mount_tool_file_entry_type}s_array;
 };
 
 int mount_file_system_initialize(
@@ -76,32 +76,32 @@ int mount_file_system_get_mounted_timestamp(
      uint64_t *mounted_timestamp,
      libcerror_error_t **error );
 
-int mount_file_system_get_number_of_${mount_tool_source_type}s(
+int mount_file_system_get_number_of_${mount_tool_file_entry_type}s(
      mount_file_system_t *file_system,
-     int *number_of_${mount_tool_source_type}s,
+     int *number_of_${mount_tool_file_entry_type}s,
      libcerror_error_t **error );
 
-int mount_file_system_get_${mount_tool_source_type}_by_index(
+int mount_file_system_get_${mount_tool_file_entry_type}_by_index(
      mount_file_system_t *file_system,
-     int ${mount_tool_source_type}_index,
-     ${library_name}_${mount_tool_library_type}_t **${mount_tool_source_type},
+     int ${mount_tool_file_entry_type}_index,
+     ${library_name}_${mount_tool_file_entry_type}_t **${mount_tool_file_entry_type},
      libcerror_error_t **error );
 
-int mount_file_system_append_${mount_tool_source_type}(
+int mount_file_system_append_${mount_tool_file_entry_type}(
      mount_file_system_t *file_system,
-     ${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type},
+     ${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type},
      libcerror_error_t **error );
 
-int mount_file_system_get_${mount_tool_source_type}_index_from_path(
+int mount_file_system_get_${mount_tool_file_entry_type}_index_from_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
-     int *${mount_tool_source_type}_index,
+     int *${mount_tool_file_entry_type}_index,
      libcerror_error_t **error );
 
-int mount_file_system_get_path_from_${mount_tool_source_type}_index(
+int mount_file_system_get_path_from_${mount_tool_file_entry_type}_index(
      mount_file_system_t *file_system,
-     int ${mount_tool_source_type}_index,
+     int ${mount_tool_file_entry_type}_index,
      system_character_t *path,
      size_t path_size,
      libcerror_error_t **error );

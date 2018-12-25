@@ -43,11 +43,12 @@ class ProjectConfiguration(object):
     mount_tool_additional_arguments (str): additional arguments of
         the mount tool.
         a password option.
-    mount_tool_library_type (str): library type used by the mount tool.
-    mount_tool_library_type_size (str): type of size provided by the library
-        type.
+    mount_tool_file_entry_type (str): file entry type used by the mount tool.
+    mount_tool_file_entry_type_size_value (str): name of the size value
+        provided by the file entry type.
     mount_tool_mounted_description (str): description what is mounted by
         the mount tool.
+    mount_tool_path_prefix (str): path prefix used by the mount tool.
     mount_tool_source_description_long (str): long description of the input
         source.
     mount_tool_source_description (str): description of the input source.
@@ -154,9 +155,10 @@ class ProjectConfiguration(object):
     # Mount tool configuration.
     self._mount_tool_features = []
     self.mount_tool_additional_arguments = None
-    self.mount_tool_library_type = None
-    self.mount_tool_library_type_size = None
+    self.mount_tool_file_entry_type = None
+    self.mount_tool_file_entry_type_size_value = None
     self.mount_tool_mounted_description = None
+    self.mount_tool_path_prefix = None
     self.mount_tool_source_description_long = None
     self.mount_tool_source_description = None
     self.mount_tool_source = None
@@ -473,20 +475,20 @@ class ProjectConfiguration(object):
     self.mount_tool_additional_arguments = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'additional_arguments')
 
-    self.mount_tool_library_type = self._GetOptionalConfigValue(
-        config_parser, 'mount_tool', 'library_type')
+    self.mount_tool_file_entry_type = self._GetOptionalConfigValue(
+        config_parser, 'mount_tool', 'file_entry_type')
 
-    if (self.mount_tool_library_type and 
-        self.mount_tool_library_type not in ('file', 'handle', 'volume')):
-      raise errors.ConfigurationError(
-          'unsupported mount tool library type: {0:s}'.format(
-              self.mount_tool_library_type))
-
-    self.mount_tool_library_type_size = self._GetOptionalConfigValue(
-        config_parser, 'mount_tool', 'library_type_size', default_value='size')
+    self.mount_tool_file_entry_type_size_value = self._GetOptionalConfigValue(
+        config_parser, 'mount_tool', 'file_entry_type_size_value',
+        default_value='size')
 
     self.mount_tool_mounted_description = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'mounted_description')
+
+    self.mount_tool_path_prefix = self._GetOptionalConfigValue(
+        config_parser, 'mount_tool', 'path_prefix',
+        default_value=self.library_name_suffix)
+
     self.mount_tool_source = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'source')
     self.mount_tool_source_description = self._GetOptionalConfigValue(

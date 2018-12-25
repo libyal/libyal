@@ -1,14 +1,14 @@
 	if( mount_handle->recovery_password != NULL )
 	{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		if( ${library_name}_${mount_tool_library_type}_set_utf16_recovery_password(
-		     ${mount_tool_source_type},
+		if( ${library_name}_${mount_tool_file_entry_type}_set_utf16_recovery_password(
+		     ${mount_tool_file_entry_type},
 		     (uint16_t *) mount_handle->recovery_password,
 		     mount_handle->recovery_password_length,
 		     error ) != 1 )
 #else
-		if( ${library_name}_${mount_tool_library_type}_set_utf8_recovery_password(
-		     ${mount_tool_source_type},
+		if( ${library_name}_${mount_tool_file_entry_type}_set_utf8_recovery_password(
+		     ${mount_tool_file_entry_type},
 		     (uint8_t *) mount_handle->recovery_password,
 		     mount_handle->recovery_password_length,
 		     error ) != 1 )

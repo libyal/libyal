@@ -5,7 +5,7 @@
 int mount_file_entry_initialize(
      mount_file_entry_t **file_entry,
      mount_file_system_t *file_system,
-     int ${mount_tool_source_type}_index,
+     int ${mount_tool_file_entry_type}_index,
      const system_character_t *name,
      libcerror_error_t **error )
 {
@@ -122,7 +122,7 @@ int mount_file_entry_initialize(
 	}
 	( *file_entry )->file_system = file_system;
 
-	( *file_entry )->${mount_tool_source_type}_index = ${mount_tool_source_type}_index;
+	( *file_entry )->${mount_tool_file_entry_type}_index = ${mount_tool_file_entry_type}_index;
 
 	return( 1 );
 

@@ -1,13 +1,13 @@
 	if( mount_handle->startup_key_path != NULL )
 	{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		if( ${library_name}_${mount_tool_library_type}_read_startup_key_wide(
-		     ${mount_tool_source_type},
+		if( ${library_name}_${mount_tool_file_entry_type}_read_startup_key_wide(
+		     ${mount_tool_file_entry_type},
 		     mount_handle->startup_key_path,
 		     error ) != 1 )
 #else
-		if( ${library_name}_${mount_tool_library_type}_read_startup_key(
-		     ${mount_tool_source_type},
+		if( ${library_name}_${mount_tool_file_entry_type}_read_startup_key(
+		     ${mount_tool_file_entry_type},
 		     mount_handle->startup_key_path,
 		     error ) != 1 )
 #endif

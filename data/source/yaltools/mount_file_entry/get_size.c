@@ -6,8 +6,8 @@ int mount_file_entry_get_size(
      size64_t *size,
      libcerror_error_t **error )
 {
-	${library_name}_${mount_tool_library_type}_t *${mount_tool_source_type} = NULL;
-	static char *function                                                   = "mount_file_entry_get_size";
+	${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type} = NULL;
+	static char *function                                                          = "mount_file_entry_get_size";
 
 	if( file_entry == NULL )
 	{
@@ -20,7 +20,7 @@ int mount_file_entry_get_size(
 
 		return( -1 );
 	}
-	if( file_entry->${mount_tool_source_type}_index == -1 )
+	if( file_entry->${mount_tool_file_entry_type}_index == -1 )
 	{
 		if( size == NULL )
 		{
@@ -37,24 +37,24 @@ int mount_file_entry_get_size(
 	}
 	else
 	{
-		if( mount_file_system_get_${mount_tool_source_type}_by_index(
+		if( mount_file_system_get_${mount_tool_file_entry_type}_by_index(
 		     file_entry->file_system,
-		     file_entry->${mount_tool_source_type}_index,
-		     &${mount_tool_source_type},
+		     file_entry->${mount_tool_file_entry_type}_index,
+		     &${mount_tool_file_entry_type},
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve ${mount_tool_source_type}: %d from file system.",
+			 "%s: unable to retrieve ${mount_tool_file_entry_type_description}: %d from file system.",
 			 function,
-			 file_entry->${mount_tool_source_type}_index );
+			 file_entry->${mount_tool_file_entry_type}_index );
 
 			return( -1 );
 		}
-		if( ${library_name}_${mount_tool_library_type}_get_${mount_tool_library_type_size}(
-		     ${mount_tool_source_type},
+		if( ${library_name}_${mount_tool_file_entry_type}_get_${mount_tool_file_entry_type_size_value}(
+		     ${mount_tool_file_entry_type},
 		     size,
 		     error ) != 1 )
 		{
@@ -62,9 +62,9 @@ int mount_file_entry_get_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve ${mount_tool_library_type_size_description} from ${mount_tool_source_type}: %d.",
+			 "%s: unable to retrieve ${mount_tool_file_entry_type_size_value_description} from ${mount_tool_file_entry_type_description}: %d.",
 			 function,
-			 file_entry->${mount_tool_source_type}_index );
+			 file_entry->${mount_tool_file_entry_type}_index );
 
 			return( -1 );
 		}
