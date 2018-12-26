@@ -1,6 +1,6 @@
-	/* The ${mount_tool_file_entry_type} offset
+	/* The ${mount_tool_source_type} offset
 	 */
-	off64_t ${mount_tool_file_entry_type}_offset;
+	off64_t ${mount_tool_source_type}_offset;
 
 	/* The libbfio file IO handle
 	 */

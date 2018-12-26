@@ -4,8 +4,7 @@
 	{
 		fprintf(
 		 stderr,
-		 "Unable to unlock: %" PRIs_SYSTEM "\n",
-		 source );
+		 "Unable to unlock source ${mount_tool_source_type}\n" );
 
 		goto on_error;
 	}

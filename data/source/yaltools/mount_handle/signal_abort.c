@@ -72,3 +72,4 @@ int mount_handle_signal_abort(
 	}
 	return( 1 );
 }
+

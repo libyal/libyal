@@ -8119,6 +8119,11 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     template_mappings['tests_info_tool_options'] = (
         project_configuration.tests_info_tool_options)
 
+    template_mappings['tests_verify_tool_option_sets'] = ' '.join(
+        project_configuration.tests_verify_tool_option_sets)
+    template_mappings['tests_verify_tool_options'] = (
+        project_configuration.tests_verify_tool_options)
+
     template_mappings['alignment_padding'] = (
         ' ' * len(project_configuration.library_name_suffix))
 
@@ -9222,12 +9227,20 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_handle')
 
+    base_type = project_configuration.mount_tool_base_type
+    file_entry_type = project_configuration.mount_tool_file_entry_type
+
     template_names = ['header.h', 'includes-start.h']
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('includes-file_io_handle.h')
 
     template_names.extend(['includes-end.h', 'struct-start.h'])
+
+    if project_configuration.HasMountToolsFeatureParent():
+      template_names.append('struct-basename.h')
+
+    template_names.append('struct-file_system.h')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('struct-keys.h')
@@ -9252,8 +9265,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('system_string_copy_from_64_bit_in_decimal.h')
 
-    template_names.extend([
-        'initialize.h', 'free.h', 'signal_abort.h', 'set_basename.h'])
+    template_names.extend(['initialize.h', 'free.h', 'signal_abort.h'])
+
+    if project_configuration.HasMountToolsFeatureParent():
+      template_names.append('set_basename.h')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('set_keys.h')
@@ -9270,7 +9285,12 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('set_startup_key.h')
 
-    template_names.extend(['set_path_prefix.h', 'open.h'])
+    template_names.append('set_path_prefix.h')
+
+    if project_configuration.HasMountToolsFeatureMultiSource():
+      template_names.append('open-multi_source.h')
+    else:
+      template_names.append('open.h')
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open_parent.h')
@@ -9286,8 +9306,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['mount_tool_file_entry_type'] = (
-        project_configuration.mount_tool_file_entry_type)
+    template_mappings['mount_tool_file_entry_type'] = file_entry_type
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
@@ -9310,7 +9329,14 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_handle')
 
+    base_type = project_configuration.mount_tool_base_type
+    file_entry_type = project_configuration.mount_tool_file_entry_type
+    source_type = project_configuration.mount_tool_source_type
+
     template_names = ['header.c', 'includes-start.c']
+
+    if project_configuration.HasMountToolsFeatureParent():
+      template_names.append('includes-basename.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('includes-keys.c')
@@ -9328,10 +9354,23 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.extend(['initialize.c', 'free-start.c'])
 
+    if project_configuration.HasMountToolsFeatureParent():
+      template_names.append('free-basename.c')
+
+    template_names.append('free-file_system.c')
+
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('free-keys.c')
 
-    template_names.extend(['free-end.c', 'signal_abort.c', 'set_basename.c'])
+    template_names.append('free-end.c')
+
+    if base_type and base_type != file_entry_type:
+      template_names.append('signal_abort-base_type.c')
+    else:
+      template_names.append('signal_abort.c')
+
+    if project_configuration.HasMountToolsFeatureParent():
+      template_names.append('set_basename.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('set_keys.c')
@@ -9350,12 +9389,31 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.append('set_path_prefix.c')
 
-    if project_configuration.HasMountToolsFeatureOffset():
-      template_names.append('open-start-file_io_handle.c')
+    if project_configuration.HasMountToolsFeatureMultiSource():
+      template_names.append('open-start-multi_source.c')
     else:
       template_names.append('open-start.c')
 
-    template_names.append('open-basename.c')
+    template_names.append('open-variables-start.c')
+
+    if project_configuration.HasMountToolsFeatureParent():
+      template_names.append('open-variables-basename.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('open-variables-file_io_handle.c')
+
+    template_names.append('open-variables-end.c')
+
+    if project_configuration.HasMountToolsFeatureMultiSource():
+      template_names.append('open-check_arguments-multi_source.c')
+    else:
+      template_names.append('open-check_arguments.c')
+
+    if project_configuration.HasMountToolsFeatureParent():
+      if project_configuration.HasMountToolsFeatureMultiSource():
+        template_names.append('open-basename-multi_source.c')
+      else:
+        template_names.append('open-basename.c')
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('open-offset.c')
@@ -9409,25 +9467,30 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['mount_tool_file_entry_type'] = (
-        project_configuration.mount_tool_file_entry_type)
+    if not base_type:
+      base_type = file_entry_type
+
+    template_mappings['mount_tool_base_type'] = base_type
+    template_mappings['mount_tool_base_type_description'] = (
+        base_type.replace('_', ' '))
+    template_mappings['mount_tool_file_entry_type'] = file_entry_type
     template_mappings['mount_tool_file_entry_type_description'] = (
-        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
-    template_mappings['mount_tool_source_type'] = (
-        project_configuration.mount_tool_source_type)
+        file_entry_type.replace('_', ' '))
+    template_mappings['mount_tool_source_type'] = source_type
     template_mappings['mount_tool_source_type_description'] = (
-        project_configuration.mount_tool_source_type.replace('_', ' '))
+        source_type.replace('_', ' '))
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
+    del template_mappings['mount_tool_base_type']
+    del template_mappings['mount_tool_base_type_description']
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
     del template_mappings['mount_tool_source_type']
     del template_mappings['mount_tool_source_type_description']
 
-    self._CorrectDescriptionSpelling(
-        project_configuration.mount_tool_file_entry_type, output_filename)
+    self._CorrectDescriptionSpelling(file_entry_type, output_filename)
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
 
@@ -9602,6 +9665,20 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names = ['main-start.c']
 
+    if project_configuration.HasMountToolsFeatureMultiSource():
+      template_names.append('main-variables-multi_source.c')
+    else:
+      template_names.append('main-variables.c')
+
+    template_names.append('main-locale.c')
+
+    if project_configuration.HasMountToolsFeatureMultiSource():
+      template_names.append('main-getopt-multi_source.c')
+    else:
+      template_names.append('main-getopt.c')
+
+    template_names.append('main-initialize.c')
+
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('main-option_keys.c')
 
@@ -9620,7 +9697,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     # TODO: make optional for file systems that don't require a path prefix.
     template_names.append('main-set_path_prefix.c')
 
-    template_names.append('main-open.c')
+    if project_configuration.HasMountToolsFeatureMultiSource():
+      template_names.append('main-open-multi_source.c')
+    else:
+      template_names.append('main-open.c')
 
     if project_configuration.HasMountToolsFeatureUnlock():
       template_names.append('main-is_locked.c')

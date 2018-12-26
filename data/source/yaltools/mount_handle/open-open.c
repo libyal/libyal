@@ -11,7 +11,6 @@
 	          ${library_name_upper_case}_OPEN_READ,
 	          error );
 #endif
-
 	if( result == -1 )
 	{
 		libcerror_error_set(

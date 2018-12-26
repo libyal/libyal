@@ -43,6 +43,7 @@ class ProjectConfiguration(object):
     mount_tool_additional_arguments (str): additional arguments of
         the mount tool.
         a password option.
+    mount_tool_base_type (str): base type used by the mount tool.
     mount_tool_file_entry_type (str): file entry type used by the mount tool.
     mount_tool_file_entry_type_size_value (str): name of the size value
         provided by the file entry type.
@@ -155,6 +156,7 @@ class ProjectConfiguration(object):
     # Mount tool configuration.
     self._mount_tool_features = []
     self.mount_tool_additional_arguments = None
+    self.mount_tool_base_type = None
     self.mount_tool_file_entry_type = None
     self.mount_tool_file_entry_type_size_value = None
     self.mount_tool_mounted_description = None
@@ -475,6 +477,9 @@ class ProjectConfiguration(object):
     self.mount_tool_additional_arguments = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'additional_arguments')
 
+    self.mount_tool_base_type = self._GetOptionalConfigValue(
+        config_parser, 'mount_tool', 'base_type')
+
     self.mount_tool_file_entry_type = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'file_entry_type')
 
@@ -789,6 +794,14 @@ class ProjectConfiguration(object):
       bool: True if the mount tools has a keys feature.
     """
     return 'keys' in self._mount_tool_features
+
+  def HasMountToolsFeatureMultiSource(self):
+    """Determines if the mount tool has a multi source feature.
+
+    Returns:
+      bool: True if the mount tools has a multi source feature.
+    """
+    return 'multi_source' in self._mount_tool_features
 
   def HasMountToolsFeatureOffset(self):
     """Determines if the mount tool has an offset feature.
