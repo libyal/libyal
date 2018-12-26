@@ -9222,7 +9222,12 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_handle')
 
-    template_names = ['header.h', 'includes.h', 'struct-start.h']
+    template_names = ['header.h', 'includes-start.h']
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('includes-file_io_handle.h')
+
+    template_names.extend(['includes-end.h', 'struct-start.h'])
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('struct-keys.h')
@@ -9310,7 +9315,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('includes-keys.c')
 
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('includes-file_io_handle.c')
+
     template_names.append('includes-end.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('file_io_handle.c')
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('system_string_copy_from_64_bit_in_decimal.c')

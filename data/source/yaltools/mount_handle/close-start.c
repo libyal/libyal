@@ -70,7 +70,7 @@ int mount_handle_close(
 			return( -1 );
 		}
 		if( ${library_name}_${mount_tool_file_entry_type}_free(
-		     ${mount_tool_file_entry_type},
+		     &${mount_tool_file_entry_type},
 		     error ) != 1 )
 		{
 			libcerror_error_set(

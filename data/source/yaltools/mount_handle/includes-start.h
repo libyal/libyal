@@ -6,8 +6,3 @@
 #include "${tools_name}_${library_name}.h"
 #include "mount_file_entry.h"
 #include "mount_file_system.h"
-
-#if defined( __cplusplus )
-extern "C" {
-#endif
-
