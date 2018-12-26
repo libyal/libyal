@@ -9433,7 +9433,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('open-startup_key.c')
 
     if project_configuration.HasMountToolsFeatureOffset():
-      template_names.append('open-open_file_io_handle.c')
+      template_names.append('open-open-file_io_handle.c')
     else:
       template_names.append('open-open.c')
 
