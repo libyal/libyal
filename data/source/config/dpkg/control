@@ -9,6 +9,8 @@ Homepage: https://github.com/libyal/${library_name}
 Package: ${library_name}
 Architecture: any
 Depends: $${shlibs:Depends}, $${misc:Depends}
+Conflicts: ${library_name}1
+Replaces: ${library_name}1
 Suggests: ${library_name}-dbg
 Description: ${library_description}
  ${library_name} is a ${library_description_lower_case}.

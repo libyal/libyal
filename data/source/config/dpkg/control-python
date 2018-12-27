@@ -2,6 +2,8 @@ Package: ${library_name}-python
 Section: python
 Architecture: any
 Depends: ${library_name} (= $${binary:Version}), $${shlibs:Depends}, $${misc:Depends}
+Conflicts: python-${library_name}
+Replaces: python-${library_name}
 Suggests: ${library_name}-python-dbg
 Description: Python 2 bindings for ${library_name}
  Python 2 bindings for ${library_name}.
@@ -17,6 +19,8 @@ Package: ${library_name}-python3
 Section: python
 Architecture: any
 Depends: ${library_name} (= $${binary:Version}), $${shlibs:Depends}, $${misc:Depends}
+Conflicts: python3-${library_name}
+Replaces: python3-${library_name}
 Suggests: ${library_name}-python3-dbg
 Description: Python 3 bindings for ${library_name}
  Python 3 bindings for ${library_name}.

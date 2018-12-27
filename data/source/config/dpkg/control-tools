@@ -2,6 +2,8 @@ Package: ${library_name}-tools
 Section: utils
 Architecture: any
 Depends: ${library_name} (= $${binary:Version}), $${shlibs:Depends}, $${misc:Depends}
+Conflicts: ${library_name}-utils
+Replaces: ${library_name}-utils
 Description: ${tools_description}
  ${tools_description}.
 
