@@ -9147,7 +9147,11 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not project_configuration.mount_tool_file_system_type:
       template_names.append('set_path_prefix.h')
 
-    template_names.append('footer.h')
+    template_names.extend([
+        'get_mounted_timestamp.h', 'get_number_of_file_entry_types.h',
+        'get_file_entry_type_by_index.h', 'append_file_entry_type.h',
+        'get_file_entry_type_index_from_path.h',
+        'get_path_from_file_entry_index.h', 'footer.h'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -9192,7 +9196,11 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not project_configuration.mount_tool_file_system_type:
       template_names.append('set_path_prefix.c')
 
-    template_names.append('body.c')
+    template_names.extend([
+        'get_number_of_file_entry_types.c', 'get_mounted_timestamp.c',
+        'get_file_entry_type_by_index.c', 'append_file_entry_type.c',
+        'get_file_entry_type_index_from_path.c',
+        'get_path_from_file_entry_index.c'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -9546,9 +9554,12 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_mappings['mount_tool_file_entry_type'] = file_entry_type
     template_mappings['mount_tool_file_entry_type_description'] = (
         file_entry_type.replace('_', ' '))
-    template_mappings['mount_tool_file_system_type'] = file_system_type
-    template_mappings['mount_tool_file_system_type_description'] = (
-        file_system_type.replace('_', ' '))
+
+    if file_system_type:
+      template_mappings['mount_tool_file_system_type'] = file_system_type
+      template_mappings['mount_tool_file_system_type_description'] = (
+          file_system_type.replace('_', ' '))
+
     template_mappings['mount_tool_source_type'] = source_type
     template_mappings['mount_tool_source_type_description'] = (
         source_type.replace('_', ' '))
@@ -9560,8 +9571,11 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     del template_mappings['mount_tool_base_type_description']
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
-    del template_mappings['mount_tool_file_system_type']
-    del template_mappings['mount_tool_file_system_type_description']
+
+    if file_system_type:
+      del template_mappings['mount_tool_file_system_type']
+      del template_mappings['mount_tool_file_system_type_description']
+
     del template_mappings['mount_tool_source_type']
     del template_mappings['mount_tool_source_type_description']
 
