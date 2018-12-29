@@ -44,6 +44,14 @@ class ProjectConfiguration(object):
         the mount tool.
         a password option.
     mount_tool_base_type (str): base type used by the mount tool.
+    mount_tool_file_entry_access_time_type (str): access date and time
+        type provided by the file entry.
+    mount_tool_file_entry_creation_time_type (str): creation date and time
+        type provided by the file entry.
+    mount_tool_file_entry_inode_change_time_type (str): inode change date and
+        time type provided by the file entry.
+    mount_tool_file_entry_modification_time_type (str): modification date and
+        time type provided by the file entry.
     mount_tool_file_entry_type (str): file entry type used by the mount tool.
     mount_tool_file_entry_type_size_value (str): name of the size value
         provided by the file entry type.
@@ -158,6 +166,10 @@ class ProjectConfiguration(object):
     self._mount_tool_features = []
     self.mount_tool_additional_arguments = None
     self.mount_tool_base_type = None
+    self.mount_tool_file_entry_access_time_type = None
+    self.mount_tool_file_entry_creation_time_type = None
+    self.mount_tool_file_entry_inode_change_time_type = None
+    self.mount_tool_file_entry_modification_time_type = None
     self.mount_tool_file_entry_type = None
     self.mount_tool_file_entry_type_size_value = None
     self.mount_tool_file_system_type = None
@@ -481,6 +493,46 @@ class ProjectConfiguration(object):
 
     self.mount_tool_base_type = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'base_type')
+
+    self.mount_tool_file_entry_access_time_type = (
+        self._GetOptionalConfigValue(
+            config_parser, 'mount_tool', 'file_entry_access_time_type'))
+
+    if (self.mount_tool_file_entry_access_time_type and
+        self.mount_tool_file_entry_access_time_type not in ('filetime', )):
+      raise errors.ConfigurationError(
+          'unsupported mount tool file entry access time type: {0:s}'.format(
+              self.mount_tool_file_entry_access_time_type))
+
+    self.mount_tool_file_entry_creation_time_type = (
+        self._GetOptionalConfigValue(
+            config_parser, 'mount_tool', 'file_entry_creation_time_type'))
+
+    if (self.mount_tool_file_entry_creation_time_type and
+        self.mount_tool_file_entry_creation_time_type not in ('filetime', )):
+      raise errors.ConfigurationError(
+          'unsupported mount tool file entry creation time type: {0:s}'.format(
+              self.mount_tool_file_entry_creation_time_type))
+
+    self.mount_tool_file_entry_inode_change_time_type = (
+        self._GetOptionalConfigValue(
+            config_parser, 'mount_tool', 'file_entry_inode_change_time_type'))
+
+    if (self.mount_tool_file_entry_inode_change_time_type and
+        self.mount_tool_file_entry_inode_change_time_type not in ('filetime', )):
+      raise errors.ConfigurationError((
+          'unsupported mount tool file entry inode change time type: '
+          '{0:s}').format(self.mount_tool_file_entry_inode_change_time_type))
+
+    self.mount_tool_file_entry_modification_time_type = (
+        self._GetOptionalConfigValue(
+            config_parser, 'mount_tool', 'file_entry_modification_time_type'))
+
+    if (self.mount_tool_file_entry_modification_time_type and
+        self.mount_tool_file_entry_modification_time_type not in ('filetime', )):
+      raise errors.ConfigurationError((
+          'unsupported mount tool file entry modification time type: '
+          '{0:s}').format(self.mount_tool_file_entry_modification_time_type))
 
     self.mount_tool_file_entry_type = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'file_entry_type')

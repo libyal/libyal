@@ -41,13 +41,13 @@ int mount_file_entry_get_parent_file_entry(
 
 		return( -1 );
 	}
-	if( file_entry->${mount_tool_file_entry_type}_index != -1 )
+	if( file_entry->${mount_tool_file_entry_type} != NULL )
 	{
 		if( mount_file_entry_initialize(
 		     parent_file_entry,
 		     file_entry->file_system,
-		     -1,
 		     "",
+		     NULL,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

@@ -5,8 +5,8 @@
 int mount_file_entry_initialize(
      mount_file_entry_t **file_entry,
      mount_file_system_t *file_system,
-     int ${mount_tool_file_entry_type}_index,
      const system_character_t *name,
+     ${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type},
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_entry_initialize";
@@ -78,12 +78,9 @@ int mount_file_entry_initialize(
 
 		return( -1 );
 	}
-	if( name == NULL )
-	{
-		( *file_entry )->name      = NULL;
-		( *file_entry )->name_size = 0;
-	}
-	else
+	( *file_entry )->file_system = file_system;
+
+	if( name != NULL )
 	{
 		name_length = system_string_length(
 		               name );
@@ -120,9 +117,7 @@ int mount_file_entry_initialize(
 
 		( *file_entry )->name_size = name_length + 1;
 	}
-	( *file_entry )->file_system = file_system;
-
-	( *file_entry )->${mount_tool_file_entry_type}_index = ${mount_tool_file_entry_type}_index;
+	( *file_entry )->${mount_tool_file_entry_type} = ${mount_tool_file_entry_type};
 
 	return( 1 );
 

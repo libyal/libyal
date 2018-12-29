@@ -50,6 +50,8 @@
 	}
 	timestamp = ( (int64_t) time_structure.tv_sec * 1000000000 ) + time_structure.tv_nsec;
 
+	( *file_system )->mounted_timestamp = (uint64_t) timestamp;
+
 #else
 	timestamp = (int64_t) time( NULL );
 

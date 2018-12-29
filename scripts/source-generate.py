@@ -9057,12 +9057,15 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_mappings['mount_tool_file_entry_type'] = (
         project_configuration.mount_tool_file_entry_type)
+    template_mappings['mount_tool_file_entry_type_description'] = (
+        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
 
     template_filename = os.path.join(template_directory, 'mount_file_entry.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
+    del template_mappings['mount_tool_file_entry_type_description']
 
   def _GenerateMountFileEntrySourceFile(
       self, project_configuration, template_mappings, output_writer,
@@ -9142,16 +9145,17 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not project_configuration.mount_tool_file_system_type:
       template_names.append('struct-file_entry_type_array.h')
 
-    template_names.extend(['struct-end.h', 'initialize.h', 'free.h'])
+    template_names.extend([
+        'struct-end.h', 'initialize.h', 'free.h', 'signal_abort.h'])
 
     if not project_configuration.mount_tool_file_system_type:
       template_names.append('set_path_prefix.h')
 
     template_names.extend([
         'get_mounted_timestamp.h', 'get_number_of_file_entry_types.h',
-        'get_file_entry_type_by_index.h', 'append_file_entry_type.h',
-        'get_file_entry_type_index_from_path.h',
-        'get_path_from_file_entry_index.h', 'footer.h'])
+        'get_file_entry_type_by_index.h', 'get_file_entry_type_by_path.h',
+        'append_file_entry_type.h', 'get_path_from_file_entry_index.h',
+        'footer.h'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -9191,16 +9195,18 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('free-path_prefix.c')
       template_names.append('free-file_entry_type_array.c')
 
-    template_names.append('free-end.c')
+    template_names.extend(['free-end.c', 'signal_abort.c'])
 
     if not project_configuration.mount_tool_file_system_type:
       template_names.append('set_path_prefix.c')
 
-    template_names.extend([
-        'get_number_of_file_entry_types.c', 'get_mounted_timestamp.c',
-        'get_file_entry_type_by_index.c', 'append_file_entry_type.c',
-        'get_file_entry_type_index_from_path.c',
-        'get_path_from_file_entry_index.c'])
+    template_names.append('get_mounted_timestamp.c')
+
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.extend([
+          'get_number_of_file_entry_types.c', 'get_file_entry_type_by_index.c',
+          'get_file_entry_type_by_path.c', 'append_file_entry_type.c',
+          'get_path_from_file_entry_index.c'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -9431,14 +9437,15 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('free-keys.c')
 
-    template_names.append('free-end.c')
+    template_names.extend(['free-end.c', 'signal_abort.c'])
 
-    if base_type:
-      template_names.append('signal_abort-base_type.c')
-    elif file_system_type:
-      template_names.append('signal_abort-file_system_type.c')
-    else:
-      template_names.append('signal_abort.c')
+    # TODO: refactor into file system.
+    # if base_type:
+    #   template_names.append('signal_abort-base_type.c')
+    # elif file_system_type:
+    #   template_names.append('signal_abort-file_system_type.c')
+    # else:
+    #  template_names.append('signal_abort.c')
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('set_basename.c')

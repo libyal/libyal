@@ -31,7 +31,7 @@ int mount_file_entry_get_number_of_sub_file_entries(
 
 		return( -1 );
 	}
-	if( file_entry->${mount_tool_file_entry_type}_index == -1 )
+	if( file_entry->${mount_tool_file_entry_type} == NULL )
 	{
 		if( mount_file_system_get_number_of_${mount_tool_file_entry_type}s(
 		     file_entry->file_system,
@@ -76,8 +76,9 @@ int mount_file_entry_get_sub_file_entry_by_index(
 {
 	system_character_t path[ 32 ];
 
-	static char *function          = "mount_file_entry_get_sub_file_entry_by_index";
-	int number_of_sub_file_entries = 0;
+	${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type} = NULL;
+	static char *function                                                          = "mount_file_entry_get_sub_file_entry_by_index";
+	int number_of_sub_file_entries                                                 = 0;
 
 	if( file_entry == NULL )
 	{
@@ -155,11 +156,39 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		return( -1 );
 	}
+	if( mount_file_system_get_${mount_tool_file_entry_type}_by_index(
+	     file_entry->file_system,
+	     sub_file_entry_index,
+	     &${mount_tool_file_entry_type},
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve ${mount_tool_file_entry_type_description}: %d from file system.",
+		 function,
+		 sub_file_entry_index );
+
+		return( -1 );
+	}
+	if( ${mount_tool_file_entry_type} == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing ${mount_tool_file_entry_type_description}: %d.",
+		 function,
+		 sub_file_entry_index );
+
+		return( -1 );
+	}
 	if( mount_file_entry_initialize(
 	     sub_file_entry,
 	     file_entry->file_system,
-	     sub_file_entry_index,
 	     &( path[ 1 ] ),
+	     ${mount_tool_file_entry_type},
 	     error ) != 1 )
 	{
 		libcerror_error_set(

@@ -8,9 +8,8 @@ ssize_t mount_file_entry_read_buffer_at_offset(
          off64_t offset,
          libcerror_error_t **error )
 {
-	${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type} = NULL;
-	static char *function                                                          = "mount_file_entry_read_buffer_at_offset";
-	ssize_t read_count                                                             = 0;
+	static char *function = "mount_file_entry_read_buffer_at_offset";
+	ssize_t read_count    = 0;
 
 	if( file_entry == NULL )
 	{
@@ -23,24 +22,19 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 
 		return( -1 );
 	}
-	if( mount_file_system_get_${mount_tool_file_entry_type}_by_index(
-	     file_entry->file_system,
-	     file_entry->${mount_tool_file_entry_type}_index,
-	     &${mount_tool_file_entry_type},
-	     error ) != 1 )
+	if( file_entry->${mount_tool_file_entry_type} == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve ${mount_tool_file_entry_type_description}: %d from file system.",
-		 function,
-		 file_entry->${mount_tool_file_entry_type}_index );
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid file entry - missing ${mount_tool_file_entry_type_description}.",
+		 function );
 
 		return( -1 );
 	}
 	read_count = ${library_name}_${mount_tool_file_entry_type}_read_buffer_at_offset(
-	              ${mount_tool_file_entry_type},
+	              file_entry->${mount_tool_file_entry_type},
 	              buffer,
 	              buffer_size,
 	              offset,
@@ -52,11 +46,10 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read buffer at offset: %" PRIi64 " (0x%08" PRIx64 ") from ${mount_tool_file_entry_type_description}: %d.",
+		 "%s: unable to read buffer at offset: %" PRIi64 " (0x%08" PRIx64 ") from ${mount_tool_file_entry_type_description}.",
 		 function,
 		 offset,
-		 offset,
-		 file_entry->${mount_tool_file_entry_type}_index );
+		 offset );
 
 		return( -1 );
 	}

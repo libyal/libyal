@@ -1,18 +1,18 @@
-/* Retrieves the ${mount_tool_file_entry_type_description} index from a path
- * Returns 1 if successful, 0 if no such ${mount_tool_file_entry_type_description} index or -1 on error
+/* Retrieves the ${mount_tool_file_entry_type} for a specific path
+ * Returns 1 if successful, 0 if no such file index or -1 on error
  */
-int mount_file_system_get_${mount_tool_file_entry_type}_index_from_path(
+int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
-     int *${mount_tool_file_entry_type}_index,
+     ${library_name}_${mount_tool_file_entry_type}_t **${mount_tool_file_entry_type},
      libcerror_error_t **error )
 {
-	static char *function                    = "mount_file_system_get_${mount_tool_file_entry_type}_index_from_path";
-	system_character_t character             = 0;
-	size_t path_index                        = 0;
-	int ${mount_tool_file_entry_type}_number = 0;
-	int result                               = 0;
+	static char *function                   = "mount_file_system_get_${mount_tool_file_entry_type}_by_path";
+	system_character_t character            = 0;
+	size_t path_index                       = 0;
+	int ${mount_tool_file_entry_type}_index = 0;
+	int result                              = 0;
 
 	if( file_system == NULL )
 	{
@@ -58,13 +58,13 @@ int mount_file_system_get_${mount_tool_file_entry_type}_index_from_path(
 
 		return( -1 );
 	}
-	if( ${mount_tool_file_entry_type}_index == NULL )
+	if( ${mount_tool_file_entry_type} == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ${mount_tool_file_entry_type_description} index.",
+		 "%s: invalid ${mount_tool_file_entry_type_description}.",
 		 function );
 
 		return( -1 );
@@ -75,7 +75,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_index_from_path(
 	if( ( path_length == 1 )
 	 && ( path[ 0 ] == file_system->path_prefix[ 0 ] ) )
 	{
-		*${mount_tool_file_entry_type}_index = -1;
+		*${mount_tool_file_entry_type} = NULL;
 
 		return( 1 );
 	}
@@ -99,7 +99,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_index_from_path(
 	{
 		return( 0 );
 	}
-	${mount_tool_file_entry_type}_number = 0;
+	${mount_tool_file_entry_type}_index = 0;
 
 	path_index = file_system->path_prefix_size - 1;
 
@@ -112,11 +112,27 @@ int mount_file_system_get_${mount_tool_file_entry_type}_index_from_path(
 		{
 			return( 0 );
 		}
-		${mount_tool_file_entry_type}_number *= 10;
-		${mount_tool_file_entry_type}_number += character - (system_character_t) '0';
+		${mount_tool_file_entry_type}_index *= 10;
+		${mount_tool_file_entry_type}_index += character - (system_character_t) '0';
 	}
-	*${mount_tool_file_entry_type}_index = ${mount_tool_file_entry_type}_number - 1;
+	${mount_tool_file_entry_type}_index -= 1;
 
+	if( libcdata_array_get_entry_by_index(
+	     file_system->${mount_tool_file_entry_type}s_array,
+	     ${mount_tool_file_entry_type}_index,
+	     (intptr_t **) ${mount_tool_file_entry_type},
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve ${mount_tool_file_entry_type_description}: %d.",
+		 function,
+		 ${mount_tool_file_entry_type}_index );
+
+		return( -1 );
+	}
 	return( 1 );
 }
 
