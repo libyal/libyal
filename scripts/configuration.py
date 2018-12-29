@@ -47,6 +47,7 @@ class ProjectConfiguration(object):
     mount_tool_file_entry_type (str): file entry type used by the mount tool.
     mount_tool_file_entry_type_size_value (str): name of the size value
         provided by the file entry type.
+    mount_tool_file_system_type (str): file system type used by the mount tool.
     mount_tool_mounted_description (str): description what is mounted by
         the mount tool.
     mount_tool_path_prefix (str): path prefix used by the mount tool.
@@ -159,6 +160,7 @@ class ProjectConfiguration(object):
     self.mount_tool_base_type = None
     self.mount_tool_file_entry_type = None
     self.mount_tool_file_entry_type_size_value = None
+    self.mount_tool_file_system_type = None
     self.mount_tool_mounted_description = None
     self.mount_tool_path_prefix = None
     self.mount_tool_source_description_long = None
@@ -487,6 +489,9 @@ class ProjectConfiguration(object):
         config_parser, 'mount_tool', 'file_entry_type_size_value',
         default_value='size')
 
+    self.mount_tool_file_system_type = self._GetOptionalConfigValue(
+        config_parser, 'mount_tool', 'file_system_type')
+
     self.mount_tool_mounted_description = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'mounted_description')
 
@@ -786,6 +791,14 @@ class ProjectConfiguration(object):
       self._has_java_bindings = os.path.exists(path)
 
     return self._has_java_bindings
+
+  def HasMountToolsFeatureCodepage(self):
+    """Determines if the mount tool has a codepage feature.
+
+    Returns:
+      bool: True if the mount tools has a codepage feature.
+    """
+    return 'codepage' in self._mount_tool_features
 
   def HasMountToolsFeatureKeys(self):
     """Determines if the mount tool has a keys feature.

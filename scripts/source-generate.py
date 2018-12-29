@@ -9132,12 +9132,32 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_system')
 
+    template_names = ['header.h', 'struct-start.h']
+
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('struct-path_prefix.h')
+
+    template_names.append('struct-mounted_timestamp.h')
+
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('struct-file_entry_type_array.h')
+
+    template_names.extend(['struct-end.h', 'initialize.h', 'free.h'])
+
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('set_path_prefix.h')
+
+    template_names.append('footer.h')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
     template_mappings['mount_tool_file_entry_type'] = (
         project_configuration.mount_tool_file_entry_type)
 
-    template_filename = os.path.join(template_directory, 'mount_file_system.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
 
@@ -9156,14 +9176,35 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_system')
 
+    template_names = ['header.c', 'initialize-start.c']
+
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('initialize-file_entry_type_array.c')
+
+    template_names.extend(['initialize-end.c', 'free-start.c'])
+
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('free-path_prefix.c')
+      template_names.append('free-file_entry_type_array.c')
+
+    template_names.append('free-end.c')
+
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('set_path_prefix.c')
+
+    template_names.append('body.c')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
     template_mappings['mount_tool_file_entry_type'] = (
         project_configuration.mount_tool_file_entry_type)
     template_mappings['mount_tool_file_entry_type_description'] = (
         project_configuration.mount_tool_file_entry_type.replace('_', ' '))
 
-    template_filename = os.path.join(template_directory, 'mount_file_system.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
@@ -9229,6 +9270,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     base_type = project_configuration.mount_tool_base_type
     file_entry_type = project_configuration.mount_tool_file_entry_type
+    file_system_type = project_configuration.mount_tool_file_system_type
 
     template_names = ['header.h', 'includes-start.h']
 
@@ -9241,6 +9283,12 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('struct-basename.h')
 
     template_names.append('struct-file_system.h')
+
+    # TODO: add support for base_type
+    # TODO: add support for file_system_type
+
+    if project_configuration.HasMountToolsFeatureCodepage():
+      template_names.append('struct-codepage.h')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('struct-keys.h')
@@ -9270,6 +9318,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('set_basename.h')
 
+    if project_configuration.HasMountToolsFeatureCodepage():
+      template_names.append('set_codepage.h')
+
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('set_keys.h')
 
@@ -9285,7 +9336,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('set_startup_key.h')
 
-    template_names.append('set_path_prefix.h')
+    if not file_system_type:
+      template_names.append('set_path_prefix.h')
 
     if project_configuration.HasMountToolsFeatureMultiSource():
       template_names.append('open-multi_source.h')
@@ -9331,12 +9383,16 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     base_type = project_configuration.mount_tool_base_type
     file_entry_type = project_configuration.mount_tool_file_entry_type
+    file_system_type = project_configuration.mount_tool_file_system_type
     source_type = project_configuration.mount_tool_source_type
 
     template_names = ['header.c', 'includes-start.c']
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('includes-basename.c')
+
+    if project_configuration.HasMountToolsFeatureCodepage():
+      template_names.append('includes-codepage.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('includes-keys.c')
@@ -9352,7 +9408,12 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('system_string_copy_from_64_bit_in_decimal.c')
 
-    template_names.extend(['initialize.c', 'free-start.c'])
+    template_names.append('initialize-start.c')
+
+    if project_configuration.HasMountToolsFeatureCodepage():
+      template_names.append('initialize-codepage.c')
+
+    template_names.extend(['initialize-end.c', 'free-start.c'])
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('free-basename.c')
@@ -9364,13 +9425,18 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.append('free-end.c')
 
-    if base_type and base_type != file_entry_type:
+    if base_type:
       template_names.append('signal_abort-base_type.c')
+    elif file_system_type:
+      template_names.append('signal_abort-file_system_type.c')
     else:
       template_names.append('signal_abort.c')
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('set_basename.c')
+
+    if project_configuration.HasMountToolsFeatureCodepage():
+      template_names.append('set_codepage.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('set_keys.c')
@@ -9387,7 +9453,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('set_startup_key.c')
 
-    template_names.append('set_path_prefix.c')
+    if not file_system_type:
+      template_names.append('set_path_prefix.c')
 
     if project_configuration.HasMountToolsFeatureMultiSource():
       template_names.append('open-start-multi_source.c')
@@ -9414,6 +9481,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         template_names.append('open-basename-multi_source.c')
       else:
         template_names.append('open-basename.c')
+
+    # TODO: add support for base_type
+    # TODO: add support for file_system_type
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('open-offset.c')
@@ -9476,6 +9546,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_mappings['mount_tool_file_entry_type'] = file_entry_type
     template_mappings['mount_tool_file_entry_type_description'] = (
         file_entry_type.replace('_', ' '))
+    template_mappings['mount_tool_file_system_type'] = file_system_type
+    template_mappings['mount_tool_file_system_type_description'] = (
+        file_system_type.replace('_', ' '))
     template_mappings['mount_tool_source_type'] = source_type
     template_mappings['mount_tool_source_type_description'] = (
         source_type.replace('_', ' '))
@@ -9487,10 +9560,19 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     del template_mappings['mount_tool_base_type_description']
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
+    del template_mappings['mount_tool_file_system_type']
+    del template_mappings['mount_tool_file_system_type_description']
     del template_mappings['mount_tool_source_type']
     del template_mappings['mount_tool_source_type_description']
 
+    if base_type:
+      self._CorrectDescriptionSpelling(base_type, output_filename)
+
     self._CorrectDescriptionSpelling(file_entry_type, output_filename)
+
+    if file_system_type:
+      self._CorrectDescriptionSpelling(file_system_type, output_filename)
+
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
 
@@ -9694,8 +9776,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('main-option_startup_key.c')
 
-    # TODO: make optional for file systems that don't require a path prefix.
-    template_names.append('main-set_path_prefix.c')
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('main-set_path_prefix.c')
 
     if project_configuration.HasMountToolsFeatureMultiSource():
       template_names.append('main-open-multi_source.c')
