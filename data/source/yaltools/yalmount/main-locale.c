@@ -1,3 +1,4 @@
+
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations ${mount_tool_name}_fuse_operations;
 

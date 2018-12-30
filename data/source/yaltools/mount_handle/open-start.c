@@ -1,4 +1,4 @@
-/* Opens a mount handle
+/* Opens the mount handle
  * Returns 1 if successful, 0 if not or -1 on error
  */
 int mount_handle_open(

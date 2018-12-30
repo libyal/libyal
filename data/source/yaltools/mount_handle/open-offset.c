@@ -39,7 +39,7 @@
 	}
 	if( libbfio_file_range_set(
 	     file_io_handle,
-	     mount_handle->${mount_tool_file_entry_type}_offset,
+	     mount_handle->${mount_tool_file_system_type}_offset,
 	     0,
 	     error ) != 1 )
 	{

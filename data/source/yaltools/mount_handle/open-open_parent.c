@@ -1,13 +1,13 @@
 	if( mount_handle_open_parent(
 	     mount_handle,
-	     ${mount_tool_file_entry_type},
+	     ${mount_tool_file_system_type},
 	     error ) == -1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open parent ${mount_tool_file_entry_type_description}.",
+		 "%s: unable to open parent ${mount_tool_file_system_type_description}.",
 		 function );
 
 		goto on_error;

@@ -1,22 +1,22 @@
-/* Opens a parent ${mount_tool_file_entry_type}
+/* Opens a parent ${mount_tool_file_system_type}
  * Returns 1 if successful, 0 if no parent or -1 on error
  */
 int mount_handle_open_parent(
      mount_handle_t *mount_handle,
-     ${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type},
+     ${library_name}_${mount_tool_file_system_type}_t *${mount_tool_file_system_type},
      libcerror_error_t **error )
 {
 	uint8_t guid[ 16 ];
 
-	${library_name}_${mount_tool_file_entry_type}_t *parent_${mount_tool_file_entry_type} = NULL;
-	system_character_t *parent_basename_end                                               = NULL;
-	system_character_t *parent_filename                                                   = NULL;
-	system_character_t *parent_path                                                       = NULL;
-	static char *function                                                                 = "mount_handle_open_parent";
-	size_t parent_basename_length                                                         = 0;
-	size_t parent_filename_size                                                           = 0;
-	size_t parent_path_size                                                               = 0;
-	int result                                                                            = 0;
+	${library_name}_${mount_tool_file_system_type}_t *parent_${mount_tool_file_system_type} = NULL;
+	system_character_t *parent_basename_end                                                 = NULL;
+	system_character_t *parent_filename                                                     = NULL;
+	system_character_t *parent_path                                                         = NULL;
+	static char *function                                                                   = "mount_handle_open_parent";
+	size_t parent_basename_length                                                           = 0;
+	size_t parent_filename_size                                                             = 0;
+	size_t parent_path_size                                                                 = 0;
+	int result                                                                              = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -29,8 +29,8 @@ int mount_handle_open_parent(
 
 		return( -1 );
 	}
-	result = ${library_name}_${mount_tool_file_entry_type}_get_parent_identifier(
-	          ${mount_tool_file_entry_type},
+	result = ${library_name}_${mount_tool_file_system_type}_get_parent_identifier(
+	          ${mount_tool_file_system_type},
 	          guid,
 	          16,
 	          error );
@@ -51,13 +51,13 @@ int mount_handle_open_parent(
 		return( 0 );
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_${mount_tool_file_entry_type}_get_utf16_parent_filename_size(
-		  ${mount_tool_file_entry_type},
+	result = ${library_name}_${mount_tool_file_system_type}_get_utf16_parent_filename_size(
+		  ${mount_tool_file_system_type},
 		  &parent_filename_size,
 		  error );
 #else
-	result = ${library_name}_${mount_tool_file_entry_type}_get_utf8_parent_filename_size(
-		  ${mount_tool_file_entry_type},
+	result = ${library_name}_${mount_tool_file_system_type}_get_utf8_parent_filename_size(
+		  ${mount_tool_file_system_type},
 		  &parent_filename_size,
 		  error );
 #endif
@@ -110,14 +110,14 @@ int mount_handle_open_parent(
 		goto on_error;
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_${mount_tool_file_entry_type}_get_utf16_parent_filename(
-		  ${mount_tool_file_entry_type},
+	result = ${library_name}_${mount_tool_file_system_type}_get_utf16_parent_filename(
+		  ${mount_tool_file_system_type},
 		  (uint16_t *) parent_filename,
 		  parent_filename_size,
 		  error );
 #else
-	result = ${library_name}_${mount_tool_file_entry_type}_get_utf8_parent_filename(
-		  ${mount_tool_file_entry_type},
+	result = ${library_name}_${mount_tool_file_system_type}_get_utf8_parent_filename(
+		  ${mount_tool_file_system_type},
 		  (uint8_t *) parent_filename,
 		  parent_filename_size,
 		  error );
@@ -179,28 +179,28 @@ int mount_handle_open_parent(
 			goto on_error;
 		}
 	}
-	if( ${library_name}_${mount_tool_file_entry_type}_initialize(
-	     &parent_${mount_tool_file_entry_type},
+	if( ${library_name}_${mount_tool_file_system_type}_initialize(
+	     &parent_${mount_tool_file_system_type},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize parent ${mount_tool_file_entry_type_description}.",
+		 "%s: unable to initialize parent ${mount_tool_file_system_type_description}.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	if( ${library_name}_${mount_tool_file_entry_type}_open_wide(
-	     parent_${mount_tool_file_entry_type},
+	if( ${library_name}_${mount_tool_file_system_type}_open_wide(
+	     parent_${mount_tool_file_system_type},
 	     parent_path,
 	     LIBVHDI_OPEN_READ,
 	     error ) != 1 )
 #else
-	if( ${library_name}_${mount_tool_file_entry_type}_open(
-	     parent_${mount_tool_file_entry_type},
+	if( ${library_name}_${mount_tool_file_system_type}_open(
+	     parent_${mount_tool_file_system_type},
 	     parent_path,
 	     LIBVHDI_OPEN_READ,
 	     error ) != 1 )
@@ -210,7 +210,7 @@ int mount_handle_open_parent(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open parent ${mount_tool_file_entry_type_description}: %" PRIs_SYSTEM ".",
+		 "%s: unable to open parent ${mount_tool_file_system_type_description}: %" PRIs_SYSTEM ".",
 		 function,
 		 parent_path );
 
@@ -218,43 +218,43 @@ int mount_handle_open_parent(
 	}
 	if( mount_handle_open_parent(
 	     mount_handle,
-	     parent_${mount_tool_file_entry_type},
+	     parent_${mount_tool_file_system_type},
 	     error ) == -1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open parent ${mount_tool_file_entry_type_description}: %" PRIs_SYSTEM ".",
+		 "%s: unable to open parent ${mount_tool_file_system_type_description}: %" PRIs_SYSTEM ".",
 		 function,
 		 parent_path );
 
 		return( -1 );
 	}
-	if( ${library_name}_${mount_tool_file_entry_type}_set_parent_file(
-	     ${mount_tool_file_entry_type},
-	     parent_${mount_tool_file_entry_type},
+	if( ${library_name}_${mount_tool_file_system_type}_set_parent_file(
+	     ${mount_tool_file_system_type},
+	     parent_${mount_tool_file_system_type},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set parent ${mount_tool_file_entry_type_description}.",
+		 "%s: unable to set parent ${mount_tool_file_system_type_description}.",
 		 function );
 
 		goto on_error;
 	}
-	if( mount_file_system_append_${mount_tool_file_entry_type}(
+	if( mount_file_system_append_${mount_tool_file_system_type}(
 	     mount_handle->file_system,
-	     ${mount_tool_file_entry_type},
+	     ${mount_tool_file_system_type},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-		 "%s: unable to append parent ${mount_tool_file_entry_type_description} to file system.",
+		 "%s: unable to append parent ${mount_tool_file_system_type_description} to file system.",
 		 function );
 
 		goto on_error;
@@ -278,10 +278,10 @@ int mount_handle_open_parent(
 	return( 1 );
 
 on_error:
-	if( parent_${mount_tool_file_entry_type} != NULL )
+	if( parent_${mount_tool_file_system_type} != NULL )
 	{
-		${library_name}_${mount_tool_file_entry_type}_free(
-		 &parent_${mount_tool_file_entry_type},
+		${library_name}_${mount_tool_file_system_type}_free(
+		 &parent_${mount_tool_file_system_type},
 		 NULL );
 	}
 	if( ( parent_path != NULL )

@@ -9691,6 +9691,11 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open-open_parent.c')
 
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('open-append_file_system_type.c')
+    else:
+      template_names.append('open-set_file_system_type.c')
+
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('open-end-file_io_handle.c')
     else:
@@ -9699,7 +9704,17 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open_parent.c')
 
-    template_names.append('close-start.c')
+    template_names.extend(['close-start.c', 'close-variables-start.c'])
+
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('close-variables-no_file_system_type.c')
+
+    template_names.extend(['close-variables-end.c', 'close-check_arguments.c'])
+
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('close-close.c')
+    else:
+      template_names.append('close-close-file_system_type.c')
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('close-file_io_handle.c')
@@ -9721,14 +9736,17 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_mappings['mount_tool_base_type'] = base_type
     template_mappings['mount_tool_base_type_description'] = (
         base_type.replace('_', ' '))
+
     template_mappings['mount_tool_file_entry_type'] = file_entry_type
     template_mappings['mount_tool_file_entry_type_description'] = (
         file_entry_type.replace('_', ' '))
 
-    if file_system_type:
-      template_mappings['mount_tool_file_system_type'] = file_system_type
-      template_mappings['mount_tool_file_system_type_description'] = (
-          file_system_type.replace('_', ' '))
+    if not file_system_type:
+      file_system_type = file_entry_type
+
+    template_mappings['mount_tool_file_system_type'] = file_system_type
+    template_mappings['mount_tool_file_system_type_description'] = (
+        file_system_type.replace('_', ' '))
 
     template_mappings['mount_tool_source_type'] = source_type
     template_mappings['mount_tool_source_type_description'] = (
@@ -9741,11 +9759,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     del template_mappings['mount_tool_base_type_description']
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
-
-    if file_system_type:
-      del template_mappings['mount_tool_file_system_type']
-      del template_mappings['mount_tool_file_system_type_description']
-
+    del template_mappings['mount_tool_file_system_type']
+    del template_mappings['mount_tool_file_system_type_description']
     del template_mappings['mount_tool_source_type']
     del template_mappings['mount_tool_source_type_description']
 
@@ -9936,6 +9951,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     else:
       template_names.append('main-variables.c')
 
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('main-variables-path_prefix.c')
+
     template_names.append('main-locale.c')
 
     if project_configuration.HasMountToolsFeatureMultiSource():
@@ -9944,6 +9962,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('main-getopt.c')
 
     template_names.append('main-initialize.c')
+
+    if project_configuration.HasMountToolsFeatureCodepage():
+      template_names.append('main-option_codepage.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('main-option_keys.c')
@@ -9991,6 +10012,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     del template_mappings['mount_tool_options_switch']
     del template_mappings['mount_tool_options_variable_declarations']
 
+    self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
 
   def _GenerateMountToolSourceUsageFunction(
@@ -10121,7 +10143,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       list[tuple[str, str, str]]: mount tool options.
     """
     # TODO: sort options with lower case before upper case.
-    mount_tool_options = [('h', '', 'shows this help')]
+    mount_tool_options = []
 
     if project_configuration.HasMountToolsFeatureCodepage():
       option = ('c', 'codepage', (
@@ -10131,6 +10153,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
           'windows-1255, windows-1256, windows-1257 or windows-1258'))
 
       mount_tool_options.append(option)
+
+    mount_tool_options.append(('h', '', 'shows this help'))
 
     if project_configuration.HasMountToolsFeatureKeys():
       # TODO: set keys option description via configuation

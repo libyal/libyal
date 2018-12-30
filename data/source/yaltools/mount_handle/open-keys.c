@@ -1,7 +1,7 @@
 	if( mount_handle->key_size > 0 )
 	{
-		if( ${library_name}_${mount_tool_file_entry_type}_set_keys(
-		     ${mount_tool_file_entry_type},
+		if( ${library_name}_${mount_tool_file_system_type}_set_keys(
+		     ${mount_tool_file_system_type},
 		     mount_handle->key_data,
 		     mount_handle->key_size,
 		     error ) != 1 )
