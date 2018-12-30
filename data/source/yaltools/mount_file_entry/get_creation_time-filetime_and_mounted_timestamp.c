@@ -56,7 +56,7 @@ int mount_file_entry_get_creation_time(
 
 			return( -1 );
 		}
-		if( ${library_name}_${mount_tool_file_entry_type}_get_creation_time(
+		if( ${library_name}_${mount_tool_file_entry_type}_get_${mount_tool_file_entry_creation_time_value}(
 		     file_entry->${mount_tool_file_entry_type},
 		     &filetime,
 		     error ) != 1 )
@@ -65,7 +65,7 @@ int mount_file_entry_get_creation_time(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve creation time from ${mount_tool_file_entry_type_description}.",
+			 "%s: unable to retrieve ${mount_tool_file_entry_creation_time_value_description} from ${mount_tool_file_entry_type_description}.",
 			 function );
 
 			return( -1 );

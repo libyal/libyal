@@ -1,5 +1,5 @@
-/* Retrieves the ${mount_tool_file_entry_type} for a specific path
- * Returns 1 if successful, 0 if no such file index or -1 on error
+/* Retrieves the ${mount_tool_file_entry_type_description} for a specific path
+ * Returns 1 if successful, 0 if no such ${mount_tool_file_entry_type_description} or -1 on error
  */
 int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
      mount_file_system_t *file_system,

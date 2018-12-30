@@ -22,13 +22,3 @@
 #if !defined( _MOUNT_FILE_SYSTEM_H )
 #define _MOUNT_FILE_SYSTEM_H
 
-#include <common.h>
-#include <types.h>
-
-#include "${tools_name}_libcdata.h"
-#include "${tools_name}_libcerror.h"
-
-#if defined( __cplusplus )
-extern "C" {
-#endif
-
