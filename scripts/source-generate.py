@@ -1446,6 +1446,53 @@ class SourceFileGenerator(object):
 
         file_object.write(line)
 
+  def _VerticalAlignFunctionArguments(self, output_filename):
+    """Vertically aligns function arguments.
+
+    Note this is a very basic approach that should suffice for the yaltools and
+    pyyal Python module source files.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = file_object.readlines()
+
+    alignment_number_of_spaces = 0
+    alignment_number_of_tabs = 0
+    in_function_call = False
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        if not line.startswith(b'\t'):
+          file_object.write(line)
+          continue
+
+        stripped_line = line.rstrip()
+
+        if in_function_call:
+          if stripped_line.endswith(b')') or stripped_line.endswith(b');'):
+            in_function_call = False
+
+          stripped_line = line.lstrip()
+          line = b'{0:s}{1:s}{2:s}'.format(
+              b'\t' * alignment_number_of_tabs,
+              b' ' * alignment_number_of_spaces,
+              stripped_line)
+
+        elif stripped_line.endswith(b'('):
+          in_function_call = True
+          stripped_line = line.lstrip()
+
+          alignment_number_of_spaces = stripped_line.rfind(b' ')
+          if alignment_number_of_spaces == -1:
+            alignment_number_of_spaces = 1
+          else:
+            alignment_number_of_spaces += 2
+
+          alignment_number_of_tabs = len(line) - len(stripped_line)
+
+        file_object.write(line)
+
   def _VerticalAlignTabs(self, output_filename):
     """Vertically aligns tabs.
 
@@ -5438,53 +5485,6 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
     template_mappings['alignment_padding'] = ' ' * alignment_padding
 
     return template_mappings
-
-  def _VerticalAlignFunctionArguments(self, output_filename):
-    """Vertically aligns function arguments.
-
-    Note this is a very basic approach that should suffice for the Python
-    module source files.
-
-    Args:
-      output_filename (str): path of the output file.
-    """
-    with open(output_filename, 'rb') as file_object:
-      lines = file_object.readlines()
-
-    alignment_number_of_spaces = 0
-    alignment_number_of_tabs = 0
-    in_function_call = False
-    with open(output_filename, 'wb') as file_object:
-      for line in lines:
-        if not line.startswith(b'\t'):
-          file_object.write(line)
-          continue
-
-        stripped_line = line.rstrip()
-
-        if in_function_call:
-          if stripped_line.endswith(b')') or stripped_line.endswith(b');'):
-            in_function_call = False
-
-          stripped_line = line.lstrip()
-          line = b'{0:s}{1:s}{2:s}'.format(
-              b'\t' * alignment_number_of_tabs,
-              b' ' * alignment_number_of_spaces,
-              stripped_line)
-
-        elif stripped_line.endswith(b'('):
-          in_function_call = True
-          stripped_line = line.lstrip()
-
-          alignment_number_of_spaces = stripped_line.rfind(b' ')
-          if alignment_number_of_spaces == -1:
-            alignment_number_of_spaces = 1
-          else:
-            alignment_number_of_spaces += 2
-
-          alignment_number_of_tabs = len(line) - len(stripped_line)
-
-        file_object.write(line)
 
   def Generate(self, project_configuration, output_writer):
     """Generates Python module source files.
@@ -9808,6 +9808,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
+    self._VerticalAlignFunctionArguments(output_filename)
 
   def _GenerateMountTool(
       self, project_configuration, template_mappings, output_writer):
@@ -9909,8 +9910,6 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     mount_tool_options = self._GetMountToolOptions(
         project_configuration, mount_tool_name)
 
-    template_mappings['mount_tool_indentation'] = ' ' * len(
-        project_configuration.library_name_suffix)
     template_mappings['mount_tool_name'] = mount_tool_name
     template_mappings['mount_tool_path_prefix'] = (
         project_configuration.mount_tool_path_prefix)
@@ -9945,7 +9944,6 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         project_configuration, template_mappings, mount_tool_name,
         mount_tool_options, output_writer, output_filename)
 
-    del template_mappings['mount_tool_indentation']
     del template_mappings['mount_tool_name']
     del template_mappings['mount_tool_path_prefix']
     del template_mappings['mount_tool_path_prefix_upper_case']
@@ -10050,6 +10048,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
+    self._VerticalAlignFunctionArguments(output_filename)
 
   def _GenerateMountToolSourceUsageFunction(
       self, project_configuration, template_mappings, mount_tool_name,

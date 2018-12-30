@@ -18,7 +18,7 @@
 	 1 );
 
 	if( libclocale_initialize(
-             "${tools_name}",
+	     "${tools_name}",
 	     &error ) != 1 )
 	{
 		fprintf(
@@ -28,8 +28,8 @@
 		goto on_error;
 	}
 	if( ${tools_name}_output_initialize(
-             _IONBF,
-             &error ) != 1 )
+	     _IONBF,
+	     &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
