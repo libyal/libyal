@@ -1,6 +1,6 @@
 	if( option_codepage != NULL )
 	{
-		result = mount_handle_set_codepage(
+		result = mount_handle_set_ascii_codepage(
 		          ${mount_tool_name}_mount_handle,
 		          option_codepage,
 		          &error );
@@ -9,7 +9,7 @@
 		{
 			fprintf(
 			 stderr,
-			 "Unable to set codepage in mount handle.\n" );
+			 "Unable to set ASCII codepage in mount handle.\n" );
 
 			goto on_error;
 		}
@@ -17,6 +17,6 @@
 		{
 			fprintf(
 			 stderr,
-			 "Unsupported codepage defaulting to: windows-1252.\n" );
+			 "Unsupported ASCII codepage defaulting to: windows-1252.\n" );
 		}
 	}

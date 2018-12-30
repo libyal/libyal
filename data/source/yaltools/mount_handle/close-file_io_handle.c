@@ -9,7 +9,7 @@
 		 "%s: unable to close file IO handle.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libbfio_handle_free(
 	     &( mount_handle->file_io_handle ),
@@ -22,5 +22,5 @@
 		 "%s: unable to free file IO handle.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}

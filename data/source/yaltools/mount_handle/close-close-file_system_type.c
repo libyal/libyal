@@ -10,7 +10,7 @@
 		 "%s: unable to retrieve ${mount_tool_file_system_type_description} from file system.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( mount_file_system_set_${mount_tool_file_system_type}(
 	     mount_handle->file_system,
@@ -24,7 +24,9 @@
 		 "%s: unable to set ${mount_tool_file_system_type_description} in file system.",
 		 function );
 
-		return( -1 );
+		${mount_tool_file_system_type} = NULL;
+
+		goto on_error;
 	}
 	if( ${library_name}_${mount_tool_file_system_type}_close(
 	     ${mount_tool_file_system_type},
@@ -37,7 +39,7 @@
 		 "%s: unable to close ${mount_tool_file_system_type_description}.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( ${library_name}_${mount_tool_file_system_type}_free(
 	     &${mount_tool_file_system_type},
@@ -50,5 +52,5 @@
 		 "%s: unable to free ${mount_tool_file_system_type_description}.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}

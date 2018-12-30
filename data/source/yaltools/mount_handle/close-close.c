@@ -10,7 +10,7 @@
 		 "%s: unable to retrieve number of ${mount_tool_file_system_type_description}s.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	for( ${mount_tool_file_system_type}_index = number_of_${mount_tool_file_system_type}s - 1;
 	     ${mount_tool_file_system_type}_index > 0;
@@ -30,8 +30,10 @@
 			 function,
 			 ${mount_tool_file_system_type}_index );
 
-			return( -1 );
+			goto on_error;
 		}
+/* TODO remove ${mount_tool_file_system_type} from file system */
+
 		if( ${library_name}_${mount_tool_file_system_type}_close(
 		     ${mount_tool_file_system_type},
 		     error ) != 0 )
@@ -44,7 +46,7 @@
 			 function,
 			 ${mount_tool_file_system_type}_index );
 
-			return( -1 );
+			goto on_error;
 		}
 		if( ${library_name}_${mount_tool_file_system_type}_free(
 		     &${mount_tool_file_system_type},
@@ -58,6 +60,6 @@
 			 function,
 			 ${mount_tool_file_system_type}_index );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
