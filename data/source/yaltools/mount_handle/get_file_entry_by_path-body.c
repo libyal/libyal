@@ -34,6 +34,33 @@
 
 		goto on_error;
 	}
+	if( ( path_length >= 2 )
+	 && ( path[ path_length - 1 ] == LIBCPATH_SEPARATOR ) )
+	{
+		path_length--;
+	}
+	path_index = path_length;
+
+	while( path_index > 0 )
+	{
+		if( path[ path_index ] == LIBCPATH_SEPARATOR )
+		{
+			break;
+		}
+		path_index--;
+	}
+	/* Ignore the name of the root item
+	 */
+	if( path_index == 0 )
+	{
+		filename        = "";
+		filename_length = 0;
+	}
+	else
+	{
+		filename        = &( path[ path_index ] );
+		filename_length = path_length - path_index;
+	}
 	result = mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 	          mount_handle->file_system,
 	          path,

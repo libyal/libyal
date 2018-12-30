@@ -9,7 +9,6 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
      size_t path_length,
      system_character_t **${mount_tool_file_entry_type}_path,
      size_t *${mount_tool_file_entry_type}_path_size,
-     size_t *last_${mount_tool_file_entry_type}_path_seperator_index,
      libcerror_error_t **error )
 {
 	system_character_t *safe_${mount_tool_file_entry_type}_path = NULL;
@@ -74,17 +73,6 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 
 		return( -1 );
 	}
-	if( last_${mount_tool_file_entry_type}_path_seperator_index == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid last ${mount_tool_file_entry_type_description} path seperator index.",
-		 function );
-
-		return( -1 );
-	}
 	*${mount_tool_file_entry_type}_path      = NULL;
 	*${mount_tool_file_entry_type}_path_size = 0;
 
@@ -145,8 +133,6 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 		 */
 		if( character_value == (system_character_t) '\\' )
 		{
-			*last_${mount_tool_file_entry_type}_path_seperator_index = ${mount_tool_file_entry_type}_path_index;
-
 			safe_${mount_tool_file_entry_type}_path[ ${mount_tool_file_entry_type}_path_index++ ] = (system_character_t) '\\';
 		}
 		else if( character_value == (system_character_t) '^' )
@@ -279,7 +265,6 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
      size_t path_length,
      system_character_t **${mount_tool_file_entry_type}_path,
      size_t *${mount_tool_file_entry_type}_path_size,
-     size_t *last_${mount_tool_file_entry_type}_path_seperator_index,
      libcerror_error_t **error )
 {
 	system_character_t *safe_${mount_tool_file_entry_type}_path = NULL;
@@ -340,17 +325,6 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid ${mount_tool_file_entry_type_description} path size.",
-		 function );
-
-		return( -1 );
-	}
-	if( last_${mount_tool_file_entry_type}_path_seperator_index == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid last ${mount_tool_file_entry_type_description} path seperator index.",
 		 function );
 
 		return( -1 );
@@ -416,8 +390,6 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 		 */
 		if( character_value == (system_character_t) '/' )
 		{
-			*last_${mount_tool_file_entry_type}_path_seperator_index = ${mount_tool_file_entry_type}_path_index;
-
 			safe_${mount_tool_file_entry_type}_path[ ${mount_tool_file_entry_type}_path_index++ ] = (system_character_t) '\\';
 		}
 		else if( character_value == (system_character_t) '\\' )

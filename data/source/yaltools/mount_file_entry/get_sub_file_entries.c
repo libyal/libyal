@@ -78,6 +78,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 	${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type} = NULL;
 	static char *function                                                          = "mount_file_entry_get_sub_file_entry_by_index";
+	size_t path_length                                                             = 0;
 	int number_of_sub_file_entries                                                 = 0;
 
 	if( file_entry == NULL )
@@ -184,10 +185,14 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		return( -1 );
 	}
+	path_length = system_string_length(
+	               path );
+
 	if( mount_file_entry_initialize(
 	     sub_file_entry,
 	     file_entry->file_system,
 	     &( path[ 1 ] ),
+	     path_length - 1,
 	     ${mount_tool_file_entry_type},
 	     error ) != 1 )
 	{

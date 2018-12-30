@@ -6,6 +6,7 @@ int mount_file_entry_initialize(
      mount_file_entry_t **file_entry,
      mount_file_system_t *file_system,
      const system_character_t *name,
+     size_t name_length,
      ${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type},
      libcerror_error_t **error )
 {
@@ -41,6 +42,17 @@ int mount_file_entry_initialize(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file system.",
+		 function );
+
+		return( -1 );
+	}
+	if( name_length > (size_t) ( SSIZE_MAX - 1 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid name length value exceeds maximum.",
 		 function );
 
 		return( -1 );
@@ -82,9 +94,6 @@ int mount_file_entry_initialize(
 
 	if( name != NULL )
 	{
-		name_length = system_string_length(
-		               name );
-
 		( *file_entry )->name = system_string_allocate(
 		                         name_length + 1 );
 

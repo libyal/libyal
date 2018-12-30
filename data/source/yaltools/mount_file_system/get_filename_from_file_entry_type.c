@@ -3,7 +3,7 @@
  */
 int mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
      mount_file_system_t *file_system,
-     libolecf_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type},
+     ${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type},
      system_character_t **filename,
      size_t *filename_size,
      libcerror_error_t **error )
@@ -25,12 +25,12 @@ int mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
 		return( -1 );
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = libolecf_${mount_tool_file_entry_type}_get_utf16_name_size(
+	result = ${library_name}_${mount_tool_file_entry_type}_get_utf16_name_size(
 	          ${mount_tool_file_entry_type},
 	          &${mount_tool_file_entry_type}_name_size,
 	          error );
 #else
-	result = libolecf_${mount_tool_file_entry_type}_get_utf8_name_size(
+	result = ${library_name}_${mount_tool_file_entry_type}_get_utf8_name_size(
 	          ${mount_tool_file_entry_type},
 	          &${mount_tool_file_entry_type}_name_size,
 	          error );
@@ -73,13 +73,13 @@ int mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
 		goto on_error;
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = libolecf_${mount_tool_file_entry_type}_get_utf16_name(
+	result = ${library_name}_${mount_tool_file_entry_type}_get_utf16_name(
 	          ${mount_tool_file_entry_type},
 	          (uint16_t *) ${mount_tool_file_entry_type}_name,
 	          ${mount_tool_file_entry_type}_name_size,
 	          error );
 #else
-	result = libolecf_${mount_tool_file_entry_type}_get_utf8_name(
+	result = ${library_name}_${mount_tool_file_entry_type}_get_utf8_name(
 	          ${mount_tool_file_entry_type},
 	          (uint8_t *) ${mount_tool_file_entry_type}_name,
 	          ${mount_tool_file_entry_type}_name_size,
@@ -108,7 +108,7 @@ int mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retriev a filename from the ${mount_tool_file_entry_type_description} name.",
+		 "%s: unable to retrieve a filename from the ${mount_tool_file_entry_type_description} name.",
 		 function );
 
 		goto on_error;

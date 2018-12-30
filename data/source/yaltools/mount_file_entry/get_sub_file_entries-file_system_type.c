@@ -28,7 +28,7 @@ int mount_file_entry_get_number_of_sub_file_entries(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of ${mount_tool_file_entry_type_description}s.",
+		 "%s: unable to retrieve number of sub ${mount_tool_file_entry_type_description}s.",
 		 function );
 
 		return( -1 );
@@ -48,7 +48,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 	${library_name}_${mount_tool_file_entry_type}_t *sub_${mount_tool_file_entry_type} = NULL;
 	system_character_t *filename                                                       = NULL;
 	static char *function                                                              = "mount_file_entry_get_sub_file_entry_by_index";
-	size_t filename_size                                                               = 0; 
+	size_t filename_size                                                               = 0;
 
 	if( file_entry == NULL )
 	{
@@ -121,6 +121,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 	     sub_file_entry,
 	     file_entry->file_system,
 	     filename,
+	     filename_size - 1,
 	     sub_${mount_tool_file_entry_type},
 	     error ) != 1 )
 	{

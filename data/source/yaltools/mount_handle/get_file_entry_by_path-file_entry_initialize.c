@@ -2,6 +2,7 @@
 		     file_entry,
 		     mount_handle->file_system,
 		     filename,
+		     filename_length,
 		     ${mount_tool_file_entry_type},
 		     error ) != 1 )
 		{
@@ -9,7 +10,7 @@
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to initialize file entry for ${mount_tool_file_entry_type_description}.",
+			 "%s: unable to initialize file entry.",
 			 function );
 
 			goto on_error;

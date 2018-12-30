@@ -41,7 +41,7 @@ int mount_file_entry_get_parent_file_entry(
 
 		return( -1 );
 	}
-/* TODO implement libolecf_item_get_parent function */
+/* TODO implement ${library_name}_item_get_parent function */
 
 	return( 1 );
 }

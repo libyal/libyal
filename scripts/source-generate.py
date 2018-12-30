@@ -9744,22 +9744,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.extend([
         'get_file_entry_by_path-start.c',
-        'get_file_entry_by_path-variables-start.c'])
-
-    if file_system_type:
-      template_names.append(
-          'get_file_entry_by_path-variables-file_system_type.c')
-
-    template_names.extend([
-        'get_file_entry_by_path-variables-end.c',
-        'get_file_entry_by_path-body.c'])
-
-    if not file_system_type:
-      template_names.append('get_file_entry_by_path-filename.c')
-    else:
-      template_names.append('get_file_entry_by_path-filename-file_system_type.c')
-
-    template_names.append('get_file_entry_by_path-file_entry_initialize.c')
+        'get_file_entry_by_path-variables.c',
+        'get_file_entry_by_path-body.c',
+        'get_file_entry_by_path-file_entry_initialize.c'])
 
     if not file_system_type:
       template_names.append('get_file_entry_by_path-end.c')

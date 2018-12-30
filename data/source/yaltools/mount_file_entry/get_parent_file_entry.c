@@ -47,6 +47,7 @@ int mount_file_entry_get_parent_file_entry(
 		     parent_file_entry,
 		     file_entry->file_system,
 		     "",
+		     0
 		     NULL,
 		     error ) != 1 )
 		{

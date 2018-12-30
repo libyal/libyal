@@ -72,7 +72,7 @@
 	                                  &${mount_tool_name}_fuse_operations,
 	                                  sizeof( struct fuse_operations ),
 	                                  ${mount_tool_name}_mount_handle );
-	
+
 	if( ${mount_tool_name}_fuse_handle == NULL )
 	{
 		fprintf(
