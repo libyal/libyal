@@ -1,6 +1,6 @@
 	/* The key data
 	 */
-	uint8_t key_data[ 64 ];
+	uint8_t key_data[ 16 ];
 
 	/* The key size
 	 */

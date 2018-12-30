@@ -1,6 +1,3 @@
-	filename_length = system_string_length(
-	                   filename );
-
 	result = ${library_name}_${mount_tool_file_entry_type}_open_file_io_handle(
 	          ${mount_tool_file_entry_type},
 	          file_io_handle,

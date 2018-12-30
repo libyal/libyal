@@ -1,5 +1,5 @@
 /*
- * The unused definition
+ * Definitions to silence compiler warnings about unused function attributes/parameters.
  *
  * Copyright (C) ${copyright}, ${tests_authors}
  *

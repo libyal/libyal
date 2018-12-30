@@ -1,5 +1,5 @@
 /*
- * The internal unused definition
+ * Definitions to silence compiler warnings about unused function attributes/parameters.
  *
  * Copyright (C) ${python_module_copyright}, ${python_module_authors}
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${python_module_name_upper_case}_INTERNAL_UNUSED_H )
-#define _${python_module_name_upper_case}_INTERNAL_UNUSED_H
+#if !defined( _${python_module_name_upper_case}_UNUSED_H )
+#define _${python_module_name_upper_case}_UNUSED_H
 
 #include <common.h>
 
@@ -40,5 +40,5 @@
 	/* parameter */
 #endif
 
-#endif /* !defined( _${python_module_name_upper_case}_INTERNAL_UNUSED_H ) */
+#endif /* !defined( _${python_module_name_upper_case}_UNUSED_H ) */
 

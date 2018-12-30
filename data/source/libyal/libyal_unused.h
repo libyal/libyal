@@ -1,5 +1,5 @@
 /*
- * The internal unused definition
+ * Definitions to silence compiler warnings about unused function attributes/parameters.
  *
  * Copyright (C) ${copyright}, ${authors}
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_INTERNAL_UNUSED_H )
-#define _${library_name_upper_case}_INTERNAL_UNUSED_H
+#if !defined( _${library_name_upper_case}_UNUSED_H )
+#define _${library_name_upper_case}_UNUSED_H
 
 #include <common.h>
 
@@ -40,5 +40,5 @@
 	/* parameter */
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_INTERNAL_UNUSED_H ) */
+#endif /* !defined( _${library_name_upper_case}_UNUSED_H ) */
 

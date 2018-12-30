@@ -9056,13 +9056,71 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         'header.c', 'includes.c', 'initialize.c', 'free.c',
         'get_parent_file_entry.c']
 
-    template_names.append('get_creation_time.c')
+    file_entry_creation_time_type = (
+        project_configuration.mount_tool_file_entry_creation_time_type)
+    if not file_entry_creation_time_type:
+      template_name = 'get_creation_time-mounted_timestamp.c'
+
+    elif not project_configuration.mount_tool_file_system_type:
+      template_name = 'get_creation_time-{0:s}_and_mounted_timestamp.c'.format(
+          file_entry_creation_time_type)
+
+    else:
+      template_name = 'get_creation_time-{0:s}.c'.format(
+          file_entry_creation_time_type)
+
+    template_names.append(template_name)
+
+    file_entry_access_time_type = (
+        project_configuration.mount_tool_file_entry_access_time_type)
+    if not file_entry_access_time_type:
+      template_name = 'get_access_time-mounted_timestamp.c'
+
+    elif not project_configuration.mount_tool_file_system_type:
+      template_name = 'get_access_time-{0:s}_and_mounted_timestamp.c'.format(
+          file_entry_access_time_type)
+
+    else:
+      template_name = 'get_access_time-{0:s}.c'.format(
+          file_entry_access_time_type)
+
+    template_names.append(template_name)
+
+    file_entry_modification_time_type = (
+        project_configuration.mount_tool_file_entry_modification_time_type)
+    if not file_entry_modification_time_type:
+      template_name = 'get_modification_time-mounted_timestamp.c'
+
+    elif not project_configuration.mount_tool_file_system_type:
+      template_name = (
+          'get_modification_time-{0:s}_and_mounted_timestamp.c'.format(
+              file_entry_modification_time_type))
+
+    else:
+      template_name = 'get_modification_time-{0:s}.c'.format(
+          file_entry_modification_time_type)
+
+    template_names.append(template_name)
+
+    file_entry_inode_change_time_type = (
+        project_configuration.mount_tool_file_entry_inode_change_time_type)
+    if not file_entry_inode_change_time_type:
+      template_name = 'get_inode_change_time-mounted_timestamp.c'
+
+    elif not project_configuration.mount_tool_file_system_type:
+      template_name = (
+          'get_inode_change_time-{0:s}_and_mounted_timestamp.c'.format(
+              file_entry_inode_change_time_type))
+
+    else:
+      template_name = 'get_inode_change_time-{0:s}.c'.format(
+          file_entry_inode_change_time_type)
+
+    template_names.append(template_name)
 
     template_names.extend([
-        'get_access_time.c', 'get_modification_time.c',
-        'get_inode_change_time.c', 'get_file_mode.c',
-        'get_name.c', 'get_sub_file_entries.c', 'read_buffer_at_offset.c',
-        'get_size.c'])
+        'get_file_mode.c', 'get_name.c', 'get_sub_file_entries.c',
+        'read_buffer_at_offset.c', 'get_size.c'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -9255,6 +9313,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     base_type = project_configuration.mount_tool_base_type
     file_entry_type = project_configuration.mount_tool_file_entry_type
     file_system_type = project_configuration.mount_tool_file_system_type
+    source_type = project_configuration.mount_tool_source_type
 
     template_names = ['header.h', 'includes-start.h']
 
@@ -9275,7 +9334,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('struct-codepage.h')
 
     if project_configuration.HasMountToolsFeatureKeys():
-      template_names.append('struct-keys.h')
+      if project_configuration.library_name == 'libbde':
+        template_names.append('struct-keys-libbde.h')
+      else:
+        template_names.append('struct-keys.h')
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('struct-offset.h')
@@ -9343,11 +9405,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         for template_name in template_names]
 
     template_mappings['mount_tool_file_entry_type'] = file_entry_type
+    template_mappings['mount_tool_source_type'] = source_type
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
+    del template_mappings['mount_tool_source_type']
 
     self._SortIncludeHeaders(project_configuration, output_filename)
 
@@ -9379,7 +9443,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('includes-codepage.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
-      template_names.append('includes-keys.c')
+      if project_configuration.library_name == 'libbde':
+        template_names.append('includes-keys-libbde.c')
+      else:
+        template_names.append('includes-keys.c')
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('includes-file_io_handle.c')
@@ -9424,7 +9491,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('set_codepage.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
-      template_names.append('set_keys.c')
+      if project_configuration.library_name == 'libbde':
+        template_names.append('set_keys-libbde.c')
+      else:
+        template_names.append('set_keys.c')
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('set_offset.c')
@@ -9476,7 +9546,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_names.append('open-initialize.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
-      template_names.append('open-keys.c')
+      if project_configuration.library_name == 'libbde':
+        template_names.append('open-keys-libbde.c')
+      else:
+        template_names.append('open-keys.c')
 
     if project_configuration.HasMountToolsFeaturePassword():
       template_names.append('open-password.c')

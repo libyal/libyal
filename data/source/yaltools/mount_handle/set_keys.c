@@ -27,7 +27,7 @@ int mount_handle_set_keys(
 	if( memory_set(
 	     mount_handle->key_data,
 	     0,
-	     64 ) == NULL )
+	     16 ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -87,7 +87,7 @@ on_error:
 	memory_set(
 	 mount_handle->key_data,
 	 0,
-	 64 );
+	 16 );
 
 	mount_handle->key_size = 0;
 

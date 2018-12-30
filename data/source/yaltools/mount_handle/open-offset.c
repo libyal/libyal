@@ -1,3 +1,6 @@
+	filename_length = system_string_length(
+	                   filename );
+
 	if( libbfio_file_range_initialize(
 	     &file_io_handle,
 	     error ) != 1 )
