@@ -1822,51 +1822,26 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     template_directory = os.path.join(self._template_directory, 'configure.ac')
 
-    template_filename = os.path.join(template_directory, 'header.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
-
-    template_filename = os.path.join(template_directory, 'programs.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'compiler_language.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'build_features.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names = [
+        'header.ac', 'programs.ac', 'compiler_language.ac', 'build_features.ac']
 
     if (include_header_file and include_header_file.have_wide_character_type or
         project_configuration.HasTools()):
-      template_filename = os.path.join(
-          template_directory, 'check_wide_character_support.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('check_wide_character_support.ac')
 
     if project_configuration.HasDebugOutput():
-      template_filename = os.path.join(
-          template_directory, 'check_debug_output.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('check_debug_output.ac')
 
-    template_filename = os.path.join(
-        template_directory, 'check_types_support.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.extend(['check_types_support.ac', 'check_common_support.ac'])
 
-    template_filename = os.path.join(
-        template_directory, 'check_common_support.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    # TODO: refactor code below to use template_names
 
     if library_dependencies:
       for name in library_dependencies:
@@ -1896,25 +1871,23 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       del template_mappings['local_library_name']
       del template_mappings['local_library_name_upper_case']
 
-    template_filename = os.path.join(
-        template_directory, 'check_library_support.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names = ['check_library_support.ac']
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(
-          template_directory, 'check_python_support.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('check_python_support.ac')
 
     if project_configuration.HasJavaBindings():
-      template_filename = os.path.join(
-          template_directory, 'check_java_support.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('check_java_support.ac')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: refactor code below to use template_names
 
     if project_configuration.HasTools():
       tools_dependencies = list(makefile_am_file.tools_dependencies)
@@ -1941,21 +1914,17 @@ class ConfigurationFileGenerator(SourceFileGenerator):
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='ab')
 
-    template_filename = os.path.join(
-        template_directory, 'check_tests_support.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
+    template_names = ['check_tests_support.ac', 'dll_support.ac', 'compiler_flags.ac']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(template_directory, 'dll_support.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'compiler_flags.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    # TODO: refactor code below to use template_names
 
     if library_dependencies:
       local_library_tests = []
@@ -2007,16 +1976,17 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
         del template_mappings['local_library_tests']
 
-    template_filename = os.path.join(template_directory, 'dates.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
+    template_names = ['dates.ac', 'config_files_start.ac']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    template_filename = os.path.join(
-        template_directory, 'config_files_start.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    # TODO: refactor code below to use template_names
 
     if makefile_am_file.library_dependencies:
       for name in makefile_am_file.library_dependencies:
@@ -2030,32 +2000,26 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['local_library_name']
 
-    template_filename = os.path.join(
-        template_directory, 'config_files_library.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names = ['config_files_library.ac']
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(
-          template_directory, 'config_files_python.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('config_files_python.ac')
 
     if project_configuration.HasDotNetBindings():
-      template_filename = os.path.join(
-          template_directory, 'config_files_dotnet.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('config_files_dotnet.ac')
 
     if project_configuration.HasJavaBindings():
-      template_filename = os.path.join(
-          template_directory, 'config_files_java.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('config_files_java.ac')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
+        access_mode='ab')
+
+    # TODO: refactor code below to use template_names
 
     if project_configuration.HasTools():
       if makefile_am_file.tools_dependencies:
@@ -2078,23 +2042,22 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     # TODO: add support for Makefile in documents (libuna)
 
-    template_filename = os.path.join(
-        template_directory, 'config_files_common.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names = ['config_files_common.ac']
 
     if project_configuration.HasDotNetBindings():
-      template_filename = os.path.join(
-          template_directory, 'config_files_dotnet_rc.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('config_files_dotnet_rc.ac')
 
-    template_filename = os.path.join(template_directory, 'config_files_end.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
+    template_names.append('config_files_end.ac')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
         access_mode='ab')
+
+    # TODO: refactor code below to use template_names
 
     maximum_description_length = 0
 
@@ -2270,14 +2233,21 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         notice_line = '   {0:s}: {1:s}{2:s}'.format(description, padding, value)
         notice_message.append(notice_line)
 
-    template_mappings['notice_message'] = '\n'.join(notice_message)
-
-    template_filename = os.path.join(template_directory, 'footer.ac')
+    template_filename = os.path.join(template_directory, 'output.ac')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    del template_mappings['notice_message']
+    # TODO: improve this condition
+    if project_configuration.library_name != 'libcerror':
+      template_mappings['notice_message'] = '\n'.join(notice_message)
+
+      template_filename = os.path.join(template_directory, 'notice.ac')
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename,
+          access_mode='ab')
+
+      del template_mappings['notice_message']
 
   def _GenerateDpkg(
       self, project_configuration, template_mappings, output_writer,
