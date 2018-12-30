@@ -70,7 +70,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 
 		return( -1 );
 	}
-	if( mount_file_system_get_${mount_tool_file_entry_type}_path(
+	if( mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 	     file_system,
 	     path,
 	     path_length,
@@ -83,7 +83,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve ${mount_tool_file_entry_type_description} path.",
+		 "%s: unable to retrieve ${mount_tool_file_entry_type_description} path from path.",
 		 function );
 
 		goto on_error;
@@ -104,18 +104,18 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = ${library_name}_file_get_${mount_tool_file_entry_type}_by_utf16_path(
-		  file_system->file,
-		  (uint16_t *) ${mount_tool_file_entry_type}_path,
-		  ${mount_tool_file_entry_type}_path_length,
-		  ${mount_tool_file_entry_type},
-		  error );
+	          file_system->file,
+	          (uint16_t *) ${mount_tool_file_entry_type}_path,
+	          ${mount_tool_file_entry_type}_path_length,
+	          ${mount_tool_file_entry_type},
+	          error );
 #else
 	result = ${library_name}_file_get_${mount_tool_file_entry_type}_by_utf8_path(
-		  file_system->file,
-		  (uint8_t *) ${mount_tool_file_entry_type}_path,
-		  ${mount_tool_file_entry_type}_path_length,
-		  ${mount_tool_file_entry_type},
-		  error );
+	          file_system->file,
+	          (uint8_t *) ${mount_tool_file_entry_type}_path,
+	          ${mount_tool_file_entry_type}_path_length,
+	          ${mount_tool_file_entry_type},
+	          error );
 #endif
 	if( result == -1 )
 	{

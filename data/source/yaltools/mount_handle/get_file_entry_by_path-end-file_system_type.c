@@ -12,11 +12,6 @@ on_error:
 		memory_free(
 		 filename );
 	}
-	if( ${mount_tool_file_entry_type}_name != NULL )
-	{
-		memory_free(
-		 ${mount_tool_file_entry_type}_name );
-	}
 	if( ${mount_tool_file_entry_type} != NULL )
 	{
 		libolecf_${mount_tool_file_entry_type}_free(

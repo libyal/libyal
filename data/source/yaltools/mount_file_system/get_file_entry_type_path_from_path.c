@@ -1,9 +1,9 @@
 #if defined( WINAPI )
 
-/* Retrieves the ${mount_tool_file_entry_type_description} path
+/* Retrieves the ${mount_tool_file_entry_type_description} path from the path
  * Returns 1 if successful or -1 on error
  */
-int mount_file_system_get_${mount_tool_file_entry_type}_path(
+int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
@@ -13,7 +13,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path(
      libcerror_error_t **error )
 {
 	system_character_t *safe_${mount_tool_file_entry_type}_path = NULL;
-	static char *function                                       = "mount_file_system_get_${mount_tool_file_entry_type}_path";
+	static char *function                                       = "mount_file_system_get_${mount_tool_file_entry_type}_path_from_path";
 	system_character_t character_value                          = 0;
 	size_t ${mount_tool_file_entry_type}_path_index             = 0;
 	size_t path_index                                           = 0;
@@ -116,7 +116,8 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path(
 		goto on_error;
 	}
 	${mount_tool_file_entry_type}_path_index = 0;
-	path_index                               = 0;
+
+	path_index = 0;
 
 	while( path_index < path_length )
 	{
@@ -269,10 +270,10 @@ on_error:
 
 #else
 
-/* Retrieves the ${mount_tool_file_entry_type_description} path
+/* Retrieves the ${mount_tool_file_entry_type_description} path from the path
  * Returns 1 if successful or -1 on error
  */
-int mount_file_system_get_${mount_tool_file_entry_type}_path(
+int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
@@ -282,7 +283,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path(
      libcerror_error_t **error )
 {
 	system_character_t *safe_${mount_tool_file_entry_type}_path = NULL;
-	static char *function                                       = "mount_file_system_get_${mount_tool_file_entry_type}_path";
+	static char *function                                       = "mount_file_system_get_${mount_tool_file_entry_type}_path_from_path";
 	system_character_t character_value                          = 0;
 	size_t ${mount_tool_file_entry_type}_path_index             = 0;
 	size_t path_index                                           = 0;
@@ -385,7 +386,8 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path(
 		goto on_error;
 	}
 	${mount_tool_file_entry_type}_path_index = 0;
-	path_index                               = 0;
+
+	path_index = 0;
 
 	while( path_index < path_length )
 	{

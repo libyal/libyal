@@ -46,12 +46,9 @@ int mount_file_entry_get_sub_file_entry_by_index(
      libcerror_error_t **error )
 {
 	${library_name}_${mount_tool_file_entry_type}_t *sub_${mount_tool_file_entry_type} = NULL;
-	system_character_t *name                                                           = NULL;
-	system_character_t *sub_${mount_tool_file_entry_type}_name                         = NULL;
+	system_character_t *filename                                                       = NULL;
 	static char *function                                                              = "mount_file_entry_get_sub_file_entry_by_index";
-	size_t name_size                                                                   = 0; 
-	size_t sub_${mount_tool_file_entry_type}_name_size                                 = 0; 
-	int result                                                                         = 0;
+	size_t filename_size                                                               = 0; 
 
 	if( file_entry == NULL )
 	{
@@ -103,92 +100,27 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		goto on_error;
 	}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_${mount_tool_file_entry_type}_get_utf16_name_size(
-	          sub_${mount_tool_file_entry_type},
-	          &sub_${mount_tool_file_entry_type}_name_size,
-	          error );
-#else
-	result = ${library_name}_${mount_tool_file_entry_type}_get_utf8_name_size(
-	          sub_${mount_tool_file_entry_type},
-	          &sub_${mount_tool_file_entry_type}_name_size,
-	          error );
-#endif
-	if( result != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve sub ${mount_tool_file_entry_type_description} name size.",
-		 function );
-
-		goto on_error;
-	}
-	sub_${mount_tool_file_entry_type}_name = system_string_allocate(
-	                                          sub_${mount_tool_file_entry_type}_name_size );
-
-	if( sub_${mount_tool_file_entry_type}_name == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create sub ${mount_tool_file_entry_type_description} name string.",
-		 function );
-
-		goto on_error;
-	}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_${mount_tool_file_entry_type}_get_utf16_name(
-	          sub_${mount_tool_file_entry_type},
-	          (uint16_t *) sub_${mount_tool_file_entry_type}_name,
-	          sub_${mount_tool_file_entry_type}_name_size,
-	          error );
-#else
-	result = ${library_name}_${mount_tool_file_entry_type}_get_utf8_name(
-	          sub_${mount_tool_file_entry_type},
-	          (uint8_t *) sub_${mount_tool_file_entry_type}_name,
-	          sub_${mount_tool_file_entry_type}_name_size,
-	          error );
-#endif
-	if( result != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve sub ${mount_tool_file_entry_type_description} name.",
-		 function );
-
-		goto on_error;
-	}
-	if( mount_file_system_get_sanitized_filename(
+	if( mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
 	     file_entry->file_system,
-	     sub_${mount_tool_file_entry_type}_name,
-	     sub_${mount_tool_file_entry_type}_name_size - 1,
-	     &name,
-	     &name_size,
+	     sub_${mount_tool_file_entry_type},
+	     &filename,
+	     &filename_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve sub file entry name.",
-		 function );
+		 "%s: unable to retrieve filename of sub file entry: %d.",
+		 function,
+		 sub_file_entry_index );
 
 		goto on_error;
 	}
-	memory_free(
-	 sub_${mount_tool_file_entry_type}_name );
-
-	sub_${mount_tool_file_entry_type}_name = NULL;
-
 	if( mount_file_entry_initialize(
 	     sub_file_entry,
 	     file_entry->file_system,
-	     name,
+	     filename,
 	     sub_${mount_tool_file_entry_type},
 	     error ) != 1 )
 	{
@@ -202,21 +134,18 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		goto on_error;
 	}
-	memory_free(
-	 name );
-
+	if( filename != NULL )
+	{
+		memory_free(
+		 filename );
+	}
 	return( 1 );
 
 on_error:
-	if( sub_${mount_tool_file_entry_type}_name != NULL )
+	if( filename != NULL )
 	{
 		memory_free(
-		 sub_${mount_tool_file_entry_type}_name );
-	}
-	if( name != NULL )
-	{
-		memory_free(
-		 name );
+		 filename );
 	}
 	if( sub_${mount_tool_file_entry_type} != NULL )
 	{

@@ -9266,6 +9266,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not file_system_type:
       template_names.extend([
           'get_number_of_file_entry_types.h', 'get_file_entry_type_by_index.h'])
+    else:
+      template_names.append('get_file_entry_type_path_from_path.h')
 
     template_names.append('get_file_entry_type_by_path.h')
 
@@ -9274,7 +9276,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
           'append_file_entry_type.h', 'get_path_from_file_entry_index.h'])
     else:
       template_names.extend([
-          'get_file_entry_type_path.h', 'get_sanitized_filename.h'])
+          'get_filename_from_file_entry_type_name.h',
+          'get_filename_from_file_entry_type.h'])
 
     template_names.append('footer.h')
 
@@ -9359,8 +9362,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
           'get_path_from_file_entry_index.c'])
     else:
       template_names.extend([
+          'get_file_entry_type_path_from_path.c',
           'get_file_entry_type_by_path-file_system_type.c',
-          'get_file_entry_type_path.c', 'get_sanitized_filename.c'])
+          'get_filename_from_file_entry_type_name.c',
+          'get_filename_from_file_entry_type.c'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -9390,6 +9395,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         project_configuration.mount_tool_file_entry_type, output_filename)
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
+    self._VerticalAlignFunctionArguments(output_filename)
 
   def _GenerateMountFuseHeaderFile(
       self, project_configuration, template_mappings, output_writer,
