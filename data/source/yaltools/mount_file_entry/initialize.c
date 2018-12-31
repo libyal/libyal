@@ -11,7 +11,6 @@ int mount_file_entry_initialize(
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_entry_initialize";
-	size_t name_length    = 0;
 
 	if( file_entry == NULL )
 	{
@@ -108,19 +107,22 @@ int mount_file_entry_initialize(
 
 			goto on_error;
 		}
-		if( system_string_copy(
-		     ( *file_entry )->name,
-		     name,
-		     name_length ) == NULL )
+		if( name_length > 0 )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-			 "%s: unable to copy name.",
-			 function );
+			if( system_string_copy(
+			     ( *file_entry )->name,
+			     name,
+			     name_length ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+				 "%s: unable to copy name.",
+				 function );
 
-			goto on_error;
+				goto on_error;
+			}
 		}
 		( *file_entry )->name[ name_length ] = 0;
 

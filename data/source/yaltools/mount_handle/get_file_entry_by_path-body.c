@@ -53,7 +53,7 @@
 	 */
 	if( path_index == 0 )
 	{
-		filename        = "";
+		filename        = _SYSTEM_STRING( "" );
 		filename_length = 0;
 	}
 	else

@@ -46,7 +46,7 @@ int mount_file_entry_get_parent_file_entry(
 		if( mount_file_entry_initialize(
 		     parent_file_entry,
 		     file_entry->file_system,
-		     "",
+		     _SYSTEM_STRING( "" ),
 		     0
 		     NULL,
 		     error ) != 1 )

@@ -22,17 +22,6 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 
 		return( -1 );
 	}
-	if( file_entry->${mount_tool_file_entry_type} == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid file entry - missing ${mount_tool_file_entry_type_description}.",
-		 function );
-
-		return( -1 );
-	}
 	read_count = ${library_name}_${mount_tool_file_entry_type}_read_buffer_at_offset(
 	              file_entry->${mount_tool_file_entry_type},
 	              buffer,
