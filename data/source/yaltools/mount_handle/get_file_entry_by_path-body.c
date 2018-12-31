@@ -51,15 +51,15 @@
 	}
 	/* Ignore the name of the root item
 	 */
-	if( path_index == 0 )
+	if( path_length == 0 )
 	{
 		filename        = _SYSTEM_STRING( "" );
 		filename_length = 0;
 	}
 	else
 	{
-		filename        = &( path[ path_index ] );
-		filename_length = path_length - path_index;
+		filename        = &( path[ path_index + 1 ] );
+		filename_length = path_length - ( path_index + 1 );
 	}
 	result = mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 	          mount_handle->file_system,

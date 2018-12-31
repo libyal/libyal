@@ -152,9 +152,15 @@ int mount_file_system_get_filename_from_name(
 		 *   / by \x2f
 		 *   \ by \\
 		 */
+#if defined( WINAPI )
 		if( ( unicode_character <= 0x1f )
-		 || ( unicode_character == (system_character_t) LIBCPATH_SEPARATOR )
+		 || ( unicode_character == 0x5c )
 		 || ( unicode_character == 0x7f ) )
+#else
+		if( ( unicode_character <= 0x1f )
+		 || ( unicode_character == 0x2f )
+		 || ( unicode_character == 0x7f ) )
+#endif
 		{
 			if( ( filename_index + 4 ) > safe_filename_size )
 			{

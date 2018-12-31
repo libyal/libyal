@@ -9580,9 +9580,6 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names = ['header.c', 'includes-start.c']
 
-    if project_configuration.HasMountToolsFeatureParent():
-      template_names.append('includes-basename.c')
-
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('includes-codepage.c')
 
@@ -9594,9 +9591,6 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('includes-file_io_handle.c')
-
-    if file_system_type:
-      template_names.append('includes-file_system_type.c')
 
     template_names.append('includes-end.c')
 

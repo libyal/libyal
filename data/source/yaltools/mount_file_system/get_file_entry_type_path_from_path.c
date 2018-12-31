@@ -168,27 +168,12 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 		 *   ^x## by values <= 0x1f and 0x7f
 		 *
 		 * On other platforms replaces:
-		 *   / by \
 		 *   \\ by \
 		 *   \x2f by /
 		 *   \x## by values <= 0x1f and 0x7f
+		 *   / by \
 		 */
-		if( unicode_character == (system_character_t) LIBCPATH_SEPARATOR )
-		{
-			if( ( ${mount_tool_file_entry_type}_path_index + 1 ) > safe_${mount_tool_file_entry_type}_path_size )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: invalid ${mount_tool_file_entry_type_description} path index value out of bounds.",
-				 function );
-
-				goto on_error;
-			}
-			safe_${mount_tool_file_entry_type}_path[ ${mount_tool_file_entry_type}_path_index++ ] = (system_character_t) '\\';
-		}
-		else if( unicode_character == escape_character )
+		if( unicode_character == escape_character )
 		{
 			if( ( path_index + 1 ) > path_length )
 			{
@@ -261,13 +246,13 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 				else if( ( hex_digit >= (system_character_t) 'A' )
 				      && ( hex_digit <= (system_character_t) 'F' ) )
 				{
-					hex_value = hex_digit - (system_character_t) 'A';
+					hex_value = hex_digit - (system_character_t) 'A' + 10;
 				}
 #endif
 				else if( ( hex_digit >= (system_character_t) 'a' )
 				      && ( hex_digit <= (system_character_t) 'f' ) )
 				{
-					hex_value = hex_digit - (system_character_t) 'a';
+					hex_value = hex_digit - (system_character_t) 'a' + 10;
 				}
 				else
 				{
@@ -294,13 +279,13 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 				else if( ( hex_digit >= (system_character_t) 'A' )
 				      && ( hex_digit <= (system_character_t) 'F' ) )
 				{
-					hex_value = hex_digit - (system_character_t) 'A';
+					hex_value = hex_digit - (system_character_t) 'A' + 10;
 				}
 #endif
 				else if( ( hex_digit >= (system_character_t) 'a' )
 				      && ( hex_digit <= (system_character_t) 'f' ) )
 				{
-					hex_value |= hex_digit - (system_character_t) 'a';
+					hex_value |= hex_digit - (system_character_t) 'a' + 10;
 				}
 				else
 				{
@@ -317,12 +302,12 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 #if defined( WINAPI )
 				if( ( hex_value == 0 )
 				 || ( ( hex_value > 0x1f )
-				  &&  ( hex_value != 0x2f )
+				  &&  ( hex_value != 0x5c )
 				  &&  ( hex_value != 0x7f ) ) )
 #else
 				if( ( hex_value == 0 )
 				 || ( ( hex_value > 0x1f )
-				  &&  ( hex_value != 0x5c )
+				  &&  ( hex_value != 0x2f )
 				  &&  ( hex_value != 0x7f ) ) )
 #endif
 				{
@@ -349,6 +334,23 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 				safe_${mount_tool_file_entry_type}_path[ ${mount_tool_file_entry_type}_path_index++ ] = hex_value;
 			}
 		}
+#if !defined( WINAPI )
+		else if( unicode_character == (system_character_t) '\' )
+		{
+			if( ( ${mount_tool_file_entry_type}_path_index + 1 ) > safe_${mount_tool_file_entry_type}_path_size )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid ${mount_tool_file_entry_type_description} path index value out of bounds.",
+				 function );
+
+				goto on_error;
+			}
+			safe_${mount_tool_file_entry_type}_path[ ${mount_tool_file_entry_type}_path_index++ ] = (system_character_t) '\\';
+		}
+#endif
 		else
 		{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
