@@ -25,50 +25,6 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 
 		return( -1 );
 	}
-	if( path == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length == 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path length.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-	if( path[ 0 ] != LIBCPATH_SEPARATOR )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported path - path is not absolute.",
-		 function );
-
-		return( -1 );
-	}
 	if( mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 	     file_system,
 	     path,
@@ -97,6 +53,8 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 
 		goto on_error;
 	}
+	/* Need to determine length here since size is based on the worst case
+	 */
 	${mount_tool_file_entry_type}_path_length = system_string_length(
 	                                             ${mount_tool_file_entry_type}_path );
 

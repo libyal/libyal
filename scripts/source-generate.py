@@ -9276,8 +9276,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
           'append_file_entry_type.h', 'get_path_from_file_entry_index.h'])
     else:
       template_names.extend([
-          'get_filename_from_file_entry_type_name.h',
-          'get_filename_from_file_entry_type.h'])
+          'get_filename_from_name.h', 'get_filename_from_file_entry_type.h'])
 
     template_names.append('footer.h')
 
@@ -9364,8 +9363,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.extend([
           'get_file_entry_type_path_from_path.c',
           'get_file_entry_type_by_path-file_system_type.c',
-          'get_filename_from_file_entry_type_name.c',
-          'get_filename_from_file_entry_type.c'])
+          'get_filename_from_name.c', 'get_filename_from_file_entry_type.c'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -9596,6 +9594,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('includes-file_io_handle.c')
+
+    if file_system_type:
+      template_names.append('includes-file_system_type.c')
 
     template_names.append('includes-end.c')
 

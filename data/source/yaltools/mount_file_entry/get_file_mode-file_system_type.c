@@ -6,8 +6,7 @@ int mount_file_entry_get_file_mode(
      uint16_t *file_mode,
      libcerror_error_t **error )
 {
-	static char *function                            = "mount_file_entry_get_file_mode";
-	int number_of_sub_${mount_tool_file_entry_type}s = 0;
+	static char *function = "mount_file_entry_get_file_mode";
 
 	if( file_entry == NULL )
 	{
@@ -31,21 +30,9 @@ int mount_file_entry_get_file_mode(
 
 		return( -1 );
 	}
-	if( ${library_name}_${mount_tool_file_entry_type}_get_number_of_sub_${mount_tool_file_entry_type}s(
-	     file_entry->${mount_tool_file_entry_type},
-	     &number_of_sub_${mount_tool_file_entry_type}s,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of sub ${mount_tool_file_entry_type_description}s.",
-		 function );
+/* TODO implement */
 
-		return( -1 );
-	}
-	if( number_of_sub_${mount_tool_file_entry_type}s > 0 )
+	if( file_entry->${mount_tool_file_entry_type} == NULL )
 	{
 		*file_mode = S_IFDIR | 0555;
 	}

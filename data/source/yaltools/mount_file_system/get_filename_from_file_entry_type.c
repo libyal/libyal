@@ -96,7 +96,7 @@ int mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
 
 		goto on_error;
 	}
-	if( mount_file_system_get_filename_from_${mount_tool_file_entry_type}_name(
+	if( mount_file_system_get_filename_from_name(
 	     file_system,
 	     ${mount_tool_file_entry_type}_name,
 	     ${mount_tool_file_entry_type}_name_size - 1,
