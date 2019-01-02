@@ -1,6 +1,6 @@
 	if( mount_file_system_get_number_of_${mount_tool_file_system_type}s(
 	     mount_handle->file_system,
-	     &number_of_${mount_tool_file_system_type_name}s,
+	     &number_of_${mount_tool_file_system_type}s,
 	     error ) != 1 )
 	{
 		libcerror_error_set(

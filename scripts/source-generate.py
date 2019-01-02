@@ -2124,6 +2124,11 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
               ('AES-XTS support', '$ac_cv_libcaes_aes_xts')])
 
+       elif project_configuration.library_name == 'libluksde':
+          build_options.extend([
+              ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'),
+              ('AES-ECB support', '$ac_cv_libcaes_aes_ecb')])
+
       elif name == 'libhmac':
         # TODO: make check more generic based on the source itself.
         if project_configuration.library_name in (
@@ -2132,8 +2137,13 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               ('MD5 support', '$ac_cv_libhmac_md5')
               ('SHA1 support', '$ac_cv_libhmac_sha1'),
               ('SHA256 support', '$ac_cv_libhmac_sha256')])
-        else:
-          build_options.append(('SHA256 support', '$ac_cv_libhmac_sha256'))
+
+        elif project_configuration.library_name == 'libluksde':
+          build_options.extend([
+              ('SHA1 support', '$ac_cv_libhmac_sha1'),
+              ('SHA224 support', '$ac_cv_libhmac_sha224'),
+              ('SHA256 support', '$ac_cv_libhmac_sha256'),
+              ('SHA512 support', '$ac_cv_libhmac_sha512')])
 
       elif name == 'zlib':
         # TODO: determine deflate function via configuration setting? 
@@ -2153,7 +2163,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
     elif project_configuration.library_name == 'libhmac':
       build_options.extend([
-          ('MD5 support', '$ac_cv_libhmac_md5')
+          ('MD5 support', '$ac_cv_libhmac_md5'),
           ('SHA1 support', '$ac_cv_libhmac_sha1'),
           ('SHA224 support', '$ac_cv_libhmac_sha224'),
           ('SHA256 support', '$ac_cv_libhmac_sha256'),
