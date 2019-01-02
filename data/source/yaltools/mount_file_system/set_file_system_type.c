@@ -3,7 +3,7 @@
  */
 int mount_file_system_set_${mount_tool_file_system_type}(
      mount_file_system_t *file_system,
-     ${library_name}_${mount_tool_file_system_type}_t *${mount_tool_file_system_type},
+     ${library_name}_${mount_tool_file_system_type}_t *${mount_tool_file_system_type_name},
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_system_set_${mount_tool_file_system_type}";
@@ -19,7 +19,7 @@ int mount_file_system_set_${mount_tool_file_system_type}(
 
 		return( -1 );
 	}
-	file_system->${mount_tool_file_system_type} = ${mount_tool_file_system_type};
+	file_system->${mount_tool_file_system_type_name} = ${mount_tool_file_system_type_name};
 
 	return( 1 );
 }

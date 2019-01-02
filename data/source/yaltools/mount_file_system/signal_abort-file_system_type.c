@@ -18,10 +18,10 @@ int mount_file_system_signal_abort(
 
 		return( -1 );
 	}
-	if( file_system->${mount_tool_file_system_type} != NULL )
+	if( file_system->${mount_tool_file_system_type_name} != NULL )
 	{
 		if( ${library_name}_${mount_tool_file_system_type}_signal_abort(
-		     file_system->${mount_tool_file_system_type},
+		     file_system->${mount_tool_file_system_type_name},
 		     error ) != 1 )
 		{
 			libcerror_error_set(

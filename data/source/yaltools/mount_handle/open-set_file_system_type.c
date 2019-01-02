@@ -1,6 +1,6 @@
 	if( mount_file_system_set_${mount_tool_file_system_type}(
 	     mount_handle->file_system,
-	     ${mount_tool_file_system_type},
+	     ${mount_tool_file_system_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(

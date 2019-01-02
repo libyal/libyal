@@ -3,10 +3,10 @@
 	return( 1 );
 
 on_error:
-	if( ${mount_tool_file_system_type} != NULL )
+	if( ${mount_tool_base_type_name} != NULL )
 	{
-		${library_name}_${mount_tool_file_system_type}_free(
-		 &${mount_tool_file_system_type},
+		${library_name}_${mount_tool_base_type}_free(
+		 &${mount_tool_base_type_name},
 		 NULL );
 	}
 	if( file_io_handle != NULL )

@@ -2104,102 +2104,70 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         template_filenames, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
-    # TODO: refactor code below to use template_names
+    # TODO: add support for build options configuration
 
-    maximum_description_length = 0
-
-    build_information = []
+    build_options = []
     for name in libraries:
       if name not in ('libcrypto', 'zlib'):
-        description = '{0:s} support'.format(name)
-        value = '$ac_cv_{0:s}'.format(name)
-        build_information.append((description, value))
-
-        maximum_description_length = max(
-            maximum_description_length, len(description))
+        build_options.append((
+            '{0:s} support'.format(name), '$ac_cv_{0:s}'.format(name)))
 
       if name == 'libcaes':
-        description = 'AES support'
-        build_information.append((description, '$ac_cv_libcaes_aes'))
+       if project_configuration.library_name == 'libbde':
+          build_options.extend([
+              ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'),
+              ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
+              ('AES-XTS support', '$ac_cv_libcaes_aes_xts')])
 
-        maximum_description_length = max(
-            maximum_description_length, len(description))
+       elif project_configuration.library_name in ('libfsapfs', 'libfvde'):
+          build_options.extend([
+              ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
+              ('AES-XTS support', '$ac_cv_libcaes_aes_xts')])
 
       elif name == 'libhmac':
         # TODO: make check more generic based on the source itself.
         if project_configuration.library_name in (
             'libewf', 'libodraw', 'libsmraw'):
-          description = 'MD5 support'
-          build_information.append((description, '$ac_cv_libhmac_md5'))
-
-          maximum_description_length = max(
-              maximum_description_length, len(description))
-
-          description = 'SHA1 support'
-          build_information.append((description, '$ac_cv_libhmac_sha1'))
-
-          maximum_description_length = max(
-              maximum_description_length, len(description))
-
-        description = 'SHA256 support'
-        build_information.append((description, '$ac_cv_libhmac_sha256'))
-
-        maximum_description_length = max(
-            maximum_description_length, len(description))
+          build_options.extend([
+              ('MD5 support', '$ac_cv_libhmac_md5')
+              ('SHA1 support', '$ac_cv_libhmac_sha1'),
+              ('SHA256 support', '$ac_cv_libhmac_sha256')])
+        else:
+          build_options.append(('SHA256 support', '$ac_cv_libhmac_sha256'))
 
       elif name == 'zlib':
-        description = 'DEFLATE compression support'
         # TODO: determine deflate function via configuration setting? 
         if project_configuration.library_name in (
             'libfsapfs', 'libfvde', 'libpff', 'libvmdk'):
-          build_information.append((description, '$ac_cv_uncompress'))
+          value = '$ac_cv_uncompress'
         else:
-          build_information.append((description, '$ac_cv_inflate'))
+          description = '$ac_cv_inflate'
 
-        maximum_description_length = max(
-            maximum_description_length, len(description))
+        build_options.append(('DEFLATE compression support', value))
 
     if project_configuration.library_name == 'libcaes':
-      description = 'AES support'
-      build_information.append((description, '$ac_cv_libcaes_aes'))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
+      build_options.extend([
+          ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'),
+          ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
+          ('AES-XTS support', '$ac_cv_libcaes_aes_xts')])
 
     elif project_configuration.library_name == 'libhmac':
-      description = 'MD5 support'
-      build_information.append((description, '$ac_cv_libhmac_md5'))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
-
-      description = 'SHA1 support'
-      build_information.append((description, '$ac_cv_libhmac_sha1'))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
-
-      description = 'SHA224 support'
-      build_information.append((description, '$ac_cv_libhmac_sha224'))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
-
-      description = 'SHA256 support'
-      build_information.append((description, '$ac_cv_libhmac_sha256'))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
-
-      description = 'SHA512 support'
-      build_information.append((description, '$ac_cv_libhmac_sha512'))
-
-      maximum_description_length = max(
-          maximum_description_length, len(description))
+      build_options.extend([
+          ('MD5 support', '$ac_cv_libhmac_md5')
+          ('SHA1 support', '$ac_cv_libhmac_sha1'),
+          ('SHA224 support', '$ac_cv_libhmac_sha224'),
+          ('SHA256 support', '$ac_cv_libhmac_sha256'),
+          ('SHA512 support', '$ac_cv_libhmac_sha512')])
 
     if 'fuse' in project_configuration.tools_build_dependencies:
-      description = 'FUSE support'
-      build_information.append((description, '$ac_cv_libfuse'))
+      build_options.append(('FUSE support', '$ac_cv_libfuse'))
+
+    build_information = []
+    maximum_description_length = 0
+
+    for description, value in build_options:
+      build_information_tuple = (description, value)
+      build_information.append(build_information_tuple)
 
       maximum_description_length = max(
           maximum_description_length, len(description))
@@ -9033,6 +9001,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         project_configuration.mount_tool_file_entry_type)
     template_mappings['mount_tool_file_entry_type_description'] = (
         project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+    template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
+        project_configuration.library_name_suffix,
+        project_configuration.mount_tool_file_entry_type)
 
     template_filename = os.path.join(template_directory, 'mount_file_entry.h')
     self._GenerateSection(
@@ -9040,7 +9011,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
+    del template_mappings['mount_tool_file_entry_type_name']
 
+    self._CorrectDescriptionSpelling(
+        project_configuration.mount_tool_file_entry_type, output_filename)
     self._SortIncludeHeaders(project_configuration, output_filename)
 
   def _GenerateMountFileEntrySourceFile(
@@ -9058,11 +9032,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_entry')
 
-    file_system_type = project_configuration.mount_tool_file_system_type
-
     template_names = ['header.c', 'includes.c', 'initialize.c']
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.extend(['free.c', 'get_parent_file_entry.c'])
     else:
       template_names.extend([
@@ -9074,7 +9046,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not file_entry_creation_time_type:
       template_name = 'get_creation_time-mounted_timestamp.c'
 
-    elif not file_system_type:
+    elif not project_configuration.mount_tool_file_system_type:
       template_name = 'get_creation_time-{0:s}_and_mounted_timestamp.c'.format(
           file_entry_creation_time_type)
 
@@ -9089,7 +9061,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not file_entry_access_time_type:
       template_name = 'get_access_time-mounted_timestamp.c'
 
-    elif not file_system_type:
+    elif not project_configuration.mount_tool_file_system_type:
       template_name = 'get_access_time-{0:s}_and_mounted_timestamp.c'.format(
           file_entry_access_time_type)
 
@@ -9104,7 +9076,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not file_entry_modification_time_type:
       template_name = 'get_modification_time-mounted_timestamp.c'
 
-    elif not file_system_type:
+    elif not project_configuration.mount_tool_file_system_type:
       template_name = (
           'get_modification_time-{0:s}_and_mounted_timestamp.c'.format(
               file_entry_modification_time_type))
@@ -9120,7 +9092,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not file_entry_inode_change_time_type:
       template_name = 'get_inode_change_time-mounted_timestamp.c'
 
-    elif not file_system_type:
+    elif not project_configuration.mount_tool_file_system_type:
       template_name = (
           'get_inode_change_time-{0:s}_and_mounted_timestamp.c'.format(
               file_entry_inode_change_time_type))
@@ -9131,21 +9103,21 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.append(template_name)
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('get_file_mode.c')
     else:
       template_names.append('get_file_mode-file_system_type.c')
 
     template_names.append('get_name.c')
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('get_sub_file_entries.c')
     else:
       template_names.append('get_sub_file_entries-file_system_type.c')
 
     template_names.append('read_buffer_at_offset.c')
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('get_size.c')
     else:
       template_names.append('get_size-file_system_type.c')
@@ -9189,6 +9161,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         project_configuration.mount_tool_file_entry_type)
     template_mappings['mount_tool_file_entry_type_description'] = (
         project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+    template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
+        project_configuration.library_name_suffix,
+        project_configuration.mount_tool_file_entry_type)
     template_mappings['mount_tool_file_entry_type_size_value'] = (
         project_configuration.mount_tool_file_entry_type_size_value)
     template_mappings['mount_tool_file_entry_type_size_value_description'] = (
@@ -9211,6 +9186,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         'mount_tool_file_entry_modification_time_value_description']
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
+    del template_mappings['mount_tool_file_entry_type_name']
     del template_mappings['mount_tool_file_entry_type_size_value']
     del template_mappings['mount_tool_file_entry_type_size_value_description']
 
@@ -9234,11 +9210,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_system')
 
-    file_system_type = project_configuration.mount_tool_file_system_type
-
     template_names = ['header.h', 'includes-start.h']
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('includes-file_entry_type_array.h')
     else:
       template_names.append('includes-file_system_type.h')
@@ -9246,7 +9220,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_names.extend([
         'includes-end.h', 'struct-start.h', 'struct-mounted_timestamp.h'])
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.extend([
           'struct-path_prefix.h', 'struct-file_entry_type_array.h'])
     else:
@@ -9255,7 +9229,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_names.extend([
         'struct-end.h', 'initialize.h', 'free.h', 'signal_abort.h'])
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('set_path_prefix.h')
     else:
       template_names.extend([
@@ -9263,7 +9237,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.append('get_mounted_timestamp.h')
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.extend([
           'get_number_of_file_entry_types.h', 'get_file_entry_type_by_index.h'])
     else:
@@ -9271,7 +9245,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.append('get_file_entry_type_by_path.h')
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.extend([
           'append_file_entry_type.h', 'get_path_from_file_entry_index.h'])
     else:
@@ -9288,22 +9262,33 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         project_configuration.mount_tool_file_entry_type)
     template_mappings['mount_tool_file_entry_type_description'] = (
         project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+    template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
+        project_configuration.library_name_suffix,
+        project_configuration.mount_tool_file_entry_type)
 
+    file_system_type = project_configuration.mount_tool_file_system_type
     if not file_system_type:
       file_system_type = project_configuration.mount_tool_file_entry_type
 
     template_mappings['mount_tool_file_system_type'] = file_system_type
     template_mappings['mount_tool_file_system_type_description'] = (
         file_system_type.replace('_', ' '))
+    template_mappings['mount_tool_file_system_type_name'] = (
+        '{0:s}_{1:s}'.format(
+            project_configuration.library_name_suffix, file_system_type))
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
+    del template_mappings['mount_tool_file_entry_type_name']
     del template_mappings['mount_tool_file_system_type']
     del template_mappings['mount_tool_file_system_type_description']
+    del template_mappings['mount_tool_file_system_type_name']
 
+    self._CorrectDescriptionSpelling(
+        project_configuration.mount_tool_file_entry_type, output_filename)
     self._SortIncludeHeaders(project_configuration, output_filename)
 
   def _GenerateMountFileSystemSourceFile(
@@ -9321,23 +9306,21 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_system')
 
-    file_system_type = project_configuration.mount_tool_file_system_type
-
     template_names = ['header.c', 'includes-start.c']
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('includes-file_entry_type_array.c')
     else:
       template_names.append('includes-file_system_type.c')
 
     template_names.extend(['includes-end.c', 'initialize-start.c'])
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('initialize-file_entry_type_array.c')
 
     template_names.extend(['initialize-end.c', 'free-start.c'])
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('free-path_prefix.c')
       template_names.append('free-file_entry_type_array.c')
 
@@ -9345,7 +9328,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     # TODO: add support for signal abort base type for libvslvm.
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.extend(['signal_abort.c', 'set_path_prefix.c'])
     else:
       template_names.extend([
@@ -9354,7 +9337,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.append('get_mounted_timestamp.c')
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.extend([
           'get_number_of_file_entry_types.c', 'get_file_entry_type_by_index.c',
           'get_file_entry_type_by_path.c', 'append_file_entry_type.c',
@@ -9373,21 +9356,30 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         project_configuration.mount_tool_file_entry_type)
     template_mappings['mount_tool_file_entry_type_description'] = (
         project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+    template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
+        project_configuration.library_name_suffix,
+        project_configuration.mount_tool_file_entry_type)
 
+    file_system_type = project_configuration.mount_tool_file_system_type
     if not file_system_type:
       file_system_type = project_configuration.mount_tool_file_entry_type
 
     template_mappings['mount_tool_file_system_type'] = file_system_type
     template_mappings['mount_tool_file_system_type_description'] = (
         file_system_type.replace('_', ' '))
+    template_mappings['mount_tool_file_system_type_name'] = (
+        '{0:s}_{1:s}'.format(
+            project_configuration.library_name_suffix, file_system_type))
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
+    del template_mappings['mount_tool_file_entry_type_name']
     del template_mappings['mount_tool_file_system_type']
     del template_mappings['mount_tool_file_system_type_description']
+    del template_mappings['mount_tool_file_system_type_name']
 
     self._CorrectDescriptionSpelling(
         project_configuration.mount_tool_file_entry_type, output_filename)
@@ -9454,11 +9446,6 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_handle')
 
-    base_type = project_configuration.mount_tool_base_type
-    file_entry_type = project_configuration.mount_tool_file_entry_type
-    file_system_type = project_configuration.mount_tool_file_system_type
-    source_type = project_configuration.mount_tool_source_type
-
     template_names = ['header.h', 'includes-start.h']
 
     if project_configuration.HasMountToolsFeatureOffset():
@@ -9471,11 +9458,11 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.append('struct-file_system.h')
 
-    # TODO: add support for base_type
-    # TODO: add support for file_system_type
-
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('struct-codepage.h')
+
+    if project_configuration.library_name == 'libfsapfs':
+      template_names.append('struct-file_system_index.h')
 
     if project_configuration.HasMountToolsFeatureKeys():
       if project_configuration.library_name == 'libbde':
@@ -9511,6 +9498,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('set_codepage.h')
 
+    if project_configuration.library_name == 'libfsapfs':
+      template_names.append('set_file_system_index.h')
+
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('set_keys.h')
 
@@ -9526,7 +9516,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('set_startup_key.h')
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('set_path_prefix.h')
 
     if project_configuration.HasMountToolsFeatureMultiSource():
@@ -9548,13 +9538,19 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['mount_tool_file_entry_type'] = file_entry_type
-    template_mappings['mount_tool_source_type'] = source_type
+    template_mappings['mount_tool_file_entry_type'] = (
+        project_configuration.mount_tool_file_entry_type)
+    template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
+        project_configuration.library_name_suffix,
+        project_configuration.mount_tool_file_entry_type)
+    template_mappings['mount_tool_source_type'] = (
+        project_configuration.mount_tool_source_type)
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
+    del template_mappings['mount_tool_file_entry_type_name']
     del template_mappings['mount_tool_source_type']
 
     self._SortIncludeHeaders(project_configuration, output_filename)
@@ -9572,11 +9568,6 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       output_filename (str): path of the output file.
     """
     template_directory = os.path.join(self._template_directory, 'mount_handle')
-
-    base_type = project_configuration.mount_tool_base_type
-    file_entry_type = project_configuration.mount_tool_file_entry_type
-    file_system_type = project_configuration.mount_tool_file_system_type
-    source_type = project_configuration.mount_tool_source_type
 
     template_names = ['header.c', 'includes-start.c']
 
@@ -9623,6 +9614,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('set_codepage.c')
 
+    if project_configuration.library_name == 'libfsapfs':
+      template_names.append('set_file_system_index.c')
+
     if project_configuration.HasMountToolsFeatureKeys():
       if project_configuration.library_name == 'libbde':
         template_names.append('set_keys-libbde.c')
@@ -9632,16 +9626,17 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('set_offset.c')
 
-    if project_configuration.HasMountToolsFeaturePassword():
-      template_names.append('set_password.c')
+    if not project_configuration.mount_tool_base_type:
+      if project_configuration.HasMountToolsFeaturePassword():
+        template_names.append('set_password.c')
 
-    if project_configuration.HasMountToolsFeatureRecoveryPassword():
-      template_names.append('set_recovery_password.c')
+      if project_configuration.HasMountToolsFeatureRecoveryPassword():
+        template_names.append('set_recovery_password.c')
 
-    if project_configuration.HasMountToolsFeatureStartupKey():
-      template_names.append('set_startup_key.c')
+      if project_configuration.HasMountToolsFeatureStartupKey():
+        template_names.append('set_startup_key.c')
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('set_path_prefix.c')
 
     if project_configuration.HasMountToolsFeatureMultiSource():
@@ -9657,6 +9652,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('open-variables-file_io_handle.c')
 
+    if project_configuration.mount_tool_base_type:
+      if project_configuration.library_name == 'libfsapfs':
+        template_names.append('open-variables-file_system_index.c')
+
     template_names.append('open-variables-end.c')
 
     if project_configuration.HasMountToolsFeatureMultiSource():
@@ -9669,9 +9668,6 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         template_names.append('open-basename-multi_source.c')
       else:
         template_names.append('open-basename.c')
-
-    # TODO: add support for base_type
-    # TODO: add support for file_system_type
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('open-offset.c')
@@ -9698,13 +9694,16 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     else:
       template_names.append('open-open.c')
 
+    if project_configuration.library_name == 'libfsapfs':
+      template_names.append('open-file_system_index.c')
+
     if project_configuration.HasMountToolsFeatureUnlock():
       template_names.append('open-is_locked.c')
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open-open_parent.c')
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('open-append_file_system_type.c')
     else:
       template_names.append('open-set_file_system_type.c')
@@ -9719,12 +9718,12 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names.extend(['close-start.c', 'close-variables-start.c'])
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('close-variables-no_file_system_type.c')
 
     template_names.extend(['close-variables-end.c', 'close-check_arguments.c'])
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('close-close.c')
     else:
       template_names.append('close-close-file_system_type.c')
@@ -9743,7 +9742,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         'get_file_entry_by_path-body.c',
         'get_file_entry_by_path-file_entry_initialize.c'])
 
-    if not file_system_type:
+    if not project_configuration.mount_tool_file_system_type:
       template_names.append('get_file_entry_by_path-end.c')
     else:
       template_names.append('get_file_entry_by_path-end-file_system_type.c')
@@ -9752,44 +9751,62 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
+    base_type = project_configuration.mount_tool_base_type
     if not base_type:
-      base_type = file_entry_type
+      base_type = project_configuration.mount_tool_file_system_type
+    if not base_type:
+      base_type = project_configuration.mount_tool_file_entry_type
 
     template_mappings['mount_tool_base_type'] = base_type
     template_mappings['mount_tool_base_type_description'] = (
         base_type.replace('_', ' '))
+    template_mappings['mount_tool_base_type_name'] = '{0:s}_{1:s}'.format(
+        project_configuration.library_name_suffix, base_type)
 
-    template_mappings['mount_tool_file_entry_type'] = file_entry_type
+    template_mappings['mount_tool_file_entry_type'] = (
+        project_configuration.mount_tool_file_entry_type)
     template_mappings['mount_tool_file_entry_type_description'] = (
-        file_entry_type.replace('_', ' '))
+        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+    template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
+        project_configuration.library_name_suffix,
+        project_configuration.mount_tool_file_entry_type)
 
+    file_system_type = project_configuration.mount_tool_file_system_type
     if not file_system_type:
-      file_system_type = file_entry_type
+      file_system_type = project_configuration.mount_tool_file_entry_type
 
     template_mappings['mount_tool_file_system_type'] = file_system_type
     template_mappings['mount_tool_file_system_type_description'] = (
         file_system_type.replace('_', ' '))
+    template_mappings['mount_tool_file_system_type_name'] = (
+        '{0:s}_{1:s}'.format(
+            project_configuration.library_name_suffix, file_system_type))
 
-    template_mappings['mount_tool_source_type'] = source_type
+    template_mappings['mount_tool_source_type'] = (
+        project_configuration.mount_tool_source_type)
     template_mappings['mount_tool_source_type_description'] = (
-        source_type.replace('_', ' '))
+        project_configuration.mount_tool_source_type.replace('_', ' '))
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_base_type']
     del template_mappings['mount_tool_base_type_description']
+    del template_mappings['mount_tool_base_type_name']
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
+    del template_mappings['mount_tool_file_entry_type_name']
     del template_mappings['mount_tool_file_system_type']
     del template_mappings['mount_tool_file_system_type_description']
+    del template_mappings['mount_tool_file_system_type_name']
     del template_mappings['mount_tool_source_type']
     del template_mappings['mount_tool_source_type_description']
 
     if base_type:
       self._CorrectDescriptionSpelling(base_type, output_filename)
 
-    self._CorrectDescriptionSpelling(file_entry_type, output_filename)
+    self._CorrectDescriptionSpelling(
+        project_configuration.mount_tool_file_entry_type, output_filename)
 
     if file_system_type:
       self._CorrectDescriptionSpelling(file_system_type, output_filename)
@@ -9988,6 +10005,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('main-option_codepage.c')
 
+    if project_configuration.library_name == 'libfsapfs':
+      template_names.append('main-option_file_system_index.c')
+
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('main-option_keys.c')
 
@@ -10174,6 +10194,12 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
           'windows-932, windows-936, windows-949, windows-950, windows-1250, '
           'windows-1251, windows-1252 (default), windows-1253, windows-1254, '
           'windows-1255, windows-1256, windows-1257 or windows-1258'))
+
+      mount_tool_options.append(option)
+
+    if project_configuration.library_name == 'libfsapfs':
+      option = ('f', 'file_system_index', (
+          'mounts a specific file system or \\"all\\"'))
 
       mount_tool_options.append(option)
 

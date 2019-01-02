@@ -1,5 +1,5 @@
 	result = ${library_name}_${mount_tool_file_system_type}_is_locked(
-	          ${mount_tool_file_system_type},
+	          ${mount_tool_file_system_type_name},
 	          error );
 
 	if( result == -1 )

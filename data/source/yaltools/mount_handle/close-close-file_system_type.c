@@ -1,6 +1,6 @@
 	if( mount_file_system_get_${mount_tool_file_system_type}(
 	     mount_handle->file_system,
-	     &${mount_tool_file_system_type},
+	     &${mount_tool_file_system_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -24,12 +24,12 @@
 		 "%s: unable to set ${mount_tool_file_system_type_description} in file system.",
 		 function );
 
-		${mount_tool_file_system_type} = NULL;
+		${mount_tool_file_system_type_name} = NULL;
 
 		goto on_error;
 	}
 	if( ${library_name}_${mount_tool_file_system_type}_close(
-	     ${mount_tool_file_system_type},
+	     ${mount_tool_file_system_type_name},
 	     error ) != 0 )
 	{
 		libcerror_error_set(
@@ -42,7 +42,7 @@
 		goto on_error;
 	}
 	if( ${library_name}_${mount_tool_file_system_type}_free(
-	     &${mount_tool_file_system_type},
+	     &${mount_tool_file_system_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(

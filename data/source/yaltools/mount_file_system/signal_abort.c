@@ -5,10 +5,10 @@ int mount_file_system_signal_abort(
      mount_file_system_t *file_system,
      libcerror_error_t **error )
 {
-	${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type} = NULL;
-	static char *function                                                          = "mount_file_system_signal_abort";
-	int ${mount_tool_file_entry_type}_index                                        = 0;
-	int number_of_${mount_tool_file_entry_type}s                                   = 0;
+	${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type_name} = NULL;
+	static char *function                                                               = "mount_file_system_signal_abort";
+	int ${mount_tool_file_entry_type}_index                                             = 0;
+	int number_of_${mount_tool_file_entry_type}s                                        = 0;
 
 	if( file_system == NULL )
 	{
@@ -42,7 +42,7 @@ int mount_file_system_signal_abort(
 		if( libcdata_array_get_entry_by_index(
 		     file_system->${mount_tool_file_entry_type}s_array,
 		     ${mount_tool_file_entry_type}_index,
-		     (intptr_t **) &${mount_tool_file_entry_type},
+		     (intptr_t **) &${mount_tool_file_entry_type_name},
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -56,7 +56,7 @@ int mount_file_system_signal_abort(
 			return( -1 );
 		}
 		if( ${library_name}_${mount_tool_file_entry_type}_signal_abort(
-		     ${mount_tool_file_entry_type},
+		     ${mount_tool_file_entry_type_name},
 		     error ) != 1 )
 		{
 			libcerror_error_set(

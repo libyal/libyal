@@ -20,7 +20,7 @@ int mount_file_entry_get_number_of_sub_file_entries(
 		return( -1 );
 	}
 	if( ${library_name}_${mount_tool_file_entry_type}_get_number_of_sub_${mount_tool_file_entry_type}s(
-	     file_entry->${mount_tool_file_entry_type},
+	     file_entry->${mount_tool_file_entry_type_name},
 	     number_of_sub_file_entries,
 	     error ) != 1 )
 	{
@@ -45,10 +45,10 @@ int mount_file_entry_get_sub_file_entry_by_index(
      mount_file_entry_t **sub_file_entry,
      libcerror_error_t **error )
 {
-	${library_name}_${mount_tool_file_entry_type}_t *sub_${mount_tool_file_entry_type} = NULL;
-	system_character_t *filename                                                       = NULL;
-	static char *function                                                              = "mount_file_entry_get_sub_file_entry_by_index";
-	size_t filename_size                                                               = 0;
+	${library_name}_${mount_tool_file_entry_type}_t *sub_${mount_tool_file_entry_type_name} = NULL;
+	system_character_t *filename                                                            = NULL;
+	static char *function                                                                   = "mount_file_entry_get_sub_file_entry_by_index";
+	size_t filename_size                                                                    = 0;
 
 	if( file_entry == NULL )
 	{
@@ -85,9 +85,9 @@ int mount_file_entry_get_sub_file_entry_by_index(
 	}
 /* TODO refactor to ${library_name}_${mount_tool_file_entry_type}_get_sub_${mount_tool_file_entry_type}_by_index */
 	if( ${library_name}_${mount_tool_file_entry_type}_get_sub_${mount_tool_file_entry_type}(
-	     file_entry->${mount_tool_file_entry_type},
+	     file_entry->${mount_tool_file_entry_type_name},
 	     sub_file_entry_index,
-	     &sub_${mount_tool_file_entry_type},
+	     &sub_${mount_tool_file_entry_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -102,7 +102,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 	}
 	if( mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
 	     file_entry->file_system,
-	     sub_${mount_tool_file_entry_type},
+	     sub_${mount_tool_file_entry_type_name},
 	     &filename,
 	     &filename_size,
 	     error ) != 1 )
@@ -122,7 +122,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 	     file_entry->file_system,
 	     filename,
 	     filename_size - 1,
-	     sub_${mount_tool_file_entry_type},
+	     sub_${mount_tool_file_entry_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -148,10 +148,10 @@ on_error:
 		memory_free(
 		 filename );
 	}
-	if( sub_${mount_tool_file_entry_type} != NULL )
+	if( sub_${mount_tool_file_entry_type_name} != NULL )
 	{
 		${library_name}_${mount_tool_file_entry_type}_free(
-		 &sub_${mount_tool_file_entry_type},
+		 &sub_${mount_tool_file_entry_type_name},
 		 NULL );
 	}
 	return( -1 );

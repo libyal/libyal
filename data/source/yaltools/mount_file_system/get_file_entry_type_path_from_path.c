@@ -335,7 +335,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 			}
 		}
 #if !defined( WINAPI )
-		else if( unicode_character == (system_character_t) '\' )
+		else if( unicode_character == (system_character_t) '\\' )
 		{
 			if( ( ${mount_tool_file_entry_type}_path_index + 1 ) > safe_${mount_tool_file_entry_type}_path_size )
 			{

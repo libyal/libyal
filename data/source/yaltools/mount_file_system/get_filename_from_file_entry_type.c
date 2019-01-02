@@ -3,7 +3,7 @@
  */
 int mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
      mount_file_system_t *file_system,
-     ${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type},
+     ${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type_name},
      system_character_t **filename,
      size_t *filename_size,
      libcerror_error_t **error )
@@ -26,12 +26,12 @@ int mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = ${library_name}_${mount_tool_file_entry_type}_get_utf16_name_size(
-	          ${mount_tool_file_entry_type},
+	          ${mount_tool_file_entry_type_name},
 	          &${mount_tool_file_entry_type}_name_size,
 	          error );
 #else
 	result = ${library_name}_${mount_tool_file_entry_type}_get_utf8_name_size(
-	          ${mount_tool_file_entry_type},
+	          ${mount_tool_file_entry_type_name},
 	          &${mount_tool_file_entry_type}_name_size,
 	          error );
 #endif
@@ -74,13 +74,13 @@ int mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = ${library_name}_${mount_tool_file_entry_type}_get_utf16_name(
-	          ${mount_tool_file_entry_type},
+	          ${mount_tool_file_entry_type_name},
 	          (uint16_t *) ${mount_tool_file_entry_type}_name,
 	          ${mount_tool_file_entry_type}_name_size,
 	          error );
 #else
 	result = ${library_name}_${mount_tool_file_entry_type}_get_utf8_name(
-	          ${mount_tool_file_entry_type},
+	          ${mount_tool_file_entry_type_name},
 	          (uint8_t *) ${mount_tool_file_entry_type}_name,
 	          ${mount_tool_file_entry_type}_name_size,
 	          error );

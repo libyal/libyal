@@ -31,7 +31,7 @@ int mount_file_entry_get_number_of_sub_file_entries(
 
 		return( -1 );
 	}
-	if( file_entry->${mount_tool_file_entry_type} == NULL )
+	if( file_entry->${mount_tool_file_entry_type_name} == NULL )
 	{
 		if( mount_file_system_get_number_of_${mount_tool_file_entry_type}s(
 		     file_entry->file_system,
@@ -76,10 +76,10 @@ int mount_file_entry_get_sub_file_entry_by_index(
 {
 	system_character_t path[ 32 ];
 
-	${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type} = NULL;
-	static char *function                                                          = "mount_file_entry_get_sub_file_entry_by_index";
-	size_t path_length                                                             = 0;
-	int number_of_sub_file_entries                                                 = 0;
+	${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type_name} = NULL;
+	static char *function                                                               = "mount_file_entry_get_sub_file_entry_by_index";
+	size_t path_length                                                                  = 0;
+	int number_of_sub_file_entries                                                      = 0;
 
 	if( file_entry == NULL )
 	{
@@ -160,7 +160,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 	if( mount_file_system_get_${mount_tool_file_entry_type}_by_index(
 	     file_entry->file_system,
 	     sub_file_entry_index,
-	     &${mount_tool_file_entry_type},
+	     &${mount_tool_file_entry_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -173,7 +173,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		return( -1 );
 	}
-	if( ${mount_tool_file_entry_type} == NULL )
+	if( ${mount_tool_file_entry_type_name} == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -193,7 +193,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 	     file_entry->file_system,
 	     &( path[ 1 ] ),
 	     path_length - 1,
-	     ${mount_tool_file_entry_type},
+	     ${mount_tool_file_entry_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(

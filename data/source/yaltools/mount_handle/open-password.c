@@ -2,13 +2,13 @@
 	{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		if( ${library_name}_${mount_tool_file_system_type}_set_utf16_password(
-		     ${mount_tool_file_system_type},
+		     ${mount_tool_file_system_type_name},
 		     (uint16_t *) mount_handle->password,
 		     mount_handle->password_length,
 		     error ) != 1 )
 #else
 		if( ${library_name}_${mount_tool_file_system_type}_set_utf8_password(
-		     ${mount_tool_file_system_type},
+		     ${mount_tool_file_system_type_name},
 		     (uint8_t *) mount_handle->password,
 		     mount_handle->password_length,
 		     error ) != 1 )

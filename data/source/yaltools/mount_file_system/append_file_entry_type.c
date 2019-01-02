@@ -3,7 +3,7 @@
  */
 int mount_file_system_append_${mount_tool_file_entry_type}(
      mount_file_system_t *file_system,
-     ${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type},
+     ${library_name}_${mount_tool_file_entry_type}_t *${mount_tool_file_entry_type_name},
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_system_append_${mount_tool_file_entry_type}";
@@ -23,7 +23,7 @@ int mount_file_system_append_${mount_tool_file_entry_type}(
 	if( libcdata_array_append_entry(
 	     file_system->${mount_tool_file_entry_type}s_array,
 	     &entry_index,
-	     (intptr_t *) ${mount_tool_file_entry_type},
+	     (intptr_t *) ${mount_tool_file_entry_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(

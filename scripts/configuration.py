@@ -27,8 +27,8 @@ class ProjectConfiguration(object):
     gcc_static_build_dependencies (list[str]): GCC build dependencies for
         building static binaries.
     info_tool_source_description (str): description of the input source.
-    info_tool_source_type (str): input source type, such as file, image
-        or volume.
+    info_tool_source_type (str): input source type, such as container, file,
+        image or volume.
     java_bindings_name (str): name of the Java bindings.
     library_build_dependencies (str): library build dependencies.
     library_description (str): description of the library.
@@ -71,8 +71,8 @@ class ProjectConfiguration(object):
         source.
     mount_tool_source_description (str): description of the input source.
     mount_tool_source (str): short description of the input source.
-    mount_tool_source_type (str): input source type, such as file, image
-        or volume.
+    mount_tool_source_type (str): input source type, such as container, file,
+        image or volume.
     msvscpp_build_dependencies (str): Visual Studio build dependencies.
     msvscpp_dll_dependencies (list[str]): Visual Studio DLL dependencies.
     project_authors (str): authors of the project.
@@ -396,8 +396,8 @@ class ProjectConfiguration(object):
     self.info_tool_source_type = self._GetOptionalConfigValue(
         config_parser, 'info_tool', 'source_type')
 
-    if (self.info_tool_source_type and 
-        self.info_tool_source_type not in ('file', 'image', 'volume')):
+    if self.info_tool_source_type and self.info_tool_source_type not in (
+        'container', 'file', 'image', 'volume'):
       raise errors.ConfigurationError(
           'unsupported info tool source type: {0:s}'.format(
               self.info_tool_source_type))
@@ -511,7 +511,8 @@ class ProjectConfiguration(object):
             config_parser, 'mount_tool', 'file_entry_access_time_type'))
 
     if (self.mount_tool_file_entry_access_time_type and
-        self.mount_tool_file_entry_access_time_type not in ('filetime', )):
+        self.mount_tool_file_entry_access_time_type not in (
+            'filetime', 'nano_posix_time')):
       raise errors.ConfigurationError(
           'unsupported mount tool file entry access time type: {0:s}'.format(
               self.mount_tool_file_entry_access_time_type))
@@ -526,7 +527,8 @@ class ProjectConfiguration(object):
             config_parser, 'mount_tool', 'file_entry_creation_time_type'))
 
     if (self.mount_tool_file_entry_creation_time_type and
-        self.mount_tool_file_entry_creation_time_type not in ('filetime', )):
+        self.mount_tool_file_entry_creation_time_type not in (
+            'filetime', 'nano_posix_time')):
       raise errors.ConfigurationError(
           'unsupported mount tool file entry creation time type: {0:s}'.format(
               self.mount_tool_file_entry_creation_time_type))
@@ -541,7 +543,8 @@ class ProjectConfiguration(object):
             config_parser, 'mount_tool', 'file_entry_inode_change_time_type'))
 
     if (self.mount_tool_file_entry_inode_change_time_type and
-        self.mount_tool_file_entry_inode_change_time_type not in ('filetime', )):
+        self.mount_tool_file_entry_inode_change_time_type not in (
+            'filetime', 'nano_posix_time')):
       raise errors.ConfigurationError((
           'unsupported mount tool file entry inode change time type: '
           '{0:s}').format(self.mount_tool_file_entry_inode_change_time_type))
@@ -556,7 +559,8 @@ class ProjectConfiguration(object):
             config_parser, 'mount_tool', 'file_entry_modification_time_type'))
 
     if (self.mount_tool_file_entry_modification_time_type and
-        self.mount_tool_file_entry_modification_time_type not in ('filetime', )):
+        self.mount_tool_file_entry_modification_time_type not in (
+            'filetime', 'nano_posix_time')):
       raise errors.ConfigurationError((
           'unsupported mount tool file entry modification time type: '
           '{0:s}').format(self.mount_tool_file_entry_modification_time_type))
@@ -596,8 +600,8 @@ class ProjectConfiguration(object):
     self.mount_tool_source_type = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'source_type')
 
-    if (self.mount_tool_source_type and 
-        self.mount_tool_source_type not in ('file', 'image', 'volume')):
+    if self.mount_tool_source_type and self.mount_tool_source_type not in (
+        'container', 'file', 'image', 'volume'):
       raise errors.ConfigurationError(
           'unsupported mount tool source type: {0:s}'.format(
               self.mount_tool_source_type))

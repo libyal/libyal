@@ -5,7 +5,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
-     ${library_name}_${mount_tool_file_entry_type}_t **${mount_tool_file_entry_type},
+     ${library_name}_${mount_tool_file_entry_type}_t **${mount_tool_file_entry_type_name},
      libcerror_error_t **error )
 {
 	system_character_t *${mount_tool_file_entry_type}_path = NULL;
@@ -59,18 +59,18 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 	                                             ${mount_tool_file_entry_type}_path );
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = ${library_name}_file_get_${mount_tool_file_entry_type}_by_utf16_path(
-	          file_system->file,
+	result = ${library_name}_file_get_${mount_tool_file_system_type}_by_utf16_path(
+	          file_system->${mount_tool_file_system_type_name},
 	          (uint16_t *) ${mount_tool_file_entry_type}_path,
 	          ${mount_tool_file_entry_type}_path_length,
-	          ${mount_tool_file_entry_type},
+	          ${mount_tool_file_entry_type_name},
 	          error );
 #else
-	result = ${library_name}_file_get_${mount_tool_file_entry_type}_by_utf8_path(
-	          file_system->file,
+	result = ${library_name}_file_get_${mount_tool_file_system_type}_by_utf8_path(
+	          file_system->${mount_tool_file_system_type_name},
 	          (uint8_t *) ${mount_tool_file_entry_type}_path,
 	          ${mount_tool_file_entry_type}_path_length,
-	          ${mount_tool_file_entry_type},
+	          ${mount_tool_file_entry_type_name},
 	          error );
 #endif
 	if( result == -1 )

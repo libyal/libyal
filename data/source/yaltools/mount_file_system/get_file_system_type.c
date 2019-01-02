@@ -3,7 +3,7 @@
  */
 int mount_file_system_get_${mount_tool_file_system_type}(
      mount_file_system_t *file_system,
-     ${library_name}_${mount_tool_file_system_type}_t **${mount_tool_file_system_type},
+     ${library_name}_${mount_tool_file_system_type}_t **${mount_tool_file_system_type_name},
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_system_get_${mount_tool_file_system_type}";
@@ -19,7 +19,7 @@ int mount_file_system_get_${mount_tool_file_system_type}(
 
 		return( -1 );
 	}
-	if( ${mount_tool_file_system_type} == NULL )
+	if( ${mount_tool_file_system_type_name} == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -30,7 +30,7 @@ int mount_file_system_get_${mount_tool_file_system_type}(
 
 		return( -1 );
 	}
-	*${mount_tool_file_system_type} = file_system->${mount_tool_file_system_type};
+	*${mount_tool_file_system_type_name} = file_system->${mount_tool_file_system_type_name};
 
 	return( 1 );
 }

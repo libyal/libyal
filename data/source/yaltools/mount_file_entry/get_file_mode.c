@@ -30,7 +30,7 @@ int mount_file_entry_get_file_mode(
 
 		return( -1 );
 	}
-	if( file_entry->${mount_tool_file_entry_type} == NULL )
+	if( file_entry->${mount_tool_file_entry_type_name} == NULL )
 	{
 		*file_mode = S_IFDIR | 0555;
 	}

@@ -1,6 +1,6 @@
 	if( mount_file_system_get_number_of_${mount_tool_file_system_type}s(
 	     mount_handle->file_system,
-	     &number_of_${mount_tool_file_system_type}s,
+	     &number_of_${mount_tool_file_system_type_name}s,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -19,7 +19,7 @@
 		if( mount_file_system_get_${mount_tool_file_system_type}_by_index(
 		     mount_handle->file_system,
 		     ${mount_tool_file_system_type}_index,
-		     &${mount_tool_file_system_type},
+		     &${mount_tool_file_system_type_name},
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -32,10 +32,10 @@
 
 			goto on_error;
 		}
-/* TODO remove ${mount_tool_file_system_type} from file system */
+/* TODO remove ${mount_tool_file_system_type_name} from file system */
 
 		if( ${library_name}_${mount_tool_file_system_type}_close(
-		     ${mount_tool_file_system_type},
+		     ${mount_tool_file_system_type_name},
 		     error ) != 0 )
 		{
 			libcerror_error_set(
@@ -49,7 +49,7 @@
 			goto on_error;
 		}
 		if( ${library_name}_${mount_tool_file_system_type}_free(
-		     &${mount_tool_file_system_type},
+		     &${mount_tool_file_system_type_name},
 		     error ) != 1 )
 		{
 			libcerror_error_set(

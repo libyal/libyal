@@ -38,7 +38,7 @@ int mount_file_entry_get_creation_time(
 		return( -1 );
 	}
 	if( ${library_name}_${mount_tool_file_entry_type}_get_${mount_tool_file_entry_creation_time_value}(
-	     file_entry->${mount_tool_file_entry_type},
+	     file_entry->${mount_tool_file_entry_type_name},
 	     &filetime,
 	     error ) != 1 )
 	{

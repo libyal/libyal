@@ -23,7 +23,7 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 		return( -1 );
 	}
 	read_count = ${library_name}_${mount_tool_file_entry_type}_read_buffer_at_offset(
-	              file_entry->${mount_tool_file_entry_type},
+	              file_entry->${mount_tool_file_entry_type_name},
 	              buffer,
 	              buffer_size,
 	              offset,

@@ -5,7 +5,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
-     ${library_name}_${mount_tool_file_entry_type}_t **${mount_tool_file_entry_type},
+     ${library_name}_${mount_tool_file_entry_type}_t **${mount_tool_file_entry_type_name},
      libcerror_error_t **error )
 {
 	static char *function                   = "mount_file_system_get_${mount_tool_file_entry_type}_by_path";
@@ -58,7 +58,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 
 		return( -1 );
 	}
-	if( ${mount_tool_file_entry_type} == NULL )
+	if( ${mount_tool_file_entry_type_name} == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -75,7 +75,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 	if( ( path_length == 1 )
 	 && ( path[ 0 ] == file_system->path_prefix[ 0 ] ) )
 	{
-		*${mount_tool_file_entry_type} = NULL;
+		*${mount_tool_file_entry_type_name} = NULL;
 
 		return( 1 );
 	}
@@ -120,7 +120,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 	if( libcdata_array_get_entry_by_index(
 	     file_system->${mount_tool_file_entry_type}s_array,
 	     ${mount_tool_file_entry_type}_index,
-	     (intptr_t **) ${mount_tool_file_entry_type},
+	     (intptr_t **) ${mount_tool_file_entry_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(

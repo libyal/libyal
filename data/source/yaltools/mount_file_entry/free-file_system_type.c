@@ -27,7 +27,7 @@ int mount_file_entry_free(
 			 ( *file_entry )->name );
 		}
 		if( ${library_name}_${mount_tool_file_entry_type}_free(
-		     &( ( *file_entry )->${mount_tool_file_entry_type} ),
+		     &( ( *file_entry )->${mount_tool_file_entry_type_name} ),
 		     error ) != 1 )
 		{
 			libcerror_error_set(

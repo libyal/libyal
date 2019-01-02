@@ -65,7 +65,7 @@
 	          mount_handle->file_system,
 	          path,
 	          path_length,
-	          &${mount_tool_file_entry_type},
+	          &${mount_tool_file_entry_type_name},
 	          error );
 
 	if( result == -1 )
