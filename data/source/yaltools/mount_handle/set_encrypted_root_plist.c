@@ -1,12 +1,12 @@
-/* Sets the startup key (.BEK) file path
+/* Sets the encrypted root plist file path
  * Returns 1 if successful or -1 on error
  */
-int mount_handle_set_startup_key(
+int mount_handle_set_encrypted_root_plist(
      mount_handle_t *mount_handle,
      const system_character_t *string,
      libcerror_error_t **error )
 {
-	static char *function = "mount_handle_set_startup_key";
+	static char *function = "mount_handle_set_encrypted_root_plist";
 
 	if( mount_handle == NULL )
 	{
@@ -30,7 +30,7 @@ int mount_handle_set_startup_key(
 
 		return( -1 );
 	}
-	mount_handle->startup_key_path = string;
+	mount_handle->encrypted_root_plist_path = string;
 
 	return( 1 );
 }

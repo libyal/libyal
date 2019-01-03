@@ -2145,6 +2145,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               ('SHA256 support', '$ac_cv_libhmac_sha256'),
               ('SHA512 support', '$ac_cv_libhmac_sha512')])
 
+        elif project_configuration.library_name == 'libfvde':
+          build_options.append(('SHA256 support', '$ac_cv_libhmac_sha256'))
+
       elif name == 'zlib':
         # TODO: determine deflate function via configuration setting? 
         if project_configuration.library_name in (
@@ -9471,6 +9474,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('struct-codepage.h')
 
+    if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
+      template_names.append('struct-encrypted_root_plist.h')
+
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('struct-file_system_index.h')
 
@@ -9507,6 +9513,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('set_codepage.h')
+
+    if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
+      template_names.append('set_encrypted_root_plist.h')
 
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('set_file_system_index.h')
@@ -9624,6 +9633,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('set_codepage.c')
 
+    if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
+      template_names.append('set_encrypted_root_plist.c')
+
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('set_file_system_index.c')
 
@@ -9683,6 +9695,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       template_names.append('open-offset.c')
 
     template_names.append('open-initialize.c')
+
+    if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
+      template_names.append('open-encrypted_root_plist.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       if project_configuration.library_name == 'libbde':
@@ -10015,6 +10030,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('main-option_codepage.c')
 
+    if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
+      template_names.append('main-option_encrypted_root_plist.c')
+
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('main-option_file_system_index.c')
 
@@ -10207,9 +10225,16 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
       mount_tool_options.append(option)
 
+    if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
+      # TODO: set option via configuation
+      option = ('e', 'plist_path', (
+          'specify the path of the EncryptedRoot.plist.wipekey file'))
+
+      mount_tool_options.append(option)
+
     if project_configuration.library_name == 'libfsapfs':
       option = ('f', 'file_system_index', (
-          'mounts a specific file system or \\"all\\"'))
+          'specify a specific file system or \\"all\\"'))
 
       mount_tool_options.append(option)
 
@@ -10219,10 +10244,15 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       # TODO: set keys option description via configuation
       if project_configuration.library_name == 'libbde':
         option = ('k', 'keys', (
-            'the full volume encryption key and tweak key formatted in base16 '
-            'and separated by a : character e.g. FVEK:TWEAK'))
-      else:
-        option = ('k', 'keys', 'the key formatted in base16')
+            'specify the full volume encryption key and tweak key formatted in '
+            'base16 and separated by a : character e.g. FVEK:TWEAK'))
+
+      elif project_configuration.library_name == 'libfvde':
+        option = ('k', 'keys', (
+            'specify the volume master key formatted in base16'))
+
+      elif project_configuration.library_name == 'libqcow':
+        option = ('k', 'keys', 'specify the key formatted in base16')
 
       mount_tool_options.append(option)
 

@@ -888,6 +888,14 @@ class ProjectConfiguration(object):
     """
     return 'codepage' in self._mount_tool_features
 
+  def HasMountToolsFeatureEncryptedRootPlist(self):
+    """Determines if the mount tool has an encrypted root plist feature.
+
+    Returns:
+      bool: True if the mount tools has an encrypted root plist feature.
+    """
+    return 'encrypted_root_plist' in self._mount_tool_features
+
   def HasMountToolsFeatureKeys(self):
     """Determines if the mount tool has a keys feature.
 
