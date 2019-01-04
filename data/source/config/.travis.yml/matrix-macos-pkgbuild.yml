@@ -1,6 +1,6 @@
-  - name: "MacOS gcc and pkgbuild"
+  - name: "Mac OS gcc and pkgbuild"
     env:
-    - CONFIGURE_OPTIONS="${configure_options}"
+    - CONFIGURE_OPTIONS="${pkgbuild_configure_options}"
     - TARGET="macos-gcc-pkgbuild"
     compiler: gcc
     os: osx

@@ -1592,105 +1592,63 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'appveyor.yml')
 
-    template_filename = os.path.join(
-        template_directory, 'environment-header.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_names = ['environment-header.yml']
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(
-          template_directory, 'environment-python.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('environment-python.yml')
 
-    template_filename = os.path.join(
-        template_directory, 'environment-cygwin.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.append('environment-cygwin.yml')
 
     # if 'crypto' in project_configuration.library_build_dependencies:
     # TODO: add environment-cygwin-openssl.yml
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(
-          template_directory, 'environment-cygwin-python.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('environment-cygwin-python.yml')
 
     if project_configuration.HasTools():
-      template_filename = os.path.join(
-          template_directory, 'environment-cygwin-static-executables.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('environment-cygwin-static-executables.yml')
 
-    template_filename = os.path.join(
-        template_directory, 'environment-cygwin64.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.append('environment-cygwin64.yml')
 
     # if 'crypto' in project_configuration.library_build_dependencies:
     # TODO: add environment-cygwin64-openssl.yml
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(
-          template_directory, 'environment-cygwin64-python.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('environment-cygwin64-python.yml')
 
     if project_configuration.HasTools():
-      template_filename = os.path.join(
-          template_directory, 'environment-cygwin64-static-executables.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('environment-cygwin64-static-executables.yml')
 
-    template_filename = os.path.join(
-        template_directory, 'environment-mingw.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.append('environment-mingw.yml')
 
-    template_filename = os.path.join(
-        template_directory, 'environment-mingw-w64.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    if project_configuration.HasTools():
+      template_names.append('environment-mingw-static-executables.yml')
 
-    template_filename = os.path.join(template_directory, 'allow-failures.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.append('environment-mingw-w64.yml')
 
-    template_filename = os.path.join(template_directory, 'install-header.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    if project_configuration.HasTools():
+      template_names.append('environment-mingw-w64-static-executables.yml')
+
+    template_names.extend(['allow-failures.yml', 'install-header.yml'])
 
     if (project_configuration.HasDependencyLex() or
         project_configuration.HasDependencyYacc()):
-      template_filename = os.path.join(
-          template_directory, 'install-winflexbison.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('install-winflexbison.yml')
 
     if 'zlib' in project_configuration.library_build_dependencies:
-      template_filename = os.path.join(template_directory, 'install-zlib.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('install-zlib.yml')
 
     if project_configuration.HasDependencyDokan():
-      template_filename = os.path.join(template_directory, 'install-dokan.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('install-dokan.yml')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    # TODO: refactor code below to use template_names
 
     cygwin_build_dependencies = self._GetCygwinBuildDependencies(
         project_configuration)
@@ -1739,55 +1697,35 @@ class ConfigurationFileGenerator(SourceFileGenerator):
 
       del template_mappings['mingw_msys2_build_dependencies']
 
-    template_filename = os.path.join(
-        template_directory, 'build_script-header.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    # TODO: refactor code above to use template_names
+
+    template_names = []
+
+    template_names.append('build_script-header.yml')
 
     # TODO: make this configuration driven
     if project_configuration.library_name == 'libevt':
-      template_filename = os.path.join(
-          template_directory, 'build_script-vs2017-nuget.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('build_script-vs2017-nuget.yml')
     else:
-      template_filename = os.path.join(
-          template_directory, 'build_script-vs2017.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('build_script-vs2017.yml')
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(
-          template_directory, 'build_script-python.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('build_script-python.yml')
 
-    template_filename = os.path.join(
-        template_directory, 'build_script-footer.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'test_script.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'after_test.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.extend([
+        'build_script-footer.yml', 'test_script.yml', 'after_test.yml'])
 
     # TODO: make this configuration driven
     if project_configuration.library_name == 'libevt':
-      template_filename = os.path.join(template_directory, 'deploy.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('deploy.yml')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
+        access_mode='ab')
 
   def _GenerateCodecovYML(
       self, project_configuration, template_mappings, output_writer,
@@ -2649,163 +2587,96 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
 
-    template_filename = os.path.join(
-        template_directory, 'header.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_names = ['header.yml']
 
     if project_configuration.coverity_scan_token:
-      template_mappings['coverity_scan_token'] = (
-          project_configuration.coverity_scan_token)
+      template_names.append('env.yml')
 
-      template_filename = os.path.join(template_directory, 'env.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-      del template_mappings['coverity_scan_token']
-
-    template_filename = os.path.join(template_directory, 'matrix-header.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.append('matrix-header.yml')
 
     if project_configuration.coverity_scan_token:
-      template_filename = os.path.join(template_directory, 'matrix-coverity.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('matrix-coverity.yml')
 
-    template_filename = os.path.join(template_directory, 'matrix-linux.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.append('matrix-linux.yml')
+
+    # TODO: improve check.
+    if project_configuration.library_name == 'libcdata':
+      template_names.append('matrix-linux-no_pthread.yml')
 
     if include_header_file.have_wide_character_type:
-      template_filename = os.path.join(
-          template_directory, 'matrix-linux-wide_character_type.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('matrix-linux-wide_character_type.yml')
 
     # TODO: make conditional
-    # template_filename = os.path.join(
-    #     template_directory, 'matrix-linux-debug_output.yml')
-    # self._GenerateSection(
-    #     template_filename, template_mappings, output_writer, output_filename,
-    #     access_mode='ab')
+    # template_names.append('matrix-linux-debug_output.yml')
 
-    configure_options = ['--enable-shared=no']
-    if include_header_file.have_wide_character_type:
-      configure_options.append('--enable-wide-character-type')
-
-    template_mappings['configure_options'] = ' '.join(configure_options)
-
-    template_filename = os.path.join(
-        template_directory, 'matrix-linux-no_optimization.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
-    del template_mappings['configure_options']
+    template_names.append('matrix-linux-no_optimization.yml')
 
     if 'crypto' in project_configuration.library_build_dependencies:
-      template_filename = os.path.join(
-          template_directory, 'matrix-linux-openssl.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('matrix-linux-openssl.yml')
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(
-          template_directory, 'matrix-linux-python.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('matrix-linux-python.yml')
 
-    template_filename = os.path.join(
-        template_directory, 'matrix-linux-shared.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.append('matrix-linux-shared.yml')
 
     if (include_header_file and include_header_file.have_wide_character_type or
         project_configuration.HasTools()):
-      template_filename = os.path.join(
-          template_directory, 'matrix-linux-shared-wide_character_type.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('matrix-linux-shared-wide_character_type.yml')
 
     if project_configuration.HasTools():
-      template_filename = os.path.join(
-          template_directory, 'matrix-linux-static-executables.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('matrix-linux-static-executables.yml')
 
-    template_filename = os.path.join(template_directory, 'matrix-macos.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.append('matrix-macos.yml')
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(
-          template_directory, 'matrix-macos-python.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('matrix-macos-python.yml')
 
-    configure_options = ['--disable-dependency-tracking', '--prefix=/usr/local']
+    template_names.extend(['matrix-macos-pkgbuild.yml', 'before_install.yml'])
+
+    if project_configuration.coverity_scan_token:
+      template_names.append('before_install-coverity.yml')
+
+    template_names.append('install.yml')
+
     if project_configuration.HasPythonModule():
-      configure_options.extend(['--enable-python', '--with-pyprefix'])
+      template_names.append('script-python.yml')
+    else:
+      template_names.append('script.yml')
 
-    template_mappings['configure_options'] = ' '.join(configure_options)
+    template_names.append('after_success.yml')
 
-    template_filename = os.path.join(
-        template_directory, 'matrix-macos-pkgbuild.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
 
-    del template_mappings['configure_options']
+    template_mappings['coverity_scan_token'] = (
+        project_configuration.coverity_scan_token or '')
 
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
 
-    template_filename = os.path.join(template_directory, 'before_install.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    no_optimization_configure_options = ['--enable-shared=no']
+    if include_header_file.have_wide_character_type:
+      no_optimization_configure_options.append('--enable-wide-character-type')
 
-    del template_mappings['dpkg_build_dependencies']
+    template_mappings['no_optimization_configure_options'] = ' '.join(
+        no_optimization_configure_options)
 
-    if project_configuration.coverity_scan_token:
-      template_filename = os.path.join(
-          template_directory, 'before_install-coverity.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-    template_filename = os.path.join(template_directory, 'install.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
-
+    pkgbuild_configure_options = [
+        '--disable-dependency-tracking', '--prefix=/usr/local']
     if project_configuration.HasPythonModule():
-      template_filename = 'script-python.yml'
-    else:
-      template_filename = 'script.yml'
+      pkgbuild_configure_options.extend(['--enable-python', '--with-pyprefix'])
 
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_mappings['pkgbuild_configure_options'] = ' '.join(
+        pkgbuild_configure_options)
 
-    template_filename = os.path.join(template_directory, 'after_success.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['coverity_scan_token']
+    del template_mappings['dpkg_build_dependencies']
+    del template_mappings['no_optimization_configure_options']
+    del template_mappings['pkgbuild_configure_options']
 
   def _GetDpkgBuildDependencies(self, project_configuration):
     """Retrieves the dpkg build dependencies.
@@ -6439,17 +6310,17 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     initialize_number_of_arguments = None
     initialize_value_name = None
     initialize_value_type = None
-    intialize_function_prototype = header_file.GetTypeFunction(
+    initialize_function_prototype = header_file.GetTypeFunction(
         type_name, 'initialize')
-    if intialize_function_prototype:
+    if initialize_function_prototype:
       initialize_number_of_arguments = len(
-          intialize_function_prototype.arguments)
+          initialize_function_prototype.arguments)
 
     if initialize_number_of_arguments not in (2, 3):
       return function_name, None, last_have_extern
 
     if initialize_number_of_arguments == 3:
-      function_argument = intialize_function_prototype.arguments[1]
+      function_argument = initialize_function_prototype.arguments[1]
       function_argument_string = function_argument.CopyToString()
 
       initialize_value_type, _, initialize_value_name = (

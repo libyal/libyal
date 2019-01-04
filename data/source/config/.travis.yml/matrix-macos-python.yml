@@ -1,11 +1,11 @@
-  - name: "MacOS with gcc and Python module"
+  - name: "Mac OS with gcc and Python module"
     env:
     - CONFIGURE_OPTIONS="--enable-python"
     - TARGET="macos-gcc-python"
     compiler: gcc
     os: osx
     osx_image: xcode8.3
-  - name: "MacOS with gcc and Python 2 module"
+  - name: "Mac OS with gcc and Python 2 module"
     env:
     - CONFIGURE_OPTIONS="--enable-python2"
     - PYTHON_VERSION=2
@@ -13,7 +13,7 @@
     compiler: gcc
     os: osx
     osx_image: xcode8.3
-  - name: "MacOS with gcc and Python 2 module (setup.py)"
+  - name: "Mac OS with gcc and Python 2 module (setup.py)"
     env:
     - TARGET="macos-gcc-python-setup-py"
     compiler: gcc

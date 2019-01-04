@@ -1,0 +1,5 @@
+  - TARGET: mingw-w64-gcc-static-executables
+    BUILD_ENVIRONMENT: mingw-w64
+    CONFIGURE_OPTIONS: "--enable-static-executables"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"

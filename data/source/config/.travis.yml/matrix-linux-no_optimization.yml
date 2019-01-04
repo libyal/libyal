@@ -1,6 +1,6 @@
   - name: "Linux with gcc without optimization"
     env:
-    - CONFIGURE_OPTIONS="${configure_options}"
+    - CONFIGURE_OPTIONS="${no_optimization_configure_options}"
     - CFLAGS="--coverage -O0"
     - CPPFLAGS="-DOPTIMIZATION_DISABLED"
     - LDFLAGS="--coverage"
