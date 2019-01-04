@@ -2600,7 +2600,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     template_names.append('matrix-linux.yml')
 
     # TODO: improve check.
-    if project_configuration.library_name == 'libcdata':
+    if project_configuration.library_name in ('libbfio', 'libcdata'):
       template_names.append('matrix-linux-no_pthread.yml')
 
     if include_header_file.have_wide_character_type:
