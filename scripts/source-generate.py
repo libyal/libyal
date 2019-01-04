@@ -9827,6 +9827,17 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'yalmount')
 
+    template_names = ['header.c', 'includes-start.c']
+
+    if project_configuration.HasMountToolsFeatureGlob():
+      template_names.append('includes-glob.c')
+
+    template_names.append('includes-end.c')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
     mount_tool_options = self._GetMountToolOptions(
         project_configuration, mount_tool_name)
 
@@ -9842,14 +9853,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     template_mappings['mount_tool_source_type'] = (
         project_configuration.mount_tool_source_type)
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
-
-    template_filename = os.path.join(template_directory, 'includes.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     self._GenerateMountToolSourceUsageFunction(
         project_configuration, template_mappings, mount_tool_name,
@@ -9908,12 +9913,20 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if not file_system_type:
       template_names.append('main-variables-path_prefix.c')
 
+    if project_configuration.HasMountToolsFeatureGlob():
+      template_names.append('main-variables-glob.c')
+
     template_names.append('main-locale.c')
 
     if project_configuration.HasMountToolsFeatureMultiSource():
       template_names.append('main-getopt-multi_source.c')
     else:
       template_names.append('main-getopt.c')
+
+    template_names.append('main-verbose.c')
+
+    if project_configuration.HasMountToolsFeatureGlob():
+      template_names.append('main-initialize-glob.c')
 
     template_names.append('main-initialize.c')
 
@@ -9952,8 +9965,16 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureUnlock():
       template_names.append('main-is_locked.c')
 
+    if project_configuration.HasMountToolsFeatureGlob():
+      template_names.append('main-glob_free.c')
+
     template_names.extend([
-        'main-fuse.c', 'main-dokan.c', 'main-end.c'])
+        'main-fuse.c', 'main-dokan.c', 'main-on_error.c'])
+
+    if project_configuration.HasMountToolsFeatureGlob():
+      template_names.append('main-on_error-glob.c')
+
+    template_names.append('main-end.c')
 
     template_filenames = [
         os.path.join(template_directory, template_name)
