@@ -896,6 +896,14 @@ class ProjectConfiguration(object):
     """
     return 'encrypted_root_plist' in self._mount_tool_features
 
+  def HasMountToolsFeatureGlob(self):
+    """Determines if the mount tool has a glob feature.
+
+    Returns:
+      bool: True if the mount tools has a glob feature.
+    """
+    return 'glob' in self._mount_tool_features
+
   def HasMountToolsFeatureKeys(self):
     """Determines if the mount tool has a keys feature.
 

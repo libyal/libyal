@@ -2072,7 +2072,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
         if project_configuration.library_name in (
             'libewf', 'libodraw', 'libsmraw'):
           build_options.extend([
-              ('MD5 support', '$ac_cv_libhmac_md5')
+              ('MD5 support', '$ac_cv_libhmac_md5'),
               ('SHA1 support', '$ac_cv_libhmac_sha1'),
               ('SHA256 support', '$ac_cv_libhmac_sha256')])
 
@@ -2083,7 +2083,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               ('SHA256 support', '$ac_cv_libhmac_sha256'),
               ('SHA512 support', '$ac_cv_libhmac_sha512')])
 
-        elif project_configuration.library_name == 'libfvde':
+        elif project_configuration.library_name in ('libfsapfs', 'libfvde'):
           build_options.append(('SHA256 support', '$ac_cv_libhmac_sha256'))
 
       elif name == 'zlib':
@@ -9542,6 +9542,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open-variables-basename.c')
 
+    if project_configuration.HasMountToolsFeatureGlob():
+      template_names.append('open-variables-glob.c')
+
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('open-variables-file_io_handle.c')
 
@@ -9561,6 +9564,9 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         template_names.append('open-basename-multi_source.c')
       else:
         template_names.append('open-basename.c')
+
+    if project_configuration.HasMountToolsFeatureGlob():
+      template_names.append('open-glob.c')
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('open-offset.c')
@@ -9587,6 +9593,8 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('open-open-file_io_handle.c')
+    elif project_configuration.HasMountToolsFeatureMultiSource():
+      template_names.append('open-open-multi_source.c')
     else:
       template_names.append('open-open.c')
 
@@ -9604,10 +9612,21 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     else:
       template_names.append('open-set_file_system_type.c')
 
+    if project_configuration.HasMountToolsFeatureGlob():
+      template_names.append('open-free-glob.c')
+
     if project_configuration.HasMountToolsFeatureOffset():
-      template_names.append('open-end-file_io_handle.c')
-    else:
-      template_names.append('open-end.c')
+      template_names.append('open-set-file_io_handle.c')
+
+    template_names.append('open-on_error.c')
+
+    if project_configuration.HasMountToolsFeatureGlob():
+      template_names.append('open-on_error-glob.c')
+
+    if project_configuration.HasMountToolsFeatureOffset():
+      template_names.append('open-on_error-file_io_handle.c')
+
+    template_names.append('open-end.c')
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open_parent.c')
