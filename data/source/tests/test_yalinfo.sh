@@ -10,7 +10,7 @@ EXIT_IGNORE=77;
 OPTION_SETS="${tests_info_tool_option_sets}";
 OPTIONS=(${tests_info_tool_options});
 
-INPUT_GLOB="${tests_input_glob}";
+INPUT_GLOB="${tests_info_tool_input_glob}";
 
 if ! test -z $${SKIP_TOOLS_TESTS};
 then

@@ -2,6 +2,14 @@
 %description -n ${library_name}
 ${library_description}
 
+%package -n ${library_name}-static
+Summary: ${library_description}
+Group: Development/Libraries
+Requires: ${library_name} = %{version}-%{release}
+
+%description -n ${library_name}-static
+Static library version of ${library_name}.
+
 %package -n ${library_name}-devel
 Summary: Header files and libraries for developing applications for ${library_name}
 Group: Development/Libraries

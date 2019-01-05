@@ -6,7 +6,7 @@ $$ExitSuccess = 0
 $$ExitFailure = 1
 $$ExitIgnore = 77
 
-$$InputGlob = "${tests_input_glob}"
+$$InputGlob = "${tests_info_tool_input_glob}"
 
 Function GetTestToolDirectory
 {

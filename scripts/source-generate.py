@@ -2057,6 +2057,9 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
               ('AES-XTS support', '$ac_cv_libcaes_aes_xts')])
 
+       elif project_configuration.library_name == 'libewf':
+         pass
+
        elif project_configuration.library_name in ('libfsapfs', 'libfvde'):
           build_options.extend([
               ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
@@ -2092,7 +2095,7 @@ class ConfigurationFileGenerator(SourceFileGenerator):
             'libfsapfs', 'libfvde', 'libpff', 'libvmdk'):
           value = '$ac_cv_uncompress'
         else:
-          description = '$ac_cv_inflate'
+          value = '$ac_cv_inflate'
 
         build_options.append(('DEFLATE compression support', value))
 
@@ -7936,6 +7939,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     template_mappings['tests_export_tool_options'] = (
         project_configuration.tests_export_tool_options)
 
+    template_mappings['tests_info_tool_input_glob'] = (
+        project_configuration.tests_info_tool_input_glob)
     template_mappings['tests_info_tool_option_sets'] = ' '.join(
         project_configuration.tests_info_tool_option_sets)
     template_mappings['tests_info_tool_options'] = (

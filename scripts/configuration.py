@@ -94,19 +94,21 @@ class ProjectConfiguration(object):
     tests_example_filename2 (str): name of the second test example filename.
     tests_export_tool_option_sets (list[str]): option sets used by the tests of
         the export tool.
-    tests_export_tool_options (str): command line options for the export tool
-        for running tests.
+    tests_export_tool_options (str): command line options used by the tests of
+        the export tool.
+    tests_info_tool_input_glob (str): input files glob used by the tests of
+        the info tool.
     tests_info_tool_option_sets (list[str]): option sets used by the tests of
         the info tool.
-    tests_info_tool_options (str): command line options for the info tool
-        for running tests.
-    tests_input_glob (str): test input files glob.
+    tests_info_tool_options (str): command line options used by the tests of
+        the info tool.
+    tests_input_glob (str): input files glob used by the tests.
     tests_option_sets (list[str]): option sets used by the tests.
     tests_profiles (list[str]): names of the test profiles.
     tests_verify_tool_option_sets (list[str]): option sets used by the tests of
         the verify tool.
-    tests_verify_tool_options (str): command line options for the verify tool
-        for running tests.
+    tests_verify_tool_options (str): command line options used by the tests of
+        the verify tool.
     tools_authors (str): authors of the tools.
     tools_build_dependencies (str): tools build dependencies.
     tools_description (str): description of the tools.
@@ -199,6 +201,7 @@ class ProjectConfiguration(object):
     self.tests_input_glob = None
     self.tests_export_tool_option_sets = None
     self.tests_export_tool_options = None
+    self.tests_info_tool_input_glob = None
     self.tests_info_tool_option_sets = None
     self.tests_info_tool_options = None
     self.tests_verify_tool_option_sets = None
@@ -727,6 +730,9 @@ class ProjectConfiguration(object):
     self.tests_export_tool_options = self._GetOptionalConfigValue(
         config_parser, 'tests', 'export_tool_options', default_value='')
 
+    self.tests_info_tool_input_glob = self._GetOptionalConfigValue(
+        config_parser, 'tests', 'info_tool_input_glob',
+        default_value=self.tests_input_glob)
     self.tests_info_tool_option_sets = self._GetOptionalConfigValue(
         config_parser, 'tests', 'info_tool_option_sets', default_value=[])
     self.tests_info_tool_options = self._GetOptionalConfigValue(
