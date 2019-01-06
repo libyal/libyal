@@ -1648,8 +1648,6 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
-    # TODO: refactor code below to use template_names
-
     cygwin_build_dependencies = self._GetCygwinBuildDependencies(
         project_configuration)
 
@@ -2070,9 +2068,17 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'),
               ('AES-ECB support', '$ac_cv_libcaes_aes_ecb')])
 
+       elif project_configuration.library_name in ('libmodi', 'libqcow'):
+          build_options.append(
+              ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'))
+
       elif name == 'libhmac':
         # TODO: make check more generic based on the source itself.
         if project_configuration.library_name in (
+            'libbde', 'libfsapfs', 'libfvde', 'libmodi'):
+          build_options.append(('SHA256 support', '$ac_cv_libhmac_sha256'))
+
+        elif project_configuration.library_name in (
             'libewf', 'libodraw', 'libsmraw'):
           build_options.extend([
               ('MD5 support', '$ac_cv_libhmac_md5'),
@@ -2086,13 +2092,10 @@ class ConfigurationFileGenerator(SourceFileGenerator):
               ('SHA256 support', '$ac_cv_libhmac_sha256'),
               ('SHA512 support', '$ac_cv_libhmac_sha512')])
 
-        elif project_configuration.library_name in ('libfsapfs', 'libfvde'):
-          build_options.append(('SHA256 support', '$ac_cv_libhmac_sha256'))
-
       elif name == 'zlib':
         # TODO: determine deflate function via configuration setting? 
         if project_configuration.library_name in (
-            'libfsapfs', 'libfvde', 'libpff', 'libvmdk'):
+            'libfsapfs', 'libfvde', 'libmodi', 'libpff', 'libvmdk'):
           value = '$ac_cv_uncompress'
         else:
           value = '$ac_cv_inflate'
@@ -6426,9 +6429,18 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     clone_function = None
     compare_function = None
     free_function = None
+    pointer_type_argument_name = None
+    pointer_type_argument_type = None
 
     for argument in function_prototype.arguments:
       argument_string = argument.CopyToString()
+
+      if argument_string.startswith(library_type_prefix):
+        argument_type, _, argument_name = argument_string.partition(' ')
+        if argument_name.startswith('**'):
+          pointer_type_argument_type = argument_type[
+              len(library_type_prefix):-2]
+          pointer_type_argument_name = argument_name[2:]
 
       if '_clone_function' in argument_string:
         _, _, clone_function = argument_string.partition('*')
@@ -6451,19 +6463,19 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     # if function_prototype.return_values:
 
     if clone_function:
-      body_template_filename = (
+      body_template_name = (
           'function-body-{0:s}-with_clone_function.c').format(function_template)
     elif free_function:
-      body_template_filename = (
+      body_template_name = (
           'function-body-{0:s}-with_free_function.c').format(function_template)
     elif with_codepage:
-      body_template_filename = (
+      body_template_name = (
           'function-body-{0:s}-with_codepage.c').format(function_template)
     else:
-      body_template_filename = 'function-body-{0:s}.c'.format(function_template)
+      body_template_name = 'function-body-{0:s}.c'.format(function_template)
 
     body_template_filename = os.path.join(
-        template_directory, body_template_filename)
+        template_directory, body_template_name)
     if not body_template_filename or not os.path.exists(body_template_filename):
       template_filename = '{0:s}.c'.format(function_template)
 
@@ -6579,109 +6591,88 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
         function_variable_strings.append(variable)
 
-      template_mappings['test_data_size'] = test_data_size
+      template_names = []
+
+      if with_input:
+        template_names.append('function-start-with_input.c')
+      else:
+        template_names.append('function-start.c')
+
+      if not with_input:
+        if initialize_number_of_arguments == 3:
+          template_name = 'function-initialize-with_value.c'
+        else:
+          template_name = 'function-initialize.c'
+
+        if function_template == 'clone':
+          template_name = '{0:s}-clone.c'.format(template_name[:-2])
+
+        template_names.append(template_name)
+
+      template_names.append(body_template_name)
+
+      # TODO: refactor to have unified function end handling
+
+      if not with_input:
+        template_names.append('function-cleanup-header.c')
+
+      if function_template == 'clone':
+        template_names.append('function-cleanup-clone.c')
+
+        if initialize_number_of_arguments == 3:
+          template_names.append('function-cleanup-with_value.c')
+
+      elif free_function:
+        template_names.append('function-cleanup-with_free_function.c')
+
+      elif not with_input:
+        template_names.append('function-cleanup-type.c')
+
+        if initialize_number_of_arguments == 3:
+          template_names.append('function-cleanup-with_value.c')
+
+      template_names.append('function-end-on_error.c')
+
+      if 'libbfio_handle_t *file_io_handle = NULL;' in function_variables:
+        template_names.append('function-end-on_error-free_file_io_handle.c')
+
+      if function_template == 'clone':
+        template_names.append('function-end-on_error-clone.c')
+      elif free_function:
+        template_names.append('function-end-on_error-with_free_function.c')
+      elif not with_input:
+        template_names.append('function-end-on_error-free_type.c')
+
+      if pointer_type_argument_name:
+        template_names.append('function-end-on_error-free_pointer_type.c')
+
+      if initialize_number_of_arguments == 3:
+        template_names.append('function-end-on_error-with_value.c')
+
+      template_names.append('function-end-footer.c')
+
+      template_filenames = [
+          os.path.join(template_directory, template_name)
+          for template_name in template_names]
+
       template_mappings['function_name'] = function_template
       template_mappings['function_variables'] = '\n'.join(
           function_variable_strings)
       template_mappings['initialize_value_name'] = initialize_value_name
       template_mappings['initialize_value_type'] = initialize_value_type
+      template_mappings['pointer_type_name'] = pointer_type_argument_type
+      template_mappings['test_data_size'] = test_data_size
 
-      if with_input:
-        template_filename = 'function-start-with_input.c'
-      else:
-        template_filename = 'function-start.c'
-
-      template_filename = os.path.join(template_directory, template_filename)
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      self._GenerateSections(
+          template_filenames, template_mappings, output_writer,
+          output_filename, access_mode='ab')
 
       del template_mappings['function_name']
       del template_mappings['function_variables']
-
-      if not with_input:
-        if initialize_number_of_arguments == 3:
-          template_filename = 'function-initialize-with_value.c'
-        else:
-          template_filename = 'function-initialize.c'
-
-        if function_template == 'clone':
-          template_filename = '{0:s}-clone.c'.format(template_filename[:-2])
-
-        template_filename = os.path.join(template_directory, template_filename)
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
-
-      self._GenerateSection(
-          body_template_filename, template_mappings, output_writer,
-          output_filename, access_mode='ab')
-
-      # TODO: refactor to have unified function end handling
-      if function_template == 'clone':
-        if initialize_number_of_arguments == 3:
-          template_filename = 'function-end-with_value-clone.c'
-        else:
-          template_filename = 'function-end-clone.c'
-
-      elif free_function:
-        template_filename = 'function-end-with_free_function.c'
-      elif initialize_number_of_arguments == 3:
-        template_filename = 'function-end-with_value.c'
-      elif with_input:
-        template_filename = 'function-end-with_input.c'
-      elif function_template == 'get_type_value':
-        template_filename = 'function-end-type_value.c'
-      else:
-        template_filename = 'function-end.c'
-
-      if template_filename != 'function-end.c':
-        template_filename = os.path.join(template_directory, template_filename)
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
-
-      else:
-        template_filename = os.path.join(
-            template_directory, 'function-end-header.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
-
-        template_filename = os.path.join(
-            template_directory, 'function-end-free_type.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
-
-        template_filename = os.path.join(
-            template_directory, 'function-end-on_error.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
-
-        if 'libbfio_handle_t *file_io_handle = NULL;' in function_variables:
-          template_filename = os.path.join(
-              template_directory, 'function-end-on_error-free_file_io_handle.c')
-          self._GenerateSection(
-              template_filename, template_mappings, output_writer,
-              output_filename, access_mode='ab')
-
-        template_filename = os.path.join(
-            template_directory, 'function-end-on_error-free_type.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
-
-        template_filename = os.path.join(
-            template_directory, 'function-end-footer.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
-
-      del template_mappings['test_data_size']
       del template_mappings['initialize_value_name']
       del template_mappings['initialize_value_type']
+      del template_mappings['pointer_type_name']
+      del template_mappings['test_data_size']
 
     test_function_name = self._GetTestFunctionName(
         project_configuration, type_name, type_function)
@@ -6996,51 +6987,58 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     has_glob = self._HasGlob(project_configuration, type_name)
 
-    function_arguments = ['     const system_character_t *source']
+    has_string_test_options = bool(set(test_options).difference(set([
+        ('o', 'offset')])))
+
+    test_options_function_arguments = ['const system_character_t *source']
     for _, argument in test_options:
       if argument != 'offset':
-        function_arguments.append(
-            '     const system_character_t *{0:s}'.format(argument))
+        function_argument = 'const system_character_t *{0:s}'.format(argument)
+        test_options_function_arguments.append(function_argument)
 
-    function_variables = ['\tint result = 0;']
-    if test_options:
-      function_variables.append('\tsize_t string_length = 0;')
+    test_options_function_variables = ['int result = 0;']
+    if has_string_test_options:
+      test_options_function_variables.append('size_t string_length = 0;')
 
-    template_mappings['test_options_function_arguments'] = ',\n'.join(
-        function_arguments)
-    template_mappings['test_options_function_variables'] = '\n'.join(
-        function_variables)
+    template_names = []
 
     if has_glob:
-      template_filename = '{0:s}-start-with_glob.c'.format(test_name)
+      template_names.append('{0:s}-start-with_glob.c'.format(test_name))
     else:
-      template_filename = '{0:s}-start.c'.format(test_name)
+      template_names.append('{0:s}-start.c'.format(test_name))
 
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
+    for _, argument in test_options:
+      if argument != 'offset':
+        template_names.append('{0:s}-set_{1:s}.c'.format(test_name, argument))
+
+    if has_glob:
+      template_names.append('{0:s}-end-with_glob.c'.format(test_name))
+    else:
+      template_names.append('{0:s}-end.c'.format(test_name))
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    test_options_function_arguments = [
+        '     {0:s}'.format(function_argument)
+        for function_argument in test_options_function_arguments]
+
+    test_options_function_variables = [
+        '\t{0:s}'.format(function_variable)
+        for function_variable in test_options_function_variables]
+
+    template_mappings['test_options_function_arguments'] = ',\n'.join(
+        test_options_function_arguments)
+    template_mappings['test_options_function_variables'] = '\n'.join(
+        test_options_function_variables)
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
     del template_mappings['test_options_function_arguments']
     del template_mappings['test_options_function_variables']
-
-    for _, argument in test_options:
-      if argument != 'offset':
-        template_filename = '{0:s}-set_{1:s}.c'.format(test_name, argument)
-        template_filename = os.path.join(template_directory, template_filename)
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
-
-    if has_glob:
-      template_filename = '{0:s}-end-with_glob.c'.format(test_name)
-    else:
-      template_filename = '{0:s}-end.c'.format(test_name)
-
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
 
   def _GenerateTypeTests(
       self, project_configuration, template_mappings, type_name, test_options,
@@ -7068,6 +7066,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if os.path.exists(output_filename) and not self._experimental:
       return False
 
+    has_string_test_options = bool(set(test_options).difference(set([
+        ('o', 'offset')])))
+
     header_file = self._GetTypeLibraryHeaderFile(
         project_configuration, type_name)
 
@@ -7083,6 +7084,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
+    template_names = []
+
     function_names = list(header_file.functions_per_name.keys())
 
     function_prototype = header_file.GetTypeFunction(
@@ -7096,26 +7099,22 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
     self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_names.append('header.c')
 
     if with_input:
-      template_filename = 'includes-with_input.c'
+      template_names.append('includes-with_input.c')
     else:
-      template_filename = 'includes.c'
-
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+      template_names.append('includes.c')
 
     if header_file.have_internal_functions:
-      template_filename = os.path.join(
-          template_directory, 'includes_internal.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('includes_internal.c')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     if with_input:
       include_header_file = self._GetLibraryIncludeHeaderFile(
@@ -7123,86 +7122,69 @@ class TestsSourceFileGenerator(SourceFileGenerator):
 
       signature_type = include_header_file.GetCheckSignatureType()
 
-      template_mappings['signature_type'] = signature_type
-
+      test_options_function_arguments = []
       if bfio_type == 'pool':
-        template_filename = 'start_with_input-bfio_pool.c'
+        function_argument = 'libbfio_pool_t *file_io_pool'
       else:
-        template_filename = 'start_with_input-bfio_handle.c'
-
-      template_filename = os.path.join(template_directory, template_filename)
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-      del template_mappings['signature_type']
-
-      template_filename = os.path.join(template_directory, 'start_with_input.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
-
-      function_arguments = []
-      if bfio_type == 'pool':
-        function_arguments.append('     libbfio_pool_t *file_io_pool')
-      else:
-        function_arguments.append('     libbfio_handle_t *file_io_handle')
+        function_argument = 'libbfio_handle_t *file_io_handle'
+      test_options_function_arguments.append(function_argument)
 
       for _, argument in test_options:
         if argument != 'offset':
-          function_arguments.append(
-              '     const system_character_t *{0:s}'.format(argument))
+          function_argument = 'const system_character_t *{0:s}'.format(argument)
+          test_options_function_arguments.append(function_argument)
 
-      function_variables = ['\tint result = 0;']
-      if test_options:
-        function_variables.insert(0, '\tsize_t string_length = 0;')
+      test_options_function_variables = ['int result = 0;']
+      if has_string_test_options:
+        test_options_function_variables.insert(0, 'size_t string_length = 0;')
 
-      template_mappings['test_options_function_arguments'] = ',\n'.join(
-          function_arguments)
-      template_mappings['test_options_function_variables'] = '\n'.join(
-          function_variables)
+      template_names = ['start_with_input.c']
 
-      template_filename = os.path.join(
-          template_directory, 'open_source-start.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      if bfio_type == 'pool':
+        template_names.append('start_with_input-bfio_pool.c')
+      else:
+        template_names.append('start_with_input-bfio_handle.c')
 
-      del template_mappings['test_options_function_arguments']
-      del template_mappings['test_options_function_variables']
+      template_names.append('open_source-start.c')
 
       for _, argument in test_options:
         if argument != 'offset':
-          template_filename = 'open_source-set_{0:s}.c'.format(argument)
-          template_filename = os.path.join(
-              template_directory, template_filename)
-          self._GenerateSection(
-              template_filename, template_mappings, output_writer,
-              output_filename, access_mode='ab')
+          template_names.append('open_source-set_{0:s}.c'.format(argument))
 
-      template_filename = os.path.join(template_directory, 'open_source-body.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      template_names.append('open_source-body.c')
 
       function_prototype = header_file.GetTypeFunction(
           type_name, 'open_extent_data_files')
       if function_prototype:
-        template_filename = os.path.join(
-            template_directory, 'open_source-extend_data_files.c')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
+        template_names.append('open_source-extend_data_files.c')
 
-      template_filename = os.path.join(template_directory, 'open_source-end.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+      template_names.extend(['open_source-end.c', 'close_source.c'])
+
+      template_filenames = [
+          os.path.join(template_directory, template_name)
+          for template_name in template_names]
+
+      test_options_function_arguments = [
+          '     {0:s}'.format(function_argument)
+          for function_argument in test_options_function_arguments]
+
+      test_options_function_variables = [
+          '\t{0:s}'.format(function_variable)
+          for function_variable in test_options_function_variables]
+
+      template_mappings['signature_type'] = signature_type
+      template_mappings['test_options_function_arguments'] = ',\n'.join(
+          test_options_function_arguments)
+      template_mappings['test_options_function_variables'] = '\n'.join(
+          test_options_function_variables)
+
+      self._GenerateSections(
+          template_filenames, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
-      template_filename = os.path.join(template_directory, 'close_source.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      del template_mappings['signature_type']
+      del template_mappings['test_options_function_arguments']
+      del template_mappings['test_options_function_variables']
 
     # Generate test data.
     test_data_directory = os.path.join('tests', 'data')
@@ -10167,7 +10149,7 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
         option = ('k', 'keys', (
             'specify the volume master key formatted in base16'))
 
-      elif project_configuration.library_name == 'libqcow':
+      elif project_configuration.library_name in ('libluksde', 'libqcow'):
         option = ('k', 'keys', 'specify the key formatted in base16')
 
       mount_tool_options.append(option)
