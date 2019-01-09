@@ -2637,7 +2637,12 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     if project_configuration.HasPythonModule():
       template_names.append('matrix-macos-python.yml')
 
-    template_names.extend(['matrix-macos-pkgbuild.yml', 'before_install.yml'])
+    template_names.append('matrix-macos-pkgbuild.yml')
+
+    if 'fuse' in project_configuration.tools_build_dependencies:
+      template_names.append('before_install-fuse.yml')
+    else:
+      template_names.append('before_install.yml')
 
     if project_configuration.coverity_scan_token:
       template_names.append('before_install-coverity.yml')
@@ -2683,6 +2688,22 @@ class ConfigurationFileGenerator(SourceFileGenerator):
     del template_mappings['dpkg_build_dependencies']
     del template_mappings['no_optimization_configure_options']
     del template_mappings['pkgbuild_configure_options']
+
+  def _GetBrewBuildDependencies(self, project_configuration):
+    """Retrieves the brew build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: dpkg build dependencies.
+    """
+    brew_build_dependencies = ['gettext', 'gnu-sed']
+
+    if 'fuse' in project_configuration.tools_build_dependencies:
+      brew_build_dependencies.append('osxfuse')
+
+    return brew_build_dependencies
 
   def _GetDpkgBuildDependencies(self, project_configuration):
     """Retrieves the dpkg build dependencies.
@@ -9322,7 +9343,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('includes-file_io_handle.h')
 
-    template_names.extend(['includes-end.h', 'struct-start.h'])
+    template_names.append('includes-end.h')
+
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      template_names.append('definitions-format.h')
+
+    template_names.append('struct-start.h')
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('struct-basename.h')
@@ -9335,8 +9362,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
       template_names.append('struct-encrypted_root_plist.h')
 
+    # TODO: set option via configuation
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('struct-file_system_index.h')
+
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      template_names.append('struct-format.h')
 
     if project_configuration.HasMountToolsFeatureKeys():
       if project_configuration.library_name == 'libbde':
@@ -9375,8 +9407,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
       template_names.append('set_encrypted_root_plist.h')
 
+    # TODO: set option via configuation
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('set_file_system_index.h')
+
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      template_names.append('set_format.h')
 
     if project_configuration.HasMountToolsFeatureKeys():
       template_names.append('set_keys.h')
@@ -9473,6 +9510,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('initialize-codepage.c')
 
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      template_names.append('initialize-format.c')
+
     template_names.extend(['initialize-end.c', 'free-start.c'])
 
     if project_configuration.HasMountToolsFeatureParent():
@@ -9494,8 +9535,13 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
       template_names.append('set_encrypted_root_plist.c')
 
+    # TODO: set option via configuation
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('set_file_system_index.c')
+
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      template_names.append('set_format.c')
 
     if project_configuration.HasMountToolsFeatureKeys():
       if project_configuration.library_name == 'libbde':
@@ -9590,6 +9636,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     if project_configuration.HasMountToolsFeatureUnlock():
       template_names.append('open-is_locked.c')
+
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      template_names.append('open-format.c')
 
     if project_configuration.HasMountToolsFeatureParent():
       template_names.append('open-open_parent.c')
@@ -9816,6 +9866,12 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names = ['header.c', 'includes-start.c']
 
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      template_names.append('includes-rlimit.c')
+
+    template_names.append('includes-yaltools.c')
+
     if project_configuration.HasMountToolsFeatureGlob():
       template_names.append('includes-glob.c')
 
@@ -9892,6 +9948,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     template_names = ['main-start.c']
 
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      template_names.append('main-variables-rlimit.c')
+
     if project_configuration.HasMountToolsFeatureMultiSource():
       template_names.append('main-variables-multi_source.c')
     else:
@@ -9940,6 +10000,10 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
 
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('main-option_startup_key.c')
+
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      template_names.append('main-set_maximum_number_of_open_handles.c')
 
     if not file_system_type:
       template_names.append('main-set_path_prefix.c')
@@ -10124,15 +10188,23 @@ class ToolsSourceFileGenerator(SourceFileGenerator):
       mount_tool_options.append(option)
 
     if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
-      # TODO: set option via configuation
       option = ('e', 'plist_path', (
           'specify the path of the EncryptedRoot.plist.wipekey file'))
 
       mount_tool_options.append(option)
 
+    # TODO: set option via configuation
     if project_configuration.library_name == 'libfsapfs':
       option = ('f', 'file_system_index', (
           'specify a specific file system or \\"all\\"'))
+
+      mount_tool_options.append(option)
+
+    # TODO: set option via configuation
+    if project_configuration.library_name == 'libewf':
+      option = ('f', 'format', (
+          'specify the input format, options: raw (default), files (restricted '
+          'to logical volume files)'))
 
       mount_tool_options.append(option)
 

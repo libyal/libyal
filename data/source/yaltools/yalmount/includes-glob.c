@@ -1,1 +1,1 @@
-#include "smrawtools_glob.h"
+#include "${tools_name}_glob.h"
