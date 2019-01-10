@@ -838,7 +838,8 @@ class ProjectConfiguration(object):
     Returns:
       bool: True if the project depends on lex.
     """
-    return 'lex' in self.library_build_dependencies
+    return ('lex' in self.library_build_dependencies or
+            'lex' in self.tools_build_dependencies)
 
   def HasDependencyYacc(self):
     """Determines if the project depends on yacc.
@@ -846,7 +847,8 @@ class ProjectConfiguration(object):
     Returns:
       bool: True if the project depends on yacc.
     """
-    return 'yacc' in self.library_build_dependencies
+    return ('yacc' in self.library_build_dependencies or
+            'yacc' in self.tools_build_dependencies)
 
   def HasDpkg(self):
     """Determines if the project provides dpkg configuration files.

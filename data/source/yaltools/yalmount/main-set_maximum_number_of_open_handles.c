@@ -1,7 +1,7 @@
 #if defined( HAVE_GETRLIMIT )
 	if( getrlimit(
-            RLIMIT_NOFILE,
-            &limit_data ) != 0 )
+	    RLIMIT_NOFILE,
+	    &limit_data ) != 0 )
 	{
 		fprintf(
 		 stderr,
