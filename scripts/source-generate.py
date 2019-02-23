@@ -3355,7 +3355,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
           functions.append(function_prototype)
 
       for function_prototype in functions:
-        function_arguments_string = function_prototype.CopyToString()
+        function_arguments_string = function_prototype.CopyToManpageString()
         function_template_mappings = {
             'function_arguments': function_arguments_string,
             'function_name': function_prototype.name,
@@ -3383,7 +3383,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
               output_filename, access_mode='ab')
 
         for function_prototype in wide_character_type_functions:
-          function_arguments_string = function_prototype.CopyToString()
+          function_arguments_string = function_prototype.CopyToManpageString()
           function_template_mappings = {
               'function_arguments': function_arguments_string,
               'function_name': function_prototype.name,
@@ -3407,7 +3407,7 @@ class LibraryManPageGenerator(SourceFileGenerator):
             output_filename, access_mode='ab')
 
         for function_prototype in bfio_functions:
-          function_arguments_string = function_prototype.CopyToString()
+          function_arguments_string = function_prototype.CopyToManpageString()
           function_template_mappings = {
               'function_arguments': function_arguments_string,
               'function_name': function_prototype.name,
@@ -8265,7 +8265,8 @@ class TestsSourceFileGenerator(SourceFileGenerator):
       else:
         output_filename = directory_entry
 
-      if directory_entry in ('test_library.ps1', 'test_library.sh'):
+      if directory_entry in (
+            'test_library.ps1', 'test_library.sh', 'test_manpage.sh'):
         force_create = bool(public_functions) or bool(public_types)
 
       elif directory_entry in ('test_yalinfo.ps1', 'test_yalinfo.sh'):

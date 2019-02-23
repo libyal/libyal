@@ -122,6 +122,20 @@ class FunctionPrototype(object):
     function_argument = FunctionArgument(argument_string)
     self.arguments.append(function_argument)
 
+  def CopyToManpageString(self):
+    """Copies the function prototype to a string to be used in manpage.
+
+    Returns:
+      str: function prototype to be used in manpage.
+    """
+    argument_strings = []
+    for function_argument in self.arguments:
+      argument_string = function_argument.CopyToString()
+      argument_string = '"{0:s}"'.format(argument_string)
+      argument_strings.append(argument_string)
+
+    return ' '.join(argument_strings)
+
   def CopyToString(self):
     """Copies the function prototype to a string.
 

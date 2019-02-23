@@ -4,7 +4,5 @@
 .Sh NAME
 .Nm ${library_name}.h
 .Nd ${library_description}
-.Sh LIBRARY
-.Lb ${library_name}
 .Sh SYNOPSIS
 .In ${library_name}.h

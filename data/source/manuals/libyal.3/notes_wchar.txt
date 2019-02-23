@@ -1,5 +1,5 @@
-${library_name} allows to be compiled with wide character support (wchar_t).
-
+${library_name} can be compiled with wide character support (wchar_t).
+.sp
 To compile ${library_name} with wide character support use:
 .Ar ./configure --enable-wide-character-type=yes
  or define:
@@ -7,6 +7,6 @@ To compile ${library_name} with wide character support use:
  or
 .Ar UNICODE
  during compilation.
-
+.sp
 .Ar ${library_name_upper_case}_WIDE_CHARACTER_TYPE
  in ${library_name}/features.h can be used to determine if ${library_name} was compiled with wide character support.
