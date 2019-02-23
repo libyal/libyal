@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests man pages.
 #
-# Version: 20190223
+# Version: 20190224
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -57,6 +57,13 @@ MANUALS_PATH="../manuals";
 if ! test -d $${MANUALS_PATH};
 then
 	MANUALS_PATH="manuals";
+fi
+
+if ! test -d $${MANUALS_PATH};
+then
+	echo "Manuals directory not found.";
+
+	exit $${EXIT_IGNORE};
 fi
 
 for INPUT_FILE in $${MANUALS_PATH}/*.[13];
