@@ -27,6 +27,11 @@ run_test()
 	return $${RESULT};
 }
 
+if test "$${OSTYPE}" = "msys";
+then
+	exit $${EXIT_IGNORE};
+fi
+
 TEST_RUNNER="tests/test_runner.sh";
 
 if ! test -f "$${TEST_RUNNER}";
