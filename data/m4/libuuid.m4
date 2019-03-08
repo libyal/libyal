@@ -1,13 +1,14 @@
 dnl Functions for libuuid
 dnl
-dnl Version: 20181117
+dnl Version: 20190308
 
 dnl Function to detect if libuuid is available
 AC_DEFUN([AX_LIBUUID_CHECK_LIB],
   [AS_IF(
     [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libuuid" = xno],
     [ac_cv_libuuid=no],
-    [dnl Check if the directory provided as parameter exists
+    [ac_cv_libuuid=check
+    dnl Check if the directory provided as parameter exists
     AS_IF(
       [test "x$ac_cv_with_libuuid" != x && test "x$ac_cv_with_libuuid" != xauto-detect],
       [AS_IF(
@@ -17,7 +18,8 @@ AC_DEFUN([AX_LIBUUID_CHECK_LIB],
         [AC_MSG_FAILURE(
           [no such directory: $ac_cv_with_libuuid],
           [1])
-        ])],
+        ])
+      ],
       [AS_IF(
         [test "x$ac_cv_enable_winapi" = xyes],
         [ac_cv_libuuid=librpcrt4
@@ -29,7 +31,7 @@ AC_DEFUN([AX_LIBUUID_CHECK_LIB],
             [uuid],
             [uuid >= 2.20],
             [ac_cv_libuuid=libuuid],
-            [ac_cv_libuuid=no])
+            [ac_cv_libuuid=check])
           ])
         AS_IF(
           [test "x$ac_cv_libuuid" = xlibuuid],
@@ -39,7 +41,7 @@ AC_DEFUN([AX_LIBUUID_CHECK_LIB],
       ])
 
     AS_IF(
-      [test "x$ac_cv_libuuid" = xno],
+      [test "x$ac_cv_libuuid" = xcheck],
       [AS_IF(
         [test "x$ac_cv_libuuid" = xuuid],
         [ac_cv_libuuid_CPPFLAGS="$pkg_cv_uuid_CFLAGS"

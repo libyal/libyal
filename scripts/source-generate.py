@@ -2785,11 +2785,18 @@ class ConfigurationFileGenerator(SourceFileGenerator):
       cygwin_build_dependencies.append('bzip2-devel')
     if ('crypto' in project_configuration.library_build_dependencies or
         'crypto' in project_configuration.tools_build_dependencies):
+      # On Cygwin also link zlib since libcrypto relies on it.
+      if 'zlib' not in project_configuration.library_build_dependencies:
+        cygwin_build_dependencies.append('zlib-devel')
+
       cygwin_build_dependencies.append('openssl-devel')
 
     if project_configuration.HasPythonModule():
       cygwin_build_dependencies.append('python2-devel')
       cygwin_build_dependencies.append('python3-devel')
+
+    if 'uuid' in project_configuration.library_build_dependencies:
+      cygwin_build_dependencies.append('libuuid-devel')
 
     return cygwin_build_dependencies
 
@@ -4994,6 +5001,9 @@ class PythonModuleSourceFileGenerator(SourceFileGenerator):
           elif value_argument_string == 'uint32_t *fat_date_time':
             data_type = definitions.DATA_TYPE_FAT_DATE_TIME
 
+          elif value_argument_string == 'uint32_t *hfs_time':
+            data_type = definitions.DATA_TYPE_HFS_TIME
+
           elif value_argument_string == 'uint32_t *posix_time':
             data_type = definitions.DATA_TYPE_POSIX_TIME
 
@@ -5959,6 +5969,9 @@ class TestsSourceFileGenerator(SourceFileGenerator):
     if (api_functions or api_functions_with_input or api_types or
         api_types_with_input or api_pseudo_types):
       test_script = 'test_library.sh'
+      test_scripts.append(test_script)
+
+      test_script = 'test_manpage.sh'
       test_scripts.append(test_script)
 
     for tool_name_suffix in ('export', 'info', 'verify'):
