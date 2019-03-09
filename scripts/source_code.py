@@ -1,6 +1,5 @@
-
-            # -*- coding: utf-8 -*-
-"""The C sources classes."""
+# -*- coding: utf-8 -*-
+"""The source code classes."""
 
 from __future__ import unicode_literals
 
