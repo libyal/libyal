@@ -4,7 +4,7 @@
 import os
 import stat
 
-from source_generators import interface
+from yaldevtools.source_generators import interface
 
 
 class ScriptFileGenerator(interface.SourceFileGenerator):

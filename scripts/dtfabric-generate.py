@@ -17,7 +17,7 @@ from dtfabric import errors
 from dtfabric import reader
 from dtfabric import registry
 
-import template_string
+from yaldevtools import template_string
 
 
 # TODO: put signature into constants: libyal_constants.[ch]

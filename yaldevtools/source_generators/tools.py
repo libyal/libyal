@@ -4,7 +4,7 @@
 import os
 import textwrap
 
-from source_generators import interface
+from yaldevtools.source_generators import interface
 
 
 class ToolSourceFileGenerator(interface.SourceFileGenerator):

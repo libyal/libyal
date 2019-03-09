@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Script to automate generation of source of the libyal libraries."""
+"""Script to generate libyal man pages."""
 
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -12,16 +12,7 @@ import sys
 
 from yaldevtools import configuration
 from yaldevtools import output_writers
-from yaldevtools.source_generators import common
-from yaldevtools.source_generators import config
-from yaldevtools.source_generators import documents
-from yaldevtools.source_generators import include
-from yaldevtools.source_generators import library
-from yaldevtools.source_generators import manpage
-from yaldevtools.source_generators import python_module
-from yaldevtools.source_generators import scripts
-from yaldevtools.source_generators import tests
-from yaldevtools.source_generators import tools
+from yaldevtools.source_generators import manpage as manpage_source_generator
 
 
 def Main():
@@ -31,19 +22,11 @@ def Main():
     bool: True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
-      'Generates source files of the libyal libraries.'))
+      'Generates man page of the libyal libraries.'))
 
   argument_parser.add_argument(
       'configuration_file', action='store', metavar='CONFIGURATION_FILE',
       default='source.conf', help='The source generation configuration file.')
-
-  argument_parser.add_argument(
-      '-e', '--experimental', dest='experimental', action='store_true',
-      default=False, help='enable experimental functionality.')
-
-  argument_parser.add_argument(
-      '-g', '--generators', dest='generators', action='store', default='all',
-      help='names of the generators to run.')
 
   argument_parser.add_argument(
       '-o', '--output', dest='output_directory', action='store',
@@ -89,65 +72,16 @@ def Main():
   if not projects_directory:
     projects_directory = os.path.dirname(libyal_directory)
 
-  # TODO: generate more source files.
-  # include headers
-  # yal.net files
-
-  if options.generators == 'all':
-    generators = []
-  else:
-    generators = options.generators.split(',')
-
   SOURCE_GENERATORS = [
-      ('common', common.CommonSourceFileGenerator),
-      ('config', config.ConfigurationFileGenerator),
-      ('documents', documents.DocumentFileGenerator),
-      ('include', include.IncludeSourceFileGenerator),
-      ('libyal', library.LibrarySourceFileGenerator),
-      ('pyyal', python_module.PythonModuleSourceFileGenerator),
-      ('scripts', scripts.ScriptFileGenerator),
-      ('tests', tests.TestSourceFileGenerator),
-      ('yaltools', tools.ToolSourceFileGenerator),
-  ]
-
-  sources_directory = os.path.join(
-      libyal_directory, 'data', 'source')
-  for source_category, source_generator_class in SOURCE_GENERATORS:
-    if generators and source_category not in generators:
-      continue
-
-    template_directory = os.path.join(sources_directory, source_category)
-    source_generator_object = source_generator_class(
-        projects_directory, template_directory,
-        experimental=options.experimental)
-
-    if options.output_directory:
-      output_writer = output_writers.FileWriter(options.output_directory)
-    else:
-      output_writer = output_writers.StdoutWriter()
-
-    source_generator_object.Generate(project_configuration, output_writer)
-
-  # TODO: dpkg handle dependencies
-
-  # TODO: add support for Unicode templates.
-
-  # TODO: generate manuals/Makefile.am
-
-  SOURCE_GENERATORS = [
-      ('libyal.3', manpage.LibraryManPageGenerator),
+      ('libyal.3', manpage_source_generator.LibraryManPageGenerator),
   ]
 
   manuals_directory = os.path.join(
       libyal_directory, 'data', 'source', 'manuals')
   for source_category, source_generator_class in SOURCE_GENERATORS:
-    if generators and source_category not in generators:
-      continue
-
     template_directory = os.path.join(manuals_directory, source_category)
     source_generator_object = source_generator_class(
-        projects_directory, template_directory,
-        experimental=options.experimental)
+        projects_directory, template_directory)
 
     if options.output_directory:
       output_writer = output_writers.FileWriter(options.output_directory)
@@ -155,8 +89,6 @@ def Main():
       output_writer = output_writers.StdoutWriter()
 
     source_generator_object.Generate(project_configuration, output_writer)
-
-  # TODO: add support for Unicode templates.
 
   return True
 

@@ -3,7 +3,7 @@
 
 import unittest
 
-from scripts import template_string
+from yaldevtools import template_string
 
 from tests import test_lib
 

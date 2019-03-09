@@ -12,7 +12,7 @@ import os
 import re
 import sys
 
-import configuration
+from yaldevtools import configuration
 
 
 class WikiPageGenerator(object):

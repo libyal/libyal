@@ -5,7 +5,7 @@ import glob
 import logging
 import os
 
-from source_generators import interface
+from yaldevtools.source_generators import interface
 
 
 class ConfigurationFileGenerator(interface.SourceFileGenerator):
@@ -1216,6 +1216,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       cygwin_build_dependencies.append('zlib-devel')
     if project_configuration.HasDependencyBzip2():
       cygwin_build_dependencies.append('bzip2-devel')
+
     if ('crypto' in project_configuration.library_build_dependencies or
         'crypto' in project_configuration.tools_build_dependencies):
       # On Cygwin also link zlib since libcrypto relies on it.
@@ -1228,7 +1229,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       cygwin_build_dependencies.append('python2-devel')
       cygwin_build_dependencies.append('python3-devel')
 
-    if 'uuid' in project_configuration.library_build_dependencies:
+    if ('uuid' in project_configuration.library_build_dependencies or
+        'uuid' in project_configuration.tools_build_dependencies):
       cygwin_build_dependencies.append('libuuid-devel')
 
     return cygwin_build_dependencies

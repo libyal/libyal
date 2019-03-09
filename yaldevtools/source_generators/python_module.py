@@ -5,10 +5,9 @@ import collections
 import logging
 import os
 
-import definitions
-import source_code
-
-from source_generators import interface
+from yaldevtools import definitions
+from yaldevtools import source_code
+from yaldevtools.source_generators import interface
 
 
 class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):

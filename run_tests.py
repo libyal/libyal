@@ -1,15 +1,19 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Script to run the tests."""
+
+from __future__ import print_function
 
 import sys
 import unittest
 
-# Change PYTHONPATH to include scripts.
-sys.path.insert(0, u'.')
+# Change PYTHONPATH to include dependencies.
+sys.path.insert(0, '.')
 
 
 if __name__ == '__main__':
+  print('Using Python version {0!s}'.format(sys.version))
+
   fail_unless_has_test_file = '--fail-unless-has-test-file' in sys.argv
   setattr(unittest, 'fail_unless_has_test_file', fail_unless_has_test_file)
   if fail_unless_has_test_file:

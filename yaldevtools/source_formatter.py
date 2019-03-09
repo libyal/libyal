@@ -2,6 +2,7 @@
 """Classes to format source of the libyal libraries."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
 
 
 # TODO: have the SourceFormatter use the GroupModifier to detect a group

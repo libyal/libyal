@@ -6,7 +6,7 @@ import os
 import shutil
 import time
 
-from source_generators import interface
+from yaldevtools.source_generators import interface
 
 
 class LibraryManPageGenerator(interface.SourceFileGenerator):

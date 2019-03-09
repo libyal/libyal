@@ -3,6 +3,8 @@
 """Script to generate documenation based on dtFabric format definitions."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import argparse
 import datetime
 import logging
@@ -14,7 +16,7 @@ from dtfabric import errors
 from dtfabric import reader
 from dtfabric import registry
 
-import template_string
+from yaldevtools import template_string
 
 
 class AsciidocFormatDocumentGenerator(object):

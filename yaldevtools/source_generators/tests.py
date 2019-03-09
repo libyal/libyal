@@ -5,9 +5,8 @@ import logging
 import os
 import stat
 
-import source_file
-
-from source_generators import interface
+from yaldevtools import source_file
+from yaldevtools.source_generators import interface
 
 
 class TestSourceFileGenerator(interface.SourceFileGenerator):

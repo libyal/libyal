@@ -7,8 +7,8 @@ import os
 import string
 import time
 
-import source_file
-import source_formatter
+from yaldevtools import source_file
+from yaldevtools import source_formatter
 
 
 class SourceFileGenerator(object):

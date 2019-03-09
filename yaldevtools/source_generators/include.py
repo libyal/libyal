@@ -3,7 +3,7 @@
 
 import os
 
-from source_generators import interface
+from yaldevtools.source_generators import interface
 
 
 class IncludeSourceFileGenerator(interface.SourceFileGenerator):
