@@ -1070,7 +1070,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasPythonModule():
       template_names.append('matrix-macos-python.yml')
 
-    template_names.append('matrix-macos-pkgbuild.yml')
+    if project_configuration.HasPythonModule():
+      template_names.append('matrix-macos-python-pkgbuild.yml')
+    else:
+      template_names.append('matrix-macos-pkgbuild.yml')
 
     if 'fuse' in project_configuration.tools_build_dependencies:
       template_names.append('before_install-fuse.yml')
@@ -1106,21 +1109,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_mappings['no_optimization_configure_options'] = ' '.join(
         no_optimization_configure_options)
 
-    pkgbuild_configure_options = [
-        '--disable-dependency-tracking', '--prefix=/usr/local']
-    if project_configuration.HasPythonModule():
-      pkgbuild_configure_options.extend(['--enable-python', '--with-pyprefix'])
-
-    template_mappings['pkgbuild_configure_options'] = ' '.join(
-        pkgbuild_configure_options)
-
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['coverity_scan_token']
     del template_mappings['dpkg_build_dependencies']
     del template_mappings['no_optimization_configure_options']
-    del template_mappings['pkgbuild_configure_options']
 
   def _GetBrewBuildDependencies(self, project_configuration):
     """Retrieves the brew build dependencies.

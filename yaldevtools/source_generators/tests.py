@@ -381,8 +381,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       test_script = 'test_library.sh'
       test_scripts.append(test_script)
 
-      test_script = 'test_manpage.sh'
-      test_scripts.append(test_script)
+      # TODO: improve test script https://github.com/libyal/libyal/issues/78
+      # test_script = 'test_manpage.sh'
+      # test_scripts.append(test_script)
 
     for tool_name_suffix in ('export', 'info', 'verify'):
       tool_name = '{0:s}{1:s}'.format(

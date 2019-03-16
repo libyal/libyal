@@ -1,6 +1,6 @@
   - name: "Mac OS gcc and pkgbuild"
     env:
-    - CONFIGURE_OPTIONS="${pkgbuild_configure_options}"
+    - CONFIGURE_OPTIONS="--disable-dependency-tracking --prefix=/usr/local"
     - TARGET="macos-gcc-pkgbuild"
     compiler: gcc
     os: osx
