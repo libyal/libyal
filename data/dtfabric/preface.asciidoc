@@ -6,12 +6,14 @@
 :numbered!:
 [abstract]
 == Summary
+
 ${summary}
 This document is intended as a working document for the file format
 specification.
 
 [preface]
 == Document information
+
 [cols="1,5"]
 |===
 | Author(s): | ${authors}
@@ -22,6 +24,7 @@ specification.
 
 [preface]
 == License
+
 ....
 Copyright (C) ${copyright}, ${authors}
 Permission is granted to copy, distribute and/or modify this document under the 

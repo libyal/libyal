@@ -17,6 +17,7 @@ from dtfabric import errors
 from dtfabric import reader
 from dtfabric import registry
 
+from yaldevtools import configuration
 from yaldevtools import template_string
 
 
@@ -25,6 +26,9 @@ from yaldevtools import template_string
 
 class SourceGenerator(object):
   """Generates source based on dtFabric format definitions."""
+
+  _DEBUG_FORMAT_DECIMAL = 'decimal'
+  _DEBUG_FORMAT_HEXADECIMAL = 'hexadecimal'
 
   _CHARACTER_DATA_TYPES = {
       1: 'char',
@@ -44,6 +48,13 @@ class SourceGenerator(object):
       8: '%f',
   }
 
+  _HEXADECIMAL_FORMAT_INDICATORS = {
+      1: '0x%02" PRIx8 "',
+      2: '0x%04" PRIx16 "',
+      4: '0x%08" PRIx32 "',
+      8: '0x%08" PRIx64 "',
+  }
+
   _SIGNED_INTEGER_DATA_TYPES = {
       1: 'int8_t',
       2: 'int16_t',
@@ -55,7 +66,7 @@ class SourceGenerator(object):
       1: '%" PRIi8 "',
       2: '%" PRIi16 "',
       4: '%" PRIi32 "',
-      8: '%" PRIi16 "',
+      8: '%" PRIi64 "',
   }
 
   _UNSIGNED_INTEGER_DATA_TYPES = {
@@ -69,7 +80,7 @@ class SourceGenerator(object):
       1: '%" PRIu8 "',
       2: '%" PRIu16 "',
       4: '%" PRIu32 "',
-      8: '%" PRIu16 "',
+      8: '%" PRIu64 "',
   }
 
   def __init__(self, templates_path):
@@ -85,19 +96,23 @@ class SourceGenerator(object):
     self._template_string_generator = template_string.TemplateStringGenerator()
 
   def _GenerateRuntimeStructureHeader(
-      self, data_type_definition, data_type_definition_name, output_file):
+      self, data_type_definition, data_type_definition_name,
+      members_configuration, output_file):
     """Generates a runtime structure header.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
       output_file (str): path of the file output file.
     """
-    template_mappings = self._GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition_name)
 
     structure_members = self._GetRuntimeStructureHeaderMembers(
-        data_type_definition)
+        data_type_definition, members_configuration)
 
     library_name = 'lib{0:s}'.format(self._prefix)
 
@@ -105,30 +120,29 @@ class SourceGenerator(object):
     template_mappings['library_name_upper_case'] = library_name.upper()
 
     template_mappings['structure_members'] = structure_members
-    template_mappings['structure_name'] = data_type_definition_name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition_name.upper())
 
     template_filename = os.path.join(
         self._templates_path, 'runtime_structure.h', 'structure.h')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
+
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
     del template_mappings['structure_members']
 
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
-
-  def _GenerateRuntimeStructureHeaderFile(self, data_type_definition):
+  def _GenerateRuntimeStructureHeaderFile(
+      self, data_type_definition, members_configuration):
     """Generates a runtime structure header file.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
     """
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.h')
 
-    template_mappings = self._GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition.name)
 
     if not self._prefix:
       output_file = 'runtime_structure.h'
@@ -149,18 +163,12 @@ class SourceGenerator(object):
     template_mappings['library_name_upper_case'] = library_name.upper()
 
     template_mappings['structure_description_title'] = structure_description_title
-    template_mappings['structure_name'] = data_type_definition.name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition.name.upper())
 
     template_filename = os.path.join(template_directory, 'header.h')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
+
+    self._GenerateSection(template_filename, template_mappings, output_file)
 
     del template_mappings['structure_description_title']
-
-    with open(output_file, 'wb') as file_object:
-      file_object.write(output_data)
 
     if data_type_definition.TYPE_INDICATOR == (
         definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
@@ -169,26 +177,25 @@ class SourceGenerator(object):
       structure_definition = data_type_definition
 
     self._GenerateRuntimeStructureHeader(
-        structure_definition, data_type_definition.name, output_file)
-
-    template_mappings['structure_name'] = data_type_definition.name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition.name.upper())
+        structure_definition, data_type_definition.name, members_configuration,
+        output_file)
 
     template_filename = os.path.join(template_directory, 'footer.h')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
 
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
-  def _GenerateRuntimeStructureSourceFile(self, data_type_definition):
+  def _GenerateRuntimeStructureSourceFile(
+      self, data_type_definition, members_configuration):
     """Generates a runtime structure source file.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
     """
-    template_mappings = self._GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition.name)
 
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
@@ -211,31 +218,19 @@ class SourceGenerator(object):
 
     template_mappings['structure_description'] = structure_description
     template_mappings['structure_description_title'] = structure_description_title
-    template_mappings['structure_name'] = data_type_definition.name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition.name.upper())
-
-    template_filename = os.path.join(template_directory, 'header.c')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
 
     logging.info('Writing: {0:s}'.format(output_file))
-    with open(output_file, 'wb') as file_object:
-      file_object.write(output_data)
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(template_filename, template_mappings, output_file)
 
     template_filename = os.path.join(template_directory, 'initialize.c')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
-
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
     template_filename = os.path.join(template_directory, 'free.c')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
-
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
     if data_type_definition.TYPE_INDICATOR == (
         definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
@@ -244,30 +239,32 @@ class SourceGenerator(object):
       structure_definition = data_type_definition
 
     self._GenerateRuntimeStructureSourceFunctionReadData(
-        structure_definition, data_type_definition.name, output_file)
+        structure_definition, data_type_definition.name, members_configuration,
+        output_file)
 
     template_filename = os.path.join(
         template_directory, 'read_file_io_handle.c')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
-
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
   def _GenerateRuntimeStructureSourceFunctionReadData(
-      self, data_type_definition, data_type_definition_name, output_file):
+      self, data_type_definition, data_type_definition_name,
+      members_configuration, output_file):
     """Generates a runtime structure read_data function.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
       output_file (str): path of the file output file.
     """
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
 
-    template_mappings = self._GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition_name)
 
     structure_description = self._GetStructureDescription(data_type_definition)
 
@@ -277,49 +274,92 @@ class SourceGenerator(object):
     template_mappings['library_name_upper_case'] = library_name.upper()
 
     template_mappings['structure_description'] = structure_description
-    template_mappings['structure_name'] = data_type_definition_name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition_name.upper())
 
     template_filename = os.path.join(template_directory, 'read_data-start.c')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
+    self._GenerateRuntimeStructureSourceFunctionReadDataDebugVariables(
+        data_type_definition, data_type_definition_name, members_configuration,
+        output_file)
+
+    template_filename = os.path.join(
+        template_directory, 'read_data-check_arguments.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
+
+    self._GenerateRuntimeStructureSourceFunctionReadDataCheckSignature(
+        data_type_definition, data_type_definition_name, output_file)
 
     self._GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
-        data_type_definition, data_type_definition_name, output_file)
+        data_type_definition, data_type_definition_name, members_configuration,
+        output_file)
 
     template_filename = os.path.join(
         template_directory, 'read_data-debug_start.c')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
-
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
     self._GenerateRuntimeStructureSourceFunctionReadDataDebugPrint(
-        data_type_definition, data_type_definition_name, output_file)
+        data_type_definition, data_type_definition_name, members_configuration,
+        output_file)
 
     template_filename = os.path.join(
         template_directory, 'read_data-debug_end.c')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
-
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
     template_filename = os.path.join(template_directory, 'read_data-end.c')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
+  def _GenerateRuntimeStructureSourceFunctionReadDataDebugVariables(
+      self, data_type_definition, data_type_definition_name,
+      members_configuration, output_file):
+    """Generates the debug variables part of a read_data function.
 
-  def _GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+      data_type_definition_name (str): name of the structure data type
+          definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
+      output_file (str): path of the file output file.
+    """
+    debug_variables = set()
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+      if members_configuration.get(member_name, {}).get('runtime', False):
+        continue
+
+      data_type_size = member_definition.GetByteSize()
+
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
+
+      type_indicator = member_data_type_definition.TYPE_INDICATOR
+      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+        debug_variable = '\tuint{0:d}_t value_{0:d}bit = 0;'.format(
+            data_type_size * 8)
+        debug_variables.add(debug_variable)
+
+    if not debug_variables:
+      return
+
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition_name)
+
+    template_mappings['debug_variables'] = '\n'.join(sorted(debug_variables))
+
+    template_filename = os.path.join(
+        self._templates_path, 'runtime_structure.c',
+        'read_data-debug_variables.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
+
+  def _GenerateRuntimeStructureSourceFunctionReadDataCheckSignature(
       self, data_type_definition, data_type_definition_name, output_file):
-    """Generates the copy from byte stream part of a read_data function.
+    """Generates the check signature part of a read_data function.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
@@ -330,13 +370,68 @@ class SourceGenerator(object):
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
 
-    template_mappings = self._GetTemplateMappings()
-
-    template_mappings['structure_name'] = data_type_definition_name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition_name.upper())
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition_name)
 
     for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+
+      data_type = getattr(member_definition, 'member_data_type', None)
+      data_type_size = member_definition.GetByteSize()
+
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
+
+      supported_values = getattr(member_definition, 'values', None)
+      if not supported_values:
+        continue
+
+      type_indicator = member_data_type_definition.TYPE_INDICATOR
+      if type_indicator == definitions.TYPE_INDICATOR_STREAM:
+        template_filename = 'read_data-check_signature-stream.c'
+
+        template_mappings['member_value'] = supported_values[0]
+        template_mappings['member_value_size'] = len(supported_values[0])
+
+      else:
+        template_filename = 'read_data-check_signature-unsupported.c'
+
+      if member_definition.description:
+        description = member_definition.description
+      else:
+        description = member_name.replace('_', ' ')
+
+      template_mappings['member_name'] = member_name
+      template_mappings['member_name_description'] = description
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_file, access_mode='ab')
+
+  def _GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
+      self, data_type_definition, data_type_definition_name,
+      members_configuration, output_file):
+    """Generates the copy from byte stream part of a read_data function.
+
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+      data_type_definition_name (str): name of the structure data type
+          definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
+      output_file (str): path of the file output file.
+    """
+    template_directory = os.path.join(
+        self._templates_path, 'runtime_structure.c')
+
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition_name)
+
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+      if not members_configuration.get(member_name, {}).get('runtime', False):
+        continue
+
       data_type = getattr(member_definition, 'member_data_type', None)
       data_type_size = member_definition.GetByteSize()
 
@@ -346,89 +441,158 @@ class SourceGenerator(object):
       type_indicator = member_data_type_definition.TYPE_INDICATOR
       if (type_indicator == definitions.TYPE_INDICATOR_INTEGER and
           data_type_size and data_type_size > 1):
-        template_filename = os.path.join(
-            template_directory, 'read_data-integer.c')
+        template_filename = 'read_data-integer.c'
 
         # TODO: get byte order from member_data_type_definition.
         template_mappings['byte_order'] = 'little_endian'
         template_mappings['data_type'] = data_type
 
       else:
-        template_filename = os.path.join(
-            template_directory, 'read_data-unsupported.c')
+        template_filename = 'read_data-unsupported.c'
 
-      template_mappings['member_name'] = member_definition.name
+      if member_definition.description:
+        description = member_definition.description
+      else:
+        description = member_name.replace('_', ' ')
 
-      output_data = self._template_string_generator.Generate(
-          template_filename, template_mappings)
+      template_mappings['member_name'] = member_name
+      template_mappings['member_name_description'] = description
 
-      with open(output_file, 'ab') as file_object:
-        file_object.write(output_data)
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_file, access_mode='ab')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataDebugPrint(
-      self, data_type_definition, data_type_definition_name, output_file):
+      self, data_type_definition, data_type_definition_name,
+      members_configuration, output_file):
     """Generates the debug print part of a read_data function.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
       output_file (str): path of the file output file.
     """
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
 
-    template_mappings = self._GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition_name)
 
-    template_mappings['structure_name'] = data_type_definition_name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition_name.upper())
+    function_name = 'int lib{0:s}_{1:s}_read_data'.format(
+        self._prefix, data_type_definition_name)
+
+    tab_alignment = 72
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+      debug_line = '{0:s}: {1:s}'.format(function_name, member_name)
+      debug_line_length = len(debug_line)
+      if debug_line_length > tab_alignment:
+        tab_alignment = debug_line_length
+
+    _, remainder = divmod(tab_alignment, 8)
+    if remainder > 0:
+      tab_alignment += 8 - remainder
 
     for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+
       data_type = getattr(member_definition, 'member_data_type', None)
       data_type_size = member_definition.GetByteSize()
 
       member_data_type_definition = getattr(
           member_definition, 'member_data_type_definition', member_definition)
 
+      template_filename = 'read_data-debug-unsupported.c'
+
       type_indicator = member_data_type_definition.TYPE_INDICATOR
       if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+        debug_format = members_configuration.get(member_name, {}).get(
+            'debug_format', self._DEBUG_FORMAT_DECIMAL)
 
         printf_format_indicator = self._GetRuntimePrintfFormatIndicator(
-            member_definition)
+            member_definition, debug_format)
 
-        # TODO: detemine number of tabs for alignment.
+        if members_configuration.get(member_name, {}).get('runtime', False):
+          template_filename = 'read_data-debug-integer-runtime.c'
+        else:
+          template_filename = 'read_data-debug-integer.c'
 
-        template_filename = os.path.join(
-            template_directory, 'read_data-debug-integer.c')
-
+        template_mappings['bit_size'] = data_type_size * 8
+        # TODO: get byte order from member_data_type_definition.
+        template_mappings['byte_order'] = 'little_endian'
         template_mappings['data_type'] = data_type
         template_mappings['format_indicator'] = printf_format_indicator
 
-      elif (type_indicator == definitions.TYPE_INDICATOR_STREAM and
-            data_type_size):
-        template_filename = os.path.join(
-            template_directory, 'read_data-debug-data.c')
+      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
+        supported_values = getattr(member_definition, 'values', None)
 
-        template_mappings['member_data_size'] = data_type_size
+        if supported_values:
+          format_indicator = ['%c'] * len(supported_values[0])
+          for supported_value in supported_values:
+            for index, character in enumerate(supported_value):
+              if not character.isalnum():
+                format_indicator[index] = '\\x%02" PRIx8 "'
 
-      else:
-        template_filename = os.path.join(
-            template_directory, 'read_data-debug-unsupported.c')
+          member_data_arguments = []
+          for byte_index in range(len(supported_values[0])):
+            argument = '\t\t ( ({0:s}_{1:s}_t *) data )->{2:s}[ {3:d} ]'.format(
+                self._prefix, data_type_definition_name, member_name,
+                byte_index)
+            member_data_arguments.append(argument)
+
+          template_filename = 'read_data-debug-signature.c'
+
+          template_mappings['format_indicator'] = ''.join(format_indicator)
+          template_mappings['member_data_arguments'] = ',\n'.join(
+              member_data_arguments)
+
+        elif data_type_size:
+          template_filename = 'read_data-debug-data.c'
+
+          template_mappings['member_data_size'] = data_type_size
 
       if member_definition.description:
         description = member_definition.description
       else:
-        description = member_definition.name.replace('_', ' ')
+        description = member_name.replace('_', ' ')
 
-      template_mappings['member_name'] = member_definition.name
+      template_filename = os.path.join(template_directory, template_filename)
+
+      template_mappings['member_name'] = member_name
       template_mappings['member_name_description'] = description
 
-      output_data = self._template_string_generator.Generate(
-          template_filename, template_mappings)
+      # Detemine number of tabs for alignment.
+      debug_line = '{0:s}: {1:s}'.format(function_name, description)
+      debug_line_length = len(debug_line)
+      number_of_tabs, remainder = divmod(tab_alignment - debug_line_length, 8)
+      if remainder > 0:
+        number_of_tabs += 1
 
-      with open(output_file, 'ab') as file_object:
-        file_object.write(output_data)
+      template_mappings['tab_alignment'] = '\\t' * number_of_tabs
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_file, access_mode='ab')
+
+  def _GenerateSection(
+      self, template_filename, template_mappings, output_filename,
+      access_mode='wb'):
+    """Generates a section from template filename.
+
+    Args:
+      template_filename (str): name of the template file.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_filename (str): name of the output file.
+      access_mode (Optional[str]): output file access mode.
+    """
+    output_data = self._template_string_generator.Generate(
+        template_filename, template_mappings)
+
+    with open(output_filename, access_mode) as file_object:
+      file_object.write(output_data)
 
   def _GenerateStoredStructureHeader(self, data_type_definition, output_file):
     """Generates a stored structure header.
@@ -437,25 +601,20 @@ class SourceGenerator(object):
       data_type_definition (DataTypeDefinition): structure data type definition.
       output_file (str): path of the file output file.
     """
-    template_mappings = self._GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition.name)
 
     structure_members = self._GetStoredStructureHeaderMembers(
         data_type_definition)
 
     template_mappings['structure_members'] = structure_members
-    template_mappings['structure_name'] = data_type_definition.name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition.name.upper())
 
     template_filename = os.path.join(
         self._templates_path, 'stored_structure.h', 'structure.h')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
     del template_mappings['structure_members']
-
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
 
   def _GenerateStoredStructureHeaderFile(self, data_type_definition):
     """Generates a stored structure header file.
@@ -468,7 +627,8 @@ class SourceGenerator(object):
     template_directory = os.path.join(
         self._templates_path, 'stored_structure.h')
 
-    template_mappings = self._GetTemplateMappings()
+    template_mappings = self._GetTemplateMappings(
+        structure_name=data_type_definition.name)
 
     if not self._prefix:
       output_file = 'stored_structure.h'
@@ -480,26 +640,19 @@ class SourceGenerator(object):
     logging.info('Writing: {0:s}'.format(output_file))
 
     structure_description = self._GetStructureDescription(data_type_definition)
-    structure_description_title = '{0:s}{1:s}'.format(
+    structure_description = '{0:s}{1:s}'.format(
         structure_description[0].upper(), structure_description[1:])
 
     if format_definition.description:
-      structure_description = '{0:s} of a {1:s}'.format(
-          structure_description_title, format_definition.description)
+      structure_description = '{0:s} of the {1:s}'.format(
+          structure_description, format_definition.description)
 
     template_mappings['structure_description'] = structure_description
-    template_mappings['structure_name'] = data_type_definition.name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition.name.upper())
 
     template_filename = os.path.join(template_directory, 'header.h')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
+    self._GenerateSection(template_filename, template_mappings, output_file)
 
     del template_mappings['structure_description']
-
-    with open(output_file, 'wb') as file_object:
-      file_object.write(output_data)
 
     if data_type_definition.TYPE_INDICATOR == (
         definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
@@ -510,16 +663,9 @@ class SourceGenerator(object):
     for structure_definition in structure_definitions:
       self._GenerateStoredStructureHeader(structure_definition, output_file)
 
-    template_mappings['structure_name'] = data_type_definition.name
-    template_mappings['structure_name_upper_case'] = (
-        data_type_definition.name.upper())
-
     template_filename = os.path.join(template_directory, 'footer.h')
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
-
-    with open(output_file, 'ab') as file_object:
-      file_object.write(output_data)
+    self._GenerateSection(
+        template_filename, template_mappings, output_file, access_mode='ab')
 
   def _GetRuntimeDataType(self, data_type_definition):
     """Retrieves a runtime data type.
@@ -560,11 +706,13 @@ class SourceGenerator(object):
 
     return data_type
 
-  def _GetRuntimePrintfFormatIndicator(self, data_type_definition):
+  def _GetRuntimePrintfFormatIndicator(
+      self, data_type_definition, debug_format):
     """Retrieves a runtime printf format indicator.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
+      debug_format (str): debug format as defined by the member configuration.
 
     Returns:
       str: C runtime data type or None if not available.
@@ -573,27 +721,32 @@ class SourceGenerator(object):
         data_type_definition, 'member_data_type_definition',
         data_type_definition)
 
-    data_type = None
-
-    type_indicator = data_type_definition.TYPE_INDICATOR
-    if type_indicator == definitions.TYPE_INDICATOR_CHARACTER:
-      data_type = self._CHARACTER_FORMAT_INDICATORS.get(
+    format_indicator = None
+    if debug_format == self._DEBUG_FORMAT_HEXADECIMAL:
+      format_indicator = self._HEXADECIMAL_FORMAT_INDICATORS.get(
           data_type_definition.size, None)
 
-    elif type_indicator == definitions.TYPE_INDICATOR_FLOATING_POINT:
-      data_type = self._FLOATING_POINT_FORMAT_INDICATORS.get(
-          data_type_definition.size, None)
-
-    elif type_indicator in (
-        definitions.TYPE_INDICATOR_BOOLEAN, definitions.TYPE_INDICATOR_INTEGER):
-      if data_type_definition.format == definitions.FORMAT_SIGNED:
-        data_type = self._SIGNED_INTEGER_FORMAT_INDICATORS.get(
-            data_type_definition.size, None)
-      else:
-        data_type = self._UNSIGNED_INTEGER_FORMAT_INDICATORS.get(
+    elif debug_format == self._DEBUG_FORMAT_DECIMAL:
+      type_indicator = data_type_definition.TYPE_INDICATOR
+      if type_indicator == definitions.TYPE_INDICATOR_CHARACTER:
+        format_indicator = self._CHARACTER_FORMAT_INDICATORS.get(
             data_type_definition.size, None)
 
-    return data_type
+      elif type_indicator == definitions.TYPE_INDICATOR_FLOATING_POINT:
+        format_indicator = self._FLOATING_POINT_FORMAT_INDICATORS.get(
+            data_type_definition.size, None)
+
+      elif type_indicator in (
+          definitions.TYPE_INDICATOR_BOOLEAN,
+          definitions.TYPE_INDICATOR_INTEGER):
+        if data_type_definition.format == definitions.FORMAT_SIGNED:
+          format_indicator = self._SIGNED_INTEGER_FORMAT_INDICATORS.get(
+              data_type_definition.size, None)
+        else:
+          format_indicator = self._UNSIGNED_INTEGER_FORMAT_INDICATORS.get(
+              data_type_definition.size, None)
+
+    return format_indicator
 
   def _GetFormatDefinitions(self):
     """Retrieves the format definition.
@@ -616,11 +769,14 @@ class SourceGenerator(object):
 
     return format_definition
 
-  def _GetRuntimeStructureHeaderMembers(self, data_type_definition):
+  def _GetRuntimeStructureHeaderMembers(
+      self, data_type_definition, members_configuration):
     """Generates the member definitions of a runtime structure header.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
 
     Returns:
       str: member definitions of the runtime structure header.
@@ -632,12 +788,14 @@ class SourceGenerator(object):
 
     last_index = len(data_type_definition.members) - 1
     for index, member_definition in enumerate(data_type_definition.members):
-      name = member_definition.name
+      member_name = member_definition.name
+      if not members_configuration.get(member_name, {}).get('runtime', False):
+        continue
 
       if member_definition.description:
         description = member_definition.description
       else:
-        description = name.replace('_', ' ')
+        description = member_name.replace('_', ' ')
 
       description = '{0:s}{1:s}'.format(
           description[0].upper(), description[1:])
@@ -652,10 +810,10 @@ class SourceGenerator(object):
         lines.append('\t/* TODO: implement */')
 
       elif data_type.endswith('*'):
-        lines.append('\t{0:s}{1:s};'.format(data_type, name))
+        lines.append('\t{0:s}{1:s};'.format(data_type, member_name))
 
       else:
-        lines.append('\t{0:s} {1:s};'.format(data_type, name))
+        lines.append('\t{0:s} {1:s};'.format(data_type, member_name))
 
       if index != last_index:
         lines.append('')
@@ -686,17 +844,13 @@ class SourceGenerator(object):
       else:
         description = name.replace('_', ' ')
 
-      lines.append('\t/* {0:s}{1:s}'.format(
-          description[0].upper(), description[1:]))
+      if description[0] == '(':
+        line = '\t/* ({0:s}{1:s}'.format(
+            description[1].upper(), description[2:])
+      else:
+        line = '\t/* {0:s}{1:s}'.format(description[0].upper(), description[1:])
 
-      if data_type_size:
-       if data_type_size == 1:
-         units = 'byte'
-       else:
-         units = 'bytes'
-
-       lines.append('\t * Consists of {0:d} {1:s}'.format(
-           data_type_size, units))
+      lines.append(line)
 
       if data_type_definition.TYPE_INDICATOR == definitions.TYPE_INDICATOR_UUID:
          lines.append('\t * Contains a UUID')
@@ -733,8 +887,11 @@ class SourceGenerator(object):
 
     return structure_description.lower()
 
-  def _GetTemplateMappings(self):
+  def _GetTemplateMappings(self, structure_name=None):
     """Retrieves the template mappings.
+
+    Args:
+      structure_name (Optional[str]): structure name.
 
     Returns:
       dict[str, str]: template mappings.
@@ -747,9 +904,9 @@ class SourceGenerator(object):
     if authors:
       template_mappings['authors'] = ', '.join(authors)
 
-    year = format_definition.metadata.get('year', None)
+    date = datetime.date.today()
+    year = format_definition.metadata.get('year', date.year)
     if year:
-      date = datetime.date.today()
       if year != date.year:
         copyright_years = '{0:d}-{1:d}'.format(year, date.year)
       else:
@@ -760,39 +917,70 @@ class SourceGenerator(object):
     template_mappings['prefix'] = self._prefix
     template_mappings['prefix_upper_case'] = self._prefix.upper()
 
+    if structure_name:
+      template_mappings['structure_name'] = structure_name
+      template_mappings['structure_name_upper_case'] = structure_name.upper()
+
     return template_mappings
 
-  def Generate(self):
-    """Generates source code from the data type definitions."""
-    for data_type_definition in self._definitions_registry.GetDefinitions():
-      if data_type_definition.TYPE_INDICATOR not in (
-          definitions.TYPE_INDICATOR_STRUCTURE,
-          definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
+  def Generate(self, project_configuration):
+    """Generates source code from the data type definitions.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      bool: True if successful, False otherwise.
+    """
+    result = True
+
+    dtfabric_configuration = project_configuration.dtfabric_configuration
+    for name, members_configuration in (
+        dtfabric_configuration.data_types.items()):
+      definition = self._definitions_registry.GetDefinitionByName(name)
+      if not definition:
+        logging.error('Missing data type: {0:s}'.format(name))
+        result = False
         continue
 
-      if data_type_definition.TYPE_INDICATOR == (
+      if definition.TYPE_INDICATOR not in (
+          definitions.TYPE_INDICATOR_STRUCTURE,
+          definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
+        logging.error('Unsupported data type: {0:s}'.format(name))
+        result = False
+        continue
+
+      if definition.TYPE_INDICATOR == (
           definitions.TYPE_INDICATOR_STRUCTURE):
 
         # Skip structures that are part of a type family.
-        if data_type_definition.family_definition:
+        if definition.family_definition:
+          logging.info('Skipping data type: {0:s}'.format(name))
           continue
 
-        # byte_size = data_type_definition.GetByteSize()
+        # byte_size = definition.GetByteSize()
         # if byte_size is None:
         #   continue
 
-      self._GenerateRuntimeStructureHeaderFile(data_type_definition)
-      self._GenerateRuntimeStructureSourceFile(data_type_definition)
-      self._GenerateStoredStructureHeaderFile(data_type_definition)
+      logging.info('Generating data type: {0:s}'.format(name))
 
-  def ReadDefinitions(self, path):
+      self._GenerateRuntimeStructureHeaderFile(
+          definition, members_configuration)
+      self._GenerateRuntimeStructureSourceFile(
+          definition, members_configuration)
+      self._GenerateStoredStructureHeaderFile(definition)
+
+    return result
+
+  def ReadDefinitions(self, definitions_file):
     """Reads the definitions form file or directory.
 
     Args:
-      path (str): path of the definition file or directory.
+      definitions_file (str): path to the data format definition file.
     """
     definitions_reader = reader.YAMLDataTypeDefinitionsFileReader()
-    definitions_reader.ReadFile(self._definitions_registry, path)
+    definitions_reader.ReadFile(
+        self._definitions_registry, definitions_file)
 
 
 def Main():
@@ -805,25 +993,31 @@ def Main():
       description='Generates source based on dtFabric format definitions.')
 
   argument_parser.add_argument(
+      '--definitions-file', '--definitions_file', dest='definitions_file',
+      action='store', metavar='PATH', default='dtfabric.yaml', help=(
+          'Path to the dtFabric definitions file.'))
+
+  argument_parser.add_argument(
       '--templates-path', '--templates_path', dest='templates_path',
       action='store', metavar='PATH', default=None, help=(
           'Path to the template files.'))
 
   argument_parser.add_argument(
-      'source', nargs='?', action='store', metavar='PATH', default=None,
-      help='name of the file containing the dtFabric format definitions.')
+      'configuration_file', action='store', metavar='PATH',
+      default='libyal.ini', help='path of the configuration file.')
 
   options = argument_parser.parse_args()
 
-  if not options.source:
-    print('Source value is missing.')
+  if not options.configuration_file:
+    print('Configuration file value is missing.')
     print('')
     argument_parser.print_help()
     print('')
     return False
 
-  if not os.path.isfile(options.source):
-    print('No such file: {0:s}'.format(options.source))
+  if not os.path.isfile(options.configuration_file):
+    print('No such configuration file: {0:s}.'.format(
+        options.configuration_file))
     print('')
     return False
 
@@ -836,17 +1030,20 @@ def Main():
     templates_path = os.path.dirname(templates_path)
     templates_path = os.path.join(templates_path, 'data', 'dtfabric')
 
+  project_configuration = configuration.ProjectConfiguration()
+  project_configuration.ReadFromFile(options.configuration_file)
+
   source_generator = SourceGenerator(templates_path)
 
   try:
-    source_generator.ReadDefinitions(options.source)
+    source_generator.ReadDefinitions(options.definitions_file)
   except errors.FormatError as exception:
-    print('Unable to read definitions with error: {0:s}'.format(exception))
+    print((
+        'Unable to read data format definitions from file: {0:s} with error: '
+        '{1!s}').format(options.definitions_file, exception))
     return False
 
-  source_generator.Generate()
-
-  return True
+  return source_generator.Generate(project_configuration)
 
 
 if __name__ == '__main__':

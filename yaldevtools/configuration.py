@@ -15,7 +15,65 @@ except ImportError:
 import errors
 
 
-class ProjectConfiguration(object):
+class BaseConfiguration(object):
+  """Shared functionality for configuration objects."""
+
+  def _GetConfigValue(self, config_parser, section_name, value_name):
+    """Retrieves a value from the config parser.
+
+    Args:
+      config_parser (ConfigParser): configuration parser.
+      section_name (str): name of the section that contains the value.
+      value_name (name): name of the value.
+
+    Returns:
+      object: value.
+    """
+    return json.loads(config_parser.get(section_name, value_name))
+
+  def _GetOptionalConfigValue(
+      self, config_parser, section_name, value_name, default_value=None):
+    """Retrieves an optional configuration value from the config parser.
+
+    Args:
+      config_parser (ConfigParser): configuration parser.
+      section_name (str): name of the section that contains the value.
+      value_name (name): name of the value.
+      default_value (Optional[object]): default value.
+
+    Returns:
+      object: value or default value if not available.
+    """
+    try:
+      return self._GetConfigValue(config_parser, section_name, value_name)
+    except (configparser.NoOptionError, configparser.NoSectionError):
+      return default_value
+
+
+class DTFabricConfiguration(BaseConfiguration):
+  """dtFabric configuration.
+
+  Attributes:
+    data_types (dict[str, dict]): code configurations of the structure
+        members per data type definition.
+  """
+
+  def __init__(self):
+    """Initializes a dtFabric configuation."""
+    super(DTFabricConfiguration, self).__init__()
+    self.data_types = {}
+
+  def ReadConfiguration(self, config_parser):
+    """Reads the configuration from the dtFabric section.
+
+    Args:
+      config_parser (ConfigParser): configuration file parser.
+    """
+    self.data_types = self._GetOptionalConfigValue(
+        config_parser, 'dtFabric', 'data_types', default_value={})
+
+
+class ProjectConfiguration(BaseConfiguration):
   """Project configuration.
 
   Attributes:
@@ -23,6 +81,7 @@ class ProjectConfiguration(object):
     cygwin_build_dependencies (str): Cygwin build dependencies.
     dpkg_build_dependencies (str): dpkg build dependencies.
     dotnet_bindings_name (str): name of the .Net bindings.
+    dtfabric_configuration (DTFabricConfiguration): dtFabric configuration.
     gcc_build_dependencies (list[str]): GCC build dependencies.
     gcc_static_build_dependencies (list[str]): GCC build dependencies for
         building static binaries.
@@ -142,6 +201,9 @@ class ProjectConfiguration(object):
     # Functionality the project offsers.
     self.supports_debug_output = False
 
+    # dtFabric configuration.
+    self.dtfabric_configuration = DTFabricConfiguration()
+
     # Library configuration.
     self.library_build_dependencies = None
     self.library_description = None
@@ -256,37 +318,6 @@ class ProjectConfiguration(object):
 
     # Troubleshooting configuration.
     self.troubleshooting_example = None
-
-  def _GetConfigValue(self, config_parser, section_name, value_name):
-    """Retrieves a value from the config parser.
-
-    Args:
-      config_parser (ConfigParser): configuration parser.
-      section_name (str): name of the section that contains the value.
-      value_name (name): name of the value.
-
-    Returns:
-      object: value.
-    """
-    return json.loads(config_parser.get(section_name, value_name))
-
-  def _GetOptionalConfigValue(
-      self, config_parser, section_name, value_name, default_value=None):
-    """Retrieves an optional configuration value from the config parser.
-
-    Args:
-      config_parser (ConfigParser): configuration parser.
-      section_name (str): name of the section that contains the value.
-      value_name (name): name of the value.
-      default_value (Optional[object]): default value.
-
-    Returns:
-      object: value or default value if not available.
-    """
-    try:
-      return self._GetConfigValue(config_parser, section_name, value_name)
-    except (configparser.NoOptionError, configparser.NoSectionError):
-      return default_value
 
   def _ReadCygwinConfiguration(self, config_parser):
     """Reads the Cygwin configuration.
@@ -1044,6 +1075,8 @@ class ProjectConfiguration(object):
     self._configuration_file_path = os.path.dirname(filename)
 
     self._ReadProjectConfiguration(config_parser)
+
+    self.dtfabric_configuration.ReadConfiguration(config_parser)
 
     self._ReadLibraryConfiguration(config_parser)
     self._ReadPythonModuleConfiguration(config_parser)

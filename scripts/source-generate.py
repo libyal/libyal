@@ -34,10 +34,6 @@ def Main():
       'Generates source files of the libyal libraries.'))
 
   argument_parser.add_argument(
-      'configuration_file', action='store', metavar='CONFIGURATION_FILE',
-      default='source.conf', help='The source generation configuration file.')
-
-  argument_parser.add_argument(
       '-e', '--experimental', dest='experimental', action='store_true',
       default=False, help='enable experimental functionality.')
 
@@ -55,10 +51,14 @@ def Main():
       metavar='PROJECTS_DIRECTORY', default=None,
       help='path of the projects.')
 
+  argument_parser.add_argument(
+      'configuration_file', action='store', metavar='PATH',
+      default='libyal.ini', help='path of the configuration file.')
+
   options = argument_parser.parse_args()
 
   if not options.configuration_file:
-    print('Config file missing.')
+    print('Configuration file missing.')
     print('')
     argument_parser.print_help()
     print('')
