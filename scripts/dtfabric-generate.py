@@ -30,6 +30,13 @@ class SourceGenerator(object):
   _DEBUG_FORMAT_DECIMAL = 'decimal'
   _DEBUG_FORMAT_HEXADECIMAL = 'hexadecimal'
 
+  # The member is used for debugging.
+  _USAGE_DEBUG = 'debug'
+  # The member is used in the read_data function.
+  _USAGE_IN_FUNCTION = 'in_function'
+  # The member is used in the runtime struct.
+  _USAGE_IN_STRUCT = 'in_struct'
+
   _CHARACTER_DATA_TYPES = {
       1: 'char',
   }
@@ -97,7 +104,7 @@ class SourceGenerator(object):
 
   def _GenerateRuntimeStructureHeader(
       self, data_type_definition, data_type_definition_name,
-      members_configuration, output_file):
+      members_configuration, output_filename):
     """Generates a runtime structure header.
 
     Args:
@@ -106,7 +113,7 @@ class SourceGenerator(object):
           definition.
       members_configuration (list[dict]): code generation configuration of
           the structure members.
-      output_file (str): path of the file output file.
+      output_filename (str): name of the output file.
     """
     template_mappings = self._GetTemplateMappings(
         structure_name=data_type_definition_name)
@@ -125,7 +132,7 @@ class SourceGenerator(object):
         self._templates_path, 'runtime_structure.h', 'structure.h')
 
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
     del template_mappings['structure_members']
 
@@ -138,6 +145,8 @@ class SourceGenerator(object):
       members_configuration (list[dict]): code generation configuration of
           the structure members.
     """
+    # TODO: make libbfio include and file_io_handle function optional
+
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.h')
 
@@ -145,13 +154,13 @@ class SourceGenerator(object):
         structure_name=data_type_definition.name)
 
     if not self._prefix:
-      output_file = 'runtime_structure.h'
+      output_filename = 'runtime_structure.h'
     else:
-      output_file = os.path.join(
+      output_filename = os.path.join(
           'lib{0:s}'.format(self._prefix),
           'lib{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
 
-    logging.info('Writing: {0:s}'.format(output_file))
+    logging.info('Writing: {0:s}'.format(output_filename))
 
     structure_description = self._GetStructureDescription(data_type_definition)
     structure_description_title = '{0:s}{1:s}'.format(
@@ -166,7 +175,7 @@ class SourceGenerator(object):
 
     template_filename = os.path.join(template_directory, 'header.h')
 
-    self._GenerateSection(template_filename, template_mappings, output_file)
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     del template_mappings['structure_description_title']
 
@@ -178,12 +187,14 @@ class SourceGenerator(object):
 
     self._GenerateRuntimeStructureHeader(
         structure_definition, data_type_definition.name, members_configuration,
-        output_file)
+        output_filename)
 
     template_filename = os.path.join(template_directory, 'footer.h')
 
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
+
+    self._SortIncludeHeaders(output_filename)
 
   def _GenerateRuntimeStructureSourceFile(
       self, data_type_definition, members_configuration):
@@ -194,6 +205,8 @@ class SourceGenerator(object):
       members_configuration (list[dict]): code generation configuration of
           the structure members.
     """
+    # TODO: make libbfio include and file_io_handle function optional
+
     template_mappings = self._GetTemplateMappings(
         structure_name=data_type_definition.name)
 
@@ -201,9 +214,9 @@ class SourceGenerator(object):
         self._templates_path, 'runtime_structure.c')
 
     if not self._prefix:
-      output_file = 'runtime_structure.c'
+      output_filename = 'runtime_structure.c'
     else:
-      output_file = os.path.join(
+      output_filename = os.path.join(
           'lib{0:s}'.format(self._prefix),
           'lib{0:s}_{1:s}.c'.format(self._prefix, data_type_definition.name))
 
@@ -219,18 +232,18 @@ class SourceGenerator(object):
     template_mappings['structure_description'] = structure_description
     template_mappings['structure_description_title'] = structure_description_title
 
-    logging.info('Writing: {0:s}'.format(output_file))
+    logging.info('Writing: {0:s}'.format(output_filename))
 
     template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(template_filename, template_mappings, output_file)
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     template_filename = os.path.join(template_directory, 'initialize.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
     template_filename = os.path.join(template_directory, 'free.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
     if data_type_definition.TYPE_INDICATOR == (
         definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
@@ -240,16 +253,18 @@ class SourceGenerator(object):
 
     self._GenerateRuntimeStructureSourceFunctionReadData(
         structure_definition, data_type_definition.name, members_configuration,
-        output_file)
+        output_filename)
 
     template_filename = os.path.join(
         template_directory, 'read_file_io_handle.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
+
+    self._SortIncludeHeaders(output_filename)
 
   def _GenerateRuntimeStructureSourceFunctionReadData(
       self, data_type_definition, data_type_definition_name,
-      members_configuration, output_file):
+      members_configuration, output_filename):
     """Generates a runtime structure read_data function.
 
     Args:
@@ -258,7 +273,7 @@ class SourceGenerator(object):
           definition.
       members_configuration (list[dict]): code generation configuration of
           the structure members.
-      output_file (str): path of the file output file.
+      output_filename (str): name of the output file.
     """
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
@@ -270,52 +285,76 @@ class SourceGenerator(object):
 
     library_name = 'lib{0:s}'.format(self._prefix)
 
+    variables = set()
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+      member_usage = members_configuration.get(member_name, {}).get(
+          'usage', self._USAGE_DEBUG)
+      if member_usage != self._USAGE_IN_FUNCTION:
+        continue
+
+      data_type_size = member_definition.GetByteSize()
+
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
+
+      type_indicator = member_data_type_definition.TYPE_INDICATOR
+      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+        variable = '\tuint{0:d}_t {1:s} = 0;'.format(
+            data_type_size * 8, member_name)
+        variables.add(variable)
+
+    variables = sorted(variables)
+    variables.append('')
+
     template_mappings['library_name'] = library_name
     template_mappings['library_name_upper_case'] = library_name.upper()
 
     template_mappings['structure_description'] = structure_description
 
+    template_mappings['variables'] = '\n'.join(variables)
+
     template_filename = os.path.join(template_directory, 'read_data-start.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
     self._GenerateRuntimeStructureSourceFunctionReadDataDebugVariables(
         data_type_definition, data_type_definition_name, members_configuration,
-        output_file)
+        output_filename)
 
     template_filename = os.path.join(
         template_directory, 'read_data-check_arguments.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
     self._GenerateRuntimeStructureSourceFunctionReadDataCheckSignature(
-        data_type_definition, data_type_definition_name, output_file)
+        data_type_definition, data_type_definition_name, output_filename)
 
     self._GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
         data_type_definition, data_type_definition_name, members_configuration,
-        output_file)
+        output_filename)
 
     template_filename = os.path.join(
         template_directory, 'read_data-debug_start.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
     self._GenerateRuntimeStructureSourceFunctionReadDataDebugPrint(
         data_type_definition, data_type_definition_name, members_configuration,
-        output_file)
+        output_filename)
 
     template_filename = os.path.join(
         template_directory, 'read_data-debug_end.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
     template_filename = os.path.join(template_directory, 'read_data-end.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataDebugVariables(
       self, data_type_definition, data_type_definition_name,
-      members_configuration, output_file):
+      members_configuration, output_filename):
     """Generates the debug variables part of a read_data function.
 
     Args:
@@ -324,12 +363,14 @@ class SourceGenerator(object):
           definition.
       members_configuration (list[dict]): code generation configuration of
           the structure members.
-      output_file (str): path of the file output file.
+      output_filename (str): name of the output file.
     """
     debug_variables = set()
     for member_definition in data_type_definition.members:
       member_name = member_definition.name
-      if members_configuration.get(member_name, {}).get('runtime', False):
+      member_usage = members_configuration.get(member_name, {}).get(
+          'usage', self._USAGE_DEBUG)
+      if member_usage != self._USAGE_DEBUG:
         continue
 
       data_type_size = member_definition.GetByteSize()
@@ -346,26 +387,28 @@ class SourceGenerator(object):
     if not debug_variables:
       return
 
+    debug_variables = sorted(debug_variables)
+
     template_mappings = self._GetTemplateMappings(
         structure_name=data_type_definition_name)
 
-    template_mappings['debug_variables'] = '\n'.join(sorted(debug_variables))
+    template_mappings['debug_variables'] = '\n'.join(debug_variables)
 
     template_filename = os.path.join(
         self._templates_path, 'runtime_structure.c',
         'read_data-debug_variables.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataCheckSignature(
-      self, data_type_definition, data_type_definition_name, output_file):
+      self, data_type_definition, data_type_definition_name, output_filename):
     """Generates the check signature part of a read_data function.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
-      output_file (str): path of the file output file.
+      output_filename (str): name of the output file.
     """
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
@@ -406,11 +449,12 @@ class SourceGenerator(object):
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_file, access_mode='ab')
+          template_filename, template_mappings, output_filename,
+          access_mode='ab')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
       self, data_type_definition, data_type_definition_name,
-      members_configuration, output_file):
+      members_configuration, output_filename):
     """Generates the copy from byte stream part of a read_data function.
 
     Args:
@@ -419,7 +463,7 @@ class SourceGenerator(object):
           definition.
       members_configuration (list[dict]): code generation configuration of
           the structure members.
-      output_file (str): path of the file output file.
+      output_filename (str): name of the output file.
     """
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
@@ -429,7 +473,9 @@ class SourceGenerator(object):
 
     for member_definition in data_type_definition.members:
       member_name = member_definition.name
-      if not members_configuration.get(member_name, {}).get('runtime', False):
+      member_usage = members_configuration.get(member_name, {}).get(
+          'usage', self._USAGE_DEBUG)
+      if member_usage != self._USAGE_IN_STRUCT:
         continue
 
       data_type = getattr(member_definition, 'member_data_type', None)
@@ -460,11 +506,12 @@ class SourceGenerator(object):
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_file, access_mode='ab')
+          template_filename, template_mappings, output_filename,
+          access_mode='ab')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataDebugPrint(
       self, data_type_definition, data_type_definition_name,
-      members_configuration, output_file):
+      members_configuration, output_filename):
     """Generates the debug print part of a read_data function.
 
     Args:
@@ -473,7 +520,7 @@ class SourceGenerator(object):
           definition.
       members_configuration (list[dict]): code generation configuration of
           the structure members.
-      output_file (str): path of the file output file.
+      output_filename (str): name of the output file.
     """
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
@@ -515,8 +562,16 @@ class SourceGenerator(object):
         printf_format_indicator = self._GetRuntimePrintfFormatIndicator(
             member_definition, debug_format)
 
-        if members_configuration.get(member_name, {}).get('runtime', False):
+        member_usage = members_configuration.get(member_name, {}).get(
+            'usage', self._USAGE_DEBUG)
+        if member_usage == self._USAGE_IN_STRUCT:
+          # TODO: rename template file: runtime to in_struct.
           template_filename = 'read_data-debug-integer-runtime.c'
+
+        elif member_usage == self._USAGE_IN_FUNCTION:
+          # TODO: improve.
+          template_filename = 'read_data-debug-integer.c'
+
         else:
           template_filename = 'read_data-debug-integer.c'
 
@@ -574,7 +629,8 @@ class SourceGenerator(object):
       template_mappings['tab_alignment'] = '\\t' * number_of_tabs
 
       self._GenerateSection(
-          template_filename, template_mappings, output_file, access_mode='ab')
+          template_filename, template_mappings, output_filename,
+          access_mode='ab')
 
   def _GenerateSection(
       self, template_filename, template_mappings, output_filename,
@@ -594,12 +650,13 @@ class SourceGenerator(object):
     with open(output_filename, access_mode) as file_object:
       file_object.write(output_data)
 
-  def _GenerateStoredStructureHeader(self, data_type_definition, output_file):
+  def _GenerateStoredStructureHeader(
+      self, data_type_definition, output_filename):
     """Generates a stored structure header.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
-      output_file (str): path of the file output file.
+      output_filename (str): name of the output file.
     """
     template_mappings = self._GetTemplateMappings(
         structure_name=data_type_definition.name)
@@ -612,7 +669,7 @@ class SourceGenerator(object):
     template_filename = os.path.join(
         self._templates_path, 'stored_structure.h', 'structure.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
     del template_mappings['structure_members']
 
@@ -631,13 +688,13 @@ class SourceGenerator(object):
         structure_name=data_type_definition.name)
 
     if not self._prefix:
-      output_file = 'stored_structure.h'
+      output_filename = 'stored_structure.h'
     else:
-      output_file = os.path.join(
+      output_filename = os.path.join(
           'lib{0:s}'.format(self._prefix),
           '{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
 
-    logging.info('Writing: {0:s}'.format(output_file))
+    logging.info('Writing: {0:s}'.format(output_filename))
 
     structure_description = self._GetStructureDescription(data_type_definition)
     structure_description = '{0:s}{1:s}'.format(
@@ -650,7 +707,7 @@ class SourceGenerator(object):
     template_mappings['structure_description'] = structure_description
 
     template_filename = os.path.join(template_directory, 'header.h')
-    self._GenerateSection(template_filename, template_mappings, output_file)
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     del template_mappings['structure_description']
 
@@ -661,11 +718,13 @@ class SourceGenerator(object):
       structure_definitions = [data_type_definition]
 
     for structure_definition in structure_definitions:
-      self._GenerateStoredStructureHeader(structure_definition, output_file)
+      self._GenerateStoredStructureHeader(structure_definition, output_filename)
 
     template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_file, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='ab')
+
+    self._SortIncludeHeaders(output_filename)
 
   def _GetRuntimeDataType(self, data_type_definition):
     """Retrieves a runtime data type.
@@ -789,7 +848,9 @@ class SourceGenerator(object):
     last_index = len(data_type_definition.members) - 1
     for index, member_definition in enumerate(data_type_definition.members):
       member_name = member_definition.name
-      if not members_configuration.get(member_name, {}).get('runtime', False):
+      member_usage = members_configuration.get(member_name, {}).get(
+          'usage', self._USAGE_DEBUG)
+      if member_usage != self._USAGE_IN_STRUCT:
         continue
 
       if member_definition.description:
@@ -817,6 +878,12 @@ class SourceGenerator(object):
 
       if index != last_index:
         lines.append('')
+
+    if not lines:
+      lines = [
+          '\t/* Dummy',
+          '\t */',
+          '\tint dummy;']
 
     return '\n'.join(lines)
 
@@ -922,6 +989,34 @@ class SourceGenerator(object):
       template_mappings['structure_name_upper_case'] = structure_name.upper()
 
     return template_mappings
+
+  def _SortIncludeHeaders(self, output_filename):
+    """Sorts the include headers within a source file.
+
+    Args:
+      output_filename (str): path of the output file.
+    """
+    with open(output_filename, 'rb') as file_object:
+      lines = file_object.readlines()
+
+    library_include_header_start = b'#include "lib{0:s}_'.format(self._prefix)
+
+    include_headers = []
+    in_include_headers = False
+
+    with open(output_filename, 'wb') as file_object:
+      for line in lines:
+        if line.startswith(library_include_header_start):
+          include_headers.append(line)
+          in_include_headers = True
+
+        elif in_include_headers:
+          file_object.writelines(sorted(include_headers))
+          file_object.write(line)
+          in_include_headers = False
+
+        else:
+          file_object.write(line)
 
   def Generate(self, project_configuration):
     """Generates source code from the data type definitions.

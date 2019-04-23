@@ -16,7 +16,7 @@ class SourceFileGenerator(object):
 
   def __init__(
       self, projects_directory, template_directory, experimental=False):
-    """Initialize a source file generator.
+    """Initializes a source file generator.
 
     Args:
       projects_directory (str): path of the projects directory.
