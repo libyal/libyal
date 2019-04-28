@@ -1,8 +1,8 @@
 		if( ${library_name}_debug_print_utf16_string_value(
 		     function,
 		     "${member_name_description}${tab_alignment}",
-		     data,
-		     string_size,
+		     ${member_name},
+		     ${member_name}_size,
 		     LIBUNA_ENDIAN_LITTLE,
 		     error ) != 1 )
 		{
