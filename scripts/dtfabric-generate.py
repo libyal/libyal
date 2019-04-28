@@ -145,7 +145,7 @@ class SourceGenerator(object):
       members_configuration (list[dict]): code generation configuration of
           the structure members.
     """
-    # TODO: make libbfio include and file_io_handle function optional
+    structure_options = members_configuration.get('__options__', {})
 
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.h')
@@ -174,10 +174,23 @@ class SourceGenerator(object):
     template_mappings['structure_description_title'] = structure_description_title
 
     template_filename = os.path.join(template_directory, 'header.h')
-
     self._GenerateSection(template_filename, template_mappings, output_filename)
 
     del template_mappings['structure_description_title']
+
+    template_filename = os.path.join(template_directory, 'includes.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='ab')
+
+    if 'file_io_handle' in structure_options:
+      template_filename = os.path.join(template_directory, 'includes-bfio.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'extern-start.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
     if data_type_definition.TYPE_INDICATOR == (
         definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
@@ -189,8 +202,21 @@ class SourceGenerator(object):
         structure_definition, data_type_definition.name, members_configuration,
         output_filename)
 
-    template_filename = os.path.join(template_directory, 'footer.h')
+    template_filename = os.path.join(template_directory, 'functions.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='ab')
 
+    if 'file_io_handle' in structure_options:
+      template_filename = os.path.join(template_directory, 'functions-bfio.h')
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'extern-end.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='ab')
 
@@ -205,7 +231,7 @@ class SourceGenerator(object):
       members_configuration (list[dict]): code generation configuration of
           the structure members.
     """
-    # TODO: make libbfio include and file_io_handle function optional
+    structure_options = members_configuration.get('__options__', {})
 
     template_mappings = self._GetTemplateMappings(
         structure_name=data_type_definition.name)
@@ -237,6 +263,20 @@ class SourceGenerator(object):
     template_filename = os.path.join(template_directory, 'header.c')
     self._GenerateSection(template_filename, template_mappings, output_filename)
 
+    template_filename = os.path.join(template_directory, 'includes-start.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='ab')
+
+    if 'file_io_handle' in structure_options:
+      template_filename = os.path.join(template_directory, 'includes-bfio.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='ab')
+
+    template_filename = os.path.join(template_directory, 'includes-end.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='ab')
+
     template_filename = os.path.join(template_directory, 'initialize.c')
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='ab')
@@ -255,10 +295,12 @@ class SourceGenerator(object):
         structure_definition, data_type_definition.name, members_configuration,
         output_filename)
 
-    template_filename = os.path.join(
-        template_directory, 'read_file_io_handle.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+    if 'file_io_handle' in structure_options:
+      template_filename = os.path.join(
+          template_directory, 'read_file_io_handle.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='ab')
 
     self._SortIncludeHeaders(output_filename)
 
@@ -303,6 +345,22 @@ class SourceGenerator(object):
         variable = '\tuint{0:d}_t {1:s} = 0;'.format(
             data_type_size * 8, member_name)
         variables.add(variable)
+
+      elif type_indicator == definitions.TYPE_INDICATOR_STRING:
+        element_data_type_definition = (
+            member_data_type_definition.element_data_type_definition)
+
+        elements_terminator = getattr(
+            element_data_type_definition, 'elements_terminator', None)
+        if elements_terminator is not None:
+          variable = '\tsize_t data_offset = 0;'
+          variables.add(variable)
+
+          variable = '\tconst uint8_t *{0:s} = NULL;'.format(member_name)
+          variables.add(variable)
+
+          variable = '\tsize_t {0:s}_size = 0;'.format(member_name)
+          variables.add(variable)
 
     variables = sorted(variables)
     variables.append('')
@@ -471,6 +529,8 @@ class SourceGenerator(object):
     template_mappings = self._GetTemplateMappings(
         structure_name=data_type_definition_name)
 
+    date_offset_is_set = False
+
     for member_definition in data_type_definition.members:
       member_name = member_definition.name
       member_usage = members_configuration.get(member_name, {}).get(
@@ -484,6 +544,8 @@ class SourceGenerator(object):
       member_data_type_definition = getattr(
           member_definition, 'member_data_type_definition', member_definition)
 
+      template_filename = 'read_data-unsupported.c'
+
       type_indicator = member_data_type_definition.TYPE_INDICATOR
       if (type_indicator == definitions.TYPE_INDICATOR_INTEGER and
           data_type_size and data_type_size > 1):
@@ -493,8 +555,28 @@ class SourceGenerator(object):
         template_mappings['byte_order'] = 'little_endian'
         template_mappings['data_type'] = data_type
 
-      else:
-        template_filename = 'read_data-unsupported.c'
+      elif type_indicator == definitions.TYPE_INDICATOR_STRING:
+        element_data_type_definition = (
+            member_data_type_definition.element_data_type_definition)
+
+        elements_terminator = getattr(
+            element_data_type_definition, 'elements_terminator', None)
+        if elements_terminator is not None:
+          if not date_offset_is_set:
+            template_filename = os.path.join(
+                template_directory, 'read_data-data_offset.c')
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename,
+                access_mode='ab')
+
+            template_filename = 'read_data-unsupported.c'
+            date_offset_is_set = True
+
+          element_data_size = element_data_type_definition.GetByteSize()
+          if element_data_size == 1:
+            template_filename = 'read_data-string_8bit.c'
+          elif element_data_size == 2:
+            template_filename = 'read_data-string_16bit.c'
 
       if member_definition.description:
         description = member_definition.description
@@ -608,6 +690,17 @@ class SourceGenerator(object):
           template_filename = 'read_data-debug-data.c'
 
           template_mappings['member_data_size'] = data_type_size
+
+      elif type_indicator == definitions.TYPE_INDICATOR_STRING:
+        element_data_type_definition = (
+            member_data_type_definition.element_data_type_definition)
+
+        elements_terminator = getattr(
+            element_data_type_definition, 'elements_terminator', None)
+        if elements_terminator is not None:
+          element_data_size = element_data_type_definition.GetByteSize()
+          # TODO
+          # if element_data_size == 2:
 
       if member_definition.description:
         description = member_definition.description
@@ -861,6 +954,8 @@ class SourceGenerator(object):
       description = '{0:s}{1:s}'.format(
           description[0].upper(), description[1:])
 
+      # TODO: handle stream / string type
+      # TODO: handle padding type
       data_type = self._GetRuntimeDataType(member_definition)
 
       lines.extend([

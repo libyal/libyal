@@ -22,13 +22,3 @@
 #if !defined( _${library_name_upper_case}_${structure_name_upper_case}_H )
 #define _${library_name_upper_case}_${structure_name_upper_case}_H
 
-#include <common.h>
-#include <types.h>
-
-#include "${library_name}_libbfio.h"
-#include "${library_name}_libcerror.h"
-
-#if defined( __cplusplus )
-extern "C" {
-#endif
-
