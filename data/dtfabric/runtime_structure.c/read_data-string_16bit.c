@@ -1,4 +1,3 @@
-
 	${member_name}      = &( data[ data_offset ] );
 	${member_name}_size = 0;
 
@@ -14,3 +13,4 @@
 		data_offset += 2;
 	}
 	data_offset += 2;
+

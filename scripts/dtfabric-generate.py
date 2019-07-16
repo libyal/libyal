@@ -638,6 +638,9 @@ class SourceGenerator(object):
         template_mappings['data_type'] = data_type
         template_mappings['format_indicator'] = printf_format_indicator
 
+      elif type_indicator == definitions.TYPE_INDICATOR_PADDING:
+        template_filename = 'read_data-debug-padding.c'
+
       elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
         supported_values = getattr(member_definition, 'values', None)
 
@@ -662,17 +665,15 @@ class SourceGenerator(object):
               member_data_arguments)
 
         elif data_type_size:
-          template_filename = 'read_data-debug-data.c'
+          template_filename = 'read_data-debug-stream_with_data_size.c'
 
           template_mappings['member_data_size'] = data_type_size
 
-      elif type_indicator == definitions.TYPE_INDICATOR_PADDING:
-        template_filename = 'read_data-debug-padding.c'
-
-      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
-        template_filename = 'read_data-debug-stream.c'
+        else:
+          template_filename = 'read_data-debug-stream.c'
 
       elif type_indicator == definitions.TYPE_INDICATOR_STRING:
+        # TODO: handle evt "data_size - 4"
         elements_terminator = getattr(
             member_data_type_definition, 'elements_terminator', None)
         if elements_terminator is not None:
@@ -724,39 +725,44 @@ class SourceGenerator(object):
     variables = set()
     for member_definition in data_type_definition.members:
       member_name = member_definition.name
+      member_usage = members_configuration.get(member_name, {}).get(
+          'usage', self._USAGE_DEBUG)
 
       member_data_type_definition = getattr(
           member_definition, 'member_data_type_definition', member_definition)
 
       type_indicator = member_data_type_definition.TYPE_INDICATOR
-      if type_indicator == definitions.TYPE_INDICATOR_PADDING:
-        variable = '\tsize_t data_offset = 0;'
-        variables.add(variable)
+      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+        if member_usage == self._USAGE_IN_FUNCTION:
+          data_type_size = member_definition.GetByteSize()
+          variable = '\tuint{0:d}_t {1:s} = 0;'.format(
+              data_type_size * 8, member_name)
+          variables.add(variable)
 
-      # TODO: what if string is only used for debugging?
+      # TODO: add support for padding type?
+
+      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
+        if member_usage in (self._USAGE_IN_FUNCTION, self._USAGE_IN_STRUCT):
+          variable = '\tsize_t data_offset = 0;'
+          variables.add(variable)
+
+        if member_usage == self._USAGE_IN_FUNCTION:
+          variable = '\tconst uint8_t *{0:s} = NULL;'.format(member_name)
+          variables.add(variable)
+
       elif type_indicator == definitions.TYPE_INDICATOR_STRING:
         elements_terminator = getattr(
             member_data_type_definition, 'elements_terminator', None)
         if elements_terminator is not None:
-          variable = '\tsize_t data_offset = 0;'
-          variables.add(variable)
+          if member_usage in (self._USAGE_IN_FUNCTION, self._USAGE_IN_STRUCT):
+            variable = '\tsize_t data_offset = 0;'
+            variables.add(variable)
 
-          variable = '\tconst uint8_t *{0:s} = NULL;'.format(member_name)
-          variables.add(variable)
+            variable = '\tconst uint8_t *{0:s} = NULL;'.format(member_name)
+            variables.add(variable)
 
-          variable = '\tsize_t {0:s}_size = 0;'.format(member_name)
-          variables.add(variable)
-
-      member_usage = members_configuration.get(member_name, {}).get(
-          'usage', self._USAGE_DEBUG)
-      if member_usage != self._USAGE_IN_FUNCTION:
-        continue
-
-      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
-        data_type_size = member_definition.GetByteSize()
-        variable = '\tuint{0:d}_t {1:s} = 0;'.format(
-            data_type_size * 8, member_name)
-        variables.add(variable)
+            variable = '\tsize_t {0:s}_size = 0;'.format(member_name)
+            variables.add(variable)
 
     variables = sorted(variables)
     variables.append('')

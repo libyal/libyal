@@ -240,7 +240,7 @@ int ${python_module_name}_${sequence_type_name}_init(
 	 "%s: initialize of ${sequence_type_description} not supported.",
 	 function );
 
-	return( 0 );
+	return( -1 );
 }
 
 /* Frees a ${sequence_type_description} sequence object

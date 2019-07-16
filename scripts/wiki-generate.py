@@ -604,6 +604,8 @@ class WikiPageGenerator(object):
         'Or directly packaged with different package managers:\n\n')
 
     # Dpkg support.
+    dpkg_build_dependencies = ''
+    dpkg_filenames = ''
     if project_configuration.HasDpkg():
       building_table_of_contents += (
           '* [Using Debian package tools (DEB)]'
@@ -617,6 +619,9 @@ class WikiPageGenerator(object):
       dpkg_filenames = '\n'.join(dpkg_filenames)
 
     # Rpm support.
+    rpm_build_dependencies = ''
+    rpm_filenames = ''
+    rpm_rename_source_package = ''
     if project_configuration.HasRpm():
       building_table_of_contents += (
           '* [Using RedHat package tools (RPM)]'
