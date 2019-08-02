@@ -51,6 +51,6 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
       if output_filename.endswith('.sh'):
-        # Set x-bit for .sh scripts.
+        # Set x-bit for .sh script.
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)

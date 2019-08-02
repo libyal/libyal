@@ -1,4 +1,4 @@
 after_success:
-  - if test $${TARGET} = "linux-gcc-no-optimization"; then
-      curl -o codecov.sh -s https://codecov.io/bash && sed 's/ -execdir / -exec /' -i ./codecov.sh && /bin/bash ./codecov.sh -n $${TARGET} -y .codecov.yml;
-    fi
+- if test $${TARGET} = "linux-gcc-no-optimization"; then
+    curl -o codecov.sh -s https://codecov.io/bash && sed 's/ -execdir / -exec /' -i ./codecov.sh && /bin/bash ./codecov.sh -n $${TARGET} -y .codecov.yml;
+  fi

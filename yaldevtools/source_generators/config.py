@@ -1007,9 +1007,105 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='ab')
 
+  def _GenerateTravisBeforeInstallSh(
+      self, project_configuration, template_mappings, output_writer):
+    """Generates the .travis/before_install.sh script file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    template_directory = os.path.join(
+        self._template_directory, '.travis', 'before_install.sh')
+
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
+    if 'fuse' in project_configuration.tools_build_dependencies:
+      template_names = ['header-fuse.sh']
+    else:
+      template_names = ['header.sh']
+
+    if project_configuration.coverity_scan_token:
+      template_names.append('coverity.sh')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    template_mappings['dpkg_build_dependencies'] = ' '.join(
+        dpkg_build_dependencies)
+
+    output_filename = os.path.join('.travis', 'before_install.sh')
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['dpkg_build_dependencies']
+
+    # Set x-bit for .sh script.
+    stat_info = os.stat(output_filename)
+    os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
+
+  def _GenerateTravisInstallSh(self, template_mappings, output_writer):
+    """Generates the .travis/install.sh script file.
+
+    Args:
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    template_directory = os.path.join(
+        self._template_directory, '.travis', 'install.sh')
+
+    template_names = ['body.sh']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    output_filename = os.path.join('.travis', 'install.sh')
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    # Set x-bit for .sh script.
+    stat_info = os.stat(output_filename)
+    os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
+
+  def _GenerateTravisScriptSh(
+      self, project_configuration, template_mappings, output_writer):
+    """Generates the .travis/script.sh script file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    template_directory = os.path.join(
+        self._template_directory, '.travis', 'script.sh')
+
+    if project_configuration.HasPythonModule():
+      template_names = ['body-python.sh']
+    else:
+      template_names = ['body.sh']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    output_filename = os.path.join('.travis', 'script.sh')
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    # Set x-bit for .sh script.
+    stat_info = os.stat(output_filename)
+    os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
+
   def _GenerateTravisYML(
       self, project_configuration, template_mappings, include_header_file,
-      output_writer, output_filename):
+      output_writer):
     """Generates the .travis.yml configuration file.
 
     Args:
@@ -1019,12 +1115,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       include_header_file (LibraryIncludeHeaderFile): library include header
           file.
       output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
     template_directory = os.path.join(self._template_directory, '.travis.yml')
-
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
 
     template_names = ['header.yml']
 
@@ -1075,22 +1167,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     else:
       template_names.append('matrix-macos-pkgbuild.yml')
 
-    if 'fuse' in project_configuration.tools_build_dependencies:
-      template_names.append('before_install-fuse.yml')
-    else:
-      template_names.append('before_install.yml')
-
-    if project_configuration.coverity_scan_token:
-      template_names.append('before_install-coverity.yml')
-
-    template_names.append('install.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('script-python.yml')
-    else:
-      template_names.append('script.yml')
-
-    template_names.append('after_success.yml')
+    template_names.extend([
+        'before_install.yml', 'install.yml', 'script.yml', 'after_success.yml'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -1098,9 +1176,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_mappings['coverity_scan_token'] = (
         project_configuration.coverity_scan_token or '')
-
-    template_mappings['dpkg_build_dependencies'] = ' '.join(
-        dpkg_build_dependencies)
 
     no_optimization_configure_options = ['--enable-shared=no']
     if include_header_file.have_wide_character_type:
@@ -1110,10 +1185,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         no_optimization_configure_options)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_writer, '.travis.yml')
 
     del template_mappings['coverity_scan_token']
-    del template_mappings['dpkg_build_dependencies']
     del template_mappings['no_optimization_configure_options']
 
   def _GetBrewBuildDependencies(self, project_configuration):
@@ -1341,7 +1415,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateTravisYML(
         project_configuration, template_mappings, include_header_file,
-        output_writer, '.travis.yml')
+        output_writer)
+
+    self._GenerateTravisBeforeInstallSh(
+        project_configuration, template_mappings, output_writer)
+
+    self._GenerateTravisInstallSh(template_mappings, output_writer)
+
+    self._GenerateTravisScriptSh(
+        project_configuration, template_mappings, output_writer)
 
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer, 'appveyor.yml')
