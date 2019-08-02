@@ -11,7 +11,15 @@ then
 	export PATH=$$(echo $$PATH | tr ":" "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s/::/:/g");
 fi
 
-if test $${TARGET} = "linux-gcc-python-setup-py" || test $${TARGET} = "macos-gcc-python-setup-py";
+if test $${TARGET} = "docker";
+then
+	CONTAINER_NAME="testcontainer";
+	CONTAINER_OPTIONS="-e LANG=en_US.UTF-8";
+
+	# Note that exec options need to be defined before the container name.
+	docker exec $${CONTAINER_OPTIONS} $${CONTAINER_NAME} sh -c "cd ${library_name} && .travis/runtests.sh";
+
+elif test $${TARGET} = "linux-gcc-python-setup-py" || test $${TARGET} = "macos-gcc-python-setup-py";
 then
 	./configure $${CONFIGURE_OPTIONS};
 	make > /dev/null;
@@ -19,45 +27,17 @@ then
 
 elif test $${TARGET} != "coverity";
 then
-	set +e;
-
-	./configure $${CONFIGURE_OPTIONS};
-	RESULT=$$?;
-
-	if test $${RESULT} -eq 0;
-	then
-		make > /dev/null;
-		RESULT=$$?;
-	fi
-	if test $${RESULT} -eq 0;
-	then
-		if test $${TARGET} = "macos-gcc-python" || test $${TARGET} = "macos-gcc-pkgbuild";
-		then
-			install_name_tool -change /usr/local/lib/${library_name}.1.dylib $${PWD}/${library_name}/.libs/${library_name}.1.dylib ./${python_module_name}/.libs/${python_module_name}.so;
-		fi
-		make check CHECK_WITH_STDERR=1;
-		RESULT=$$?;
-	fi
-	if test $${RESULT} -ne 0;
-	then
-	        if test -f tests/test-suite.log;
-		then
-			cat tests/test-suite.log;
-		fi
-		return $${RESULT};
-	fi
-
-	set -e;
+	.travis/runtests.sh;
 
 	if test $${TARGET} = "macos-gcc-pkgbuild";
 	then
 		export VERSION=`sed '5!d; s/^ \[//;s/\],$$//' configure.ac`;
 
 		make install DESTDIR=$${PWD}/osx-pkg;
-		mkdir -p $${PWD}/osx-pkg/usr/share/doc/libcerror;
-		cp AUTHORS COPYING NEWS README $${PWD}/osx-pkg/usr/share/doc/libcerror;
+		mkdir -p $${PWD}/osx-pkg/usr/share/doc/${library_name};
+		cp AUTHORS COPYING NEWS README $${PWD}/osx-pkg/usr/share/doc/${library_name};
 
-		pkgbuild --root osx-pkg --identifier com.github.libyal.libcerror --version $${VERSION} --ownership recommended ../libcerror-$${VERSION}.pkg;
+		pkgbuild --root osx-pkg --identifier com.github.libyal.${library_name} --version $${VERSION} --ownership recommended ../${library_name}-$${VERSION}.pkg;
 	fi
 fi
 

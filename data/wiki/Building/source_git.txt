@@ -20,7 +20,7 @@ The source from the git repository will not work without synchronizing the libra
 ### Debian/Ubuntu
 On Debian based Linux distributions such as Ubuntu install the following packages:
 ```
-sudo apt install ${git_apt_dependencies}
+sudo apt-get install ${git_apt_dependencies}
 ```
 
 ### macOS
