@@ -1099,6 +1099,31 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     stat_info = os.stat(output_filename)
     os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
+  def _GenerateTravisScriptDockerSh(self, template_mappings, output_writer):
+    """Generates the .travis/script_docker.sh script file.
+
+    Args:
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    template_directory = os.path.join(
+        self._template_directory, '.travis', 'script_docker.sh')
+
+    template_names = ['body.sh']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    output_filename = os.path.join('.travis', 'script_docker.sh')
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    # Set x-bit for .sh script.
+    stat_info = os.stat(output_filename)
+    os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
+
   def _GenerateTravisScriptSh(
       self, project_configuration, template_mappings, output_writer):
     """Generates the .travis/script.sh script file.
@@ -1452,6 +1477,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateTravisScriptSh(
         project_configuration, template_mappings, output_writer)
+
+    self._GenerateTravisScriptDockerSh(template_mappings, output_writer)
 
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer, 'appveyor.yml')

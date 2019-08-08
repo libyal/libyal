@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 # Script to run script step on Travis-CI
 #
-# Version: 20190802
+# Version: 20190808
 
 # Exit on error.
 set -e;
@@ -13,11 +13,7 @@ fi
 
 if test $${TARGET} = "docker";
 then
-	CONTAINER_NAME="testcontainer";
-	CONTAINER_OPTIONS="-e LANG=en_US.UTF-8";
-
-	# Note that exec options need to be defined before the container name.
-	docker exec $${CONTAINER_OPTIONS} $${CONTAINER_NAME} sh -c "cd ${library_name} && .travis/runtests.sh";
+	docker run -t -v "$${PWD}:/${library_name}" $${DOCKERHUB_REPO}:$${DOCKERHUB_TAG} sh -c "cd ${library_name} && .travis/script_docker.sh";
 
 elif test $${TARGET} != "coverity";
 then

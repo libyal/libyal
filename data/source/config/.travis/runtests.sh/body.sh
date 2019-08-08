@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 # Script to run tests on Travis-CI
 #
-# Version: 20190802
+# Version: 20190808
 
 ./configure $${CONFIGURE_OPTIONS};
 RESULT=$$?;
