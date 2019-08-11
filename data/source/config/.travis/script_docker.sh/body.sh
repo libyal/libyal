@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to run script step on Travis-CI with Docker
 #
-# Version: 20190808
+# Version: 20190809
 
 # Exit on error.
 set -e;
@@ -17,7 +17,7 @@ apt-get install -y locales software-properties-common;
 locale-gen en_US.UTF-8;
 
 # Install packages essential for building.
-apt-get install -y autoconf automake build-essential libtool pkg-config autopoint;
+apt-get install -y autoconf automake build-essential git libtool pkg-config autopoint;
 
 export LANG="en_US.UTF-8";
 
