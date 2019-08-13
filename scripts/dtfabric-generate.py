@@ -227,6 +227,7 @@ class SourceGenerator(object):
     """
     structure_options = members_configuration.get('__options__', {})
 
+    has_datetime_member = False
     has_string_member = False
     for member_definition in data_type_definition.members:
       member_data_type_definition = getattr(
@@ -235,6 +236,10 @@ class SourceGenerator(object):
       type_indicator = member_data_type_definition.TYPE_INDICATOR
       if type_indicator == definitions.TYPE_INDICATOR_STRING:
         has_string_member = True
+
+      member_data_type = getattr(member_definition, 'member_data_type', None)
+      if member_data_type in ('filetime', ):
+        has_datetime_member = True
 
     library_name = 'lib{0:s}'.format(self._prefix)
     template_mappings = self._GetTemplateMappings(
@@ -266,12 +271,20 @@ class SourceGenerator(object):
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='ab')
 
-    if has_string_member:
+    if has_datetime_member or has_string_member:
       template_filename = os.path.join(template_directory, 'includes-debug.c')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
           access_mode='ab')
 
+    if has_datetime_member:
+      template_filename = os.path.join(
+          template_directory, 'includes-libfdatetime.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='ab')
+
+    if has_string_member:
       template_filename = os.path.join(template_directory, 'includes-libuna.c')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
@@ -682,6 +695,11 @@ class SourceGenerator(object):
           element_data_size = element_data_type_definition.GetByteSize()
           if element_data_size == 2:
             template_filename = 'read_data-debug-string_16bit.c'
+
+      else:
+        member_data_type = getattr(member_definition, 'member_data_type', None)
+        if member_data_type in ('filetime', ):
+          template_filename = 'read_data-debug-filetime.c'
 
       if member_definition.description:
         description = member_definition.description
