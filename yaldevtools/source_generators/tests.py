@@ -596,6 +596,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       logging.warning('Skipping: {0:s}'.format(header_file.path))
       return False
 
+    test_options = self._GetTestOptions(project_configuration, type_name)
+    test_options = [argument for _, argument in test_options]
+
     template_directory = os.path.join(
         self._template_directory, 'pyyal_test_type')
 
@@ -603,19 +606,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.python_module_name, type_name)
     output_filename = os.path.join('tests', output_filename)
 
-    template_filename = os.path.join(template_directory, 'header.py')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_names = ['header.py', 'imports.py']
 
-    template_filename = os.path.join(template_directory, 'imports.py')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    if 'offset' in test_options:
+      template_names.append('data_range_file_object.py')
 
-    template_filename = os.path.join(template_directory, 'test_case.py')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_names.append('test_case.py')
 
     for type_function in (
         'signal_abort', 'open', 'set_ascii_codepage', 'read_buffer',
@@ -624,14 +620,29 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       if not function_prototype:
         continue
 
-      template_filename = '{0:s}.py'.format(type_function)
-      template_filename = os.path.join(template_directory, template_filename)
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+      if type_function == 'open' and 'offset' in test_options:
+        template_name = '{0:s}-with_offset.py'.format(type_function)
+      else:
+        template_name = '{0:s}.py'.format(type_function)
 
-    test_options = self._GetTestOptions(project_configuration, type_name)
-    test_options = [argument for _, argument in test_options]
+      template_names.append(template_name)
+
+    getter_functions = []
+    for function_prototype in header_file.functions_per_name.values():
+      if '_get_' in function_prototype.name:
+        _, _, function_name = function_prototype.name.partition('_get_')
+        if function_name.startswith('utf'):
+          _, _, function_name = function_name.partition('_')
+
+        # TODO: skip string size functions
+        # TODO: correct for by_index
+
+        function_name = 'get_{0:s}'.format(function_name)
+        getter_functions.append(function_name)
+
+    # TODO: generate tests for getter functions and properties
+
+    template_names.append('main.py')
 
     argument_parser_options = []
     unittest_options = []
@@ -678,10 +689,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         argument_parser_options)
     template_mappings['unittest_options'] = '\n'.join(unittest_options)
 
-    template_filename = os.path.join(template_directory, 'main.py')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer,
+        output_filename)
 
     del template_mappings['argument_parser_options']
     del template_mappings['unittest_options']

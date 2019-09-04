@@ -1,20 +1,28 @@
 class DataRangeFileObject(object):
   """File-like object that maps an in-file data range."""
 
-  def __init__(self, file_object, range_offset, range_size):
+  def __init__(self, path, range_offset, range_size):
     """Initializes a file-like object.
 
     Args:
-      file_object (file): parent file-like object.
+      path (str): path of the file that contains the data range.
       range_offset (int): offset where the data range starts.
       range_size (int): size of the data range starts, or None to indicate
           the range should continue to the end of the parent file-like object.
     """
     super(DataRangeFileObject, self).__init__()
     self._current_offset = 0
-    self._file_object = file_object
+    self._file_object = open(unittest.source, "rb")
     self._range_offset = range_offset
     self._range_size = range_size
+
+  def __enter__(self):
+    """Enters a with statement."""
+    return self
+
+  def __exit__(self, unused_type, unused_value, unused_traceback):
+    """Exits a with statement."""
+    return
 
   def close(self):
     """Closes the file-like object."""

@@ -2,7 +2,7 @@
   def test_read_buffer(self):
     """Tests the read_buffer function."""
     if not unittest.source:
-      return
+      raise unittest.SkipTest('missing source')
 
     ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
 
@@ -43,7 +43,7 @@
   def test_read_buffer_file_object(self):
     """Tests the read_buffer function on a file-like object."""
     if not unittest.source:
-      return
+      raise unittest.SkipTest('missing source')
 
     file_object = open(unittest.source, "rb")
 
@@ -64,7 +64,7 @@
   def test_read_buffer_at_offset(self):
     """Tests the read_buffer_at_offset function."""
     if not unittest.source:
-      return
+      raise unittest.SkipTest('missing source')
 
     ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
 

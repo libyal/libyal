@@ -4,6 +4,9 @@
     if not unittest.source:
       raise unittest.SkipTest('missing source')
 
+    if unittest.offset:
+      raise unittest.SkipTest('source defines offset')
+
     ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
 
     ${library_name_suffix}_${type_name}.open(unittest.source)
@@ -24,16 +27,17 @@
     if not unittest.source:
       raise unittest.SkipTest('missing source')
 
-    file_object = open(unittest.source, "rb")
+    with DataRangeFileObject(
+        unittest.source, unittest.offset or 0, None) as file_object:
 
-    ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
+      ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
 
-    ${library_name_suffix}_${type_name}.open_file_object(file_object)
-
-    with self.assertRaises(IOError):
       ${library_name_suffix}_${type_name}.open_file_object(file_object)
 
-    ${library_name_suffix}_${type_name}.close()
+      with self.assertRaises(IOError):
+        ${library_name_suffix}_${type_name}.open_file_object(file_object)
+
+      ${library_name_suffix}_${type_name}.close()
 
     # TODO: change IOError into TypeError
     with self.assertRaises(IOError):
@@ -55,7 +59,10 @@
   def test_open_close(self):
     """Tests the open and close functions."""
     if not unittest.source:
-      return
+      raise unittest.SkipTest('missing source')
+
+    if unittest.offset:
+      raise unittest.SkipTest('source defines offset')
 
     ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
 
