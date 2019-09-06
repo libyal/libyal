@@ -94,6 +94,9 @@ class FunctionPrototype(object):
       return_type (str): return type.
     """
     super(FunctionPrototype, self).__init__()
+    self._parsed_value = False
+    self._value_name = None
+    self._value_type = None
     self.arguments = []
     self.have_bfio = False
     self.have_debug_output = False
@@ -147,6 +150,54 @@ class FunctionPrototype(object):
       argument_strings.append(argument_string)
 
     return ', '.join(argument_strings)
+
+  def _ParseValue(self):
+    """Parses the value name and type."""
+    # Strip the library name.
+    _, _, function_name = self.name.partition('_')
+    # Strip the library type.
+    _, _, function_name = function_name.partition('_')
+
+    value_name = None
+    value_type = None
+
+    number_of_arguments = len(self.arguments)
+
+    if function_name.startswith('get_utf'):
+      if number_of_arguments in (3, 4):
+        _, _, value_name = function_name.partition('_')
+        _, _, value_name = value_name.partition('_')
+
+    elif function_name.startswith('get_'):
+      # TODO: handle by_index, by_path getters
+      if number_of_arguments == 3:
+        _, _, value_name = function_name.partition('_')
+
+    self._parsed_value = True
+    self._value_name = value_name
+    self._value_type = value_type
+
+  def GetValueName(self):
+    """Determines the value name of a getter or setter function.
+
+    Returns:
+      str: value name or None if not available.
+    """
+    if not self._parsed_value:
+      self._ParseValue()
+
+    return self._value_name
+
+  def GetValueType(self):
+    """Determines the value type of a getter or setter function.
+
+    Returns:
+      str: value type or None if not available.
+    """
+    if not self._parsed_value:
+      self._ParseValue()
+
+    return self._value_type
 
 
 class PythonTypeObjectFunctionPrototype(object):

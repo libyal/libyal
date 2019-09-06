@@ -627,22 +627,40 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       template_names.append(template_name)
 
-    getter_functions = []
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer,
+        output_filename)
+
+    value_names = []
     for function_prototype in header_file.functions_per_name.values():
-      if '_get_' in function_prototype.name:
-        _, _, function_name = function_prototype.name.partition('_get_')
-        if function_name.startswith('utf'):
-          _, _, function_name = function_name.partition('_')
+      if '_utf16_' in function_prototype.name:
+        continue
 
-        # TODO: skip string size functions
-        # TODO: correct for by_index
+      value_name = function_prototype.GetValueName()
+      if value_name:
+        value_names.append(value_name)
 
-        function_name = 'get_{0:s}'.format(function_name)
-        getter_functions.append(function_name)
+    for value_name in value_names:
+      # Skip value name size getter functions.
+      if value_name.endswith('_size') and value_name[:-5] in value_names:
+        continue
 
-    # TODO: generate tests for getter functions and properties
+      template_mappings['value_name'] = value_name
 
-    template_names.append('main.py')
+      template_filename = os.path.join(
+          template_directory, 'getter_with_property.py')
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer,
+          output_filename, access_mode='ab')
+
+      del template_mappings['value_name']
+
+    template_names = ['main.py']
 
     argument_parser_options = []
     unittest_options = []
@@ -695,7 +713,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer,
-        output_filename)
+        output_filename, access_mode='ab')
 
     del template_mappings['argument_parser_options']
     del template_mappings['unittest_options']
