@@ -26,7 +26,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'appveyor.yml')
 
-    template_names = ['environment-header.yml']
+    template_names = ['environment.yml']
+
+    if project_configuration.HasPythonModule():
+      template_names.append('environment-pypi.yml')
+
+    template_names.append('environment-matrix.yml')
 
     if project_configuration.HasPythonModule():
       template_names.append('environment-python.yml')
@@ -63,7 +68,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasTools():
       template_names.append('environment-mingw-w64-static-executables.yml')
 
-    template_names.extend(['allow-failures.yml', 'install-header.yml'])
+    template_names.append('install-header.yml')
 
     if (project_configuration.HasDependencyLex() or
         project_configuration.HasDependencyYacc()):
@@ -75,12 +80,20 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasDependencyDokan():
       template_names.append('install-dokan.yml')
 
+    if project_configuration.HasPythonModule():
+      template_names.append('install-python.yml')
+
+    # TODO: set template mapping
+    template_mappings['pypi_token'] = ''
+
     template_filenames = [
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['pypi_token']
 
     cygwin_build_dependencies = self._GetCygwinBuildDependencies(
         project_configuration)
@@ -148,8 +161,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         'build_script-footer.yml', 'test_script.yml', 'after_test.yml'])
 
     # TODO: make this configuration driven
-    if project_configuration.library_name == 'libevt':
-      template_names.append('deploy.yml')
+    if (project_configuration.library_name == 'libevt' or
+        project_configuration.HasPythonModule()):
+      template_names.append('artifacts.yml')
+
+      if project_configuration.library_name == 'libevt':
+        template_names.append('artifacts-nuget.yml')
+
+      elif project_configuration.HasPythonModule():
+        template_names.append('artifacts-pypi.yml')
+
+      if project_configuration.library_name == 'libevt':
+        template_names.append('deploy-nuget.yml')
+
+      if project_configuration.HasPythonModule():
+        template_names.append('deploy-pypi.yml')
 
     template_filenames = [
         os.path.join(template_directory, template_name)

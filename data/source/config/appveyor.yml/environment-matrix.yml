@@ -1,4 +1,3 @@
-environment:
   matrix:
   - TARGET: vs2008
     BUILD_ENVIRONMENT: msbuild

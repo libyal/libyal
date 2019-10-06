@@ -1,2 +1,2 @@
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
-    "%PYTHON%\\python.exe" setup.py bdist_msi )
+    "%PYTHON%\\python.exe" setup.py bdist_msi bdist_wheel )

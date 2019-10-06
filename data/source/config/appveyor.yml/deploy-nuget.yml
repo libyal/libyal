@@ -1,5 +1,3 @@
-artifacts:
-- path: \*.nupkg
 
 deploy:
 - provider: NuGet

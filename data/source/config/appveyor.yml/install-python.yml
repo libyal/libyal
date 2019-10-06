@@ -1,0 +1,2 @@
+- cmd: if [%BUILD_ENVIRONMENT%]==[python] (
+    "%PYTHON%\\python.exe" -m pip install -U pip setuptools wheel )

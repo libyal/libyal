@@ -1,4 +1,0 @@
-
-matrix:
-  allow_failures:
-  - TARGET: python27-x64
