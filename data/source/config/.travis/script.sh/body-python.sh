@@ -21,6 +21,11 @@ then
 	make > /dev/null;
 	python ./setup.py build;
 
+	if test ${TARGET} = "macos-gcc-python-setup-py";
+	then
+		python ./setup.py bdist_wheel;
+	fi
+
 elif test $${TARGET} != "coverity";
 then
 	.travis/runtests.sh;

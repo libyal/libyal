@@ -83,8 +83,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasPythonModule():
       template_names.append('install-python.yml')
 
-    # TODO: set template mapping
-    template_mappings['pypi_token'] = ''
+    template_mappings['pypi_token'] = getattr(
+        project_configuration, 'pypi_token_appveyor', '')
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -1330,7 +1330,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       dpkg_build_dependencies.append('libssl-dev')
 
     if project_configuration.HasPythonModule():
-      dpkg_build_dependencies.extend(['python-dev', 'python3-dev'])
+      dpkg_build_dependencies.extend([
+          'python-dev', 'python-setuptools', 'python3-dev',
+          'python3-setuptools'])
 
     if 'fuse' in project_configuration.tools_build_dependencies:
       dpkg_build_dependencies.append('libfuse-dev')
