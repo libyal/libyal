@@ -21,10 +21,11 @@ then
 	make > /dev/null;
 	python ./setup.py build;
 
-	if test ${TARGET} = "macos-gcc-python-setup-py";
-	then
-		python ./setup.py bdist_wheel;
-	fi
+elif test $${TARGET} = "macos-gcc-python-setup-py37";
+then
+	./configure $${CONFIGURE_OPTIONS};
+	make > /dev/null;
+	python3 ./setup.py bdist_wheel;
 
 elif test $${TARGET} != "coverity";
 then
