@@ -64,16 +64,16 @@ class DataRangeFileObject(object):
     """
     if (self._range_offset < 0 or
         (self._range_size is not None and self._range_size < 0)):
-      raise IOError('Invalid data range.')
+      raise IOError("Invalid data range.")
 
     if self._current_offset < 0:
       raise IOError(
-          'Invalid current offset: {0:d} value less than zero.'.format(
+          "Invalid current offset: {0:d} value less than zero.".format(
               self._current_offset))
 
     if (self._range_size is not None and
         self._current_offset >= self._range_size):
-      return b''
+      return b""
 
     if size is None:
       size = self._range_size
@@ -102,7 +102,7 @@ class DataRangeFileObject(object):
     """
     if self._current_offset < 0:
       raise IOError(
-          'Invalid current offset: {0:d} value less than zero.'.format(
+          "Invalid current offset: {0:d} value less than zero.".format(
               self._current_offset))
 
     if whence == os.SEEK_CUR:
@@ -110,9 +110,9 @@ class DataRangeFileObject(object):
     elif whence == os.SEEK_END:
       offset += self._range_size
     elif whence != os.SEEK_SET:
-      raise IOError('Unsupported whence.')
+      raise IOError("Unsupported whence.")
     if offset < 0:
-      raise IOError('Invalid offset value less than zero.')
+      raise IOError("Invalid offset value less than zero.")
 
     self._current_offset = offset
 

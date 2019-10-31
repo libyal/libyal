@@ -2,7 +2,7 @@
   def test_get_${value_name}(self):
     """Tests the get_${value_name} function and ${value_name} property."""
     if not unittest.source:
-      raise unittest.SkipTest('missing source')
+      raise unittest.SkipTest("missing source")
 
     with DataRangeFileObject(
         unittest.source, unittest.offset or 0, None) as file_object:

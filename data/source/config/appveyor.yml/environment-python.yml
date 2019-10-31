@@ -4,9 +4,9 @@
   - TARGET: python27-x64
     BUILD_ENVIRONMENT: python
     PYTHON: "C:\\Python27-x64"
-  - TARGET: python36
+  - TARGET: python37
     BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python36"
-  - TARGET: python36-x64
+    PYTHON: "C:\\Python37"
+  - TARGET: python37-x64
     BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python36-x64"
+    PYTHON: "C:\\Python37-x64"
