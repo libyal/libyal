@@ -10,19 +10,13 @@
 
     file_size = ${library_name_suffix}_${type_name}.get_size()
 
-    # Test normal read.
+    # Test read with maximum size.
     data = ${library_name_suffix}_${type_name}.read_buffer(size=4096)
 
     self.assertIsNotNone(data)
     self.assertEqual(len(data), min(file_size, 4096))
 
-    if file_size < 4096:
-      data = ${library_name_suffix}_${type_name}.read_buffer()
-
-      self.assertIsNotNone(data)
-      self.assertEqual(len(data), file_size)
-
-    # Test read beyond file size.
+    # Test read with maximum size beyond file size.
     if file_size > 16:
       ${library_name_suffix}_${type_name}.seek_offset(-16, os.SEEK_END)
 
@@ -30,6 +24,15 @@
 
       self.assertIsNotNone(data)
       self.assertEqual(len(data), 16)
+
+    # Test read without maximum size.
+    if file_size < 4096:
+      ${library_name_suffix}_${type_name}.seek_offset(0, os.SEEK_SET)
+
+      data = ${library_name_suffix}_${type_name}.read_buffer()
+
+      self.assertIsNotNone(data)
+      self.assertEqual(len(data), file_size)
 
     with self.assertRaises(ValueError):
       ${library_name_suffix}_${type_name}.read_buffer(size=-1)

@@ -25,10 +25,11 @@
     offset = ${library_name_suffix}_${type_name}.get_offset()
     self.assertEqual(offset, 16)
 
-    ${library_name_suffix}_${type_name}.seek_offset(-16, os.SEEK_END)
+    if file_size > 16:
+      ${library_name_suffix}_${type_name}.seek_offset(-16, os.SEEK_END)
 
-    offset = ${library_name_suffix}_${type_name}.get_offset()
-    self.assertEqual(offset, file_size - 16)
+      offset = ${library_name_suffix}_${type_name}.get_offset()
+      self.assertEqual(offset, file_size - 16)
 
     ${library_name_suffix}_${type_name}.seek_offset(16, os.SEEK_END)
 
