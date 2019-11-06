@@ -1576,12 +1576,27 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
+    function_prototype = header_file.GetTypeFunction(
+        type_name, 'read_buffer')
+
+    with_read_functions = bool(function_prototype)
+
     template_names.append('header.c')
 
     if with_input:
-      template_names.append('includes-with_input.c')
+      template_names.append('includes_common-with_input.c')
     else:
-      template_names.append('includes.c')
+      template_names.append('includes_common.c')
+
+    template_names.append('includes.c')
+
+    if with_read_functions:
+      template_names.append('includes_time.c')
+
+    if with_input:
+      template_names.append('includes_local-with_input.c')
+    else:
+      template_names.append('includes_local.c')
 
     if header_file.have_internal_functions:
       template_names.append('includes_internal.c')
@@ -1615,13 +1630,21 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       if has_string_test_options:
         test_options_function_variables.insert(0, 'size_t string_length = 0;')
 
-      template_names = ['start_with_input.c']
+    template_names = []
 
+    if with_input:
+      template_names.append('start_with_input.c')
+
+    if with_read_functions:
+      template_names.append('start_read_buffer_size.c')
+
+    if with_input:
       if bfio_type == 'pool':
         template_names.append('start_with_input-bfio_pool.c')
       else:
         template_names.append('start_with_input-bfio_handle.c')
 
+    if with_input:
       template_names.append('open_source-start.c')
 
       for _, argument in test_options:
