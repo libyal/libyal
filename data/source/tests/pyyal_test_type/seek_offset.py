@@ -8,7 +8,7 @@
 
     ${library_name_suffix}_${type_name}.open(unittest.source)
 
-    file_size = ${library_name_suffix}_${type_name}.get_size()
+    ${type_size_name} = ${library_name_suffix}_${type_name}.get_${type_size_name}()
 
     ${library_name_suffix}_${type_name}.seek_offset(16, os.SEEK_SET)
 
@@ -25,16 +25,16 @@
     offset = ${library_name_suffix}_${type_name}.get_offset()
     self.assertEqual(offset, 16)
 
-    if file_size > 16:
+    if ${type_size_name} > 16:
       ${library_name_suffix}_${type_name}.seek_offset(-16, os.SEEK_END)
 
       offset = ${library_name_suffix}_${type_name}.get_offset()
-      self.assertEqual(offset, file_size - 16)
+      self.assertEqual(offset, ${type_size_name} - 16)
 
     ${library_name_suffix}_${type_name}.seek_offset(16, os.SEEK_END)
 
     offset = ${library_name_suffix}_${type_name}.get_offset()
-    self.assertEqual(offset, file_size + 16)
+    self.assertEqual(offset, ${type_size_name} + 16)
 
     # TODO: change IOError into ValueError
     with self.assertRaises(IOError):
@@ -42,11 +42,11 @@
 
     # TODO: change IOError into ValueError
     with self.assertRaises(IOError):
-      ${library_name_suffix}_${type_name}.seek_offset(-32 - file_size, os.SEEK_CUR)
+      ${library_name_suffix}_${type_name}.seek_offset(-32 - ${type_size_name}, os.SEEK_CUR)
 
     # TODO: change IOError into ValueError
     with self.assertRaises(IOError):
-      ${library_name_suffix}_${type_name}.seek_offset(-32 - file_size, os.SEEK_END)
+      ${library_name_suffix}_${type_name}.seek_offset(-32 - ${type_size_name}, os.SEEK_END)
 
     # TODO: change IOError into ValueError
     with self.assertRaises(IOError):

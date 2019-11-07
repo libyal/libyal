@@ -596,6 +596,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       logging.warning('Skipping: {0:s}'.format(header_file.path))
       return False
 
+    function_prototype = header_file.GetTypeFunction(
+        type_name, 'read_buffer')
+
+    with_read_functions = bool(function_prototype)
+
     test_options = self._GetTestOptions(project_configuration, type_name)
     test_options = [argument for _, argument in test_options]
 
@@ -606,7 +611,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.python_module_name, type_name)
     output_filename = os.path.join('tests', output_filename)
 
-    template_names = ['header.py', 'imports.py']
+    template_names = ['header.py', 'imports-start.py']
+
+    if with_read_functions:
+      template_names.append('imports-random.py')
+
+    template_names.append('imports-end.py')
 
     if 'offset' in test_options:
       template_names.append('data_range_file_object.py')
@@ -631,9 +641,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
+    type_size_name = self._GetTypeSizeName(project_configuration, type_name)
+
+    template_mappings['type_size_name'] = type_size_name
+
     self._GenerateSections(
         template_filenames, template_mappings, output_writer,
         output_filename)
+
+    del template_mappings['type_size_name']
 
     value_names = []
     for function_prototype in header_file.functions_per_name.values():

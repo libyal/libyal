@@ -24,6 +24,9 @@
     if not unittest.source:
       raise unittest.SkipTest("missing source")
 
+    if not os.path.isfile(unittest.source):
+      raise unittest.SkipTest("source not a regular file")
+
     file_object = open(unittest.source, "rb")
 
     ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
@@ -67,17 +70,19 @@
     ${library_name_suffix}_${type_name}.open(unittest.source)
     ${library_name_suffix}_${type_name}.close()
 
-    file_object = open(unittest.source, "rb")
+    if os.path.isfile(unittest.source):
+      file_object = open(unittest.source, "rb")
 
-    # Test open_file_object and close.
-    ${library_name_suffix}_${type_name}.open_file_object(file_object)
-    ${library_name_suffix}_${type_name}.close()
+      # Test open_file_object and close.
+      ${library_name_suffix}_${type_name}.open_file_object(file_object)
+      ${library_name_suffix}_${type_name}.close()
 
-    # Test open_file_object and close a second time to validate clean up on close.
-    ${library_name_suffix}_${type_name}.open_file_object(file_object)
-    ${library_name_suffix}_${type_name}.close()
+      # Test open_file_object and close a second time to validate clean up on close.
+      ${library_name_suffix}_${type_name}.open_file_object(file_object)
+      ${library_name_suffix}_${type_name}.close()
 
-    # Test open_file_object and close and dereferencing file_object.
-    ${library_name_suffix}_${type_name}.open_file_object(file_object)
-    del file_object
+      # Test open_file_object and close and dereferencing file_object.
+      ${library_name_suffix}_${type_name}.open_file_object(file_object)
+      del file_object
+
     ${library_name_suffix}_${type_name}.close()

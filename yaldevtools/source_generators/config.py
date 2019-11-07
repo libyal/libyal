@@ -300,7 +300,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         # TODO: determine deflate function via configuration setting? 
         elif project_configuration.library_name in (
-            'libfsapfs', 'libfvde', 'libpff', 'libvmdk'):
+            'libfsapfs', 'libfvde', 'libmodi', 'libpff', 'libvmdk'):
           template_filename = 'check_zlib_uncompress.ac'
 
         else:
@@ -1125,10 +1125,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     stat_info = os.stat(output_filename)
     os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
-  def _GenerateTravisScriptDockerSh(self, template_mappings, output_writer):
+  def _GenerateTravisScriptDockerSh(
+      self, project_configuration, template_mappings, output_writer):
     """Generates the .travis/script_docker.sh script file.
 
     Args:
+      project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       output_writer (OutputWriter): output writer.
@@ -1142,9 +1144,17 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
+    template_mappings['dpkg_build_dependencies'] = ' '.join(sorted(
+        dpkg_build_dependencies))
+
     output_filename = os.path.join('.travis', 'script_docker.sh')
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['dpkg_build_dependencies']
 
     # Set x-bit for .sh script.
     stat_info = os.stat(output_filename)
@@ -1290,9 +1300,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      list[str]: dpkg build dependencies.
+      list[str]: dpkg build dependencies in alphabetical order.
     """
-    dpkg_build_dependencies = ['autopoint']
+    dpkg_build_dependencies = [
+        'autoconf',
+        'automake',
+        'autopoint',
+        'build-essential',
+        'git',
+        'libtool',
+        'pkg-config']
+
+    if project_configuration.HasDependencyYacc():
+      dpkg_build_dependencies.append('byacc')
+    if project_configuration.HasDependencyLex():
+      dpkg_build_dependencies.append('flex')
 
     if 'zlib' in project_configuration.library_build_dependencies:
       dpkg_build_dependencies.append('zlib1g-dev')
@@ -1310,7 +1332,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     dpkg_build_dependencies.extend(
         project_configuration.dpkg_build_dependencies)
 
-    return dpkg_build_dependencies
+    return sorted(dpkg_build_dependencies)
 
   def _GetDpkgBuildDependenciesDpkgControl(self, project_configuration):
     """Retrieves the dpkg build dependencies for the dpkg/control file.
@@ -1506,7 +1528,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     self._GenerateTravisScriptSh(
         project_configuration, template_mappings, output_writer)
 
-    self._GenerateTravisScriptDockerSh(template_mappings, output_writer)
+    self._GenerateTravisScriptDockerSh(
+        project_configuration, template_mappings, output_writer)
 
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer, 'appveyor.yml')
