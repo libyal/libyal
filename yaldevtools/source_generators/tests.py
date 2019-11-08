@@ -571,7 +571,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
   def _GeneratePythonModuleTypeTests(
       self, project_configuration, template_mappings, type_name, output_writer,
-      with_input=False):
+      with_input=False, with_offset=False):
     """Generates a Python module type tests script file.
 
     Args:
@@ -582,6 +582,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       with_input (Optional[bool]): True if the type is to be tested with
           input data.
+      with_offset (Optional[bool]): True if tests require offset support.
 
     Returns:
       bool: True if successful or False if not.
@@ -667,8 +668,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       template_mappings['value_name'] = value_name
 
-      template_filename = os.path.join(
-          template_directory, 'getter_with_property.py')
+      if with_offset:
+        template_filename = 'getter_with_property-with_offset.py'
+      else:
+        template_filename = 'getter_with_property.py'
+
+      template_filename = os.path.join(template_directory, template_filename)
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer,
@@ -2834,7 +2839,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       if project_configuration.HasPythonModule():
         python_module_types.append(type_name)
         self._GeneratePythonModuleTypeTests(
-            project_configuration, template_mappings, type_name, output_writer)
+            project_configuration, template_mappings, type_name, output_writer,
+            with_offset=with_offset)
 
     # Making a copy since the list is changed in the loop.
     for type_name in list(api_types_with_input):
@@ -2854,7 +2860,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         python_module_types.append(type_name)
         self._GeneratePythonModuleTypeTests(
             project_configuration, template_mappings, type_name, output_writer,
-            with_input=True)
+            with_input=True, with_offset=with_offset)
 
     # Making a copy since the list is changed in the loop.
     for type_name in list(api_pseudo_types):
@@ -2877,7 +2883,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       if project_configuration.HasPythonModule():
         self._GeneratePythonModuleTypeTests(
-            project_configuration, template_mappings, type_name, output_writer)
+            project_configuration, template_mappings, type_name, output_writer,
+            with_offset=with_offset)
 
     # Making a copy since the list is changed in the loop.
     for type_name in list(internal_types):

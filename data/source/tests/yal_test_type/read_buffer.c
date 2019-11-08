@@ -12,15 +12,12 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	size64_t remaining_${type_size_name} = 0;
 	size_t read_size                     = 0;
 	ssize_t read_count                   = 0;
+	off64_t media_offset                 = 0;
 	off64_t offset                       = 0;
 	int number_of_tests                  = 1024;
 	int random_number                    = 0;
 	int result                           = 0;
 	int test_number                      = 0;
-
-#if defined( ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_VERBOSE )
-	off64_t media_offset                 = 0;
-#endif
 
 	/* Determine size
 	 */
@@ -196,11 +193,28 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 		 "error",
 		 error );
 
-		remaining_${type_size_name} -= read_count;
-
-#if defined( ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_VERBOSE )
 		media_offset += read_count;
-#endif
+
+		result = ${library_name}_${type_name}_get_offset(
+		          ${type_name},
+		          &offset,
+		          &error );
+
+		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 offset,
+		 media_offset );
+
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		remaining_${type_size_name} -= read_count;
 
 		if( remaining_${type_size_name} == 0 )
 		{
@@ -219,11 +233,9 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 			 "error",
 			 error );
 
-			remaining_${type_size_name} = ${type_size_name};
-
-#if defined( ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_VERBOSE )
 			media_offset = 0;
-#endif
+
+			remaining_${type_size_name} = ${type_size_name};
 		}
 	}
 	/* Test error cases

@@ -152,27 +152,24 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 		 "error",
 		 error );
 
-		remaining_${type_size_name} -= read_count;
+		result = ${library_name}_${type_name}_get_offset(
+		          ${type_name},
+		          &offset,
+		          &error );
 
-		if( remaining_${type_size_name} == 0 )
-		{
-			offset = ${library_name}_${type_name}_seek_offset(
-			          ${type_name},
-			          0,
-			          SEEK_SET,
-			          &error );
+		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
-			 "offset",
-			 offset,
-			 (int64_t) 0 );
+		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 offset,
+		 media_offset );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-			 "error",
-			 error );
-
-			remaining_${type_size_name} = ${type_size_name};
-		}
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
 	}
 	/* Test error cases
 	 */
