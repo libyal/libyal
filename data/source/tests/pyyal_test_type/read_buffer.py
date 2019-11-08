@@ -10,13 +10,14 @@
 
     ${type_size_name} = ${library_name_suffix}_${type_name}.get_${type_size_name}()
 
-    # Test read without maximum size.
-    ${library_name_suffix}_${type_name}.seek_offset(0, os.SEEK_SET)
+    if ${type_size_name} < 4096:
+      # Test read without maximum size.
+      ${library_name_suffix}_${type_name}.seek_offset(0, os.SEEK_SET)
 
-    data = ${library_name_suffix}_${type_name}.read_buffer()
+      data = ${library_name_suffix}_${type_name}.read_buffer()
 
-    self.assertIsNotNone(data)
-    self.assertEqual(len(data), ${type_size_name})
+      self.assertIsNotNone(data)
+      self.assertEqual(len(data), ${type_size_name})
 
     # Test read with maximum size.
     ${library_name_suffix}_${type_name}.seek_offset(0, os.SEEK_SET)
@@ -88,7 +89,7 @@
 
     ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
 
-    ${library_name_suffix}_${type_name}.open_file_object([file_object])
+    ${library_name_suffix}_${type_name}.open_file_object(file_object)
 
     ${type_size_name} = ${library_name_suffix}_${type_name}.get_${type_size_name}()
 

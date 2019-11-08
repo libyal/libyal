@@ -4,7 +4,7 @@
 int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
      ${library_name}_${type_name}_t *${type_name} )
 {
-	uint8_t buffer[ ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE ];
+	uint8_t buffer[ ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE ];
 
 	libcerror_error_t *error             = NULL;
 	time_t timestamp                     = 0;
@@ -37,16 +37,16 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 
 	/* Test regular cases
 	 */
-	read_size = ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE;
+	read_size = ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE;
 
-	if( ${type_size_name} < ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE )
+	if( ${type_size_name} < ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE )
 	{
 		read_size = (size_t) ${type_size_name};
 	}
 	read_count = ${library_name}_${type_name}_read_buffer_at_offset(
 	              ${type_name},
 	              buffer,
-	              ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE,
+	              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
 	              0,
 	              &error );
 
@@ -66,7 +66,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 		read_count = ${library_name}_${type_name}_read_buffer_at_offset(
 		              ${type_name},
 		              buffer,
-		              ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE,
+		              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
 		              ${type_size_name} - 8,
 		              &error );
 
@@ -84,7 +84,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 		read_count = ${library_name}_${type_name}_read_buffer_at_offset(
 		              ${type_name},
 		              buffer,
-		              ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE,
+		              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
 		              ${type_size_name} + 8,
 		              &error );
 
@@ -120,9 +120,9 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 		{
 			media_offset = (off64_t) random_number % ${type_size_name};
 		}
-		read_size = (size_t) random_number % ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE;
+		read_size = (size_t) random_number % ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE;
 
-#if defined( ${library_name_suffix_upper_case}_TEST_HANDLE_VERBOSE )
+#if defined( ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_VERBOSE )
 		fprintf(
 		 stdout,
 		 "${library_name}_${type_name}_read_buffer_at_offset: at offset: %" PRIi64 " (0x%08" PRIx64 ") of size: %" PRIzd "\n",
@@ -179,7 +179,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 	read_count = ${library_name}_${type_name}_read_buffer_at_offset(
 	              NULL,
 	              buffer,
-	              ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE,
+	              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
 	              0,
 	              &error );
 
@@ -198,7 +198,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 	read_count = ${library_name}_${type_name}_read_buffer_at_offset(
 	              ${type_name},
 	              NULL,
-	              ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE,
+	              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
 	              0,
 	              &error );
 
@@ -236,7 +236,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer_at_offset(
 	read_count = ${library_name}_${type_name}_read_buffer_at_offset(
 	              ${type_name},
 	              buffer,
-	              ${library_name_suffix_upper_case}_TEST_HANDLE_READ_BUFFER_SIZE,
+	              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
 	              -1,
 	              &error );
 
