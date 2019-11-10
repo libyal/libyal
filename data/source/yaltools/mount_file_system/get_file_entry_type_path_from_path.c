@@ -173,7 +173,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
 		 *   \x## by values <= 0x1f and 0x7f
 		 *   / by \
 		 */
-		if( unicode_character == escape_character )
+		if( unicode_character == (libuna_unicode_character_t) escape_character )
 		{
 			if( ( path_index + 1 ) > path_length )
 			{

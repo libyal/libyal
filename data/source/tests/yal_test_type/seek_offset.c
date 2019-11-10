@@ -160,6 +160,66 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	libcerror_error_free(
 	 &error );
 
+#if defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK )
+
+	/* Test ${library_name}_${type_name}_seek_offset with pthread_rwlock_wrlock failing in libcthreads_read_write_lock_grab_for_write
+	 */
+	${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fail = 0;
+
+	offset = ${library_name}_${type_name}_seek_offset(
+	          ${type_name},
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	if( ${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fail != -1 )
+	{
+		${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 (int64_t) offset,
+		 (int64_t) -1 );
+
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test ${library_name}_${type_name}_seek_offset with pthread_rwlock_unlock failing in libcthreads_read_write_lock_release_for_write
+	 */
+	${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail = 0;
+
+	offset = ${library_name}_${type_name}_seek_offset(
+	          ${type_name},
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	if( ${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail != -1 )
+	{
+		${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 (int64_t) offset,
+		 (int64_t) -1 );
+
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK ) */
+
 	return( 1 );
 
 on_error:

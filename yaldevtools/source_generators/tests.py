@@ -795,7 +795,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     Returns:
       tuple: contains:
         str: name of library type function.
-        str: name of the test function corresponding to the library type function.
+        str: name of the test function corresponding to the library type
+            function or None if no test function could be generated.
         bool: True if the function prototype was externally available.
     """
     function_name = self._GetFunctionName(
@@ -960,15 +961,20 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for functions that don't return 0 to not use is_set in tests.
     # if function_prototype.return_values:
 
+    with_is_set = bool(function_prototype.return_values == [-1, 0, 1])
+
     if clone_function:
-      body_template_name = (
-          'function-body-{0:s}-with_clone_function.c').format(function_template)
+      body_template_name = 'function-body-{0:s}-with_clone_function.c'.format(
+          function_template)
     elif free_function:
-      body_template_name = (
-          'function-body-{0:s}-with_free_function.c').format(function_template)
+      body_template_name = 'function-body-{0:s}-with_free_function.c'.format(
+          function_template)
     elif with_codepage:
-      body_template_name = (
-          'function-body-{0:s}-with_codepage.c').format(function_template)
+      body_template_name = 'function-body-{0:s}-with_codepage.c'.format(
+          function_template)
+    elif with_is_set:
+      body_template_name = 'function-body-{0:s}-with_is_set.c'.format(
+          function_template)
     else:
       body_template_name = 'function-body-{0:s}.c'.format(function_template)
 
@@ -983,7 +989,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             'Unable to generate tests source code for type: "{0:s}" function: '
             '"{1:s}" with error: missing template').format(
                 type_name, type_function))
-        return function_name, None, have_extern
+        return function_name, None, last_have_extern
+
+      self._GenerateTypeTestDefineInternalEnd(
+          template_mappings, last_have_extern, have_extern, output_writer,
+          output_filename)
+
+      self._GenerateTypeTestDefineInternalStart(
+          template_mappings, last_have_extern, have_extern, output_writer,
+          output_filename)
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -1012,7 +1026,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             '{0:s} {1:s}[ 512 ];'.format(value_type, value_name),
             ''])
 
-        if not with_index:
+        if with_is_set and not with_index:
           function_variables.append(
               'int {0:s}_is_set = 0;'.format(value_name))
 
@@ -1020,7 +1034,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         function_variables.append(
             '{0:s}_t *{1:s} = 0;'.format(value_type, value_name))
 
-        if not with_index:
+        if with_is_set and not with_index:
           function_variables.append(
               'int {0:s}_is_set = 0;'.format(value_name))
 
@@ -1033,7 +1047,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         function_variables.append(
             '{0:s} {1:s} = 0;'.format(value_type, value_name))
 
-        if not with_index:
+        if with_is_set and not with_index:
           function_variables.append(
               'int {0:s}_is_set = 0;'.format(value_name))
 
@@ -1160,6 +1174,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_mappings['initialize_value_type'] = initialize_value_type
       template_mappings['pointer_type_name'] = pointer_type_argument_type
       template_mappings['test_data_size'] = test_data_size
+
+      self._GenerateTypeTestDefineInternalEnd(
+          template_mappings, last_have_extern, have_extern, output_writer,
+          output_filename)
+
+      self._GenerateTypeTestDefineInternalStart(
+          template_mappings, last_have_extern, have_extern, output_writer,
+          output_filename)
 
       self._GenerateSections(
           template_filenames, template_mappings, output_writer,
@@ -1665,7 +1687,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       else:
         template_names.append('start_with_input-bfio_handle.c')
 
-    if with_input:
       template_names.append('open_source-start.c')
 
       for _, argument in test_options:
@@ -1681,10 +1702,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       template_names.extend(['open_source-end.c', 'close_source.c'])
 
-      template_filenames = [
-          os.path.join(template_directory, template_name)
-          for template_name in template_names]
-
       test_options_function_arguments = [
           '     {0:s}'.format(function_argument)
           for function_argument in test_options_function_arguments]
@@ -1699,10 +1716,16 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_mappings['test_options_function_variables'] = '\n'.join(
           test_options_function_variables)
 
+    if template_names:
+      template_filenames = [
+          os.path.join(template_directory, template_name)
+          for template_name in template_names]
+
       self._GenerateSections(
           template_filenames, template_mappings, output_writer, output_filename,
           access_mode='ab')
 
+    if with_input:
       del template_mappings['signature_type']
       del template_mappings['test_options_function_arguments']
       del template_mappings['test_options_function_variables']
@@ -1843,13 +1866,20 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.library_name, type_name)
     function_name_prefix_length = len(function_name_prefix)
 
+    internal_function_name_prefix = '{0:s}_internal_{1:s}_'.format(
+        project_configuration.library_name, type_name)
+    internal_function_name_prefix_length = len(internal_function_name_prefix)
+
     test_data = self._ReadTestDataFile(type_name)
 
     for function_name in function_names:
-      if not function_name.startswith(function_name_prefix):
+      if function_name.startswith(function_name_prefix):
+        type_function = function_name[function_name_prefix_length:]
+      elif function_name.startswith(internal_function_name_prefix):
+        type_function = 'internal_{0:s}'.format(
+            function_name[internal_function_name_prefix_length:])
+      else:
         continue
-
-      type_function = function_name[function_name_prefix_length:]
 
       type_function_with_input = (
           with_input or (test_data and type_function.startswith('get_')))
@@ -2472,6 +2502,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     Returns:
       str: test function name.
     """
+    if type_function.startswith('internal_'):
+      return '{0:s}_test_internal_{1:s}_{2:s}'.format(
+          project_configuration.library_name_suffix, type_name,
+          type_function[9:])
+
     return '{0:s}_test_{1:s}_{2:s}'.format(
         project_configuration.library_name_suffix, type_name, type_function)
 

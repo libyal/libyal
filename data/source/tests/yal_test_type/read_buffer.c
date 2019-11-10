@@ -12,7 +12,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	size64_t remaining_${type_size_name} = 0;
 	size_t read_size                     = 0;
 	ssize_t read_count                   = 0;
-	off64_t media_offset                 = 0;
+	off64_t read_offset                  = 0;
 	off64_t offset                       = 0;
 	int number_of_tests                  = 1024;
 	int random_number                    = 0;
@@ -170,8 +170,8 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 		fprintf(
 		 stdout,
 		 "${library_name}_${type_name}_read_buffer: at offset: %" PRIi64 " (0x%08" PRIx64 ") of size: %" PRIzd "\n",
-		 media_offset,
-		 media_offset,
+		 read_offset,
+		 read_offset,
 		 read_size );
 #endif
 		read_count = ${library_name}_${type_name}_read_buffer(
@@ -193,7 +193,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 		 "error",
 		 error );
 
-		media_offset += read_count;
+		read_offset += read_count;
 
 		result = ${library_name}_${type_name}_get_offset(
 		          ${type_name},
@@ -208,7 +208,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
 		 "offset",
 		 offset,
-		 media_offset );
+		 read_offset );
 
 		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
@@ -233,11 +233,28 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 			 "error",
 			 error );
 
-			media_offset = 0;
+			read_offset = 0;
 
 			remaining_${type_size_name} = ${type_size_name};
 		}
 	}
+	/* Reset offset to 0
+	 */
+	offset = ${library_name}_${type_name}_seek_offset(
+	          ${type_name},
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	/* Test error cases
 	 */
 	read_count = ${library_name}_${type_name}_read_buffer(
@@ -293,6 +310,66 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 
 	libcerror_error_free(
 	 &error );
+
+#if defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK )
+
+	/* Test ${library_name}_${type_name}_read_buffer with pthread_rwlock_wrlock failing in libcthreads_read_write_lock_grab_for_write
+	 */
+	${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fail = 0;
+
+	read_count = ${library_name}_${type_name}_read_buffer(
+	              ${type_name},
+	              buffer,
+	              ${library_name_suffix_upper_case}_TEST_PARTITION_READ_BUFFER_SIZE,
+	              &error );
+
+	if( ${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fail != -1 )
+	{
+		${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) -1 );
+
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test ${library_name}_${type_name}_read_buffer with pthread_rwlock_unlock failing in libcthreads_read_write_lock_release_for_write
+	 */
+	${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail = 0;
+
+	read_count = ${library_name}_${type_name}_read_buffer(
+	              ${type_name},
+	              buffer,
+	              ${library_name_suffix_upper_case}_TEST_PARTITION_READ_BUFFER_SIZE,
+	              &error );
+
+	if( ${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail != -1 )
+	{
+		${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) -1 );
+
+		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK ) */
 
 	return( 1 );
 

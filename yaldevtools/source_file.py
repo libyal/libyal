@@ -254,8 +254,12 @@ class LibraryHeaderFile(object):
       FunctionPrototype: function prototype of the type function or None
           if no such function.
     """
-    function_name = '{0:s}_{1:s}_{2:s}'.format(
-        self._library_name, type_name, type_function)
+    if type_function.startswith('internal_'):
+      function_name = '{0:s}_internal_{1:s}_{2:s}'.format(
+          self._library_name, type_name, type_function[9:])
+    else:
+      function_name = '{0:s}_{1:s}_{2:s}'.format(
+          self._library_name, type_name, type_function)
     return self.functions_per_name.get(function_name, None)
 
   def Read(self, project_configuration):
