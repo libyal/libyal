@@ -29,14 +29,14 @@
 extern "C" {
 #endif
 
-#if !defined( HAVE_LOCAL_${library_name_upper_case} )
-
-#include <${library_name}/codepage.h>
-
 /* Define HAVE_LOCAL_${library_name_upper_case} for local use of ${library_name}
  * The definitions in <${library_name}/codepage.h> are copied here
  * for local use of ${library_name}
  */
+#if !defined( HAVE_LOCAL_${library_name_upper_case} )
+
+#include <${library_name}/codepage.h>
+
 #else
 
 /* The codepage definitions

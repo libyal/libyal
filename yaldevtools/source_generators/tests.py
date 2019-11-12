@@ -17,7 +17,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
   # TODO: replace by type specific test scripts.
   _PYTHON_FUNCTION_WITH_INPUT_NAMES = (
-      'open_close', 'seek', 'read', 'file', 'volume')
+      'file', 'handle', 'volume')
 
   def _FormatTestData(self, data):
     """Formats the test data as a C byte array.
@@ -2410,6 +2410,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         type_name = type_name[type_name_prefix_length:]
         types.append(type_name)
+
+    # TODO: determine if the source file for functions actually contain functions
+    if 'codepage' in functions:
+      functions.remove('codepage')
 
     return types, functions
 
