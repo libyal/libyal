@@ -1,18 +1,18 @@
 %files -n ${library_name}
 %defattr(644,root,root,755)
-%license COPYING
+%license COPYING COPYING.LESSER
 %doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
 %files -n ${library_name}-static
 %defattr(644,root,root,755)
-%license COPYING
+%license COPYING COPYING.LESSER
 %doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.a
 
 %files -n ${library_name}-devel
 %defattr(644,root,root,755)
-%license COPYING
+%license COPYING COPYING.LESSER
 %doc AUTHORS README
 %{_libdir}/*.la
 %{_libdir}/*.so

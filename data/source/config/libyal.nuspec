@@ -5,7 +5,7 @@
     <version>${library_version}</version>
     <authors>Joachim Metz</authors>
     <owners>joachimmetz</owners>
-    <licenseUrl>https://raw.githubusercontent.com/libyal/${library_name}/master/COPYING</licenseUrl>
+    <licenseUrl>https://raw.githubusercontent.com/libyal/${library_name}/master/COPYING.LESSER</licenseUrl>
     <projectUrl>https://github.com/libyal/${library_name}</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <title>${library_name}</title>

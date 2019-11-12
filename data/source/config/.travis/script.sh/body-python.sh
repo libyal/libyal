@@ -37,7 +37,7 @@ then
 
 		make install DESTDIR=$${PWD}/osx-pkg;
 		mkdir -p $${PWD}/osx-pkg/usr/share/doc/${library_name};
-		cp AUTHORS COPYING NEWS README $${PWD}/osx-pkg/usr/share/doc/${library_name};
+		cp AUTHORS COPYING COPYING.LESSER NEWS README $${PWD}/osx-pkg/usr/share/doc/${library_name};
 
 		pkgbuild --root osx-pkg --identifier com.github.libyal.${library_name} --version $${VERSION} --ownership recommended ../${library_name}-$${VERSION}.pkg;
 	fi

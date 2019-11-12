@@ -35,7 +35,7 @@ $$PWD/tmp/
 If you are planning to distribute ${project_name}.pkg make sure it contains a copy of LGPL license:
 ```
 mkdir -p $$PWD/tmp/usr/share/doc/${project_name}
-cp AUTHORS COPYING NEWS README $$PWD/tmp/usr/share/doc/${project_name}
+cp AUTHORS COPYING COPYING.LESSER NEWS README $$PWD/tmp/usr/share/doc/${project_name}
 ```
 
 To create the package (directory):
