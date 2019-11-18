@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import argparse
 import datetime
+import io
 import logging
 import os
 import string
@@ -129,7 +130,7 @@ class SourceGenerator(object):
         self._templates_path, 'runtime_structure.h', 'structure.h')
 
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['structure_members']
 
@@ -173,17 +174,17 @@ class SourceGenerator(object):
 
     template_filename = os.path.join(template_directory, 'includes.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if 'file_io_handle' in structure_options:
       template_filename = os.path.join(template_directory, 'includes-libbfio.h')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(template_directory, 'extern-start.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if data_type_definition.TYPE_INDICATOR == (
         definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
@@ -197,22 +198,22 @@ class SourceGenerator(object):
 
     template_filename = os.path.join(template_directory, 'functions.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if 'file_io_handle' in structure_options:
       template_filename = os.path.join(
           template_directory, 'functions-read_file_io_handle.h')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(template_directory, 'extern-end.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     self._SortIncludeHeaders(output_filename)
 
@@ -269,44 +270,44 @@ class SourceGenerator(object):
 
     template_filename = os.path.join(template_directory, 'includes-start.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if has_datetime_member or has_string_member:
       template_filename = os.path.join(template_directory, 'includes-debug.c')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if has_datetime_member:
       template_filename = os.path.join(
           template_directory, 'includes-libfdatetime.c')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if has_string_member:
       template_filename = os.path.join(template_directory, 'includes-libuna.c')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if 'file_io_handle' in structure_options:
       template_filename = os.path.join(template_directory, 'includes-libbfio.c')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(template_directory, 'includes-end.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     template_filename = os.path.join(template_directory, 'initialize.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     template_filename = os.path.join(template_directory, 'free.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if data_type_definition.TYPE_INDICATOR == (
         definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
@@ -323,7 +324,7 @@ class SourceGenerator(object):
           template_directory, 'read_file_io_handle.c')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     self._SortIncludeHeaders(output_filename)
     self._SortVariableDeclarations(output_filename)
@@ -362,7 +363,7 @@ class SourceGenerator(object):
     template_filename = os.path.join(
         template_directory, 'read_data-check_arguments.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     self._GenerateRuntimeStructureSourceFunctionReadDataCheckSignature(
         data_type_definition, data_type_definition_name, output_filename)
@@ -374,7 +375,7 @@ class SourceGenerator(object):
     template_filename = os.path.join(
         template_directory, 'read_data-debug_start.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     self._GenerateRuntimeStructureSourceFunctionReadDataDebugPrint(
         data_type_definition, data_type_definition_name, members_configuration,
@@ -383,11 +384,11 @@ class SourceGenerator(object):
     template_filename = os.path.join(
         template_directory, 'read_data-debug_end.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     template_filename = os.path.join(template_directory, 'read_data-end.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataDebugVariables(
       self, data_type_definition, data_type_definition_name,
@@ -442,7 +443,7 @@ class SourceGenerator(object):
         self._templates_path, 'runtime_structure.c',
         'read_data-debug_variables.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataCheckSignature(
       self, data_type_definition, data_type_definition_name, output_filename):
@@ -494,7 +495,7 @@ class SourceGenerator(object):
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
       self, data_type_definition, data_type_definition_name,
@@ -550,7 +551,7 @@ class SourceGenerator(object):
                 template_directory, 'read_data-data_offset.c')
             self._GenerateSection(
                 template_filename, template_mappings, output_filename,
-                access_mode='ab')
+                access_mode='a')
 
             template_filename = 'read_data-unsupported.c'
             date_offset_is_set = True
@@ -574,7 +575,7 @@ class SourceGenerator(object):
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataDebugPrint(
       self, data_type_definition, data_type_definition_name,
@@ -722,7 +723,7 @@ class SourceGenerator(object):
 
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataVariables(
       self, data_type_definition, data_type_definition_name,
@@ -796,11 +797,11 @@ class SourceGenerator(object):
 
     template_filename = os.path.join(template_directory, 'read_data-start.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GenerateSection(
       self, template_filename, template_mappings, output_filename,
-      access_mode='wb'):
+      access_mode='w'):
     """Generates a section from template filename.
 
     Args:
@@ -813,7 +814,7 @@ class SourceGenerator(object):
     output_data = self._template_string_generator.Generate(
         template_filename, template_mappings)
 
-    with open(output_filename, access_mode) as file_object:
+    with io.open(output_filename, access_mode, encoding='utf8') as file_object:
       file_object.write(output_data)
 
   def _GenerateStoredStructureHeader(
@@ -835,7 +836,7 @@ class SourceGenerator(object):
     template_filename = os.path.join(
         self._templates_path, 'stored_structure.h', 'structure.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['structure_members']
 
@@ -887,7 +888,7 @@ class SourceGenerator(object):
 
     template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='ab')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     self._SortIncludeHeaders(output_filename)
 
@@ -1164,15 +1165,15 @@ class SourceGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
-    library_include_header_start = b'#include "lib{0:s}_'.format(self._prefix)
+    library_include_header_start = '#include "lib{0:s}_'.format(self._prefix)
 
     include_headers = []
     in_include_headers = False
 
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         if line.startswith(library_include_header_start):
           include_headers.append(line)
@@ -1192,24 +1193,24 @@ class SourceGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     formatter = source_formatter.SourceFormatter()
     variable_declarations = None
     in_variable_declarations = False
 
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         stripped_line = line.rstrip()
-        if stripped_line == b'{':
+        if stripped_line == '{':
           file_object.write(line)
           variable_declarations = []
           in_variable_declarations = True
 
         elif in_variable_declarations:
-          if (b'(' not in stripped_line or
-              stripped_line.startswith(b'#if defined(')):
+          if ('(' not in stripped_line or
+              stripped_line.startswith('#if defined(')):
             variable_declarations.append(line)
 
           else:
@@ -1230,15 +1231,15 @@ class SourceGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     assigment_statements = []
     in_assigment_statements_block = False
 
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
-        if b' = ' in line:
+        if ' = ' in line:
           if not in_assigment_statements_block:
             in_assigment_statements_block = True
 
@@ -1252,17 +1253,17 @@ class SourceGenerator(object):
           else:
             alignment_offset = 0
             for assigment_statement in assigment_statements:
-              prefix, _, _ = assigment_statement.rpartition(b'=')
+              prefix, _, _ = assigment_statement.rpartition('=')
               prefix = prefix.rstrip()
               alignment_offset = max(alignment_offset, len(prefix) + 1)
 
             for assigment_statement in assigment_statements:
-              prefix, _, suffix = assigment_statement.rpartition(b'=')
+              prefix, _, suffix = assigment_statement.rpartition('=')
               prefix = prefix.rstrip()
               alignment_length = alignment_offset - len(prefix)
 
-              assigment_statement_line = b'{0:s}{1:s}={2:s}'.format(
-                  prefix, b' ' * alignment_length, suffix)
+              assigment_statement_line = '{0:s}{1:s}={2:s}'.format(
+                  prefix, ' ' * alignment_length, suffix)
               file_object.write(assigment_statement_line)
 
           in_assigment_statements_block = False

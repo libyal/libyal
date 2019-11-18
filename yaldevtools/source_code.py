@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import collections
 
-import definitions
+from yaldevtools import definitions
 
 
 class EnumDeclaration(object):

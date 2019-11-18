@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """The source file generator for test source files."""
 
+import io
 import logging
 import os
 import stat
@@ -86,7 +87,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     for support_function in (
         'get_version', 'get_access_flags_read', 'get_codepage',
@@ -98,13 +99,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if signature_type:
       template_filename = os.path.join(template_directory, 'check_signature.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
       test_getopt_string = []
       test_options_variable_declarations = []
@@ -134,7 +135,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'main-start-with_source-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
       del template_mappings['test_getopt_string']
       del template_mappings['test_options_variable_declarations']
@@ -149,7 +150,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
               template_directory, 'main-start-with_source-switch_case.c')
           self._GenerateSection(
               template_filename, template_mappings, output_writer, output_filename,
-              access_mode='ab')
+              access_mode='a')
 
           del template_mappings['test_option']
           del template_mappings['test_option_argument']
@@ -166,7 +167,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             template_directory, 'main-start-with_source-switch_case_unused.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
+            access_mode='a')
 
         del template_mappings['test_options_switch_case_unused']
 
@@ -174,20 +175,20 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'main-start-with_source-end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
       if 'offset' in [argument for _, argument in test_options]:
         template_filename = os.path.join(
             template_directory, 'main-option_offset.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
+            output_filename, access_mode='a')
 
       template_filename = os.path.join(
           template_directory, 'main-body_with_input.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
       if 'offset' in [argument for _, argument in test_options]:
         template_filename = 'main-end_with_offset.c'
@@ -197,13 +198,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     else:
       template_filename = os.path.join(template_directory, 'main.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if signature_type:
       del template_mappings['signature_type']
@@ -267,7 +268,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, 'with_offset.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     # TODO: make check more generic based on the source itself.
     if project_configuration.library_name == 'libcfile':
@@ -275,7 +276,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'get_temporary_filename.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     # TODO: make check more generic based on the source itself.
     if project_configuration.library_name not in (
@@ -283,12 +284,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, 'file_io_handle.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
   def _GenerateTestFunctionsSource(
       self, project_configuration, template_mappings, output_writer,
@@ -318,7 +319,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, 'with_offset.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     # TODO: make check more generic based on the source itself.
     if project_configuration.library_name == 'libcfile':
@@ -326,7 +327,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'get_temporary_filename.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     # TODO: make check more generic based on the source itself.
     if project_configuration.library_name not in (
@@ -334,7 +335,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, 'file_io_handle.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
   def _GenerateMakefileAM(
       self, project_configuration, template_mappings, include_header_file,
@@ -459,12 +460,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, 'python.am')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(template_directory, 'body.am')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     # TODO: add support for read_file_io_handle tests
     # TODO: add support for rwlock tests
@@ -510,12 +511,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(template_directory, 'footer.am')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     self._SortSources(output_filename)
 
@@ -546,12 +547,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, 'imports.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     template_filename = os.path.join(template_directory, 'test_case.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     for support_function in (
         'get_version', ):
@@ -562,12 +563,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(template_directory, 'main.py')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
   def _GeneratePythonModuleTypeTests(
       self, project_configuration, template_mappings, type_name, output_writer,
@@ -677,7 +678,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer,
-          output_filename, access_mode='ab')
+          output_filename, access_mode='a')
 
       del template_mappings['value_name']
 
@@ -734,7 +735,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer,
-        output_filename, access_mode='ab')
+        output_filename, access_mode='a')
 
     del template_mappings['argument_parser_options']
     del template_mappings['unittest_options']
@@ -1001,7 +1002,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     else:
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
@@ -1185,7 +1186,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       self._GenerateSections(
           template_filenames, template_mappings, output_writer,
-          output_filename, access_mode='ab')
+          output_filename, access_mode='a')
 
       del template_mappings['function_name']
       del template_mappings['function_variables']
@@ -1256,7 +1257,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     test_function_name = self._GetTestFunctionName(
         project_configuration, type_name, type_function)
@@ -1285,7 +1286,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'define_internal-end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
   def _GenerateTypeTestDefineInternalStart(
       self, template_mappings, last_have_extern, have_extern, output_writer,
@@ -1309,7 +1310,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'define_internal-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
   def _GenerateTypeTestDefineWideCharacterTypeEnd(
       self, template_mappings, last_have_wide_character_type,
@@ -1333,7 +1334,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'define_wide_character_type-end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
   def _GenerateTypeTestDefineWideCharacterTypeStart(
       self, template_mappings, last_have_wide_character_type,
@@ -1357,7 +1358,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'define_wide_character_type-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
   def _GenerateTypeTestInitializeFunction(
       self, project_configuration, template_mappings, type_name, type_function,
@@ -1555,7 +1556,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     del template_mappings['test_options_function_arguments']
     del template_mappings['test_options_function_variables']
@@ -1723,7 +1724,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       self._GenerateSections(
           template_filenames, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if with_input:
       del template_mappings['signature_type']
@@ -1743,7 +1744,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           test_data_suffix = '_{0:s}'.format(test_data_suffix)
 
         test_data_file = os.path.join(test_data_directory, directory_entry)
-        with open(test_data_file, 'rb') as file_object:
+        with io.open(test_data_file, 'r', encoding='utf8') as file_object:
           test_data = file_object.read()
 
         template_mappings['test_data'] = self._FormatTestData(test_data)
@@ -1754,7 +1755,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_filename = os.path.join(template_directory, 'test_data.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer, output_filename,
-            access_mode='ab')
+            access_mode='a')
 
     # Generate a clone, compare and/or free test function if necessary.
     clone_function = None
@@ -1784,7 +1785,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, 'free_function.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if clone_function:
       value_name, _, _ = clone_function.rpartition('_clone_function')
@@ -1793,7 +1794,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, 'clone_function.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if compare_function:
       value_name, _, _ = compare_function.rpartition('_compare_function')
@@ -1802,7 +1803,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, 'compare_function.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     have_extern = True
     tests_to_run = []
@@ -1979,7 +1980,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'main-start-with_source-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
       del template_mappings['test_getopt_string']
       del template_mappings['test_options_variable_declarations']
@@ -1992,7 +1993,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             template_directory, 'main-start-with_source-switch_case.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
+            output_filename, access_mode='a')
 
         del template_mappings['test_option']
         del template_mappings['test_option_argument']
@@ -2001,32 +2002,32 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'main-start-with_source-end.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
       if with_offset:
         template_filename = os.path.join(
             template_directory, 'main-option_offset.c')
         self._GenerateSection(
             template_filename, template_mappings, output_writer,
-            output_filename, access_mode='ab')
+            output_filename, access_mode='a')
 
       template_filename = os.path.join(template_directory, 'main-notify_set.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     elif tests_to_run_with_args:
       template_filename = os.path.join(
           template_directory, 'main-start-with_test_data.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     else:
       template_filename = os.path.join(template_directory, 'main-start.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     self._GenerateTypeTestsMainTestsToRun(
         project_configuration, template_mappings, type_name, test_options,
@@ -2057,7 +2058,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
       del template_mappings['signature_type']
       del template_mappings['test_data_size']
@@ -2088,7 +2089,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
       del template_mappings['test_options_open_source_arguments']
 
@@ -2115,7 +2116,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if tests_to_run_with_source and has_glob:
       template_filename = 'main-end-with_glob.c'
@@ -2129,7 +2130,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
   def _GenerateTypeTestsMainTestsToRun(
       self, project_configuration, template_mappings, type_name, test_options,
@@ -2191,7 +2192,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
               template_directory, 'main-tests_to_run.c')
           self._GenerateSection(
               template_filename, template_mappings, output_writer,
-              output_filename, access_mode='ab')
+              output_filename, access_mode='a')
 
         self._GenerateTypeTestDefineWideCharacterTypeEnd(
             template_mappings, last_have_wide_character_type,
@@ -2272,7 +2273,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'main-tests_to_run.c')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
       self._GenerateTypeTestDefineWideCharacterTypeEnd(
           template_mappings, last_have_wide_character_type,
@@ -2333,7 +2334,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     function_name = self._GetFunctionName(
         project_configuration, type_name, type_function)
@@ -2610,32 +2611,32 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     Args:
       output_filename (str): path of the output file.
     """
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     sources = None
     in_sources = False
 
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         stripped_line = line.strip()
-        if stripped_line.endswith(b'_SOURCES = \\'):
+        if stripped_line.endswith('_SOURCES = \\'):
           file_object.write(line)
           sources = []
           in_sources = True
 
         elif in_sources:
           if stripped_line:
-            if stripped_line.endswith(b' \\'):
+            if stripped_line.endswith(' \\'):
               stripped_line = stripped_line[:-2]
             sources.append(stripped_line)
 
           else:
-            sorted_lines = b' \\\n'.join(
-                [b'\t{0:s}'.format(filename) for filename in sorted(sources)])
+            sorted_lines = ' \\\n'.join(
+                ['\t{0:s}'.format(filename) for filename in sorted(sources)])
 
             file_object.writelines(sorted_lines)
-            file_object.write(b'\n')
+            file_object.write('\n')
             file_object.write(line)
             in_sources = False
 
@@ -2656,9 +2657,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     test_data_file = os.path.join('tests', 'data', test_data_filename)
 
     if not os.path.exists(test_data_file):
-      return b''
+      return ''
 
-    with open(test_data_file, 'rb') as file_object:
+    with io.open(test_data_file, 'r', encoding='utf8') as file_object:
       return file_object.read()
 
   def Generate(self, project_configuration, output_writer):

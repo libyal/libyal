@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
+import io
 import json
 import logging
 import os
@@ -381,7 +382,7 @@ class FileWriter(object):
     Returns:
       A boolean containing True if successful or False if not.
     """
-    self._file_object = open(self._name, 'wb')
+    self._file_object = io.open(self._name, 'w', encoding='utf8')
     return True
 
   def Close(self):

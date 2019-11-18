@@ -10,6 +10,45 @@ import io
 import sys
 
 
+class SourceFileParser(object):
+  """Source file parser."""
+
+  _STATE_NONE = 0
+  _STATE_IN_COMMENT = 1
+
+  def __init__(self):
+    """Initializes a source file parser."""
+    super(SourceFileParser, self).__init__()
+    self._functions = []
+
+  def ReadFile(self, path):
+    """Reads a source file.
+
+    Args:
+      path (str): path of the source file.
+    """
+    state = self._STATE_NONE
+    group = []
+
+    with io.open(path, 'r', encoding='utf8') as file_object:
+      for line_number, line in enumerate(file_object.readlines()):
+        stripped_line = line.strip()
+
+        if state == self._STATE_NONE:
+          if stripped_line.startswith('/*'):
+            state = self._STATE_IN_COMMENT
+            group = [line]
+
+        elif state == self._STATE_IN_COMMENT:
+          group.append(line)
+
+          if stripped_line.startswith('*/'):
+            print(''.join(group))
+
+            state = self._STATE_NONE
+            group = []
+
+
 def Main():
   """The main program function.
 
@@ -32,38 +71,48 @@ def Main():
     print('')
     return False
 
+  parser = SourceFileParser()
+  parser.ReadFile(options.source_file)
+
+  return
+
   with io.open(options.source_file, 'r', encoding='utf8') as file_object:
     file_content = file_object.read()
 
-  with io.open(options.source_file, 'w', encoding='utf8') as file_object:
-    lines = file_content.split('\n')
+  formatted_lines = []
+  lines = file_content.split('\n')
 
-    in_function = False
+  in_function = False
 
-    for line in lines[:-1]:
-      line = line.rstrip()
+  for line in lines:
+    line = line.rstrip()
 
-      if in_function:
-        if line == '}':
-          in_function = False
-        else:
-          index = 0
+    if in_function:
+      if line == '}':
+        in_function = False
+      else:
+        index = 0
+        line_length = len(line)
+
+        while index < line_length:
+          end_index = index + 8
+          if line[index:end_index] != '        ':
+            break
+
+          line = '{0:s}\t{1:s}'.format(line[:index], line[end_index:])
           line_length = len(line)
 
-          while index < line_length:
-            end_index = index + 8
-            if line[index:end_index] != '        ':
-              break
+          index += 8
 
-            line = '{0:s}\t{1:s}'.format(line[:index], line[end_index:])
-            line_length = len(line)
+    elif line == '{':
+      in_function = True
 
-            index += 8
+    formatted_lines.append(line)
 
-      elif line == '{':
-        in_function = True
+  formatted_file_content = '\n'.join(formatted_lines)
 
-      file_object.write('{0:s}\n'.format(line))
+  with io.open(options.source_file, 'w', encoding='utf8') as file_object:
+    file_object.write(formatted_file_content)
 
   return True
 

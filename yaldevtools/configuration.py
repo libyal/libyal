@@ -12,7 +12,7 @@ try:
 except ImportError:
   import configparser  # pylint: disable=import-error
 
-import errors
+from yaldevtools import errors
 
 
 class BaseConfiguration(object):

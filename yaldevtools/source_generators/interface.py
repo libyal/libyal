@@ -3,6 +3,7 @@
 
 import abc
 import datetime
+import io
 import logging
 import os
 import string
@@ -52,21 +53,21 @@ class SourceFileGenerator(object):
     if not name or name[0] not in ('a', 'e', 'i', 'o', ''):
       return
 
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     name = name.replace('_', ' ')
     description = ' a {0:s}'.format(name)
     corrected_description = ' an {0:s}'.format(name)
 
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         line = line.replace(description, corrected_description)
         file_object.write(line)
 
   def _GenerateSection(
       self, template_filename, template_mappings, output_writer,
-      output_filename, access_mode='wb'):
+      output_filename, access_mode='w'):
     """Generates a section from template filename.
 
     Args:
@@ -91,7 +92,7 @@ class SourceFileGenerator(object):
 
   def _GenerateSections(
       self, template_filenames, template_mappings, output_writer,
-      output_filename, access_mode='wb'):
+      output_filename, access_mode='w'):
     """Generates a section from template filenames.
 
     Args:
@@ -106,7 +107,7 @@ class SourceFileGenerator(object):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode=access_mode)
-      access_mode = 'ab'
+      access_mode = 'a'
 
   def _GetDefinitionsIncludeHeaderFile(self, project_configuration):
     """Retrieves the definitions include header file.
@@ -360,7 +361,7 @@ class SourceFileGenerator(object):
     Returns:
       string.Template: template string.
     """
-    with open(filename, 'rb') as file_object:
+    with io.open(filename, 'r', encoding='utf8') as file_object:
       file_data = file_object.read()
 
     return string.Template(file_data)
@@ -484,25 +485,25 @@ class SourceFileGenerator(object):
       project_configuration (ProjectConfiguration): project configuration.
       output_filename (str): path of the output file.
     """
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
-    library_include_header_start = b'#include "{0:s}_'.format(
+    library_include_header_start = '#include "{0:s}_'.format(
         project_configuration.library_name)
 
-    python_module_include_header_start = b'#include "{0:s}_'.format(
+    python_module_include_header_start = '#include "{0:s}_'.format(
         project_configuration.python_module_name)
 
-    test_include_header_start = b'#include "{0:s}_test_'.format(
+    test_include_header_start = '#include "{0:s}_test_'.format(
         project_configuration.library_name_suffix)
 
-    tools_include_header_start = b'#include "{0:s}tools_'.format(
+    tools_include_header_start = '#include "{0:s}tools_'.format(
         project_configuration.library_name_suffix)
 
     include_headers = []
     in_include_headers = False
 
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         if (line.startswith(library_include_header_start) or
             line.startswith(python_module_include_header_start) or
@@ -527,24 +528,24 @@ class SourceFileGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     formatter = source_formatter.SourceFormatter()
     variable_declarations = None
     in_variable_declarations = False
 
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         stripped_line = line.rstrip()
-        if stripped_line == b'{':
+        if stripped_line == '{':
           file_object.write(line)
           variable_declarations = []
           in_variable_declarations = True
 
         elif in_variable_declarations:
-          if (b'(' not in stripped_line or
-              stripped_line.startswith(b'#if defined(')):
+          if ('(' not in stripped_line or
+              stripped_line.startswith('#if defined(')):
             variable_declarations.append(line)
 
           else:
@@ -565,15 +566,15 @@ class SourceFileGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     assigment_statements = []
     in_assigment_statements_block = False
 
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
-        if b' = ' in line:
+        if ' = ' in line:
           if not in_assigment_statements_block:
             in_assigment_statements_block = True
 
@@ -587,17 +588,17 @@ class SourceFileGenerator(object):
           else:
             alignment_offset = 0
             for assigment_statement in assigment_statements:
-              prefix, _, _ = assigment_statement.rpartition(b'=')
+              prefix, _, _ = assigment_statement.rpartition('=')
               prefix = prefix.rstrip()
               alignment_offset = max(alignment_offset, len(prefix) + 1)
 
             for assigment_statement in assigment_statements:
-              prefix, _, suffix = assigment_statement.rpartition(b'=')
+              prefix, _, suffix = assigment_statement.rpartition('=')
               prefix = prefix.rstrip()
               alignment_length = alignment_offset - len(prefix)
 
-              assigment_statement_line = b'{0:s}{1:s}={2:s}'.format(
-                  prefix, b' ' * alignment_length, suffix)
+              assigment_statement_line = '{0:s}{1:s}={2:s}'.format(
+                  prefix, ' ' * alignment_length, suffix)
               file_object.write(assigment_statement_line)
 
           in_assigment_statements_block = False
@@ -614,35 +615,35 @@ class SourceFileGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     alignment_number_of_spaces = 0
     alignment_number_of_tabs = 0
     in_function_call = False
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
-        if not line.startswith(b'\t'):
+        if not line.startswith('\t'):
           file_object.write(line)
           continue
 
         stripped_line = line.rstrip()
 
         if in_function_call:
-          if stripped_line.endswith(b')') or stripped_line.endswith(b');'):
+          if stripped_line.endswith(')') or stripped_line.endswith(');'):
             in_function_call = False
 
           stripped_line = line.lstrip()
-          line = b'{0:s}{1:s}{2:s}'.format(
-              b'\t' * alignment_number_of_tabs,
-              b' ' * alignment_number_of_spaces,
+          line = '{0:s}{1:s}{2:s}'.format(
+              '\t' * alignment_number_of_tabs,
+              ' ' * alignment_number_of_spaces,
               stripped_line)
 
-        elif stripped_line.endswith(b'('):
+        elif stripped_line.endswith('('):
           in_function_call = True
           stripped_line = line.lstrip()
 
-          alignment_number_of_spaces = stripped_line.rfind(b' ')
+          alignment_number_of_spaces = stripped_line.rfind(' ')
           if alignment_number_of_spaces == -1:
             alignment_number_of_spaces = 1
           else:
@@ -658,17 +659,17 @@ class SourceFileGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with open(output_filename, 'rb') as file_object:
+    with io.open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     alignment_offset = 0
     for line in lines:
-      if b'\t' not in line.lstrip(b'\t'):
+      if '\t' not in line.lstrip('\t'):
         continue
 
-      prefix, _, suffix = line.rpartition(b'\t')
-      prefix = prefix.rstrip(b'\t')
-      formatted_prefix = prefix.replace(b'\t', ' ' * 8)
+      prefix, _, suffix = line.rpartition('\t')
+      prefix = prefix.rstrip('\t')
+      formatted_prefix = prefix.replace('\t', ' ' * 8)
 
       equal_sign_offset = len(formatted_prefix) + 8
       equal_sign_offset, _ = divmod(equal_sign_offset, 8)
@@ -679,21 +680,21 @@ class SourceFileGenerator(object):
       else:
         alignment_offset = max(alignment_offset, equal_sign_offset)
 
-    with open(output_filename, 'wb') as file_object:
+    with io.open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
-        if b'\t' in line.lstrip(b'\t'):
-          prefix, _, suffix = line.rpartition(b'\t')
-          prefix = prefix.rstrip(b'\t')
-          formatted_prefix = prefix.replace(b'\t', ' ' * 8)
+        if '\t' in line.lstrip('\t'):
+          prefix, _, suffix = line.rpartition('\t')
+          prefix = prefix.rstrip('\t')
+          formatted_prefix = prefix.replace('\t', ' ' * 8)
 
           alignment_size = alignment_offset - len(formatted_prefix)
           alignment_size, remainder = divmod(alignment_size, 8)
           if remainder > 0:
             alignment_size += 1
 
-          alignment = b'\t' * alignment_size
+          alignment = '\t' * alignment_size
 
-          line = b'{0:s}{1:s}{2:s}'.format(prefix, alignment, suffix)
+          line = '{0:s}{1:s}{2:s}'.format(prefix, alignment, suffix)
 
         file_object.write(line)
 

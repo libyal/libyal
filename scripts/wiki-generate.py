@@ -7,9 +7,10 @@ from __future__ import unicode_literals
 
 import abc
 import argparse
-import string
+import io
 import os
 import re
+import string
 import sys
 
 from yaldevtools import configuration
@@ -827,9 +828,10 @@ class WikiPageGenerator(object):
       string.Template: template string.
     """
     path = os.path.join(self._template_directory, filename)
-    file_object = open(path, 'rb')
-    file_data = file_object.read()
-    file_object.close()
+
+    with io.open(path, 'r', encoding='utf8') as file_object:
+      file_data = file_object.read()
+
     return string.Template(file_data)
 
   @abc.abstractmethod
@@ -1269,7 +1271,7 @@ class FileWriter(object):
     Returns:
       bool: True if successful or False if not.
     """
-    self._file_object = open(self._name, 'wb')
+    self._file_object = io.open(self._name, 'w', encoding='utf8')
     return True
 
   def Close(self):
@@ -1362,7 +1364,7 @@ def Main():
 
   project_description = []
   if os.path.exists(readme_file):
-    with open(readme_file, 'rb') as file_object:
+    with io.open(readme_file, 'r', encdoing='utf8') as file_object:
       for line in file_object.readlines():
         if line.startswith('For more information see:'):
           project_description.pop()

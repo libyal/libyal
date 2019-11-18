@@ -2,6 +2,7 @@
 """The source file generator for man page files."""
 
 import difflib
+import io
 import os
 import shutil
 import time
@@ -50,7 +51,7 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(self._template_directory, 'section.txt')
       self._GenerateSection(
           template_filename, section_template_mappings, output_writer,
-          output_filename, access_mode='ab')
+          output_filename, access_mode='a')
 
       bfio_functions = []
       debug_output_functions = []
@@ -77,7 +78,7 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
             self._template_directory, 'function.txt')
         self._GenerateSection(
             template_filename, function_template_mappings, output_writer,
-            output_filename, access_mode='ab')
+            output_filename, access_mode='a')
 
       if wide_character_type_functions:
         have_wide_character_type_functions = True
@@ -92,7 +93,7 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
               self._template_directory, 'section.txt')
           self._GenerateSection(
               template_filename, section_template_mappings, output_writer,
-              output_filename, access_mode='ab')
+              output_filename, access_mode='a')
 
         for function_prototype in wide_character_type_functions:
           function_arguments_string = function_prototype.CopyToManpageString()
@@ -105,7 +106,7 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
               self._template_directory, 'function.txt')
           self._GenerateSection(
               template_filename, function_template_mappings, output_writer,
-              output_filename, access_mode='ab')
+              output_filename, access_mode='a')
 
       if bfio_functions:
         section_template_mappings = {
@@ -116,7 +117,7 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
             self._template_directory, 'section.txt')
         self._GenerateSection(
             template_filename, section_template_mappings, output_writer,
-            output_filename, access_mode='ab')
+            output_filename, access_mode='a')
 
         for function_prototype in bfio_functions:
           function_arguments_string = function_prototype.CopyToManpageString()
@@ -129,7 +130,7 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
               self._template_directory, 'function.txt')
           self._GenerateSection(
               template_filename, function_template_mappings, output_writer,
-              output_filename, access_mode='ab')
+              output_filename, access_mode='a')
 
       # TODO: add support for debug output functions.
 
@@ -137,34 +138,34 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
         self._template_directory, 'description.txt')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     if have_wide_character_type_functions:
       template_filename = os.path.join(self._template_directory, 'notes.txt')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if have_wide_character_type_functions:
       template_filename = os.path.join(
           self._template_directory, 'notes_wchar.txt')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(self._template_directory, 'footer.txt')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
-    backup_file = open(backup_filename, 'rb')
+    backup_file = io.open(backup_filename, 'r', encoding='utf8')
     backup_lines = backup_file.readlines()
 
-    output_file = open(output_filename, 'rb')
+    output_file = io.open(output_filename, 'r', encoding='utf8')
     output_lines = output_file.readlines()
 
     diff_lines = list(difflib.ndiff(backup_lines[1:], output_lines[1:]))
-    diff_lines = [line for line in diff_lines if line.startswith(b'-')]
+    diff_lines = [line for line in diff_lines if line.startswith('-')]
 
     # Check if there are changes besides the date.
     if diff_lines:

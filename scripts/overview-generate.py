@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import abc
 import argparse
 import glob
+import io
 import json
 import logging
 import os
@@ -152,7 +153,7 @@ class ConfigureAcFile(object):
     Returns:
       bool: True if the version was read from the file.
     """
-    with open(self._path, 'rb') as file_object:
+    with io.open(self._path, 'r', encoding='utf8') as file_object:
       line_count = 0
       for line in file_object.readlines():
         line = line.strip()
@@ -160,14 +161,14 @@ class ConfigureAcFile(object):
           version = line[1:-2]
 
           # TODO: convert version to integer?
-          self.version = version.decode('ascii')
+          self.version = version
 
           return True
 
         elif line_count:
           line_count += 1
 
-        elif line.startswith(b'AC_INIT('):
+        elif line.startswith('AC_INIT('):
           line_count += 1
 
     return False
@@ -200,9 +201,9 @@ class DefinitionsHeaderFile(object):
       bool: True if the version was read from the file.
     """
     library_name, _, _ = self.name.partition('_')
-    version_line = b'#define {0:s}_VERSION'.format(library_name.upper())
+    version_line = '#define {0:s}_VERSION'.format(library_name.upper())
 
-    with open(self._path, 'rb') as file_object:
+    with io.open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
         if line.startswith(version_line):
@@ -210,7 +211,7 @@ class DefinitionsHeaderFile(object):
           version = version.strip()
 
           # TODO: convert version to integer?
-          self.version = version.decode('ascii')
+          self.version = version
 
           return True
 
@@ -243,13 +244,14 @@ class M4ScriptFile(object):
     Returns:
       bool: True if the version was read from the file.
     """
-    with open(self._path, 'rb') as file_object:
+    with io.open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
-        if line.startswith(b'dnl Version: '):
-          _, _, version = line.rpartition(b'dnl Version: ')
+        if line.startswith('dnl Version: '):
+          _, _, version = line.rpartition('dnl Version: ')
+
           # TODO: convert version to integer?
-          self.version = version.decode('ascii')
+          self.version = version
 
           return True
 
@@ -282,13 +284,14 @@ class ScriptFile(object):
     Returns:
       bool: True if the version was read from the file.
     """
-    with open(self._path, 'rb') as file_object:
+    with io.open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
-        if line.startswith(b'# Version: '):
-          _, _, version = line.rpartition(b'# Version: ')
+        if line.startswith('# Version: '):
+          _, _, version = line.rpartition('# Version: ')
+
           # TODO: convert version to integer?
-          self.version = version.decode('ascii')
+          self.version = version
 
           return True
 
@@ -378,9 +381,10 @@ class WikiPageGenerator(object):
       string.Template: a template string.
     """
     path = os.path.join(self._template_directory, filename)
-    file_object = open(path, 'rb')
-    file_data = file_object.read()
-    file_object.close()
+
+    with io.open(path, 'r', encoding='utf8') as file_object:
+      file_data = file_object.read()
+
     return string.Template(file_data)
 
   @abc.abstractmethod
@@ -1095,7 +1099,7 @@ class FileWriter(object):
     Returns:
       bool: True if successful or False if not.
     """
-    self._file_object = open(self._name, 'wb')
+    self._file_object = io.open(self._name, 'w', encoding='utf8')
     return True
 
   def Close(self):

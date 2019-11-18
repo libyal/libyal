@@ -104,7 +104,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, 'includes.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     template_mappings['info_tool_source_type'] = (
         project_configuration.info_tool_source_type)
@@ -114,26 +114,26 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_name)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     # TODO: add condition
     template_filename = os.path.join(template_directory, 'set_ascii_codepage.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     for template_name in ('open.h', 'close.h'):
       template_filename = os.path.join(template_directory, template_name)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     del template_mappings['info_tool_source_type']
 
     template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
   def _GenerateInfoHandleSourceFile(
       self, project_configuration, template_mappings, output_writer,
@@ -156,7 +156,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, 'includes.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     template_mappings['info_tool_source_type'] = (
         project_configuration.info_tool_source_type)
@@ -165,19 +165,19 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, template_name)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     # TODO: add condition
     template_filename = os.path.join(template_directory, 'set_ascii_codepage.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     for template_name in ('open.c', 'close.c'):
       template_filename = os.path.join(template_directory, template_name)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     del template_mappings['info_tool_source_type']
 
@@ -246,7 +246,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, 'includes.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     self._GenerateInfoToolSourceUsageFunction(
         project_configuration, template_mappings, info_tool_name,
@@ -255,7 +255,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, 'signal_handler.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     self._GenerateInfoToolSourceMainFunction(
         project_configuration, template_mappings, info_tool_name,
@@ -298,7 +298,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, 'main-start.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     del template_mappings['info_tool_getopt_string']
     del template_mappings['info_tool_options_switch']
@@ -309,12 +309,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_directory, 'main-option_codepage.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     template_filename = os.path.join(template_directory, 'main-end.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
   def _GenerateInfoToolSourceUsageFunction(
       self, project_configuration, template_mappings, info_tool_name,
@@ -395,7 +395,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, 'usage.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     del template_mappings['info_tool_options']
     del template_mappings['info_tool_usage']
@@ -1501,7 +1501,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, 'signal_handler.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     self._GenerateMountToolSourceMainFunction(
         project_configuration, template_mappings, mount_tool_name,
@@ -1633,7 +1633,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     del template_mappings['mount_tool_getopt_string']
     del template_mappings['mount_tool_options_switch']
@@ -1725,7 +1725,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_filename = os.path.join(template_directory, 'usage.c')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
     del template_mappings['mount_tool_options']
     del template_mappings['mount_tool_source_alignment']

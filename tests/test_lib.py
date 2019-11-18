@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Shared test case."""
 
+import io
 import os
 import sys
 import unittest
@@ -69,7 +70,7 @@ class BaseTestCase(unittest.TestCase):
     """
     definitions_reader = reader.YAMLDataTypeDefinitionsFileReader()
 
-    with open(path, 'rb') as file_object:
+    with io.open(path, 'r', encoding='utf8') as file_object:
       definitions_reader.ReadFileObject(definitions_registry, file_object)
 
   def _GetTestFilePath(self, path_segments):

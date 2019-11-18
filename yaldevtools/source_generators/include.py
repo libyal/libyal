@@ -37,25 +37,25 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
           template_directory, 'wide_character_type.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     # TODO: improve detection if include is needed.
     if 'libcthreads' in makefile_am_file.libraries:
       template_filename = os.path.join(template_directory, 'multi_thread.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     if include_header_file.have_bfio:
       template_filename = os.path.join(template_directory, 'bfio.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
   def _GenerateMakefileAM(
       self, project_configuration, template_mappings, include_header_file,
@@ -144,12 +144,12 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = os.path.join(template_directory, 'public_types.h')
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
-          access_mode='ab')
+          access_mode='a')
 
     template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
-        access_mode='ab')
+        access_mode='a')
 
   def Generate(self, project_configuration, output_writer):
     """Generates include source files.

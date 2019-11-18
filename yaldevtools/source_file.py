@@ -4,9 +4,10 @@
 from __future__ import unicode_literals
 
 import collections
+import io
 import os
 
-import source_code
+from yaldevtools import source_code
 
 
 class DefinitionsIncludeHeaderFile(object):
@@ -35,32 +36,32 @@ class DefinitionsIncludeHeaderFile(object):
     """
     self.enum_declarations = []
 
-    enum_prefix = b'enum '.format(
+    enum_prefix = 'enum '.format(
         project_configuration.library_name.upper())
     enum_prefix_length = len(enum_prefix)
 
     in_enum = False
     enum_declaration = None
 
-    with open(self._path, 'rb') as file_object:
+    with io.open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
         if in_enum:
-          if line.startswith(b'};'):
+          if line.startswith('};'):
             in_enum = False
 
             self.enum_declarations.append(enum_declaration)
             enum_declaration = None
 
-          elif not line.startswith(b'{'):
-            definition, _, value = line.partition(b'=')
+          elif not line.startswith('{'):
+            definition, _, value = line.partition('=')
 
             definition = definition.strip()
-            definition = definition.rstrip(b',')
+            definition = definition.rstrip(',')
 
             value = value.strip()
-            value = value.rstrip(b',')
+            value = value.rstrip(',')
 
             enum_declaration.constants[definition] = value
 
@@ -110,12 +111,12 @@ class LibraryHeaderFile(object):
     self.functions_per_name = collections.OrderedDict()
     self.types = []
 
-    define_extern = b'{0:s}_EXTERN'.format(self._library_name.upper())
+    define_extern = '{0:s}_EXTERN'.format(self._library_name.upper())
 
-    define_have_debug_output = b'#if defined( HAVE_DEBUG_OUTPUT )'
+    define_have_debug_output = '#if defined( HAVE_DEBUG_OUTPUT )'
 
     define_have_wide_character_type = (
-        b'#if defined( HAVE_WIDE_CHARACTER_TYPE )')
+        '#if defined( HAVE_WIDE_CHARACTER_TYPE )')
 
     function_argument = None
     function_prototype = None
@@ -128,8 +129,6 @@ class LibraryHeaderFile(object):
       line = line.strip()
 
       if in_function_prototype:
-        line = line.decode('ascii')
-
         # Check if we have a callback function argument.
         if line.endswith('('):
           argument_string = '{0:s} '.format(line)
@@ -161,7 +160,7 @@ class LibraryHeaderFile(object):
           in_function_prototype = False
           have_extern = False
 
-      elif line.endswith(b'('):
+      elif line.endswith('('):
         # Get the part of the line before the library name.
         data_type, _, _ = line.partition(self._library_name)
 
@@ -175,38 +174,36 @@ class LibraryHeaderFile(object):
         return_values = None
         value_description = None
         if source_file_object:
-          ascii_name = name.encode('ascii')
-
           source_line = source_file_object.readline()
           while source_line:
-            if source_line.startswith(b'/* Retrieves '):
+            if source_line.startswith('/* Retrieves '):
               value_description = source_line.strip()
               value_description = value_description[13:]
 
-              if value_description.startswith(b'a '):
+              if value_description.startswith('a '):
                 value_description = value_description[2:]
 
-              elif value_description.startswith(b'an '):
+              elif value_description.startswith('an '):
                 value_description = value_description[3:]
 
-              elif value_description.startswith(b'the '):
+              elif value_description.startswith('the '):
                 value_description = value_description[4:]
 
-              if value_description.startswith(b'specific '):
+              if value_description.startswith('specific '):
                 value_description = value_description[9:]
 
-            elif source_line.startswith(b' * Returns '):
+            elif source_line.startswith(' * Returns '):
               return_values = set()
-              if b' -1 ' in source_line:
+              if ' -1 ' in source_line:
                 return_values.add('-1')
-              if b' 0 ' in source_line:
+              if ' 0 ' in source_line:
                 return_values.add('0')
-              if b' 1 ' in source_line:
+              if ' 1 ' in source_line:
                 return_values.add('1')
-              if b' NULL ' in source_line:
+              if ' NULL ' in source_line:
                 return_values.add('NULL')
 
-            elif ascii_name in source_line:
+            elif name in source_line:
               break
 
             source_line = source_file_object.readline()
@@ -233,12 +230,12 @@ class LibraryHeaderFile(object):
       elif line.startswith(define_have_wide_character_type):
         have_wide_character_type = True
 
-      elif line.startswith(b'#endif'):
+      elif line.startswith('#endif'):
         have_debug_output = False
         have_wide_character_type = False
 
-      elif line.startswith(b'typedef struct '):
-        type_name = line.split(b' ')[2]
+      elif line.startswith('typedef struct '):
+        type_name = line.split(' ')[2]
         self.types.append(type_name)
 
     self.types = sorted(self.types)
@@ -277,9 +274,9 @@ class LibraryHeaderFile(object):
       raise IOError('Missing include header file: {0:s}'.format(self.path))
 
     source_file_path = '{0:s}.c'.format(self.path[:-2])
-    with open(header_file_path, 'rb') as header_file_object:
+    with io.open(header_file_path, 'r', encoding='utf8') as header_file_object:
       if os.path.exists(source_file_path):
-        source_file_object = open(source_file_path, 'rb')
+        source_file_object = io.open(source_file_path, 'r', encoding='utf8')
       else:
         source_file_object = None
 
@@ -545,17 +542,17 @@ class LibraryIncludeHeaderFile(object):
     self.have_wide_character_type = False
     self.section_names = []
 
-    define_deprecated = b'{0:s}_DEPRECATED'.format(self._library_name.upper())
+    define_deprecated = '{0:s}_DEPRECATED'.format(self._library_name.upper())
 
-    define_extern = b'{0:s}_EXTERN'.format(self._library_name.upper())
+    define_extern = '{0:s}_EXTERN'.format(self._library_name.upper())
 
-    define_have_bfio = b'#if defined( {0:s}_HAVE_BFIO )'.format(
+    define_have_bfio = '#if defined( {0:s}_HAVE_BFIO )'.format(
         self._library_name.upper())
 
-    define_have_debug_output = b'#if defined( HAVE_DEBUG_OUTPUT )'
+    define_have_debug_output = '#if defined( HAVE_DEBUG_OUTPUT )'
 
     define_have_wide_character_type = (
-        b'#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )').format(
+        '#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )').format(
             self._library_name.upper())
 
     function_argument = None
@@ -568,13 +565,11 @@ class LibraryIncludeHeaderFile(object):
     in_section = False
     section_name = None
 
-    with open(self._path, 'rb') as file_object:
+    with io.open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
         if have_extern:
-          line = line.decode('ascii')
-
           if function_prototype:
             # Check if we have a callback function argument.
             if line.endswith('('):
@@ -640,15 +635,15 @@ class LibraryIncludeHeaderFile(object):
               self.have_wide_character_type = True
 
         elif in_section:
-          if line.startswith(b'* '):
+          if line.startswith('* '):
             section_name = line[2:]
             self.section_names.append(section_name)
             self.functions_per_section[section_name] = []
             in_section = False
 
         elif line == (
-            b'/* -------------------------------------------------------------'
-            b'------------'):
+            '/* -------------------------------------------------------------'
+            '------------'):
           in_section = True
 
         elif line.startswith(define_deprecated):
@@ -666,7 +661,7 @@ class LibraryIncludeHeaderFile(object):
         elif line.startswith(define_have_wide_character_type):
           have_wide_character_type = True
 
-        elif line.startswith(b'#endif'):
+        elif line.startswith('#endif'):
           have_bfio = False
           have_debug_output = False
           have_wide_character_type = False
@@ -706,12 +701,12 @@ class LibraryMakefileAMFile(object):
     self.libraries = []
     self.sources = []
 
-    library_sources = b'{0:s}_la_SOURCES'.format(self._library_name)
-    library_libadd = b'{0:s}_la_LIBADD'.format(self._library_name)
+    library_sources = '{0:s}_la_SOURCES'.format(self._library_name)
+    library_libadd = '{0:s}_la_LIBADD'.format(self._library_name)
 
     in_section = None
 
-    with open(self._path, 'rb') as file_object:
+    with io.open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
@@ -720,22 +715,22 @@ class LibraryMakefileAMFile(object):
             in_section = None
             continue
 
-          if line.endswith(b'\\'):
+          if line.endswith('\\'):
             line = line[:-1].strip()
 
-          if (in_section == 'cppflags' and line.startswith(b'@') and
-              line.endswith(b'_CPPFLAGS@')):
+          if (in_section == 'cppflags' and line.startswith('@') and
+              line.endswith('_CPPFLAGS@')):
             self.cppflags.append(line[1:-10].lower())
 
-          elif (in_section == 'libadd' and line.startswith(b'@') and
-                line.endswith(b'_LIBADD@')):
+          elif (in_section == 'libadd' and line.startswith('@') and
+                line.endswith('_LIBADD@')):
             self.libraries.append(line[1:-8].lower())
 
           elif in_section == 'sources':
-            sources = line.split(b' ')
+            sources = line.split(' ')
             self.sources.extend(sources)
 
-        elif line == b'AM_CPPFLAGS = \\':
+        elif line == 'AM_CPPFLAGS = \\':
           in_section = 'cppflags'
 
         elif line.startswith(library_libadd):
@@ -779,18 +774,18 @@ class MainMakefileAMFile(object):
     in_subdirs = False
     in_library_dependencies = True
 
-    with open(self._path, 'rb') as file_object:
+    with io.open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
         if in_subdirs:
-          if line.endswith(b'\\'):
+          if line.endswith('\\'):
             line = line[:-1].strip()
 
           if not line:
             in_subdirs = False
 
-          elif line.startswith(b'lib'):
+          elif line.startswith('lib'):
             if line == self._library_name:
               in_library_dependencies = False
             else:
@@ -801,7 +796,7 @@ class MainMakefileAMFile(object):
               else:
                 self.tools_dependencies.append(line)
 
-        elif line.startswith(b'SUBDIRS'):
+        elif line.startswith('SUBDIRS'):
           in_subdirs = True
 
 
@@ -833,11 +828,11 @@ class TypesIncludeHeaderFile(object):
 
     self.types = []
 
-    typedef_prefix = b'typedef intptr_t {0:s}_'.format(self._library_name)
+    typedef_prefix = 'typedef intptr_t {0:s}_'.format(self._library_name)
     typedef_prefix_length = len(typedef_prefix)
 
-    with open(self._path, 'rb') as file_object:
+    with io.open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
-        if line.startswith(typedef_prefix) and line.endswith(b'_t;'):
+        if line.startswith(typedef_prefix) and line.endswith('_t;'):
           self.types.append(line[typedef_prefix_length:-3])

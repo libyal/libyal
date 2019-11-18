@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Template string generator."""
 
+import io
 import string
 
 
@@ -16,7 +17,7 @@ class TemplateStringGenerator(object):
     Returns:
       string.Template: template string.
     """
-    with open(filename, 'rb') as file_object:
+    with io.open(filename, 'r', encoding='utf8') as file_object:
       file_data = file_object.read()
 
     return string.Template(file_data)

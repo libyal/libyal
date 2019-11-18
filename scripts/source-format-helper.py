@@ -75,22 +75,52 @@ class Variable(object):
     self.type = variable_type
     self.type_sort_ranking = variable_type_sort_ranking
 
-  def __lt__(self, other):
-    return self.Compare(other) < 0
-
-  def __gt__(self, other):
-    return self.Compare(other) > 0
-
   def __eq__(self, other):
+    """Checks if the variable equals another variable.
+
+    Returns:
+      bool: True if the variable equals another variable.
+    """
     return self.Compare(other) == 0
 
-  def __le__(self, other):
-    return self.Compare(other) <= 0
-
   def __ge__(self, other):
+    """Checks if the variable greater equals another variable.
+
+    Returns:
+      bool: True if the variable greater equals another variable.
+    """
     return self.Compare(other) >= 0
 
+  def __gt__(self, other):
+    """Checks if the variable is greater than another variable.
+
+    Returns:
+      bool: True if the variable is greater than another variable.
+    """
+    return self.Compare(other) > 0
+
+  def __le__(self, other):
+    """Checks if the variable less equals another variable.
+
+    Returns:
+      bool: True if the variable less equals another variable.
+    """
+    return self.Compare(other) <= 0
+
+  def __lt__(self, other):
+    """Checks if the variable is less than another variable.
+
+    Returns:
+      bool: True if the variable is less than another variable.
+    """
+    return self.Compare(other) < 0
+
   def __ne__(self, other):
+    """Checks if the variable not equals another variable.
+
+    Returns:
+      bool: True if the variable not equals another variable.
+    """
     return self.Compare(other) != 0
 
   def Compare(self, variable):

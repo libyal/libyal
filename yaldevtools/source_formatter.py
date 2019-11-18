@@ -21,28 +21,28 @@ class Variable(object):
   """C variable."""
 
   _TYPE_SORT_RANKING = [
-      b'FILE',
-      b'size64_t',
-      b'size32_t',
-      b'size_t',
-      b'ssize_t',
-      b'off64_t',
-      b'off_t',
-      b'uint64_t',
-      b'int64_t',
-      b'uint32_t',
-      b'int32_t',
-      b'uint16_t',
-      b'int16_t',
-      b'uint8_t',
-      b'int8_t',
-      b'double',
-      b'float',
-      b'intptr_t',
-      b'int',
-      b'wchar_t',
-      b'char',
-      b'void']
+      'FILE',
+      'size64_t',
+      'size32_t',
+      'size_t',
+      'ssize_t',
+      'off64_t',
+      'off_t',
+      'uint64_t',
+      'int64_t',
+      'uint32_t',
+      'int32_t',
+      'uint16_t',
+      'int16_t',
+      'uint8_t',
+      'int8_t',
+      'double',
+      'float',
+      'intptr_t',
+      'int',
+      'wchar_t',
+      'char',
+      'void']
 
   def __init__(self, declaration):
     """Initializes a C variable.
@@ -50,14 +50,14 @@ class Variable(object):
     Args:
       declaration (str): C variable declaration.
     """
-    prefix, _, _ = declaration.partition(b'=')
+    prefix, _, _ = declaration.partition('=')
     prefix = prefix.strip()
-    prefix, _, name = prefix.rpartition(b' ')
-    modifiers, _, variable_type = prefix.rpartition(b' ')
+    prefix, _, name = prefix.rpartition(' ')
+    modifiers, _, variable_type = prefix.rpartition(' ')
 
-    is_pointer = name.startswith(b'*')
+    is_pointer = name.startswith('*')
     if is_pointer:
-      _, _, name = name.rpartition(b'*')
+      _, _, name = name.rpartition('*')
 
     try:
       variable_type_sort_ranking = (
@@ -71,6 +71,54 @@ class Variable(object):
     self.modifiers = modifiers
     self.type = variable_type
     self.type_sort_ranking = variable_type_sort_ranking
+
+  def __eq__(self, other):
+    """Checks if the variable equals another variable.
+
+    Returns:
+      bool: True if the variable equals another variable.
+    """
+    return self.Compare(other) == 0
+
+  def __ge__(self, other):
+    """Checks if the variable greater equals another variable.
+
+    Returns:
+      bool: True if the variable greater equals another variable.
+    """
+    return self.Compare(other) >= 0
+
+  def __gt__(self, other):
+    """Checks if the variable is greater than another variable.
+
+    Returns:
+      bool: True if the variable is greater than another variable.
+    """
+    return self.Compare(other) > 0
+
+  def __le__(self, other):
+    """Checks if the variable less equals another variable.
+
+    Returns:
+      bool: True if the variable less equals another variable.
+    """
+    return self.Compare(other) <= 0
+
+  def __lt__(self, other):
+    """Checks if the variable is less than another variable.
+
+    Returns:
+      bool: True if the variable is less than another variable.
+    """
+    return self.Compare(other) < 0
+
+  def __ne__(self, other):
+    """Checks if the variable not equals another variable.
+
+    Returns:
+      bool: True if the variable not equals another variable.
+    """
+    return self.Compare(other) != 0
 
   def Compare(self, variable):
     """Compares the variable with another variable.
@@ -93,36 +141,24 @@ class Variable(object):
 
     # If no specific sort ranking use alphabetically ordering without
     # the trailing '_t'.
-    self_type, _, _ = self.type.rpartition(b'_t')
-    variable_type, _, _ = variable.type.rpartition(b'_t')
-    variable_type_sort_ranking = cmp(self_type, variable_type)
+    self_type, _, _ = self.type.rpartition('_t')
+    variable_type, _, _ = variable.type.rpartition('_t')
+
+    # (a > b) - (a < b) is a Python 3 compatable variant of cmp(a, b)
+    variable_type_sort_ranking = (
+        (self_type > variable_type) - (self_type < variable_type))
+
     if variable_type_sort_ranking != 0:
       return variable_type_sort_ranking
 
     # TODO: handle modifiers like const, static
 
-    return cmp(self.name, variable.name)
+    # (a > b) - (a < b) is a Python 3 compatable variant of cmp(a, b)
+    return (self.name > variable.name) - (self.name < variable.name)
 
 
 class SourceFormatter(object):
   """C source formatter."""
-
-  def CompareVariableDeclarations(
-      self, first_variable_declaration, second_variable_declaration):
-    """Compares two C variable declarations.
-
-    Args:
-      first_variable_declaration (str): first C variable declaration.
-      second_variable_declaration (str): second C variable declaration.
-
-    Returns:
-      int: -1 if the first declaration should be ranked earlier, 0 if both
-          declarations are ranked equally, 1 if the first declaration should
-          be ranked later
-    """
-    first_variable = Variable(first_variable_declaration)
-    second_variable = Variable(second_variable_declaration)
-    return first_variable.Compare(second_variable)
 
   def VerticalAlignEqualSigns(self, lines, alignment_offset):
     """Vertically aligns the equal signs.
@@ -139,15 +175,15 @@ class SourceFormatter(object):
     aligned_lines = []
     for line in lines:
       striped_line = line.strip()
-      if b'=' in striped_line and not striped_line.endswith(b' = {'):
-        prefix, _, suffix = line.rpartition(b'=')
+      if '=' in striped_line and not striped_line.endswith(' = {'):
+        prefix, _, suffix = line.rpartition('=')
         prefix = prefix.rstrip()
-        formatted_prefix = prefix.replace(b'\t', ' ' * 8)
+        formatted_prefix = prefix.replace('\t', ' ' * 8)
 
         alignment_size = alignment_offset - len(formatted_prefix)
-        alignment = b' ' * alignment_size
+        alignment = ' ' * alignment_size
 
-        line = b'{0:s}{1:s}={2:s}'.format(prefix, alignment, suffix)
+        line = '{0:s}{1:s}={2:s}'.format(prefix, alignment, suffix)
 
       aligned_lines.append(line)
 
@@ -165,12 +201,12 @@ class SourceFormatter(object):
     alignment_offset = None
     for line in lines:
       striped_line = line.strip()
-      if b'=' not in striped_line or striped_line.endswith(b' = {'):
+      if '=' not in striped_line or striped_line.endswith(' = {'):
         continue
 
-      prefix, _, _ = line.rpartition(b'=')
+      prefix, _, _ = line.rpartition('=')
       prefix = prefix.rstrip()
-      formatted_prefix = prefix.replace(b'\t', ' ' * 8)
+      formatted_prefix = prefix.replace('\t', ' ' * 8)
 
       equal_sign_offset = len(formatted_prefix) + 1
 
@@ -198,24 +234,24 @@ class SourceFormatter(object):
     for line in lines:
       striped_line = line.strip()
       if in_declaration_block:
-        if striped_line.endswith(b'};'):
+        if striped_line.endswith('};'):
           in_declaration_block = False
         formatted_lines.append(line)
         continue
 
-      if striped_line.endswith(b' = {'):
+      if striped_line.endswith(' = {'):
         in_declaration_block = True
         formatted_lines.append(line)
         continue
 
       if (striped_line and
-          not striped_line.startswith(b'#') and
-          not striped_line.startswith(b'/*') and
-          not striped_line.startswith(b'*/')):
+          not striped_line.startswith('#') and
+          not striped_line.startswith('/*') and
+          not striped_line.startswith('*/')):
         declaration_lines.append(line)
         continue
 
-      declaration_lines.sort(self.CompareVariableDeclarations)
+      declaration_lines.sort(key=lambda line: Variable(line))
       declaration_lines = self.VerticalAlignEqualSigns(
           declaration_lines, alignment_offset)
 
@@ -224,7 +260,7 @@ class SourceFormatter(object):
       declaration_lines = []
 
     if declaration_lines:
-      declaration_lines.sort(self.CompareVariableDeclarations)
+      declaration_lines.sort(key=lambda line: Variable(line))
       declaration_lines = self.VerticalAlignEqualSigns(
           declaration_lines, alignment_offset)
 

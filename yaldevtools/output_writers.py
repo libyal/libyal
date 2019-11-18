@@ -19,7 +19,7 @@ class FileWriter(object):
     super(FileWriter, self).__init__()
     self._output_directory = output_directory
 
-  def WriteFile(self, file_path, file_data, access_mode='wb'):
+  def WriteFile(self, file_path, file_data, access_mode='w'):
     """Writes the data to file.
 
     Args:
@@ -27,7 +27,7 @@ class FileWriter(object):
       file_data (bytes): to write.
       access_mode (Optional[str]): output file access mode.
     """
-    with open(file_path, access_mode) as file_object:
+    with io.open(file_path, access_mode, encoding='utf8') as file_object:
       file_object.write(file_data)
 
 
@@ -39,7 +39,7 @@ class StdoutWriter(object):
     super(StdoutWriter, self).__init__()
 
   # pylint: disable=unused-argument
-  def WriteFile(self, file_path, file_data, access_mode='wb'):
+  def WriteFile(self, file_path, file_data, access_mode='w'):
     """Writes the data to stdout (without the default trailing newline).
 
     Args:
