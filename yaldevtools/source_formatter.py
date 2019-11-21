@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Classes to format source of the libyal libraries."""
+"""The libyal source formatter classes."""
 
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -158,16 +158,14 @@ class Variable(object):
 
 
 class SourceFormatter(object):
-  """C source formatter."""
+  """Libyal C source formatter."""
 
   def VerticalAlignEqualSigns(self, lines, alignment_offset):
     """Vertically aligns the equal signs.
 
     Args:
       lines (list[str]): C variable declarations.
-      alignment_offset (Optional[int]): aligment offset, where None indicates
-          the function should determine the alingment offset based on the equal
-          signs.
+      alignment_offset (int): aligment offset.
 
     Returns:
       list[str]: C variable declarations with aligned equal signs.
