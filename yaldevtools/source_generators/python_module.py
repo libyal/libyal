@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """The source file generator for python module source files."""
 
+from __future__ import unicode_literals
+
 import collections
 import io
 import logging

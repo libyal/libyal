@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """The source file generator interface."""
 
+from __future__ import unicode_literals
+
 import abc
 import datetime
 import io
@@ -361,8 +363,12 @@ class SourceFileGenerator(object):
     Returns:
       string.Template: template string.
     """
-    with io.open(filename, 'r', encoding='utf8') as file_object:
+    # Read with binary mode to make sure end of line characters are
+    # not converted.
+    with io.open(filename, 'rb') as file_object:
       file_data = file_object.read()
+
+    file_data = file_data.decode('utf8')
 
     return string.Template(file_data)
 

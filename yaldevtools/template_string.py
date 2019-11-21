@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Template string generator."""
 
+from __future__ import unicode_literals
+
 import io
 import string
 

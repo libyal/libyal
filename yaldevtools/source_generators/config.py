@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """The source file generator for configuration files."""
 
+from __future__ import unicode_literals
+
 import glob
 import logging
 import os

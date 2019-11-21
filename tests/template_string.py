@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the template string generator."""
 
+from __future__ import unicode_literals
+
 import unittest
 
 from yaldevtools import template_string
