@@ -35,11 +35,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     hexadecimal_lines = []
     data_size = len(data)
-    for block_index in xrange(0, data_size, 16):
+    for block_index in range(0, data_size, 16):
       data_string = data[block_index:block_index + 16]
 
       hexadecimal_string = ', '.join([
-          '0x{0:02x}'.format(ord(byte_value))
+          '0x{0:02x}'.format(byte_value)
           for byte_value in data_string[0:16]])
 
       if len(data_string) < 16 or block_index + 16 == data_size:
@@ -1746,7 +1746,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           test_data_suffix = '_{0:s}'.format(test_data_suffix)
 
         test_data_file = os.path.join(test_data_directory, directory_entry)
-        with io.open(test_data_file, 'r', encoding='utf8') as file_object:
+        with open(test_data_file, 'rb') as file_object:
           test_data = file_object.read()
 
         template_mappings['test_data'] = self._FormatTestData(test_data)
@@ -2659,9 +2659,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     test_data_file = os.path.join('tests', 'data', test_data_filename)
 
     if not os.path.exists(test_data_file):
-      return ''
+      return bytes()
 
-    with io.open(test_data_file, 'r', encoding='utf8') as file_object:
+    with open(test_data_file, 'rb') as file_object:
       return file_object.read()
 
   def Generate(self, project_configuration, output_writer):
