@@ -423,7 +423,7 @@ class LibraryIncludeHeaderFile(object):
     if not self._api_types_group and not self._api_types_with_input_group:
       self._AnalyzeFunctionGroups()
 
-    return self._api_pseudo_types_group.keys()
+    return list(self._api_pseudo_types_group.keys())
 
   def GetAPITypeTestGroups(self):
     """Determines the API type test groups.
@@ -436,7 +436,8 @@ class LibraryIncludeHeaderFile(object):
     if not self._api_types_group and not self._api_types_with_input_group:
       self._AnalyzeFunctionGroups()
 
-    return self._api_types_group.keys(), self._api_types_with_input_group.keys()
+    return (list(self._api_types_group.keys()),
+            list(self._api_types_with_input_group.keys()))
 
   def GetCheckSignatureType(self):
     """Determines the check signature function type.
