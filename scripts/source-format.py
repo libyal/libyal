@@ -9,6 +9,8 @@ import argparse
 import io
 import sys
 
+from yaldevtools import source_formatter
+
 
 class SourceFileParser(object):
   """Source file parser."""
@@ -71,44 +73,18 @@ def Main():
     print('')
     return False
 
-  parser = SourceFileParser()
-  parser.ReadFile(options.source_file)
+  # parser = SourceFileParser()
+  # parser.ReadFile(options.source_file)
 
-  return
+  # return
 
   with io.open(options.source_file, 'r', encoding='utf8') as file_object:
     file_content = file_object.read()
 
-  formatted_lines = []
   lines = file_content.split('\n')
 
-  in_function = False
-
-  for line in lines:
-    line = line.rstrip()
-
-    if in_function:
-      if line == '}':
-        in_function = False
-      else:
-        index = 0
-        line_length = len(line)
-
-        while index < line_length:
-          end_index = index + 8
-          if line[index:end_index] != '        ':
-            break
-
-          line = '{0:s}\t{1:s}'.format(line[:index], line[end_index:])
-          line_length = len(line)
-
-          index += 8
-
-    elif line == '{':
-      in_function = True
-
-    formatted_lines.append(line)
-
+  formatter = source_formatter.SourceFormatter()
+  formatted_lines = formatter.FormatSource(lines)
   formatted_file_content = '\n'.join(formatted_lines)
 
   with io.open(options.source_file, 'w', encoding='utf8') as file_object:

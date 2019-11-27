@@ -160,6 +160,145 @@ class Variable(object):
 class SourceFormatter(object):
   """Libyal C source formatter."""
 
+  def FormatLineIndentation(self, line, indentation_level):
+    """Formats the identation for a line of C source.
+
+    Args:
+      line (str): line of C source.
+      indentation_level (int): the indentation level.
+
+    Returns:
+      str: line of C source with formatted indentation.
+    """
+    index = 0
+    line_length = len(line)
+
+    for _ in range(0, indentation_level):
+      maximum_end_index = min(index + 8, line_length)
+
+      end_index = index
+      while end_index < maximum_end_index:
+        if line[end_index] != ' ':
+          break
+        end_index += 1
+
+      # Merge less than 8 spaces and a tab.
+      if end_index < maximum_end_index:
+        if line[end_index] != '\t':
+          break
+
+        end_index += 1
+
+      indentation = set(line[index:end_index])
+      if indentation == set([' ']) or indentation == set([' ', '\t']):
+        line = '{0:s}\t{1:s}'.format(line[:index], line[end_index:])
+        line_length = len(line)
+
+      index += 1
+
+    while index < line_length:
+      if line[index] == '\t':
+        line = '{0:s}        {1:s}'.format(line[:index], line[index + 1:])
+        line_length = len(line)
+
+      index += 1
+
+    return line
+
+  def FormatSource(self, lines):
+    """Formats lines of C source.
+
+    Args:
+      lines (list[str]): lines of C source.
+
+    Returns:
+      list[str]: formatted lines of C source.
+    """
+    in_variables_declaration_block = False
+    in_function = False
+    in_switch_case = False
+    indentation_level = 0
+
+    formatted_lines = []
+    declaration_lines = []
+
+    for line in lines:
+      stripped_line = line.strip()
+
+      if in_function:
+        if line == '}':
+          in_function = False
+          indentation_level = 0
+
+        elif in_variables_declaration_block:
+          if ('(' not in stripped_line or
+              stripped_line.startswith('#') or
+              stripped_line.startswith('/*') or
+              stripped_line.startswith('*') or
+              stripped_line.startswith('*/')):
+            declaration_lines.append(line)
+            continue
+
+          else:
+            in_variables_declaration_block = False
+
+        elif stripped_line == '}':
+          indentation_level -= 1
+
+      # TODO: refactor to separate function
+      if declaration_lines:
+        alignment_offset = self.VerticalAlignEqualSignsDetermineOffset(
+            declaration_lines)
+
+        block_of_declaration_lines = []
+        for declaration_line in declaration_lines:
+          stripped_declaration_line = declaration_line.strip()
+          if stripped_declaration_line and not (
+                  stripped_declaration_line.startswith('#') or
+                  stripped_declaration_line.startswith('/*') or
+                  stripped_declaration_line.startswith('*') or
+                  stripped_declaration_line.startswith('*/')):
+            block_of_declaration_lines.append(declaration_line)
+            continue
+
+          if block_of_declaration_lines:
+            block_of_declaration_lines.sort(key=lambda line: Variable(line))
+            block_of_declaration_lines = self.VerticalAlignEqualSigns(
+                block_of_declaration_lines, alignment_offset)
+
+            formatted_lines.extend(block_of_declaration_lines)
+            block_of_declaration_lines = []
+
+          formatted_lines.append(declaration_line)
+
+        declaration_lines = []
+
+      line = self.FormatLineIndentation(line, indentation_level)
+      formatted_lines.append(line)
+
+      if in_function:
+        if stripped_line == '{':
+          indentation_level += 1
+
+        # TODO: handle switch case with return.
+        elif in_switch_case and (
+            stripped_line == 'break;' or
+            line == '{0:s}}}'.format('\t' * (indentation_level - 1))):
+          in_switch_case = False
+          indentation_level -= 1
+
+        elif not in_switch_case and (
+            stripped_line.startswith('case ') or stripped_line == 'default:'):
+          in_switch_case = True
+          indentation_level += 1
+
+      elif line == '{':
+        in_function = True
+        in_variables_declaration_block = True
+        indentation_level = 1
+
+    return formatted_lines
+
   def VerticalAlignEqualSigns(self, lines, alignment_offset):
     """Vertically aligns the equal signs.
 
@@ -172,8 +311,8 @@ class SourceFormatter(object):
     """
     aligned_lines = []
     for line in lines:
-      striped_line = line.strip()
-      if '=' in striped_line and not striped_line.endswith(' = {'):
+      stripped_line = line.strip()
+      if '=' in stripped_line and not stripped_line.endswith(' = {'):
         prefix, _, suffix = line.rpartition('=')
         prefix = prefix.rstrip()
         formatted_prefix = prefix.replace('\t', ' ' * 8)
@@ -198,8 +337,8 @@ class SourceFormatter(object):
     """
     alignment_offset = None
     for line in lines:
-      striped_line = line.strip()
-      if '=' not in striped_line or striped_line.endswith(' = {'):
+      stripped_line = line.strip()
+      if '=' not in stripped_line or stripped_line.endswith(' = {'):
         continue
 
       prefix, _, _ = line.rpartition('=')
@@ -214,55 +353,3 @@ class SourceFormatter(object):
         alignment_offset = max(alignment_offset, equal_sign_offset)
 
     return alignment_offset
-
-  def FormatSource(self, lines):
-    """Formats lines of C source.
-
-    Args:
-      lines (list[str]): lines of C source.
-
-    Returns:
-      list[str]: formatted lines of C source.
-    """
-    alignment_offset = self.VerticalAlignEqualSignsDetermineOffset(lines)
-
-    in_declaration_block = False
-    formatted_lines = []
-    declaration_lines = []
-    for line in lines:
-      striped_line = line.strip()
-      if in_declaration_block:
-        if striped_line.endswith('};'):
-          in_declaration_block = False
-        formatted_lines.append(line)
-        continue
-
-      if striped_line.endswith(' = {'):
-        in_declaration_block = True
-        formatted_lines.append(line)
-        continue
-
-      if (striped_line and
-          not striped_line.startswith('#') and
-          not striped_line.startswith('/*') and
-          not striped_line.startswith('*/')):
-        declaration_lines.append(line)
-        continue
-
-      declaration_lines.sort(key=lambda line: Variable(line))
-      declaration_lines = self.VerticalAlignEqualSigns(
-          declaration_lines, alignment_offset)
-
-      formatted_lines.extend(declaration_lines)
-      formatted_lines.append(line)
-      declaration_lines = []
-
-    if declaration_lines:
-      declaration_lines.sort(key=lambda line: Variable(line))
-      declaration_lines = self.VerticalAlignEqualSigns(
-          declaration_lines, alignment_offset)
-
-      formatted_lines.extend(declaration_lines)
-      declaration_lines = []
-
-    return formatted_lines
