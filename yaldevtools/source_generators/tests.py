@@ -966,6 +966,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     with_is_set = bool(function_prototype.return_values == [-1, 0, 1])
 
+    body_template_name = None
     if clone_function:
       body_template_name = 'function-body-{0:s}-with_clone_function.c'.format(
           function_template)
@@ -978,15 +979,20 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     elif with_is_set:
       body_template_name = 'function-body-{0:s}-with_is_set.c'.format(
           function_template)
-    else:
+    elif function_template:
       body_template_name = 'function-body-{0:s}.c'.format(function_template)
 
-    body_template_filename = os.path.join(
-        template_directory, body_template_name)
-    if not body_template_filename or not os.path.exists(body_template_filename):
-      template_filename = '{0:s}.c'.format(function_template)
+    body_template_filename = None
+    if body_template_name:
+      body_template_filename = os.path.join(
+          template_directory, body_template_name)
 
-      template_filename = os.path.join(template_directory, template_filename)
+    if not body_template_filename or not os.path.exists(body_template_filename):
+      template_filename = None
+      if function_template:
+        template_filename = '{0:s}.c'.format(function_template)
+        template_filename = os.path.join(template_directory, template_filename)
+
       if not template_filename or not os.path.exists(template_filename):
         logging.warning((
             'Unable to generate tests source code for type: "{0:s}" function: '

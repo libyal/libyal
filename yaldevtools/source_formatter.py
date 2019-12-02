@@ -222,6 +222,8 @@ class SourceFormatter(object):
     formatted_lines = []
     declaration_lines = []
 
+    # TODO: add support for macro in libcerror/libcerror_system.c
+
     for line in lines:
       stripped_line = line.strip()
 

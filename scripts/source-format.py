@@ -73,6 +73,8 @@ def Main():
     print('')
     return False
 
+  # TODO: remove trailing whitespace
+
   # parser = SourceFileParser()
   # parser.ReadFile(options.source_file)
 
