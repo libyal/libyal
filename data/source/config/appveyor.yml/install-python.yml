@@ -1,2 +1,4 @@
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
     "%PYTHON%\\python.exe" -m pip install -U pip setuptools twine wheel )
+- sh: if test $${BUILD_ENVIRONMENT} = "python"; then brew update && brew install gettext gnu-sed python3 && brew link --force gettext; fi
+- sh: if test $${BUILD_ENVIRONMENT} = "python"; then $${PYTHON} -m pip install -U pip setuptools twine wheel; fi

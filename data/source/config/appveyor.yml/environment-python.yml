@@ -10,3 +10,7 @@
   - TARGET: python37-x64
     BUILD_ENVIRONMENT: python
     PYTHON: "C:\\Python37-x64"
+  - TARGET: python37-x64
+    BUILD_ENVIRONMENT: python
+    APPVEYOR_BUILD_WORKER_IMAGE: macOS-Mojave
+    PYTHON: "/usr/local/bin/python3.7"
