@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import logging
 import os
 
 from yaldevtools.source_generators import interface
