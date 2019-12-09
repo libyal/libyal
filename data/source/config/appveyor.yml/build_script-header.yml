@@ -3,7 +3,6 @@ build_script:
 - ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild" -or ($$env:BUILD_ENVIRONMENT -eq "python" -and $$isWindows)) {
     .\synclibs.ps1;
     .\autogen.ps1 }
-- sh: if test $${BUILD_ENVIRONMENT} = "python"; then ./synclibs.sh && ./autogen.sh; fi
 - cmd: if [%TARGET%]==[vs2008] (
     msbuild /verbosity:quiet msvscpp\${library_name}.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2010] (

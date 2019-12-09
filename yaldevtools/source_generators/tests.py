@@ -1086,7 +1086,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           'get_string_value', 'get_type_value', 'get_value'):
         function_template = 'get_{0:s}'.format(value_name)
 
-      if initialize_number_of_arguments == 3:
+      if (initialize_number_of_arguments == 3 and initialize_value_type and
+          initialize_value_name):
         function_variable = '{0:s}_{1:s}_t *{2:s} = NULL;'.format(
             project_configuration.library_name, initialize_value_type,
             initialize_value_name)
