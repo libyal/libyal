@@ -967,20 +967,21 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     with_is_set = bool(function_prototype.return_values == [-1, 0, 1])
 
     body_template_name = None
-    if clone_function:
-      body_template_name = 'function-body-{0:s}-with_clone_function.c'.format(
-          function_template)
-    elif free_function:
-      body_template_name = 'function-body-{0:s}-with_free_function.c'.format(
-          function_template)
-    elif with_codepage:
-      body_template_name = 'function-body-{0:s}-with_codepage.c'.format(
-          function_template)
-    elif with_is_set:
-      body_template_name = 'function-body-{0:s}-with_is_set.c'.format(
-          function_template)
-    elif function_template:
-      body_template_name = 'function-body-{0:s}.c'.format(function_template)
+    if function_template:
+      if clone_function:
+        body_template_name = 'function-body-{0:s}-with_clone_function.c'.format(
+            function_template)
+      elif free_function:
+        body_template_name = 'function-body-{0:s}-with_free_function.c'.format(
+            function_template)
+      elif with_codepage:
+        body_template_name = 'function-body-{0:s}-with_codepage.c'.format(
+            function_template)
+      elif with_is_set:
+        body_template_name = 'function-body-{0:s}-with_is_set.c'.format(
+            function_template)
+      else:
+        body_template_name = 'function-body-{0:s}.c'.format(function_template)
 
     body_template_filename = None
     if body_template_name:

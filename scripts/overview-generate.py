@@ -70,9 +70,17 @@ class ProjectsReader(object):
       value_name (str): name of the value.
 
     Returns:
-      object: value.
+      object: value or None if the value is not available.
     """
-    return json.loads(self._config_parser.get(section_name, value_name))
+    try:
+      value = self._config_parser.get(section_name, value_name)
+    except configparser.NoOptionError:
+      value = None
+
+    if value:
+      return json.loads(value)
+
+    return None
 
   def ReadFromFile(self, filename):
     """Reads the projects from file.
@@ -89,38 +97,23 @@ class ProjectsReader(object):
     for project_name in self._config_parser.sections():
       project = Project(project_name)
 
-      try:
-        project.appveyor_identifier = self._GetConfigValue(
-            project_name, 'appveyor_identifier')
-      except configparser.NoOptionError:
-        pass
+      project.appveyor_identifier = self._GetConfigValue(
+          project_name, 'appveyor_identifier')
 
       project.category = self._GetConfigValue(project_name, 'category')
 
-      try:
-        project.coverity_badge = self._GetConfigValue(
-            project_name, 'coverity_badge')
-      except configparser.NoOptionError:
-        pass
+      project.coverity_badge = self._GetConfigValue(
+          project_name, 'coverity_badge')
 
       project.description = self._GetConfigValue(project_name, 'description')
 
-      try:
-        project.display_name = self._GetConfigValue(
-            project_name, 'display_name')
-      except configparser.NoOptionError:
-        pass
+      project.display_name = self._GetConfigValue(
+          project_name, 'display_name')
 
-      try:
-        project.documentation_only = self._GetConfigValue(
-            project_name, 'documentation_only')
-      except configparser.NoOptionError:
-        pass
+      project.documentation_only = self._GetConfigValue(
+          project_name, 'documentation_only')
 
-      try:
-        project.group = self._GetConfigValue(project_name, 'group')
-      except configparser.NoOptionError:
-        pass
+      project.group = self._GetConfigValue(project_name, 'group')
 
       projects.append(project)
 
@@ -463,8 +456,8 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
           travis_build_status = (
               '[![Build status]'
-              '(https://travis-ci.org/libyal/{0:s}.svg?branch=master)]'
-              '(https://travis-ci.org/libyal/{0:s})').format(
+              '(https://travis-ci.com/libyal/{0:s}.svg?branch=master)]'
+              '(https://travis-ci.com/libyal/{0:s})').format(
                   project.name)
 
         template_mappings = {
@@ -486,9 +479,11 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
       projects = projects_per_category[category]
       for project in projects_per_category[category]:
+        project_display_name = project.display_name or project.name
+
         template_mappings = {
             'project_description': project.description,
-            'project_display_name': project.display_name,
+            'project_display_name': project_display_name,
             'project_name': project.name,
         }
         self._GenerateSection('other.txt', template_mappings, output_writer)
@@ -949,7 +944,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
           script, script_reference))
 
     table_of_contents.append('')
-    output_data = '\n'.join(table_of_contents).encode('utf-8')
+    output_data = '\n'.join(table_of_contents)
     output_writer.Write(output_data)
 
     template_mappings = {'category_title': 'Configurations'}
@@ -1110,7 +1105,7 @@ class FileWriter(object):
     """Writes the data to file.
 
     Args:
-      data (bytes): data to write.
+      data (str): data to write.
     """
     self._file_object.write(data)
 
@@ -1138,7 +1133,7 @@ class StdoutWriter(object):
     """Writes the data to stdout (without the default trailing newline).
 
     Args:
-      data (bytes): data to write.
+      data (str): data to write.
     """
     print(data, end='')
 
