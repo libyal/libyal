@@ -30,5 +30,3 @@ then
 
 	brew install gettext gnu-sed;
 	brew link --force gettext;
-fi
-

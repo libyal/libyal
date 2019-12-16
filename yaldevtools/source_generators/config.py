@@ -1052,10 +1052,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
 
+    template_names = ['body-start.sh']
+
     if 'fuse' in project_configuration.tools_build_dependencies:
-      template_names = ['header-fuse.sh']
-    else:
-      template_names = ['header.sh']
+      template_names.append('body-osxfuse.sh')
+
+    if project_configuration.HasPythonModule():
+      template_names.append('body-osxpython.sh')
+
+    template_names.append('body-end.sh')
 
     if project_configuration.coverity_scan_token:
       template_names.append('coverity.sh')
@@ -1258,6 +1263,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.extend([
         'before_install.yml', 'install.yml', 'script.yml', 'after_success.yml'])
+
+    if project_configuration.HasPythonModule():
+      template_names.append('after_success-python.yml')
 
     template_filenames = [
         os.path.join(template_directory, template_name)
