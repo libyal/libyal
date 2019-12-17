@@ -486,13 +486,14 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_entry')
 
-    template_mappings['mount_tool_file_entry_type'] = (
-        project_configuration.mount_tool_file_entry_type)
+    mount_tool_file_entry_type = (
+        project_configuration.mount_tool_file_entry_type or '')
+
+    template_mappings['mount_tool_file_entry_type'] = mount_tool_file_entry_type
     template_mappings['mount_tool_file_entry_type_description'] = (
-        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+        mount_tool_file_entry_type.replace('_', ' '))
     template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
-        project_configuration.library_name_suffix,
-        project_configuration.mount_tool_file_entry_type)
+        project_configuration.library_name_suffix, mount_tool_file_entry_type)
 
     template_filename = os.path.join(template_directory, 'mount_file_entry.h')
     self._GenerateSection(
@@ -646,18 +647,22 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         'mount_tool_file_entry_modification_time_value_description'] = (
             file_entry_modification_time_value.replace('_', ' '))
 
-    template_mappings['mount_tool_file_entry_type'] = (
-        project_configuration.mount_tool_file_entry_type)
+    mount_tool_file_entry_type = (
+        project_configuration.mount_tool_file_entry_type or '')
+
+    template_mappings['mount_tool_file_entry_type'] = mount_tool_file_entry_type
     template_mappings['mount_tool_file_entry_type_description'] = (
-        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+        mount_tool_file_entry_type.replace('_', ' '))
     template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
-        project_configuration.library_name_suffix,
-        project_configuration.mount_tool_file_entry_type)
+        project_configuration.library_name_suffix, mount_tool_file_entry_type)
+
+    mount_tool_file_entry_type_size_value = (
+        project_configuration.mount_tool_file_entry_type_size_value or '')
+
     template_mappings['mount_tool_file_entry_type_size_value'] = (
-        project_configuration.mount_tool_file_entry_type_size_value)
+        mount_tool_file_entry_type_size_value)
     template_mappings['mount_tool_file_entry_type_size_value_description'] = (
-        project_configuration.mount_tool_file_entry_type_size_value.replace(
-            '_', ' '))
+        mount_tool_file_entry_type_size_value.replace('_', ' '))
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
@@ -747,17 +752,18 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['mount_tool_file_entry_type'] = (
-        project_configuration.mount_tool_file_entry_type)
+    mount_tool_file_entry_type = (
+        project_configuration.mount_tool_file_entry_type or '')
+
+    template_mappings['mount_tool_file_entry_type'] = mount_tool_file_entry_type
     template_mappings['mount_tool_file_entry_type_description'] = (
-        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+        mount_tool_file_entry_type.replace('_', ' '))
     template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
-        project_configuration.library_name_suffix,
-        project_configuration.mount_tool_file_entry_type)
+        project_configuration.library_name_suffix, mount_tool_file_entry_type)
 
     file_system_type = project_configuration.mount_tool_file_system_type
     if not file_system_type:
-      file_system_type = project_configuration.mount_tool_file_entry_type
+      file_system_type = mount_tool_file_entry_type
 
     template_mappings['mount_tool_file_system_type'] = file_system_type
     template_mappings['mount_tool_file_system_type_description'] = (
@@ -841,17 +847,18 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['mount_tool_file_entry_type'] = (
-        project_configuration.mount_tool_file_entry_type)
+    mount_tool_file_entry_type = (
+        project_configuration.mount_tool_file_entry_type or '')
+
+    template_mappings['mount_tool_file_entry_type'] = mount_tool_file_entry_type
     template_mappings['mount_tool_file_entry_type_description'] = (
-        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+        mount_tool_file_entry_type.replace('_', ' '))
     template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
-        project_configuration.library_name_suffix,
-        project_configuration.mount_tool_file_entry_type)
+        project_configuration.library_name_suffix, mount_tool_file_entry_type)
 
     file_system_type = project_configuration.mount_tool_file_system_type
     if not file_system_type:
-      file_system_type = project_configuration.mount_tool_file_entry_type
+      file_system_type = mount_tool_file_entry_type
 
     template_mappings['mount_tool_file_system_type'] = file_system_type
     template_mappings['mount_tool_file_system_type_description'] = (
@@ -1049,11 +1056,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['mount_tool_file_entry_type'] = (
-        project_configuration.mount_tool_file_entry_type)
+    mount_tool_file_entry_type = (
+        project_configuration.mount_tool_file_entry_type or '')
+
+    template_mappings['mount_tool_file_entry_type'] = mount_tool_file_entry_type
     template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
-        project_configuration.library_name_suffix,
-        project_configuration.mount_tool_file_entry_type)
+        project_configuration.library_name_suffix, mount_tool_file_entry_type)
     template_mappings['mount_tool_source_type'] = (
         project_configuration.mount_tool_source_type)
 
@@ -1300,11 +1308,14 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
+    mount_tool_file_entry_type = (
+        project_configuration.mount_tool_file_entry_type or '')
+
     base_type = project_configuration.mount_tool_base_type
     if not base_type:
       base_type = project_configuration.mount_tool_file_system_type
     if not base_type:
-      base_type = project_configuration.mount_tool_file_entry_type
+      base_type = mount_tool_file_entry_type
 
     template_mappings['mount_tool_base_type'] = base_type
     template_mappings['mount_tool_base_type_description'] = (
@@ -1312,17 +1323,15 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['mount_tool_base_type_name'] = '{0:s}_{1:s}'.format(
         project_configuration.library_name_suffix, base_type)
 
-    template_mappings['mount_tool_file_entry_type'] = (
-        project_configuration.mount_tool_file_entry_type)
+    template_mappings['mount_tool_file_entry_type'] = mount_tool_file_entry_type
     template_mappings['mount_tool_file_entry_type_description'] = (
-        project_configuration.mount_tool_file_entry_type.replace('_', ' '))
+        mount_tool_file_entry_type.replace('_', ' '))
     template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
-        project_configuration.library_name_suffix,
-        project_configuration.mount_tool_file_entry_type)
+        project_configuration.library_name_suffix, mount_tool_file_entry_type)
 
     file_system_type = project_configuration.mount_tool_file_system_type
     if not file_system_type:
-      file_system_type = project_configuration.mount_tool_file_entry_type
+      file_system_type = mount_tool_file_entry_type
 
     template_mappings['mount_tool_file_system_type'] = file_system_type
     template_mappings['mount_tool_file_system_type_description'] = (
