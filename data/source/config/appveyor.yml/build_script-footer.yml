@@ -1,13 +1,13 @@
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     xcopy /i /q /s C:\projects\${library_name} C:\cygwin\home\appveyor\${library_name} &&
-    C:\cygwin\bin\bash -e -l -c "cd ${library_name} && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\cygwin\bin\bash -e -l -c "cd ${library_name} && ./synclibs.sh --use-head && ./autogen.sh && ./configure $${CONFIGURE_OPTIONS} && make > /dev/null" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\${library_name} C:\cygwin64\home\appveyor\${library_name} &&
-    C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && ./synclibs.sh --use-head && ./autogen.sh && ./configure $${CONFIGURE_OPTIONS} && make > /dev/null" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
     xcopy /i /q /s C:\projects\${library_name} C:\MinGW\msys\1.0\home\appveyor\${library_name} &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd ${library_name} && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd ${library_name} && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh --use-head && ./autogen.sh && ./configure $${CONFIGURE_OPTIONS} && make > /dev/null" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\${library_name} C:\msys64\home\appveyor\${library_name} &&
-    C:\msys64\usr\bin\bash -e -l -c "cd ${library_name} && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\msys64\usr\bin\bash -e -l -c "cd ${library_name} && ./synclibs.sh --use-head && ./autogen.sh && ./configure $${CONFIGURE_OPTIONS} && make > /dev/null" )
 
