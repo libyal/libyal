@@ -1,7 +1,7 @@
 /*
  * The libfdata header wrapper
  *
- * Copyright (C) ${copyright}, ${tools_authors}
+ * Copyright (C) ${copyright}, ${tests_authors}
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${tools_name_upper_case}_LIBFDATA_H )
-#define _${tools_name_upper_case}_LIBFDATA_H
+#if !defined( _${library_name_suffix_upper_case}_TEST_LIBFDATA_H )
+#define _${library_name_suffix_upper_case}_TEST_LIBFDATA_H
 
 #include <common.h>
 
@@ -44,7 +44,7 @@
 /* If libtool DLL support is enabled set LIBFDATA_DLL_IMPORT
  * before including libfdata.h
  */
-#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
+#if defined( _WIN32 ) && defined( DLL_IMPORT )
 #define LIBFDATA_DLL_IMPORT
 #endif
 
@@ -52,5 +52,5 @@
 
 #endif /* defined( HAVE_LOCAL_LIBFDATA ) */
 
-#endif /* !defined( _${tools_name_upper_case}_LIBFDATA_H ) */
+#endif /* !defined( _${library_name_suffix_upper_case}_TEST_LIBFDATA_H ) */
 
