@@ -64,13 +64,13 @@ ${test_options_function_arguments} )
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "file_io_pool",
-         file_io_pool );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "file_io_pool",
+	 file_io_pool );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	for( filename_index = 0;
 	     filename_index < number_of_filenames;

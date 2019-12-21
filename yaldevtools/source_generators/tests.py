@@ -395,7 +395,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         test_script = 'test_{0:s}.sh'.format(tool_name)
         test_scripts.append(test_script)
 
-    check_scripts = ['test_runner.sh']
+    check_scripts = ['test_manpage.sh', 'test_runner.sh']
     check_scripts.extend(test_scripts)
 
     python_scripts = []
@@ -443,31 +443,30 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.library_name.upper())
     cppflags.append(cppflag)
 
-    template_mappings['cppflags'] = ' \\\n'.join(
-        ['\t{0:s}'.format(name) for name in cppflags])
-    template_mappings['python_tests'] = ' \\\n'.join(
-        ['\t{0:s}'.format(filename) for filename in python_test_scripts])
-    template_mappings['tests'] = ' \\\n'.join(
-        ['\t{0:s}'.format(filename) for filename in test_scripts])
-    template_mappings['check_scripts'] = ' \\\n'.join(
-        ['\t{0:s}'.format(filename) for filename in check_scripts])
-    template_mappings['check_programs'] = ' \\\n'.join(
-        ['\t{0:s}'.format(filename) for filename in check_programs])
+    template_mappings['cppflags'] = ' \\\n'.join([
+        '\t{0:s}'.format(name) for name in cppflags])
+    template_mappings['python_tests'] = ' \\\n'.join([
+        '\t{0:s}'.format(filename) for filename in python_test_scripts])
+    template_mappings['tests'] = ' \\\n'.join([
+        '\t{0:s}'.format(filename) for filename in test_scripts])
+    template_mappings['check_scripts'] = ' \\\n'.join([
+        '\t{0:s}'.format(filename) for filename in check_scripts])
+    template_mappings['check_programs'] = ' \\\n'.join([
+        '\t{0:s}'.format(filename) for filename in check_programs])
 
-    template_filename = os.path.join(template_directory, 'header.am')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_names = ['header.am']
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(template_directory, 'python.am')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('python.am')
 
-    template_filename = os.path.join(template_directory, 'body.am')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    template_names.append('body.am')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     # TODO: add support for read_file_io_handle tests
     # TODO: add support for rwlock tests
@@ -477,6 +476,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if (project_configuration.library_name != 'libcerror' and
             group_name != 'error' and has_error_argument):
           template_filename = 'yal_test_function.am'
+
+        elif (project_configuration.library_name == 'libcerror' and
+              group_name == 'system'):
+          template_filename = 'yal_test_function_no_error_with_memory.am'
+
         else:
           template_filename = 'yal_test_function_no_error.am'
 
@@ -744,8 +748,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
   def _GenerateTypeTest(
       self, project_configuration, template_mappings, type_name, type_function,
-      last_have_extern, header_file, output_writer, output_filename,
-      with_input=False):
+      last_have_extern, header_file, test_source_file, output_writer,
+      output_filename, with_input=False):
     """Generates a test for a type function.
 
     Args:
@@ -757,6 +761,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       last_have_extern (bool): True if the previous function prototype was
           externally available.
       header_file (LibraryHeaderFile): library header file.
+      test_source_file (TestSourceFile): test source file.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
       with_input (Optional[bool]): True if the type is to be tested with
@@ -772,13 +777,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     return self._GenerateTypeTestFromTemplate(
         project_configuration, template_mappings, template_filename, type_name,
-        type_function, last_have_extern, header_file, output_writer,
-        output_filename, with_input=with_input)
+        type_function, last_have_extern, header_file, test_source_file,
+        output_writer, output_filename, with_input=with_input)
 
   def _GenerateTypeTestFunction(
       self, project_configuration, template_mappings, type_name, type_function,
-      last_have_extern, header_file, output_writer, output_filename,
-      with_input=False):
+      last_have_extern, header_file, test_source_file, output_writer,
+      output_filename, with_input=False):
     """Generates a test for a type function.
 
     Args:
@@ -790,6 +795,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       last_have_extern (bool): True if the previous function prototype was
           externally available.
       header_file (LibraryHeaderFile): library header file.
+      test_source_file (TestSourceFile): test source file.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
       with_input (Optional[bool]): True if the type is to be tested with
@@ -803,6 +809,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         bool: True if the function prototype was externally available.
     """
     function_name = self._GetFunctionName(
+        project_configuration, type_name, type_function)
+
+    test_function_name = self._GetTestFunctionName(
         project_configuration, type_name, type_function)
 
     library_type_prefix = '{0:s}_'.format(project_configuration.library_name)
@@ -825,7 +834,16 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           initialize_function_prototype.arguments)
 
     if initialize_number_of_arguments not in (2, 3):
-      return function_name, None, last_have_extern
+      existing_test_function = test_source_file.functions.get(
+          test_function_name, None)
+      if not existing_test_function:
+        return function_name, None, last_have_extern
+
+      else:
+        output_data = '\n'.join(existing_test_function)
+        output_writer.WriteFile(
+            output_filename, output_data, access_mode='a')
+        return function_name, test_function_name, last_have_extern
 
     if initialize_number_of_arguments == 3:
       function_argument = initialize_function_prototype.arguments[1]
@@ -999,7 +1017,17 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             'Unable to generate tests source code for type: "{0:s}" function: '
             '"{1:s}" with error: missing template').format(
                 type_name, type_function))
-        return function_name, None, last_have_extern
+
+        existing_test_function = test_source_file.functions.get(
+            test_function_name, None)
+        if not existing_test_function:
+          return function_name, None, last_have_extern
+
+        else:
+          output_data = '\n'.join(existing_test_function)
+          output_writer.WriteFile(
+              output_filename, output_data, access_mode='a')
+          return function_name, test_function_name, last_have_extern
 
       self._GenerateTypeTestDefineInternalEnd(
           template_mappings, last_have_extern, have_extern, output_writer,
@@ -1205,15 +1233,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       del template_mappings['pointer_type_name']
       del template_mappings['test_data_size']
 
-    test_function_name = self._GetTestFunctionName(
-        project_configuration, type_name, type_function)
-
     return function_name, test_function_name, have_extern
 
   def _GenerateTypeTestFromTemplate(
       self, project_configuration, template_mappings, template_filename,
-      type_name, type_function, last_have_extern, header_file, output_writer,
-      output_filename, with_input=False):
+      type_name, type_function, last_have_extern, header_file, test_source_file,
+      output_writer, output_filename, with_input=False):
     """Generates a test for a type function with a specific template.
 
     Args:
@@ -1226,6 +1251,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       last_have_extern (bool): True if the previous function prototype was
           externally available.
       header_file (LibraryHeaderFile): library header file.
+      test_source_file (TestSourceFile): test source file.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
       with_input (Optional[bool]): True if the type is to be tested with
@@ -1238,6 +1264,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         bool: True if the function prototype was externally available.
     """
     function_name = self._GetFunctionName(
+        project_configuration, type_name, type_function)
+
+    test_function_name = self._GetTestFunctionName(
         project_configuration, type_name, type_function)
 
     function_prototype = header_file.GetTypeFunction(type_name, type_function)
@@ -1263,14 +1292,21 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           'Unable to generate tests source code for type: "{0:s}" function: '
           '"{1:s}" with error: missing template').format(
               type_name, type_function))
-      return function_name, None, have_extern
+
+      existing_test_function = test_source_file.functions.get(
+          test_function_name, None)
+      if not existing_test_function:
+        return function_name, None, have_extern
+
+      else:
+        output_data = '\n'.join(existing_test_function)
+        output_writer.WriteFile(
+            output_filename, output_data, access_mode='a')
+        return function_name, test_function_name, have_extern
 
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='a')
-
-    test_function_name = self._GetTestFunctionName(
-        project_configuration, type_name, type_function)
 
     return function_name, test_function_name, have_extern
 
@@ -1372,8 +1408,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
   def _GenerateTypeTestInitializeFunction(
       self, project_configuration, template_mappings, type_name, type_function,
-      last_have_extern, header_file, output_writer, output_filename,
-      function_names, tests_to_run):
+      last_have_extern, header_file, test_source_file, output_writer,
+      output_filename, function_names, tests_to_run):
     """Generates a test for a type initialize function.
 
     Args:
@@ -1385,6 +1421,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       last_have_extern (bool): True if the previous function prototype was
           externally available.
       header_file (LibraryHeaderFile): library header file.
+      test_source_file (TestSourceFile): test source file.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
       function_names (list[str]): function names.
@@ -1439,7 +1476,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateTypeTestFromTemplate(
             project_configuration, template_mappings, template_filename,
             type_name, 'initialize', last_have_extern, header_file,
-            output_writer, output_filename))
+            test_source_file, output_writer, output_filename))
 
     tests_to_run.append((function_name, test_function_name))
     function_names.remove(function_name)
@@ -1610,6 +1647,18 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       logging.warning('Unable to read header file: {0:s}'.format(
           header_file.path))
       return False
+
+    # Read existing test file.
+    test_source_file = None
+    if os.path.exists(output_filename):
+      test_source_file = source_file.TestSourceFile(output_filename)
+
+      try:
+        test_source_file.Read(project_configuration)
+      except IOError:
+        logging.warning('Unable to read test source file: {0:s}'.format(
+            test_source_file.path))
+        return False
 
     type_size_name = self._GetTypeSizeName(project_configuration, type_name)
 
@@ -1822,8 +1871,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     have_extern = self._GenerateTypeTestInitializeFunction(
         project_configuration, template_mappings, type_name, 'initialize',
-        have_extern, header_file, output_writer, output_filename,
-        function_names, tests_to_run)
+        have_extern, header_file, test_source_file, output_writer,
+        output_filename, function_names, tests_to_run)
 
     have_extern = self._GenerateTypeTestWithFreeFunction(
         project_configuration, template_mappings, type_name, 'free',
@@ -1834,8 +1883,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       function_name, test_function_name, have_extern = (
           self._GenerateTypeTestFunction(
               project_configuration, template_mappings, type_name,
-              type_function, have_extern, header_file, output_writer,
-              output_filename))
+              type_function, have_extern, header_file, test_source_file,
+              output_writer, output_filename))
 
       if test_function_name:
         tests_to_run.append((function_name, test_function_name))
@@ -1853,8 +1902,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       function_name, test_function_name, have_extern = self._GenerateTypeTest(
           project_configuration, template_mappings, type_name, 'close',
-          have_extern, header_file, output_writer, output_filename,
-          with_input=with_input)
+          have_extern, header_file, test_source_file, output_writer,
+          output_filename, with_input=with_input)
 
       if test_function_name:
         tests_to_run_with_source.append((function_name, test_function_name))
@@ -1897,8 +1946,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       _, test_function_name, have_extern = self._GenerateTypeTestFunction(
           project_configuration, template_mappings, type_name, type_function,
-          have_extern, header_file, output_writer, output_filename,
-          with_input=type_function_with_input)
+          have_extern, header_file, test_source_file, output_writer,
+          output_filename, with_input=type_function_with_input)
 
       if type_function_with_input:
         tests_to_run_with_args.append((function_name, test_function_name))
@@ -2845,7 +2894,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         self._SortIncludeHeaders(project_configuration, output_filename)
 
       elif output_filename.endswith('.sh'):
-        # Set x-bit for .sh script.
+        # Set x-bit for a shell script (.sh).
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 

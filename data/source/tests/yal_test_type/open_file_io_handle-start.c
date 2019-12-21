@@ -21,13 +21,13 @@ ${test_options_function_arguments} )
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-         "file_io_handle",
-         file_io_handle );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	 "file_io_handle",
+	 file_io_handle );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	string_length = system_string_length(
 	                 source );
@@ -50,9 +50,9 @@ ${test_options_function_arguments} )
 	 result,
 	 1 );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = ${library_name}_${type_name}_initialize(
 	          &${type_name},

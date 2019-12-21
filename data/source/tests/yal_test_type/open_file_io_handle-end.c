@@ -120,12 +120,12 @@
 	 1 );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "file_io_handle",
-         file_io_handle );
+	 "file_io_handle",
+	 file_io_handle );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	return( 1 );
 

@@ -301,6 +301,59 @@ class SourceFormatter(object):
 
     return formatted_lines
 
+  # TODO: remove this once _SortVariableDeclarations has been fixed.
+  def FormatSourceOld(self, lines):
+    """Formats lines of C source.
+
+    Args:
+      lines (list[str]): lines of C source.
+
+    Returns:
+      list[str]: formatted lines of C source.
+    """
+    alignment_offset = self.VerticalAlignEqualSignsDetermineOffset(lines)
+
+    in_declaration_block = False
+    formatted_lines = []
+    declaration_lines = []
+    for line in lines:
+      striped_line = line.strip()
+      if in_declaration_block:
+        if striped_line.endswith('};'):
+          in_declaration_block = False
+        formatted_lines.append(line)
+        continue
+
+      if striped_line.endswith(' = {'):
+        in_declaration_block = True
+        formatted_lines.append(line)
+        continue
+
+      if (striped_line and
+          not striped_line.startswith('#') and
+          not striped_line.startswith('/*') and
+          not striped_line.startswith('*/')):
+        declaration_lines.append(line)
+        continue
+
+      declaration_lines.sort(key=lambda line: Variable(line))
+      declaration_lines = self.VerticalAlignEqualSigns(
+          declaration_lines, alignment_offset)
+
+      formatted_lines.extend(declaration_lines)
+      formatted_lines.append(line)
+      declaration_lines = []
+
+    if declaration_lines:
+      declaration_lines.sort(key=lambda line: Variable(line))
+      declaration_lines = self.VerticalAlignEqualSigns(
+          declaration_lines, alignment_offset)
+
+      formatted_lines.extend(declaration_lines)
+      declaration_lines = []
+
+    return formatted_lines
+
   def VerticalAlignEqualSigns(self, lines, alignment_offset):
     """Vertically aligns the equal signs.
 

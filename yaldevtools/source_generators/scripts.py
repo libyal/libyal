@@ -12,6 +12,86 @@ from yaldevtools.source_generators import interface
 class ScriptFileGenerator(interface.SourceFileGenerator):
   """Script files generator."""
 
+  def _GenerateRunTestsSh(
+      self, project_configuration, template_mappings, output_writer):
+    """Generates the runtests.sh script.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    template_directory = os.path.join(
+        self._template_directory, 'runtests.sh')
+    output_filename = os.path.join('runtests.sh')
+
+    template_names = ['header.sh', 'functions.sh']
+
+    if project_configuration.HasPythonModule():
+      template_names.append('functions-python.sh')
+
+    template_names.append('configure-start.sh')
+
+    template_names.append('configure-debug_output.sh')
+
+    if project_configuration.library_name not in ('libcerror', 'libcthreads'):
+      template_names.append('configure-pthread.sh')
+
+    template_names.append('tests-start.sh')
+
+    template_names.append('tests-debug_output.sh')
+
+    if project_configuration.library_name not in ('libcerror', 'libcthreads'):
+      template_names.append('tests-pthread.sh')
+
+    if project_configuration.HasDependencyZlib():
+      template_names.append('tests-zlib.sh')
+
+    if project_configuration.HasDependencyCrypto():
+      template_names.append('tests-openssl.sh')
+
+    if project_configuration.HasTools():
+      template_names.append('tests-static_executables.sh')
+
+    if project_configuration.HasPythonModule():
+      template_names.append('tests-python.sh')
+
+    asan_configure_options = []
+    coverage_configure_options = ['--enable-shared=no']
+
+    if project_configuration.HasDependencyCrypto():
+      asan_configure_options.append('--with-openssl=no')
+      coverage_configure_options.append('--with-openssl=no')
+
+    if project_configuration.HasDependencyZlib():
+      asan_configure_options.append('--with-zlib=no')
+      coverage_configure_options.append('--with-zlib=no')
+
+    # TODO: test python bindings with asan?
+
+    template_names.append('tests-end.sh')
+
+    template_mappings['asan_configure_options'] = ' '.join(
+        asan_configure_options)
+
+    template_mappings['coverage_configure_options'] = ' '.join(
+        coverage_configure_options)
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['asan_configure_options']
+    del template_mappings['coverage_configure_options']
+
+    # Set the x-bit for the shell script (.sh).
+    stat_info = os.stat(output_filename)
+    os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
+
   def Generate(self, project_configuration, output_writer):
     """Generates script files.
 
@@ -33,6 +113,9 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
         sorted(makefile_am_file.libraries))
     template_mappings['shared_libs'] = ' '.join(makefile_am_file.libraries)
 
+    self._GenerateRunTestsSh(
+        project_configuration, template_mappings, output_writer)
+
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(
           self._template_directory, directory_entry)
@@ -53,6 +136,6 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename)
 
       if output_filename.endswith('.sh'):
-        # Set x-bit for .sh script.
+        # Set the x-bit for a shell script (.sh).
         stat_info = os.stat(output_filename)
         os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)

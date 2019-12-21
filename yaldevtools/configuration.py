@@ -852,6 +852,14 @@ class ProjectConfiguration(BaseConfiguration):
     """
     return 'bzip2' in self.library_build_dependencies
 
+  def HasDependencyCrypto(self):
+    """Determines if the project depends on libcrypto.
+
+    Returns:
+      bool: True if the project depends on libcrypto.
+    """
+    return 'crypto' in self.library_build_dependencies
+
   def HasDependencyDokan(self):
     """Determines if the project depends on Dokan.
 
@@ -886,6 +894,14 @@ class ProjectConfiguration(BaseConfiguration):
     """
     return ('yacc' in self.library_build_dependencies or
             'yacc' in self.tools_build_dependencies)
+
+  def HasDependencyZlib(self):
+    """Determines if the project depends on zlib.
+
+    Returns:
+      bool: True if the project depends on zlib.
+    """
+    return 'zlib' in self.library_build_dependencies
 
   def HasDpkg(self):
     """Determines if the project provides dpkg configuration files.

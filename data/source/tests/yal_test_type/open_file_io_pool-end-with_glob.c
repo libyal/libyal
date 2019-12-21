@@ -120,12 +120,12 @@
 	 1 );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "file_io_pool",
-         file_io_pool );
+	 "file_io_pool",
+	 file_io_pool );
 
-        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = ${library_name}_glob_wide_free(

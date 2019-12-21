@@ -36,8 +36,7 @@ class DefinitionsIncludeHeaderFile(object):
     """
     self.enum_declarations = []
 
-    enum_prefix = 'enum '.format(
-        project_configuration.library_name.upper())
+    enum_prefix = 'enum '.format(project_configuration.library_name.upper())
     enum_prefix_length = len(enum_prefix)
 
     in_enum = False
@@ -799,6 +798,87 @@ class MainMakefileAMFile(object):
 
         elif line.startswith('SUBDIRS'):
           in_subdirs = True
+
+
+class TestSourceFile(object):
+  """Test source file.
+
+  Attributes:
+    functions (dict[str, list[str]])): lines of the test functions per name.
+    path (str): path of the source file.
+  """
+
+  def __init__(self, path):
+    """Initializes a test source file.
+
+    Args:
+      path (str): path of the source file.
+    """
+    super(TestSourceFile, self).__init__()
+    self.functions = {}
+    self.path = path
+
+  def _ReadFileObject(self, project_configuration, source_file_object):
+    """Reads a source file-like object.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      source_file_object (file): source file-like object.
+    """
+    test_function_prefix = 'int {0:s}_test_'.format(
+        project_configuration.library_name_suffix)
+
+    in_comment = False
+    in_function = False
+
+    lines_comment = []
+    lines_function = []
+    function_name = None
+
+    for line in source_file_object.readlines():
+      line = line.rstrip()
+
+      if in_comment:
+        lines_comment.append(line)
+
+        if line == ' */':
+          in_comment = False
+
+      if in_function:
+        lines_function.append(line)
+
+        if line == '}':
+          function_lines = list(lines_comment)
+          function_lines.extend(lines_function)
+          function_lines.extend(['', ''])
+
+          self.functions[function_name] = function_lines
+
+          in_function = False
+
+      elif line.startswith('/* '):
+        lines_comment = [line]
+
+        in_comment = True
+
+      elif line.startswith(test_function_prefix) and line.endswith('('):
+        _, _, function_name = line[:-1].partition(' ')
+
+        lines_function = [line]
+
+        in_function = True
+
+  def Read(self, project_configuration):
+    """Reads a source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+    """
+    if not os.path.exists(self.path):
+      raise IOError('Missing test source file: {0:s}'.format(self.path))
+
+    with io.open(self.path, 'r', encoding='utf8') as source_file_object:
+      self._ReadFileObject(project_configuration, source_file_object)
 
 
 class TypesIncludeHeaderFile(object):

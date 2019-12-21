@@ -555,7 +555,8 @@ class SourceFileGenerator(object):
             variable_declarations.append(line)
 
           else:
-            sorted_lines = formatter.FormatSource(variable_declarations)
+            # TODO: remove the need for FormatSourceOld.
+            sorted_lines = formatter.FormatSourceOld(variable_declarations)
 
             file_object.writelines(sorted_lines)
             file_object.write(line)
