@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import logging
+import io
 import os
 
 from yaldevtools.source_generators import interface
@@ -11,6 +12,82 @@ from yaldevtools.source_generators import interface
 
 class LibrarySourceFileGenerator(interface.SourceFileGenerator):
   """Library source file generator."""
+
+  def _GetLibraryPath(self, project_configuration):
+    """Retrieves the library path.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      str: the library path.
+    """
+    return os.path.join(
+        self._projects_directory, project_configuration.library_name,
+        project_configuration.library_name)
+
+  def _GenerateTypesHeader(
+      self, project_configuration, template_mappings, output_writer):
+    """Generates the library types header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+    """
+    # TODO: add support for libuna/libuna_types.h
+    # TODO: types.h alignment of debug types?
+
+    template_directory = os.path.join(self._template_directory, 'libyal_types.h')
+
+    library_path = self._GetLibraryPath(project_configuration)
+    output_filename = '{0:s}_types.h'.format(project_configuration.library_name)
+    output_filename = os.path.join(library_path, output_filename)
+
+    if project_configuration.library_name in ('libcerror', 'libcthreads'):
+      return
+
+    internal_types_start_line = (
+        '#endif /* defined( HAVE_LOCAL_{0:s} ) */'.format(
+            project_configuration.library_name.upper()))
+    internal_types_end_line = (
+        '#endif /* !defined( _{0:s}_INTERNAL_TYPES_H ) */'.format(
+            project_configuration.library_name.upper()))
+
+    in_internal_types = False
+
+    internal_types = []
+    if os.path.exists(output_filename):
+      with io.open(output_filename, 'r', encoding='utf8') as file_object:
+        for line in file_object.readlines():
+          line = line.rstrip()
+
+          if in_internal_types:
+            if line == internal_types_end_line:
+              in_internal_types = False
+            else:
+              internal_types.append(line)
+
+          if line == internal_types_start_line:
+            in_internal_types = True
+
+    template_filename = os.path.join(template_directory, 'header.h')
+
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    if internal_types:
+      output_data = '\n'.join(internal_types)
+      output_writer.WriteFile(output_filename, output_data, access_mode='a')
+
+    template_filename = os.path.join(template_directory, 'footer.h')
+
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename,
+        access_mode='a')
+
+    self._VerticalAlignTabs(output_filename)
 
   def Generate(self, project_configuration, output_writer):
     """Generates library source files.
@@ -20,8 +97,6 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
     """
     # TODO: libcsplit skip wide_string.[ch]
-    # TODO: add support for libuna/libuna_types.h
-    # TODO: types.h alingment of debug types?
     # TODO: libsmraw/libsmraw_codepage.h alignment of definitions
     # TODO: libfvalue/libfvalue_codepage.h different
 
@@ -33,9 +108,7 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
               self._types_include_header_path))
       return
 
-    library_path = os.path.join(
-        self._projects_directory, project_configuration.library_name,
-        project_configuration.library_name)
+    library_path = self._GetLibraryPath(project_configuration)
 
     codepage_header_file = os.path.join(
         library_path, '{0:s}_codepage.h'.format(
@@ -45,9 +118,6 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
             project_configuration.library_name))
     notify_header_file = os.path.join(
         library_path, '{0:s}_notify.h'.format(
-            project_configuration.library_name))
-    types_header_file = os.path.join(
-        library_path, '{0:s}_types.h'.format(
             project_configuration.library_name))
 
     if include_header_file.types:
@@ -80,6 +150,9 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
         type_definitions)
 
     authors_template_mapping = template_mappings['authors']
+
+    self._GenerateTypesHeader(
+        project_configuration, template_mappings, output_writer)
 
     for directory_entry in os.listdir(self._template_directory):
       if not directory_entry.startswith('libyal'):
@@ -114,13 +187,6 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
                project_configuration.library_name == 'libcsplit')):
         continue
 
-      # TODO: improve generation of _types.h file
-      if (directory_entry == 'libyal_types.h' and (
-          not os.path.exists(types_header_file) or
-          project_configuration.library_name in (
-              'libcerror', 'libcthreads'))):
-        continue
-
       template_filename = os.path.join(
           self._template_directory, directory_entry)
       if not os.path.isfile(template_filename):
@@ -145,5 +211,5 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
-      if directory_entry in ('libyal_codepage.h', 'libyal_types.h'):
+      if directory_entry == 'libyal_codepage.h':
         self._VerticalAlignTabs(output_filename)

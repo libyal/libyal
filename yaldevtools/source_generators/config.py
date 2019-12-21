@@ -40,7 +40,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('environment-cygwin.yml')
 
-    # if 'crypto' in project_configuration.library_build_dependencies:
+    # if project_configuration.HasDependencyCrypto():
     # TODO: add environment-cygwin-openssl.yml
 
     if project_configuration.HasPythonModule():
@@ -51,7 +51,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('environment-cygwin64.yml')
 
-    # if 'crypto' in project_configuration.library_build_dependencies:
+    # if project_configuration.HasDependencyCrypto():
     # TODO: add environment-cygwin64-openssl.yml
 
     if project_configuration.HasPythonModule():
@@ -76,8 +76,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         project_configuration.HasDependencyYacc()):
       template_names.append('install-winflexbison.yml')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyZlib():
       template_names.append('install-zlib.yml')
+
+    if project_configuration.HasDependencyBzip2():
+      template_names.append('install-bzip2.yml')
 
     if project_configuration.HasDependencyDokan():
       template_names.append('install-dokan.yml')
@@ -247,7 +250,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       libcrypto_index = min(
           libcrypto_index, library_dependencies.index('libhmac'))
 
-    if 'crypto' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyCrypto():
       if libcrypto_index == len(library_dependencies):
         libraries.append('libcrypto')
         library_dependencies.append('libcrypto')
@@ -256,8 +259,16 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       libraries.append('sgutils2')
       library_dependencies.append('sgutils2')
 
+    if 'bzip2' in project_configuration.library_build_dependencies:
+      if libcrypto_index < len(library_dependencies):
+        libraries.insert(libcrypto_index, 'bzip2')
+        library_dependencies.insert(libcrypto_index, 'bzip2')
+      else:
+        libraries.append('bzip2')
+        library_dependencies.append('bzip2')
+
     # Have zlib checked before libcrypto.
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyZlib():
       if libcrypto_index < len(library_dependencies):
         libraries.insert(libcrypto_index, 'zlib')
         library_dependencies.insert(libcrypto_index, 'zlib')
@@ -336,6 +347,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if project_configuration.HasTools():
       tools_dependencies = list(makefile_am_file.tools_dependencies)
+      if 'uuid' in project_configuration.tools_build_dependencies:
+        tools_dependencies.append('libuuid')
+
       if 'fuse' in project_configuration.tools_build_dependencies:
         tools_dependencies.append('libfuse')
 
@@ -399,6 +413,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       tools_dependencies = list(makefile_am_file.tools_dependencies)
       if 'fuse' in project_configuration.tools_build_dependencies:
         tools_dependencies.append('libfuse')
+      if 'uuid' in project_configuration.tools_build_dependencies:
+        tools_dependencies.append('libuuid')
 
       if tools_dependencies:
         local_library_tests = []
@@ -506,9 +522,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     build_options = []
     for name in libraries:
-      if name not in ('libcrypto', 'zlib'):
+      if name not in ('bzip2', 'libcrypto', 'zlib'):
         build_options.append((
             '{0:s} support'.format(name), '$ac_cv_{0:s}'.format(name)))
+
+      if name == 'bzip2':
+        build_options.append(('BZIP2 compression support', '$ac_cv_bzip2'))
 
       if name == 'libcaes':
        if project_configuration.library_name == 'libbde':
@@ -555,9 +574,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
               ('SHA512 support', '$ac_cv_libhmac_sha512')])
 
       elif name == 'zlib':
+        if project_configuration.library_name == 'libewf':
+          build_options.append(('ADLER32 checksum support', '$ac_cv_adler32'))
+
         # TODO: determine deflate function via configuration setting? 
         if project_configuration.library_name in (
-            'libfsapfs', 'libfvde', 'libmodi', 'libpff', 'libvmdk'):
+            'libfsapfs', 'libewf', 'libfvde', 'libmodi', 'libpff', 'libvmdk'):
           value = '$ac_cv_uncompress'
         else:
           value = '$ac_cv_inflate'
@@ -577,6 +599,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           ('SHA224 support', '$ac_cv_libhmac_sha224'),
           ('SHA256 support', '$ac_cv_libhmac_sha256'),
           ('SHA512 support', '$ac_cv_libhmac_sha512')])
+
+    if 'uuid' in project_configuration.tools_build_dependencies:
+      build_options.append(('GUID/UUID support', '$ac_cv_libuuid'))
 
     if 'fuse' in project_configuration.tools_build_dependencies:
       build_options.append(('FUSE support', '$ac_cv_libfuse'))
@@ -907,9 +932,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     library_dependencies = list(makefile_am_file.library_dependencies)
 
-    if 'crypto' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyCrypto():
       library_dependencies.append('libcrypto')
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyZlib():
       library_dependencies.append('zlib')
 
     if not library_dependencies:
@@ -1236,7 +1261,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('matrix-linux-no_optimization.yml')
 
-    if 'crypto' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyCrypto():
       template_names.append('matrix-linux-openssl.yml')
 
     if project_configuration.HasPythonModule():
@@ -1326,7 +1351,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasDependencyLex():
       dpkg_build_dependencies.append('flex')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyZlib():
       dpkg_build_dependencies.append('zlib1g-dev')
 
     if ('crypto' in project_configuration.library_build_dependencies or
@@ -1355,7 +1380,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     """
     dpkg_build_dependencies = ['debhelper (>= 9)', 'dh-autoreconf', 'pkg-config']
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyZlib():
       dpkg_build_dependencies.append('zlib1g-dev')
     if ('crypto' in project_configuration.library_build_dependencies or
         'crypto' in project_configuration.tools_build_dependencies):
@@ -1391,7 +1416,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasDependencyLex():
       cygwin_build_dependencies.append('flex')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyZlib():
       cygwin_build_dependencies.append('zlib-devel')
     if project_configuration.HasDependencyBzip2():
       cygwin_build_dependencies.append('bzip2-devel')
@@ -1424,7 +1449,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         project_configuration.mingw_msys_build_dependencies)
 
     # TODO: add support for other dependencies.
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyZlib():
       mingw_msys_build_dependencies.append('libz-dev')
 
     return mingw_msys_build_dependencies
@@ -1444,7 +1469,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       mingw_msys2_build_dependencies.append('msys/flex')
 
     # TODO: add support for other dependencies.
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if project_configuration.HasDependencyZlib():
       mingw_msys2_build_dependencies.append('msys/zlib-devel')
 
     return mingw_msys2_build_dependencies

@@ -160,6 +160,8 @@ class LibraryHeaderFile(object):
           have_extern = False
 
       elif line.endswith('('):
+        function_line = line
+
         # Get the part of the line before the library name.
         data_type, _, _ = line.partition(self._library_name)
 
@@ -174,6 +176,7 @@ class LibraryHeaderFile(object):
         value_description = None
         if source_file_object:
           source_line = source_file_object.readline()
+
           while source_line:
             if source_line.startswith('/* Retrieves '):
               value_description = source_line.strip()
@@ -202,7 +205,7 @@ class LibraryHeaderFile(object):
               if ' NULL ' in source_line:
                 return_values.add('NULL')
 
-            elif name in source_line:
+            elif function_line == source_line.strip():
               break
 
             source_line = source_file_object.readline()

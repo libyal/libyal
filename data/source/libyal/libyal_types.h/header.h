@@ -42,6 +42,3 @@ ${library_type_definitions}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI ) */
 
 #endif /* defined( HAVE_LOCAL_${library_name_upper_case} ) */
-
-#endif /* !defined( _${library_name_upper_case}_INTERNAL_TYPES_H ) */
-

@@ -982,7 +982,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for functions that don't return 0 to not use is_set in tests.
     # if function_prototype.return_values:
 
-    with_is_set = bool(function_prototype.return_values == [-1, 0, 1])
+    with_is_set = bool(function_prototype.return_values == set(['-1', '0', '1']))
 
     body_template_name = None
     if function_template:
