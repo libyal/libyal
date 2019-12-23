@@ -1,4 +1,4 @@
-	result = ${library_name}_${initialize_value_type}_free(
+	result = ${initialize_value_type}_free(
 	          &${initialize_value_name},
 	          &error );
 

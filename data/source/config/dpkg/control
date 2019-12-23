@@ -2,9 +2,10 @@ Source: ${library_name}
 Priority: extra
 Maintainer: Joachim Metz <joachim.metz@gmail.com>
 Build-Depends: ${dpkg_build_dependencies}
-Standards-Version: 3.9.5
+Standards-Version: 4.1.4
 Section: libs
 Homepage: https://github.com/libyal/${library_name}
+Vcs-Git: https://github.com/libyal/${library_name}.git
 
 Package: ${library_name}
 Architecture: any

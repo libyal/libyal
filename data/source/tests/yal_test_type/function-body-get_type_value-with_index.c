@@ -1,15 +1,15 @@
 	/* Test regular cases
 	 */
-	result = ${library_name}_${type_name}_get_${value_name}(
+	result = ${library_name}_${type_name}_${function_name}(
 	          ${type_name},
 	          0,
 	          &${value_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT(
+	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -34,7 +34,7 @@
 
 	/* Test error cases
 	 */
-	result = ${library_name}_${type_name}_get_${value_name}(
+	result = ${library_name}_${type_name}_${function_name}(
 	          NULL,
 	          0,
 	          &${value_name},
@@ -56,7 +56,7 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_get_${value_name}(
+	result = ${library_name}_${type_name}_${function_name}(
 	          ${type_name},
 	          -1,
 	          &${value_name},
@@ -78,7 +78,7 @@
 	libcerror_error_free(
 	 &error );
 
-	result = ${library_name}_${type_name}_get_${value_name}(
+	result = ${library_name}_${type_name}_${function_name}(
 	          ${type_name},
 	          0,
 	          NULL,

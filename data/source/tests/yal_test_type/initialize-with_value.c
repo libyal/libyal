@@ -6,7 +6,7 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 {
 	libcerror_error_t *error                       = NULL;
 	${library_name}_${type_name}_t *${type_name}   = NULL;
-	${library_name}_${value_type}_t *${value_name} = NULL;
+	${value_type}_t *${value_name}                 = NULL;
 	int result                                     = 0;
 
 #if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
@@ -17,7 +17,7 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 
 	/* Initialize test
 	 */
-	result = ${library_name}_${value_type}_initialize(
+	result = ${value_type}_initialize(
 	          &${value_name},
 	          &error );
 
@@ -220,7 +220,7 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 
 	/* Clean up
 	 */
-	result = ${library_name}_${value_type}_free(
+	result = ${value_type}_free(
 	          &${value_name},
 	          &error );
 
@@ -253,7 +253,7 @@ on_error:
 	}
 	if( ${value_name} != NULL )
 	{
-		${library_name}_${value_type}_free(
+		${value_type}_free(
 		 &${value_name},
 		 NULL );
 	}

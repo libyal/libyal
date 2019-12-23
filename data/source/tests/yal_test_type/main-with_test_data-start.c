@@ -34,3 +34,5 @@
 	 "error",
 	 error );
 
+	/* Run tests
+	 */

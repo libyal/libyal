@@ -214,6 +214,34 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     self._SortIncludeHeaders(project_configuration, output_filename)
     self._SortVariableDeclarations(output_filename)
 
+  def _GenerateExistingFunction(
+      self, test_function_name, test_source_file, output_writer,
+      output_filename, access_mode='w'):
+    """Writes an existing function to the output.
+
+    Args:
+      test_function_name (str): name of the test function.
+      test_source_file (TestSourceFile): test source file.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+      access_mode (Optional[str]): output file access mode.
+
+    Returns:
+      bool: True if there was an existing function, False otherwise.
+    """
+    if not test_source_file:
+      return False
+
+    existing_test_function = test_source_file.functions.get(
+        test_function_name, None)
+    if not existing_test_function:
+      return False
+
+    output_data = '\n'.join(existing_test_function)
+    output_writer.WriteFile(
+        output_filename, output_data, access_mode=access_mode)
+    return True
+
   def _GenerateTestFunctions(
       self, project_configuration, template_mappings, output_writer,
       output_filename, with_input=False, with_offset=False):
@@ -834,31 +862,22 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           initialize_function_prototype.arguments)
 
     if initialize_number_of_arguments not in (2, 3):
-      existing_test_function = test_source_file.functions.get(
-          test_function_name, None)
-      if not existing_test_function:
-        return function_name, None, last_have_extern
-
-      else:
-        output_data = '\n'.join(existing_test_function)
-        output_writer.WriteFile(
-            output_filename, output_data, access_mode='a')
+      if self._GenerateExistingFunction(
+          test_function_name, test_source_file, output_writer,
+          output_filename, access_mode='a'):
         return function_name, test_function_name, last_have_extern
+      else:
+        return function_name, None, last_have_extern
 
     if initialize_number_of_arguments == 3:
       function_argument = initialize_function_prototype.arguments[1]
-      function_argument_string = function_argument.CopyToString()
 
-      initialize_value_type, _, initialize_value_name = (
-          function_argument_string.partition(' '))
+      initialize_value_type, initialize_value_name = (
+          self._GetValueTypeFromFunctionArgument(function_argument))
 
       if not initialize_value_type.startswith(library_type_prefix):
         initialize_value_type = None
         initialize_value_name = None
-      else:
-        initialize_value_name = initialize_value_name.lstrip('*')
-        _, _, initialize_value_type = initialize_value_type.partition('_')
-        initialize_value_type, _, _ = initialize_value_type.rpartition('_')
 
     function_template = None
     value_name = None
@@ -911,8 +930,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       function_argument = function_prototype.arguments[function_argument_index]
       function_argument_string = function_argument.CopyToString()
 
-      value_name = type_function[4:]
-      value_type, _, _ = function_argument_string.partition(' ')
+      function_value_name = type_function[4:]
+
+      if with_index:
+        value_type, value_name = self._GetValueTypeFromFunctionArgument(
+            function_argument)
+
+      else:
+        value_name = function_value_name
+        value_type, _, _ = function_argument_string.partition(' ')
 
       if function_argument_string == 'uint8_t *guid_data':
         function_template = 'get_guid_value'
@@ -1018,16 +1044,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             '"{1:s}" with error: missing template').format(
                 type_name, type_function))
 
-        existing_test_function = test_source_file.functions.get(
-            test_function_name, None)
-        if not existing_test_function:
-          return function_name, None, last_have_extern
-
-        else:
-          output_data = '\n'.join(existing_test_function)
-          output_writer.WriteFile(
-              output_filename, output_data, access_mode='a')
+        if self._GenerateExistingFunction(
+            test_function_name, test_source_file, output_writer,
+            output_filename, access_mode='a'):
           return function_name, test_function_name, last_have_extern
+        else:
+          return function_name, None, last_have_extern
 
       self._GenerateTypeTestDefineInternalEnd(
           template_mappings, last_have_extern, have_extern, output_writer,
@@ -1070,7 +1092,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       elif function_template == 'get_type_value':
         function_variables.append(
-            '{0:s}_t *{1:s} = 0;'.format(value_type, value_name))
+            '{0:s}_t *{1:s} = NULL;'.format(value_type, value_name))
 
         if with_is_set and not with_index:
           function_variables.append(
@@ -1113,13 +1135,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       if function_template in (
           'get_binary_data_value', 'get_guid_value', 'get_uuid_value',
           'get_string_value', 'get_type_value', 'get_value'):
-        function_template = 'get_{0:s}'.format(value_name)
+        function_template = 'get_{0:s}'.format(function_value_name)
 
       if (initialize_number_of_arguments == 3 and initialize_value_type and
           initialize_value_name):
-        function_variable = '{0:s}_{1:s}_t *{2:s} = NULL;'.format(
-            project_configuration.library_name, initialize_value_type,
-            initialize_value_name)
+        function_variable = '{0:s}_t *{1:s} = NULL;'.format(
+            initialize_value_type, initialize_value_name)
         function_variables.append(function_variable)
 
       # TODO: add support for multiple test data files.
@@ -1293,16 +1314,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           '"{1:s}" with error: missing template').format(
               type_name, type_function))
 
-      existing_test_function = test_source_file.functions.get(
-          test_function_name, None)
-      if not existing_test_function:
-        return function_name, None, have_extern
-
-      else:
-        output_data = '\n'.join(existing_test_function)
-        output_writer.WriteFile(
-            output_filename, output_data, access_mode='a')
+      if self._GenerateExistingFunction(
+          test_function_name, test_source_file, output_writer,
+          output_filename, access_mode='a'):
         return function_name, test_function_name, have_extern
+      else:
+        return function_name, None, have_extern
 
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
@@ -1447,23 +1464,18 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = '{0:s}-with_value.c'.format(type_function)
 
       function_argument = function_prototype.arguments[1]
-      function_argument_string = function_argument.CopyToString()
+
+      value_type, value_name = self._GetValueTypeFromFunctionArgument(
+          function_argument)
+
+      if not value_type.startswith(library_type_prefix):
+        function_name = self._GetFunctionName(
+            project_configuration, type_name, type_function)
+        function_names.remove(function_name)
+        return last_have_extern
 
       # TODO: add support for non pointer value types.
-      value_type, _, value_name = function_argument_string.partition(' ')
-      if value_name.startswith('*'):
-        value_name = value_name.lstrip('*')
-
-        if not value_type.startswith(library_type_prefix):
-          function_name = self._GetFunctionName(
-              project_configuration, type_name, type_function)
-          function_names.remove(function_name)
-          return last_have_extern
-
-        _, _, value_type = value_type.partition('_')
-        value_type, _, _ = value_type.rpartition('_')
-
-      else:
+      if not value_name.startswith('*'):
         function_name = self._GetFunctionName(
             project_configuration, type_name, type_function)
         function_names.remove(function_name)
@@ -1684,6 +1696,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     with_read_functions = bool(function_prototype)
 
+    with_read_file_io_handle = False
+    if is_internal:
+      for function_prototype in header_file.functions_per_name.values():
+        if function_prototype.name.endswith('_read_file_io_handle'):
+          with_read_file_io_handle = True
+
     template_names.append('header.c')
 
     if with_input:
@@ -1698,6 +1716,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     if with_input:
       template_names.append('includes_local-with_input.c')
+    elif with_read_file_io_handle:
+      template_names.append('includes_local-with_read_file_io_handle.c')
     else:
       template_names.append('includes_local.c')
 
@@ -1941,8 +1961,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       else:
         continue
 
-      type_function_with_input = (
-          with_input or (test_data and type_function.startswith('get_')))
+      type_function_with_input = (with_input or (test_data and (
+          type_function.startswith('copy_to_') or
+          type_function.startswith('get_'))))
 
       _, test_function_name, have_extern = self._GenerateTypeTestFunction(
           project_configuration, template_mappings, type_name, type_function,
@@ -2663,6 +2684,23 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       return 'media_size'
 
     return 'size'
+
+  def _GetValueTypeFromFunctionArgument(self, function_argument):
+    """Deterines a value type based on the function argument.
+
+    Args:
+      function_argument (FunctionArgument): function argument.
+
+    Returns:
+      tuple[str, str]: value type and value name.
+    """
+    function_argument_string = function_argument.CopyToString()
+
+    value_type, _, value_name = function_argument_string.partition(' ')
+
+    value_name = value_name.lstrip('*')
+
+    return value_type, value_name
 
   def _SortSources(self, output_filename):
     """Sorts the sources.

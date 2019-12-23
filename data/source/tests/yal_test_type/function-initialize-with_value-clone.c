@@ -1,6 +1,6 @@
 	/* Initialize test
 	 */
-	result = ${library_name}_${initialize_value_type}_initialize(
+	result = ${initialize_value_type}_initialize(
 	          &${initialize_value_name},
 	          &error );
 
