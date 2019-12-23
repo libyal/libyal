@@ -524,15 +524,26 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       elif (group_name in api_types or group_name in api_pseudo_types or
             group_name in internal_types):
+        header_file = self._GetTypeLibraryHeaderFile(
+            project_configuration, group_name)
+
         if project_configuration.library_name == 'libcerror':
           template_filename = 'yal_test_type_no_error.am'
+
+        elif (project_configuration.library_name != 'libcthreads' and
+              header_file and header_file.has_read_write_lock):
+          template_filename = 'yal_test_function_with_rwlock.am'
+
         else:
           template_filename = 'yal_test_type.am'
 
         self._SetTypeNameInTemplateMappings(template_mappings, group_name)
 
       elif group_name in api_types_with_input:
-        template_filename = 'yal_test_type_with_input.am'
+        if project_configuration.library_name == 'libcdirectory':
+          template_filename = 'yal_test_type.am'
+        else:
+          template_filename = 'yal_test_type_with_input.am'
 
         self._SetTypeNameInTemplateMappings(template_mappings, group_name)
 
@@ -624,18 +635,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     """
     header_file = self._GetTypeLibraryHeaderFile(
         project_configuration, type_name)
-
-    # TODO: handle types in non-matching header files.
-    try:
-      header_file.Read(project_configuration)
-    except IOError:
-      logging.warning('Skipping: {0:s}'.format(header_file.path))
+    if not header_file:
       return False
 
     function_prototype = header_file.GetTypeFunction(
         type_name, 'read_buffer')
 
-    with_read_functions = bool(function_prototype)
+    with_read_buffer_function = bool(function_prototype)
 
     test_options = self._GetTestOptions(project_configuration, type_name)
     test_options = [argument for _, argument in test_options]
@@ -649,7 +655,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names = ['header.py', 'imports-start.py']
 
-    if with_read_functions:
+    if with_read_buffer_function:
       template_names.append('imports-random.py')
 
     template_names.append('imports-end.py')
@@ -1651,13 +1657,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     header_file = self._GetTypeLibraryHeaderFile(
         project_configuration, type_name)
-
-    # TODO: handle types in non-matching header files.
-    try:
-      header_file.Read(project_configuration)
-    except IOError:
-      logging.warning('Unable to read header file: {0:s}'.format(
-          header_file.path))
+    if not header_file:
       return False
 
     # Read existing test file.
@@ -1694,13 +1694,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     function_prototype = header_file.GetTypeFunction(
         type_name, 'read_buffer')
 
-    with_read_functions = bool(function_prototype)
+    with_read_buffer_function = bool(function_prototype)
 
-    with_read_file_io_handle = False
+    with_read_file_io_handle_function = False
     if is_internal:
       for function_prototype in header_file.functions_per_name.values():
         if function_prototype.name.endswith('_read_file_io_handle'):
-          with_read_file_io_handle = True
+          with_read_file_io_handle_function = True
 
     template_names.append('header.c')
 
@@ -1711,12 +1711,16 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('includes.c')
 
-    if with_read_functions:
+    if with_read_buffer_function:
       template_names.append('includes_time.c')
+
+    if project_configuration.library_name == 'libcthreads' and type_name in (
+        'condition', 'lock', 'mutex', 'queue', 'read_write_lock'):
+      template_names.append('includes_dlfcn.c')
 
     if with_input:
       template_names.append('includes_local-with_input.c')
-    elif with_read_file_io_handle:
+    elif with_read_file_io_handle_function:
       template_names.append('includes_local-with_read_file_io_handle.c')
     else:
       template_names.append('includes_local.c')
@@ -1755,10 +1759,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names = []
 
+    if project_configuration.library_name == 'libcthreads' and type_name in (
+        'condition', 'lock', 'mutex', 'queue', 'read_write_lock', 'thread',
+        'thread_pool'):
+      template_names.append('start_cthreads_{0:s}.c'.format(type_name))
+
     if with_input:
       template_names.append('start_with_input.c')
 
-    if with_read_functions:
+    if with_read_buffer_function:
       template_names.append('start_read_buffer_size.c')
 
     if with_input:

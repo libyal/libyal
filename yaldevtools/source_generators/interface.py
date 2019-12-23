@@ -37,6 +37,7 @@ class SourceFileGenerator(object):
     self._library_makefile_am_file = None
     self._library_makefile_am_path = None
     self._library_path = None
+    self._library_type_header_files = {}
     self._projects_directory = projects_directory
     self._python_module_path = None
     self._template_directory = template_directory
@@ -282,18 +283,29 @@ class SourceFileGenerator(object):
 
     Returns:
       LibraryHeaderFile: library header file or None if the library header file
-          cannot be found.
+          cannot be found or read.
     """
-    if not self._library_path:
-      self._library_path = os.path.join(
-          self._projects_directory, project_configuration.library_name,
-          project_configuration.library_name)
+    header_file = self._library_type_header_files.get(type_name, None)
+    if not header_file:
+      if not self._library_path:
+        self._library_path = os.path.join(
+            self._projects_directory, project_configuration.library_name,
+            project_configuration.library_name)
 
-    # TODO: cache header files.
-    header_file_path = '{0:s}_{1:s}.h'.format(
-        project_configuration.library_name, type_name)
-    header_file_path = os.path.join(self._library_path, header_file_path)
-    header_file = source_file.LibraryHeaderFile(header_file_path)
+      header_file_path = '{0:s}_{1:s}.h'.format(
+          project_configuration.library_name, type_name)
+      header_file_path = os.path.join(self._library_path, header_file_path)
+      header_file = source_file.LibraryHeaderFile(header_file_path)
+
+      # TODO: handle types in non-matching header files.
+      try:
+        header_file.Read(project_configuration)
+      except IOError:
+        logging.warning('Unable to read library header file: {0:s}'.format(
+            header_file.path))
+        return None
+
+      self._library_type_header_files[type_name] = header_file
 
     return header_file
 

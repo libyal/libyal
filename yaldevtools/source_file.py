@@ -76,6 +76,8 @@ class LibraryHeaderFile(object):
   Attributes:
     functions_per_name (dict[str, list[FunctionPrototype]]): function
         prototypes per name.
+    has_read_write_lock (bool): True if the header uses a thread read/write
+        lock.
     have_internal_functions (bool): True if the header defines internal, non
         extern, functions.
     path (str): path of the header file.
@@ -91,6 +93,7 @@ class LibraryHeaderFile(object):
     super(LibraryHeaderFile, self).__init__()
     self._library_name = None
     self.functions_per_name = collections.OrderedDict()
+    self.has_read_write_lock = False
     self.have_internal_functions = False
     self.path = path
     self.types = []
@@ -239,6 +242,9 @@ class LibraryHeaderFile(object):
       elif line.startswith('typedef struct '):
         type_name = line.split(' ')[2]
         self.types.append(type_name)
+
+      elif line == 'libcthreads_read_write_lock_t *read_write_lock;':
+        self.has_read_write_lock = True
 
     self.types = sorted(self.types)
 

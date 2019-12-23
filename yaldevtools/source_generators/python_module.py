@@ -1708,12 +1708,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     """
     header_file = self._GetTypeLibraryHeaderFile(
         project_configuration, type_name)
-
-    # TODO: handle types in non-matching header files.
-    try:
-      header_file.Read(project_configuration)
-    except IOError:
-      logging.warning('Skipping: {0:s}'.format(header_file.path))
+    if not header_file:
       return
 
     function_name_prefix = '{0:s}_{1:s}_'.format(
