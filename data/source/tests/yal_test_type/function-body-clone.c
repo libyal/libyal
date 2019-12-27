@@ -95,82 +95,94 @@
 
 #if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
 
-	/* Test ${library_name}_${type_name}_clone with malloc failing
-	 */
-	${library_name_suffix}_test_malloc_attempts_before_fail = 0;
-
-	result = ${library_name}_${type_name}_clone(
-	          &destination_${type_name},
-	          source_${type_name},
-	          &error );
-
-	if( ${library_name_suffix}_test_malloc_attempts_before_fail != -1 )
+	for( test_number = 0;
+	     test_number < number_of_malloc_fail_tests;
+	     test_number++ )
 	{
-		${library_name_suffix}_test_malloc_attempts_before_fail = -1;
+		/* Test ${library_name}_${type_name}_clone with malloc failing
+		 */
+		${library_name_suffix}_test_malloc_attempts_before_fail = test_number;
 
-		if( destination_${type_name} != NULL )
+		result = ${library_name}_${type_name}_clone(
+		          &destination_${type_name},
+		          source_${type_name},
+		          &error );
+
+		if( ${library_name_suffix}_test_malloc_attempts_before_fail != -1 )
 		{
-			${library_name}_${type_name}_free(
-			 &destination_${type_name},
-			 NULL );
+			${library_name_suffix}_test_malloc_attempts_before_fail = -1;
+
+			if( destination_${type_name} != NULL )
+			{
+				${library_name}_${type_name}_free(
+				 &destination_${type_name},
+				 NULL );
+			}
+		}
+		else
+		{
+			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			 "result",
+			 result,
+			 -1 );
+
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			 "destination_${type_name}",
+			 destination_${type_name} );
+
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			 "error",
+			 error );
+
+			libcerror_error_free(
+			 &error );
 		}
 	}
-	else
+#if defined( OPTIMIZATION_DISABLED )
+
+	for( test_number = 0;
+	     test_number < number_of_memcpy_fail_tests;
+	     test_number++ )
 	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
+		/* Test ${library_name}_${type_name}_clone with memcpy failing
+		 */
+		${library_name_suffix}_test_memcpy_attempts_before_fail = test_number;
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-		 "destination_${type_name}",
-		 destination_${type_name} );
+		result = ${library_name}_${type_name}_clone(
+		          &destination_${type_name},
+		          source_${type_name},
+		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
-
-		libcerror_error_free(
-		 &error );
-	}
-
-	/* Test ${library_name}_${type_name}_clone with memcpy failing
-	 */
-	${library_name_suffix}_test_memcpy_attempts_before_fail = 0;
-
-	result = ${library_name}_${type_name}_clone(
-	          &destination_${type_name},
-	          source_${type_name},
-	          &error );
-
-	if( ${library_name_suffix}_test_memcpy_attempts_before_fail != -1 )
-	{
-		${library_name_suffix}_test_memcpy_attempts_before_fail = -1;
-
-		if( destination_${type_name} != NULL )
+		if( ${library_name_suffix}_test_memcpy_attempts_before_fail != -1 )
 		{
-			${library_name}_${type_name}_free(
-			 &destination_${type_name},
-			 NULL );
+			${library_name_suffix}_test_memcpy_attempts_before_fail = -1;
+
+			if( destination_${type_name} != NULL )
+			{
+				${library_name}_${type_name}_free(
+				 &destination_${type_name},
+				 NULL );
+			}
+		}
+		else
+		{
+			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			 "result",
+			 result,
+			 -1 );
+
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			 "destination_${type_name}",
+			 destination_${type_name} );
+
+			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			 "error",
+			 error );
+
+			libcerror_error_free(
+			 &error );
 		}
 	}
-	else
-	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
-
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
-		 "destination_${type_name}",
-		 destination_${type_name} );
-
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
-
-		libcerror_error_free(
-		 &error );
-	}
+#endif /* defined( OPTIMIZATION_DISABLED ) */
 #endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
 

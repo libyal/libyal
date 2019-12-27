@@ -301,31 +301,36 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if library_dependencies:
       for name in library_dependencies:
-        template_mappings['local_library_name'] = name
-        template_mappings['local_library_name_upper_case'] = name.upper()
+        if (name == 'libcrypto' and
+            project_configuration.library_name == 'libcaes'):
+          continue
 
-        if name != 'zlib':
-          template_filename = 'check_dependency_support.ac'
+        if name == 'zlib':
+          # TODO: make check more generic based on the source itself.
+          if project_configuration.library_name == 'libewf':
+            template_filename = 'check_zlib_compress.ac'
 
-        # TODO: make check more generic based on the source itself.
-        elif project_configuration.library_name == 'libewf':
-          template_filename = 'check_zlib_compress.ac'
+          # TODO: determine deflate function via configuration setting? 
+          elif project_configuration.library_name in (
+              'libfsapfs', 'libfvde', 'libmodi', 'libpff', 'libvmdk'):
+            template_filename = 'check_zlib_uncompress.ac'
 
-        # TODO: determine deflate function via configuration setting? 
-        elif project_configuration.library_name in (
-            'libfsapfs', 'libfvde', 'libmodi', 'libpff', 'libvmdk'):
-          template_filename = 'check_zlib_uncompress.ac'
+          else:
+            template_filename = 'check_zlib_inflate.ac'
 
         else:
-          template_filename = 'check_zlib_inflate.ac'
+          template_filename = 'check_dependency_support.ac'
+
+        template_mappings['local_library_name'] = name
+        template_mappings['local_library_name_upper_case'] = name.upper()
 
         template_filename = os.path.join(template_directory, template_filename)
         self._GenerateSection(
             template_filename, template_mappings, output_writer,
             output_filename, access_mode='a')
 
-      del template_mappings['local_library_name']
-      del template_mappings['local_library_name_upper_case']
+        del template_mappings['local_library_name']
+        del template_mappings['local_library_name_upper_case']
 
     template_names = ['check_library_support.ac']
 
@@ -1143,7 +1148,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, '.travis', 'runtests.sh')
 
+    if project_configuration.library_name == 'libewf':
+      shared_object_version = '3'
+    else:
+      shared_object_version = '1'
+
     template_names = ['body.sh']
+
+    template_mappings['shared_object_version'] = shared_object_version
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -1152,6 +1164,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     output_filename = os.path.join('.travis', 'runtests.sh')
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['shared_object_version']
 
     # Set x-bit for .sh script.
     stat_info = os.stat(output_filename)

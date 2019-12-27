@@ -871,8 +871,18 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       if self._GenerateExistingFunction(
           test_function_name, test_source_file, output_writer,
           output_filename, access_mode='a'):
+        logging.info((
+            'Used existing tests source code for type: "{0:s}" function: '
+            '"{1:s}" due to unsuppored number of arguments').format(
+                type_name, type_function))
+
         return function_name, test_function_name, last_have_extern
       else:
+        logging.warning((
+            'Unable to generate tests source code for type: "{0:s}" function: '
+            '"{1:s}" with error: unsupported number of arguments').format(
+                type_name, type_function))
+
         return function_name, None, last_have_extern
 
     if initialize_number_of_arguments == 3:
@@ -884,6 +894,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       if not initialize_value_type.startswith(library_type_prefix):
         initialize_value_type = None
         initialize_value_name = None
+      else:
+        # Remove the trailing _t
+        initialize_value_type = initialize_value_type[:-2]
 
     function_template = None
     value_name = None
@@ -905,7 +918,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         index_argument_string.endswith('_index')):
       with_index = True
 
-    if with_index:
+    io_handle_argument = function_prototype.arguments[1]
+    io_handle_argument_string = io_handle_argument.CopyToString()
+
+    with_io_handle = False
+    if io_handle_argument_string == '{0:s}_io_handle_t *io_handle'.format(
+        project_configuration.library_name):
+      with_io_handle = True
+
+    if with_index or with_io_handle:
       function_argument_index = 2
     else:
       function_argument_index = 1
@@ -918,6 +939,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         file_offset_argument_string.endswith('_offset')):
       with_file_offset = True
 
+    function_value_name = None
     if (type_function.startswith('get_utf8_') or
         type_function.startswith('get_utf16_')):
       function_argument = function_prototype.arguments[function_argument_index]
@@ -963,16 +985,17 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     if function_template and with_index:
       function_template = '{0:s}-with_index'.format(function_template)
 
-    if type_function in ('copy_from_byte_stream', 'read_data'):
+    if type_function in (
+        'copy_from_byte_stream', 'internal_read_data', 'read_data'):
       # TODO: add support for read data with value.
       if (number_of_arguments == 4 or (
-         number_of_arguments == 5 and with_codepage)):
+         number_of_arguments == 5 and (with_codepage or with_io_handle))):
         function_template = type_function
 
-    elif type_function == 'read_file_io_handle':
-      # TODO: add support for io_handle argument
+    elif type_function in (
+        'internal_read_file_io_handle', 'read_file_io_handle'):
       if (number_of_arguments == 3 or (
-         number_of_arguments == 4 and with_file_offset)):
+         number_of_arguments == 4 and (with_file_offset or with_io_handle))):
         function_template = type_function
 
     elif not function_template:
@@ -1027,6 +1050,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       elif with_codepage:
         body_template_name = 'function-body-{0:s}-with_codepage.c'.format(
             function_template)
+      elif with_io_handle:
+        body_template_name = 'function-body-{0:s}-with_io_handle.c'.format(
+            function_template)
       elif with_is_set:
         body_template_name = 'function-body-{0:s}-with_is_set.c'.format(
             function_template)
@@ -1045,16 +1071,23 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_filename = os.path.join(template_directory, template_filename)
 
       if not template_filename or not os.path.exists(template_filename):
-        logging.warning((
-            'Unable to generate tests source code for type: "{0:s}" function: '
-            '"{1:s}" with error: missing template').format(
-                type_name, type_function))
 
         if self._GenerateExistingFunction(
             test_function_name, test_source_file, output_writer,
             output_filename, access_mode='a'):
+          logging.info((
+              'Used existing tests source code for type: "{0:s}" function: '
+              '"{1:s}" due to missing template').format(
+                  type_name, type_function))
+
           return function_name, test_function_name, last_have_extern
+
         else:
+          logging.warning((
+              'Unable to generate tests source code for type: "{0:s}" function: '
+              '"{1:s}" with error: missing template').format(
+                  type_name, type_function))
+
           return function_name, None, last_have_extern
 
       self._GenerateTypeTestDefineInternalEnd(
@@ -1064,6 +1097,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       self._GenerateTypeTestDefineInternalStart(
           template_mappings, last_have_extern, have_extern, output_writer,
           output_filename)
+
+      logging.info((
+          'Generating tests source code for type: "{0:s}" function: "{1:s}" '
+          'with template: {2:s}').format(
+              type_name, type_function, function_template))
 
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
@@ -1141,7 +1179,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       if function_template in (
           'get_binary_data_value', 'get_guid_value', 'get_uuid_value',
           'get_string_value', 'get_type_value', 'get_value'):
-        function_template = 'get_{0:s}'.format(function_value_name)
+        function_template = 'get_{0:s}'.format(
+            function_value_name or value_name)
 
       if (initialize_number_of_arguments == 3 and initialize_value_type and
           initialize_value_name):
@@ -1151,7 +1190,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       # TODO: add support for multiple test data files.
       test_data_size = None
-      if function_template in ('copy_from_byte_stream', 'read_data'):
+      if function_template in (
+          'copy_from_byte_stream', 'internal_read_data', 'read_data'):
         test_data = self._ReadTestDataFile(type_name)
         test_data_size = len(test_data)
         if not test_data_size:
@@ -1171,7 +1211,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       template_names = []
 
-      if with_input:
+      if function_template == 'clone':
+        template_names.append('function-start-clone.c')
+      elif with_input:
         template_names.append('function-start-with_input.c')
       else:
         template_names.append('function-start.c')
@@ -1221,7 +1263,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       elif not with_input:
         template_names.append('function-end-on_error-free_type.c')
 
-      if pointer_type_argument_name:
+      if function_template != 'clone' and pointer_type_argument_name:
         template_names.append('function-end-on_error-free_pointer_type.c')
 
       if initialize_number_of_arguments == 3:
@@ -1249,9 +1291,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_mappings, last_have_extern, have_extern, output_writer,
           output_filename)
 
+      logging.info((
+          'Generating tests source code for type: "{0:s}" function: "{1:s}" '
+          'with templates: {2:s}').format(
+              type_name, type_function, ', '.join(template_names)))
+
       self._GenerateSections(
-          template_filenames, template_mappings, output_writer,
-          output_filename, access_mode='a')
+          template_filenames, template_mappings, output_writer, output_filename,
+          access_mode='a')
 
       del template_mappings['function_name']
       del template_mappings['function_variables']
@@ -1311,20 +1358,27 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         output_filename)
 
     template_directory = os.path.join(self._template_directory, 'yal_test_type')
+    # os.path.join will fail if template_filename is None.
     if template_filename:
-      # os.path.join will fail if template_filename is None.
       template_filename = os.path.join(template_directory, template_filename)
-    if not template_filename or not os.path.exists(template_filename):
-      logging.warning((
-          'Unable to generate tests source code for type: "{0:s}" function: '
-          '"{1:s}" with error: missing template').format(
-              type_name, type_function))
 
+    if not template_filename or not os.path.exists(template_filename):
       if self._GenerateExistingFunction(
           test_function_name, test_source_file, output_writer,
           output_filename, access_mode='a'):
+        logging.info((
+            'Used existing tests source code for type: "{0:s}" function: '
+            '"{1:s}" due to missing template').format(
+                type_name, type_function))
+
         return function_name, test_function_name, have_extern
+
       else:
+        logging.warning((
+            'Unable to generate tests source code for type: "{0:s}" function: '
+            '"{1:s}" with error: missing template').format(
+                type_name, type_function))
+
         return function_name, None, have_extern
 
     self._GenerateSection(
@@ -1474,21 +1528,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       value_type, value_name = self._GetValueTypeFromFunctionArgument(
           function_argument)
 
-      if not value_type.startswith(library_type_prefix):
-        function_name = self._GetFunctionName(
-            project_configuration, type_name, type_function)
-        function_names.remove(function_name)
-        return last_have_extern
-
       # TODO: add support for non pointer value types.
-      if not value_name.startswith('*'):
-        function_name = self._GetFunctionName(
-            project_configuration, type_name, type_function)
-        function_names.remove(function_name)
-        return last_have_extern
-
-      self._SetValueNameInTemplateMappings(template_mappings, value_name)
-      self._SetValueTypeInTemplateMappings(template_mappings, value_type)
+      if (not value_type.startswith(library_type_prefix) or
+          not value_name.startswith('*')):
+        template_filename = None
+      else:
+        self._SetValueNameInTemplateMappings(template_mappings, value_name)
+        self._SetValueTypeInTemplateMappings(template_mappings, value_type)
 
     function_name, test_function_name, have_extern = (
         self._GenerateTypeTestFromTemplate(
@@ -1714,7 +1760,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     if with_read_buffer_function:
       template_names.append('includes_time.c')
 
-    if project_configuration.library_name == 'libcthreads' and type_name in (
+    if project_configuration.library_name == 'libcaes' and type_name in (
+        'context', 'tweaked_context'):
+      template_names.append('includes_dlfcn.c')
+
+    elif project_configuration.library_name == 'libcthreads' and type_name in (
         'condition', 'lock', 'mutex', 'queue', 'read_write_lock'):
       template_names.append('includes_dlfcn.c')
 
@@ -1759,10 +1809,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names = []
 
-    if project_configuration.library_name == 'libcthreads' and type_name in (
-        'condition', 'lock', 'mutex', 'queue', 'read_write_lock', 'thread',
-        'thread_pool'):
-      template_names.append('start_cthreads_{0:s}.c'.format(type_name))
+    if ((project_configuration.library_name == 'libcaes' and
+         type_name in ('context', 'tweaked_context')) or
+        (project_configuration.library_name == 'libcthreads' and
+         type_name in ('condition', 'lock', 'mutex', 'queue',
+                       'read_write_lock', 'thread', 'thread_pool'))):
+      template_names.append('start_{0:s}_{1:s}.c'.format(
+          project_configuration.library_name_suffix, type_name))
 
     if with_input:
       template_names.append('start_with_input.c')

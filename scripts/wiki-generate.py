@@ -684,6 +684,11 @@ class WikiPageGenerator(object):
     else:
       mount_tool_source_description_long = project_configuration.mount_tool_source_description
 
+    if project_configuration.library_name == 'libewf':
+      shared_object_version = '3'
+    else:
+      shared_object_version = '1'
+
     template_mappings = {
         'building_table_of_contents': building_table_of_contents,
 
@@ -766,6 +771,8 @@ class WikiPageGenerator(object):
             project_configuration.mount_tool_source_description),
         'mount_tool_source_description_long': (
             mount_tool_source_description_long),
+
+        'shared_object_version': shared_object_version,
     }
     return template_mappings
 

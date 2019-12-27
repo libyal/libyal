@@ -24,7 +24,7 @@ This is not the case when you use:
 
 You can check the library paths in the dylib by running:
 ```
-otool -LT tmp/usr/lib/${project_name}.1.dylib
+otool -LT tmp/usr/lib/${project_name}.${shared_object_version}.dylib
 ```
 
 After running "make install" the binaries are installed in:

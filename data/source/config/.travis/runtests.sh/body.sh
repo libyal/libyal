@@ -15,7 +15,7 @@ if test $${RESULT} -eq 0;
 then
 	if test $${TARGET} = "macos-gcc-python" || test $${TARGET} = "macos-gcc-pkgbuild";
 	then
-		install_name_tool -change /usr/local/lib/${library_name}.1.dylib $${PWD}/${library_name}/.libs/${library_name}.1.dylib ./${python_module_name}/.libs/${python_module_name}.so;
+		install_name_tool -change /usr/local/lib/${library_name}.${shared_object_version}.dylib $${PWD}/${library_name}/.libs/${library_name}.${shared_object_version}.dylib ./${python_module_name}/.libs/${python_module_name}.so;
 	fi
 	make check CHECK_WITH_STDERR=1;
 	RESULT=$$?;
