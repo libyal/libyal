@@ -947,12 +947,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       value_name = type_function[4:]
       value_type, _, _ = function_argument_string.partition(' ')
+      utf_type, _, _ = value_name.partition('_')
 
       if (number_of_arguments == function_argument_index + 2 and
           type_function.endswith('_size')):
-        function_template = 'get_value'
+        function_template = 'get_{0:s}_string_size'.format(utf_type)
+
       elif number_of_arguments == function_argument_index + 3:
-        function_template = 'get_string_value'
+        function_template = 'get_{0:s}_string'.format(utf_type)
 
     elif type_function.startswith('get_'):
       function_argument = function_prototype.arguments[function_argument_index]
@@ -981,6 +983,19 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           function_template = 'get_type_value'
 
           value_type = value_type[:-2]
+
+    elif type_function.startswith('has_'):
+      function_template = 'has_value'
+
+      value_name = type_function[4:]
+
+    elif type_function.startswith('is_'):
+      function_template = 'is_value'
+
+      value_name = type_function[3:]
+
+    elif '_refers_to_' in type_function:
+      function_template = 'refers_to_value'
 
     if function_template and with_index:
       function_template = '{0:s}-with_index'.format(function_template)
@@ -1037,7 +1052,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for functions that don't return 0 to not use is_set in tests.
     # if function_prototype.return_values:
 
-    with_is_set = bool(function_prototype.return_values == set(['-1', '0', '1']))
+    if function_template in ('has_value', 'is_value', 'refers_to_value'):
+      with_is_set = False
+    else:
+      with_is_set = bool(function_prototype.return_values == set(['-1', '0', '1']))
 
     body_template_name = None
     if function_template:
@@ -1070,242 +1088,263 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_filename = '{0:s}.c'.format(function_template)
         template_filename = os.path.join(template_directory, template_filename)
 
-      if not template_filename or not os.path.exists(template_filename):
+      # Generate the test function based on a single template.
+      if template_filename and os.path.exists(template_filename):
+        self._GenerateTypeTestDefineInternalEnd(
+            template_mappings, last_have_extern, have_extern, output_writer,
+            output_filename)
 
-        if self._GenerateExistingFunction(
-            test_function_name, test_source_file, output_writer,
-            output_filename, access_mode='a'):
-          logging.info((
-              'Used existing tests source code for type: "{0:s}" function: '
-              '"{1:s}" due to missing template').format(
-                  type_name, type_function))
+        self._GenerateTypeTestDefineInternalStart(
+            template_mappings, last_have_extern, have_extern, output_writer,
+            output_filename)
 
-          return function_name, test_function_name, last_have_extern
+        logging.info((
+            'Generating tests source code for type: "{0:s}" function: "{1:s}" '
+            'with template: {2:s}').format(
+                type_name, type_function, function_template))
 
-        else:
-          logging.warning((
-              'Unable to generate tests source code for type: "{0:s}" function: '
-              '"{1:s}" with error: missing template').format(
-                  type_name, type_function))
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer, output_filename,
+            access_mode='a')
 
-          return function_name, None, last_have_extern
+        return function_name, test_function_name, have_extern
 
-      self._GenerateTypeTestDefineInternalEnd(
-          template_mappings, last_have_extern, have_extern, output_writer,
-          output_filename)
+      # Generate the test function based on the existing code.
+      if self._GenerateExistingFunction(
+          test_function_name, test_source_file, output_writer,
+          output_filename, access_mode='a'):
+        logging.info((
+            'Used existing tests source code for type: "{0:s}" function: '
+            '"{1:s}" due to missing template').format(
+                type_name, type_function))
 
-      self._GenerateTypeTestDefineInternalStart(
-          template_mappings, last_have_extern, have_extern, output_writer,
-          output_filename)
+        return function_name, test_function_name, last_have_extern
 
-      logging.info((
-          'Generating tests source code for type: "{0:s}" function: "{1:s}" '
-          'with template: {2:s}').format(
-              type_name, type_function, function_template))
+      else:
+        logging.warning((
+            'Unable to generate tests source code for type: "{0:s}" function: '
+            '"{1:s}" with error: missing template').format(
+                type_name, type_function))
 
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+        body_template_name = 'function-body.c'
+        # TODO: improve generation of default function body.
+        return function_name, None, last_have_extern
 
-    else:
-      self._SetValueNameInTemplateMappings(template_mappings, value_name)
-      self._SetValueTypeInTemplateMappings(template_mappings, value_type)
+    self._SetValueNameInTemplateMappings(template_mappings, value_name)
+    self._SetValueTypeInTemplateMappings(template_mappings, value_type)
 
-      function_variables = []
+    function_variables = []
 
-      function_template, _, _ = function_template.partition('-')
+    function_template, _, _ = function_template.partition('-')
 
-      if function_template == 'get_binary_data_value':
-        function_variables.extend([
-            '{0:s} {1:s}[ 4096 ];'.format(value_type, value_name),
-            ''])
+    if function_template == 'get_binary_data_value':
+      function_variables.extend([
+          '{0:s} {1:s}[ 4096 ];'.format(value_type, value_name),
+          ''])
 
-      elif function_template == 'get_guid_value':
-        function_variables.extend([
-            'uint8_t guid_data[ 16 ];',
-            ''])
+    elif function_template == 'get_guid_value':
+      function_variables.extend([
+          'uint8_t guid_data[ 16 ];',
+          ''])
 
-      elif function_template == 'get_string_value':
-        function_variables.extend([
-            '{0:s} {1:s}[ 512 ];'.format(value_type, value_name),
-            ''])
-
-        if with_is_set and not with_index:
-          function_variables.append(
-              'int {0:s}_is_set = 0;'.format(value_name))
-
-      elif function_template == 'get_type_value':
-        function_variables.append(
-            '{0:s}_t *{1:s} = NULL;'.format(value_type, value_name))
-
-        if with_is_set and not with_index:
-          function_variables.append(
-              'int {0:s}_is_set = 0;'.format(value_name))
-
-      elif function_template == 'get_uuid_value':
-        function_variables.extend([
-            'uint8_t uuid_data[ 16 ];',
-            ''])
-
-      elif function_template == 'get_value':
-        function_variables.append(
-            '{0:s} {1:s} = 0;'.format(value_type, value_name))
-
-        if with_is_set and not with_index:
-          function_variables.append(
-              'int {0:s}_is_set = 0;'.format(value_name))
-
-      elif function_template == 'read_file_io_handle':
-          function_variables.append(
-              'libbfio_handle_t *file_io_handle = NULL;')
+    elif function_template in (
+        'get_string_value', 'get_utf8_string', 'get_utf16_string'):
+      if function_template in ('get_utf8_string', 'get_utf16_string'):
+        variable_name = function_template[4:]
+      else:
+        variable_name = value_name
 
       function_variables.extend([
-          'libcerror_error_t *error = NULL;',
-          'int result = 0;'])
+          '{0:s} {1:s}[ 512 ];'.format(value_type, variable_name),
+          ''])
 
-      if function_template == 'clone':
+      if with_is_set and not with_index:
         function_variables.append(
-            '{0:s}_{1:s}_t *destination_{1:s} = NULL;'.format(
-                project_configuration.library_name, type_name))
-        function_variables.append(
-            '{0:s}_{1:s}_t *source_{1:s} = NULL;'.format(
-                project_configuration.library_name, type_name))
+            'int {0:s}_is_set = 0;'.format(value_name))
 
-      elif not with_input:
-        function_variables.append(
-            '{0:s}_{1:s}_t *{1:s} = NULL;'.format(
-                project_configuration.library_name, type_name))
+    elif function_template == 'get_type_value':
+      function_variables.append(
+          '{0:s}_t *{1:s} = NULL;'.format(value_type, value_name))
 
+      if with_is_set and not with_index:
+        function_variables.append(
+            'int {0:s}_is_set = 0;'.format(value_name))
+
+    elif function_template == 'get_uuid_value':
+      function_variables.extend([
+          'uint8_t uuid_data[ 16 ];',
+          ''])
+
+    elif function_template in (
+        'get_utf8_string_size', 'get_utf16_string_size', 'get_value'):
       if function_template in (
-          'get_binary_data_value', 'get_guid_value', 'get_uuid_value',
-          'get_string_value', 'get_type_value', 'get_value'):
-        function_template = 'get_{0:s}'.format(
-            function_value_name or value_name)
-
-      if (initialize_number_of_arguments == 3 and initialize_value_type and
-          initialize_value_name):
-        function_variable = '{0:s}_t *{1:s} = NULL;'.format(
-            initialize_value_type, initialize_value_name)
-        function_variables.append(function_variable)
-
-      # TODO: add support for multiple test data files.
-      test_data_size = None
-      if function_template in (
-          'copy_from_byte_stream', 'internal_read_data', 'read_data'):
-        test_data = self._ReadTestDataFile(type_name)
-        test_data_size = len(test_data)
-        if not test_data_size:
-          logging.warning((
-              'Unable to generate tests source code for type: "{0:s}" '
-              'function: "{1:s}" with error: missing test data').format(
-                  type_name, type_function))
-          return function_name, None, last_have_extern
-
-      function_variable_strings = []
-      for variable in function_variables:
-        # Do not indent empty lines of function_variables.
-        if variable:
-          variable = '\t{0:s}'.format(variable)
-
-        function_variable_strings.append(variable)
-
-      template_names = []
-
-      if function_template == 'clone':
-        template_names.append('function-start-clone.c')
-      elif with_input:
-        template_names.append('function-start-with_input.c')
+          'get_utf8_string_size', 'get_utf16_string_size'):
+        variable_name = function_template[4:]
       else:
-        template_names.append('function-start.c')
+        variable_name = value_name
 
-      if not with_input:
-        if initialize_number_of_arguments == 3:
-          template_name = 'function-initialize-with_value.c'
-        else:
-          template_name = 'function-initialize.c'
+      function_variables.append(
+          '{0:s} {1:s} = 0;'.format(value_type, variable_name))
 
-        if function_template == 'clone':
-          template_name = '{0:s}-clone.c'.format(template_name[:-2])
+      if with_is_set and not with_index:
+        function_variables.append(
+            'int {0:s}_is_set = 0;'.format(value_name))
 
-        template_names.append(template_name)
+    elif function_template == 'read_file_io_handle':
+        function_variables.append(
+            'libbfio_handle_t *file_io_handle = NULL;')
 
-      template_names.append(body_template_name)
+    function_variables.extend([
+        'libcerror_error_t *error = NULL;',
+        'int result = 0;'])
 
-      # TODO: refactor to have unified function end handling
+    if function_template == 'clone':
+      function_variables.append(
+          '{0:s}_{1:s}_t *destination_{1:s} = NULL;'.format(
+              project_configuration.library_name, type_name))
+      function_variables.append(
+          '{0:s}_{1:s}_t *source_{1:s} = NULL;'.format(
+              project_configuration.library_name, type_name))
 
-      if not with_input:
-        template_names.append('function-cleanup-header.c')
+    elif not with_input:
+      function_variables.append(
+          '{0:s}_{1:s}_t *{1:s} = NULL;'.format(
+              project_configuration.library_name, type_name))
+
+    if function_template in (
+        'get_binary_data_value', 'get_guid_value', 'get_uuid_value',
+        'get_string_value', 'get_type_value', 'get_value'):
+      function_template = 'get_{0:s}'.format(function_value_name or value_name)
+
+    elif function_template in ('has_value', 'is_value', 'refers_to_value'):
+      function_template = type_function
+
+    if (initialize_number_of_arguments == 3 and initialize_value_type and
+        initialize_value_name):
+      function_variable = '{0:s}_t *{1:s} = NULL;'.format(
+          initialize_value_type, initialize_value_name)
+      function_variables.append(function_variable)
+
+    # TODO: add support for multiple test data files.
+    test_data_size = None
+    if function_template in (
+        'copy_from_byte_stream', 'internal_read_data', 'read_data'):
+      test_data = self._ReadTestDataFile(type_name)
+      test_data_size = len(test_data)
+      if not test_data_size:
+        logging.warning((
+            'Unable to generate tests source code for type: "{0:s}" '
+            'function: "{1:s}" with error: missing test data').format(
+                type_name, type_function))
+        return function_name, None, last_have_extern
+
+    function_variable_strings = []
+    for variable in function_variables:
+      # Do not indent empty lines of function_variables.
+      if variable:
+        variable = '\t{0:s}'.format(variable)
+
+      function_variable_strings.append(variable)
+
+    template_names = []
+
+    if function_template == 'clone':
+      template_names.append('function-start-clone.c')
+    elif with_input:
+      template_names.append('function-start-with_input.c')
+    else:
+      template_names.append('function-start.c')
+
+    if not with_input:
+      if initialize_number_of_arguments == 3:
+        template_name = 'function-initialize-with_value.c'
+      else:
+        template_name = 'function-initialize.c'
 
       if function_template == 'clone':
-        template_names.append('function-cleanup-clone.c')
+        template_name = '{0:s}-clone.c'.format(template_name[:-2])
 
-        if initialize_number_of_arguments == 3:
-          template_names.append('function-cleanup-with_value.c')
+      template_names.append(template_name)
 
-      elif free_function:
-        template_names.append('function-cleanup-with_free_function.c')
+    template_names.append(body_template_name)
 
-      elif not with_input:
-        template_names.append('function-cleanup-type.c')
+    # TODO: refactor to have unified function end handling
 
-        if initialize_number_of_arguments == 3:
-          template_names.append('function-cleanup-with_value.c')
+    if not with_input:
+      template_names.append('function-cleanup-header.c')
 
-      template_names.append('function-end-on_error.c')
-
-      if 'libbfio_handle_t *file_io_handle = NULL;' in function_variables:
-        template_names.append('function-end-on_error-free_file_io_handle.c')
-
-      if function_template == 'clone':
-        template_names.append('function-end-on_error-clone.c')
-      elif free_function:
-        template_names.append('function-end-on_error-with_free_function.c')
-      elif not with_input:
-        template_names.append('function-end-on_error-free_type.c')
-
-      if function_template != 'clone' and pointer_type_argument_name:
-        template_names.append('function-end-on_error-free_pointer_type.c')
+    if function_template == 'clone':
+      template_names.append('function-cleanup-clone.c')
 
       if initialize_number_of_arguments == 3:
-        template_names.append('function-end-on_error-with_value.c')
+        template_names.append('function-cleanup-with_value.c')
 
-      template_names.append('function-end-footer.c')
+    elif free_function:
+      template_names.append('function-cleanup-with_free_function.c')
 
-      template_filenames = [
-          os.path.join(template_directory, template_name)
-          for template_name in template_names]
+    elif not with_input:
+      template_names.append('function-cleanup-type.c')
 
-      template_mappings['function_name'] = function_template
-      template_mappings['function_variables'] = '\n'.join(
-          function_variable_strings)
-      template_mappings['initialize_value_name'] = initialize_value_name
-      template_mappings['initialize_value_type'] = initialize_value_type
-      template_mappings['pointer_type_name'] = pointer_type_argument_type
-      template_mappings['test_data_size'] = test_data_size
+      if initialize_number_of_arguments == 3:
+        template_names.append('function-cleanup-with_value.c')
 
-      self._GenerateTypeTestDefineInternalEnd(
-          template_mappings, last_have_extern, have_extern, output_writer,
-          output_filename)
+    template_names.append('function-end-on_error.c')
 
-      self._GenerateTypeTestDefineInternalStart(
-          template_mappings, last_have_extern, have_extern, output_writer,
-          output_filename)
+    if 'libbfio_handle_t *file_io_handle = NULL;' in function_variables:
+      template_names.append('function-end-on_error-free_file_io_handle.c')
 
-      logging.info((
-          'Generating tests source code for type: "{0:s}" function: "{1:s}" '
-          'with templates: {2:s}').format(
-              type_name, type_function, ', '.join(template_names)))
+    if function_template == 'clone':
+      template_names.append('function-end-on_error-clone.c')
+    elif free_function:
+      template_names.append('function-end-on_error-with_free_function.c')
+    elif not with_input:
+      template_names.append('function-end-on_error-free_type.c')
 
-      self._GenerateSections(
-          template_filenames, template_mappings, output_writer, output_filename,
-          access_mode='a')
+    if function_template != 'clone' and pointer_type_argument_name:
+      template_names.append('function-end-on_error-free_pointer_type.c')
 
-      del template_mappings['function_name']
-      del template_mappings['function_variables']
-      del template_mappings['initialize_value_name']
-      del template_mappings['initialize_value_type']
-      del template_mappings['pointer_type_name']
-      del template_mappings['test_data_size']
+    if initialize_number_of_arguments == 3:
+      template_names.append('function-end-on_error-with_value.c')
+
+    template_names.append('function-end-footer.c')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    template_mappings['function_name'] = function_template
+    template_mappings['function_variables'] = '\n'.join(
+        function_variable_strings)
+    template_mappings['initialize_value_name'] = initialize_value_name
+    template_mappings['initialize_value_type'] = initialize_value_type
+    template_mappings['pointer_type_name'] = pointer_type_argument_type
+    template_mappings['test_data_size'] = test_data_size
+    template_mappings['type_function'] = type_function
+
+    self._GenerateTypeTestDefineInternalEnd(
+        template_mappings, last_have_extern, have_extern, output_writer,
+        output_filename)
+
+    self._GenerateTypeTestDefineInternalStart(
+        template_mappings, last_have_extern, have_extern, output_writer,
+        output_filename)
+
+    logging.info((
+        'Generating tests source code for type: "{0:s}" function: "{1:s}" '
+        'with templates: {2:s}').format(
+            type_name, type_function, ', '.join(template_names)))
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
+        access_mode='a')
+
+    del template_mappings['function_name']
+    del template_mappings['function_variables']
+    del template_mappings['initialize_value_name']
+    del template_mappings['initialize_value_type']
+    del template_mappings['pointer_type_name']
+    del template_mappings['test_data_size']
+    del template_mappings['type_function']
 
     return function_name, test_function_name, have_extern
 

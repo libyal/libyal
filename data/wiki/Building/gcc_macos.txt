@@ -1,37 +1,4 @@
 ## macOS
-### Universal binary
-With XCode you can build a macOS universal binary to run on multiple architectures. The supported architectures and exact command differs per version of macOS.
-
-#### Mac OS X 10.4
-E.g. on Mac OS X 10.4 to build an PPC and Intel 32-bit multi binary, run the following commands:
-```
-CFLAGS="-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386" \
-LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386" \
-./configure --disable-dependency-tracking
-make
-make install
-```
-
-#### Mac OS X 10.6
-E.g. on Mac OS X 10.6 to build an Intel 32-bit and 64-bit multi binary, run the following commands:
-```
-CFLAGS="-isysroot /Developer/SDKs/MacOSX10.6.sdk -arch x86_64 -arch i386" \
-LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.6.sdk -arch x86_64 -arch i386" \
-./configure --disable-dependency-tracking
-make
-make install
-```
-
-#### Mac OS X 10.7
-E.g. on Mac OS X 10.7 to build an Intel 32-bit and 64-bit multi binary, run the following commands:
-```
-CFLAGS="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -arch x86_64 -arch i386" \
-LDFLAGS="-Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -arch x86_64 -arch i386" \
-./configure --disable-dependency-tracking
-make
-make install
-```
-
 ### libtoolize
 If you find that libtoolize is missing use glibtoolize instead.
 

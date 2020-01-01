@@ -201,6 +201,9 @@ class SourceFormatter(object):
     Returns:
       int: aligment offset or None if no equal sign was found.
     """
+    # TODO: handle equal sign in string values e.g.
+    # char *mystring = "equal sign (=)";
+
     alignment_offset = None
     for line in lines:
       striped_line = line.strip()

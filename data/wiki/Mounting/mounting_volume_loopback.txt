@@ -1,5 +1,11 @@
-You can now mount the device file as a loopback device:
+If your operating system supports loop devices, such as Linux, mount can be used
+to mount the device file as a loop device:
 ```
 mount -o loop,ro /mnt/fuse/${project_name_suffix}1 /mnt/file_system
+```
+
+On Mac OS hdiutil can be used to mount the device file:
+```
+hdiutil attach -imagekey diskimage-class=CRawDiskImage -nomount /mnt/fuse/${project_name_suffix}1
 ```
 

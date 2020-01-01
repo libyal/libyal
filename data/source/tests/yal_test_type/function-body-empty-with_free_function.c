@@ -1,4 +1,4 @@
-	/* Test ${library_name}_test_${type_name}_empty
+	/* Test regular cases
 	 */
 	result = lib${library_name_suffix}_${type_name}_empty(
 	          ${type_name},

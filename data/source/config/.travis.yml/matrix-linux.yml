@@ -6,7 +6,7 @@
     - TARGET="linux-clang"
     compiler: clang
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
   - name: "Linux with gcc"
@@ -17,7 +17,7 @@
     - TARGET="linux-gcc"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
   - name: "Linux with gcc on s390x (Docker)"
@@ -30,7 +30,7 @@
     - TARGET="docker"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
     services:

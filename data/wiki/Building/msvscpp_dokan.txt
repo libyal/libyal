@@ -1,14 +1,4 @@
 ## Dokan library
-Note that currently ${project_name} only supports Dokan 0.6.0. There is work in progress to support later versions of Dokan.
-
-Get the Dokan installation from: https://github.com/dokan-dev/dokany/releases/tag/0.6.0 and install the driver.
-
-Get the source including patches.
-```
-git clone https://github.com/joachimmetz/dokan
-```
-
-The Visual Studio project files expect the source directory to be named dokan and located in the directory containing the ${project_name}-```<version>``` directory.
-
-The Dokan library is now ready to be build from the ${project_name} Visual Studio solution file and will be named dokan.dll.
+Get the Dokan from: http://dokan-dev.github.io and install the library and
+driver.
 

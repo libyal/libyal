@@ -535,7 +535,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         build_options.append(('BZIP2 compression support', '$ac_cv_bzip2'))
 
       if name == 'libcaes':
-       if project_configuration.library_name == 'libbde':
+       if project_configuration.library_name in ('libbde', 'libluksde'):
           build_options.extend([
               ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'),
               ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
@@ -548,11 +548,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           build_options.extend([
               ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
               ('AES-XTS support', '$ac_cv_libcaes_aes_xts')])
-
-       elif project_configuration.library_name == 'libluksde':
-          build_options.extend([
-              ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'),
-              ('AES-ECB support', '$ac_cv_libcaes_aes_ecb')])
 
        elif project_configuration.library_name in ('libmodi', 'libqcow'):
           build_options.append(
@@ -577,6 +572,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
               ('SHA224 support', '$ac_cv_libhmac_sha224'),
               ('SHA256 support', '$ac_cv_libhmac_sha256'),
               ('SHA512 support', '$ac_cv_libhmac_sha512')])
+
+      elif name == 'libfcrypto':
+       if project_configuration.library_name == 'libluksde':
+          build_options.extend([
+              ('Serpent-ECB support', '$ac_cv_libfcrypto')])
 
       elif name == 'zlib':
         if project_configuration.library_name == 'libewf':
@@ -1137,10 +1137,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     stat_info = os.stat(output_filename)
     os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
-  def _GenerateTravisRunTestsSh(self, template_mappings, output_writer):
+  def _GenerateTravisRunTestsSh(
+      self, project_configuration, template_mappings, output_writer):
     """Generates the .travis/runtests.sh script file.
 
     Args:
+      project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       output_writer (OutputWriter): output writer.
@@ -1572,7 +1574,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateTravisInstallSh(template_mappings, output_writer)
 
-    self._GenerateTravisRunTestsSh(template_mappings, output_writer)
+    self._GenerateTravisRunTestsSh(
+        project_configuration, template_mappings, output_writer)
 
     self._GenerateTravisScriptSh(
         project_configuration, template_mappings, output_writer)

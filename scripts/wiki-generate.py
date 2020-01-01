@@ -110,7 +110,7 @@ class WikiPageGenerator(object):
       dependencies.append('flex')
 
     if 'yacc' in project_configuration.library_build_dependencies:
-      dependencies.append('byacc')
+      dependencies.append('bison')
 
     if 'zlib' in project_configuration.library_build_dependencies:
       dependencies.append('zlib1g-dev')
@@ -193,12 +193,6 @@ class WikiPageGenerator(object):
       dependencies.append(
           'MinGW build of bzip2 library and source headers (required for '
           'bzip2 compression support)')
-
-    if ('crypto' in project_configuration.library_build_dependencies or
-        'crypto' in project_configuration.tools_build_dependencies):
-      # TODO: describe how to disable.
-      dependencies.append(
-          'Windows Crypto API (libadvapi32) (optional but recommended)')
 
     dependencies.extend(project_configuration.mingw_build_dependencies)
 
@@ -379,7 +373,7 @@ class WikiPageGenerator(object):
       git_apt_dependencies.append('flex')
 
     if 'yacc' in project_configuration.library_build_dependencies:
-      git_apt_dependencies.append('byacc')
+      git_apt_dependencies.append('bison')
 
     git_apt_dependencies = ' '.join(git_apt_dependencies)
 
@@ -794,11 +788,6 @@ class WikiPageGenerator(object):
     if project_configuration.HasDependencyBzip2():
       dependencies.append(
           'bzip2 (required for bzip2 compression support)')
-
-    if ('crypto' in project_configuration.library_build_dependencies or
-        'crypto' in project_configuration.tools_build_dependencies):
-      dependencies.append(
-          'Windows Crypto API (libadvapi32)')
 
     dependencies.extend(project_configuration.msvscpp_build_dependencies)
 
@@ -1371,7 +1360,7 @@ def Main():
 
   project_description = []
   if os.path.exists(readme_file):
-    with io.open(readme_file, 'r', encdoing='utf8') as file_object:
+    with io.open(readme_file, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         if line.startswith('For more information see:'):
           project_description.pop()

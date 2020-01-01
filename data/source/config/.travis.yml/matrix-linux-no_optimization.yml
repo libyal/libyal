@@ -7,6 +7,6 @@
     - TARGET="linux-gcc-no-optimization"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
