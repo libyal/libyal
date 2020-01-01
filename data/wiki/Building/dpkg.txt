@@ -2,7 +2,7 @@
 
 To build ${project_name} using the Debian package tools make sure you have the following packages installed:
 ```
-sudo apt-get install build-essential debhelper fakeroot autotools-dev ${dpkg_build_dependencies}
+sudo apt install build-essential debhelper fakeroot autotools-dev ${dpkg_build_dependencies}
 ```
 
 If you downloaded the source using git make sure to run ./configure at least once to generate the dpkg packaging files.

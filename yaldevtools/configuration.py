@@ -111,6 +111,7 @@ class ProjectConfiguration(BaseConfiguration):
         and time value provided by the file entry.
     mount_tool_file_entry_creation_time_value (str): name of the creation date
         and time value provided by the file entry.
+    mount_tool_file_entry_example (str): example file entry.
     mount_tool_file_entry_inode_change_time_type (str): type of the inode
         change date and time value provided by the file entry.
     mount_tool_file_entry_inode_change_time_value (str): name of the inode
@@ -126,10 +127,10 @@ class ProjectConfiguration(BaseConfiguration):
     mount_tool_mounted_description (str): description what is mounted by
         the mount tool.
     mount_tool_path_prefix (str): path prefix used by the mount tool.
+    mount_tool_source (str): short description of the input source.
     mount_tool_source_description_long (str): long description of the input
         source.
     mount_tool_source_description (str): description of the input source.
-    mount_tool_source (str): short description of the input source.
     mount_tool_source_type (str): input source type, such as container, file,
         image or volume.
     msvscpp_build_dependencies (str): Visual Studio build dependencies.
@@ -244,6 +245,7 @@ class ProjectConfiguration(BaseConfiguration):
     self.mount_tool_file_entry_access_time_value = None
     self.mount_tool_file_entry_creation_time_type = None
     self.mount_tool_file_entry_creation_time_value = None
+    self.mount_tool_file_entry_example = None
     self.mount_tool_file_entry_inode_change_time_type = None
     self.mount_tool_file_entry_inode_change_time_value = None
     self.mount_tool_file_entry_modification_time_type = None
@@ -577,6 +579,9 @@ class ProjectConfiguration(BaseConfiguration):
         self._GetOptionalConfigValue(
             config_parser, 'mount_tool', 'file_entry_creation_time_value',
             default_value='creation_time'))
+
+    self.mount_tool_file_entry_example = self._GetOptionalConfigValue(
+        config_parser, 'mount_tool', 'file_entry_example')
 
     self.mount_tool_file_entry_inode_change_time_type = (
         self._GetOptionalConfigValue(

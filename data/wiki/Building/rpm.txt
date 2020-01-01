@@ -1,7 +1,7 @@
 # Using RedHat package tools (RPM)
 To build ${project_name} using the RedHat package tools make sure you have the following packages installed:
 ```
-yum install rpm-build ${rpm_build_dependencies}
+dnf install rpm-build ${rpm_build_dependencies}
 ```
 
 To build:

@@ -1,0 +1,11 @@
+# Mounting
+To mount ${mount_tool_source_description}:
+```
+${mount_tool_name}${mount_tool_additional_arguments} ${mount_tool_source} /mnt/fuse
+```
+
+This will expose ${mount_tool_mounted_description}.
+```
+/mnt/fuse/${mount_tool_file_entry_example}
+```
+

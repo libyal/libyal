@@ -55,13 +55,16 @@ class WikiPageGenerator(object):
         'autoconf', 'automake', 'binutils', 'gcc-core', 'gettext', 'libiconv',
         'libtool', 'make', 'pkg-config']
 
-    if 'lex' in project_configuration.library_build_dependencies:
+    if ('lex' in project_configuration.library_build_dependencies or
+        'lex' in project_configuration.tools_build_dependencies):
       dependencies.append('flex')
 
-    if 'yacc' in project_configuration.library_build_dependencies:
+    if ('yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
       dependencies.append('byacc')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if ('zlib' in project_configuration.library_build_dependencies or
+        'zlib' in project_configuration.tools_build_dependencies):
       dependencies.append(
           'zlib-devel (for DEFLATE compression support) (optional but '
           'recommended, can be disabled by --with-zlib=no)')
@@ -106,13 +109,16 @@ class WikiPageGenerator(object):
     """
     dependencies = list(project_configuration.dpkg_build_dependencies)
 
-    if 'lex' in project_configuration.library_build_dependencies:
+    if ('lex' in project_configuration.library_build_dependencies or
+        'lex' in project_configuration.tools_build_dependencies):
       dependencies.append('flex')
 
-    if 'yacc' in project_configuration.library_build_dependencies:
+    if ('yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
       dependencies.append('bison')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if ('zlib' in project_configuration.library_build_dependencies or
+        'zlib' in project_configuration.tools_build_dependencies):
       dependencies.append('zlib1g-dev')
 
     if project_configuration.HasDependencyBzip2():
@@ -177,13 +183,16 @@ class WikiPageGenerator(object):
     """
     dependencies = []
 
-    if 'lex' in project_configuration.library_build_dependencies:
+    if ('lex' in project_configuration.library_build_dependencies or
+        'lex' in project_configuration.tools_build_dependencies):
       dependencies.append('flex')
 
-    if 'yacc' in project_configuration.library_build_dependencies:
+    if ('yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
       dependencies.append('byacc')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if ('zlib' in project_configuration.library_build_dependencies or
+        'zlib' in project_configuration.tools_build_dependencies):
       dependencies.append(
           'MinGW build of zlib library and source headers (for DEFLATE '
           'compression support) (optional but recommended, can be disabled '
@@ -224,13 +233,16 @@ class WikiPageGenerator(object):
     """
     dependencies = list(project_configuration.rpm_build_dependencies)
 
-    if 'lex' in project_configuration.library_build_dependencies:
+    if ('lex' in project_configuration.library_build_dependencies or
+        'lex' in project_configuration.tools_build_dependencies):
       dependencies.append('flex')
 
-    if 'yacc' in project_configuration.library_build_dependencies:
+    if ('yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
       dependencies.append('byacc')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if ('zlib' in project_configuration.library_build_dependencies or
+        'zlib' in project_configuration.tools_build_dependencies):
       dependencies.append('zlib-devel')
 
     if project_configuration.HasDependencyBzip2():
@@ -334,6 +346,8 @@ class WikiPageGenerator(object):
 
     mount_tool_additional_arguments = ''
     mount_tool_source_description_long = ''
+    mount_tool_file_entry_example = (
+        project_configuration.mount_tool_file_entry_example)
 
     development_prefix = project_configuration.project_name[3:]
     python_bindings_name = 'py{0:s}'.format(
@@ -369,10 +383,12 @@ class WikiPageGenerator(object):
     git_apt_dependencies = [
         'git', 'autoconf', 'automake', 'autopoint', 'libtool', 'pkg-config']
 
-    if 'lex' in project_configuration.library_build_dependencies:
+    if ('lex' in project_configuration.library_build_dependencies or
+        'lex' in project_configuration.tools_build_dependencies):
       git_apt_dependencies.append('flex')
 
-    if 'yacc' in project_configuration.library_build_dependencies:
+    if ('yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
       git_apt_dependencies.append('bison')
 
     git_apt_dependencies = ' '.join(git_apt_dependencies)
@@ -381,10 +397,12 @@ class WikiPageGenerator(object):
         'git', 'aclocal', 'autoconf', 'automake', 'autopoint or gettextize',
         'libtoolize', 'pkg-config']
 
-    if 'lex' in project_configuration.library_build_dependencies:
+    if ('lex' in project_configuration.library_build_dependencies or
+        'lex' in project_configuration.tools_build_dependencies):
       git_build_dependencies.append('flex')
 
-    if 'yacc' in project_configuration.library_build_dependencies:
+    if ('yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
       git_build_dependencies.append('byacc')
 
     git_build_dependencies = '\n'.join([
@@ -393,10 +411,12 @@ class WikiPageGenerator(object):
     git_macports_dependencies = [
         'git', 'autoconf', 'automake', 'gettext', 'libtool', 'pkgconfig']
 
-    if 'lex' in project_configuration.library_build_dependencies:
+    if ('lex' in project_configuration.library_build_dependencies or
+        'lex' in project_configuration.tools_build_dependencies):
       git_macports_dependencies.append('flex')
 
-    if 'yacc' in project_configuration.library_build_dependencies:
+    if ('yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
       git_macports_dependencies.append('byacc')
 
     git_macports_dependencies = ' '.join(git_macports_dependencies)
@@ -404,10 +424,13 @@ class WikiPageGenerator(object):
     git_msvscpp_dependencies = ['.\synclibs.ps1']
 
     if ('lex' in project_configuration.library_build_dependencies or
-        'yacc' in project_configuration.library_build_dependencies):
+        'yacc' in project_configuration.tools_build_dependencies or
+        'yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
       git_msvscpp_dependencies.append('.\syncwinflexbison.ps1')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if ('zlib' in project_configuration.library_build_dependencies or
+        'zlib' in project_configuration.tools_build_dependencies):
       git_msvscpp_dependencies.append('.\synczlib.ps1')
 
     git_msvscpp_dependencies = '\n'.join(git_msvscpp_dependencies)
@@ -420,13 +443,16 @@ class WikiPageGenerator(object):
     gcc_build_dependencies = []
     gcc_static_build_dependencies = []
 
-    if 'lex' in project_configuration.library_build_dependencies:
+    if ('lex' in project_configuration.library_build_dependencies or
+        'lex' in project_configuration.tools_build_dependencies):
       gcc_build_dependencies.append('flex')
 
-    if 'yacc' in project_configuration.library_build_dependencies:
+    if ('yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
       gcc_build_dependencies.append('byacc')
 
-    if 'zlib' in project_configuration.library_build_dependencies:
+    if ('zlib' in project_configuration.library_build_dependencies or
+        'zlib' in project_configuration.tools_build_dependencies):
       gcc_build_dependencies.append(
           'zlib (for DEFLATE compression support) (optional but recommended, '
           'can be disabled by --with-zlib=no)')
@@ -699,6 +725,9 @@ class WikiPageGenerator(object):
         'build_dependencies': build_dependencies,
 
         'python_bindings_name': python_bindings_name,
+        'mount_tool_file_entry_example': mount_tool_file_entry_example,
+        'mount_tool_file_entry_example_windows': (
+            mount_tool_file_entry_example.replace('\\x', '^x')),
         'mount_tool_name': mount_tool_name,
         'tools_name': tools_name,
 
@@ -716,11 +745,14 @@ class WikiPageGenerator(object):
             development_main_object_post_open_python),
         'development_main_object_post_open_file_object_python': (
             development_main_object_post_open_file_object_python),
-        'development_main_object_size': project_configuration.development_main_object_size,
+        'development_main_object_size': (
+            project_configuration.development_main_object_size),
 
         'tests_profiles': tests_profiles,
-        'tests_example_filename1': project_configuration.tests_example_filename1,
-        'tests_example_filename2': project_configuration.tests_example_filename2,
+        'tests_example_filename1': (
+            project_configuration.tests_example_filename1),
+        'tests_example_filename2': (
+            project_configuration.tests_example_filename2),
 
         'troubleshooting_example': troubleshooting_example,
 
@@ -1102,38 +1134,34 @@ class MountingPageGenerator(WikiPageGenerator):
       self._GenerateSection(
           'introduction.txt', template_mappings, output_writer)
 
-      if project_configuration.mount_tool_source_type == 'image':
-        self._GenerateSection(
-            'mounting_image.txt', template_mappings, output_writer)
-
-      elif project_configuration.mount_tool_source_type == 'volume':
-        self._GenerateSection(
-            'mounting_volume.txt', template_mappings, output_writer)
+      if project_configuration.mount_tool_source_type in (
+          'file', 'image', 'volume'):
+        template_file = 'mounting_{0:s}.txt'.format(
+            project_configuration.mount_tool_source_type)
+        self._GenerateSection(template_file, template_mappings, output_writer)
 
       self._GenerateSection(
           'mounting_missing_backend.txt', template_mappings, output_writer)
 
+      if project_configuration.mount_tool_source_type in (
+          'image', 'volume'):
+        template_file = 'mounting_{0:s}_contents.txt'.format(
+            project_configuration.mount_tool_source_type)
+        self._GenerateSection(template_file, template_mappings, output_writer)
+
       if project_configuration.mount_tool_source_type == 'volume':
         self._GenerateSection(
-            'mounting_volume_loopback.txt', template_mappings,
-            output_writer)
-        self._GenerateSection(
-            'obtaining_volume_offset.txt', template_mappings,
-            output_writer)
+            'obtaining_volume_offset.txt', template_mappings, output_writer)
 
       self._GenerateSection(
           'mounting_root_access.txt', template_mappings, output_writer)
 
       if project_configuration.HasDependencyDokan():
-        if project_configuration.mount_tool_source_type == 'image':
-          self._GenerateSection(
-              'mounting_image_windows.txt', template_mappings,
-              output_writer)
-
-        elif project_configuration.mount_tool_source_type == 'volume':
-          self._GenerateSection(
-              'mounting_volume_windows.txt', template_mappings,
-              output_writer)
+        if project_configuration.mount_tool_source_type in (
+            'file', 'image', 'volume'):
+          template_file = 'mounting_{0:s}_windows.txt'.format(
+              project_configuration.mount_tool_source_type)
+          self._GenerateSection(template_file, template_mappings, output_writer)
 
       self._GenerateSection(
           'unmounting.txt', template_mappings, output_writer)
@@ -1358,6 +1386,8 @@ def Main():
 
   LINK_RE = re.compile(r'\* (.*): (http[s]://.*)')
 
+  last_line_was_header = False
+
   project_description = []
   if os.path.exists(readme_file):
     with io.open(readme_file, 'r', encoding='utf8') as file_object:
@@ -1366,13 +1396,18 @@ def Main():
           project_description.pop()
           break
 
+        if last_line_was_header:
+          last_line_was_header = False
+          if line != '\n':
+            # Add an empty line to make sure unnumbered list are formatted
+            # correctly by most markdown parsers.
+            project_description.append('\n')
+
         line = LINK_RE.sub(r'* [\1](\2)', line)
         project_description.append(line)
 
         if line.endswith(':\n'):
-          # Add an empty line to make sure unnumbered list are formatted
-          # correctly by most markdown parsers.
-          project_description.append('\n')
+          last_line_was_header = True
 
   project_configuration.project_description = ''.join(project_description)
 
