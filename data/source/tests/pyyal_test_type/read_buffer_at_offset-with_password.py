@@ -1,2 +1,2 @@
     if unittest.password:
-      luksde_volume.set_password(unittest.password)
+      ${library_name_suffix}_${type_name}.set_password(unittest.password)
