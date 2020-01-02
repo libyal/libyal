@@ -346,8 +346,7 @@ class WikiPageGenerator(object):
 
     mount_tool_additional_arguments = ''
     mount_tool_source_description_long = ''
-    mount_tool_file_entry_example = (
-        project_configuration.mount_tool_file_entry_example)
+    mount_tool_file_entry_example = ''
 
     development_prefix = project_configuration.project_name[3:]
     python_bindings_name = 'py{0:s}'.format(
@@ -694,6 +693,13 @@ class WikiPageGenerator(object):
     elif project_configuration.development_main_object_post_open_python:
       development_main_object_post_open_file_object_python = '{0:s}\n'.format(
           '\n'.join(project_configuration.development_main_object_post_open_python))
+
+    if project_configuration.mount_tool_file_entry_example:
+      mount_tool_file_entry_example = (
+          project_configuration.mount_tool_file_entry_example)
+    else:
+      mount_tool_file_entry_example = '{0:s}1'.format(
+          project_configuration.project_name[3:])
 
     if project_configuration.mount_tool_additional_arguments:
       mount_tool_additional_arguments = project_configuration.mount_tool_additional_arguments

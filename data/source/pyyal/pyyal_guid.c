@@ -61,7 +61,7 @@ PyObject *${python_module_name}_string_new_from_guid(
 	     guid,
 	     guid_buffer,
 	     guid_buffer_size,
-	     LIBFGUID_ENDIAN_LITTLE,
+	     LIBFGUID_ENDIAN_${guid_byte_order},
 	     &error ) != 1 )
 	{
 		${python_module_name}_error_raise(

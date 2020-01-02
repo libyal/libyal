@@ -1907,6 +1907,11 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     template_mappings = self._GetTemplateMappings(project_configuration)
 
+    if project_configuration.python_module_name == 'pyluksde':
+      template_mappings['guid_byte_order'] = 'BIG'
+    else:
+      template_mappings['guid_byte_order'] = 'LITTLE'
+
     for directory_entry in os.listdir(self._template_directory):
       if not directory_entry.startswith('pyyal_'):
         continue
@@ -1937,6 +1942,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
       if directory_entry == 'pyyal_file_object_io_handle.c':
         self._SortVariableDeclarations(output_filename)
+
+    del template_mappings['guid_byte_order']
 
     library_include_header_file = self._GetLibraryIncludeHeaderFile(
         project_configuration)

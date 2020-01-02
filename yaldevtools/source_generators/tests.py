@@ -660,24 +660,89 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('imports-end.py')
 
-    if 'offset' in test_options:
+    if with_offset:
       template_names.append('data_range_file_object.py')
 
     template_names.append('test_case.py')
 
-    for type_function in (
-        'signal_abort', 'open', 'set_ascii_codepage', 'read_buffer',
-        'seek_offset'):
-      function_prototype = header_file.GetTypeFunction(type_name, type_function)
-      if not function_prototype:
-        continue
+    function_prototype = header_file.GetTypeFunction(type_name, 'signal_abort')
+    if function_prototype:
+      template_names.append('signal_abort.py')
 
-      if type_function == 'open' and 'offset' in test_options:
-        template_name = '{0:s}-with_offset.py'.format(type_function)
+    function_prototype = header_file.GetTypeFunction(type_name, 'open')
+    if function_prototype:
+      template_names.append('open-start.py')
+      if with_offset:
+        template_names.append('open-with_offset.py')
+
+      template_names.append('open-initialize.py')
+      if 'password' in test_options:
+        template_names.append('open-with_password.py')
+
+      template_names.append('open-end.py')
+
+      template_names.append('open_file_object-start.py')
+      if 'password' in test_options:
+        template_names.append('open_file_object-with_password.py')
+
+      if with_offset:
+        template_names.append('open_file_object-body-with_offset.py')
       else:
-        template_name = '{0:s}.py'.format(type_function)
+        template_names.append('open_file_object-body.py')
 
-      template_names.append(template_name)
+      template_names.append('open_file_object-end.py')
+
+      template_names.append('close-start.py')
+      if 'password' in test_options:
+        template_names.append('close-with_password.py')
+
+      template_names.append('close-end.py')
+
+      template_names.append('open_close-start.py')
+      if with_offset:
+        template_names.append('open_close-with_offset.py')
+
+      template_names.append('open_close-initialize.py')
+      if 'password' in test_options:
+        template_names.append('open_close-with_password.py')
+
+      template_names.append('open_close-end.py')
+
+    function_prototype = header_file.GetTypeFunction(type_name, 'set_ascii_codepage')
+    if function_prototype:
+      template_names.append('set_ascii_codepage.py')
+
+    function_prototype = header_file.GetTypeFunction(type_name, 'is_locked')
+    if function_prototype:
+      template_names.append('is_locked.py')
+
+    function_prototype = header_file.GetTypeFunction(type_name, 'read_buffer')
+    if function_prototype:
+      template_names.append('read_buffer-start.py')
+      if 'password' in test_options:
+        template_names.append('read_buffer-with_password.py')
+
+      template_names.append('read_buffer-end.py')
+
+      template_names.append('read_buffer_file_object-start.py')
+      if 'password' in test_options:
+        template_names.append('read_buffer_file_object-with_password.py')
+
+      template_names.append('read_buffer_file_object-end.py')
+
+      template_names.append('read_buffer_at_offset-start.py')
+      if 'password' in test_options:
+        template_names.append('read_buffer_at_offset-with_password.py')
+
+      template_names.append('read_buffer_at_offset-end.py')
+
+    function_prototype = header_file.GetTypeFunction(type_name, 'seek_offset')
+    if function_prototype:
+      template_names.append('seek_offset-start.py')
+      if 'password' in test_options:
+        template_names.append('seek_offset-with_password.py')
+
+      template_names.append('seek_offset-end.py')
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -707,17 +772,23 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       if value_name.endswith('_size') and value_name[:-5] in value_names:
         continue
 
-      template_mappings['value_name'] = value_name
+      template_names = ['getter_with_property-start.py']
+      if 'password' in test_options:
+        template_names.append('getter_with_property-with_password.py')
 
       if with_offset:
-        template_filename = 'getter_with_property-with_offset.py'
+        template_names.append('getter_with_property-end-with_offset.py')
       else:
-        template_filename = 'getter_with_property.py'
+        template_names.append('getter_with_property-end.py')
 
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filenames = [
+          os.path.join(template_directory, template_name)
+          for template_name in template_names]
 
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer,
+      template_mappings['value_name'] = value_name
+
+      self._GenerateSections(
+          template_filenames, template_mappings, output_writer,
           output_filename, access_mode='a')
 
       del template_mappings['value_name']
@@ -727,7 +798,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     argument_parser_options = []
     unittest_options = []
 
-    if 'offset' in test_options:
+    if with_offset:
       argument_parser_options.extend([
           '  argument_parser.add_argument(',
           ('      "-o", "--offset", dest="offset", action="store", '
