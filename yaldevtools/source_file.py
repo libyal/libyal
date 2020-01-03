@@ -181,21 +181,51 @@ class LibraryHeaderFile(object):
           source_line = source_file_object.readline()
 
           while source_line:
-            if source_line.startswith('/* Retrieves '):
+            if source_line.startswith('/* Reads '):
+              value_description = source_line.strip()
+              value_description = value_description[9:]
+
+              if value_description.endswith(' at the current offset into a buffer'):
+                value_description = value_description[:-36]
+
+              elif value_description.endswith(' at a specific offset'):
+                value_description = value_description[:-21]
+
+            elif source_line.startswith('/* Retrieves '):
               value_description = source_line.strip()
               value_description = value_description[13:]
 
               if value_description.startswith('a '):
                 value_description = value_description[2:]
-
               elif value_description.startswith('an '):
                 value_description = value_description[3:]
-
               elif value_description.startswith('the '):
                 value_description = value_description[4:]
 
+              if value_description.startswith('current offset within '):
+                value_description = value_description[22:]
+
               if value_description.startswith('specific '):
                 value_description = value_description[9:]
+
+              if value_description.startswith('UTF-8 '):
+                value_description = value_description[6:]
+              elif value_description.startswith('UTF-16 '):
+                value_description = value_description[7:]
+
+              if value_description.startswith('string value of '):
+                value_description = value_description[16:]
+
+              if value_description.startswith('a '):
+                value_description = value_description[2:]
+              elif value_description.startswith('an '):
+                value_description = value_description[3:]
+              elif value_description.startswith('the '):
+                value_description = value_description[4:]
+
+            elif source_line.startswith('/* Seeks a certain offset of the '):
+               value_description = source_line.strip()
+               value_description = value_description[33:]
 
             elif source_line.startswith(' * Returns '):
               return_values = set()

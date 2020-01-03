@@ -178,54 +178,32 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     if signature_type:
       template_mappings['signature_type'] = signature_type
 
-    template_filename = os.path.join(template_directory, 'header.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
-
-    template_filename = os.path.join(template_directory, 'includes.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
-
-    template_filename = os.path.join(template_directory, 'get_version.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    template_names = ['header.h', 'includes.h', 'get_version.h']
 
     if signature_type:
-      template_filename = os.path.join(template_directory, 'check_signature.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('check_signature.h')
 
     if has_glob:
-      template_filename = os.path.join(template_directory, 'glob.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('glob.h')
 
     if signature_type:
-      template_filename = os.path.join(template_directory, 'open_new.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('open_new.h')
 
-    template_filename = os.path.join(template_directory, 'init.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    template_names.extend(['init.h', 'footer.h'])
 
-    template_filename = os.path.join(template_directory, 'footer.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     if signature_type:
       del template_mappings['signature_type']
 
   def _GenerateModuleSourceFile(
       self, project_configuration, template_mappings, include_header_file,
-      python_module_types, output_writer):
+      python_module_types, definition_types, output_writer):
     """Generates a Python module source file.
 
     Args:
@@ -234,7 +212,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           maps to the name of a template variable.
       include_header_file (LibraryIncludeHeaderFile): library include header
           file.
-      python_module_types (set[str]): names of Python module types.
+      python_module_types (list[str]): names of Python module types.
+      definition_types (list[str]): names of Python module definition types.
       output_writer (OutputWriter): output writer.
     """
     signature_type = include_header_file.GetCheckSignatureType()
@@ -248,25 +227,27 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.python_module_name, output_filename)
 
     if signature_type:
-      template_mappings['signature_type'] = signature_type
-      template_mappings['signature_desription'] = (
+      signature_desription = (
           project_configuration.project_data_format or 'TODO')
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+      if signature_type.lower() not in signature_desription.lower():
+        signature_desription = '{0:s} {1:s}'.format(
+            signature_desription, signature_type)
 
-    template_filename = os.path.join(template_directory, 'includes-start.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+      template_mappings['signature_type'] = signature_type
+      template_mappings['signature_desription'] = signature_desription
+
+    template_names = ['header.c', 'includes-start.c']
 
     if signature_type:
-      template_filename = os.path.join(
-          template_directory, 'includes-file_object_io_handle.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('includes-file_object_io_handle.c')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     for type_name in sorted(python_module_types):
       self._SetTypeNameInTemplateMappings(template_mappings, type_name)
@@ -277,87 +258,53 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'includes-end.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    template_names = ['includes-end.c']
 
     if signature_type:
-      template_filename = os.path.join(template_directory, 'bfio.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('bfio.c')
 
-    template_filename = os.path.join(
-        template_directory, 'module_methods-start.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    template_names.append('module_methods-start.c')
 
     if signature_type:
-      template_filename = os.path.join(
-          template_directory, 'module_methods-check_signature.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('module_methods-check_signature.c')
 
     if has_glob:
-      template_filename = os.path.join(
-          template_directory, 'module_methods-glob.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('module_methods-glob.c')
 
     # TODO: add multi-file open support if glob is present.
     if signature_type:
-      template_filename = os.path.join(
-          template_directory, 'module_methods-open_new.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('module_methods-open_new.c')
 
-    template_filename = os.path.join(template_directory, 'module_methods-end.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
-
-    template_filename = os.path.join(template_directory, 'get_version.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    template_names.extend(['module_methods-end.c', 'get_version.c'])
 
     if signature_type:
-      template_filename = os.path.join(template_directory, 'check_signature.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('check_signature.c')
 
     # TODO: add condition
-    # template_filename = os.path.join(template_directory, 'glob.c')
-    # self._GenerateSection(
-    #     template_filename, template_mappings, output_writer, output_filename,
-    #     access_mode='a')
+    # template_names.append('glob.c')
 
     if signature_type:
-      template_filename = os.path.join(template_directory, 'open_new.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.append('open_new.c')
 
-    template_filename = os.path.join(template_directory, 'module_definition.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    template_names.extend(['module_definition.c', 'init-start.c'])
 
-    template_filename = os.path.join(template_directory, 'init-start.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename,
         access_mode='a')
 
     for type_name in sorted(python_module_types):
       self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
-      template_filename = os.path.join(template_directory, 'init-type_object.c')
+      if type_name in definition_types:
+        template_filename = 'init-definitions_type_object.c'
+      else:
+        template_filename = 'init-type_object.c'
+
+      template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='a')
@@ -514,59 +461,35 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       template_mappings['base_type_description'] = base_type_name
       template_mappings['base_type_indicator'] = base_type_indicator
 
-    template_filename = os.path.join(template_directory, 'header.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_names = ['header.h']
 
     if open_support:
-      template_filename = 'includes_with_input.h'
+      template_names.append('includes_with_input.h')
     else:
-      template_filename = 'includes.h'
-
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+      template_names.append('includes.h')
 
     if open_support:
-      template_filename = 'typedef_with_input.h'
+      template_names.append('typedef_with_input.h')
     elif with_parent:
-      template_filename = 'typedef_with_parent.h'
+      template_names.append('typedef_with_parent.h')
     else:
-      template_filename = 'typedef.h'
-
-    template_filename = os.path.join(template_directory, template_filename)
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
-
-    python_type_prefix = '{0:s}_{1:s}'.format(
-        project_configuration.python_module_name, type_name)
+      template_names.append('typedef.h')
 
     if not is_pseudo_type:
       if has_pseudo_sub_types:
-        template_filename = os.path.join(
-            template_directory, 'new-with_type_object.h')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='a')
+        template_names.append('new-with_type_object.h')
 
       elif with_parent:
-        template_filename = os.path.join(
-            template_directory, 'new-with_parent.h')
-        self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='a')
+        template_names.append('new-with_parent.h')
 
-      template_filename = os.path.join(template_directory, 'init.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+      template_names.extend(['init.h', 'free.h'])
 
-      template_filename = os.path.join(template_directory, 'free.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
@@ -2021,6 +1944,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         module_type_name = self._GetSequenceName(sequence_type_name)
         python_module_types.append(module_type_name)
 
+    definition_types = []
+
     definitions_include_header_file = self._GetDefinitionsIncludeHeaderFile(
         project_configuration)
 
@@ -2052,7 +1977,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             project_configuration, template_mappings, definitions_name,
             enum_declaration, output_writer)
 
-        python_module_types.append(definitions_name)
+        definition_types.append(definitions_name)
+
+    python_module_types.extend(definition_types)
 
     self._GenerateModuleHeaderFile(
         project_configuration, template_mappings, library_include_header_file,
@@ -2060,4 +1987,4 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateModuleSourceFile(
         project_configuration, template_mappings, library_include_header_file,
-        python_module_types, output_writer)
+        python_module_types, definition_types, output_writer)

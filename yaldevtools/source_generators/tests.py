@@ -677,13 +677,17 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       template_names.append('open-initialize.py')
       if 'password' in test_options:
-        template_names.append('open-with_password.py')
+        template_names.append('test_function-with_password.py')
+      if 'recovery_password' in test_options:
+        template_names.append('test_function-with_recovery_password.py')
 
       template_names.append('open-end.py')
 
       template_names.append('open_file_object-start.py')
       if 'password' in test_options:
-        template_names.append('open_file_object-with_password.py')
+        template_names.append('test_function-with_password.py')
+      if 'recovery_password' in test_options:
+        template_names.append('test_function-with_recovery_password.py')
 
       if with_offset:
         template_names.append('open_file_object-body-with_offset.py')
@@ -694,7 +698,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       template_names.append('close-start.py')
       if 'password' in test_options:
-        template_names.append('close-with_password.py')
+        template_names.append('test_function-with_password.py')
+      if 'recovery_password' in test_options:
+        template_names.append('test_function-with_recovery_password.py')
 
       template_names.append('close-end.py')
 
@@ -704,7 +710,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       template_names.append('open_close-initialize.py')
       if 'password' in test_options:
-        template_names.append('open_close-with_password.py')
+        template_names.append('test_function-with_password.py')
+      if 'recovery_password' in test_options:
+        template_names.append('test_function-with_recovery_password.py')
 
       template_names.append('open_close-end.py')
 
@@ -714,25 +722,34 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     function_prototype = header_file.GetTypeFunction(type_name, 'is_locked')
     if function_prototype:
-      template_names.append('is_locked.py')
+      if 'recovery_password' in test_options:
+        template_names.append('is_locked-with_recovery_password.py')
+      else:
+        template_names.append('is_locked.py')
 
     function_prototype = header_file.GetTypeFunction(type_name, 'read_buffer')
     if function_prototype:
       template_names.append('read_buffer-start.py')
       if 'password' in test_options:
-        template_names.append('read_buffer-with_password.py')
+        template_names.append('test_function-with_password.py')
+      if 'recovery_password' in test_options:
+        template_names.append('test_function-with_recovery_password.py')
 
       template_names.append('read_buffer-end.py')
 
       template_names.append('read_buffer_file_object-start.py')
       if 'password' in test_options:
-        template_names.append('read_buffer_file_object-with_password.py')
+        template_names.append('test_function-with_password.py')
+      if 'recovery_password' in test_options:
+        template_names.append('test_function-with_recovery_password.py')
 
       template_names.append('read_buffer_file_object-end.py')
 
       template_names.append('read_buffer_at_offset-start.py')
       if 'password' in test_options:
-        template_names.append('read_buffer_at_offset-with_password.py')
+        template_names.append('test_function-with_password.py')
+      if 'recovery_password' in test_options:
+        template_names.append('test_function-with_recovery_password.py')
 
       template_names.append('read_buffer_at_offset-end.py')
 
@@ -740,7 +757,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     if function_prototype:
       template_names.append('seek_offset-start.py')
       if 'password' in test_options:
-        template_names.append('seek_offset-with_password.py')
+        template_names.append('test_function-with_password.py')
+      if 'recovery_password' in test_options:
+        template_names.append('test_function-with_recovery_password.py')
 
       template_names.append('seek_offset-end.py')
 
@@ -774,7 +793,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       template_names = ['getter_with_property-start.py']
       if 'password' in test_options:
-        template_names.append('getter_with_property-with_password.py')
+        template_names.append('test_function-with_password.py')
+      if 'recovery_password' in test_options:
+        template_names.append('test_function-with_recovery_password.py')
 
       if with_offset:
         template_names.append('getter_with_property-end-with_offset.py')

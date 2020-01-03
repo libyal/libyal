@@ -526,13 +526,25 @@ class PythonTypeObjectFunctionPrototype(object):
           'Opens a {0:s} using a file-like object.').format(type_name)]
 
     elif type_function == 'read_buffer':
-      description = ['Reads a buffer of data.']
+      if self.value_description:
+        description = ['Reads a buffer of {0:s}.'.format(
+            self.value_description)]
+      else:
+        description = ['Reads a buffer of data.']
 
     elif type_function == 'read_buffer_at_offset':
-      description = ['Reads a buffer of data at a specific offset.']
+      if self.value_description:
+        description = ['Reads a buffer of {0:s} at a specific offset.'.format(
+            self.value_description)]
+      else:
+        description = ['Reads a buffer of data at a specific offset.']
 
     elif type_function == 'seek_offset':
-      description = ['Seeks an offset within the data.']
+      if self.value_description:
+        description = ['Seeks an offset within the {0:s}.'.format(
+            self.value_description)]
+      else:
+        description = ['Seeks an offset within the data.']
 
     elif type_function == 'set_ascii_codepage':
       description = [
