@@ -791,16 +791,26 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       if value_name.endswith('_size') and value_name[:-5] in value_names:
         continue
 
-      template_names = ['getter_with_property-start.py']
+      if value_name == 'offset':
+        template_names = ['getter-start.py']
+      else:
+        template_names = ['getter_with_property-start.py']
+
       if 'password' in test_options:
         template_names.append('test_function-with_password.py')
       if 'recovery_password' in test_options:
         template_names.append('test_function-with_recovery_password.py')
 
-      if with_offset:
-        template_names.append('getter_with_property-end-with_offset.py')
+      if value_name == 'offset':
+        if with_offset:
+          template_names.append('getter-end-with_offset.py')
+        else:
+          template_names.append('getter-end.py')
       else:
-        template_names.append('getter_with_property-end.py')
+        if with_offset:
+          template_names.append('getter_with_property-end-with_offset.py')
+        else:
+          template_names.append('getter_with_property-end.py')
 
       template_filenames = [
           os.path.join(template_directory, template_name)

@@ -1011,14 +1011,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
       python_type_object_methods.extend(python_type_object_method)
 
-      if (type_function == 'get_offset' and
-          'read_buffer' in python_function_prototypes and
-          'seek_offset' in python_function_prototypes):
-
-        description = ['Retrieves the current offset within the data.']
-      else:
-        description = python_function_prototype.GetDescription()
-
+      description = python_function_prototype.GetDescription()
       for index, line in enumerate(description):
         # Correct xml => XML in description for pyevtx.
         line = line.replace(' xml ', ' XML ')
@@ -1032,6 +1025,11 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           'read_buffer' in python_function_prototypes and
           'seek_offset' in python_function_prototypes):
 
+        read_buffer_description = (
+            python_function_prototypes['read_buffer'].GetDescription())
+        seek_offset_description = (
+            python_function_prototypes['seek_offset'].GetDescription())
+
         python_type_object_methods.extend([
             '',
             '\t{ "read",',
@@ -1040,7 +1038,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             '\t  METH_VARARGS | METH_KEYWORDS,',
             '\t  "read(size) -> Binary string\\n"',
             '\t  "\\n"',
-            '\t  "Reads a buffer of data." },',
+            '\t  "{0:s}." }},'.format(read_buffer_description[0][:-1]),
             '',
             '\t{ "seek",',
             '\t  (PyCFunction) {0:s}_{1:s}_seek_offset,'.format(
@@ -1048,7 +1046,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             '\t  METH_VARARGS | METH_KEYWORDS,',
             '\t  "seek(offset, whence) -> None\\n"',
             '\t  "\\n"',
-            '\t  "Seeks an offset within the data." },',
+            '\t  "{0:s}." }},'.format(seek_offset_description[0][:-1]),
             '',
             '\t{ "tell",',
             '\t  (PyCFunction) {0:s}_{1:s}_get_offset,'.format(
@@ -1056,7 +1054,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             '\t  METH_NOARGS,',
             '\t  "tell() -> Integer\\n"',
             '\t  "\\n"',
-            '\t  "Retrieves the current offset within the data." },'])
+            '\t  "{0:s}." }},'.format(description[0][:-1])])
 
       elif (python_function_prototype.DataTypeIsDatetime() and
             type_function != 'get_data_as_datetime'):
@@ -1553,7 +1551,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         arguments = ['mode', 'key', 'tweak_key']
 
       elif type_function in (
-          'set_password', 'set_recovery_password', 'set_utf8_password'):
+          'set_password', 'set_recovery_password',
+          'set_utf8_password', 'set_utf8_recovery_password'):
         arguments = ['password']
 
       else:

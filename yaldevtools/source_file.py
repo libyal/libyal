@@ -202,9 +202,6 @@ class LibraryHeaderFile(object):
               elif value_description.startswith('the '):
                 value_description = value_description[4:]
 
-              if value_description.startswith('current offset within '):
-                value_description = value_description[22:]
-
               if value_description.startswith('specific '):
                 value_description = value_description[9:]
 
@@ -223,9 +220,9 @@ class LibraryHeaderFile(object):
               elif value_description.startswith('the '):
                 value_description = value_description[4:]
 
-            elif source_line.startswith('/* Seeks a certain offset of the '):
+            elif source_line.startswith('/* Seeks a certain offset within the '):
                value_description = source_line.strip()
-               value_description = value_description[33:]
+               value_description = value_description[37:]
 
             elif source_line.startswith(' * Returns '):
               return_values = set()

@@ -1,6 +1,6 @@
 dnl Checks for libfcrypto required headers and functions
 dnl
-dnl Version: 20191231
+dnl Version: 20200104
 
 dnl Function to detect if libfcrypto is available
 dnl ac_libfcrypto_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -25,7 +25,7 @@ AC_DEFUN([AX_LIBFCRYPTO_CHECK_LIB],
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
         [PKG_CHECK_MODULES(
           [libfcrypto],
-          [libfcrypto >= 20191231],
+          [libfcrypto >= 20200104],
           [ac_cv_libfcrypto=yes],
           [ac_cv_libfcrypto=check])
         ])
@@ -94,6 +94,11 @@ AC_DEFUN([AX_LIBFCRYPTO_CHECK_LIB],
           [ac_cv_libfcrypto_dummy=yes],
           [ac_cv_libfcrypto=no])
 
+        AC_CHECK_LIB(
+          fcrypto,
+          libfcrypto_serpent_crypt_cbc,
+          [ac_cv_libfcrypto_dummy=yes],
+          [ac_cv_libfcrypto=no])
         AC_CHECK_LIB(
           fcrypto,
           libfcrypto_serpent_crypt_ecb,
