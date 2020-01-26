@@ -1443,7 +1443,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       if 'zlib' not in project_configuration.library_build_dependencies:
         cygwin_build_dependencies.append('zlib-devel')
 
-      cygwin_build_dependencies.append('openssl-devel')
+      cygwin_build_dependencies.append('libssl-devel')
 
     if project_configuration.HasPythonModule():
       cygwin_build_dependencies.append('python2-devel')

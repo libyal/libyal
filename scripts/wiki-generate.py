@@ -76,7 +76,7 @@ class WikiPageGenerator(object):
     if ('crypto' in project_configuration.library_build_dependencies or
         'crypto' in project_configuration.tools_build_dependencies):
       dependencies.append(
-          'openssl-devel (optional but recommended, can be disabled by '
+          'libssl-devel (optional but recommended, can be disabled by '
           '--with-openssl=no)')
 
     dependencies.extend(project_configuration.cygwin_build_dependencies)

@@ -1,5 +1,9 @@
 - cmd: if [%TARGET%]==[vs2017] (
     set PYTHONPATH=..\vstools &&
-    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2017 --with-dokany msvscpp\${library_name}.sln &&
+    C:\Python37\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2017 --with-dokany msvscpp\${library_name}.sln &&
     msbuild /verbosity:quiet vs2017\${library_name}.sln /property:Platform=Win32 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
     msbuild /verbosity:quiet vs2017\${library_name}.sln /property:Platform=x64 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+- cmd: if [%TARGET%]==[vs2019] (
+    set PYTHONPATH=..\vstools &&
+    C:\Python37\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2019 --with-dokany msvscpp\${library_name}.sln &&
+    msbuild /verbosity:quiet vs2019\${library_name}.sln /property:Platform=x64 /property:PlatformToolset=v142 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
