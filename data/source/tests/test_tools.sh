@@ -1,5 +1,5 @@
 #!/bin/bash
-# Tests library functions and types.
+# Tests tools functions and types.
 #
 # Version: 20190216
 
@@ -7,8 +7,8 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-LIBRARY_TESTS="${library_tests}";
-LIBRARY_TESTS_WITH_INPUT="${library_tests_with_input}";
+TOOLS_TESTS="${tools_tests}";
+TOOLS_TESTS_WITH_INPUT="${tools_tests_with_input}";
 OPTION_SETS="${tests_option_sets}";
 
 INPUT_GLOB="${tests_input_glob}";
@@ -59,7 +59,7 @@ run_test_with_input()
 		return $${EXIT_IGNORE};
 	fi
 
-	local TEST_PROFILE_DIRECTORY=$$(get_test_profile_directory "input" "${library_name}");
+	local TEST_PROFILE_DIRECTORY=$$(get_test_profile_directory "input" "${library_name_suffix}tools");
 
 	local IGNORE_LIST=$$(read_ignore_list "$${TEST_PROFILE_DIRECTORY}");
 
@@ -129,7 +129,7 @@ run_test_with_input()
 	return $${RESULT};
 }
 
-if ! test -z $${SKIP_LIBRARY_TESTS};
+if ! test -z $${SKIP_TOOLS_TESTS};
 then
 	exit $${EXIT_IGNORE};
 fi
@@ -152,7 +152,7 @@ source $${TEST_RUNNER};
 
 RESULT=$${EXIT_IGNORE};
 
-for TEST_NAME in $${LIBRARY_TESTS};
+for TEST_NAME in $${TOOLS_TESTS};
 do
 	run_test "$${TEST_NAME}";
 	RESULT=$$?;
@@ -168,7 +168,7 @@ then
 	exit $${RESULT};
 fi
 
-for TEST_NAME in $${LIBRARY_TESTS_WITH_INPUT};
+for TEST_NAME in $${TOOLS_TESTS_WITH_INPUT};
 do
 	if test -d "input";
 	then

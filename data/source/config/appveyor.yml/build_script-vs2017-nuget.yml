@@ -1,12 +1,9 @@
+- ps: If ($$env:TARGET -eq "vs2017") {
+    .\build.ps1 -VisualStudioVersion 2017 -Platform Win32 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany";
+    .\build.ps1 -VisualStudioVersion 2017 -Platform x64 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - cmd: if [%TARGET%]==[vs2017] (
-    set PYTHONPATH=..\vstools &&
-    C:\Python37\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2017 --with-dokany msvscpp\${library_name}.sln &&
-    msbuild /verbosity:quiet vs2017\${library_name}.sln /property:Platform=Win32 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
-    msbuild /verbosity:quiet vs2017\${library_name}.sln /property:Platform=x64 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
     move msvscpp vs2008 &&
     move vs2017 msvscpp &&
     nuget pack ${library_name}.nuspec )
-- cmd: if [%TARGET%]==[vs2019] (
-    set PYTHONPATH=..\vstools &&
-    C:\Python37\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2019 --with-dokany msvscpp\${library_name}.sln &&
-    msbuild /verbosity:quiet vs2019\${library_name}.sln /property:Platform=x64 /property:PlatformToolset=v142 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+- ps: If ($$env:TARGET -eq "vs2019") {
+    .\build.ps1 -VisualStudioVersion 2019 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }

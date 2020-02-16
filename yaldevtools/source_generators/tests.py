@@ -2745,6 +2745,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['library_tests_with_input'] = ' '.join(
         library_tests_with_input)
 
+    # TODO: determine tools tests
+    template_mappings['tools_tests'] = ''
+    template_mappings['tools_tests_with_input'] = ''
+
     template_mappings['test_python_functions'] = ' '.join(
         sorted(python_functions))
     template_mappings['test_python_functions_with_input'] = ' '.join(

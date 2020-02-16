@@ -1,4 +1,4 @@
-# Tests library functions and types.
+# Tests tools functions and types.
 #
 # Version: 20200216
 
@@ -6,8 +6,8 @@ $$ExitSuccess = 0
 $$ExitFailure = 1
 $$ExitIgnore = 77
 
-$$LibraryTests = "${library_tests}"
-$$LibraryTestsWithInput = "${library_tests_with_input}"
+$$ToolsTests = "${tools_tests}"
+$$ToolsTestsWithInput = "${tools_tests_with_input}"
 
 $$InputGlob = "${tests_input_glob}"
 
@@ -113,7 +113,7 @@ Function RunTestWithInput
 	$$TestDescription = "Testing: $${TestName}"
 	$$TestExecutable = "$${TestExecutablesDirectory}\${library_name_suffix}_test_$${TestName}.exe"
 
-	$$TestProfileDirectory = GetTestProfileDirectory "input" "${library_name}"
+	$$TestProfileDirectory = GetTestProfileDirectory "input" "${library_name_suffix}tools"
 
 	$$IgnoreList = ReadIgnoreList $${TestProfileDirectory}
 
@@ -183,9 +183,9 @@ If (-Not (Test-Path $${TestExecutablesDirectory}))
 
 $$Result = $${ExitIgnore}
 
-Foreach ($${TestName} in $${LibraryTests} -split " ")
+Foreach ($${TestName} in $${ToolsTests} -split " ")
 {
-	# Split will return an array of a single empty string when LibraryTests is empty.
+	# Split will return an array of a single empty string when ToolsTests is empty.
 	If (-Not ($${TestName}))
 	{
 		Continue
@@ -198,9 +198,9 @@ Foreach ($${TestName} in $${LibraryTests} -split " ")
 	}
 }
 
-Foreach ($${TestName} in $${LibraryTestsWithInput} -split " ")
+Foreach ($${TestName} in $${ToolsTestsWithInput} -split " ")
 {
-	# Split will return an array of a single empty string when LibraryTestsWithInput is empty.
+	# Split will return an array of a single empty string when ToolsTestsWithInput is empty.
 	If (-Not ($${TestName}))
 	{
 		Continue
