@@ -1,8 +1,6 @@
   - TARGET: mingw-gcc
     BUILD_ENVIRONMENT: mingw
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-gcc-no-optimization
     BUILD_ENVIRONMENT: mingw
     CONFIGURE_OPTIONS: "--enable-shared=no"

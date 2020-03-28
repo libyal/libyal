@@ -2771,6 +2771,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.tests_info_tool_option_sets)
     template_mappings['tests_info_tool_options'] = (
         project_configuration.tests_info_tool_options)
+    template_mappings['tests_info_tool_options_per_profile'] = " ".join([
+        '"{0:s}"'.format(options) for options in (
+            project_configuration.tests_info_tool_options_per_profile)])
+    template_mappings['tests_info_tool_profiles'] = " ".join([
+        '"{0:s}"'.format(profile) for profile in (
+            project_configuration.tests_info_tool_profiles)])
 
     template_mappings['tests_verify_tool_option_sets'] = ' '.join(
         project_configuration.tests_verify_tool_option_sets)

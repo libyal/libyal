@@ -1,8 +1,6 @@
   - TARGET: mingw-w64-gcc
     BUILD_ENVIRONMENT: mingw-w64
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-w64-gcc-no-optimization
     BUILD_ENVIRONMENT: mingw-w64
     CONFIGURE_OPTIONS: "--enable-shared=no"
