@@ -3,9 +3,6 @@
     - CONFIGURE_OPTIONS=""
     - TARGET="coverity"
     compiler: clang
-    os: linux
-    dist: bionic
-    sudo: required
     group: edge
     addons:
       coverity_scan:

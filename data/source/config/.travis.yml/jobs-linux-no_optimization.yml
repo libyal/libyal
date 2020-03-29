@@ -6,7 +6,4 @@
     - LDFLAGS="--coverage"
     - TARGET="linux-gcc-no-optimization"
     compiler: gcc
-    os: linux
-    dist: bionic
-    sudo: required
     group: edge

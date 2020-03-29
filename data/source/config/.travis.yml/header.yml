@@ -1,1 +1,4 @@
+version: ~> 1.0
 language: c
+os: linux
+dist: bionic

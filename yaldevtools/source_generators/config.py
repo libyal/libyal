@@ -1258,49 +1258,49 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.coverity_scan_token:
       template_names.append('env.yml')
 
-    template_names.append('matrix-header.yml')
+    template_names.append('jobs-header.yml')
 
     if project_configuration.coverity_scan_token:
-      template_names.append('matrix-coverity.yml')
+      template_names.append('jobs-coverity.yml')
 
-    template_names.append('matrix-linux.yml')
+    template_names.append('jobs-linux.yml')
 
     # TODO: improve check.
     if project_configuration.library_name in ('libbfio', 'libcdata'):
-      template_names.append('matrix-linux-no_pthread.yml')
+      template_names.append('jobs-linux-no_pthread.yml')
 
     if include_header_file.have_wide_character_type:
-      template_names.append('matrix-linux-wide_character_type.yml')
+      template_names.append('jobs-linux-wide_character_type.yml')
 
     # TODO: make conditional
-    # template_names.append('matrix-linux-debug_output.yml')
+    # template_names.append('jobs-linux-debug_output.yml')
 
-    template_names.append('matrix-linux-no_optimization.yml')
+    template_names.append('jobs-linux-no_optimization.yml')
 
     if project_configuration.HasDependencyCrypto():
-      template_names.append('matrix-linux-openssl.yml')
+      template_names.append('jobs-linux-openssl.yml')
 
     if project_configuration.HasPythonModule():
-      template_names.append('matrix-linux-python.yml')
+      template_names.append('jobs-linux-python.yml')
 
-    template_names.append('matrix-linux-shared.yml')
+    template_names.append('jobs-linux-shared.yml')
 
     if (include_header_file and include_header_file.have_wide_character_type or
         project_configuration.HasTools()):
-      template_names.append('matrix-linux-shared-wide_character_type.yml')
+      template_names.append('jobs-linux-shared-wide_character_type.yml')
 
     if project_configuration.HasTools():
-      template_names.append('matrix-linux-static-executables.yml')
+      template_names.append('jobs-linux-static-executables.yml')
 
-    template_names.append('matrix-macos.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('matrix-macos-python.yml')
+    template_names.append('jobs-macos.yml')
 
     if project_configuration.HasPythonModule():
-      template_names.append('matrix-macos-python-pkgbuild.yml')
+      template_names.append('jobs-macos-python.yml')
+
+    if project_configuration.HasPythonModule():
+      template_names.append('jobs-macos-python-pkgbuild.yml')
     else:
-      template_names.append('matrix-macos-pkgbuild.yml')
+      template_names.append('jobs-macos-pkgbuild.yml')
 
     template_names.extend([
         'before_install.yml', 'install.yml', 'script.yml', 'after_success.yml'])

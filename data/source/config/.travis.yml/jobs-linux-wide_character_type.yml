@@ -5,7 +5,4 @@
     - LDFLAGS="--coverage"
     - TARGET="linux-gcc-wide-character-type"
     compiler: gcc
-    os: linux
-    dist: bionic
-    sudo: required
     group: edge

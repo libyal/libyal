@@ -3,7 +3,4 @@
     - CONFIGURE_OPTIONS="--enable-verbose-output --enable-debug-output"
     - TARGET="linux-gcc"
     compiler: gcc
-    os: linux
-    dist: bionic
-    sudo: required
     group: edge

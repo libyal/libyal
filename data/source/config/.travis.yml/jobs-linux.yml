@@ -5,9 +5,6 @@
     - LDFLAGS="--coverage"
     - TARGET="linux-clang"
     compiler: clang
-    os: linux
-    dist: bionic
-    sudo: required
     group: edge
   - name: "Linux with gcc"
     env:
@@ -16,9 +13,6 @@
     - LDFLAGS="--coverage"
     - TARGET="linux-gcc"
     compiler: gcc
-    os: linux
-    dist: bionic
-    sudo: required
     group: edge
   - name: "Linux with gcc on s390x (Docker)"
     env:
@@ -29,9 +23,6 @@
     - LDFLAGS="--coverage"
     - TARGET="docker"
     compiler: gcc
-    os: linux
-    dist: bionic
-    sudo: required
     group: edge
     services:
     - docker
