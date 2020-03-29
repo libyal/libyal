@@ -78,7 +78,7 @@ PyObject *${python_module_name}_${type_name}_read_buffer_at_offset(
 		{
 			${python_module_name}_error_raise(
 			 error,
-			 PyExc_IOError,
+			 PyExc_ValueError,
 			 "%s: unable to convert integer object into read size.",
 			 function );
 

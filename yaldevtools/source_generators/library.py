@@ -197,10 +197,12 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
       output_filename = os.path.join(
           project_configuration.library_name, output_filename)
 
-      if not os.path.exists(output_filename) and not directory_entry in (
+      if not directory_entry in (
           'libyal.c', 'libyal_extern.h', 'libyal.rc.in', 'libyal_support.c',
           'libyal_support.h', 'libyal_unused.h'):
-        continue
+        # Only update if the file exists.
+        if not os.path.exists(output_filename):
+          continue
 
       if directory_entry == 'libyal.rc.in':
         template_mappings['authors'] = ', '.join(
