@@ -72,6 +72,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('install-header.yml')
 
+    # TODO: check test more generic.
+    if project_configuration.library_name == 'libfsntfs':
+      template_names.append('install-testdata.yml')
+
     if (project_configuration.HasDependencyLex() or
         project_configuration.HasDependencyYacc()):
       template_names.append('install-winflexbison.yml')

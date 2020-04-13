@@ -1279,8 +1279,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     elif function_template in (
         'get_utf8_string_size', 'get_utf16_string_size', 'get_value'):
-      if function_template in (
-          'get_utf8_string_size', 'get_utf16_string_size'):
+      if function_template in ('get_utf8_string_size', 'get_utf16_string_size'):
         variable_name = function_template[4:]
       else:
         variable_name = value_name
