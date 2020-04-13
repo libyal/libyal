@@ -132,8 +132,8 @@ class WikiPageGenerator(object):
       dependencies.append('libfuse-dev')
 
     if project_configuration.HasPythonModule():
-      dependencies.append('python-all-dev')
-      dependencies.append('python3-all-dev')
+      dependencies.extend([
+          'python-dev', 'python-setuptools', 'python3-dev', 'python3-setuptools'])
 
     return dependencies
 

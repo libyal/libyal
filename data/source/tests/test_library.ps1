@@ -1,6 +1,6 @@
 # Tests library functions and types.
 #
-# Version: 20200216
+# Version: 20200405
 
 $$ExitSuccess = 0
 $$ExitFailure = 1
@@ -8,6 +8,7 @@ $$ExitIgnore = 77
 
 $$LibraryTests = "${library_tests}"
 $$LibraryTestsWithInput = "${library_tests_with_input}"
+$$OptionSets = "${tests_option_sets}";
 
 $$InputGlob = "${tests_input_glob}"
 
