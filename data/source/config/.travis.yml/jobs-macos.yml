@@ -4,11 +4,11 @@
     - TARGET="macos-clang"
     compiler: clang
     os: osx
-    osx_image: xcode8.3
+    osx_image: xcode9.2
   - name: "Mac OS with gcc"
     env:
     - CONFIGURE_OPTIONS=""
     - TARGET="macos-gcc"
     compiler: gcc
     os: osx
-    osx_image: xcode8.3
+    osx_image: xcode9.2
