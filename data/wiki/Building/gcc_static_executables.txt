@@ -9,3 +9,10 @@ To make static executables add --enable-static-executables=yes to configure, .e.
 ./configure --enable-static-executables=yes
 ```
 
+Check if the executables can be run.
+
+Disable multi-thread support with `--enable-multi-threading-support=no` if you get an error similar to:
+```
+libcthreads_read_write_lock_grab_for_write: unable to lock read/write lock for write with error: Deadlock condition detected.
+```
+
