@@ -1329,7 +1329,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for multiple test data files.
     test_data_size = None
     if function_template in (
-        'copy_from_byte_stream', 'internal_read_data', 'read_data'):
+        'copy_from_byte_stream', 'internal_read_data',
+        'internal_read_file_io_handle', 'read_data', 'read_file_io_handle'):
       test_data = self._ReadTestDataFile(type_name)
       test_data_size = len(test_data)
       if not test_data_size:
