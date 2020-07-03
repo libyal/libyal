@@ -702,13 +702,15 @@ class WikiPageGenerator(object):
           project_configuration.project_name[3:])
 
     if project_configuration.mount_tool_additional_arguments:
-      mount_tool_additional_arguments = project_configuration.mount_tool_additional_arguments
+      mount_tool_additional_arguments = (
+          project_configuration.mount_tool_additional_arguments)
 
     if project_configuration.mount_tool_source_description_long:
       mount_tool_source_description_long = (
           project_configuration.mount_tool_source_description_long)
     else:
-      mount_tool_source_description_long = project_configuration.mount_tool_source_description
+      mount_tool_source_description_long = (
+          project_configuration.mount_tool_source_description)
 
     if project_configuration.library_name == 'libewf':
       shared_object_version = '3'

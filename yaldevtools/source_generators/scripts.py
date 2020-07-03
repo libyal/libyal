@@ -113,8 +113,9 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
         sorted(makefile_am_file.libraries))
     template_mappings['shared_libs'] = ' '.join(makefile_am_file.libraries)
 
-    self._GenerateRunTestsSh(
-        project_configuration, template_mappings, output_writer)
+    if self._experimental:
+      self._GenerateRunTestsSh(
+          project_configuration, template_mappings, output_writer)
 
     for directory_entry in os.listdir(self._template_directory):
       template_filename = os.path.join(

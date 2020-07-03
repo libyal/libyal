@@ -202,13 +202,21 @@ class LibraryHeaderFile(object):
               elif value_description.startswith('the '):
                 value_description = value_description[4:]
 
-              if value_description.startswith('specific '):
+              if value_description.startswith(
+                  '64-bit FILETIME value containing the '):
+                value_description = value_description[37:]
+              elif value_description.startswith('specific '):
                 value_description = value_description[9:]
 
-              if value_description.startswith('UTF-8 '):
-                value_description = value_description[6:]
-              elif value_description.startswith('UTF-16 '):
-                value_description = value_description[7:]
+              if (value_description.startswith('UTF-8 ') or
+                  value_description.startswith('UTF-16 ')):
+                if value_description.startswith('UTF-8 '):
+                  value_description = value_description[6:]
+                elif value_description.startswith('UTF-16 '):
+                  value_description = value_description[7:]
+
+                if value_description.startswith('encoded '):
+                  value_description = value_description[8:]
 
               if value_description.startswith('string value of '):
                 value_description = value_description[16:]

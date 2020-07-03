@@ -769,6 +769,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     type_size_name = self._GetTypeSizeName(project_configuration, type_name)
 
+    template_mappings['type_name'] = type_name
+    template_mappings['type_name_pascal_case'] = type_name.title()
+
     template_mappings['type_size_name'] = type_size_name
 
     self._GenerateSections(
@@ -881,6 +884,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     del template_mappings['argument_parser_options']
     del template_mappings['unittest_options']
+
+    del template_mappings['type_name']
 
   def _GenerateTypeTest(
       self, project_configuration, template_mappings, type_name, type_function,

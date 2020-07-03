@@ -86,7 +86,7 @@ class SourceFileGenerator(object):
       output_data = template_string.substitute(template_mappings)
     except (KeyError, ValueError) as exception:
       logging.error(
-          'Unable to format template: {0:s} with error: {1:s}'.format(
+          'Unable to format template: {0:s} with error: {1!s}'.format(
               template_filename, exception))
       return
 
