@@ -567,7 +567,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
   def _GeneratePythonModuleSupportTests(
       self, project_configuration, template_mappings, include_header_file,
-      output_writer, with_input=False):
+      output_writer, with_input=False, with_offset=False):
     """Generates a Python module support tests script file.
 
     Args:
@@ -579,7 +579,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       with_input (Optional[bool]): True if the type is to be tested with
           input data.
+      with_offset (Optional[bool]): True if tests require offset support.
     """
+    test_options = self._GetTestOptions(project_configuration, 'support')
+    test_options = [argument for _, argument in test_options]
+
     template_directory = os.path.join(
         self._template_directory, 'pyyal_test_support')
 
@@ -619,10 +623,58 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     else:
       template_filename = 'main.py'
 
+    # TODO: move to separate method
+    argument_parser_options = []
+    unittest_options = []
+
+    if with_offset:
+      argument_parser_options.extend([
+          '  argument_parser.add_argument(',
+          ('      "-o", "--offset", dest="offset", action="store", '
+           'default=None,'),
+          '      type=int, help="offset of the source file.")',
+          ''])
+      unittest_options.append('  setattr(unittest, "offset", options.offset)')
+
+    if 'password' in test_options:
+      argument_parser_options.extend([
+          '  argument_parser.add_argument(',
+          ('      "-p", "--password", dest="password", action="store", '
+           'default=None,'),
+          '      type=str, help="password to unlock the source file.")',
+          ''])
+      unittest_options.append(
+          '  setattr(unittest, "password", options.password)')
+
+    if 'recovery_password' in test_options:
+      argument_parser_options.extend([
+          '  argument_parser.add_argument(',
+          '      "-r", "--recovery-password", "--recovery_password",',
+          ('      dest="recovery_password", action="store", default=None, '
+           'type=str,'),
+          '      help="recovery password to unlock the source file.")',
+          ''])
+      unittest_options.append(
+          '  setattr(unittest, "recovery_password", options.recovery_password)')
+
+    argument_parser_options.extend([
+        '  argument_parser.add_argument(',
+        '      "source", nargs="?", action="store", metavar="PATH",',
+        '      default=None, help="path of the source file.")',
+        ''])
+    unittest_options.append('  setattr(unittest, "source", options.source)')
+
+    template_mappings['argument_parser_options'] = '\n'.join(
+        argument_parser_options)
+    template_mappings['unittest_options'] = '\n'.join(unittest_options)
+
     template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='a')
+
+    del template_mappings['argument_parser_options']
+    del template_mappings['unittest_options']
 
   def _GeneratePythonModuleTypeTests(
       self, project_configuration, template_mappings, type_name, output_writer,
@@ -840,6 +892,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names = ['main.py']
 
+    # TODO: move to separate method
     argument_parser_options = []
     unittest_options = []
 
