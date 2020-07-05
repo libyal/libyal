@@ -43,6 +43,36 @@ PyObject *${python_module_name}_${type_name}_open_file_object(
 
 		return( NULL );
 	}
+	PyErr_Clear();
+
+	result = PyObject_HasAttrString(
+	          file_object,
+	          "read" );
+
+	if( result != 1 )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: unsupported file object - missing read attribute.",
+		 function );
+
+		return( NULL );
+	}
+	PyErr_Clear();
+
+	result = PyObject_HasAttrString(
+	          file_object,
+	          "seek" );
+
+	if( result != 1 )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: unsupported file object - missing seek attribute.",
+		 function );
+
+		return( NULL );
+	}
 	if( ${python_module_name}_${type_name}->file_io_handle != NULL )
 	{
 		${python_module_name}_error_raise(

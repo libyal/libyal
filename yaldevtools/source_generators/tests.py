@@ -567,7 +567,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
   def _GeneratePythonModuleSupportTests(
       self, project_configuration, template_mappings, include_header_file,
-      output_writer):
+      output_writer, with_input=False):
     """Generates a Python module support tests script file.
 
     Args:
@@ -577,6 +577,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       include_header_file (LibraryIncludeHeaderFile): library include header
           file.
       output_writer (OutputWriter): output writer.
+      with_input (Optional[bool]): True if the type is to be tested with
+          input data.
     """
     template_directory = os.path.join(
         self._template_directory, 'pyyal_test_support')
@@ -585,22 +587,24 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.python_module_name)
     output_filename = os.path.join('tests', output_filename)
 
-    template_filename = os.path.join(template_directory, 'header.py')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_names = ['header.py']
 
-    template_filename = os.path.join(template_directory, 'imports.py')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    if with_input:
+      template_names.append('imports-with_input.py')
+    else:
+      template_names.append('imports.py')
 
-    template_filename = os.path.join(template_directory, 'test_case.py')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    template_names.append('test_case.py')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     for support_function in (
-        'get_version', ):
+        'get_version', 'check_file_signature', 'open'):
       if not include_header_file.HasFunction(support_function):
         continue
 
@@ -610,7 +614,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'main.py')
+    if with_input:
+      template_filename = 'main-with_input.py'
+    else:
+      template_filename = 'main.py'
+
+    template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='a')
@@ -769,8 +778,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     type_size_name = self._GetTypeSizeName(project_configuration, type_name)
 
+    type_name_pascal_case = type_name.replace(' ', '').title()
+
     template_mappings['type_name'] = type_name
-    template_mappings['type_name_pascal_case'] = type_name.title()
+    template_mappings['type_name_pascal_case'] = type_name_pascal_case
 
     template_mappings['type_size_name'] = type_size_name
 
@@ -1840,9 +1851,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     output_filename = '{0:s}_test_{1:s}.c'.format(
         project_configuration.library_name_suffix, type_name)
     output_filename = os.path.join('tests', output_filename)
-
-    if os.path.exists(output_filename) and not self._experimental:
-      return False
 
     has_string_test_options = bool(set(test_options).difference(set([
         ('o', 'offset')])))
@@ -3167,9 +3175,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         test_options, output_writer)
 
     if project_configuration.HasPythonModule():
+      with_input = bool(api_types_with_input)
+
       self._GeneratePythonModuleSupportTests(
           project_configuration, template_mappings, include_header_file,
-          output_writer)
+          output_writer, with_input=with_input)
 
     python_module_types = []
 
