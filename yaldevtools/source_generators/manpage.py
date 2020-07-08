@@ -168,7 +168,7 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
     output_lines = output_file.readlines()
 
     diff_lines = list(difflib.ndiff(backup_lines[1:], output_lines[1:]))
-    diff_lines = [line for line in diff_lines if line.startswith('-')]
+    diff_lines = [line for line in diff_lines if line[0] in ('-', '+')]
 
     # Check if there are changes besides the date.
     if diff_lines:

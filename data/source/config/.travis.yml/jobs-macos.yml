@@ -1,14 +1,14 @@
-  - name: "Mac OS with clang"
+  - name: "Mac OS 10.13 with clang"
     env:
     - CONFIGURE_OPTIONS=""
     - TARGET="macos-clang"
     compiler: clang
     os: osx
-    osx_image: xcode9.2
-  - name: "Mac OS with gcc"
+    osx_image: xcode9.4
+  - name: "Mac OS 10.13 with gcc"
     env:
     - CONFIGURE_OPTIONS=""
     - TARGET="macos-gcc"
     compiler: gcc
     os: osx
-    osx_image: xcode9.2
+    osx_image: xcode9.4

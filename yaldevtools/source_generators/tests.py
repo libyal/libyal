@@ -830,7 +830,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     type_size_name = self._GetTypeSizeName(project_configuration, type_name)
 
-    type_name_pascal_case = type_name.replace(' ', '').title()
+    type_name_pascal_case = type_name.replace('_', '').title()
 
     template_mappings['type_name'] = type_name
     template_mappings['type_name_pascal_case'] = type_name_pascal_case

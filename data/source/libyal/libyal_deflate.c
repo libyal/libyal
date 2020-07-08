@@ -891,7 +891,7 @@ int ${library_name}_deflate_decode_huffman(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve listeral value from bit stream.",
+			 "%s: unable to retrieve literal value from bit stream.",
 			 function );
 
 			return( -1 );
