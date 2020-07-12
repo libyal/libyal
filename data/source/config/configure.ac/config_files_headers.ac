@@ -1,0 +1,11 @@
+AC_CONFIG_FILES([msvscpp/Makefile])
+dnl Generate header files
+AC_CONFIG_FILES([include/${library_name}.h])
+AC_CONFIG_FILES([include/${library_name}/definitions.h])
+AC_CONFIG_FILES([include/${library_name}/features.h])
+AC_CONFIG_FILES([include/${library_name}/types.h])
+AC_CONFIG_FILES([${library_name}/${library_name}_definitions.h])
+dnl Generate distribution specific files
+AC_CONFIG_FILES([common/types.h])
+AC_CONFIG_FILES([dpkg/changelog])
+AC_CONFIG_FILES([${library_name}/${library_name}.rc])

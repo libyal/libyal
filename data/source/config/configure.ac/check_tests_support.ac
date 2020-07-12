@@ -1,3 +1,2 @@
 dnl Check if tests required headers and functions are available
 AX_TESTS_CHECK_LOCAL
-

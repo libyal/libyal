@@ -27,7 +27,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    m4_file = '{0:s}.m4'.format(project_configuration.library_name)
+    library_name = project_configuration.library_name
+
+    m4_file = '{0:s}.m4'.format(library_name)
     m4_file = os.path.join(self._data_directory, 'm4', m4_file)
 
     if os.path.exists(m4_file):
@@ -49,7 +51,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         # Find the line with the start of the definition of the
         # AX_${library_name}_CHECK_LOCAL macro.
         m4_macro_definition = 'AC_DEFUN([AX_{0:s}_CHECK_LOCAL],'.format(
-            project_configuration.library_name.upper())
+            library_name.upper())
 
         macro_start_line_number = None
         for line_number, line in enumerate(input_lines):
@@ -75,6 +77,19 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         # Copy the AX_${library_name}_CHECK_LOCAL macro.
         for line in input_lines[macro_start_line_number:macro_end_line_number]:
           file_object.write(line)
+
+    template_directory = os.path.join(self._template_directory, 'acinclude.m4')
+
+    template_mappings['local_library_name'] = library_name
+    template_mappings['local_library_name_upper_case'] = library_name.upper()
+
+    template_filename = os.path.join(template_directory, 'check_dll_support.m4')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer,
+        output_filename, access_mode='a')
+
+    del template_mappings['local_library_name']
+    del template_mappings['local_library_name_upper_case']
 
   def _GenerateAppVeyorYML(
       self, project_configuration, template_mappings, output_writer,
@@ -444,7 +459,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='a')
 
-    template_names = ['check_tests_support.ac', 'dll_support.ac', 'compiler_flags.ac']
+    template_names = ['check_tests_support.ac']
+
+    if os.path.isdir('ossfuzz'):
+      template_names.append('check_ossfuzz_support.ac')
+
+    template_names.append('compiler_flags.ac')
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -575,6 +595,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for Makefile in documents (libuna)
 
     template_names = ['config_files_common.ac']
+
+    if os.path.isdir('ossfuzz'):
+      template_names.append('config_files_ossfuzz.ac')
+
+    template_names.append('config_files_headers.ac')
 
     if project_configuration.HasDotNetBindings():
       template_names.append('config_files_dotnet_rc.ac')
