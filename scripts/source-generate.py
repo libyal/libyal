@@ -89,6 +89,8 @@ def Main():
   if not projects_directory:
     projects_directory = os.path.dirname(libyal_directory)
 
+  data_directory = os.path.join(libyal_directory, 'data')
+
   # TODO: generate more source files.
   # include headers
   # yal.net files
@@ -110,15 +112,14 @@ def Main():
       ('yaltools', tools.ToolSourceFileGenerator),
   ]
 
-  sources_directory = os.path.join(
-      libyal_directory, 'data', 'source')
+  sources_directory = os.path.join(data_directory, 'source')
   for source_category, source_generator_class in SOURCE_GENERATORS:
     if generators and source_category not in generators:
       continue
 
     template_directory = os.path.join(sources_directory, source_category)
     source_generator_object = source_generator_class(
-        projects_directory, template_directory,
+        projects_directory, data_directory, template_directory,
         experimental=options.experimental)
 
     if options.output_directory:
@@ -129,8 +130,6 @@ def Main():
     source_generator_object.Generate(project_configuration, output_writer)
 
   # TODO: dpkg handle dependencies
-
-  # TODO: add support for Unicode templates.
 
   # TODO: generate manuals/Makefile.am
 
@@ -146,7 +145,7 @@ def Main():
 
     template_directory = os.path.join(manuals_directory, source_category)
     source_generator_object = source_generator_class(
-        projects_directory, template_directory,
+        projects_directory, data_directory, template_directory,
         experimental=options.experimental)
 
     if options.output_directory:
@@ -155,8 +154,6 @@ def Main():
       output_writer = output_writers.StdoutWriter()
 
     source_generator_object.Generate(project_configuration, output_writer)
-
-  # TODO: add support for Unicode templates.
 
   return True
 

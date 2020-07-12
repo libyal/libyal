@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import glob
+import io
 import logging
 import os
 import stat
@@ -13,6 +14,67 @@ from yaldevtools.source_generators import interface
 
 class ConfigurationFileGenerator(interface.SourceFileGenerator):
   """Configuration file generator."""
+
+  def _GenerateACIncludeM4(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the acinclude.m4 configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    m4_file = '{0:s}.m4'.format(project_configuration.library_name)
+    m4_file = os.path.join(self._data_directory, 'm4', m4_file)
+
+    if os.path.exists(m4_file):
+      with io.open(m4_file, 'r', encoding='utf8') as file_object:
+        input_lines = file_object.readlines()
+
+      with io.open(output_filename, 'w', encoding='utf8') as file_object:
+        # Generate the first line
+        input_lines.pop(0)
+        file_object.write('dnl Checks for required headers and functions\n')
+
+        # Copy the rest of the header
+        while input_lines:
+          line = input_lines.pop(0)
+          file_object.write(line)
+          if not line.strip():
+            break
+
+        # Find the line with the start of the definition of the
+        # AX_${library_name}_CHECK_LOCAL macro.
+        m4_macro_definition = 'AC_DEFUN([AX_{0:s}_CHECK_LOCAL],'.format(
+            project_configuration.library_name.upper())
+
+        macro_start_line_number = None
+        for line_number, line in enumerate(input_lines):
+          if line.startswith(m4_macro_definition):
+            macro_start_line_number = line_number
+            break
+
+        macro_start_line_number -= 1
+
+        macro_end_line_number = None
+        for line_number, line in enumerate(
+            input_lines[macro_start_line_number + 2:]):
+          if line.startswith('dnl ') or line.startswith('AC_DEFUN(['):
+            macro_end_line_number = line_number
+            break
+
+        macro_end_line_number += macro_start_line_number + 2
+
+        for _ in range(5):
+          input_lines.pop(macro_end_line_number - 3)
+          macro_end_line_number -= 1
+
+        # Copy the AX_${library_name}_CHECK_LOCAL macro.
+        for line in input_lines[macro_start_line_number:macro_end_line_number]:
+          file_object.write(line)
 
   def _GenerateAppVeyorYML(
       self, project_configuration, template_mappings, output_writer,
@@ -1592,6 +1654,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateConfigureAC(
         project_configuration, template_mappings, output_writer, 'configure.ac')
+
+    self._GenerateACIncludeM4(
+        project_configuration, template_mappings, output_writer, 'acinclude.m4')
 
     self._GenerateDpkg(
         project_configuration, template_mappings, output_writer, 'dpkg')

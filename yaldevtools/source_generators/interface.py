@@ -19,15 +19,18 @@ class SourceFileGenerator(object):
   """Source file generator."""
 
   def __init__(
-      self, projects_directory, template_directory, experimental=False):
+      self, projects_directory, data_directory, template_directory,
+      experimental=False):
     """Initializes a source file generator.
 
     Args:
       projects_directory (str): path of the projects directory.
+      data_directory (str): path of the data directory.
       template_directory (str): path of the template directory.
       experimental (bool): True if experimental features should be enabled.
     """
     super(SourceFileGenerator, self).__init__()
+    self._data_directory = data_directory
     self._definitions_include_header_file = None
     self._definitions_include_header_path = None
     self._experimental = experimental
