@@ -99,7 +99,7 @@ AC_DEFUN([AX_LIBREGF_CHECK_LOCAL],
     [AC_MSG_FAILURE(
       [Missing function: towupper],
       [1])
-   ])
+    ])
 
   ac_cv_libregf_CPPFLAGS="-I../libregf";
   ac_cv_libregf_LIBADD="../libregf/libregf.la";

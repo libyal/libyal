@@ -41,7 +41,7 @@ PyObject *${python_module_name}_${type_name}_seek_offset(
 
 	Py_END_ALLOW_THREADS
 
- 	if( offset == -1 )
+	if( offset == -1 )
 	{
 		${python_module_name}_error_raise(
 		 error,

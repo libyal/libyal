@@ -1,0 +1,12 @@
+dnl Function to detect if ${tools_name} dependencies are available
+AC_DEFUN([AX_${tools_name_upper_case}_CHECK_LOCAL],
+  [AC_CHECK_HEADERS([signal.h sys/signal.h unistd.h])
+
+  AC_CHECK_FUNCS([close getopt setvbuf])
+
+  AS_IF(
+   [test "x$$ac_cv_func_close" != xyes],
+   [AC_MSG_FAILURE(
+     [Missing function: close],
+     [1])
+  ])

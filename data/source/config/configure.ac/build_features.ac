@@ -4,6 +4,3 @@ AC_SYS_LARGEFILE
 dnl Check if shared library support should be disabled
 AX_COMMON_CHECK_DISABLE_SHARED_LIBS
 
-dnl Check if WINAPI support should be enabled
-AX_COMMON_CHECK_ENABLE_WINAPI
-

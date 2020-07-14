@@ -50,6 +50,28 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     return True
 
+  def _FormatHeaderFile(self, project_configuration, output_filename):
+    """Formats a header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      output_filename (str): path of the output file.
+    """
+    self._SortIncludeHeaders(project_configuration, output_filename)
+
+  def _FormatSourceFile(self, project_configuration, output_filename):
+    """Formats a source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      output_filename (str): path of the output file.
+    """
+    self._SortIncludeHeaders(project_configuration, output_filename)
+    self._SortVariableDeclarations(output_filename)
+    # TODO: combine vertical align functions.
+    self._VerticalAlignAssignmentStatements(output_filename)
+    self._VerticalAlignFunctionArguments(output_filename)
+
   def _GenerateDefinitionsHeaderFile(
       self, project_configuration, template_mappings, definitions_name,
       enum_declaration, output_writer):
@@ -82,7 +104,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(definitions_name, output_filename)
-    self._SortIncludeHeaders(project_configuration, output_filename)
+
+    self._FormatHeaderFile(project_configuration, output_filename)
 
   def _GenerateDefinitionsSourceFile(
       self, project_configuration, template_mappings, definitions_name,
@@ -148,9 +171,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(definitions_name, output_filename)
-    self._SortIncludeHeaders(project_configuration, output_filename)
-    self._SortVariableDeclarations(output_filename)
-    self._VerticalAlignFunctionArguments(output_filename)
+
+    self._FormatSourceFile(project_configuration, output_filename)
 
   def _GenerateModuleHeaderFile(
       self, project_configuration, template_mappings, include_header_file,
@@ -200,6 +222,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     if signature_type:
       del template_mappings['signature_type']
+
+    self._FormatHeaderFile(project_configuration, output_filename)
 
   def _GenerateModuleSourceFile(
       self, project_configuration, template_mappings, include_header_file,
@@ -318,7 +342,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       del template_mappings['signature_type']
       del template_mappings['signature_desription']
 
-    self._SortIncludeHeaders(project_configuration, output_filename)
+    self._FormatSourceFile(project_configuration, output_filename)
 
   def _GenerateSequenceTypeHeaderFile(
       self, project_configuration, template_mappings, type_name, output_writer):
@@ -352,7 +376,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(sequence_type_name, output_filename)
     self._CorrectDescriptionSpelling(type_name, output_filename)
-    self._SortIncludeHeaders(project_configuration, output_filename)
+
+    self._FormatHeaderFile(project_configuration, output_filename)
 
   def _GenerateSequenceTypeSourceFile(
       self, project_configuration, template_mappings, type_name, output_writer,
@@ -404,11 +429,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
     self._CorrectDescriptionSpelling(sequence_type_name, output_filename)
-    self._SortIncludeHeaders(project_configuration, output_filename)
-    # TODO: combine vertical align functions.
-    self._VerticalAlignAssignmentStatements(output_filename)
-    self._VerticalAlignFunctionArguments(output_filename)
-    self._SortVariableDeclarations(output_filename)
+
+    self._FormatSourceFile(project_configuration, output_filename)
 
   def _GenerateTypeHeaderFile(
       self, project_configuration, template_mappings, type_name,
@@ -556,7 +578,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
-    self._SortIncludeHeaders(project_configuration, output_filename)
+
+    self._FormatHeaderFile(project_configuration, output_filename)
 
   def _GenerateTypeSourceFile(
       self, project_configuration, template_mappings, type_name,
@@ -949,11 +972,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
-    self._SortIncludeHeaders(project_configuration, output_filename)
-    # TODO: combine vertical align functions.
-    self._VerticalAlignAssignmentStatements(output_filename)
-    self._VerticalAlignFunctionArguments(output_filename)
-    self._SortVariableDeclarations(output_filename)
+
+    self._FormatSourceFile(project_configuration, output_filename)
 
   def _GenerateTypeSourceFileTypeObjectMethods(
       self, project_configuration, template_mappings, type_name,

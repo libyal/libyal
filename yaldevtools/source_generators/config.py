@@ -27,7 +27,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
+    template_directory = os.path.join(self._template_directory, 'acinclude.m4')
+
     library_name = project_configuration.library_name
+    tools_name = '{0:s}tools'.format(project_configuration.library_name_suffix)
 
     m4_file = '{0:s}.m4'.format(library_name)
     m4_file = os.path.join(self._data_directory, 'm4', m4_file)
@@ -78,18 +81,52 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         for line in input_lines[macro_start_line_number:macro_end_line_number]:
           file_object.write(line)
 
-    template_directory = os.path.join(self._template_directory, 'acinclude.m4')
+    else:
+      template_names = ['header.m4', 'check_library.m4']
 
-    template_mappings['local_library_name'] = library_name
-    template_mappings['local_library_name_upper_case'] = library_name.upper()
+      if project_configuration.HasTools():
+        template_names.append('check_tools.m4-start')
 
-    template_filename = os.path.join(template_directory, 'check_dll_support.m4')
+        # TODO: fix
+        if os.path.exists(os.path.join(tools_name, 'log_handle.c')):
+          template_names.append('check_tools.m4-log_handle')
+
+        # TODO: add support for cregtools/cregmount.c
+
+        template_names.append('check_tools.m4-end')
+
+      template_mappings['library_name'] = library_name
+      template_mappings['library_name_upper_case'] = library_name.upper()
+      template_mappings['tools_name'] = tools_name
+      template_mappings['tools_name_upper_case'] = tools_name.upper()
+
+      template_filenames = [
+          os.path.join(template_directory, template_name)
+          for template_name in template_names]
+
+      self._GenerateSections(
+          template_filenames, template_mappings, output_writer, output_filename)
+
+      del template_mappings['library_name']
+      del template_mappings['library_name_upper_case']
+      del template_mappings['tools_name']
+      del template_mappings['tools_name_upper_case']
+
+    template_mappings['library_name'] = library_name
+    template_mappings['library_name_upper_case'] = library_name.upper()
+
+    if project_configuration.HasTools():
+      template_filename = 'check_dll_support.m4-tools'
+    else:
+      template_filename = 'check_dll_support.m4'
+
+    template_filename = os.path.join(template_directory, template_filename)
     self._GenerateSection(
         template_filename, template_mappings, output_writer,
         output_filename, access_mode='a')
 
-    del template_mappings['local_library_name']
-    del template_mappings['local_library_name_upper_case']
+    del template_mappings['library_name']
+    del template_mappings['library_name_upper_case']
 
   def _GenerateAppVeyorYML(
       self, project_configuration, template_mappings, output_writer,
@@ -359,8 +396,18 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_directory = os.path.join(self._template_directory, 'configure.ac')
 
-    template_names = [
-        'header.ac', 'programs.ac', 'compiler_language.ac', 'build_features.ac']
+    template_names = ['header.ac', 'programs.ac-start']
+
+    if os.path.isdir('ossfuzz'):
+      template_names.append('programs.ac-ossfuzz')
+
+    template_names.extend([
+        'programs.ac-end', 'compiler_language.ac', 'build_features.ac'])
+
+    if project_configuration.HasTools():
+      template_names.append('check_static_executables.ac')
+
+    template_names.append('check_winapi.ac')
 
     if (include_header_file and include_header_file.have_wide_character_type or
         project_configuration.HasTools()):
@@ -459,7 +506,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           template_filename, template_mappings, output_writer,
           output_filename, access_mode='a')
 
-    template_names = ['check_tests_support.ac']
+    template_names = ['check_dll_support.ac', 'check_tests_support.ac']
 
     if os.path.isdir('ossfuzz'):
       template_names.append('check_ossfuzz_support.ac')
@@ -1022,16 +1069,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'libyal.spec.in')
 
-    template_filename = os.path.join(template_directory, 'header.in')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
-
     library_dependencies = list(makefile_am_file.library_dependencies)
 
     if project_configuration.HasDependencyCrypto():
       library_dependencies.append('libcrypto')
     if project_configuration.HasDependencyZlib():
       library_dependencies.append('zlib')
+
+    template_names = ['header.in']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     if not library_dependencies:
       template_filename = os.path.join(template_directory, 'build_requires.in')
