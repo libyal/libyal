@@ -87,16 +87,22 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       if project_configuration.HasTools():
         template_names.append('check_tools.m4-start')
 
-        # TODO: fix
-        if os.path.exists(os.path.join(tools_name, 'log_handle.c')):
+        log_handle_path = os.path.join(tools_name, 'log_handle.c')
+        if os.path.exists(log_handle_path):
           template_names.append('check_tools.m4-log_handle')
 
-        # TODO: add support for cregtools/cregmount.c
+        mount_tool_name = '{0:s}mount'.format(
+            project_configuration.library_name_suffix)
+        mount_tool_path = os.path.join(
+            tools_name, '{0:s}.c'.format(mount_tool_name))
+        if os.path.exists(mount_tool_path):
+          template_names.append('check_tools.m4-mount_tool')
 
         template_names.append('check_tools.m4-end')
 
       template_mappings['library_name'] = library_name
       template_mappings['library_name_upper_case'] = library_name.upper()
+      template_mappings['mount_tool_name'] = mount_tool_name
       template_mappings['tools_name'] = tools_name
       template_mappings['tools_name_upper_case'] = tools_name.upper()
 
@@ -109,6 +115,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
       del template_mappings['library_name']
       del template_mappings['library_name_upper_case']
+      del template_mappings['mount_tool_name']
       del template_mappings['tools_name']
       del template_mappings['tools_name_upper_case']
 

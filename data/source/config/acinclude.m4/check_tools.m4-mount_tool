@@ -1,0 +1,11 @@
+
+  dnl Headers included in ${tools_name}/${mount_tool_name}.c
+  AC_CHECK_HEADERS([errno.h])
+
+  AC_HEADER_TIME
+
+  dnl Functions included in ${tools_name}/mount_file_system.c and ${tools_name}/mount_file_entry.c
+  AS_IF(
+    [test "x$$ac_cv_enable_winapi" = xno],
+    [AC_CHECK_FUNCS([clock_gettime getegid geteuid time])
+  ])

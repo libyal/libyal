@@ -81,7 +81,7 @@ PyObject *${python_module_name}_${type_name}_open_file_object(
 		 "%s: invalid ${type_description} - file IO handle already set.",
 		 function );
 
-		goto on_error;
+		return( NULL );
 	}
 	if( ${python_module_name}_file_object_initialize(
 	     &( ${python_module_name}_${type_name}->file_io_handle ),
