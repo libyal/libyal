@@ -43,6 +43,9 @@ PyObject *${python_module_name}_datetime_new_from_floatingtime(
 PyObject *${python_module_name}_datetime_new_from_posix_time(
            uint32_t posix_time );
 
+PyObject *${python_module_name}_datetime_new_from_posix_time_in_micro_seconds(
+           int64_t posix_time );
+
 #if defined( __cplusplus )
 }
 #endif

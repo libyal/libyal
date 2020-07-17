@@ -94,12 +94,12 @@ AC_DEFUN([AX_LIBMAPIDB_CHECK_LOCAL],
 
 dnl Function to detect how to enable libmapidb
 AC_DEFUN([AX_LIBMAPIDB_CHECK_ENABLE],
- [AX_COMMON_ARG_WITH(
-   [libmapidb],
-   [libmapidb],
-   [search for libmapidb in includedir and libdir or in the specified DIR, or no if to use local version],
-   [auto-detect],
-   [DIR])
+  [AX_COMMON_ARG_WITH(
+    [libmapidb],
+    [libmapidb],
+    [search for libmapidb in includedir and libdir or in the specified DIR, or no if to use local version],
+    [auto-detect],
+    [DIR])
 
   dnl Check for a shared library version
   AX_LIBMAPIDB_CHECK_LIB

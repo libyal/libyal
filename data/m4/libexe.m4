@@ -115,12 +115,12 @@ AC_DEFUN([AX_LIBEXE_CHECK_LOCAL],
 
 dnl Function to detect how to enable libexe
 AC_DEFUN([AX_LIBEXE_CHECK_ENABLE],
- [AX_COMMON_ARG_WITH(
-   [libexe],
-   [libexe],
-   [search for libexe in includedir and libdir or in the specified DIR, or no if to use local version],
-   [auto-detect],
-   [DIR])
+  [AX_COMMON_ARG_WITH(
+    [libexe],
+    [libexe],
+    [search for libexe in includedir and libdir or in the specified DIR, or no if to use local version],
+    [auto-detect],
+    [DIR])
 
   dnl Check for a shared library version
   AX_LIBEXE_CHECK_LIB
