@@ -877,6 +877,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_directory = os.path.join(self._template_directory, 'dpkg')
 
+    template_mappings['library_name'] = library_name
+    template_mappings['library_name_upper_case'] = library_name.upper()
+
     for directory_entry in os.listdir(template_directory):
       template_filename = os.path.join(template_directory, directory_entry)
       if not os.path.isfile(template_filename):
@@ -900,31 +903,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         output_filename = '{0:s}{1:s}'.format(
             project_configuration.library_name, output_filename[6:])
 
-      template_mappings['library_name'] = library_name
-      template_mappings['library_name_upper_case'] = library_name.upper()
-
       output_filename = os.path.join(output_directory, output_filename)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
-
-      del template_mappings['library_name']
-      del template_mappings['library_name_upper_case']
 
     dpkg_build_dependencies = self._GetDpkgBuildDependenciesDpkgControl(
         project_configuration)
 
     template_mappings['dpkg_build_dependencies'] = ', '.join(dpkg_build_dependencies)
 
-    template_mappings['library_name'] = library_name
-    template_mappings['library_name_upper_case'] = library_name.upper()
-
     template_filename = os.path.join(template_directory, 'control')
     output_filename = os.path.join(output_directory, 'control')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
 
-    del template_mappings['library_name']
-    del template_mappings['library_name_upper_case']
+    del template_mappings['dpkg_build_dependencies']
 
     if project_configuration.HasTools():
       template_filename = os.path.join(template_directory, 'control-tools')
@@ -950,16 +943,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     else:
       template_filename = 'rules'
 
-    template_mappings['library_name'] = library_name
-    template_mappings['library_name_upper_case'] = library_name.upper()
-
     template_filename = os.path.join(template_directory, template_filename)
     output_filename = os.path.join(output_directory, 'rules')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename)
-
-    del template_mappings['library_name']
-    del template_mappings['library_name_upper_case']
 
     template_directory = os.path.join(
         self._template_directory, 'dpkg', 'source')
@@ -973,6 +960,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_filename = os.path.join(output_directory, directory_entry)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
+
+    del template_mappings['library_name']
+    del template_mappings['library_name_upper_case']
 
   def _GenerateGitignore(
       self, project_configuration, template_mappings, output_writer,
@@ -1117,9 +1107,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
-    del template_mappings['library_name']
-    del template_mappings['library_name_upper_case']
-
     if not library_dependencies:
       template_filename = os.path.join(template_directory, 'build_requires.in')
       self._GenerateSection(
@@ -1136,8 +1123,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         build_requires = '@ax_{0:s}_spec_build_requires@'.format(name)
         spec_build_requires.append(build_requires)
 
-      template_mappings['library_name'] = library_name
-      template_mappings['library_name_upper_case'] = library_name.upper()
       template_mappings['spec_requires'] = ' '.join(spec_requires)
       template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
 
@@ -1146,21 +1131,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='a')
 
-      del template_mappings['library_name']
-      del template_mappings['library_name_upper_case']
       del template_mappings['spec_requires']
       del template_mappings['spec_build_requires']
-
-    template_mappings['library_name'] = library_name
-    template_mappings['library_name_upper_case'] = library_name.upper()
 
     template_filename = os.path.join(template_directory, 'package.in')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='a')
-
-    del template_mappings['library_name']
-    del template_mappings['library_name_upper_case']
 
     if project_configuration.HasPythonModule():
       template_filename = os.path.join(template_directory, 'package-python.in')
@@ -1232,16 +1209,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='a')
 
-    template_mappings['library_name'] = library_name
-    template_mappings['library_name_upper_case'] = library_name.upper()
-
     template_filename = os.path.join(template_directory, 'files.in')
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='a')
-
-    del template_mappings['library_name']
-    del template_mappings['library_name_upper_case']
 
     if project_configuration.HasPythonModule():
       template_filename = os.path.join(template_directory, 'files-python.in')
@@ -1259,6 +1230,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='a')
+
+    del template_mappings['library_name']
+    del template_mappings['library_name_upper_case']
 
   def _GenerateTravisBeforeInstallSh(
       self, project_configuration, template_mappings, output_writer):
