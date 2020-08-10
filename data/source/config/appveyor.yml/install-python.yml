@@ -1,4 +1,4 @@
-- sh: if test $${BUILD_ENVIRONMENT} = "python"; then brew update && brew install gettext gnu-sed && brew link --force gettext; fi
-- sh: if test $${BUILD_ENVIRONMENT} = "python"; then brew install python3 || true; fi
+- sh: if test $${BUILD_ENVIRONMENT} = "python"; then brew update; fi
+- sh: if test $${BUILD_ENVIRONMENT} = "python"; then brew install gnu-sed python3 || true; fi
 - ps: If ($$env:BUILD_ENVIRONMENT -eq "python") {
     Invoke-Expression "$${env:PYTHON} -m pip install -U pip setuptools twine wheel" }
