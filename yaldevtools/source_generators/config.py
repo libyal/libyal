@@ -278,8 +278,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('build_script-header.yml')
 
-    # TODO: make this configuration driven
-    if project_configuration.library_name == 'libevt':
+    if project_configuration.deploy_to_nuget:
       template_names.append('build_script-vs2017-nuget.yml')
     else:
       template_names.append('build_script-vs2017.yml')
@@ -290,18 +289,17 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names.extend([
         'build_script-footer.yml', 'test_script.yml', 'after_test.yml'])
 
-    # TODO: make this configuration driven
-    if (project_configuration.library_name == 'libevt' or
+    if (project_configuration.deploy_to_nuget or
         project_configuration.HasPythonModule()):
       template_names.append('artifacts.yml')
 
-      if project_configuration.library_name == 'libevt':
+      if project_configuration.deploy_to_nuget:
         template_names.append('artifacts-nuget.yml')
 
-      elif project_configuration.HasPythonModule():
+      if project_configuration.HasPythonModule():
         template_names.append('artifacts-pypi.yml')
 
-      if project_configuration.library_name == 'libevt':
+      if project_configuration.deploy_to_nuget:
         template_names.append('deploy-nuget.yml')
 
       if project_configuration.HasPythonModule():
@@ -1710,8 +1708,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         output_filename = '{0:s}.nuspec'.format(
             project_configuration.library_name)
 
-        # TODO: for now only generate a nuspec file when exists.
-        if not os.path.isfile(output_filename):
+        if not project_configuration.deploy_to_nuget:
           logging.warning('Skipping: {0:s}'.format(output_filename))
           continue
 

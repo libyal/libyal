@@ -79,6 +79,8 @@ class ProjectConfiguration(BaseConfiguration):
   Attributes:
     coverity_scan_token (str): scan token for Coverity Scan (scan.coverity.com).
     cygwin_build_dependencies (str): Cygwin build dependencies.
+    deploy_to_nuget (bool): True if the project should be deployed to NuGet on
+        release.
     dpkg_build_dependencies (str): dpkg build dependencies.
     dotnet_bindings_name (str): name of the .Net bindings.
     dtfabric_configuration (DTFabricConfiguration): dtFabric configuration.
@@ -207,6 +209,7 @@ class ProjectConfiguration(BaseConfiguration):
 
     # Functionality the project offsers.
     self.supports_debug_output = False
+    self.deploy_to_nuget = False
 
     # dtFabric configuration.
     self.dtfabric_configuration = DTFabricConfiguration()
@@ -716,6 +719,7 @@ class ProjectConfiguration(BaseConfiguration):
         config_parser, u'project', u'features', default_value=[])
 
     self.supports_debug_output = 'debug_output' in features
+    self.deploy_to_nuget = 'nuget' in features
 
   def _ReadPythonModuleConfiguration(self, config_parser):
     """Reads the Python module configuration.
