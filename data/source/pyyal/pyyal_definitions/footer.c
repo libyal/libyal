@@ -54,7 +54,7 @@ on_error:
 	return( NULL );
 }
 
-/* Intializes a ${definitions_description} object
+/* Initializes a ${definitions_description} object
  * Returns 0 if successful or -1 on error
  */
 int ${python_module_name}_${definitions_name}_init(

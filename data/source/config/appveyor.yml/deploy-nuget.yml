@@ -4,8 +4,8 @@ deploy:
   skip_symbols: true
   api_key:
     secure: gCkz3PNGORdxJGl+aegOa7OJ4IQFHC/FqgCzbirMk7nyNFCuZzc1/ne2174eYxsw
-  artifact: /.*\.nupkg/
+  artifact: /.*(\.|\.s)nupkg/
   on:
     branch: master
-    appveyor_repo_tag: true
-    target: vs2017
+    APPVEYOR_REPO_TAG: true
+    TARGET: vs2017

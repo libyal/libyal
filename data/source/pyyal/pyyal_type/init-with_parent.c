@@ -1,4 +1,4 @@
-/* Intializes a ${type_description} object
+/* Initializes a ${type_description} object
  * Returns 0 if successful or -1 on error
  */
 int ${python_module_name}_${type_name}_init(

@@ -211,7 +211,7 @@ on_error:
 	return( NULL );
 }
 
-/* Intializes a ${sequence_type_description} sequence and iterator object
+/* Initializes a ${sequence_type_description} sequence and iterator object
  * Returns 0 if successful or -1 on error
  */
 int ${python_module_name}_${sequence_type_name}_init(
