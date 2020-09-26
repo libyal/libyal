@@ -1,6 +1,6 @@
 # Tests tools functions and types.
 #
-# Version: 20200216
+# Version: 20200820
 
 $$ExitSuccess = 0
 $$ExitFailure = 1
@@ -84,7 +84,7 @@ Function RunTest
 	param( [string]$$TestType )
 
 	$$TestDescription = "Testing: $${TestName}"
-	$$TestExecutable = "$${TestExecutablesDirectory}\${library_name_suffix}_test_$${TestName}.exe"
+	$$TestExecutable = "$${TestExecutablesDirectory}\${library_name_suffix}_test_tools_$${TestName}.exe"
 
 	$$Output = Invoke-Expression $${TestExecutable}
 	$$Result = $${LastExitCode}
@@ -111,7 +111,7 @@ Function RunTestWithInput
 	param( [string]$$TestType )
 
 	$$TestDescription = "Testing: $${TestName}"
-	$$TestExecutable = "$${TestExecutablesDirectory}\${library_name_suffix}_test_$${TestName}.exe"
+	$$TestExecutable = "$${TestExecutablesDirectory}\${library_name_suffix}_test_tools_$${TestName}.exe"
 
 	$$TestProfileDirectory = GetTestProfileDirectory "input" "${library_name_suffix}tools"
 
