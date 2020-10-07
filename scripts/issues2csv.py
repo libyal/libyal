@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
+import configparser
 import io
 import json
 import logging
@@ -14,43 +15,27 @@ import re
 import sys
 import time
 
-# pylint: disable=import-error
-
-# pylint: disable=wrong-import-order
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser
-
-# pylint: disable=no-name-in-module
-if sys.version_info[0] < 3:
-  # Keep urllib2 here since we this code should be able to be used
-  # by a default Python set up.
-  import urllib2 as urllib_error
-  from urllib2 import urlopen
-else:
-  import urllib.error as urllib_error
-  from urllib.request import urlopen
+from urllib import error as urllib_error
+from urllib.request import urlopen
 
 
 class Project(object):
-  """Class that defines a project.
+  """Project definition.
 
   Attributes:
-    appveyor_identifier: a string containing the AppVeyor identifier.
-    category: a string containing the category.
-    description: a string containing the description.
-    display_name: a string containing the display name.
-    documentation_only: a boolean indicating if the project only contains
-                        documentation.
-    name: a string containing the name.
+    appveyor_identifier (str): the AppVeyor identifier.
+    category (str): the project category.
+    description (str): the project description.
+    display_name (str): the project display name.
+    documentation_only (bool): True if the project only contains documentation.
+    name (str): the name of the project.
   """
 
   def __init__(self, name):
-    """Initializes a project object.
+    """Initializes a project definition.
 
     Args:
-      name: a string containing the name.
+      name (str): name of the project.
     """
     super(Project, self).__init__()
     self.appveyor_identifier = None
@@ -62,24 +47,22 @@ class Project(object):
 
 
 class ProjectsReader(object):
-  """Class that defines a project reader."""
+  """Project definition reader."""
 
   def __init__(self):
-    """Initializes a projects reader object."""
+    """Initializes a projects definition reader."""
     super(ProjectsReader, self).__init__()
-    # TODO: replace by:
-    # self._config_parser = configparser. ConfigParser(interpolation=None)
-    self._config_parser = configparser.RawConfigParser()
+    self._config_parser = configparser.ConfigParser(interpolation=None)
 
   def _GetConfigValue(self, section_name, value_name):
     """Retrieves a value from the config parser.
 
     Args:
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
+      section_name (str): name of the section that contains the value.
+      value_name (str): name of the value.
 
     Returns:
-      An object containing the value.
+      object: the value.
     """
     return json.loads(self._config_parser.get(section_name, value_name))
 
@@ -87,10 +70,10 @@ class ProjectsReader(object):
     """Reads the projects from file.
 
     Args:
-      filename: a string containing the filename.
+      filename (str): the filename.
 
     Returns:
-      A list of project objects (instances of Project).
+      list[Project]: project definitions.
     """
     self._config_parser.read([filename])
 
@@ -125,7 +108,7 @@ class ProjectsReader(object):
 
 
 class GithubIssueHelper(object):
-  """Class that defines a github issue helper."""
+  """Github issue helper."""
 
   _KEYS = [
       'number', 'state', 'created_at', 'assignee', 'milestone', 'labels',
@@ -136,10 +119,10 @@ class GithubIssueHelper(object):
       r'state=open&page=)([0-9]+)>; rel="last"')
 
   def __init__(self, organization):
-    """Initialize the issue helper object.
+    """Initialize a Github issue helper.
 
     Args:
-      organization: a string containing the name of the organization.
+      organization (str): name of the organization on Github.
     """
     super(GithubIssueHelper, self).__init__()
     self._organization = organization
@@ -148,12 +131,11 @@ class GithubIssueHelper(object):
     """Downloads the page content from the URL.
 
     Args:
-      download_url: the URL where to download the page content.
+      download_url (str): URL where to download the page content.
 
     Returns:
-      A tuple of a binary string containing the page content and
-      a HTTP response message object containing the response headers
-      (instance of HTTPMessage) if successful, None otherwise.
+      tuple[bytes, HTTPMessage]: page content and HTTP response message
+          containing the response headers if successful, None otherwise.
     """
     if not download_url:
       return None, None
@@ -161,9 +143,8 @@ class GithubIssueHelper(object):
     try:
       url_object = urlopen(download_url)
     except urllib_error.URLError as exception:
-      logging.warning(
-          'Unable to download URL: {0:s} with error: {1!s}'.format(
-              download_url, exception))
+      logging.warning('Unable to download URL: {0:s} with error: {1!s}'.format(
+          download_url, exception))
       return None, None
 
     if url_object.code != 200:
@@ -178,8 +159,8 @@ class GithubIssueHelper(object):
     """Lists the issues of a specific project.
 
     Args:
-      project_name: a string containing the name of the project.
-      output_writer: an output writer object (instance of OutputWriter).
+      project_name (str): name of the project.
+      output_writer (OutputWriter): an output writer.
     """
     self._WaitForRateLimit()
 
@@ -199,7 +180,7 @@ class GithubIssueHelper(object):
       return
 
     # Handle the multi-page response.
-    link_header = response.getheader('Link')
+    link_header = response.get('Link')
     if not link_header:
       return
 
@@ -268,7 +249,7 @@ class GithubIssueHelper(object):
 
       reset_timestamp -= current_timestamp
       logging.info((
-          'Rate limiting calls to github API - sleeping for {0:d} '
+          'Rate limiting calls to Github API - sleeping for {0:d} '
           'seconds.').format(reset_timestamp))
       time.sleep(reset_timestamp)
 
@@ -276,20 +257,20 @@ class GithubIssueHelper(object):
     """Writes a header to CSV.
 
     Args:
-      output_writer: an output writer object (instance of OutputWriter).
+      output_writer (OutputWriter): an output writer.
     """
     csv_line = 'project:\t{0:s}\n'.format(
         '\t'.join(['{0:s}:'.format(key) for key in self._KEYS]))
 
-    output_writer.Write(csv_line.decode('utf-8'))
+    output_writer.Write(csv_line)
 
   def _WriteIssue(self, project_name, issue_json, output_writer):
     """Writes an issue to CSV.
 
     Args:
-      project_name: a string containing the name of the project.
-      issue_json: a dictionary containing the JSON issue.
-      output_writer: an output writer object (instance of OutputWriter).
+      project_name (str): name of the project.
+      issue_json (dict[str, object]): issue formatted in JSON.
+      output_writer (OutputWriter): an output writer.
     """
     # https://developer.github.com/v3/issues/
     # Keys: {
@@ -346,82 +327,82 @@ class GithubIssueHelper(object):
 
     csv_line = '{0:s}\t{1:s}\n'.format(project_name, '\t'.join(csv_values))
 
-    output_writer.Write(csv_line.decode('utf-8'))
+    output_writer.Write(csv_line)
 
   def ListIssues(self, project_names, output_writer):
     """Lists the issues of projects.
 
     Args:
-      project_names: a list of strings containing the names of the projects.
-      output_writer: an output writer object (instance of OutputWriter).
+      project_names (list[str]): names of the projects to list.
+      output_writer (OutputWriter): an output writer.
     """
     self._WriteHeader(output_writer)
 
     for project_name in project_names:
       self._ListIssuesForProject(project_name, output_writer)
 
-    output_writer.Write('\n'.decode('utf-8'))
+    output_writer.Write('\n')
 
 
 class FileWriter(object):
-  """Class that defines a file output writer."""
+  """Output writer that writes to file."""
 
   def __init__(self, name):
-    """Initializes an output writer object.
+    """Initializes an output writer.
 
     Args:
-      name: a string containing the name of the output.
+      name (str): name of the output.
     """
     super(FileWriter, self).__init__()
     self._file_object = None
     self._name = name
 
   def Open(self):
-    """Opens the output writer object.
+    """Opens the output writer.
 
     Returns:
-      A boolean containing True if successful or False if not.
+      bool: True if successful or False if not.
     """
     self._file_object = io.open(self._name, 'w', encoding='utf8')
     return True
 
   def Close(self):
-    """Closes the output writer object."""
+    """Closes the output writer."""
     self._file_object.close()
 
   def Write(self, data):
     """Writes the data to file.
 
     Args:
-      data: the data to write.
+      data (str): the data to write.
     """
     self._file_object.write(data)
 
 
 class StdoutWriter(object):
-  """Class that defines a stdout output writer."""
+  """Output writer that writes to stdout."""
 
   def __init__(self):
-    """Initializes an output writer object."""
+    """Initializes an output writer."""
     super(StdoutWriter, self).__init__()
 
   def Open(self):
-    """Opens the output writer object.
+    """Opens the output writer.
 
     Returns:
-      A boolean containing True if successful or False if not.
+      bool: True if successful or False if not.
     """
     return True
 
   def Close(self):
-    """Closes the output writer object."""
+    """Closes the output writer."""
     return
 
   def Write(self, data):
     """Writes the data to stdout (without the default trailing newline).
 
     Args:
-      data: the data to write.
+      data (str): the data to write.
     """
     print(data, end='')
 
@@ -430,10 +411,10 @@ def Main():
   """The main program function.
 
   Returns:
-    A boolean containing True if successful or False if not.
+    bool: True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
-      'Generates an overview of open github issues of the libyal libraries.'))
+      'Generates an overview of open Github issues of the libyal libraries.'))
 
   argument_parser.add_argument(
       'configuration_file', action='store', metavar='CONFIGURATION_FILE',
