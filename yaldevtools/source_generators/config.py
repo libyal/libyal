@@ -1511,6 +1511,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if 'sgutils' in project_configuration.library_build_dependencies:
       dpkg_build_dependencies.append('libsgutils2-dev')
 
+    if project_configuration.HasPythonModule():
+      dpkg_build_dependencies.append('python2-dev')
+      dpkg_build_dependencies.append('python-dev-is-python3')
+
     dpkg_build_dependencies.extend(
         project_configuration.dpkg_build_dependencies)
 
