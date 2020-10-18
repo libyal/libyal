@@ -151,6 +151,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names = ['environment.yml']
 
+    if project_configuration.deploy_to_nuget:
+      template_names.append('environment-nuget.yml')
+
     if project_configuration.HasPythonModule():
       template_names.append('environment-pypi.yml')
 
@@ -299,11 +302,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       if project_configuration.HasPythonModule():
         template_names.append('artifacts-pypi.yml')
 
+      template_names.append('deploy_script-header.yml')
+
       if project_configuration.deploy_to_nuget:
-        template_names.append('deploy-nuget.yml')
+        template_names.append('deploy_script-nuget.yml')
 
       if project_configuration.HasPythonModule():
-        template_names.append('deploy-pypi.yml')
+        template_names.append('deploy_script-pypi.yml')
+
+      template_names.append('deploy_script-footer.yml')
 
     template_filenames = [
         os.path.join(template_directory, template_name)

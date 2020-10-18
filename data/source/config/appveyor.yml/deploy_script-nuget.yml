@@ -1,0 +1,2 @@
+- ps: If ($$env:APPVEYOR_REPO_TAG -eq "true" -and $$isWindows -and $$env:TARGET -eq "vs2017") {
+    Invoke-Expression "nuget push *.nupkg -ApiKey $${env:NUGET_TOKEN} -NonInteractive -Source https://api.nuget.org/v3/index.json" }
