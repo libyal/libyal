@@ -40,7 +40,8 @@ PyMODINIT_FUNC init${python_module_name}(
 		return;
 #endif
 	}
+#if PY_VERSION_HEX < 0x03070000
 	PyEval_InitThreads();
-
+#endif
 	gil_state = PyGILState_Ensure();
 
