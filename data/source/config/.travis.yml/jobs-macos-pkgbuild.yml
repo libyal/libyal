@@ -1,7 +1,0 @@
-  - name: "Mac OS 10.14 with gcc and pkgbuild"
-    env:
-    - CONFIGURE_OPTIONS="--disable-dependency-tracking --prefix=/usr/local"
-    - TARGET="macos-gcc-pkgbuild"
-    compiler: gcc
-    os: osx
-    osx_image: xcode11

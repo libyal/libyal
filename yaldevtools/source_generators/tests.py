@@ -2768,13 +2768,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     return types, functions
 
   def _GetTemplateMappings(
-      self, project_configuration, api_functions, api_functions_with_input,
-      api_types, api_types_with_input, api_pseudo_types, internal_functions,
-      internal_types, python_functions, python_functions_with_input):
+      self, project_configuration, makefile_am_file, api_functions,
+      api_functions_with_input, api_types, api_types_with_input,
+      api_pseudo_types, internal_functions, internal_types, python_functions,
+      python_functions_with_input):
     """Retrieves the template mappings.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
+      makefile_am_file (LibraryMakefileAMFile): library Makefile.am file.
       api_functions (list[str]): names of API functions to test.
       api_functions_with_input (list[str]): names of API functions to test
           with input data.
@@ -2810,6 +2812,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['library_tests'] = ' '.join(library_tests)
     template_mappings['library_tests_with_input'] = ' '.join(
         library_tests_with_input)
+
+    template_mappings['shared_libs'] = ' '.join(makefile_am_file.libraries)
 
     # TODO: determine tools tests
     template_mappings['tools_tests'] = ''
@@ -3136,9 +3140,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         test_python_functions_with_input.append(function_name)
 
     template_mappings = self._GetTemplateMappings(
-        project_configuration, api_functions, api_functions_with_input,
-        api_types, api_types_with_input, api_pseudo_types, internal_functions,
-        internal_types, test_python_functions, test_python_functions_with_input)
+        project_configuration, makefile_am_file, api_functions,
+        api_functions_with_input, api_types, api_types_with_input,
+        api_pseudo_types, internal_functions, internal_types,
+        test_python_functions, test_python_functions_with_input)
 
     for directory_entry in os.listdir(self._template_directory):
       # Ignore yal_test_library.h in favor of yal_test_libyal.h

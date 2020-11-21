@@ -1,8 +1,0 @@
-  - name: "Linux with gcc and shared libraries"
-    env:
-    - CONFIGURE_OPTIONS=""
-    - CFLAGS="--coverage"
-    - LDFLAGS="--coverage"
-    - TARGET="linux-gcc-shared"
-    compiler: gcc
-    group: edge

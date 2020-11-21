@@ -1,3 +1,4 @@
+after_success:
 - if test $${TARGET} = "macos-gcc-python-setup-py38" && test -n "$${TRAVIS_TAG}"; then
     python3 -m twine upload dist/*.whl --username __token__ --password $${PYPI_TOKEN} --skip-existing;
   fi

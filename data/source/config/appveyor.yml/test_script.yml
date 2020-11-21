@@ -2,12 +2,14 @@ test_script:
 - cmd: rem Run tests
 - ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\runtests.ps1 }
+- sh: if test $${BUILD_ENVIRONMENT} = "xcode" && test $${TARGET} != "macos-pkgbuild"; then tests/runtests.sh; fi
+- sh: if test $${TARGET} = "macos-pkgbuild"; then tests/pkgbuild.sh; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\bin\bash -l -c "cd ${library_name} && make check CHECK_WITH_STDERR=1; RESULT=$$?; if test $${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit $${RESULT};" )
+    C:\cygwin\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\bin\bash -l -c "cd ${library_name} && make check CHECK_WITH_STDERR=1; RESULT=$$?; if test $${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit $${RESULT};" )
+    C:\cygwin64\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
-    C:\MinGW\msys\1.0\bin\bash -l -c "cd ${library_name} && make check CHECK_WITH_STDERR=1; RESULT=$$?; if test $${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit $${RESULT};" )
+    C:\MinGW\msys\1.0\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    C:\msys64\usr\bin\bash -l -c "cd ${library_name} && make check CHECK_WITH_STDERR=1; RESULT=$$?; if test $${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit $${RESULT};" )
+    C:\msys64\usr\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
 

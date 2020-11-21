@@ -159,8 +159,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('environment-matrix.yml')
 
+    template_names.append('environment-macos.yml')
+
     if project_configuration.HasPythonModule():
       template_names.append('environment-python.yml')
+
+    if project_configuration.HasPythonModule():
+      template_names.append('environment-macos-python.yml')
 
     template_names.append('environment-cygwin.yml')
 
@@ -212,6 +217,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if project_configuration.HasDependencyDokan():
       template_names.append('install-dokan.yml')
+
+    template_names.append('install-macos.yml')
 
     if project_configuration.HasPythonModule():
       template_names.append('install-python.yml')
@@ -285,6 +292,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_names.append('build_script-vs2017-nuget.yml')
     else:
       template_names.append('build_script-vs2017.yml')
+
+    template_names.append('build_script-macos.yml')
 
     if project_configuration.HasPythonModule():
       template_names.append('build_script-python.yml')
@@ -1257,17 +1266,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names = ['body-start.sh']
 
-    if 'fuse' in project_configuration.tools_build_dependencies:
-      template_names.append('body-osxfuse.sh')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('body-osxpython.sh')
-
-    template_names.append('body-end.sh')
-
-    if project_configuration.coverity_scan_token:
-      template_names.append('coverity.sh')
-
     template_filenames = [
         os.path.join(template_directory, template_name)
         for template_name in template_names]
@@ -1285,96 +1283,33 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     stat_info = os.stat(output_filename)
     os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
-  def _GenerateTravisInstallSh(self, template_mappings, output_writer):
-    """Generates the .travis/install.sh script file.
-
-    Args:
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-    """
-    template_directory = os.path.join(
-        self._template_directory, '.travis', 'install.sh')
-
-    template_names = ['body.sh']
-
-    template_filenames = [
-        os.path.join(template_directory, template_name)
-        for template_name in template_names]
-
-    output_filename = os.path.join('.travis', 'install.sh')
-    self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
-
-    # Set x-bit for .sh script.
-    stat_info = os.stat(output_filename)
-    os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
-
-  def _GenerateTravisRunTestsSh(
-      self, project_configuration, template_mappings, output_writer):
-    """Generates the .travis/runtests.sh script file.
+  def _GenerateGitHubActions(
+      self, project_configuration, template_mappings, include_header_file,
+      output_writer):
+    """Generates the .github/workflows/*.yml configuration files.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
+      include_header_file (LibraryIncludeHeaderFile): library include header
+          file.
       output_writer (OutputWriter): output writer.
     """
     template_directory = os.path.join(
-        self._template_directory, '.travis', 'runtests.sh')
+        self._template_directory, 'github_workflows')
 
-    if project_configuration.library_name == 'libewf':
-      shared_object_version = '3'
-    else:
-      shared_object_version = '1'
+    output_directory = os.path.join('.github', 'workflows')
 
-    template_names = ['body.sh']
+    for directory_entry in os.listdir(template_directory):
+      template_filename = os.path.join(
+          self._template_directory, directory_entry)
+      if not os.path.isfile(template_filename):
+        continue
 
-    template_mappings['shared_object_version'] = shared_object_version
-
-    template_filenames = [
-        os.path.join(template_directory, template_name)
-        for template_name in template_names]
-
-    output_filename = os.path.join('.travis', 'runtests.sh')
-    self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
-
-    del template_mappings['shared_object_version']
-
-    # Set x-bit for .sh script.
-    stat_info = os.stat(output_filename)
-    os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
-
-  def _GenerateTravisScriptSh(
-      self, project_configuration, template_mappings, output_writer):
-    """Generates the .travis/script.sh script file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-    """
-    template_directory = os.path.join(
-        self._template_directory, '.travis', 'script.sh')
-
-    if project_configuration.HasPythonModule():
-      template_names = ['body-python.sh']
-    else:
-      template_names = ['body.sh']
-
-    template_filenames = [
-        os.path.join(template_directory, template_name)
-        for template_name in template_names]
-
-    output_filename = os.path.join('.travis', 'script.sh')
-    self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
-
-    # Set x-bit for .sh script.
-    stat_info = os.stat(output_filename)
-    os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
+      output_filename = os.path.join(output_directory, directory_entry)
+      self._GenerateSection(
+          template_filename, template_mappings, output_writer, output_filename)
 
   def _GenerateTravisYML(
       self, project_configuration, template_mappings, include_header_file,
@@ -1410,18 +1345,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if include_header_file.have_wide_character_type:
       template_names.append('jobs-linux-wide_character_type.yml')
 
-    # TODO: make conditional
-    # template_names.append('jobs-linux-debug_output.yml')
-
-    template_names.append('jobs-linux-no_optimization.yml')
-
     if project_configuration.HasDependencyCrypto():
       template_names.append('jobs-linux-openssl.yml')
 
     if project_configuration.HasPythonModule():
       template_names.append('jobs-linux-python.yml')
-
-    template_names.append('jobs-linux-shared.yml')
 
     if (include_header_file and include_header_file.have_wide_character_type or
         project_configuration.HasTools()):
@@ -1430,18 +1358,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasTools():
       template_names.append('jobs-linux-static-executables.yml')
 
-    template_names.append('jobs-macos.yml')
-
     if project_configuration.HasPythonModule():
       template_names.append('jobs-macos-python.yml')
 
     if project_configuration.HasPythonModule():
       template_names.append('jobs-macos-python-pkgbuild.yml')
-    else:
-      template_names.append('jobs-macos-pkgbuild.yml')
 
     template_names.extend([
-        'before_install.yml', 'install.yml', 'script.yml', 'after_success.yml'])
+        'before_install.yml', 'install.yml', 'script.yml'])
 
     if project_configuration.HasPythonModule():
       template_names.append('after_success-python.yml')
@@ -1706,19 +1630,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     self._GenerateGitignore(
         project_configuration, template_mappings, output_writer, '.gitignore')
 
+    self._GenerateGitHubActions(
+        project_configuration, template_mappings, include_header_file,
+        output_writer)
+
     self._GenerateTravisYML(
         project_configuration, template_mappings, include_header_file,
         output_writer)
 
     self._GenerateTravisBeforeInstallSh(
-        project_configuration, template_mappings, output_writer)
-
-    self._GenerateTravisInstallSh(template_mappings, output_writer)
-
-    self._GenerateTravisRunTestsSh(
-        project_configuration, template_mappings, output_writer)
-
-    self._GenerateTravisScriptSh(
         project_configuration, template_mappings, output_writer)
 
     self._GenerateAppVeyorYML(

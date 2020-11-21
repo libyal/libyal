@@ -1,5 +1,0 @@
-after_success:
-- if test $${TARGET} = "linux-gcc-no-optimization"; then
-    for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd $${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done;
-    curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh -n $${TARGET} -X gcov;
-  fi
