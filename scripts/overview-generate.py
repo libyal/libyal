@@ -27,7 +27,6 @@ class Project(object):
   Attributes:
     appveyor_identifier (str): AppVeyor identifier.
     category (str): category.
-    coverity_badge (int): Coverity badge identifier.
     description (str): description.
     display_name (str): display name.
     documentation_only (bool): True if the project only contains documentation.
@@ -44,7 +43,6 @@ class Project(object):
     super(Project, self).__init__()
     self.appveyor_identifier = None
     self.category = None
-    self.coverity_badge = None
     self.description = None
     self.display_name = name
     self.documentation_only = False
@@ -101,9 +99,6 @@ class ProjectsReader(object):
           project_name, 'appveyor_identifier')
 
       project.category = self._GetConfigValue(project_name, 'category')
-
-      project.coverity_badge = self._GetConfigValue(
-          project_name, 'coverity_badge')
 
       project.description = self._GetConfigValue(project_name, 'description')
 
@@ -424,13 +419,11 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
       for project in projects_per_category[category]:
         appveyor_build_status = ''
         codecov_status = ''
-        coverity_status = ''
-        travis_build_status = ''
 
         if project.documentation_only:
           project_description = (
               '{0:s} (**at the moment [documentation]'
-              '(https://github.com/libyal/{1:s}/blob/master/documentation) '
+              '(https://github.com/libyal/{1:s}/blob/main/documentation) '
               'only**)').format(project.description, project.name)
 
         else:
@@ -444,29 +437,15 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
                     project.appveyor_identifier, project.name)
 
           codecov_status = (
-              '[![codecov](https://codecov.io/gh/libyal/{0:s}/branch/master/'
+              '[![codecov](https://codecov.io/gh/libyal/{0:s}/branch/main/'
               'graph/badge.svg)](https://codecov.io/gh/libyal/{0:s})').format(
-                  project.name)
-
-          if project.coverity_badge:
-            coverity_status = (
-                '[![Coverity Scan Build Status](https://scan.coverity.com/'
-                'projects/{0:d}/badge.svg)](https://scan.coverity.com/projects/'
-                'libyal-{1:s})').format(project.coverity_badge, project.name)
-
-          travis_build_status = (
-              '[![Build status]'
-              '(https://travis-ci.com/libyal/{0:s}.svg?branch=master)]'
-              '(https://travis-ci.com/libyal/{0:s})').format(
                   project.name)
 
         template_mappings = {
             'appveyor_build_status': appveyor_build_status,
             'codecov_status': codecov_status,
-            'coverity_status': coverity_status,
             'project_description': project_description,
             'project_name': project.name,
-            'travis_build_status': travis_build_status
         }
         self._GenerateSection('library.txt', template_mappings, output_writer)
 

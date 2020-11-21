@@ -1248,41 +1248,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     del template_mappings['library_name']
     del template_mappings['library_name_upper_case']
 
-  def _GenerateTravisBeforeInstallSh(
-      self, project_configuration, template_mappings, output_writer):
-    """Generates the .travis/before_install.sh script file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-    """
-    template_directory = os.path.join(
-        self._template_directory, '.travis', 'before_install.sh')
-
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
-
-    template_names = ['body-start.sh']
-
-    template_filenames = [
-        os.path.join(template_directory, template_name)
-        for template_name in template_names]
-
-    template_mappings['dpkg_build_dependencies'] = ' '.join(
-        dpkg_build_dependencies)
-
-    output_filename = os.path.join('.travis', 'before_install.sh')
-    self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
-
-    del template_mappings['dpkg_build_dependencies']
-
-    # Set x-bit for .sh script.
-    stat_info = os.stat(output_filename)
-    os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
-
   def _GenerateGitHubActions(
       self, project_configuration, template_mappings, include_header_file,
       output_writer):
@@ -1310,85 +1275,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_filename = os.path.join(output_directory, directory_entry)
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
-
-  def _GenerateTravisYML(
-      self, project_configuration, template_mappings, include_header_file,
-      output_writer):
-    """Generates the .travis.yml configuration file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      include_header_file (LibraryIncludeHeaderFile): library include header
-          file.
-      output_writer (OutputWriter): output writer.
-    """
-    template_directory = os.path.join(self._template_directory, '.travis.yml')
-
-    template_names = ['header.yml']
-
-    if project_configuration.coverity_scan_token:
-      template_names.append('env.yml')
-
-    template_names.append('jobs-header.yml')
-
-    if project_configuration.coverity_scan_token:
-      template_names.append('jobs-coverity.yml')
-
-    template_names.append('jobs-linux.yml')
-
-    # TODO: improve check.
-    if project_configuration.library_name in ('libbfio', 'libcdata'):
-      template_names.append('jobs-linux-no_pthread.yml')
-
-    if include_header_file.have_wide_character_type:
-      template_names.append('jobs-linux-wide_character_type.yml')
-
-    if project_configuration.HasDependencyCrypto():
-      template_names.append('jobs-linux-openssl.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('jobs-linux-python.yml')
-
-    if (include_header_file and include_header_file.have_wide_character_type or
-        project_configuration.HasTools()):
-      template_names.append('jobs-linux-shared-wide_character_type.yml')
-
-    if project_configuration.HasTools():
-      template_names.append('jobs-linux-static-executables.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('jobs-macos-python.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('jobs-macos-python-pkgbuild.yml')
-
-    template_names.extend([
-        'before_install.yml', 'install.yml', 'script.yml'])
-
-    if project_configuration.HasPythonModule():
-      template_names.append('after_success-python.yml')
-
-    template_filenames = [
-        os.path.join(template_directory, template_name)
-        for template_name in template_names]
-
-    template_mappings['coverity_scan_token'] = (
-        project_configuration.coverity_scan_token or '')
-
-    no_optimization_configure_options = ['--enable-shared=no']
-    if include_header_file.have_wide_character_type:
-      no_optimization_configure_options.append('--enable-wide-character-type')
-
-    template_mappings['no_optimization_configure_options'] = ' '.join(
-        no_optimization_configure_options)
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_writer, '.travis.yml')
-
-    del template_mappings['coverity_scan_token']
-    del template_mappings['no_optimization_configure_options']
 
   def _GetBrewBuildDependencies(self, project_configuration):
     """Retrieves the brew build dependencies.
@@ -1633,13 +1519,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     self._GenerateGitHubActions(
         project_configuration, template_mappings, include_header_file,
         output_writer)
-
-    self._GenerateTravisYML(
-        project_configuration, template_mappings, include_header_file,
-        output_writer)
-
-    self._GenerateTravisBeforeInstallSh(
-        project_configuration, template_mappings, output_writer)
 
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer, 'appveyor.yml')

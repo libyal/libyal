@@ -2,7 +2,7 @@
 name: test_build_ubuntu_shared
 on:
   push:
-    branches: [master]
+    branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -1,2 +1,0 @@
-install:
-- if test $${TARGET} != "coverity" && test -x "synctestdata.sh"; then ./synctestdata.sh; fi

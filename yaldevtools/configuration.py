@@ -77,7 +77,6 @@ class ProjectConfiguration(BaseConfiguration):
   """Project configuration.
 
   Attributes:
-    coverity_scan_token (str): scan token for Coverity Scan (scan.coverity.com).
     cygwin_build_dependencies (str): Cygwin build dependencies.
     deploy_to_nuget (bool): True if the project should be deployed to NuGet on
         release.
@@ -150,7 +149,6 @@ class ProjectConfiguration(BaseConfiguration):
     python_module_name (str): name of the Python module, such as "pyyal".
     python_module_year_of_creation (str): year the Python module was created.
     pypi_token_appveyor (str): secure PyPI API token for use on AppVeyor.
-    pypi_token_travis (str): secure PyPI API token for use on Travis CI.
     rpm_build_dependencies (str): rpm build dependencies.
     supports_debug_output (bool): True if the project supports debug output.
     tests_authors (str): authors of the test files.
@@ -314,12 +312,8 @@ class ProjectConfiguration(BaseConfiguration):
     # RPM specific configuration.
     self.rpm_build_dependencies = None
 
-    # Coverity configuration.
-    self.coverity_scan_token = None
-
     # PyPI configuration.
     self.pypi_token_appveyor = None
-    self.pypi_token_travis = None
 
     # TODO: add attributes below to docstring.
 
@@ -1140,13 +1134,8 @@ class ProjectConfiguration(BaseConfiguration):
     self._ReadDPKGConfiguration(config_parser)
     self._ReadRPMConfiguration(config_parser)
 
-    self.coverity_scan_token = self._GetOptionalConfigValue(
-        config_parser, 'coverity', 'scan_token', default_value='')
-
     self.pypi_token_appveyor = self._GetOptionalConfigValue(
         config_parser, 'pypi', 'appveyor_token', default_value='')
-    self.pypi_token_travis = self._GetOptionalConfigValue(
-        config_parser, 'pypi', 'travis_token', default_value='')
 
     self._ReadInfoToolConfiguration(config_parser)
     self._ReadMountToolConfiguration(config_parser)
