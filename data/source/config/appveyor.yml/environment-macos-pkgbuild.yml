@@ -1,0 +1,5 @@
+  - TARGET: macos-pkgbuild
+    BUILD_ENVIRONMENT: xcode
+    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CONFIGURE_OPTIONS: "--disable-dependency-tracking --prefix=/usr/local --with-pyprefix"

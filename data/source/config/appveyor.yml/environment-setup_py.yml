@@ -10,3 +10,8 @@
   - TARGET: python38-x64
     BUILD_ENVIRONMENT: python
     PYTHON: "C:\\Python38-x64\\python.exe"
+  - TARGET: python38-x64
+    BUILD_ENVIRONMENT: python
+    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    PYTHON: "/usr/local/opt/python@3.8/bin/python3"
+    HOMEBREW_NO_INSTALL_CLEANUP: 1

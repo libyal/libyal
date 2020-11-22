@@ -162,10 +162,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names.append('environment-macos.yml')
 
     if project_configuration.HasPythonModule():
-      template_names.append('environment-python.yml')
+      template_names.append('environment-macos-python.yml')
+    else:
+      template_names.append('environment-macos-pkgbuild.yml')
 
     if project_configuration.HasPythonModule():
-      template_names.append('environment-macos-python.yml')
+      template_names.append('environment-setup_py.yml')
 
     template_names.append('environment-cygwin.yml')
 
@@ -1300,6 +1302,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if include_header_file.have_wide_character_type:
       template_names.append('build_ubuntu-wide_character_type.yml')
+
+    template_names.append('build_ubuntu-end.yml')
+
+    if project_configuration.HasPythonModule():
+      template_names.append('build_python_ubuntu.yml')
 
     template_names.append('coverage_ubuntu-start.yml')
 

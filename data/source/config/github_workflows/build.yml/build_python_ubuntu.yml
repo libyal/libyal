@@ -1,0 +1,65 @@
+  build_python_ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-python'
+          python_version: ''
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-python2'
+          python_version: '2'
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-python3'
+          python_version: '3'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install build dependencies
+      run: |
+        sudo apt-get -y install autoconf automake autopoint build-essential git libtool pkg-config python-dev python3-dev
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Building from source
+      env:
+        CC: $${{ matrix.compiler }}
+      run: |
+        tests/build.sh $${{ matrix.configure_options }}
+    - name: Run tests
+      env:
+        PYTHON_VERSION: $${{ matrix.python_version }}
+      run: |
+        tests/runtests.sh
+  build_setup_py_ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: ''
+          python-version: 2.7
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: ''
+          python-version: 3.8
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python $${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: $${{ matrix.python-version }}
+    - name: Install build dependencies
+      run: |
+        sudo apt-get install autoconf automake autopoint build-essential git libtool pkg-config python-dev python3-dev
+    - name: Building from source
+      env:
+        CC: $${{ matrix.compiler }}
+      run: |
+        tests/build.sh $${{ matrix.configure_options }}
+    - name: Build Python module
+      run: |
+        python setup.py build
