@@ -1,0 +1,21 @@
+# Build from source.
+name: build
+on: [push, pull_request]
+jobs:
+  build_ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x86'
+          compiler: 'clang'
+          configure_options: ''
+        - architecture: 'x64'
+          compiler: 'clang'
+          configure_options: ''
+        - architecture: 'x86'
+          compiler: 'gcc'
+          configure_options: ''
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: ''

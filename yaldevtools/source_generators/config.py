@@ -1275,6 +1275,79 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       self._GenerateSection(
           template_filename, template_mappings, output_writer, output_filename)
 
+  def _GenerateGitHubActionsBuildYML(
+      self, project_configuration, template_mappings, include_header_file,
+      output_writer, output_filename):
+    """Generates the .github/workflows/build.yml configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      include_header_file (LibraryIncludeHeaderFile): library include header
+          file.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(
+        self._template_directory, 'github_workflows', 'build.yml')
+
+    template_names = ['header.yml']
+
+    # TODO: improve check.
+    if project_configuration.library_name in ('libbfio', 'libcdata'):
+      template_names.append('build_ubuntu-no_pthread.yml')
+
+    if include_header_file.have_wide_character_type:
+      template_names.append('build_ubuntu-wide_character_type.yml')
+
+    template_names.append('coverage_ubuntu-start.yml')
+
+    if include_header_file.have_wide_character_type:
+      template_names.append('coverage_ubuntu-wide_character_type.yml')
+    else:
+      template_names.append('coverage_ubuntu.yml')
+
+    template_names.append('footer.yml')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+  def _GenerateGitHubActionsBuildSharedYML(
+      self, project_configuration, template_mappings, include_header_file,
+      output_writer, output_filename):
+    """Generates the .github/workflows/build_shared.yml configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      include_header_file (LibraryIncludeHeaderFile): library include header
+          file.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(
+        self._template_directory, 'github_workflows', 'build_shared.yml')
+
+    template_names = ['header.yml']
+
+    if include_header_file.have_wide_character_type:
+      template_names.append('build_shared_ubuntu-wide_character_type.yml')
+
+    template_names.append('footer.yml')
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
   def _GetBrewBuildDependencies(self, project_configuration):
     """Retrieves the brew build dependencies.
 
@@ -1518,6 +1591,16 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     self._GenerateGitHubActions(
         project_configuration, template_mappings, include_header_file,
         output_writer)
+
+    output_filename = os.path.join('.github', 'workflows', 'build.yml')
+    self._GenerateGitHubActionsBuildYML(
+        project_configuration, template_mappings, include_header_file,
+        output_writer, output_filename)
+
+    output_filename = os.path.join('.github', 'workflows', 'build_shared.yml')
+    self._GenerateGitHubActionsBuildSharedYML(
+        project_configuration, template_mappings, include_header_file,
+        output_writer, output_filename)
 
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer, 'appveyor.yml')

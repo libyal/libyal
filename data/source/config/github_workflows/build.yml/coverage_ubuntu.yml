@@ -1,0 +1,6 @@
+        - architecture: 'x86'
+          compiler: 'gcc'
+          configure_options: ''
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: ''
