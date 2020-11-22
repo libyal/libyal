@@ -1,16 +1,17 @@
-# Tests building from source on Ubuntu with libyal dependencies as shared libraries
-name: test_build_ubuntu_shared
+# Build from source with libyal dependencies as shared libraries.
+name: build_shared
 on:
   push:
     branches: [main]
 jobs:
-  build:
+  build_shared_ubuntu:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        architecture: ['x64']
-        compiler: [gcc]
+        include:
+        - architecture: 'x86'
+          compiler: 'gcc'
+          configure_options: ''
     steps:
     - uses: actions/checkout@v2
     - name: Install build dependencies
@@ -26,7 +27,7 @@ jobs:
       env:
         CC: $${{ matrix.compiler }}
       run: |
-        tests/build.sh
+        tests/build.sh $${{ matrix.configure_options }}
     - name: Run tests
       run: |
         tests/runtests.sh

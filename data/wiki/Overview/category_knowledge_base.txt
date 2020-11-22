@@ -1,6 +1,5 @@
 
 # ${category_title}
-${category_description}.
 
 Project | Description | Status | [AppVeyor](https://ci.appveyor.com) | [Codecov](https://codecov.io/)
 --- | --- | --- | --- | ---

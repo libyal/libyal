@@ -1267,8 +1267,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     output_directory = os.path.join('.github', 'workflows')
 
     for directory_entry in os.listdir(template_directory):
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
+      template_filename = os.path.join(template_directory, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 

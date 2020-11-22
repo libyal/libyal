@@ -453,8 +453,12 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
       template_mappings = {
           'category_title': self._CATEGORIES[category][0]
       }
-      self._GenerateSection(
-          'category_other.txt', template_mappings, output_writer)
+      if category == 'knowledge_base':
+        template_filename = 'category_knowledge_base.txt'
+      else:
+        template_filename = 'category_other.txt'
+
+      self._GenerateSection(template_filename, template_mappings, output_writer)
 
       projects = projects_per_category[category]
       for project in projects_per_category[category]:
@@ -465,7 +469,13 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
             'project_display_name': project_display_name,
             'project_name': project.name,
         }
-        self._GenerateSection('other.txt', template_mappings, output_writer)
+        if category == 'knowledge_base':
+          template_filename = 'knowledge_base.txt'
+        else:
+          template_filename = 'other.txt'
+
+        self._GenerateSection(
+            template_filename, template_mappings, output_writer)
 
 
 class StatusWikiPageGenerator(WikiPageGenerator):
