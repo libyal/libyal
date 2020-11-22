@@ -214,7 +214,7 @@ PyObject *${python_module_name}_check_${signature_type}_signature_file_object(
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
-	     "|O",
+	     "O|",
 	     keyword_list,
 	     &file_object ) == 0 )
 	{

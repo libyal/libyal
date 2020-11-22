@@ -19,7 +19,7 @@
     - uses: actions/checkout@v2
     - name: Install build dependencies
       run: |
-        sudo apt-get -y install autoconf automake autopoint build-essential git libtool pkg-config python-dev python3-dev
+        sudo apt-get -y install ${dpkg_build_dependencies} python-dev python3-dev
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
@@ -54,7 +54,7 @@
         python-version: $${{ matrix.python-version }}
     - name: Install build dependencies
       run: |
-        sudo apt-get install autoconf automake autopoint build-essential git libtool pkg-config python-dev python3-dev
+        sudo apt-get -y install ${dpkg_build_dependencies} python-dev python3-dev
     - name: Building from source
       env:
         CC: $${{ matrix.compiler }}

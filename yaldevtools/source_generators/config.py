@@ -1294,6 +1294,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'github_workflows', 'build.yml')
 
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
     template_names = ['header.yml']
 
     # TODO: improve check.
@@ -1302,6 +1305,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if include_header_file.have_wide_character_type:
       template_names.append('build_ubuntu-wide_character_type.yml')
+
+    if project_configuration.HasDependencyCrypto():
+      template_names.append('build_ubuntu-openssl.yml')
+
+    if project_configuration.HasTools():
+      template_names.append('build_ubuntu-static_executables.yml')
 
     template_names.append('build_ubuntu-end.yml')
 
@@ -1321,8 +1330,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
+    template_mappings['dpkg_build_dependencies'] = ' '.join(
+        dpkg_build_dependencies)
+
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['dpkg_build_dependencies']
 
   def _GenerateGitHubActionsBuildSharedYML(
       self, project_configuration, template_mappings, include_header_file,
@@ -1341,6 +1355,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'github_workflows', 'build_shared.yml')
 
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
     template_names = ['header.yml']
 
     if include_header_file.have_wide_character_type:
@@ -1352,8 +1369,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
+    template_mappings['dpkg_build_dependencies'] = ' '.join(
+        dpkg_build_dependencies)
+
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['dpkg_build_dependencies']
 
   def _GetBrewBuildDependencies(self, project_configuration):
     """Retrieves the brew build dependencies.

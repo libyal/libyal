@@ -1,0 +1,3 @@
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-static-executables=yes --enable-multi-threading-support=no'
