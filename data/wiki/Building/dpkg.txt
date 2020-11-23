@@ -23,3 +23,14 @@ To install, e.g. the library:
 sudo dpkg -i ${project_name}_<version>-1_<arch>.deb
 ```
 
+## Troubleshooting
+
+```
+dpkg-source: error: can't build with source format '3.0 (quilt)': no upstream tarball' found at ../${project_name}-<version>.orig.tar.{bz2,gz,lzma,xz}
+```
+
+This means dpkg-buildpackage cannot find the source distribution package. Make sure it is provided as:
+```
+../${project_name}-<version>.orig.tar.gz
+```
+
