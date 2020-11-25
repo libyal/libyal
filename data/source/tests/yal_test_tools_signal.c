@@ -39,7 +39,7 @@ void ${library_name_suffix}_test_tools_signal_handler(
 	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( signal )
 }
 
-/* Tests the ${library_name_suffix}tools_signal_attach and function
+/* Tests the ${library_name_suffix}tools_signal_attach function
  * Returns 1 if successful or 0 if not
  */
 int ${library_name_suffix}_test_tools_signal_attach(
@@ -72,7 +72,7 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the ${library_name_suffix}tools_signal_detach and function
+/* Tests the ${library_name_suffix}tools_signal_detach function
  * Returns 1 if successful or 0 if not
  */
 int ${library_name_suffix}_test_tools_signal_detach(

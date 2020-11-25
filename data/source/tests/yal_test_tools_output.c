@@ -39,7 +39,7 @@
 
 #include "../${library_name_suffix}tools/${library_name_suffix}tools_output.h"
 
-/* Tests the ${library_name_suffix}tools_output_initialize and function
+/* Tests the ${library_name_suffix}tools_output_initialize function
  * Returns 1 if successful or 0 if not
  */
 int ${library_name_suffix}_test_tools_output_initialize(
