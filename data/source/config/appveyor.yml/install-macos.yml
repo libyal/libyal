@@ -1,2 +1,2 @@
-- sh: if test $${BUILD_ENVIRONMENT} = "xcode" || test $${BUILD_ENVIRONMENT} = "python"; then brew update; fi
-- sh: if test $${BUILD_ENVIRONMENT} = "xcode" || test $${BUILD_ENVIRONMENT} = "python"; then brew install gettext gnu-sed || true; fi
+- sh: if test $${BUILD_ENVIRONMENT} = "xcode" || test $${BUILD_ENVIRONMENT} = "python"; then brew update -q; fi
+- sh: if test $${BUILD_ENVIRONMENT} = "xcode" || test $${BUILD_ENVIRONMENT} = "python"; then brew install -q gettext gnu-sed || true; fi
