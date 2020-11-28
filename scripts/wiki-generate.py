@@ -52,8 +52,8 @@ class WikiPageGenerator(object):
       list[str]: Cygwin build dependencies.
     """
     dependencies = [
-        'autoconf', 'automake', 'binutils', 'gcc-core', 'gettext', 'libiconv',
-        'libtool', 'make', 'pkg-config']
+        'autoconf', 'automake', 'binutils', 'gcc-core', 'gcc-g++',
+        'gettext-devel', 'libiconv', 'libtool', 'make', 'pkg-config']
 
     if ('lex' in project_configuration.library_build_dependencies or
         'lex' in project_configuration.tools_build_dependencies):
@@ -71,7 +71,7 @@ class WikiPageGenerator(object):
 
     if project_configuration.HasDependencyBzip2():
       dependencies.append(
-          'bzip2-devel (required for bzip2 compression support)')
+          'libbz2-devel (required for bzip2 compression support)')
 
     if ('crypto' in project_configuration.library_build_dependencies or
         'crypto' in project_configuration.tools_build_dependencies):

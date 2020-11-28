@@ -1481,6 +1481,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     cygwin_build_dependencies = list(
         project_configuration.cygwin_build_dependencies)
 
+    cygwin_build_dependencies.append('gettext-devel')
+
     if project_configuration.HasDependencyYacc():
       cygwin_build_dependencies.append('bison')
     if project_configuration.HasDependencyLex():
@@ -1489,7 +1491,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasDependencyZlib():
       cygwin_build_dependencies.append('zlib-devel')
     if project_configuration.HasDependencyBzip2():
-      cygwin_build_dependencies.append('bzip2-devel')
+      cygwin_build_dependencies.append('libbz2-devel')
 
     if ('crypto' in project_configuration.library_build_dependencies or
         'crypto' in project_configuration.tools_build_dependencies):
