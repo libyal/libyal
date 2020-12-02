@@ -30,7 +30,7 @@
 
 #include <${library_name}/extern.h>
 
-#if defined( __CYGWIN__ )
+#if defined( __CYGWIN__ ) || defined( __MINGW32__ )
 #define ${library_name_upper_case}_EXTERN_VARIABLE	extern
 #else
 #define ${library_name_upper_case}_EXTERN_VARIABLE	${library_name_upper_case}_EXTERN
