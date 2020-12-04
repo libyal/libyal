@@ -1,2 +1,2 @@
-- ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild") {
+- ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild" -or ($$env:BUILD_ENVIRONMENT -eq "python" -and $$isWindows)) {
     .\syncwinflexbison.ps1 }

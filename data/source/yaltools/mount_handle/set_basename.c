@@ -53,7 +53,7 @@ int mount_handle_set_basename(
 
 		goto on_error;
 	}
-	if( basename_size > (size_t) ( SSIZE_MAX / sizeof( system_character_t ) ) )
+	if( basename_size > (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE / sizeof( system_character_t ) ) )
 	{
 		libcerror_error_set(
 		 error,

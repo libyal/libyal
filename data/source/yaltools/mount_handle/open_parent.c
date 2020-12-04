@@ -83,8 +83,7 @@ int mount_handle_open_parent(
 
 		goto on_error;
 	}
-	if( ( parent_filename_size > (size_t) SSIZE_MAX )
-	 || ( ( sizeof( system_character_t ) * parent_filename_size ) > (size_t) SSIZE_MAX ) )
+	if( parent_filename_size > (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE / sizeof( system_character_t ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -247,7 +246,7 @@ int mount_handle_open_parent(
 	}
 	if( mount_file_system_append_${mount_tool_file_system_type}(
 	     mount_handle->file_system,
-	     ${mount_tool_file_system_type_name},
+	     parent_${mount_tool_file_system_type_name},
 	     error ) != 1 )
 	{
 		libcerror_error_set(
