@@ -1288,7 +1288,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureOffset():
       template_names.append('close-file_io_handle.c')
 
-    template_names.append('close-end.c')
+    if not project_configuration.mount_tool_file_system_type:
+      template_names.append('close-end.c')
+    else:
+      template_names.append('close-end-file_system_type.c')
 
     if project_configuration.HasMountToolsFeatureUnlock():
       template_names.append('is_locked.c')
