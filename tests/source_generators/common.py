@@ -22,11 +22,11 @@ class CommonSourceFileGeneratorTest(test_lib.BaseTestCase):
     source_directory = os.path.dirname(source_directory)
 
     projects_directory = os.path.dirname(source_directory)
-    template_directory = os.path.join(
-        source_directory, 'data', 'source', 'common')
+    data_directory = os.path.join(source_directory, 'data')
+    template_directory = os.path.join(data_directory, 'source', 'common')
 
     generator = common.CommonSourceFileGenerator(
-        projects_directory, template_directory)
+        projects_directory, data_directory, template_directory)
     self.assertIsNotNone(generator)
 
   # TODO: add tests for Generate function.
