@@ -194,7 +194,7 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
           not os.path.exists(output_filename)):
         continue
 
-      # Do not overwrite defintions.h.in when it exist.
+      # Do not overwrite definitions.h.in when it exist.
       if (directory_entry != 'definitions.h.in' and
           os.path.exists(output_filename)):
         self._GenerateSection(
