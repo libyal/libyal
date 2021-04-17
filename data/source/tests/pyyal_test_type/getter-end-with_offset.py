@@ -1,6 +1,6 @@
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
       ${library_name_suffix}_${type_name}.open_file_object(file_object)

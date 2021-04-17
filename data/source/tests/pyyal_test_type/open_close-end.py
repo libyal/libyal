@@ -1,14 +1,14 @@
 
     # Test open and close.
-    ${library_name_suffix}_${type_name}.open(unittest.source)
+    ${library_name_suffix}_${type_name}.open(test_source)
     ${library_name_suffix}_${type_name}.close()
 
     # Test open and close a second time to validate clean up on close.
-    ${library_name_suffix}_${type_name}.open(unittest.source)
+    ${library_name_suffix}_${type_name}.open(test_source)
     ${library_name_suffix}_${type_name}.close()
 
-    if os.path.isfile(unittest.source):
-      with open(unittest.source, "rb") as file_object:
+    if os.path.isfile(test_source):
+      with open(test_source, "rb") as file_object:
 
         # Test open_file_object and close.
         ${library_name_suffix}_${type_name}.open_file_object(file_object)

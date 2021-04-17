@@ -1,5 +1,5 @@
 
-    ${library_name_suffix}_${type_name}.open(unittest.source)
+    ${library_name_suffix}_${type_name}.open(test_source)
 
     ${type_size_name} = ${library_name_suffix}_${type_name}.get_${type_size_name}()
 

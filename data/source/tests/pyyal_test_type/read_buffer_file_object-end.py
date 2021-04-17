@@ -1,5 +1,5 @@
 
-    with open(unittest.source, "rb") as file_object:
+    with open(test_source, "rb") as file_object:
       ${library_name_suffix}_${type_name}.open_file_object(file_object)
 
       ${type_size_name} = ${library_name_suffix}_${type_name}.get_${type_size_name}()
