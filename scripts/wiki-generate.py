@@ -392,6 +392,19 @@ class WikiPageGenerator(object):
 
     git_apt_dependencies = ' '.join(git_apt_dependencies)
 
+    git_dnf_dependencies = [
+        'git', 'autoconf', 'automake', 'gettext-devel', 'libtool', 'pkg-config']
+
+    if ('lex' in project_configuration.library_build_dependencies or
+        'lex' in project_configuration.tools_build_dependencies):
+      git_dnf_dependencies.append('flex')
+
+    if ('yacc' in project_configuration.library_build_dependencies or
+        'yacc' in project_configuration.tools_build_dependencies):
+      git_dnf_dependencies.append('byacc')
+
+    git_dnf_dependencies = ' '.join(git_dnf_dependencies)
+
     git_build_dependencies = [
         'git', 'aclocal', 'autoconf', 'automake', 'autopoint or gettextize',
         'libtoolize', 'pkg-config']
@@ -775,6 +788,7 @@ class WikiPageGenerator(object):
 
         'git_apt_dependencies': git_apt_dependencies,
         'git_build_dependencies': git_build_dependencies,
+        'git_dnf_dependencies': git_dnf_dependencies,
         'git_macports_dependencies': git_macports_dependencies,
         'git_msvscpp_dependencies': git_msvscpp_dependencies,
 

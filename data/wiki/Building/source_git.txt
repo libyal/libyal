@@ -1,4 +1,5 @@
 ## Git
+
 **Note that the git repository holds the development version of the source code.**
 
 **If you are not developing it is recommended that you download a source distribution package instead.**
@@ -18,12 +19,21 @@ cd ${project_name}/
 The source from the git repository will not work without synchronizing the library dependencies "./synclibs.sh" and having the autotools generate the necessary files "./autogen.sh".
 
 ### Debian/Ubuntu
+
 On Debian based Linux distributions such as Ubuntu install the following packages:
 ```
 sudo apt install ${git_apt_dependencies}
 ```
 
+### Fedora
+
+On Fedora based Linux distributions install the following packages:
+```
+sudo dnf install ${git_dnf_dependencies}
+```
+
 ### macOS
+
 On macOS the XCode command line tools no longer provide the autotools you can obtain them e.g. via [MacPorts](https://www.macports.org/).
 Install the following packages:
 ```
@@ -31,6 +41,7 @@ sudo port install ${git_macports_dependencies}
 ```
 
 ### Microsoft Visual Studio
+
 Since Microsoft Visual Studio does not come with a Unix shell or equivalent you'll need to use the Windows PowerShell scripts instead:
 ```
 git clone ${project_git_url}
