@@ -572,6 +572,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if project_configuration.HasTools():
       tools_dependencies = list(makefile_am_file.tools_dependencies)
+      if 'crypto' in project_configuration.tools_build_dependencies:
+        tools_dependencies.append('libcrypto')
       if 'fuse' in project_configuration.tools_build_dependencies:
         tools_dependencies.append('libfuse')
       if 'uuid' in project_configuration.tools_build_dependencies:
@@ -580,7 +582,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       if tools_dependencies:
         local_library_tests = []
         for name in tools_dependencies:
-          if name == 'libfuse':
+          if name in ('libcrypto', 'libfuse'):
             local_library_test = 'test "x$ac_cv_{0:s}" != xno'.format(name)
           else:
             local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
