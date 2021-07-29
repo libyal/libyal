@@ -1,0 +1,11 @@
+${library_name_suffix}_test_tools_output_SOURCES = \
+	../${tools_name}/${tools_name}_output.c ../${tools_name}/${tools_name}_output.h \
+	${library_name_suffix}_test_libcerror.h \
+	${library_name_suffix}_test_macros.h \
+	${library_name_suffix}_test_tools_output.c \
+	${library_name_suffix}_test_unused.h
+
+${library_name_suffix}_test_tools_output_LDADD = \
+	../${library_name}/${library_name}.la \
+	@LIBCERROR_LIBADD@
+

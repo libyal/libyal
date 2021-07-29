@@ -365,7 +365,7 @@ class LibraryIncludeHeaderFile(object):
     self._api_functions_with_input_group = {}
     self._api_pseudo_types_group = {}
     self._api_types_group = {}
-    self._api_types_with_input_group = {}
+    self._api_types_with_open_group = {}
     self._check_signature_type = None
     self._library_name = None
     self._path = path
@@ -382,7 +382,7 @@ class LibraryIncludeHeaderFile(object):
     self._api_functions_group = {}
     self._api_functions_with_input_group = {}
     self._api_types_group = {}
-    self._api_types_with_input_group = {}
+    self._api_types_with_open_group = {}
 
     for section_name, functions in self.functions_per_section.items():
       if not functions:
@@ -440,11 +440,11 @@ class LibraryIncludeHeaderFile(object):
             not self.HasTypeFunction(group_name, 'free')):
         self._api_functions_group[group_name] = section_name
 
-      elif not self.HasTypeFunction(group_name, 'open'):
-        self._api_types_group[group_name] = section_name
+      elif self.HasTypeFunction(group_name, 'open'):
+        self._api_types_with_open_group[group_name] = section_name
 
       else:
-        self._api_types_with_input_group[group_name] = section_name
+        self._api_types_group[group_name] = section_name
 
   def GetAPIFunctionTestGroups(self):
     """Determines the API function test groups.
@@ -468,7 +468,7 @@ class LibraryIncludeHeaderFile(object):
     Returns:
       list[str]: names of API pseudo type groups without test data.
     """
-    if not self._api_types_group and not self._api_types_with_input_group:
+    if not self._api_types_group and not self._api_types_with_open_group:
       self._AnalyzeFunctionGroups()
 
     return list(self._api_pseudo_types_group.keys())
@@ -481,11 +481,11 @@ class LibraryIncludeHeaderFile(object):
         list[str]: names of API type groups without test data.
         list[str]: names of API type groups with test data.
     """
-    if not self._api_types_group and not self._api_types_with_input_group:
+    if not self._api_types_group and not self._api_types_with_open_group:
       self._AnalyzeFunctionGroups()
 
     return (list(self._api_types_group.keys()),
-            list(self._api_types_with_input_group.keys()))
+            list(self._api_types_with_open_group.keys()))
 
   def GetCheckSignatureType(self):
     """Determines the check signature function type.
@@ -521,7 +521,7 @@ class LibraryIncludeHeaderFile(object):
     if not section_name:
       section_name = self._api_types_group.get(group_name, None)
     if not section_name:
-      section_name = self._api_types_with_input_group.get(group_name, None)
+      section_name = self._api_types_with_open_group.get(group_name, None)
     if not section_name:
       return []
 

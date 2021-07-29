@@ -1,0 +1,22 @@
+${library_name_suffix}_test_${type_name}_SOURCES = \
+	${library_name_suffix}_test_${type_name}.c \
+	${library_name_suffix}_test_functions.c ${library_name_suffix}_test_functions.h \
+	${library_name_suffix}_test_libbfio.h \
+	${library_name_suffix}_test_libcerror.h \
+	${library_name_suffix}_test_${library_name}.h \
+	${library_name_suffix}_test_macros.h \
+	${library_name_suffix}_test_memory.c ${library_name_suffix}_test_memory.h \
+	${library_name_suffix}_test_unused.h
+
+${library_name_suffix}_test_${type_name}_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../${library_name}/${library_name}.la \
+	@LIBCERROR_LIBADD@
+

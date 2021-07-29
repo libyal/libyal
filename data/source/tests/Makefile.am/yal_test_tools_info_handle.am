@@ -1,0 +1,12 @@
+${library_name_suffix}_test_tools_info_handle_SOURCES = \
+	../${tools_name}/info_handle.c ../${tools_name}/info_handle.h \
+	${library_name_suffix}_test_libcerror.h \
+	${library_name_suffix}_test_macros.h \
+	${library_name_suffix}_test_memory.c ${library_name_suffix}_test_memory.h \
+	${library_name_suffix}_test_tools_info_handle.c \
+	${library_name_suffix}_test_unused.h
+
+${library_name_suffix}_test_tools_info_handle_LDADD = \
+	../${library_name}/${library_name}.la \
+	@LIBCERROR_LIBADD@
+

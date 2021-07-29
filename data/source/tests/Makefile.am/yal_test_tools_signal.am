@@ -1,0 +1,11 @@
+${library_name_suffix}_test_tools_signal_SOURCES = \
+	../${tools_name}/${tools_name}_signal.c ../${tools_name}/${tools_name}_signal.h \
+	${library_name_suffix}_test_libcerror.h \
+	${library_name_suffix}_test_macros.h \
+	${library_name_suffix}_test_tools_signal.c \
+	${library_name_suffix}_test_unused.h
+
+${library_name_suffix}_test_tools_signal_LDADD = \
+	../${library_name}/${library_name}.la \
+	@LIBCERROR_LIBADD@
+
