@@ -61,6 +61,7 @@ class VSConfigurations(object):
 
   @property
   def number_of_configurations(self):
+    """int: number of configurations."""
     return len(self._configurations.values())
 
   def Append(self, configuration):
@@ -80,7 +81,8 @@ class VSConfigurations(object):
 
     self._configurations[identifier] = configuration
 
-  def ExtendWithX64(self, unused_output_version):
+  # pylint: disable=unused-argument
+  def ExtendWithX64(self, output_version):
     """Extends the configurations with the x64 platform.
 
     Args:
@@ -176,6 +178,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def basic_runtime_checks_string(self):
+    """str: basic runtime checks string value."""
     basic_runtime_checks = int(self.basic_runtime_checks, 10)
     if basic_runtime_checks == 0:
       return u'Default'
@@ -185,6 +188,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def character_set_string(self):
+    """str: character set string value."""
     character_set = int(self.character_set, 10)
     if character_set == 1:
       return u'Unicode'
@@ -192,6 +196,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def compile_as_string(self):
+    """str: compile as string value."""
     compile_as = int(self.compile_as, 10)
     if compile_as == 1:
       return u'CompileAsC'
@@ -201,6 +206,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def data_execution_prevention_string(self):
+    """str: data execution prevention string value."""
     data_execution_prevention = int(self.data_execution_prevention, 10)
     if data_execution_prevention == 1:
       return u'false'
@@ -210,6 +216,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def debug_information_format_string(self):
+    """str: debug information format string value."""
     debug_information_format = int(self.debug_information_format, 10)
     if debug_information_format == 3:
       return u'ProgramDatabase'
@@ -217,6 +224,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def enable_comdat_folding_string(self):
+    """str: enable comdat folding format string value."""
     enable_comdat_folding = int(self.enable_comdat_folding, 10)
     if enable_comdat_folding == 2:
       return u'true'
@@ -224,6 +232,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def link_incremental_string(self):
+    """str: link incremental string value."""
     link_incremental = int(self.link_incremental, 10)
     if link_incremental == 1:
       return u'false'
@@ -231,6 +240,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def optimize_references_string(self):
+    """str: optimize references string value."""
     optimize_references = int(self.optimize_references, 10)
     if optimize_references == 2:
       return u'true'
@@ -238,6 +248,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def optimization_string(self):
+    """str: optimization string value."""
     optimization = int(self.optimization, 10)
     if optimization == 0:
       return u'Disabled'
@@ -247,6 +258,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def output_type_string(self):
+    """str: output type string value."""
     output_type = int(self.output_type, 10)
     if output_type == 1:
       return u'Application'
@@ -258,12 +270,14 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def precompiled_header_string(self):
+    """str: precompiled header string value."""
     _ = int(self.precompiled_header, 10)
     # TODO: do something with precompiled_header.
     return u''
 
   @property
   def randomized_base_address_string(self):
+    """str: randomized base address string value."""
     randomized_base_address = int(self.randomized_base_address, 10)
     if randomized_base_address == 1:
       return u'false'
@@ -273,6 +287,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def runtime_librarian_string(self):
+    """str: runtime librarian string value."""
     runtime_library = int(self.runtime_library, 10)
     if runtime_library == 2:
       return u'MultiThreadedDLL'
@@ -282,6 +297,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def sub_system_string(self):
+    """str: sub system string value."""
     sub_system = int(self.sub_system, 10)
     if sub_system == 0:
       return u'NotSet'
@@ -291,6 +307,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def target_machine_string(self):
+    """str: target machine string value."""
     target_machine = int(self.target_machine, 10)
     if target_machine == 1:
       return u'MachineX86'
@@ -301,6 +318,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def warning_level_string(self):
+    """str: warning level string value."""
     warning_level = int(self.warning_level, 10)
     if warning_level == 3:
       return u'Level3'
@@ -310,6 +328,7 @@ class VSProjectConfiguration(VSConfiguration):
 
   @property
   def whole_program_optimization_string(self):
+    """str: whole program optimization string value."""
     whole_program_optimization = int(self.whole_program_optimization, 10)
     if whole_program_optimization == 0:
       return u'false'

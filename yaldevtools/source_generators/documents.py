@@ -33,6 +33,7 @@ class DocumentFileGenerator(interface.SourceFileGenerator):
 
     template_directory = os.path.join(self._template_directory, 'AUTHORS')
 
+    # TODO: move authors to project_configuration
     template_mappings['authors'] = self._AUTHORS
 
     template_filename = os.path.join(template_directory, 'header')
