@@ -1950,10 +1950,19 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     with_read_buffer_function = bool(function_prototype)
 
     with_read_file_io_handle_function = False
+    with_io_handle = False
+
     if is_internal:
       for function_prototype in header_file.functions_per_name.values():
         if function_prototype.name.endswith('_read_file_io_handle'):
           with_read_file_io_handle_function = True
+
+        io_handle_argument = function_prototype.arguments[1]
+        io_handle_argument_string = io_handle_argument.CopyToString()
+
+        if io_handle_argument_string == '{0:s}_io_handle_t *io_handle'.format(
+            project_configuration.library_name):
+          with_io_handle = True
 
     template_names.append('header.c')
 
@@ -1983,7 +1992,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_names.append('includes_local.c')
 
     if header_file.have_internal_functions:
-      template_names.append('includes_internal.c')
+      if with_io_handle:
+        template_names.append('includes_internal-with_io_handle.c')
+      else:
+        template_names.append('includes_internal.c')
 
     template_filenames = [
         os.path.join(template_directory, template_name)

@@ -1,7 +1,7 @@
 	/* Test regular cases
 	 */
 	result = ${library_name}_${type_name}_${function_name}(
-	          NULL,
+	          ${type_name},
 	          &error );
 
 	${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT(
