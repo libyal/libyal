@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source file generator for library source files."""
 
-from __future__ import unicode_literals
-
 import logging
 import io
 import os

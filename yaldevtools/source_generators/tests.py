@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source file generator for test source files."""
 
-from __future__ import unicode_literals
-
 import io
 import logging
 import os
@@ -118,7 +116,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         test_getopt_string.append(getopt_string)
 
-        if argument == 'offset': 
+        if argument == 'offset':
           test_options_variable_declarations.extend([
               '\tlibcerror_error_t *error = NULL;',
               '\tsystem_character_t *option_{0:s} = NULL;'.format(argument),
@@ -144,15 +142,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       switch_case_unused = []
       for option, argument in test_options:
-        if argument == 'offset': 
+        if argument == 'offset':
           template_mappings['test_option'] = option
           template_mappings['test_option_argument'] = argument
 
           template_filename = os.path.join(
               template_directory, 'main-start-with_source-switch_case.c')
           self._GenerateSection(
-              template_filename, template_mappings, output_writer, output_filename,
-              access_mode='a')
+              template_filename, template_mappings, output_writer,
+              output_filename, access_mode='a')
 
           del template_mappings['test_option']
           del template_mappings['test_option_argument']
@@ -168,8 +166,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_filename = os.path.join(
             template_directory, 'main-start-with_source-switch_case_unused.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='a')
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='a')
 
         del template_mappings['test_options_switch_case_unused']
 
@@ -260,15 +258,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.library_name_suffix)
     output_filename = os.path.join('tests', output_filename)
     self._GenerateTestFunctionsHeader(
-        project_configuration, template_mappings, output_writer, output_filename,
-        with_input=with_input, with_offset=with_offset)
+        project_configuration, template_mappings, output_writer,
+        output_filename, with_input=with_input, with_offset=with_offset)
 
     output_filename = '{0:s}_test_functions.c'.format(
         project_configuration.library_name_suffix)
     output_filename = os.path.join('tests', output_filename)
     self._GenerateTestFunctionsSource(
-        project_configuration, template_mappings, output_writer, output_filename,
-        with_input=with_input, with_offset=with_offset)
+        project_configuration, template_mappings, output_writer,
+        output_filename, with_input=with_input, with_offset=with_offset)
 
   def _GenerateTestFunctionsHeader(
       self, project_configuration, template_mappings, output_writer,
@@ -777,7 +775,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
       template_names.append('open_close-end.py')
 
-    function_prototype = header_file.GetTypeFunction(type_name, 'set_ascii_codepage')
+    function_prototype = header_file.GetTypeFunction(
+        type_name, 'set_ascii_codepage')
     if function_prototype:
       template_names.append('set_ascii_codepage.py')
 
@@ -975,7 +974,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     Returns:
       tuple: contains:
         str: name of library type function.
-        str: name of the test function corresponding to the library type function.
+        str: name of the test function corresponding to the library type
+            function.
         bool: True if the function prototype was externally available.
     """
     template_filename = '{0:s}.c'.format(type_function)
@@ -1220,13 +1220,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     template_directory = os.path.join(self._template_directory, 'yal_test_type')
 
-    # TODO: add support for functions that don't return 0 to not use is_set in tests.
+    # TODO: add support for functions that don't return 0 to not use is_set in
+    # tests.
     # if function_prototype.return_values:
 
     if function_template in ('has_value', 'is_value', 'refers_to_value'):
       with_is_set = False
     else:
-      with_is_set = bool(function_prototype.return_values == set(['-1', '0', '1']))
+      with_is_set = bool(
+          function_prototype.return_values == set(['-1', '0', '1']))
 
     body_template_name = None
     if function_template:
@@ -1275,8 +1277,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 type_name, type_function, function_template))
 
         self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='a')
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='a')
 
         return function_name, test_function_name, have_extern
 
@@ -1361,8 +1363,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             'int {0:s}_is_set = 0;'.format(value_name))
 
     elif function_template == 'read_file_io_handle':
-        function_variables.append(
-            'libbfio_handle_t *file_io_handle = NULL;')
+      function_variables.append(
+          'libbfio_handle_t *file_io_handle = NULL;')
 
     function_variables.extend([
         'libcerror_error_t *error = NULL;',
@@ -1544,7 +1546,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     Returns:
       tuple: contains:
         str: name of library type function.
-        str: name of the test function corresponding to the library type function.
+        str: name of the test function corresponding to the library type
+            function.
         bool: True if the function prototype was externally available.
     """
     function_name = self._GetFunctionName(
@@ -2114,8 +2117,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         template_filename = os.path.join(template_directory, 'test_data.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='a')
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='a')
 
     # Generate a clone, compare and/or free test function if necessary.
     clone_function = None
@@ -2193,7 +2196,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     if with_input:
       # TODO: fix libbfio having no open wide.
-      # TODO: make handling open close more generic for libpff attachment handle.
+      # TODO: make handling open close more generic for libpff attachment
+      # handle.
       for type_function in (
           'open', 'open_wide', 'open_file_io_handle', 'open_file_io_pool'):
         have_extern = self._GenerateTypeTestOpenFunction(
@@ -2262,7 +2266,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings, have_extern, True, output_writer, output_filename)
 
     # TODO: create generic test for get_number_of_X API functions.
-    # TODO: make tests condition for type with read_data on availability of data.
+    # TODO: make tests condition for type with read_data on availability of
+    # data.
 
     self._GenerateTypeTestsMainFunction(
         project_configuration, template_mappings, type_name, test_options,
@@ -2292,8 +2297,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           and its corresponding test function.
       tests_to_run_with_args (list[tuple[str, str]]): names of the library type
           function and its corresponding test function with arguments.
-      tests_to_run_with_source (list[tuple[str, str]]): names of the library type
-          function and its corresponding test function with a source argument.
+      tests_to_run_with_source (list[tuple[str, str]]): names of the library
+          type function and its corresponding test function with a source
+          argument.
       header_file (LibraryHeaderFile): library header file.
       output_writer (OutputWriter): output writer.
       output_filename (str): name of the output file.
@@ -2313,7 +2319,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         test_getopt_string.append(getopt_string)
 
-        if argument == 'offset': 
+        if argument == 'offset':
           test_options_variable_declarations.extend([
               '\tsystem_character_t *option_{0:s} = NULL;'.format(argument),
               '\toff64_t {0:s}_offset = 0;'.format(type_name)])
@@ -2563,7 +2569,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           self._GenerateTypeTestDefineInternalEnd(
               template_mappings, last_have_extern, have_extern,
               output_writer, output_filename)
-  
+
           self._GenerateTypeTestDefineInternalStart(
               template_mappings, last_have_extern, have_extern,
               output_writer, output_filename)
@@ -2612,11 +2618,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
             for _, argument in test_options:
               if argument != 'offset':
-                test_to_run_mappings[-1] = '{0:s},'.format(test_to_run_mappings[-1])
+                test_to_run_mappings[-1] = '{0:s},'.format(
+                    test_to_run_mappings[-1])
                 test_to_run_mappings.append('{0:s} option_{1:s}'.format(
                     indentation, argument))
 
-            test_to_run_mappings[-1] = '{0:s} );'.format(test_to_run_mappings[-1])
+            test_to_run_mappings[-1] = '{0:s} );'.format(
+                test_to_run_mappings[-1])
 
         else:
           test_to_run_mappings = [
@@ -2773,7 +2781,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         type_name = type_name[type_name_prefix_length:]
         types.append(type_name)
 
-    # TODO: determine if the source file for functions actually contain functions
+    # TODO: determine if the source file for functions actually contain
+    # functions.
     if 'codepage' in functions:
       functions.remove('codepage')
 
@@ -3341,8 +3350,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     with_input = bool(api_types_with_input)
 
     self._GenerateTestFunctions(
-        project_configuration, template_mappings, output_writer, output_filename,
-        with_input=with_input, with_offset=with_offset)
+        project_configuration, template_mappings, output_writer,
+        output_filename, with_input=with_input, with_offset=with_offset)
 
     self._GenerateMakefileAM(
         project_configuration, template_mappings, include_header_file,

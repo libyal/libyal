@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source code classes."""
 
-from __future__ import unicode_literals
-
 import collections
 
 from yaldevtools import definitions
@@ -267,14 +265,13 @@ class PythonTypeObjectFunctionPrototype(object):
           '16bit_integer', '32bit_integer', '64bit_integer'):
         return 'get_data_as_integer'
 
-      elif type_function_suffix in ('filetime', 'floatingtime'):
+      if type_function_suffix in ('filetime', 'floatingtime'):
         return 'get_data_as_datetime'
 
-      elif type_function_suffix == 'utf8_string':
+      if type_function_suffix == 'utf8_string':
         return 'get_data_as_string'
 
-      else:
-        return self._type_function
+      return self._type_function
 
     if self._type_function.startswith('get_'):
       type_function_prefix, _, type_function_suffix = (
@@ -359,7 +356,7 @@ class PythonTypeObjectFunctionPrototype(object):
       bool: True if the data type is a floating-point type.
     """
     return self.data_type in (
-        definitions.DATA_TYPE_FLOAT, 
+        definitions.DATA_TYPE_FLOAT,
         definitions.DATA_TYPE_DOUBLE)
 
   def DataTypeIsInteger(self):

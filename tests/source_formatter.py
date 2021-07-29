@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the libyal source formatter classes."""
 
-from __future__ import unicode_literals
-
 import unittest
 
 from yaldevtools import source_formatter

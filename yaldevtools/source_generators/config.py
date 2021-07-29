@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 """The source file generator for configuration files."""
 
-from __future__ import unicode_literals
-
 import glob
 import io
 import logging
 import os
-import stat
 
 from yaldevtools.source_generators import interface
 
@@ -461,7 +458,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           if project_configuration.library_name == 'libewf':
             template_filename = 'check_zlib_compress.ac'
 
-          # TODO: determine deflate function via configuration setting? 
+          # TODO: determine deflate function via configuration setting?
           elif project_configuration.library_name in (
               'libfsapfs', 'libfvde', 'libmodi', 'libpff', 'libvmdk'):
             template_filename = 'check_zlib_uncompress.ac'
@@ -595,8 +592,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_filename = os.path.join(
             template_directory, 'spec_requires_tools.ac')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='a')
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='a')
 
         del template_mappings['local_library_tests']
 
@@ -698,21 +695,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         build_options.append(('BZIP2 compression support', '$ac_cv_bzip2'))
 
       if name == 'libcaes':
-       if project_configuration.library_name in ('libbde', 'libluksde'):
+        if project_configuration.library_name in ('libbde', 'libluksde'):
           build_options.extend([
               ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'),
               ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
               ('AES-XTS support', '$ac_cv_libcaes_aes_xts')])
 
-       elif project_configuration.library_name == 'libewf':
-         pass
+        elif project_configuration.library_name == 'libewf':
+          pass
 
-       elif project_configuration.library_name in ('libfsapfs', 'libfvde'):
+        elif project_configuration.library_name in ('libfsapfs', 'libfvde'):
           build_options.extend([
               ('AES-ECB support', '$ac_cv_libcaes_aes_ecb'),
               ('AES-XTS support', '$ac_cv_libcaes_aes_xts')])
 
-       elif project_configuration.library_name in ('libmodi', 'libqcow'):
+        elif project_configuration.library_name in ('libmodi', 'libqcow'):
           build_options.append(
               ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'))
 
@@ -737,7 +734,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
               ('SHA512 support', '$ac_cv_libhmac_sha512')])
 
       elif name == 'libfcrypto':
-       if project_configuration.library_name == 'libluksde':
+        if project_configuration.library_name == 'libluksde':
           build_options.extend([
               ('Serpent-ECB support', '$ac_cv_libfcrypto')])
 
@@ -745,7 +742,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         if project_configuration.library_name == 'libewf':
           build_options.append(('ADLER32 checksum support', '$ac_cv_adler32'))
 
-        # TODO: determine deflate function via configuration setting? 
+        # TODO: determine deflate function via configuration setting?
         if project_configuration.library_name in (
             'libfsapfs', 'libewf', 'libfvde', 'libmodi', 'libpff', 'libvmdk'):
           value = '$ac_cv_uncompress'
@@ -928,7 +925,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     dpkg_build_dependencies = self._GetDpkgBuildDependenciesDpkgControl(
         project_configuration)
 
-    template_mappings['dpkg_build_dependencies'] = ', '.join(dpkg_build_dependencies)
+    template_mappings['dpkg_build_dependencies'] = ', '.join(
+        dpkg_build_dependencies)
 
     template_filename = os.path.join(template_directory, 'control')
     output_filename = os.path.join(output_directory, 'control')
@@ -1450,7 +1448,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     Returns:
       list[str]: dpkg build dependencies.
     """
-    dpkg_build_dependencies = ['debhelper (>= 9)', 'dh-autoreconf', 'pkg-config']
+    dpkg_build_dependencies = [
+        'debhelper (>= 9)', 'dh-autoreconf', 'pkg-config']
 
     if project_configuration.HasDependencyZlib():
       dpkg_build_dependencies.append('zlib1g-dev')
@@ -1470,7 +1469,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       dpkg_build_dependencies.append('libsgutils2-dev')
 
     if project_configuration.dpkg_build_dependencies:
-      dpkg_build_dependencies.extend(project_configuration.dpkg_build_dependencies)
+      dpkg_build_dependencies.extend(
+          project_configuration.dpkg_build_dependencies)
 
     return dpkg_build_dependencies
 

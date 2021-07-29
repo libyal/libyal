@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to automate generation of wiki pages of the libyal libraries."""
-
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import abc
 import argparse
@@ -133,7 +131,8 @@ class WikiPageGenerator(object):
 
     if project_configuration.HasPythonModule():
       dependencies.extend([
-          'python-dev', 'python-setuptools', 'python3-dev', 'python3-setuptools'])
+          'python-dev', 'python-setuptools', 'python3-dev',
+          'python3-setuptools'])
 
     return dependencies
 
@@ -433,17 +432,17 @@ class WikiPageGenerator(object):
 
     git_macports_dependencies = ' '.join(git_macports_dependencies)
 
-    git_msvscpp_dependencies = ['.\synclibs.ps1']
+    git_msvscpp_dependencies = ['.\\synclibs.ps1']
 
     if ('lex' in project_configuration.library_build_dependencies or
         'yacc' in project_configuration.tools_build_dependencies or
         'yacc' in project_configuration.library_build_dependencies or
         'yacc' in project_configuration.tools_build_dependencies):
-      git_msvscpp_dependencies.append('.\syncwinflexbison.ps1')
+      git_msvscpp_dependencies.append('.\\syncwinflexbison.ps1')
 
     if ('zlib' in project_configuration.library_build_dependencies or
         'zlib' in project_configuration.tools_build_dependencies):
-      git_msvscpp_dependencies.append('.\synczlib.ps1')
+      git_msvscpp_dependencies.append('.\\synczlib.ps1')
 
     git_msvscpp_dependencies = '\n'.join(git_msvscpp_dependencies)
 
@@ -757,7 +756,8 @@ class WikiPageGenerator(object):
         'development_table_of_contents': development_table_of_contents,
 
         'development_prefix': development_prefix,
-        'development_main_object': project_configuration.development_main_object,
+        'development_main_object': (
+            project_configuration.development_main_object),
         'development_main_object_filename': (
             project_configuration.development_main_object_filename),
         'development_main_object_pre_open_python': (
@@ -1335,10 +1335,6 @@ class FileWriter(object):
 
 class StdoutWriter(object):
   """Class that defines a stdout output writer."""
-
-  def __init__(self):
-    """Initializes an output writer."""
-    super(StdoutWriter, self).__init__()
 
   def Open(self):
     """Opens the output writer object.

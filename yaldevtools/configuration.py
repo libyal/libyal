@@ -1,16 +1,9 @@
 # -*- coding: utf-8 -*-
 """The project configuration."""
 
-from __future__ import unicode_literals
-
+import configparser
 import json
-import logging
 import os
-
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
 
 from yaldevtools import errors
 
@@ -1103,9 +1096,7 @@ class ProjectConfiguration(BaseConfiguration):
     Args:
       filename (str): path of the configuration file.
     """
-    # TODO: replace by:
-    # config_parser = configparser. ConfigParser(interpolation=None)
-    config_parser = configparser.RawConfigParser()
+    config_parser = configparser.ConfigParser(interpolation=None)
     config_parser.read([filename])
 
     self._configuration_file_path = os.path.dirname(filename)

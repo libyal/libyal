@@ -1,12 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to automate generation of an overview of the libyal libraries."""
-
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import abc
 import argparse
+import configparser
 import glob
 import io
 import json
@@ -14,11 +13,6 @@ import logging
 import os
 import string
 import sys
-
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
 
 
 class Project(object):
@@ -56,9 +50,7 @@ class ProjectsReader(object):
   def __init__(self):
     """Initializes a projects definition reader."""
     super(ProjectsReader, self).__init__()
-    # TODO: replace by:
-    # self._config_parser = configparser. ConfigParser(interpolation=None)
-    self._config_parser = configparser.RawConfigParser()
+    self._config_parser = configparser.ConfigParser(interpolation=None)
 
   def _GetConfigValue(self, section_name, value_name):
     """Retrieves a value from the config parser.
@@ -153,7 +145,7 @@ class ConfigureAcFile(object):
 
           return True
 
-        elif line_count:
+        if line_count:
           line_count += 1
 
         elif line.startswith('AC_INIT('):
@@ -392,8 +384,8 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
     """Generates a wiki page.
 
     Args:
-      projects: a list of project objects (instances of Project).
-      output_writer: an output writer object (instance of OutputWriter).
+      projects (list[Project]): projects.
+      output_writer (OutputWriter): output writer.
     """
     self._GenerateSection('introduction.txt', {}, output_writer)
 
@@ -546,7 +538,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     for project in projects:
       project_configurations_path = os.path.join(projects_path, project.name)
 
-      for configuration in versions_per_configuration.keys():
+      for configuration in versions_per_configuration:
         configuration_path = os.path.join(
             project_configurations_path, configuration)
         if not os.path.exists(configuration_path):
@@ -573,7 +565,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     """Retrieves the versions per library.
 
     Args:
-      projects list[Project]: projects.
+      projects (list[Project]): projects.
       category (str): category.
 
     Returns:
@@ -610,7 +602,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     for project in projects:
       project_path = os.path.join(projects_path, project.name)
 
-      for library in versions_per_library.keys():
+      for library in versions_per_library:
         if project.name == library:
           continue
 
@@ -669,7 +661,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     for project in projects:
       project_m4_scripts_path = os.path.join(projects_path, project.name, 'm4')
 
-      for m4_script in versions_per_m4_script.keys():
+      for m4_script in versions_per_m4_script:
         m4_script_path = os.path.join(project_m4_scripts_path, m4_script)
         if not os.path.exists(m4_script_path):
           continue
@@ -724,7 +716,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     for project in projects:
       project_py_scripts_path = os.path.join(projects_path, project.name)
 
-      for py_script in versions_per_py_script.keys():
+      for py_script in versions_per_py_script:
         py_script_path = os.path.join(project_py_scripts_path, py_script)
         if not os.path.exists(py_script_path):
           continue
@@ -779,7 +771,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     for project in projects:
       project_scripts_path = os.path.join(projects_path, project.name)
 
-      for script in versions_per_script.keys():
+      for script in versions_per_script:
         script_path = os.path.join(project_scripts_path, script)
         if not os.path.exists(script_path):
           continue
@@ -849,7 +841,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
       project_test_scripts_path = os.path.join(
           projects_path, project.name, 'tests')
 
-      for script in versions_per_script.keys():
+      for script in versions_per_script:
         # TODO: handle yal and pyyal place holders.
 
         script_path = os.path.join(project_test_scripts_path, script)
@@ -877,7 +869,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     """Generates a wiki page.
 
     Args:
-      projects list[Project]: projects.
+      projects (list[Project]): projects.
       output_writer (OutputWriter): output writer.
     """
     self._GenerateSection('introduction.txt', {}, output_writer)
@@ -897,19 +889,19 @@ class StatusWikiPageGenerator(WikiPageGenerator):
     table_of_contents = []
 
     table_of_contents.append('* [Configurations](Status#configurations)')
-    for configuration in sorted(versions_per_configuration.keys()):
+    for configuration in sorted(versions_per_configuration):
       configuration_reference = configuration.lower().replace('.', '')
       table_of_contents.append('  * [{0:s}](Status#{1:s})'.format(
           configuration, configuration_reference))
 
     table_of_contents.append('* [Scripts](Status#scripts)')
-    for script in sorted(versions_per_script.keys()):
+    for script in sorted(versions_per_script):
       script_reference = script.lower().replace('.', '')
       table_of_contents.append('  * [{0:s}](Status#{1:s})'.format(
           script, script_reference))
 
     table_of_contents.append('* [M4 scripts](Status#m4-scripts)')
-    for m4_script in sorted(versions_per_m4_script.keys()):
+    for m4_script in sorted(versions_per_m4_script):
       m4_script_reference = m4_script.lower().replace('.', '')
       table_of_contents.append('  * [{0:s}](Status#{1:s})'.format(
           m4_script, m4_script_reference))
@@ -927,7 +919,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
             project.name))
 
     table_of_contents.append('* [Test scripts](Status#test-scripts)')
-    for script in sorted(versions_per_test_script.keys()):
+    for script in sorted(versions_per_test_script):
       script_reference = script.lower().replace('.', '')
       table_of_contents.append('  * [{0:s}](Status#{1:s})'.format(
           script, script_reference))
@@ -1032,7 +1024,8 @@ class StatusWikiPageGenerator(WikiPageGenerator):
 
         for version, project_names in sorted(
             projects_per_version.items(), reverse=True):
-          project_names = self._FormatProjectNames(project_groups, project_names)
+          project_names = self._FormatProjectNames(
+              project_groups, project_names)
 
           template_mappings = {
               'project_names': project_names,
@@ -1101,10 +1094,6 @@ class FileWriter(object):
 
 class StdoutWriter(object):
   """Stdout-based output writer."""
-
-  def __init__(self):
-    """Initialize an output writer."""
-    super(StdoutWriter, self).__init__()
 
   def Open(self):
     """Opens the output writer object.

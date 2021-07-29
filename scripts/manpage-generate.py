@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to generate libyal man pages."""
-
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import argparse
 import logging

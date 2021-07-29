@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The definitions."""
 
-from __future__ import unicode_literals
-
 
 DATA_TYPE_BOOLEAN = 'boolean'
 DATA_TYPE_BINARY_DATA = 'binary_data'

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """The libyal source formatter classes."""
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 
 # TODO: have the SourceFormatter use the GroupModifier to detect a group
 # of lines it applies to and then make the necessary changes.
@@ -241,8 +238,7 @@ class SourceFormatter(object):
             declaration_lines.append(line)
             continue
 
-          else:
-            in_variables_declaration_block = False
+          in_variables_declaration_block = False
 
         elif stripped_line == '}':
           indentation_level -= 1

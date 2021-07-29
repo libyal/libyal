@@ -1,16 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to generate source based on dtFabric format definitions."""
-
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import argparse
 import datetime
 import io
 import logging
 import os
-import string
 import sys
 
 from dtfabric import definitions
@@ -165,7 +162,8 @@ class SourceGenerator(object):
     structure_description_title = '{0:s}{1:s}'.format(
         structure_description[0].upper(), structure_description[1:])
 
-    template_mappings['structure_description_title'] = structure_description_title
+    template_mappings['structure_description_title'] = (
+        structure_description_title)
 
     template_filename = os.path.join(template_directory, 'header.h')
     self._GenerateSection(template_filename, template_mappings, output_filename)
@@ -261,7 +259,8 @@ class SourceGenerator(object):
         structure_description[0].upper(), structure_description[1:])
 
     template_mappings['structure_description'] = structure_description
-    template_mappings['structure_description_title'] = structure_description_title
+    template_mappings['structure_description_title'] = (
+        structure_description_title)
 
     logging.info('Writing: {0:s}'.format(output_filename))
 
@@ -1084,7 +1083,7 @@ class SourceGenerator(object):
       lines.append(line)
 
       if data_type_definition.TYPE_INDICATOR == definitions.TYPE_INDICATOR_UUID:
-         lines.append('\t * Contains a UUID')
+        lines.append('\t * Contains a UUID')
 
       lines.append('\t */')
 

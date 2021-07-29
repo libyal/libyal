@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to format a source file."""
-
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import argparse
 import io

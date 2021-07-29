@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source file generator interface."""
 
-from __future__ import unicode_literals
-
 import abc
 import datetime
 import io

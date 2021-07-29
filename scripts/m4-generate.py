@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to generate libyal m4 files."""
-
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import argparse
 import logging
@@ -11,8 +9,6 @@ import os
 import sys
 
 from yaldevtools import configuration
-from yaldevtools import output_writers
-from yaldevtools.source_generators import m4 as m4_source_generator
 
 
 def Main():

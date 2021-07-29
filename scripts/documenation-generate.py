@@ -1,15 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to generate documenation based on dtFabric format definitions."""
-
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import argparse
 import datetime
 import logging
 import os
-import string
 import sys
 
 from dtfabric import errors
@@ -74,6 +71,10 @@ class AsciidocFormatDocumentGenerator(object):
 
     Returns:
       FormatDefinition: format definition.
+
+    Raises:
+      RuntimeError: if the format definition is missing or if there are more
+          than 1 format definitions.
     """
     # pylint: disable=protected-access
 

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source file generator for python module source files."""
 
-from __future__ import unicode_literals
-
 import collections
 import io
 import logging
@@ -553,12 +551,13 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_filename = 'type_object_function.h'
 
         if template_filename:
-          template_filename = os.path.join(template_directory, template_filename)
+          template_filename = os.path.join(
+              template_directory, template_filename)
 
       if not template_filename or not os.path.exists(template_filename):
         logging.warning((
             'Unable to generate Python type object header for: {0:s}.{1:s} '
-            'missing template: {1:s}').format(
+            'missing template: {2:s}').format(
                 type_name, type_function, template_filename))
         continue
 
@@ -746,15 +745,15 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         template_filename = os.path.join(
             template_directory, 'new-with_type_object.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='a')
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='a')
 
       elif with_parent:
         template_filename = os.path.join(
             template_directory, 'new-with_parent.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='a')
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='a')
 
       if bfio_support:
         template_filename = 'init-with_file_io_handle.c'
@@ -849,8 +848,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             if not python_function_prototype.arguments:
               if value_name.startswith('number_of_recovered_'):
                 value_name = value_name[20:]
-                template_filename = 'get_number_of_recovered_{0:s}_value.c'.format(
-                    python_function_prototype.data_type)
+                template_filename = (
+                    'get_number_of_recovered_{0:s}_value.c').format(
+                        python_function_prototype.data_type)
 
               else:
                 if (python_function_prototype.return_values and
@@ -913,12 +913,13 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           template_filename = 'is_value.c'
 
         if template_filename:
-          template_filename = os.path.join(template_directory, template_filename)
+          template_filename = os.path.join(
+              template_directory, template_filename)
 
       if not template_filename or not os.path.exists(template_filename):
         logging.warning((
             'Unable to generate Python type object source code for: '
-            '{0:s}.{1:s} missing template: {1:s}').format(
+            '{0:s}.{1:s} missing template: {2:s}').format(
                 type_name, type_function, template_filename))
         continue
 
@@ -1103,8 +1104,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         elif python_function_prototype.data_type == (
             definitions.DATA_TYPE_FLOATINGTIME):
           description[0] = (
-              '{0:s} as a 64-bit integer containing a floatingtime value.').format(
-                  description[0][:-1])
+              '{0:s} as a 64-bit integer containing a floatingtime '
+              'value.').format(description[0][:-1])
 
         elif python_function_prototype.data_type == (
             definitions.DATA_TYPE_POSIX_TIME):
@@ -1796,7 +1797,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     if python_function_prototype.data_type == definitions.DATA_TYPE_OBJECT:
       return python_function_prototype.object_type, True
 
-    elif python_function_prototype.data_type == definitions.DATA_TYPE_STRING:
+    if python_function_prototype.data_type == definitions.DATA_TYPE_STRING:
       return python_function_prototype.value_name, False
 
     return None, None
@@ -1915,8 +1916,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
         is_pseudo_type = type_name in api_pseudo_types
 
-        python_function_prototypes = self._GetPythonTypeObjectFunctionPrototypes(
-            project_configuration, type_name, is_pseudo_type=is_pseudo_type)
+        python_function_prototypes = (
+            self._GetPythonTypeObjectFunctionPrototypes(
+                project_configuration, type_name,
+                is_pseudo_type=is_pseudo_type))
 
         if not python_function_prototypes:
           logging.warning((

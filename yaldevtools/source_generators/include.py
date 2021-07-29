@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source file generator for include source files."""
 
-from __future__ import unicode_literals
-
 import logging
 import os
 
@@ -198,7 +196,8 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
       if (directory_entry != 'definitions.h.in' and
           os.path.exists(output_filename)):
         self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename)
+            template_filename, template_mappings, output_writer,
+            output_filename)
 
       if directory_entry in ('codepage.h', 'definitions.h.in', 'error.h'):
         self._VerticalAlignTabs(output_filename)

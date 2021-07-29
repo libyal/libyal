@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source file generator for man page files."""
 
-from __future__ import unicode_literals
-
 import difflib
 import io
 import logging

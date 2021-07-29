@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Libyal CLI source format helper."""
-
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import sys
 
@@ -278,6 +276,6 @@ class SourceFormatter(object):
 
 if __name__ == '__main__':
   formatter = SourceFormatter()
-  lines = formatter.FormatSource(sys.stdin.readlines())
+  formatted_lines = formatter.FormatSource(sys.stdin.readlines())
 
-  print(''.join(lines), end='')
+  print(''.join(formatted_lines), end='')

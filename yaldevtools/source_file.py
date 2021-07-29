@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source file classes."""
 
-from __future__ import unicode_literals
-
 import collections
 import io
 import os
@@ -36,7 +34,8 @@ class DefinitionsIncludeHeaderFile(object):
     """
     self.enum_declarations = []
 
-    enum_prefix = 'enum '.format(project_configuration.library_name.upper())
+    enum_prefix = 'enum {0:s}'.format(
+        project_configuration.library_name.upper())
     enum_prefix_length = len(enum_prefix)
 
     in_enum = False
@@ -185,7 +184,8 @@ class LibraryHeaderFile(object):
               value_description = source_line.strip()
               value_description = value_description[9:]
 
-              if value_description.endswith(' at the current offset into a buffer'):
+              if value_description.endswith(
+                  ' at the current offset into a buffer'):
                 value_description = value_description[:-36]
 
               elif value_description.endswith(' at a specific offset'):
@@ -228,9 +228,10 @@ class LibraryHeaderFile(object):
               elif value_description.startswith('the '):
                 value_description = value_description[4:]
 
-            elif source_line.startswith('/* Seeks a certain offset within the '):
-               value_description = source_line.strip()
-               value_description = value_description[37:]
+            elif source_line.startswith(
+                '/* Seeks a certain offset within the '):
+              value_description = source_line.strip()
+              value_description = value_description[37:]
 
             elif source_line.startswith(' * Returns '):
               return_values = set()
@@ -307,6 +308,10 @@ class LibraryHeaderFile(object):
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
+
+    Raises:
+      IOError: if the include header file is missing.
+      OSError: if the include header file is missing.
     """
     header_file_path = self.path
     if not os.path.exists(header_file_path):
@@ -917,6 +922,10 @@ class TestSourceFile(object):
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
+
+    Raises:
+      IOError: if the test source file is missing.
+      OSError: if the test source file is missing.
     """
     if not os.path.exists(self.path):
       raise IOError('Missing test source file: {0:s}'.format(self.path))

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """The output writers."""
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import io
 
 
@@ -33,10 +30,6 @@ class FileWriter(object):
 
 class StdoutWriter(object):
   """Stdout output writer."""
-
-  def __init__(self):
-    """Initializes a stdout output writer."""
-    super(StdoutWriter, self).__init__()
 
   # pylint: disable=unused-argument
   def WriteFile(self, file_path, file_data, access_mode='w'):

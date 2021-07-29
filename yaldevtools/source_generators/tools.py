@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source file generator for tool source files."""
 
-from __future__ import unicode_literals
-
 import os
 import textwrap
 
@@ -1733,7 +1731,8 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     mount_tool_usage.append(usage)
 
     template_mappings['mount_tool_options'] = '\n'.join(options_details)
-    template_mappings['mount_tool_source_alignment'] = mount_tool_source_alignment
+    template_mappings['mount_tool_source_alignment'] = (
+        mount_tool_source_alignment)
     template_mappings['mount_tool_usage'] = '\n'.join(mount_tool_usage)
 
     template_filename = os.path.join(template_directory, 'usage.c')

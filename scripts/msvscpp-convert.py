@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to generate different versions of Visual Studio (express) files.
 
 Currently supported input formats:
@@ -22,7 +23,6 @@ Currently supported output formats:
 # TODO: add vs2017 reader.
 # TODO: add vs2017 writer.
 
-from __future__ import print_function
 import abc
 import argparse
 import logging
@@ -3995,7 +3995,7 @@ class LibyalSourceVSSolution(VSSolution):
           solution_name = line[1:-2]
         break
 
-      elif line.startswith('AC_INIT('):
+      if line.startswith('AC_INIT('):
         in_ac_init_section = True
 
     file_object.close()
@@ -4130,7 +4130,7 @@ class LibyalSourceVSSolution(VSSolution):
       solution_projects_by_guid[solution_project.guid] = solution_project
 
     # Set-up the solution dependencies.
-    for guid, project_information in projects_by_guid.iteritems():
+    for guid, project_information in projects_by_guid.items():
       solution_project = solution_projects_by_guid[guid]
 
       for dependency in project_information.dependencies:

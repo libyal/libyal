@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 """Script to convert github.com issues into CSV."""
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import argparse
 import configparser
 import io
@@ -381,10 +378,6 @@ class FileWriter(object):
 
 class StdoutWriter(object):
   """Output writer that writes to stdout."""
-
-  def __init__(self):
-    """Initializes an output writer."""
-    super(StdoutWriter, self).__init__()
 
   def Open(self):
     """Opens the output writer.
