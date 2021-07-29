@@ -977,6 +977,10 @@ class SourceGenerator(object):
 
     Returns:
       FormatDefinition: format definition.
+
+    Raises:
+      RuntimeError: if the format definition is mission or more than 1
+          format definition is defined.
     """
     # pylint: disable=protected-access
 

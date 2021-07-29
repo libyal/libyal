@@ -276,6 +276,6 @@ class SourceFormatter(object):
 
 if __name__ == '__main__':
   formatter = SourceFormatter()
-  formatted_lines = formatter.FormatSource(sys.stdin.readlines())
+  output_lines = formatter.FormatSource(sys.stdin.readlines())
 
-  print(''.join(formatted_lines), end='')
+  print(''.join(output_lines), end='')

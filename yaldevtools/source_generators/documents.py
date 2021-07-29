@@ -22,7 +22,8 @@ class DocumentFileGenerator(interface.SourceFileGenerator):
     template_mappings = self._GetTemplateMappings(
         project_configuration, authors_separator=self._AUTHORS_SEPARATOR)
     template_mappings['authors'] = self._AUTHORS
-    template_mappings['project_description'] = project_configuration.project_description
+    template_mappings['project_description'] = (
+        project_configuration.project_description)
     template_mappings['project_status'] = project_configuration.project_status
 
     for directory_entry in os.listdir(self._template_directory):

@@ -179,7 +179,7 @@ class VSProjectConfiguration(VSConfiguration):
     basic_runtime_checks = int(self.basic_runtime_checks, 10)
     if basic_runtime_checks == 0:
       return u'Default'
-    elif basic_runtime_checks == 3:
+    if basic_runtime_checks == 3:
       return u'EnableFastChecks'
     return u''
 
@@ -195,7 +195,7 @@ class VSProjectConfiguration(VSConfiguration):
     compile_as = int(self.compile_as, 10)
     if compile_as == 1:
       return u'CompileAsC'
-    elif compile_as == 2:
+    if compile_as == 2:
       return u'CompileAsCpp'
     return u''
 
@@ -241,7 +241,7 @@ class VSProjectConfiguration(VSConfiguration):
     optimization = int(self.optimization, 10)
     if optimization == 0:
       return u'Disabled'
-    elif optimization == 2:
+    if optimization == 2:
       return u'MaxSpeed'
     return u''
 
@@ -250,9 +250,9 @@ class VSProjectConfiguration(VSConfiguration):
     output_type = int(self.output_type, 10)
     if output_type == 1:
       return u'Application'
-    elif output_type == 2:
+    if output_type == 2:
       return u'DynamicLibrary'
-    elif output_type == 4:
+    if output_type == 4:
       return u'StaticLibrary'
     return u''
 
@@ -267,7 +267,7 @@ class VSProjectConfiguration(VSConfiguration):
     randomized_base_address = int(self.randomized_base_address, 10)
     if randomized_base_address == 1:
       return u'false'
-    elif randomized_base_address == 2:
+    if randomized_base_address == 2:
       return u'true'
     return u''
 
@@ -285,7 +285,7 @@ class VSProjectConfiguration(VSConfiguration):
     sub_system = int(self.sub_system, 10)
     if sub_system == 0:
       return u'NotSet'
-    elif sub_system == 1:
+    if sub_system == 1:
       return u'Console'
     return u''
 
@@ -295,7 +295,7 @@ class VSProjectConfiguration(VSConfiguration):
     if target_machine == 1:
       return u'MachineX86'
     # TODO: assuming here that 2 is x64.
-    elif target_machine == 2:
+    if target_machine == 2:
       return u'MachineX64'
     return u''
 
@@ -304,7 +304,7 @@ class VSProjectConfiguration(VSConfiguration):
     warning_level = int(self.warning_level, 10)
     if warning_level == 3:
       return u'Level3'
-    elif warning_level == 4:
+    if warning_level == 4:
       return u'Level4'
     return u''
 
@@ -313,7 +313,7 @@ class VSProjectConfiguration(VSConfiguration):
     whole_program_optimization = int(self.whole_program_optimization, 10)
     if whole_program_optimization == 0:
       return u'false'
-    elif whole_program_optimization == 1:
+    if whole_program_optimization == 1:
       return u'true'
     return u''
 
@@ -516,7 +516,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
       if line.startswith(u'</Configuration>'):
         break
 
-      elif found_tool:
+      if found_tool:
         if line.startswith(u'/>'):
           found_tool = False
           found_tool_compiler = False
@@ -792,7 +792,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
         if line.startswith(u'</Configurations>'):
           break
 
-        elif line.startswith(u'<Configuration'):
+        if line.startswith(u'<Configuration'):
           project_configuration = self._ReadConfiguration(line)
 
           if project_configuration:
@@ -826,7 +826,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
         if line.startswith(u'</Files>'):
           break
 
-        elif found_filter:
+        if found_filter:
           if line.startswith(u'</Filter>'):
             found_filter = False
             found_filter_source_files = False
@@ -878,7 +878,7 @@ class VS2008ProjectFileReader(VSProjectFileReader):
       if line.startswith(u'>'):
         break
 
-      elif line.startswith(u'Name='):
+      if line.startswith(u'Name='):
         values = re.findall(u'Name="([^"]*)"', line)
         if len(values) == 1:
           project_information.name = values[0]

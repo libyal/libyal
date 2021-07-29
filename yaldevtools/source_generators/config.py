@@ -1479,6 +1479,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: Cygwin build dependencies.
     """
     cygwin_build_dependencies = list(
         project_configuration.cygwin_build_dependencies)
@@ -1518,6 +1521,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: MinGW-MSYS build dependencies.
     """
     mingw_msys_build_dependencies = list(
         project_configuration.mingw_msys_build_dependencies)
@@ -1533,6 +1539,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: MinGW-MSYS2 build dependencies.
     """
     mingw_msys2_build_dependencies = list(
         project_configuration.mingw_msys2_build_dependencies)

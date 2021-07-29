@@ -37,7 +37,8 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for libuna/libuna_types.h
     # TODO: types.h alignment of debug types?
 
-    template_directory = os.path.join(self._template_directory, 'libyal_types.h')
+    template_directory = os.path.join(
+        self._template_directory, 'libyal_types.h')
 
     library_path = self._GetLibraryPath(project_configuration)
     output_filename = '{0:s}_types.h'.format(project_configuration.library_name)
@@ -165,22 +166,20 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
           project_configuration.library_name == 'libclocale')):
         continue
 
-      if ((directory_entry == 'libyal_libcerror.h' or
-           directory_entry == 'libyal_error.c' or
-           directory_entry == 'libyal_error.h') and (
+      if (directory_entry in (
+          'libyal_libcerror.h', 'libyal_error.c', 'libyal_error.h') and (
                not os.path.exists(error_header_file) or
                project_configuration.library_name == 'libcerror')):
         continue
 
-      if ((directory_entry == 'libyal_libcnotify.h' or
-           directory_entry == 'libyal_notify.c' or
-           directory_entry == 'libyal_notify.h') and (
+      if (directory_entry in (
+           'libyal_libcnotify.h', 'libyal_notify.c', 'libyal_notify.h') and (
                not os.path.exists(notify_header_file) or
                project_configuration.library_name == 'libcnotify')):
         continue
 
-      if ((directory_entry == 'libyal_wide_string.c' or
-           directory_entry == 'libyal_wide_string.h') and (
+      if (directory_entry in (
+          'libyal_wide_string.c', 'libyal_wide_string.h') and (
                not os.path.exists(notify_header_file) or
                project_configuration.library_name == 'libcsplit')):
         continue

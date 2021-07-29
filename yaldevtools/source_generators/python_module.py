@@ -861,7 +861,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 elif has_pseudo_sub_types:
                   template_filename = (
                       'get_{0:s}{1:s}_value-with_type_object.c').format(
-                          value_name_prefix, python_function_prototype.data_type)
+                          value_name_prefix,
+                          python_function_prototype.data_type)
 
                 else:
                   template_filename = 'get_{0:s}{1:s}_value.c'.format(
@@ -968,8 +969,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
       if not result:
         self._GenerateSection(
-            template_filename, template_mappings, output_writer, output_filename,
-            access_mode='a')
+            template_filename, template_mappings, output_writer,
+            output_filename, access_mode='a')
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
@@ -1647,12 +1648,12 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     Returns:
       dict[str, PythonTypeObjectFunctionPrototype]: Python type object
-          function prototypes per name.
+          function prototypes per name or None if not available.
     """
     header_file = self._GetTypeLibraryHeaderFile(
         project_configuration, type_name)
     if not header_file:
-      return
+      return None
 
     function_name_prefix = '{0:s}_{1:s}_'.format(
         project_configuration.library_name, type_name)

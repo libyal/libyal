@@ -31,7 +31,7 @@ class SourceFileParser(object):
     group = []
 
     with io.open(path, 'r', encoding='utf8') as file_object:
-      for line_number, line in enumerate(file_object.readlines()):
+      for line in file_object.readlines():
         stripped_line = line.strip()
 
         if state == self._STATE_NONE:

@@ -70,16 +70,17 @@ def Main():
   if not projects_directory:
     projects_directory = os.path.dirname(libyal_directory)
 
+  data_directory = os.path.join(libyal_directory, 'data')
+  manuals_directory = os.path.join(data_directory, 'source', 'manuals')
+
   SOURCE_GENERATORS = [
       ('libyal.3', manpage_source_generator.LibraryManPageGenerator),
   ]
 
-  manuals_directory = os.path.join(
-      libyal_directory, 'data', 'source', 'manuals')
   for source_category, source_generator_class in SOURCE_GENERATORS:
     template_directory = os.path.join(manuals_directory, source_category)
     source_generator_object = source_generator_class(
-        projects_directory, template_directory)
+        projects_directory, data_directory, template_directory)
 
     if options.output_directory:
       output_writer = output_writers.FileWriter(options.output_directory)

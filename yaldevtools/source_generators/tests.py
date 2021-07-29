@@ -688,14 +688,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       with_input (Optional[bool]): True if the type is to be tested with
           input data.
       with_offset (Optional[bool]): True if tests require offset support.
-
-    Returns:
-      bool: True if successful or False if not.
     """
     header_file = self._GetTypeLibraryHeaderFile(
         project_configuration, type_name)
     if not header_file:
-      return False
+      return
 
     function_prototype = header_file.GetTypeFunction(
         type_name, 'read_buffer')
@@ -1048,13 +1045,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 type_name, type_function))
 
         return function_name, test_function_name, last_have_extern
-      else:
-        logging.warning((
-            'Unable to generate tests source code for type: "{0:s}" function: '
-            '"{1:s}" with error: unsupported number of arguments').format(
-                type_name, type_function))
 
-        return function_name, None, last_have_extern
+      logging.warning((
+          'Unable to generate tests source code for type: "{0:s}" function: '
+          '"{1:s}" with error: unsupported number of arguments').format(
+              type_name, type_function))
+
+      return function_name, None, last_have_extern
 
     if initialize_number_of_arguments == 3:
       function_argument = initialize_function_prototype.arguments[1]
@@ -1293,15 +1290,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         return function_name, test_function_name, last_have_extern
 
-      else:
-        logging.warning((
-            'Unable to generate tests source code for type: "{0:s}" function: '
-            '"{1:s}" with error: missing template').format(
-                type_name, type_function))
+      logging.warning((
+          'Unable to generate tests source code for type: "{0:s}" function: '
+          '"{1:s}" with error: missing template').format(
+              type_name, type_function))
 
-        body_template_name = 'function-body.c'
-        # TODO: improve generation of default function body.
-        return function_name, None, last_have_extern
+      body_template_name = 'function-body.c'
+      # TODO: improve generation of default function body.
+      return function_name, None, last_have_extern
 
     self._SetValueNameInTemplateMappings(template_mappings, value_name)
     self._SetValueTypeInTemplateMappings(template_mappings, value_type)
@@ -1586,13 +1582,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         return function_name, test_function_name, have_extern
 
-      else:
-        logging.warning((
-            'Unable to generate tests source code for type: "{0:s}" function: '
-            '"{1:s}" with error: missing template').format(
-                type_name, type_function))
+      logging.warning((
+          'Unable to generate tests source code for type: "{0:s}" function: '
+          '"{1:s}" with error: missing template').format(
+              type_name, type_function))
 
-        return function_name, None, have_extern
+      return function_name, None, have_extern
 
     self._GenerateSection(
         template_filename, template_mappings, output_writer, output_filename,
