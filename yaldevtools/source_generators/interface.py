@@ -3,7 +3,6 @@
 
 import abc
 import datetime
-import io
 import logging
 import os
 import string
@@ -57,14 +56,14 @@ class SourceFileGenerator(object):
     if not name or name[0] not in ('a', 'e', 'i', 'o', ''):
       return
 
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     name = name.replace('_', ' ')
     description = ' a {0:s}'.format(name)
     corrected_description = ' an {0:s}'.format(name)
 
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         line = line.replace(description, corrected_description)
         file_object.write(line)
@@ -378,7 +377,7 @@ class SourceFileGenerator(object):
     """
     # Read with binary mode to make sure end of line characters are
     # not converted.
-    with io.open(filename, 'rb') as file_object:
+    with open(filename, 'rb') as file_object:
       file_data = file_object.read()
 
     file_data = file_data.decode('utf8')
@@ -504,7 +503,7 @@ class SourceFileGenerator(object):
       project_configuration (ProjectConfiguration): project configuration.
       output_filename (str): path of the output file.
     """
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     library_include_header_start = '#include "{0:s}_'.format(
@@ -522,7 +521,7 @@ class SourceFileGenerator(object):
     include_headers = []
     in_include_headers = False
 
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         if (line.startswith(library_include_header_start) or
             line.startswith(python_module_include_header_start) or
@@ -547,14 +546,14 @@ class SourceFileGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     formatter = source_formatter.SourceFormatter()
     variable_declarations = None
     in_variable_declarations = False
 
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         stripped_line = line.rstrip()
         if stripped_line == '{':
@@ -578,21 +577,19 @@ class SourceFileGenerator(object):
         else:
           file_object.write(line)
 
-    lines = formatter.FormatSource(lines)
-
   def _VerticalAlignAssignmentStatements(self, output_filename):
     """Vertically aligns assignment statements.
 
     Args:
       output_filename (str): path of the output file.
     """
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     assigment_statements = []
     in_assigment_statements_block = False
 
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         if ' = ' in line:
           if not in_assigment_statements_block:
@@ -635,13 +632,13 @@ class SourceFileGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     alignment_number_of_spaces = 0
     alignment_number_of_tabs = 0
     in_function_call = False
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         if not line.startswith('\t'):
           file_object.write(line)
@@ -679,7 +676,7 @@ class SourceFileGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     alignment_offset = 0
@@ -700,7 +697,7 @@ class SourceFileGenerator(object):
       else:
         alignment_offset = max(alignment_offset, equal_sign_offset)
 
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         if '\t' in line.lstrip('\t'):
           prefix, _, suffix = line.rpartition('\t')

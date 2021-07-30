@@ -1,4 +1,4 @@
-/* Reads the ${structure_description} from a Basic File IO (bfio) handle
+/* Reads the ${structure_description}
  * Returns 1 if successful or -1 on error
  */
 int ${library_name}_${structure_name}_read_file_io_handle(
@@ -7,11 +7,22 @@ int ${library_name}_${structure_name}_read_file_io_handle(
      off64_t file_offset,
      libcerror_error_t **error )
 {
-	uint8_t data[ sizeof( ${prefix}_${structure_name}_t ) ];
+	uint8_t ${structure_name}_data[ sizeof( ${prefix}_${structure_name}_t ) ];
 
 	static char *function = "${library_name}_${structure_name}_read_file_io_handle";
 	ssize_t read_count    = 0;
 
+	if( ${structure_name} == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid ${structure_description}.",
+		 function );
+
+		return( -1 );
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -22,27 +33,11 @@ int ${library_name}_${structure_name}_read_file_io_handle(
 		 file_offset );
 	}
 #endif
-	if( libbfio_handle_seek_offset(
-	     file_io_handle,
-	     file_offset,
-	     SEEK_SET,
-	     error ) == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek ${structure_description} offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function,
-		 file_offset,
-		 file_offset );
-
-		return( -1 );
-	}
-	read_count = libbfio_handle_read_buffer(
+	read_count = libbfio_handle_read_buffer_at_offset(
 	              file_io_handle,
-	              data,
+	              ${structure_name}_data,
 	              sizeof( ${prefix}_${structure_name}_t ),
+	              file_offset,
 	              error );
 
 	if( read_count != (ssize_t) sizeof( ${prefix}_${structure_name}_t ) )
@@ -51,7 +46,7 @@ int ${library_name}_${structure_name}_read_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read ${structure_description} at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 "%s: unable to read ${structure_description} data at offset: %" PRIi64 " (0x%08" PRIx64 ").",
 		 function,
 		 file_offset,
 		 file_offset );
@@ -60,7 +55,7 @@ int ${library_name}_${structure_name}_read_file_io_handle(
 	}
 	if( ${library_name}_${structure_name}_read_data(
 	     ${structure_name},
-	     data,
+	     ${structure_name}_data,
 	     sizeof( ${prefix}_${structure_name}_t ),
 	     error ) != 1 )
 	{
@@ -68,10 +63,8 @@ int ${library_name}_${structure_name}_read_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read ${structure_description} at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function,
-		 file_offset,
-		 file_offset );
+		 "%s: unable to read ${structure_description}.",
+		 function );
 
 		return( -1 );
 	}

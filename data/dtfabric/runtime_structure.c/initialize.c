@@ -31,7 +31,7 @@ int ${library_name}_${structure_name}_initialize(
 		return( -1 );
 	}
 	*${structure_name} = memory_allocate_structure(
-	              ${library_name}_${structure_name}_t );
+	${memory_allocate_indentation} ${library_name}_${structure_name}_t );
 
 	if( *${structure_name} == NULL )
 	{

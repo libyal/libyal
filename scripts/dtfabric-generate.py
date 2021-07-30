@@ -5,7 +5,6 @@
 
 import argparse
 import datetime
-import io
 import logging
 import os
 import sys
@@ -228,6 +227,7 @@ class SourceGenerator(object):
 
     has_datetime_member = False
     has_string_member = False
+    has_uuid_member = False
     for member_definition in data_type_definition.members:
       member_data_type_definition = getattr(
           member_definition, 'member_data_type_definition', member_definition)
@@ -235,6 +235,9 @@ class SourceGenerator(object):
       type_indicator = member_data_type_definition.TYPE_INDICATOR
       if type_indicator == definitions.TYPE_INDICATOR_STRING:
         has_string_member = True
+
+      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
+        has_uuid_member = True
 
       member_data_type = getattr(member_definition, 'member_data_type', None)
       if member_data_type in ('filetime', ):
@@ -271,7 +274,7 @@ class SourceGenerator(object):
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
 
-    if has_datetime_member or has_string_member:
+    if has_datetime_member or has_string_member or has_uuid_member:
       template_filename = os.path.join(template_directory, 'includes-debug.c')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
@@ -280,6 +283,13 @@ class SourceGenerator(object):
     if has_datetime_member:
       template_filename = os.path.join(
           template_directory, 'includes-libfdatetime.c')
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
+
+    if has_uuid_member:
+      template_filename = os.path.join(
+          template_directory, 'includes-libfguid.c')
       self._GenerateSection(
           template_filename, template_mappings, output_filename,
           access_mode='a')
@@ -300,9 +310,15 @@ class SourceGenerator(object):
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
 
+    # Indentation needs to account for "*name = ".
+    template_mappings['memory_allocate_indentation'] = ' ' * (
+        len(data_type_definition.name) + 4)
+
     template_filename = os.path.join(template_directory, 'initialize.c')
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
+
+    del template_mappings['memory_allocate_indentation']
 
     template_filename = os.path.join(template_directory, 'free.c')
     self._GenerateSection(
@@ -444,6 +460,8 @@ class SourceGenerator(object):
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
 
+    del template_mappings['debug_variables']
+
   def _GenerateRuntimeStructureSourceFunctionReadDataCheckSignature(
       self, data_type_definition, data_type_definition_name, output_filename):
     """Generates the check signature part of a read_data function.
@@ -489,7 +507,8 @@ class SourceGenerator(object):
         description = member_name.replace('_', ' ')
 
       template_mappings['member_name'] = member_name
-      template_mappings['member_name_description'] = description
+      template_mappings['member_name_description'] = '{0:s}{1:s}'.format(
+          description[0].lower(), description[1:])
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -535,7 +554,10 @@ class SourceGenerator(object):
       type_indicator = member_data_type_definition.TYPE_INDICATOR
       if (type_indicator == definitions.TYPE_INDICATOR_INTEGER and
           data_type_size and data_type_size > 1):
-        template_filename = 'read_data-integer.c'
+        if data_type.startswith('uint'):
+          template_filename = 'read_data-unsigned_integer.c'
+        else:
+          template_filename = 'read_data-integer.c'
 
         # TODO: get byte order from member_data_type_definition.
         template_mappings['byte_order'] = 'little_endian'
@@ -563,13 +585,26 @@ class SourceGenerator(object):
           elif element_data_size == 2:
             template_filename = 'read_data-string_16bit.c'
 
+      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
+        template_filename = 'read_data-guid.c'
+
+      else:
+        member_data_type = getattr(member_definition, 'member_data_type', None)
+        if member_data_type == 'filetime':
+          template_filename = 'read_data-unsigned_integer.c'
+
+          # TODO: get byte order from member_data_type_definition.
+          template_mappings['byte_order'] = 'little_endian'
+          template_mappings['data_type'] = 'uint64'
+
       if member_definition.description:
         description = member_definition.description
       else:
         description = member_name.replace('_', ' ')
 
       template_mappings['member_name'] = member_name
-      template_mappings['member_name_description'] = description
+      template_mappings['member_name_description'] = '{0:s}{1:s}'.format(
+          description[0].lower(), description[1:])
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -596,10 +631,11 @@ class SourceGenerator(object):
     template_mappings = self._GetTemplateMappings(
         library_name=library_name, structure_name=data_type_definition_name)
 
-    function_name = 'int lib{0:s}_{1:s}_read_data'.format(
+    function_name = 'lib{0:s}_{1:s}_read_data'.format(
         self._prefix, data_type_definition_name)
 
-    tab_alignment = 72
+    # Default alignment is 9 tabs.
+    tab_alignment = 9 * 8
     for member_definition in data_type_definition.members:
       member_name = member_definition.name
       debug_line = '{0:s}: {1:s}'.format(function_name, member_name)
@@ -636,7 +672,10 @@ class SourceGenerator(object):
           template_filename = 'read_data-debug-integer-in_function.c'
 
         elif member_usage == self._USAGE_IN_STRUCT:
-          template_filename = 'read_data-debug-integer-in_struct.c'
+          if member_name.endswith('_flags'):
+            template_filename = 'read_data-debug-integer-in_struct-as_flags.c'
+          else:
+            template_filename = 'read_data-debug-integer-in_struct.c'
 
         elif member_usage == self._USAGE_IN_FUNCTION:
           # TODO: improve.
@@ -696,24 +735,26 @@ class SourceGenerator(object):
           if element_data_size == 2:
             template_filename = 'read_data-debug-string_16bit.c'
 
+      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
+        template_filename = 'read_data-debug-guid.c'
+
       else:
         member_data_type = getattr(member_definition, 'member_data_type', None)
-        if member_data_type in ('filetime', ):
+        if member_data_type == 'filetime':
           template_filename = 'read_data-debug-filetime.c'
 
-      if member_definition.description:
-        description = member_definition.description
-      else:
-        description = member_name.replace('_', ' ')
+      # Use the member name as the debug description.
+      description = member_name.replace('_', ' ')
 
       template_filename = os.path.join(template_directory, template_filename)
 
       template_mappings['member_name'] = member_name
       template_mappings['member_name_description'] = description
 
-      # Detemine number of tabs for alignment.
+      # Determine the number of tabs for alignment.
       debug_line = '{0:s}: {1:s}'.format(function_name, description)
       debug_line_length = len(debug_line)
+
       number_of_tabs, remainder = divmod(tab_alignment - debug_line_length, 8)
       if remainder > 0:
         number_of_tabs += 1
@@ -798,6 +839,8 @@ class SourceGenerator(object):
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
 
+    del template_mappings['variables']
+
   def _GenerateSection(
       self, template_filename, template_mappings, output_filename,
       access_mode='w'):
@@ -813,22 +856,24 @@ class SourceGenerator(object):
     output_data = self._template_string_generator.Generate(
         template_filename, template_mappings)
 
-    with io.open(output_filename, access_mode, encoding='utf8') as file_object:
+    with open(output_filename, access_mode, encoding='utf8') as file_object:
       file_object.write(output_data)
 
   def _GenerateStoredStructureHeader(
-      self, data_type_definition, output_filename):
+      self, data_type_definition, members_configuration, output_filename):
     """Generates a stored structure header.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
       output_filename (str): name of the output file.
     """
     template_mappings = self._GetTemplateMappings(
         structure_name=data_type_definition.name)
 
     structure_members = self._GetStoredStructureHeaderMembers(
-        data_type_definition)
+        data_type_definition, members_configuration)
 
     template_mappings['structure_members'] = structure_members
 
@@ -839,11 +884,14 @@ class SourceGenerator(object):
 
     del template_mappings['structure_members']
 
-  def _GenerateStoredStructureHeaderFile(self, data_type_definition):
+  def _GenerateStoredStructureHeaderFile(
+      self, data_type_definition, members_configuration):
     """Generates a stored structure header file.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
     """
     template_directory = os.path.join(
         self._templates_path, 'stored_structure.h')
@@ -883,52 +931,14 @@ class SourceGenerator(object):
       structure_definitions = [data_type_definition]
 
     for structure_definition in structure_definitions:
-      self._GenerateStoredStructureHeader(structure_definition, output_filename)
+      self._GenerateStoredStructureHeader(
+          structure_definition, members_configuration, output_filename)
 
     template_filename = os.path.join(template_directory, 'footer.h')
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
 
     self._SortIncludeHeaders(output_filename)
-
-  def _GetRuntimeDataType(self, data_type_definition):
-    """Retrieves a runtime data type.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
-
-    Returns:
-      str: C runtime data type or None if not available.
-    """
-    data_type_definition = getattr(
-        data_type_definition, 'member_data_type_definition',
-        data_type_definition)
-
-    data_type = None
-
-    type_indicator = data_type_definition.TYPE_INDICATOR
-    if type_indicator == definitions.TYPE_INDICATOR_CHARACTER:
-      data_type = self._CHARACTER_DATA_TYPES.get(
-          data_type_definition.size, None)
-
-    elif type_indicator == definitions.TYPE_INDICATOR_FLOATING_POINT:
-      data_type = self._FLOATING_POINT_DATA_TYPES.get(
-          data_type_definition.size, None)
-
-    elif type_indicator in (
-        definitions.TYPE_INDICATOR_BOOLEAN, definitions.TYPE_INDICATOR_INTEGER):
-      if data_type_definition.format == definitions.FORMAT_SIGNED:
-        data_type = self._SIGNED_INTEGER_DATA_TYPES.get(
-            data_type_definition.size, None)
-      else:
-        data_type = self._UNSIGNED_INTEGER_DATA_TYPES.get(
-            data_type_definition.size, None)
-
-    elif type_indicator in (
-        definitions.TYPE_INDICATOR_STREAM, definitions.TYPE_INDICATOR_STRING):
-      data_type = 'uint8_t *'
-
-    return data_type
 
   def _GetRuntimePrintfFormatIndicator(
       self, data_type_definition, debug_format):
@@ -993,6 +1003,93 @@ class SourceGenerator(object):
     return self._definitions_registry.GetDefinitionByName(
         self._definitions_registry._format_definitions[0])
 
+  def _GetRuntimeStructureHeaderMember(
+      self, member_definition, members_configuration):
+    """Generates the member definition of a runtime structure header.
+
+    Args:
+      member_definition (MemberDataTypeDefinition): member data type definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
+
+    Returns:
+      list[str]: member definition of a runtime structure header.
+    """
+    member_name = member_definition.name
+
+    if member_definition.description:
+      description = member_definition.description
+    else:
+      description = member_name.replace('_', ' ')
+
+    # TODO: remove leading "The", kept for testing purposed for now.
+    # description = '{0:s}{1:s}'.format(
+    #     description[0].upper(), description[1:])
+    description = 'The {0:s}{1:s}'.format(
+        description[0].lower(), description[1:])
+
+    lines = None
+
+    # TODO: handle stream / string type
+    # TODO: handle padding type
+    data_type_definition = getattr(
+        member_definition, 'member_data_type_definition', member_definition)
+
+    type_indicator = data_type_definition.TYPE_INDICATOR
+
+    if data_type_definition.name == 'filetime':
+      lines = [
+          '\t/* {0:s}'.format(description),
+          '\t * Contains a 64-bit filetime value',
+          '\t */',
+          '\tuint64_t {0:s};'.format(member_name)]
+
+    elif type_indicator in (
+        definitions.TYPE_INDICATOR_STREAM, definitions.TYPE_INDICATOR_STRING):
+      lines = [
+          '\t/* {0:s}'.format(description),
+          '\t */',
+          '\tuint8_t *{0:s};'.format(member_name)]
+
+    elif type_indicator == definitions.TYPE_INDICATOR_UUID:
+      lines = [
+          '\t/* {0:s}'.format(description),
+          '\t */',
+          '\tuint8_t {0:s}[ 16 ];'.format(member_name)]
+
+    else:
+      data_type = None
+      if type_indicator == definitions.TYPE_INDICATOR_CHARACTER:
+        data_type = self._CHARACTER_DATA_TYPES.get(
+            data_type_definition.size, None)
+
+      elif type_indicator == definitions.TYPE_INDICATOR_FLOATING_POINT:
+        data_type = self._FLOATING_POINT_DATA_TYPES.get(
+            data_type_definition.size, None)
+
+      elif type_indicator in (
+          definitions.TYPE_INDICATOR_BOOLEAN, definitions.TYPE_INDICATOR_INTEGER):
+        if data_type_definition.format == definitions.FORMAT_SIGNED:
+          data_type = self._SIGNED_INTEGER_DATA_TYPES.get(
+              data_type_definition.size, None)
+        else:
+          data_type = self._UNSIGNED_INTEGER_DATA_TYPES.get(
+            data_type_definition.size, None)
+
+      if data_type:
+        lines = [
+            '\t/* {0:s}'.format(description),
+            '\t */',
+            '\t{0:s} {1:s};'.format(data_type, member_name)]
+
+    if not lines:
+      lines = [
+          '\t/* {0:s}'.format(description),
+          '\t */',
+          '\t/* TODO: implement */']
+
+    return lines
+
   def _GetRuntimeStructureHeaderMembers(
       self, data_type_definition, members_configuration):
     """Generates the member definitions of a runtime structure header.
@@ -1003,48 +1100,23 @@ class SourceGenerator(object):
           the structure members.
 
     Returns:
-      str: member definitions of the runtime structure header.
-
-    Raises:
-      RuntimeError: if the size of the data type is not defined.
+      str: member definitions of a runtime structure header.
     """
     lines = []
 
     last_index = len(data_type_definition.members) - 1
     for member_definition in data_type_definition.members:
-      member_name = member_definition.name
-      member_usage = members_configuration.get(member_name, {}).get(
+      member_usage = members_configuration.get(member_definition.name, {}).get(
           'usage', self._USAGE_DEBUG)
       if member_usage != self._USAGE_IN_STRUCT:
         continue
 
-      if member_definition.description:
-        description = member_definition.description
-      else:
-        description = member_name.replace('_', ' ')
-
-      description = '{0:s}{1:s}'.format(
-          description[0].upper(), description[1:])
-
-      # TODO: handle stream / string type
-      # TODO: handle padding type
-      data_type = self._GetRuntimeDataType(member_definition)
-
       if lines:
         lines.append('')
 
-      lines.extend([
-          '\t/* {0:s}'.format(description),
-          '\t */'])
-
-      if not data_type:
-        lines.append('\t/* TODO: implement */')
-
-      elif data_type.endswith('*'):
-        lines.append('\t{0:s}{1:s};'.format(data_type, member_name))
-
-      else:
-        lines.append('\t{0:s} {1:s};'.format(data_type, member_name))
+      member_definition_lines = self._GetRuntimeStructureHeaderMember(
+          member_definition, members_configuration)
+      lines.extend(member_definition_lines)
 
     if not lines:
       lines = [
@@ -1054,11 +1126,14 @@ class SourceGenerator(object):
 
     return '\n'.join(lines)
 
-  def _GetStoredStructureHeaderMembers(self, data_type_definition):
+  def _GetStoredStructureHeaderMembers(
+      self, data_type_definition, members_configuration):
     """Generates the member definitions of a stored structure header.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
 
     Returns:
       str: member definitions of the stored structure header.
@@ -1070,13 +1145,13 @@ class SourceGenerator(object):
 
     last_index = len(data_type_definition.members) - 1
     for index, member_definition in enumerate(data_type_definition.members):
-      name = member_definition.name
+      member_name = member_definition.name
       data_type_size = member_definition.GetByteSize()
 
-      if member_definition.description:
-        description = member_definition.description
-      else:
-        description = name.replace('_', ' ')
+      description = members_configuration.get(member_name, {}).get(
+          'description', member_definition.description)
+      if not description:
+        description = member_name.replace('_', ' ')
 
       if description[0] == '(':
         line = '\t/* ({0:s}{1:s}'.format(
@@ -1086,19 +1161,28 @@ class SourceGenerator(object):
 
       lines.append(line)
 
+      if not data_type_size:
+        line = '\t * TODO: unknown size'
+      elif data_type_size == 1:
+        line = '\t * Consists of 1 byte'
+      else:
+        line = '\t * Consists of {0:d} bytes'.format(data_type_size)
+
+      lines.append(line)
+
       if data_type_definition.TYPE_INDICATOR == definitions.TYPE_INDICATOR_UUID:
         lines.append('\t * Contains a UUID')
 
       lines.append('\t */')
 
       if not data_type_size:
-        lines.append('\t/* TODO: unknown size */')
-
+        line = '\t/* TODO: unknown size */'
       elif data_type_size == 1:
-        lines.append('\tuint8_t {0:s};'.format(name))
-
+        line = '\tuint8_t {0:s};'.format(member_name)
       else:
-        lines.append('\tuint8_t {0:s}[ {1:d} ];'.format(name, data_type_size))
+        line = '\tuint8_t {0:s}[ {1:d} ];'.format(member_name, data_type_size)
+
+      lines.append(line)
 
       if index != last_index:
         lines.append('')
@@ -1168,7 +1252,7 @@ class SourceGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     library_include_header_start = '#include "lib{0:s}_'.format(self._prefix)
@@ -1176,7 +1260,7 @@ class SourceGenerator(object):
     include_headers = []
     in_include_headers = False
 
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         if line.startswith(library_include_header_start):
           include_headers.append(line)
@@ -1196,14 +1280,14 @@ class SourceGenerator(object):
     Args:
       output_filename (str): path of the output file.
     """
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     formatter = source_formatter.SourceFormatter()
     variable_declarations = None
     in_variable_declarations = False
 
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         stripped_line = line.rstrip()
         if stripped_line == '{':
@@ -1217,7 +1301,8 @@ class SourceGenerator(object):
             variable_declarations.append(line)
 
           else:
-            sorted_lines = formatter.FormatSource(variable_declarations)
+            # TODO: remove the need for FormatSourceOld.
+            sorted_lines = formatter.FormatSourceOld(variable_declarations)
 
             file_object.writelines(sorted_lines)
             file_object.write(line)
@@ -1226,21 +1311,19 @@ class SourceGenerator(object):
         else:
           file_object.write(line)
 
-    lines = formatter.FormatSource(lines)
-
   def _VerticalAlignAssignmentStatements(self, output_filename):
     """Vertically aligns assignment statements.
 
     Args:
       output_filename (str): path of the output file.
     """
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     assigment_statements = []
     in_assigment_statements_block = False
 
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         if ' = ' in line:
           if not in_assigment_statements_block:
@@ -1322,7 +1405,7 @@ class SourceGenerator(object):
           definition, members_configuration)
       self._GenerateRuntimeStructureSourceFile(
           definition, members_configuration)
-      self._GenerateStoredStructureHeaderFile(definition)
+      self._GenerateStoredStructureHeaderFile(definition, members_configuration)
 
     return result
 
