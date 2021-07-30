@@ -492,11 +492,27 @@ class SourceGenerator(object):
         continue
 
       type_indicator = member_data_type_definition.TYPE_INDICATOR
-      if type_indicator == definitions.TYPE_INDICATOR_STREAM:
+      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+        data_type_size = member_definition.GetByteSize()
+
+        template_filename = 'read_data-check_signature-integer.c'
+
+        template_mappings['bit_size'] = data_type_size * 8
+        template_mappings['member_value'] = supported_values[0]
+
+      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
+        # TODO: make sure to escape all bytes in supported_values[0]
+        # things like \x00F can cause issues.
         template_filename = 'read_data-check_signature-stream.c'
 
-        template_mappings['member_value'] = supported_values[0]
+        template_mappings['member_value'] = supported_values[0].decode('ascii')
         template_mappings['member_value_size'] = len(supported_values[0])
+
+      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
+        template_filename = 'read_data-check_signature-stream.c'
+
+        template_mappings['member_value'] = supported_values[0].decode('ascii')
+        template_mappings['member_value_size'] = 16
 
       else:
         template_filename = 'read_data-check_signature-unsupported.c'
@@ -624,6 +640,8 @@ class SourceGenerator(object):
           the structure members.
       output_filename (str): name of the output file.
     """
+    # TODO: add support for debug output of trailing units, such as "X bytes"
+
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
 
@@ -858,6 +876,73 @@ class SourceGenerator(object):
 
     with open(output_filename, access_mode, encoding='utf8') as file_object:
       file_object.write(output_data)
+
+  def _GenerateRuntimeStructureTestSourceFile(
+      self, data_type_definition, members_configuration):
+    """Generates a runtime structure test source file.
+
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+      members_configuration (list[dict]): code generation configuration of
+          the structure members.
+    """
+    library_name = 'lib{0:s}'.format(self._prefix)
+    template_mappings = self._GetTemplateMappings(
+        library_name=library_name, structure_name=data_type_definition.name)
+
+    template_directory = os.path.join(
+        self._templates_path, 'runtime_structure_test.c')
+
+    if not self._prefix:
+      output_filename = 'runtime_structure_test.c'
+    else:
+      output_filename = os.path.join('tests', '{0:s}_test_{1:s}.c'.format(
+          self._prefix, data_type_definition.name))
+
+    logging.info('Writing: {0:s}'.format(output_filename))
+
+    template_filename = os.path.join(template_directory, 'header.c')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
+
+    template_filename = os.path.join(template_directory, 'includes.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
+
+    # TODO: generate test data.
+    template_filename = os.path.join(template_directory, 'test_data.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
+
+    template_filename = os.path.join(template_directory, 'body-start.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
+
+    template_filename = os.path.join(template_directory, 'initialize.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
+
+    template_filename = os.path.join(template_directory, 'free.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
+
+    template_filename = os.path.join(template_directory, 'read_data.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
+
+    template_filename = os.path.join(
+        template_directory, 'read_file_io_handle.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
+
+    # TODO: add support for get functions.
+
+    template_filename = os.path.join(template_directory, 'body-end.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
+
+    template_filename = os.path.join(template_directory, 'main.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GenerateStoredStructureHeader(
       self, data_type_definition, members_configuration, output_filename):
@@ -1404,6 +1489,8 @@ class SourceGenerator(object):
       self._GenerateRuntimeStructureHeaderFile(
           definition, members_configuration)
       self._GenerateRuntimeStructureSourceFile(
+          definition, members_configuration)
+      self._GenerateRuntimeStructureTestSourceFile(
           definition, members_configuration)
       self._GenerateStoredStructureHeaderFile(definition, members_configuration)
 

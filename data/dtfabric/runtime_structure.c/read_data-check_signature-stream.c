@@ -7,7 +7,7 @@
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: invalid ${member_name_description}.",
+		 "%s: unsupported ${member_name_description}.",
 		 function );
 
 		return( -1 );
