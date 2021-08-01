@@ -33,7 +33,7 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	result = ${prefix}_test_open_file_io_handle(
 	          &file_io_handle,
 	          ${prefix}_test_${structure_name}_data1,
-	          76,
+	          ${test_data_size},
 	          &error );
 
 	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -124,7 +124,7 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	result = ${prefix}_test_open_file_io_handle(
 	          &file_io_handle,
 	          ${prefix}_test_${structure_name}_data1,
-	          8,
+	          1,
 	          &error );
 
 	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -176,7 +176,7 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	result = ${prefix}_test_open_file_io_handle(
 	          &file_io_handle,
 	          ${prefix}_test_${structure_name}_data1,
-	          76,
+	          ${test_data_size},
 	          &error );
 
 	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(

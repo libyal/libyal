@@ -102,6 +102,33 @@ class SourceGenerator(object):
     self._templates_path = templates_path
     self._template_string_generator = template_string.TemplateStringGenerator()
 
+  def _FormatTestData(self, data):
+    """Formats the test data as a C byte array.
+
+    Args:
+      data (bytes): data.
+
+    Returns:
+      str: data as a C byte array.
+    """
+    # TODO: print text as text?
+
+    hexadecimal_lines = []
+    data_size = len(data)
+    for block_index in range(0, data_size, 16):
+      data_string = data[block_index:block_index + 16]
+
+      hexadecimal_string = ', '.join([
+          '0x{0:02x}'.format(byte_value)
+          for byte_value in data_string[0:16]])
+
+      if len(data_string) < 16 or block_index + 16 == data_size:
+        hexadecimal_lines.append('\t{0:s}'.format(hexadecimal_string))
+      else:
+        hexadecimal_lines.append('\t{0:s},'.format(hexadecimal_string))
+
+    return '\n'.join(hexadecimal_lines)
+
   def _GenerateRuntimeStructureHeader(
       self, data_type_definition, data_type_definition_name,
       members_configuration, output_filename):
@@ -904,6 +931,11 @@ class SourceGenerator(object):
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure_test.c')
 
+    test_data = self._ReadTestDataFile(data_type_definition.name)
+
+    template_mappings['test_data'] = self._FormatTestData(test_data)
+    template_mappings['test_data_size'] = len(test_data)
+
     if not self._prefix:
       output_filename = 'runtime_structure_test.c'
     else:
@@ -919,7 +951,6 @@ class SourceGenerator(object):
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
 
-    # TODO: generate test data.
     template_filename = os.path.join(template_directory, 'test_data.c')
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
@@ -954,6 +985,9 @@ class SourceGenerator(object):
     template_filename = os.path.join(template_directory, 'main.c')
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
+
+    del template_mappings['test_data']
+    del template_mappings['test_data_size']
 
   def _GenerateStoredStructureHeader(
       self, data_type_definition, members_configuration, output_filename):
@@ -1350,6 +1384,26 @@ class SourceGenerator(object):
       template_mappings['structure_name_upper_case'] = structure_name.upper()
 
     return template_mappings
+
+  def _ReadTestDataFile(self, type_name, sequence_number=1):
+    """Reads a test data file.
+
+    Args:
+      type_name (str): name of type.
+      sequence_number (int): sequence number.
+
+    Returns:
+      bytes: contents of test data file.
+    """
+    test_data_filename = '{0:s}.{1:d}'.format(type_name, sequence_number)
+    test_data_file = os.path.join('tests', 'data', test_data_filename)
+
+    test_data = b''
+    if os.path.exists(test_data_file):
+      with open(test_data_file, 'rb') as file_object:
+        test_data = file_object.read()
+
+    return test_data
 
   def _SortIncludeHeaders(self, output_filename):
     """Sorts the include headers within a source file.

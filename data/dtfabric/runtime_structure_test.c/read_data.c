@@ -32,7 +32,7 @@ int ${prefix}_test_${structure_name}_read_data(
 	result = ${library_name}_${structure_name}_read_data(
 	          ${structure_name},
 	          ${prefix}_test_${structure_name}_data1,
-	          76,
+	          ${test_data_size},
 	          &error );
 
 	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -54,7 +54,7 @@ int ${prefix}_test_${structure_name}_read_data(
 	result = ${library_name}_${structure_name}_read_data(
 	          NULL,
 	          ${prefix}_test_${structure_name}_data1,
-	          76,
+	          ${test_data_size},
 	          &error );
 
 	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -72,7 +72,7 @@ int ${prefix}_test_${structure_name}_read_data(
 	result = ${library_name}_${structure_name}_read_data(
 	          ${structure_name},
 	          NULL,
-	          76,
+	          ${test_data_size},
 	          &error );
 
 	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -132,7 +132,7 @@ int ${prefix}_test_${structure_name}_read_data(
 	result = ${library_name}_${structure_name}_read_data(
 	          ${structure_name},
 	          ${prefix}_test_${structure_name}_data1,
-	          76,
+	          ${test_data_size},
 	          &error );
 
 	if( ${prefix}_test_memcpy_attempts_before_fail != -1 )
@@ -164,7 +164,7 @@ int ${prefix}_test_${structure_name}_read_data(
 	result = ${library_name}_${structure_name}_read_data(
 	          ${structure_name},
 	          ${prefix}_test_${structure_name}_data1,
-	          76,
+	          ${test_data_size},
 	          &error );
 
 	byte_stream_copy_from_uint32_little_endian(
@@ -192,7 +192,7 @@ int ${prefix}_test_${structure_name}_read_data(
 	result = ${library_name}_${structure_name}_read_data(
 	          ${structure_name},
 	          ${prefix}_test_${structure_name}_data1,
-	          76,
+	          ${test_data_size},
 	          &error );
 
 	byte_stream_copy_from_uint32_little_endian(
