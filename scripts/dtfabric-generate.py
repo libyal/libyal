@@ -96,6 +96,8 @@ class SourceGenerator(object):
     """
     super(SourceGenerator, self).__init__()
     self._definitions_registry = registry.DataTypeDefinitionsRegistry()
+    self._generate_structure_member_contents_hint = True
+    self._generate_structure_member_size_hint = False
     self._prefix = None
     self._templates_path = templates_path
     self._template_string_generator = template_string.TemplateStringGenerator()
@@ -240,7 +242,7 @@ class SourceGenerator(object):
         has_uuid_member = True
 
       member_data_type = getattr(member_definition, 'member_data_type', None)
-      if member_data_type in ('filetime', ):
+      if member_data_type in ('filetime', 'posix_time'):
         has_datetime_member = True
 
     library_name = 'lib{0:s}'.format(self._prefix)
@@ -568,8 +570,23 @@ class SourceGenerator(object):
       template_filename = 'read_data-unsupported.c'
 
       type_indicator = member_data_type_definition.TYPE_INDICATOR
-      if (type_indicator == definitions.TYPE_INDICATOR_INTEGER and
-          data_type_size and data_type_size > 1):
+
+      if data_type == 'filetime':
+        template_filename = 'read_data-unsigned_integer.c'
+
+        # TODO: get byte order from member_data_type_definition.
+        template_mappings['byte_order'] = 'little_endian'
+        template_mappings['data_type'] = 'uint64'
+
+      elif data_type == 'posix_time':
+        template_filename = 'read_data-unsigned_integer.c'
+
+        # TODO: get byte order from member_data_type_definition.
+        template_mappings['byte_order'] = 'little_endian'
+        template_mappings['data_type'] = 'uint32'
+
+      elif (type_indicator == definitions.TYPE_INDICATOR_INTEGER and
+            data_type_size and data_type_size > 1):
         if data_type.startswith('uint'):
           template_filename = 'read_data-unsigned_integer.c'
         else:
@@ -603,15 +620,6 @@ class SourceGenerator(object):
 
       elif type_indicator == definitions.TYPE_INDICATOR_UUID:
         template_filename = 'read_data-guid.c'
-
-      else:
-        member_data_type = getattr(member_definition, 'member_data_type', None)
-        if member_data_type == 'filetime':
-          template_filename = 'read_data-unsigned_integer.c'
-
-          # TODO: get byte order from member_data_type_definition.
-          template_mappings['byte_order'] = 'little_endian'
-          template_mappings['data_type'] = 'uint64'
 
       if member_definition.description:
         description = member_definition.description
@@ -677,7 +685,14 @@ class SourceGenerator(object):
       template_filename = 'read_data-debug-unsupported.c'
 
       type_indicator = member_data_type_definition.TYPE_INDICATOR
-      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+
+      if data_type == 'filetime':
+        template_filename = 'read_data-debug-filetime.c'
+
+      elif data_type == 'posix_time':
+        template_filename = 'read_data-debug-posix_time.c'
+
+      elif type_indicator == definitions.TYPE_INDICATOR_INTEGER:
         debug_format = members_configuration.get(member_name, {}).get(
             'debug_format', self._DEBUG_FORMAT_DECIMAL)
 
@@ -717,9 +732,10 @@ class SourceGenerator(object):
         if supported_values:
           format_indicator = ['%c'] * len(supported_values[0])
           for supported_value in supported_values:
-            for index, character in enumerate(supported_value):
-              if not character.isalnum():
-                format_indicator[index] = '\\x%02" PRIx8 "'
+            if isinstance(supported_value, str):
+              for index, character in enumerate(supported_value):
+                if not character.isalnum():
+                  format_indicator[index] = '\\x%02" PRIx8 "'
 
           member_data_arguments = []
           for byte_index in range(len(supported_values[0])):
@@ -755,11 +771,6 @@ class SourceGenerator(object):
 
       elif type_indicator == definitions.TYPE_INDICATOR_UUID:
         template_filename = 'read_data-debug-guid.c'
-
-      else:
-        member_data_type = getattr(member_definition, 'member_data_type', None)
-        if member_data_type == 'filetime':
-          template_filename = 'read_data-debug-filetime.c'
 
       # Use the member name as the debug description.
       description = member_name.replace('_', ' ')
@@ -1129,6 +1140,13 @@ class SourceGenerator(object):
           '\t */',
           '\tuint64_t {0:s};'.format(member_name)]
 
+    elif data_type_definition.name == 'posix_time':
+      lines = [
+          '\t/* {0:s}'.format(description),
+          '\t * Contains a 32-bit POSIX time value',
+          '\t */',
+          '\tuint32_t {0:s};'.format(member_name)]
+
     elif type_indicator in (
         definitions.TYPE_INDICATOR_STREAM, definitions.TYPE_INDICATOR_STRING):
       lines = [
@@ -1246,17 +1264,19 @@ class SourceGenerator(object):
 
       lines.append(line)
 
-      if not data_type_size:
-        line = '\t * TODO: unknown size'
-      elif data_type_size == 1:
-        line = '\t * Consists of 1 byte'
-      else:
-        line = '\t * Consists of {0:d} bytes'.format(data_type_size)
+      if self._generate_structure_member_size_hint:
+        if not data_type_size:
+          line = '\t * TODO: unknown size'
+        elif data_type_size == 1:
+          line = '\t * Consists of 1 byte'
+        else:
+          line = '\t * Consists of {0:d} bytes'.format(data_type_size)
 
-      lines.append(line)
+        lines.append(line)
 
-      if data_type_definition.TYPE_INDICATOR == definitions.TYPE_INDICATOR_UUID:
-        lines.append('\t * Contains a UUID')
+      if self._generate_structure_member_contents_hint:
+        if data_type_definition.TYPE_INDICATOR == definitions.TYPE_INDICATOR_UUID:
+          lines.append('\t * Contains a UUID')
 
       lines.append('\t */')
 
