@@ -756,6 +756,10 @@ class WikiPageGenerator(object):
         'development_table_of_contents': development_table_of_contents,
 
         'development_prefix': development_prefix,
+        'development_item_object': (
+            project_configuration.development_item_object),
+        'development_item_path': (
+            project_configuration.development_item_path.replace('\\', '\\\\')),
         'development_main_object': (
             project_configuration.development_main_object),
         'development_main_object_filename': (
@@ -1091,6 +1095,9 @@ class PythonDevelopmentPageGenerator(WikiPageGenerator):
       else:
         self._GenerateSection(
             'main_object.txt', template_mappings, output_writer)
+
+    if project_configuration.development_item_object:
+      self._GenerateSection('item_object.txt', template_mappings, output_writer)
 
     if project_configuration.development_pytsk3:
       if project_configuration.development_glob:
@@ -1439,8 +1446,8 @@ def Main():
       ('Development', DevelopmentPageGenerator),
       ('Home', HomePageGenerator),
       ('Mounting', MountingPageGenerator),
-      ('C development', CDevelopmentPageGenerator),
-      ('Python development', PythonDevelopmentPageGenerator),
+      ('C-development', CDevelopmentPageGenerator),
+      ('Python-development', PythonDevelopmentPageGenerator),
       ('Testing', TestingPageGenerator),
       ('Troubleshooting', TroubleshootingPageGenerator),
   ]

@@ -917,10 +917,16 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           template_filename = os.path.join(
               template_directory, template_filename)
 
-      if not template_filename or not os.path.exists(template_filename):
+      if not template_filename:
         logging.warning((
             'Unable to generate Python type object source code for: '
-            '{0:s}.{1:s} missing template: {2:s}').format(
+            '{0:s}.{1:s} missing template').format(type_name, type_function))
+        continue
+
+      if not os.path.exists(template_filename):
+        logging.warning((
+            'Unable to generate Python type object source code for: '
+            '{0:s}.{1:s} not such template file: {2:s}').format(
                 type_name, type_function, template_filename))
         continue
 

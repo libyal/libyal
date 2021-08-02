@@ -311,13 +311,15 @@ class ProjectConfiguration(BaseConfiguration):
     # TODO: add attributes below to docstring.
 
     # Development configuration.
+    self.development_glob = False
+    self.development_item_object = None
+    self.development_item_path = None
     self.development_main_object = None
     self.development_main_object_filename = None
     self.development_main_object_pre_open_python = None
     self.development_main_object_post_open_python = None
     self.development_main_object_post_open_file_object_python = None
     self.development_main_object_size = None
-    self.development_glob = False
     self.development_pytsk3 = False
 
     # Troubleshooting configuration.
@@ -358,6 +360,12 @@ class ProjectConfiguration(BaseConfiguration):
     if features:
       self.development_glob = 'glob' in features
       self.development_pytsk3 = 'pytsk3' in features
+
+    self.development_item_object = self._GetConfigValue(
+        config_parser, 'development', 'item_object')
+
+    self.development_item_path = self._GetConfigValue(
+        config_parser, 'development', 'item_path')
 
     self.development_main_object = self._GetConfigValue(
         config_parser, 'development', 'main_object')

@@ -1,0 +1,32 @@
+# Retrieve ${development_item_object}s
+
+## Retrieve the root ${development_item_object}
+
+```
+${development_prefix}_${development_main_object} = py${development_prefix}.file()
+${development_main_object_pre_open_python}
+${development_prefix}_${development_main_object}.open("NTUSER.DAT")
+${development_main_object_post_open_python}
+root_${development_item_object} = ${development_prefix}_${development_main_object}.get_root_${development_item_object}()
+
+...
+
+${development_prefix}_${development_main_object}.close()
+```
+
+## Retrieve a ${development_item_object} by path
+
+```
+${development_prefix}_${development_main_object} = py${development_prefix}.file()
+${development_main_object_pre_open_python}
+${development_prefix}_${development_main_object}.open("NTUSER.DAT")
+${development_main_object_post_open_python}
+${development_item_object} = ${development_prefix}_${development_main_object}.get_${development_item_object}_by_path("${development_item_path}")
+
+...
+
+${development_prefix}_${development_main_object}.close()
+```
+
+Note that the path is relative to the root ${development_item_object} in the ${development_main_object}.
+

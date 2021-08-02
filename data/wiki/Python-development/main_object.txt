@@ -1,16 +1,20 @@
 # Open ${development_main_object}
 
+## Open a ${development_main_object} by path
+
 ```
 ${development_prefix}_${development_main_object} = ${python_bindings_name}.${development_main_object}()
 ${development_main_object_pre_open_python}
 ${development_prefix}_${development_main_object}.open("${development_main_object_filename}")
 ${development_main_object_post_open_python}
+...
+
 ${development_prefix}_${development_main_object}.close()
 ```
 
-The explicit call to ${development_prefix}_${development_main_object}.close() is not required.
+The explicit call to ${development_prefix}_${development_main_object}.close() is not required. Close only must be called once all operations on the ${development_main_object} have been completed.
 
-# Open ${development_main_object} using a file-like object
+## Open a ${development_main_object} using a file-like object
 
 ```
 file_object = open("${development_main_object_filename}", "rb")
@@ -19,8 +23,10 @@ ${development_prefix}_${development_main_object} = ${python_bindings_name}.${dev
 ${development_main_object_pre_open_python}
 ${development_prefix}_${development_main_object}.open_file_object(file_object)
 ${development_main_object_post_open_file_object_python}
+...
+
 ${development_prefix}_${development_main_object}.close()
 ```
 
-The explicit call to ${development_prefix}_${development_main_object}.close() is not required.
+The explicit call to ${development_prefix}_${development_main_object}.close() is not required. Close only must be called once all operations on the ${development_main_object} have been completed and will not close the file-like object itself.
 
