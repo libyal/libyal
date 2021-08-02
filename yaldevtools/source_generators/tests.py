@@ -2007,12 +2007,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if function_prototype.name.endswith('_read_file_io_handle'):
           with_read_file_io_handle_function = True
 
-        io_handle_argument = function_prototype.arguments[1]
-        io_handle_argument_string = io_handle_argument.CopyToString()
+        if len(function_prototype.arguments) >= 2:
+          io_handle_argument = function_prototype.arguments[1]
+          io_handle_argument_string = io_handle_argument.CopyToString()
 
-        if io_handle_argument_string == '{0:s}_io_handle_t *io_handle'.format(
-            project_configuration.library_name):
-          with_io_handle = True
+          if io_handle_argument_string == '{0:s}_io_handle_t *io_handle'.format(
+              project_configuration.library_name):
+            with_io_handle = True
 
     template_names.append('header.c')
 
@@ -2862,10 +2863,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       dict[str, str]: string template mappings, where the key maps to the name
           of a template variable.
     """
-    template_mappings = super(
-        TestSourceFileGenerator, self)._GetTemplateMappings(
-            project_configuration)
-
     library_tests = set(api_functions)
     library_tests = library_tests.union(set(api_types))
     library_tests = library_tests.union(set(internal_functions))
@@ -2877,11 +2874,19 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         set(api_functions_with_input))
     library_tests_with_input = sorted(library_tests_with_input)
 
+    shared_libs = list(makefile_am_file.libraries)
+    if 'pthread' in shared_libs:
+      shared_libs.remove('pthread')
+
+    template_mappings = super(
+        TestSourceFileGenerator, self)._GetTemplateMappings(
+            project_configuration)
+
     template_mappings['library_tests'] = ' '.join(library_tests)
     template_mappings['library_tests_with_input'] = ' '.join(
         library_tests_with_input)
 
-    template_mappings['shared_libs'] = ' '.join(makefile_am_file.libraries)
+    template_mappings['shared_libs'] = ' '.join(shared_libs)
 
     # TODO: determine tools tests
     template_mappings['tools_tests'] = ''

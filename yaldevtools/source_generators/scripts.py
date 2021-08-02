@@ -106,10 +106,12 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
     mount_tool_filename = os.path.join(
         project_configuration.tools_directory, mount_tool_filename)
 
+    shared_libs = list(makefile_am_file.libraries)
+
     template_mappings = self._GetTemplateMappings(project_configuration)
     template_mappings['local_libs'] = ' '.join(
         sorted(makefile_am_file.libraries))
-    template_mappings['shared_libs'] = ' '.join(makefile_am_file.libraries)
+    template_mappings['shared_libs'] = ' '.join(shared_libs)
 
     if self._experimental:
       self._GenerateRunTestsSh(
