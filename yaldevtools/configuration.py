@@ -361,10 +361,10 @@ class ProjectConfiguration(BaseConfiguration):
       self.development_glob = 'glob' in features
       self.development_pytsk3 = 'pytsk3' in features
 
-    self.development_item_object = self._GetConfigValue(
+    self.development_item_object = self._GetOptionalConfigValue(
         config_parser, 'development', 'item_object')
 
-    self.development_item_path = self._GetConfigValue(
+    self.development_item_path = self._GetOptionalConfigValue(
         config_parser, 'development', 'item_path')
 
     self.development_main_object = self._GetConfigValue(
@@ -711,7 +711,7 @@ class ProjectConfiguration(BaseConfiguration):
               self.project_year_of_creation))
 
     features = self._GetOptionalConfigValue(
-        config_parser, u'project', u'features', default_value=[])
+        config_parser, 'project', 'features', default_value=[])
 
     self.supports_debug_output = 'debug_output' in features
     self.deploy_to_nuget = 'nuget' in features

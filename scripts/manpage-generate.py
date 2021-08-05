@@ -39,7 +39,7 @@ def Main():
   options = argument_parser.parse_args()
 
   if not options.configuration_file:
-    print('Config file missing.')
+    print('Configuration file missing.')
     print('')
     argument_parser.print_help()
     print('')
