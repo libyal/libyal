@@ -11,7 +11,6 @@ int libuna_codepage_${codepage_name}_copy_from_byte_stream(
 	static char *function                             = "libuna_codepage_${codepage_name}_copy_from_byte_stream";
 	libuna_unicode_character_t safe_unicode_character = 0;
 	size_t safe_byte_stream_index                     = 0;
-	uint8_t additional_character                      = 0;
 	uint8_t byte_stream_character                     = 0;
 
 	if( unicode_character == NULL )

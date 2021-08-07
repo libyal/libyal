@@ -1,4 +1,4 @@
-/* Copies an Unicode character to a byte stream
+/* Copies an Unicode character to a ${codepage_description} encoded byte stream
  * Returns 1 if successful or -1 on error
  */
 int libuna_codepage_${codepage_name}_copy_to_byte_stream(
@@ -8,8 +8,9 @@ int libuna_codepage_${codepage_name}_copy_to_byte_stream(
      size_t *byte_stream_index,
      libcerror_error_t **error )
 {
-	static char *function      = "libuna_codepage_${codepage_name}_copy_to_byte_stream";
-	uint16_t byte_stream_value = 0x001a;
+	static char *function         = "libuna_codepage_${codepage_name}_copy_to_byte_stream";
+	size_t safe_byte_stream_index = 0;
+	uint16_t byte_stream_value    = 0x001a;
 
 	if( byte_stream == NULL )
 	{
@@ -44,7 +45,9 @@ int libuna_codepage_${codepage_name}_copy_to_byte_stream(
 
 		return( -1 );
 	}
-	if( *byte_stream_index >= byte_stream_size )
+	safe_byte_stream_index = *byte_stream_index;
+
+	if( safe_byte_stream_index >= byte_stream_size )
 	{
 		libcerror_error_set(
 		 error,

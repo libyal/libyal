@@ -33,6 +33,7 @@ class SourceGenerator(object):
     self._templates_path = templates_path
     self._template_string_generator = template_string.TemplateStringGenerator()
     self._unicode_mappings = {}
+    self._unicode_values = {}
 
   def _GenerateSection(
       self, template_filename, template_mappings, output_filename,
@@ -138,7 +139,7 @@ class SourceGenerator(object):
     first_unicode_value = None
     last_unicode_value = None
 
-    groups = {}
+    unicode_mappings_groups = {}
     for unicode_value in sorted(self._unicode_mappings):
       if first_unicode_value is None:
         first_unicode_value = unicode_value
@@ -146,35 +147,36 @@ class SourceGenerator(object):
             last_unicode_value + 16 < unicode_value):
         first_unicode_value = unicode_value
 
-      group_base_value = first_unicode_value & ~( 0x0007 )
-      if group_base_value not in groups:
-        groups[group_base_value] = [unicode_value]
+      base_unicode_value = first_unicode_value & ~( 0x0007 )
+      if base_unicode_value not in unicode_mappings_groups:
+        unicode_mappings_groups[base_unicode_value] = [unicode_value]
       else:
-        groups[group_base_value].append(unicode_value)
+        unicode_mappings_groups[base_unicode_value].append(unicode_value)
 
       last_unicode_value = unicode_value
 
-    for group_base_value, unicode_values in sorted(groups.items()):
+    for base_unicode_value, unicode_values in sorted(
+        unicode_mappings_groups.items()):
       if len(unicode_values) < 8:
         continue
 
       number_of_table_values = 0
-      last_unicode_value = group_base_value - 1
+      last_unicode_value = base_unicode_value - 1
       lines = []
       table_values = []
 
       for unicode_value in sorted(unicode_values):
-        codepage_value = self._unicode_mappings[unicode_value]
-
         while last_unicode_value < unicode_value - 1:
           last_unicode_value += 1
-          table_values.append('0x1a')
+          codepage_value = self._unicode_values.get(last_unicode_value, 0x1a)
+          table_values.append('0x{0:02x}'.format(codepage_value))
           number_of_table_values += 1
 
           if last_unicode_value % 8 == 7:
             lines.append('\t{0:s},'.format(', '.join(table_values)))
             table_values = []
 
+        codepage_value = self._unicode_values[unicode_value]
         table_values.append('0x{0:02x}'.format(codepage_value))
         number_of_table_values += 1
 
@@ -190,7 +192,7 @@ class SourceGenerator(object):
         lines[-1] = lines[-1][:-1]
 
       template_mappings['entries_base_offset'] = '0x{0:04x}'.format(
-          group_base_value)
+          base_unicode_value)
       template_mappings['number_of_entries'] = number_of_table_values
       template_mappings['table_entries'] = '\n'.join(lines)
 
@@ -233,12 +235,70 @@ class SourceGenerator(object):
         template_filename, template_mappings, output_filename,
         access_mode='a')
 
+    unmapped_values = {}
+    for base_unicode_value, unicode_values in sorted(
+        unicode_mappings_groups.items()):
+      if len(unicode_values) < 8:
+        for unicode_value in sorted(unicode_values):
+          unmapped_values[unicode_value] = self._unicode_mappings[unicode_value]
+
+    # TODO: determine directly mapped values.
     template_filename = os.path.join(
-        templates_path, 'copy_to_byte_stream-body.c')
+        templates_path, 'copy_to_byte_stream-body-direct.c')
 
     self._GenerateSection(
         template_filename, template_mappings, output_filename,
         access_mode='a')
+
+    for base_unicode_value, unicode_values in sorted(
+        unicode_mappings_groups.items()):
+      if len(unicode_values) > 8:
+        template_mappings['base_unicode_value'] = '0x{0:04x}'.format(
+            base_unicode_value)
+        template_mappings['first_unicode_value'] = '0x{0:04x}'.format(
+            unicode_values[0])
+        template_mappings['last_unicode_value'] = '0x{0:04x}'.format(
+            unicode_values[-1] + 1)
+
+        template_filename = os.path.join(
+            templates_path, 'copy_to_byte_stream-body-mapped.c')
+
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
+
+        del template_mappings['base_unicode_value']
+        del template_mappings['first_unicode_value']
+        del template_mappings['last_unicode_value']
+
+    if unmapped_values:
+      template_filename = os.path.join(
+          templates_path, 'copy_to_byte_stream-body-switch-start.c')
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
+
+      for unicode_value, codepage_value in sorted(unmapped_values.items()):
+        template_mappings['codepage_value'] = '0x{0:02x}'.format(codepage_value)
+        template_mappings['unicode_value'] = '0x{0:04x}'.format(unicode_value)
+
+        template_filename = os.path.join(
+            templates_path, 'copy_to_byte_stream-body-switch-entry.c')
+
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
+
+        del template_mappings['codepage_value']
+        del template_mappings['unicode_value']
+
+      template_filename = os.path.join(
+          templates_path, 'copy_to_byte_stream-body-switch-end.c')
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
 
     template_filename = os.path.join(
         templates_path, 'copy_to_byte_stream-end.c')
@@ -324,7 +384,11 @@ class SourceGenerator(object):
     template_mappings['copyright'] = '2008-{0:d}'.format(date.year)
 
     codepage_description = self._codepage_name.replace('_', ' ')
-    template_mappings['codepage_description'] = codepage_description.title()
+    codepage_description = codepage_description.title()
+    if codepage_description.startswith('Mac '):
+      codepage_description = 'Mac{0:s}'.format(codepage_description[4:])
+
+    template_mappings['codepage_description'] = codepage_description
     template_mappings['codepage_name'] = self._codepage_name
     template_mappings['codepage_name_upper_case'] = self._codepage_name.upper()
 
@@ -353,6 +417,8 @@ class SourceGenerator(object):
     # TODO: add support for multi-byte characters
 
     self._codepage_values = {}
+    self._unicode_values = {}
+
     with open(definitions_file, 'r', encoding='utf-8') as file_object:
       for line in file_object.readlines():
         match_groups = self._CODEPAGE_MAPPINGS_REGEX.match(line)
@@ -360,7 +426,9 @@ class SourceGenerator(object):
           try:
             codepage_value = int(match_groups[1], 16)
             unicode_value = int(match_groups[2], 16)
+
             self._codepage_values[codepage_value] = unicode_value
+            self._unicode_values[unicode_value] = codepage_value
           except (ValueError, TypeError):
             pass
 
