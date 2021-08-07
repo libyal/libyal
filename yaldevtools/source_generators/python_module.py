@@ -767,7 +767,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           template_filename, template_mappings, output_writer, output_filename,
           access_mode='a')
 
-      if with_parent:
+      if open_support:
+        template_filename = 'free_with_input.c'
+      elif with_parent:
         template_filename = 'free_with_parent.c'
       else:
         template_filename = 'free.c'
