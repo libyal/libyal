@@ -1,5 +1,5 @@
 /*
- * Definitions for ${codepage_description} codepage tests
+ * ${codepage_description} codepage functions
  *
  * Copyright (C) ${copyright}, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -18,26 +18,4 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#if !defined( _UNA_TEST_CODEPAGE_${codepage_name_upper_case}_H )
-#define _UNA_TEST_CODEPAGE_${codepage_name_upper_case}_H
-
-#include <common.h>
-#include <types.h>
-
-#include "una_test_types.h"
-
-#if defined( __cplusplus )
-extern "C" {
-#endif
-
-una_test_byte_stream_to_unicode_t una_test_codepage_${codepage_name}_byte_stream_to_unicode[ ${number_of_test_mappings} ] = {
-${test_mappings}
-};
-
-#if defined( __cplusplus )
-}
-#endif
-
-#endif /* !defined( _UNA_TEST_CODEPAGE_${codepage_name_upper_case}_H ) */
 

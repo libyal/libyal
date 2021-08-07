@@ -1,5 +1,5 @@
 /*
- * Definitions for ${codepage_description} codepage tests
+ * ${codepage_description} codepage functions
  *
  * Copyright (C) ${copyright}, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,25 +19,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _UNA_TEST_CODEPAGE_${codepage_name_upper_case}_H )
-#define _UNA_TEST_CODEPAGE_${codepage_name_upper_case}_H
+#if !defined( _LIBUNA_CODEPAGE_${codepage_name_upper_case}_H )
+#define _LIBUNA_CODEPAGE_${codepage_name_upper_case}_H
 
 #include <common.h>
 #include <types.h>
 
-#include "una_test_types.h"
+#include "libuna_extern.h"
+#include "libuna_libcerror.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-una_test_byte_stream_to_unicode_t una_test_codepage_${codepage_name}_byte_stream_to_unicode[ ${number_of_test_mappings} ] = {
-${test_mappings}
-};
+LIBUNA_EXTERN \
+int libuna_codepage_${codepage_name}_copy_from_byte_stream(
+     libuna_unicode_character_t *unicode_character,
+     const uint8_t *byte_stream,
+     size_t byte_stream_size,
+     size_t *byte_stream_index,
+     libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _UNA_TEST_CODEPAGE_${codepage_name_upper_case}_H ) */
+#endif /* !defined( _LIBUNA_CODEPAGE_${codepage_name_upper_case}_H ) */
 
