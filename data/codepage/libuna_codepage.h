@@ -26,6 +26,7 @@
 #include <types.h>
 
 #include "libuna_libcerror.h"
+#include "libuna_types.h"
 
 #if defined( __cplusplus )
 extern "C" {

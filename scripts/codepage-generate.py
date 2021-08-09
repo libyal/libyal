@@ -253,12 +253,10 @@ class SourceGenerator(object):
     for base_unicode_value, unicode_values in sorted(
         unicode_mappings_groups.items()):
       if len(unicode_values) > 8:
-        template_mappings['base_unicode_value'] = '0x{0:04x}'.format(
-            base_unicode_value)
         template_mappings['first_unicode_value'] = '0x{0:04x}'.format(
-            unicode_values[0])
+            unicode_values[0] & ~( 0x0007 ))
         template_mappings['last_unicode_value'] = '0x{0:04x}'.format(
-            unicode_values[-1] + 1)
+            (unicode_values[-1] & ~( 0x0007 )) + 8)
 
         template_filename = os.path.join(
             templates_path, 'copy_to_byte_stream-body-mapped.c')
@@ -267,7 +265,6 @@ class SourceGenerator(object):
             template_filename, template_mappings, output_filename,
             access_mode='a')
 
-        del template_mappings['base_unicode_value']
         del template_mappings['first_unicode_value']
         del template_mappings['last_unicode_value']
 

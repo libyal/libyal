@@ -3,4 +3,5 @@
 
 #include "libuna_codepage_${codepage_name}.h"
 #include "libuna_libcerror.h"
+#include "libuna_types.h"
 

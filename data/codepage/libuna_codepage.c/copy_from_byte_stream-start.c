@@ -9,7 +9,7 @@ int libuna_codepage_${codepage_name}_copy_from_byte_stream(
      libcerror_error_t **error )
 {
 	static char *function                             = "libuna_codepage_${codepage_name}_copy_from_byte_stream";
-	libuna_unicode_character_t safe_unicode_character = 0;
+	libuna_unicode_character_t safe_unicode_character = 0xfffd;
 	size_t safe_byte_stream_index                     = 0;
 	uint8_t byte_stream_character                     = 0;
 
@@ -70,6 +70,5 @@ int libuna_codepage_${codepage_name}_copy_from_byte_stream(
 
 		return( -1 );
 	}
-	safe_unicode_character = 0xfffd;
-	byte_stream_character  = byte_stream[ safe_byte_stream_index ];
+	byte_stream_character = byte_stream[ safe_byte_stream_index++ ];
 
