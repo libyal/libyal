@@ -40,8 +40,8 @@ void ${python_module_name}_${type_name}_free(
 	}
 	if( ${python_module_name}_${type_name}->file_io_handle != NULL )
 	{
-		if( {python_module_name}_${type_name}_close(
-		     {python_module_name}_${type_name},
+		if( ${python_module_name}_${type_name}_close(
+		     ${python_module_name}_${type_name},
 		     NULL ) == NULL )
 		{
 			return;

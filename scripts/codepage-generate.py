@@ -82,19 +82,20 @@ class SourceGenerator(object):
     # TODO: group values in small tables
     # TODO: add suport for undefined codepage values
     # TODO: add suport for MSC
-    for codepage_value, unicode_value in sorted(
-        self._codepage_mappings.items()):
+    for codepage_value in sorted(self._codepage_mappings):
 
       if last_codepage_value is not None:
         while last_codepage_value < codepage_value - 1:
           last_codepage_value += 1
-          table_values.append('0x{0:04x}'.format(last_codepage_value))
+          unicode_value = self._codepage_values.get(last_codepage_value, 0xfffd)
+          table_values.append('0x{0:04x}'.format(unicode_value))
           number_of_table_values += 1
 
           if last_codepage_value % 8 == 7:
             lines.append('\t{0:s},'.format(', '.join(table_values)))
             table_values = []
 
+      unicode_value = self._codepage_values[codepage_value]
       table_values.append('0x{0:04x}'.format(unicode_value))
       number_of_table_values += 1
 
@@ -107,6 +108,12 @@ class SourceGenerator(object):
       last_codepage_value = codepage_value
 
     if table_values:
+      while len(table_values) < 8:
+        last_codepage_value += 1
+        unicode_value = self._codepage_values.get(last_codepage_value, 0xfffd)
+        table_values.append('0x{0:04x}'.format(unicode_value))
+        number_of_table_values += 1
+
       lines.append('\t{0:s}'.format(', '.join(table_values)))
       table_values = []
     else:
@@ -187,7 +194,14 @@ class SourceGenerator(object):
         last_unicode_value = unicode_value
 
       if table_values:
+        while len(table_values) < 8:
+          last_unicode_value += 1
+          codepage_value = self._unicode_values.get(last_unicode_value, 0x1a)
+          table_values.append('0x{0:02x}'.format(codepage_value))
+          number_of_table_values += 1
+
         lines.append('\t{0:s}'.format(', '.join(table_values)))
+        table_values = []
       else:
         lines[-1] = lines[-1][:-1]
 
