@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # pylint: disable=invalid-name
-"""Script to automate generation of source of the libyal libraries."""
+"""Script to generate source of the libyal libraries."""
 
 import argparse
 import logging

@@ -1546,17 +1546,17 @@ class SourceGenerator(object):
         result = False
         continue
 
-      if definition.TYPE_INDICATOR == (
-          definitions.TYPE_INDICATOR_STRUCTURE):
+      # if definition.TYPE_INDICATOR == (
+      #     definitions.TYPE_INDICATOR_STRUCTURE):
 
-        # Skip structures that are part of a type family.
-        if definition.family_definition:
-          logging.info('Skipping data type: {0:s}'.format(name))
-          continue
+      #   Skip structures that are part of a type family.
+      #   if definition.family_definition:
+      #     logging.info('Skipping data type: {0:s}'.format(name))
+      #     continue
 
-        # byte_size = definition.GetByteSize()
-        # if byte_size is None:
-        #   continue
+      #   byte_size = definition.GetByteSize()
+      #   if byte_size is None:
+      #     continue
 
       logging.info('Generating data type: {0:s}'.format(name))
 
