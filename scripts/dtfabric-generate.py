@@ -88,6 +88,11 @@ class SourceGenerator(object):
       8: '%" PRIu64 "',
   }
 
+  _NON_PRINTABLE_CHARACTERS = list(range(0, 0x20)) + list(range(0x7f, 0xa0))
+  _ESCAPE_CHARACTERS = str.maketrans({
+      value: '\\x{0:02x}'.format(value)
+      for value in _NON_PRINTABLE_CHARACTERS})
+
   def __init__(self, templates_path):
     """Initializes a source generator.
 
@@ -138,26 +143,119 @@ class SourceGenerator(object):
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
       output_filename (str): name of the output file.
     """
     library_name = 'lib{0:s}'.format(self._prefix)
     template_mappings = self._GetTemplateMappings(
         library_name=library_name, structure_name=data_type_definition_name)
 
-    structure_members = self._GetRuntimeStructureHeaderMembers(
-        data_type_definition, members_configuration)
-
-    template_mappings['structure_members'] = structure_members
-
     template_filename = os.path.join(
-        self._templates_path, 'runtime_structure.h', 'structure.h')
+        self._templates_path, 'runtime_structure.h', 'structure-start.h')
 
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
 
-    del template_mappings['structure_members']
+    has_structure_members = False
+
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+      member_configuration = members_configuration.get(member_name, {})
+
+      member_usage = member_configuration.get('usage', self._USAGE_DEBUG)
+      if member_usage != self._USAGE_IN_STRUCT:
+        continue
+
+      member_options = member_configuration.get('__options__', [])
+
+      if has_structure_members:
+        template_filename = os.path.join(
+            self._templates_path, 'runtime_structure.h',
+            'structure_member-separator.h')
+
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
+
+      if member_definition.description:
+        description = member_definition.description
+      else:
+        description = member_name.replace('_', ' ')
+
+      # TODO: remove leading "The", kept for testing purposed for now.
+      # description = '{0:s}{1:s}'.format(
+      #     description[0].upper(), description[1:])
+      description = 'The {0:s}{1:s}'.format(
+          description[0].lower(), description[1:])
+
+      member_data_size = 0
+      member_data_type = None
+      template_name = None
+
+      # TODO: handle stream / string type
+      # TODO: handle padding type
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
+
+      type_indicator = member_data_type_definition.TYPE_INDICATOR
+
+      if member_data_type_definition.name == 'filetime':
+        template_name = 'structure_member-filetime.h'
+
+      elif member_data_type_definition.name == 'posix_time':
+        template_name = 'structure_member-posix_time.h'
+
+      elif type_indicator in (
+          definitions.TYPE_INDICATOR_STREAM, definitions.TYPE_INDICATOR_STRING):
+        if 'fixed_size' in member_options:
+          member_data_size = member_data_type_definition.GetByteSize() + 1
+
+          template_name = 'structure_member-fixed_size_string.h'
+        else:
+          template_name = 'structure_member-string.h'
+
+      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
+        template_name = 'structure_member-uuid.h'
+
+      else:
+        member_data_type = self._GetRuntimeDataType(member_data_type_definition)
+        if member_data_type:
+          template_name = 'structure_member-data_type.h'
+
+      if not template_name:
+        template_name = 'structure_member-todo.h'
+
+      template_mappings['structure_member_data_size'] = member_data_size
+      template_mappings['structure_member_data_type'] = member_data_type
+      template_mappings['structure_member_description'] = description
+      template_mappings['structure_member_name'] = member_name
+
+      template_filename = os.path.join(
+          self._templates_path, 'runtime_structure.h', template_name)
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename, access_mode='a')
+
+      del template_mappings['structure_member_data_size']
+      del template_mappings['structure_member_data_type']
+      del template_mappings['structure_member_description']
+      del template_mappings['structure_member_name']
+
+      has_structure_members = True
+
+    if not has_structure_members:
+      template_filename = os.path.join(
+          self._templates_path, 'runtime_structure.h', 'structure_member-dummy.h')
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename, access_mode='a')
+
+    template_filename = os.path.join(
+        self._templates_path, 'runtime_structure.h', 'structure-end.h')
+
+    self._GenerateSection(
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GenerateRuntimeStructureHeaderFile(
       self, data_type_definition, members_configuration):
@@ -165,8 +263,8 @@ class SourceGenerator(object):
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
     """
     structure_options = members_configuration.get('__options__', {})
 
@@ -233,6 +331,63 @@ class SourceGenerator(object):
           template_filename, template_mappings, output_filename,
           access_mode='a')
 
+    # Add getter functions.
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+      member_configuration = members_configuration.get(member_name, {})
+
+      member_options = member_configuration.get('__options__', [])
+      if 'getter' not in member_options:
+        continue
+
+      template_name = None
+
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
+
+      type_indicator = member_data_type_definition.TYPE_INDICATOR
+
+      if member_data_type_definition.name == 'filetime':
+        # TODO: implement
+        pass
+
+      elif member_data_type_definition.name == 'posix_time':
+        # TODO: implement
+        pass
+
+      elif type_indicator in (
+          definitions.TYPE_INDICATOR_STREAM, definitions.TYPE_INDICATOR_STRING):
+        if 'fixed_size' in member_options:
+          template_name = 'functions-get_fixed_size_string.h'
+        else:
+          # TODO: implement
+          pass
+
+      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
+        # TODO: implement
+        pass
+
+      else:
+        member_data_type = self._GetRuntimeDataType(member_data_type_definition)
+        if member_data_type:
+          template_name = 'functions-get_data_type.h'
+
+      if not template_name:
+        continue
+
+      template_mappings['structure_member_data_type'] = member_data_type
+      template_mappings['structure_member_name'] = member_name
+
+      template_filename = os.path.join(
+          self._templates_path, 'runtime_structure.h', template_name)
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
+
+      del template_mappings['structure_member_data_type']
+      del template_mappings['structure_member_name']
+
     template_filename = os.path.join(template_directory, 'extern-end.h')
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
@@ -249,8 +404,8 @@ class SourceGenerator(object):
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
     """
     structure_options = members_configuration.get('__options__', {})
 
@@ -383,8 +538,8 @@ class SourceGenerator(object):
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
       output_filename (str): name of the output file.
     """
     template_directory = os.path.join(
@@ -443,8 +598,8 @@ class SourceGenerator(object):
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
       output_filename (str): name of the output file.
     """
     debug_variables = set()
@@ -534,13 +689,17 @@ class SourceGenerator(object):
         # things like \x00F can cause issues.
         template_filename = 'read_data-check_signature-stream.c'
 
-        template_mappings['member_value'] = supported_values[0].decode('ascii')
+        member_value = supported_values[0].decode('ascii')
+        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
+        template_mappings['member_value'] = member_value
         template_mappings['member_value_size'] = len(supported_values[0])
 
       elif type_indicator == definitions.TYPE_INDICATOR_UUID:
         template_filename = 'read_data-check_signature-stream.c'
 
-        template_mappings['member_value'] = supported_values[0].decode('ascii')
+        member_value = supported_values[0].decode('ascii')
+        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
+        template_mappings['member_value'] = member_value
         template_mappings['member_value_size'] = 16
 
       else:
@@ -569,8 +728,8 @@ class SourceGenerator(object):
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
       output_filename (str): name of the output file.
     """
     template_directory = os.path.join(
@@ -671,8 +830,8 @@ class SourceGenerator(object):
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
       output_filename (str): name of the output file.
     """
     # TODO: add support for debug output of trailing units, such as "X bytes"
@@ -830,8 +989,8 @@ class SourceGenerator(object):
       data_type_definition (DataTypeDefinition): structure data type definition.
       data_type_definition_name (str): name of the structure data type
           definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
       output_filename (str): name of the output file.
     """
     template_directory = os.path.join(
@@ -921,8 +1080,8 @@ class SourceGenerator(object):
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
     """
     library_name = 'lib{0:s}'.format(self._prefix)
     template_mappings = self._GetTemplateMappings(
@@ -995,8 +1154,8 @@ class SourceGenerator(object):
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
       output_filename (str): name of the output file.
     """
     template_mappings = self._GetTemplateMappings(
@@ -1020,8 +1179,8 @@ class SourceGenerator(object):
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
     """
     template_directory = os.path.join(
         self._templates_path, 'stored_structure.h')
@@ -1133,144 +1292,14 @@ class SourceGenerator(object):
     return self._definitions_registry.GetDefinitionByName(
         self._definitions_registry._format_definitions[0])
 
-  def _GetRuntimeStructureHeaderMember(
-      self, member_definition, members_configuration):
-    """Generates the member definition of a runtime structure header.
-
-    Args:
-      member_definition (MemberDataTypeDefinition): member data type definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
-
-    Returns:
-      list[str]: member definition of a runtime structure header.
-    """
-    member_name = member_definition.name
-
-    if member_definition.description:
-      description = member_definition.description
-    else:
-      description = member_name.replace('_', ' ')
-
-    # TODO: remove leading "The", kept for testing purposed for now.
-    # description = '{0:s}{1:s}'.format(
-    #     description[0].upper(), description[1:])
-    description = 'The {0:s}{1:s}'.format(
-        description[0].lower(), description[1:])
-
-    lines = None
-
-    # TODO: handle stream / string type
-    # TODO: handle padding type
-    data_type_definition = getattr(
-        member_definition, 'member_data_type_definition', member_definition)
-
-    type_indicator = data_type_definition.TYPE_INDICATOR
-
-    if data_type_definition.name == 'filetime':
-      lines = [
-          '\t/* {0:s}'.format(description),
-          '\t * Contains a 64-bit filetime value',
-          '\t */',
-          '\tuint64_t {0:s};'.format(member_name)]
-
-    elif data_type_definition.name == 'posix_time':
-      lines = [
-          '\t/* {0:s}'.format(description),
-          '\t * Contains a 32-bit POSIX time value',
-          '\t */',
-          '\tuint32_t {0:s};'.format(member_name)]
-
-    elif type_indicator in (
-        definitions.TYPE_INDICATOR_STREAM, definitions.TYPE_INDICATOR_STRING):
-      lines = [
-          '\t/* {0:s}'.format(description),
-          '\t */',
-          '\tuint8_t *{0:s};'.format(member_name)]
-
-    elif type_indicator == definitions.TYPE_INDICATOR_UUID:
-      lines = [
-          '\t/* {0:s}'.format(description),
-          '\t */',
-          '\tuint8_t {0:s}[ 16 ];'.format(member_name)]
-
-    else:
-      data_type = None
-      if type_indicator == definitions.TYPE_INDICATOR_CHARACTER:
-        data_type = self._CHARACTER_DATA_TYPES.get(
-            data_type_definition.size, None)
-
-      elif type_indicator == definitions.TYPE_INDICATOR_FLOATING_POINT:
-        data_type = self._FLOATING_POINT_DATA_TYPES.get(
-            data_type_definition.size, None)
-
-      elif type_indicator in (
-          definitions.TYPE_INDICATOR_BOOLEAN, definitions.TYPE_INDICATOR_INTEGER):
-        if data_type_definition.format == definitions.FORMAT_SIGNED:
-          data_type = self._SIGNED_INTEGER_DATA_TYPES.get(
-              data_type_definition.size, None)
-        else:
-          data_type = self._UNSIGNED_INTEGER_DATA_TYPES.get(
-            data_type_definition.size, None)
-
-      if data_type:
-        lines = [
-            '\t/* {0:s}'.format(description),
-            '\t */',
-            '\t{0:s} {1:s};'.format(data_type, member_name)]
-
-    if not lines:
-      lines = [
-          '\t/* {0:s}'.format(description),
-          '\t */',
-          '\t/* TODO: implement */']
-
-    return lines
-
-  def _GetRuntimeStructureHeaderMembers(
-      self, data_type_definition, members_configuration):
-    """Generates the member definitions of a runtime structure header.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
-
-    Returns:
-      str: member definitions of a runtime structure header.
-    """
-    lines = []
-
-    last_index = len(data_type_definition.members) - 1
-    for member_definition in data_type_definition.members:
-      member_usage = members_configuration.get(member_definition.name, {}).get(
-          'usage', self._USAGE_DEBUG)
-      if member_usage != self._USAGE_IN_STRUCT:
-        continue
-
-      if lines:
-        lines.append('')
-
-      member_definition_lines = self._GetRuntimeStructureHeaderMember(
-          member_definition, members_configuration)
-      lines.extend(member_definition_lines)
-
-    if not lines:
-      lines = [
-          '\t/* Dummy',
-          '\t */',
-          '\tint dummy;']
-
-    return '\n'.join(lines)
-
   def _GetStoredStructureHeaderMembers(
       self, data_type_definition, members_configuration):
     """Generates the member definitions of a stored structure header.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
-      members_configuration (list[dict]): code generation configuration of
-          the structure members.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
 
     Returns:
       str: member definitions of the stored structure header.
@@ -1343,6 +1372,35 @@ class SourceGenerator(object):
       structure_description = data_type_definition.name
 
     return structure_description.lower()
+
+  def _GetRuntimeDataType(self, data_type_definition):
+    """Retrieves a runtime data type.
+
+    Args:
+      data_type_definition (DataTypeDefinition): data type definition.
+
+    Returns:
+      str: runtime data type or None if not available.
+    """
+    type_indicator = data_type_definition.TYPE_INDICATOR
+
+    if type_indicator == definitions.TYPE_INDICATOR_CHARACTER:
+      return self._CHARACTER_DATA_TYPES.get(data_type_definition.size, None)
+
+    if type_indicator == definitions.TYPE_INDICATOR_FLOATING_POINT:
+      return self._FLOATING_POINT_DATA_TYPES.get(
+          data_type_definition.size, None)
+
+    if type_indicator in (definitions.TYPE_INDICATOR_BOOLEAN,
+                          definitions.TYPE_INDICATOR_INTEGER):
+      if data_type_definition.format == definitions.FORMAT_SIGNED:
+        return self._SIGNED_INTEGER_DATA_TYPES.get(
+            data_type_definition.size, None)
+
+      return self._UNSIGNED_INTEGER_DATA_TYPES.get(
+          data_type_definition.size, None)
+
+    return None
 
   def _GetTemplateMappings(self, library_name=None, structure_name=None):
     """Retrieves the template mappings.

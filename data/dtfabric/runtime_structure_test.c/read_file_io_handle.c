@@ -124,7 +124,7 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	result = ${prefix}_test_open_file_io_handle(
 	          &file_io_handle,
 	          ${prefix}_test_${structure_name}_data1,
-	          1,
+	          ${test_data_size} - 1,
 	          &error );
 
 	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
@@ -145,66 +145,6 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          file_io_handle,
 	          0,
 	          &error );
-
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = ${prefix}_test_close_file_io_handle(
-	          &file_io_handle,
-	          &error );
-
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 0 );
-
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	/* Test data invalid
-	 */
-	result = ${prefix}_test_open_file_io_handle(
-	          &file_io_handle,
-	          ${prefix}_test_${structure_name}_data1,
-	          ${test_data_size},
-	          &error );
-
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
-	 "file_io_handle",
-	 file_io_handle );
-
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	byte_stream_copy_from_uint32_little_endian(
-	 ${prefix}_test_${structure_name}_data1,
-	 0xffffffffUL );
-
-	result = ${library_name}_${structure_name}_read_file_io_handle(
-	          ${structure_name},
-	          file_io_handle,
-	          0,
-	          &error );
-
-	byte_stream_copy_from_uint32_little_endian(
-	 ${prefix}_test_${structure_name}_data1,
-	 0x0000004cUL );
 
 	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",

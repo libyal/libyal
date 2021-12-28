@@ -2,6 +2,3 @@ typedef struct ${library_name}_${structure_name} ${library_name}_${structure_nam
 
 struct ${library_name}_${structure_name}
 {
-${structure_members}
-};
-
