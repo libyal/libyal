@@ -1788,7 +1788,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           type object function prototype.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
+
         str: sequence type name or None.
         bool: True if the sequence type is an object type or None.
     """

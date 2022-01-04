@@ -1019,7 +1019,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           input data.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
+
         str: name of library type function.
         str: name of the test function corresponding to the library type
             function.
@@ -1054,7 +1055,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           input data.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
+
         str: name of library type function.
         str: name of the test function corresponding to the library type
             function or None if no test function could be generated.
@@ -1590,7 +1592,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           input data.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
+
         str: name of library type function.
         str: name of the test function corresponding to the library type
             function.
@@ -1947,7 +1950,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           input data.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
+
         bool: True if successful or False if not.
         bool: True if type uses libbfio or False if not.
     """
@@ -2786,7 +2790,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       makefile_am_file (MainMakefileAMFile): project main Makefile.am file.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
+
         list[str]: type names.
         list[str]: function names.
     """

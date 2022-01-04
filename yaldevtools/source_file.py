@@ -450,7 +450,8 @@ class LibraryIncludeHeaderFile(object):
     """Determines the API function test groups.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
+
         list[str]: names of API function groups without test data.
         list[str]: names of API function groups with test data.
     """
@@ -477,7 +478,8 @@ class LibraryIncludeHeaderFile(object):
     """Determines the API type test groups.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
+
         list[str]: names of API type groups without test data.
         list[str]: names of API type groups with test data.
     """
