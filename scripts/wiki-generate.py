@@ -691,6 +691,10 @@ class WikiPageGenerator(object):
       development_table_of_contents += (
           '* [Python development](Python-development)\n')
 
+    development_item_path = project_configuration.development_item_path or ''
+    if development_item_path:
+      development_item_path = development_item_path.replace('\\', '\\\\')
+
     if project_configuration.development_main_object_pre_open_python:
       development_main_object_pre_open_python = '{0:s}\n'.format(
           project_configuration.development_main_object_pre_open_python)
@@ -758,8 +762,7 @@ class WikiPageGenerator(object):
         'development_prefix': development_prefix,
         'development_item_object': (
             project_configuration.development_item_object),
-        'development_item_path': (
-            project_configuration.development_item_path.replace('\\', '\\\\')),
+        'development_item_path': development_item_path,
         'development_main_object': (
             project_configuration.development_main_object),
         'development_main_object_filename': (
