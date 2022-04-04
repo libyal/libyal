@@ -1,14 +1,3 @@
-%package -n ${library_name}-python2
-Obsoletes: ${library_name}-python < %{version}
-Provides: ${library_name}-python = %{version}
-Summary: Python 2 bindings for ${library_name}
-Group: System Environment/Libraries
-Requires: ${library_name} = %{version}-%{release} python2
-BuildRequires: python2-devel
-
-%description -n ${library_name}-python2
-Python 2 bindings for ${library_name}
-
 %package -n ${library_name}-python3
 Summary: Python 3 bindings for ${library_name}
 Group: System Environment/Libraries

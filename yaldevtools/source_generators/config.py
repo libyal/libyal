@@ -1314,11 +1314,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('build_ubuntu-end.yml')
 
-    # TODO: remove
-    # if project_configuration.HasPythonModule():
-    #   dpkg_build_dependencies.append('python2-dev')
-    #   dpkg_build_dependencies.append('python-dev-is-python3')
-
     if project_configuration.HasPythonModule():
       template_names.append('build_python_ubuntu.yml')
 
@@ -1459,8 +1454,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if project_configuration.HasPythonModule():
       dpkg_build_dependencies.extend([
-          'python-dev', 'python-setuptools', 'python3-dev',
-          'python3-setuptools'])
+          'python3-dev', 'python3-setuptools'])
 
     if 'fuse' in project_configuration.tools_build_dependencies:
       dpkg_build_dependencies.append('libfuse-dev')

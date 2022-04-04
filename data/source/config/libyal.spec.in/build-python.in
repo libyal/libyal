@@ -1,4 +1,4 @@
 %build
-%configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir} --enable-python2 --enable-python3
+%configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir} --enable-python3
 make %{?_smp_mflags}
 
