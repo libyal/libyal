@@ -5,7 +5,7 @@
 # export DH_VERBOSE=1
 
 %:
-	dh $$@ --with=autoreconf
+	dh $$@ --buildsystem=autoconf --with=autoreconf,python3
 
 .PHONY: override_dh_auto_configure
 override_dh_auto_configure:

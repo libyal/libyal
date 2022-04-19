@@ -1444,7 +1444,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       list[str]: dpkg build dependencies.
     """
     dpkg_build_dependencies = [
-        'debhelper (>= 9)', 'dh-autoreconf', 'pkg-config']
+        'debhelper (>= 9)', 'dh-autoreconf', 'dh-python', 'pkg-config']
 
     if project_configuration.HasDependencyZlib():
       dpkg_build_dependencies.append('zlib1g-dev')
