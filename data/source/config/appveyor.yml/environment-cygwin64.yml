@@ -1,8 +1,10 @@
   - TARGET: cygwin64-gcc
     BUILD_ENVIRONMENT: cygwin64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: ""
   - TARGET: cygwin64-gcc-no-optimization
     BUILD_ENVIRONMENT: cygwin64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-shared=no"
     CFLAGS: "--coverage -O0"
     CPPFLAGS: "-DOPTIMIZATION_DISABLED"
