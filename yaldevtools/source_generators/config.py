@@ -1443,8 +1443,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     Returns:
       list[str]: dpkg build dependencies.
     """
-    dpkg_build_dependencies = [
-        'debhelper (>= 9)', 'dh-autoreconf', 'pkg-config']
+    dpkg_build_dependencies = ['debhelper (>= 9)', 'dh-autoreconf']
+
+    if project_configuration.HasPythonModule():
+      dpkg_build_dependencies.append('dh-python')
+
+    dpkg_build_dependencies.append('pkg-config')
 
     if project_configuration.HasDependencyZlib():
       dpkg_build_dependencies.append('zlib1g-dev')
@@ -1453,8 +1457,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       dpkg_build_dependencies.append('libssl-dev')
 
     if project_configuration.HasPythonModule():
-      dpkg_build_dependencies.extend([
-          'dh-python', 'python3-dev', 'python3-setuptools'])
+      dpkg_build_dependencies.extend(['python3-dev', 'python3-setuptools'])
 
     if 'fuse' in project_configuration.tools_build_dependencies:
       dpkg_build_dependencies.append('libfuse-dev')

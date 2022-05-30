@@ -3,6 +3,5 @@
 %license COPYING COPYING.LESSER
 %doc AUTHORS README
 %{_libdir}/python3*/site-packages/*.a
-%{_libdir}/python3*/site-packages/*.la
 %{_libdir}/python3*/site-packages/*.so
 
