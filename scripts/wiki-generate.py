@@ -959,7 +959,8 @@ class BuildingPageGenerator(WikiPageGenerator):
 
     # MinGW support.
     self._GenerateSection('mingw.txt', template_mappings, output_writer)
-    self._GenerateSection('mingw_msys.txt', template_mappings, output_writer)
+    # TODO: generate MinGW-MSYS2 information
+    # self._GenerateSection('mingw_msys2.txt', template_mappings, output_writer)
     self._GenerateSection('mingw_dll.txt', template_mappings, output_writer)
     self._GenerateSection(
         'mingw_troubleshooting.txt', template_mappings, output_writer)
