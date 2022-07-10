@@ -1,5 +1,5 @@
 dnl Check for libtool DLL support
-AC_LIBTOOL_WIN32_DLL
+LT_INIT([win32-dll])
 
 dnl Checks for programs
 AC_PROG_CC

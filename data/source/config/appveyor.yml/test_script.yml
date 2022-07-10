@@ -8,8 +8,6 @@ test_script:
     C:\cygwin\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     C:\cygwin64\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
-- cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
-    C:\MinGW\msys\1.0\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     C:\msys64\usr\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
 

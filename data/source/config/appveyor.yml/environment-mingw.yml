@@ -1,9 +1,0 @@
-  - TARGET: mingw-gcc
-    BUILD_ENVIRONMENT: mingw
-    CONFIGURE_OPTIONS: ""
-  - TARGET: mingw-gcc-no-optimization
-    BUILD_ENVIRONMENT: mingw
-    CONFIGURE_OPTIONS: "--enable-shared=no"
-    CFLAGS: "--coverage -O0"
-    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
-    LDFLAGS: "--coverage"

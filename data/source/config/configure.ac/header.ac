@@ -1,4 +1,4 @@
-AC_PREREQ( 2.59 )
+AC_PREREQ([2.71])
 
 AC_INIT(
  [${library_name}],

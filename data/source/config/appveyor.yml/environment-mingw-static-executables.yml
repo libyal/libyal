@@ -1,3 +1,0 @@
-  - TARGET: mingw-gcc-static-executables
-    BUILD_ENVIRONMENT: mingw
-    CONFIGURE_OPTIONS: "--enable-static-executables"

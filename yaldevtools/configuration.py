@@ -91,7 +91,6 @@ class ProjectConfiguration(BaseConfiguration):
     mingw_build_dependencies (list[str]): MinGW build dependencies.
     mingw_dll_dependencies (list[str]): MinGW DLL dependencies.
     mingw_dll_filename (str): name of the MinGW DLL file.
-    mingw_msys_build_dependencies (str): MinGW-MSYS build dependencies.
     mingw_msys2_build_dependencies (str): MinGW-MSYS2 build dependencies.
     mount_tool_additional_arguments (str): additional arguments of
         the mount tool.
@@ -288,9 +287,6 @@ class ProjectConfiguration(BaseConfiguration):
     self.mingw_build_dependencies = None
     self.mingw_dll_dependencies = None
     self.mingw_dll_filename = None
-
-    # MinGW-MSYS specific configuration.
-    self.mingw_msys_build_dependencies = None
 
     # MinGW-MSYS2 specific configuration.
     self.mingw_msys2_build_dependencies = None
@@ -500,19 +496,6 @@ class ProjectConfiguration(BaseConfiguration):
     # Remove trailing comments.
     self.mingw_build_dependencies = [
         name.split(' ')[0] for name in self.mingw_build_dependencies]
-
-  def _ReadMinGWMSYSConfiguration(self, config_parser):
-    """Reads the MinGW-MSYS configuration.
-
-    Args:
-      config_parser (ConfigParser): configuration file parser.
-    """
-    self.mingw_msys_build_dependencies = self._GetOptionalConfigValue(
-        config_parser, 'mingw_msys', 'build_dependencies', default_value=[])
-
-    # Remove trailing comments.
-    self.mingw_msys_build_dependencies = [
-        name.split(' ')[0] for name in self.mingw_msys_build_dependencies]
 
   def _ReadMinGWMSYS2Configuration(self, config_parser):
     """Reads the MinGW-MSYS2 configuration.
@@ -1126,7 +1109,6 @@ class ProjectConfiguration(BaseConfiguration):
     self._ReadCygwinConfiguration(config_parser)
     self._ReadGCCConfiguration(config_parser)
     self._ReadMinGWConfiguration(config_parser)
-    self._ReadMinGWMSYSConfiguration(config_parser)
     self._ReadMinGWMSYS2Configuration(config_parser)
     self._ReadVisualStudioConfiguration(config_parser)
 

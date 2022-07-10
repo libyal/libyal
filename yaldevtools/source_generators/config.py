@@ -188,11 +188,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasTools():
       template_names.append('environment-cygwin64-static-executables.yml')
 
-    template_names.append('environment-mingw.yml')
-
-    if project_configuration.HasTools():
-      template_names.append('environment-mingw-static-executables.yml')
-
     template_names.append('environment-mingw-w64.yml')
 
     if project_configuration.HasTools():
@@ -248,22 +243,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           access_mode='a')
 
       del template_mappings['cygwin_build_dependencies']
-
-    mingw_msys_build_dependencies = self._GetMinGWMSYSBuildDependencies(
-        project_configuration)
-
-    if mingw_msys_build_dependencies:
-      mingw_msys_build_dependencies = ' '.join(mingw_msys_build_dependencies)
-      template_mappings['mingw_msys_build_dependencies'] = (
-          mingw_msys_build_dependencies)
-
-      template_filename = os.path.join(
-          template_directory, 'install-mingw-msys.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
-
-      del template_mappings['mingw_msys_build_dependencies']
 
     mingw_msys2_build_dependencies = self._GetMinGWMSYS2BuildDependencies(
         project_configuration)
@@ -1513,24 +1492,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     return cygwin_build_dependencies
 
-  def _GetMinGWMSYSBuildDependencies(self, project_configuration):
-    """Retrieves the MinGW-MSYS build dependencies.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-
-    Returns:
-      list[str]: MinGW-MSYS build dependencies.
-    """
-    mingw_msys_build_dependencies = list(
-        project_configuration.mingw_msys_build_dependencies)
-
-    # TODO: add support for other dependencies.
-    if project_configuration.HasDependencyZlib():
-      mingw_msys_build_dependencies.append('libz-dev')
-
-    return mingw_msys_build_dependencies
-
   def _GetMinGWMSYS2BuildDependencies(self, project_configuration):
     """Retrieves the MinGW-MSYS2 build dependencies.
 
@@ -1542,6 +1503,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     """
     mingw_msys2_build_dependencies = list(
         project_configuration.mingw_msys2_build_dependencies)
+
+    mingw_msys2_build_dependencies.extend([
+        'autoconf', 'automake', 'gcc', 'gettext-devel', 'libtool', 'make'])
 
     if project_configuration.HasDependencyYacc():
       mingw_msys2_build_dependencies.append('msys/bison')
