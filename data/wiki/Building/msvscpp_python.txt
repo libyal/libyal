@@ -1,7 +1,9 @@
 ## Python-bindings
-To compile the ${python_bindings_name} Python-bindings you'll need the Python development files which are part of the Python.org windows installer package.
+
+To compile the ${python_bindings_name} Python-bindings you'll need the Python development files which are part of the Python.org Windows installer package.
 
 The Microsoft Visual Studio files are configured to look in:
+
 ```
 C:\Python2.7\
 ```

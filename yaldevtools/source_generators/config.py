@@ -695,19 +695,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       elif name == 'libhmac':
         # TODO: make check more generic based on the source itself.
         if project_configuration.library_name in (
-            'libbde', 'libfsapfs', 'libfvde', 'libmodi'):
-          build_options.append(('SHA256 support', '$ac_cv_libhmac_sha256'))
+            'libewf', 'libfsapfs', 'libfsext', 'libfshfs', 'libfsntfs',
+            'libfsxfs', 'libodraw', 'libsmraw'):
+          build_options.append(('MD5 support', '$ac_cv_libhmac_md5'))
 
-        elif project_configuration.library_name in (
-            'libewf', 'libodraw', 'libsmraw'):
-          build_options.extend([
-              ('MD5 support', '$ac_cv_libhmac_md5'),
-              ('SHA1 support', '$ac_cv_libhmac_sha1'),
-              ('SHA256 support', '$ac_cv_libhmac_sha256')])
+        if project_configuration.library_name in (
+            'libewf', 'libluksde', 'libodraw', 'libsmraw'):
+          build_options.append(('SHA1 support', '$ac_cv_libhmac_sha1'))
+
+        if project_configuration.library_name in (
+            'libbde', 'libewf', 'libfsapfs', 'libfvde', 'libmodi', 'libodraw',
+            'libsmraw'):
+          build_options.append(('SHA256 support', '$ac_cv_libhmac_sha256'))
 
         elif project_configuration.library_name == 'libluksde':
           build_options.extend([
-              ('SHA1 support', '$ac_cv_libhmac_sha1'),
               ('SHA224 support', '$ac_cv_libhmac_sha224'),
               ('SHA256 support', '$ac_cv_libhmac_sha256'),
               ('SHA512 support', '$ac_cv_libhmac_sha512')])

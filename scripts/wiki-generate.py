@@ -130,9 +130,7 @@ class WikiPageGenerator(object):
       dependencies.append('libfuse-dev')
 
     if project_configuration.HasPythonModule():
-      dependencies.extend([
-          'python-dev', 'python-setuptools', 'python3-dev',
-          'python3-setuptools'])
+      dependencies.extend(['python3-dev', 'python3-setuptools'])
 
     return dependencies
 
@@ -156,10 +154,6 @@ class WikiPageGenerator(object):
     filenames.append(dpkg_development_filename)
 
     if project_configuration.HasPythonModule():
-      dpkg_python2_filename = '{0:s}-python_<version>-1_<arch>.deb'.format(
-          project_configuration.project_name)
-      filenames.append(dpkg_python2_filename)
-
       dpkg_python3_filename = '{0:s}-python3_<version>-1_<arch>.deb'.format(
           project_configuration.project_name)
       filenames.append(dpkg_python3_filename)
@@ -255,7 +249,6 @@ class WikiPageGenerator(object):
       dependencies.append('fuse-devel')
 
     if project_configuration.HasPythonModule():
-      dependencies.append('python-devel')
       dependencies.append('python3-devel')
 
     return dependencies
@@ -282,11 +275,6 @@ class WikiPageGenerator(object):
     filenames.append(rpm_development_filename)
 
     if project_configuration.HasPythonModule():
-      rpm_python2_filename = (
-          '~/rpmbuild/RPMS/<arch>/{0:s}-python-<version>-1.<arch>.rpm').format(
-              project_configuration.project_name)
-      filenames.append(rpm_python2_filename)
-
       rpm_python3_filename = (
           '~/rpmbuild/RPMS/<arch>/{0:s}-python3-<version>-1.<arch>.rpm').format(
               project_configuration.project_name)

@@ -1,19 +1,22 @@
 # Using Debian package tools (DEB)
 
 To build ${project_name} using the Debian package tools make sure you have the following packages installed:
+
 ```
-sudo apt install build-essential debhelper fakeroot autotools-dev ${dpkg_build_dependencies}
+sudo apt install autotools-dev build-essential debhelper dh-autoreconf dh-python fakeroot pkg-config ${dpkg_build_dependencies}
 ```
 
 If you downloaded the source using git make sure to run ./configure at least once to generate the dpkg packaging files.
 
 To build the Debian packages change into the source directory and run:
+
 ```
 cp -rf dpkg debian
 dpkg-buildpackage -rfakeroot
 ```
 
 This will create the following files in the parent directory:
+
 ```
 ${dpkg_filenames}
 ```
@@ -30,6 +33,7 @@ dpkg-source: error: can't build with source format '3.0 (quilt)': no upstream ta
 ```
 
 This means dpkg-buildpackage cannot find the source distribution package. Make sure it is provided as:
+
 ```
 ../${project_name}-<version>.orig.tar.gz
 ```
