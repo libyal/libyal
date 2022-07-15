@@ -439,7 +439,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
           # TODO: determine deflate function via configuration setting?
           elif project_configuration.library_name in (
-              'libfsapfs', 'libfvde', 'libmodi', 'libpff', 'libvmdk'):
+              'libfsapfs', 'libfshfs', 'libfvde', 'libmodi', 'libpff',
+              'libvmdk'):
             template_filename = 'check_zlib_uncompress.ac'
 
           else:
