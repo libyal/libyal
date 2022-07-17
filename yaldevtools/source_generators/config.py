@@ -718,6 +718,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       elif name == 'libfcrypto':
         if project_configuration.library_name == 'libluksde':
           build_options.extend([
+              ('ARC4-ECB support', '$ac_cv_libfcrypto'),
+              ('Serpent-CBC support', '$ac_cv_libfcrypto'),
               ('Serpent-ECB support', '$ac_cv_libfcrypto')])
 
       elif name == 'zlib':
