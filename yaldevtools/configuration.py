@@ -541,7 +541,7 @@ class ProjectConfiguration(BaseConfiguration):
 
     if (self.mount_tool_file_entry_access_time_type and
         self.mount_tool_file_entry_access_time_type not in (
-            'filetime', 'hfs_time', 'nano_posix_time')):
+            'fat_timestamp', 'filetime', 'hfs_time', 'nano_posix_time')):
       raise errors.ConfigurationError(
           'unsupported mount tool file entry access time type: {0:s}'.format(
               self.mount_tool_file_entry_access_time_type))
@@ -557,7 +557,7 @@ class ProjectConfiguration(BaseConfiguration):
 
     if (self.mount_tool_file_entry_creation_time_type and
         self.mount_tool_file_entry_creation_time_type not in (
-            'filetime', 'hfs_time', 'nano_posix_time')):
+            'fat_timestamp', 'filetime', 'hfs_time', 'nano_posix_time')):
       raise errors.ConfigurationError(
           'unsupported mount tool file entry creation time type: {0:s}'.format(
               self.mount_tool_file_entry_creation_time_type))
@@ -576,7 +576,7 @@ class ProjectConfiguration(BaseConfiguration):
 
     if (self.mount_tool_file_entry_inode_change_time_type and
         self.mount_tool_file_entry_inode_change_time_type not in (
-            'filetime', 'hfs_time', 'nano_posix_time')):
+            'fat_timestamp', 'filetime', 'hfs_time', 'nano_posix_time')):
       raise errors.ConfigurationError((
           'unsupported mount tool file entry inode change time type: '
           '{0:s}').format(self.mount_tool_file_entry_inode_change_time_type))
@@ -592,7 +592,7 @@ class ProjectConfiguration(BaseConfiguration):
 
     if (self.mount_tool_file_entry_modification_time_type and
         self.mount_tool_file_entry_modification_time_type not in (
-            'filetime', 'hfs_time', 'nano_posix_time')):
+            'fat_timestamp', 'filetime', 'hfs_time', 'nano_posix_time')):
       raise errors.ConfigurationError((
           'unsupported mount tool file entry modification time type: '
           '{0:s}').format(self.mount_tool_file_entry_modification_time_type))
