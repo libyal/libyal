@@ -696,8 +696,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       elif name == 'libhmac':
         # TODO: make check more generic based on the source itself.
         if project_configuration.library_name in (
-            'libewf', 'libfsapfs', 'libfsext', 'libfshfs', 'libfsntfs',
-            'libfsxfs', 'libodraw', 'libsmraw'):
+            'libewf', 'libfsapfs', 'libfsext', 'libfsfat', 'libfshfs',
+            'libfsntfs', 'libfsxfs', 'libodraw', 'libsmraw'):
           build_options.append(('MD5 support', '$ac_cv_libhmac_md5'))
 
         if project_configuration.library_name in (

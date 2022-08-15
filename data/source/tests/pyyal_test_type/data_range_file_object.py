@@ -10,6 +10,10 @@ class DataRangeFileObject(object):
       range_size (int): size of the data range starts, or None to indicate
           the range should continue to the end of the parent file-like object.
     """
+    if range_size is None:
+      stat_object = os.stat(path)
+      range_size = stat_object.st_size
+
     super(DataRangeFileObject, self).__init__()
     self._current_offset = 0
     self._file_object = open(path, "rb")
