@@ -75,12 +75,8 @@ run_configure_make_check_with_asan()
 	then
 		return $${EXIT_SUCCESS};
 	fi
-	# Using libasan is platform dependent.
-	if test $${LIBASAN} != "/lib64/libasan.so.4" && test $${LIBASAN} != "/lib64/libasan.so.5";
-	then
-		return $${EXIT_SUCCESS};
-	fi
 
+	# Using libasan is platform dependent.
 	export CPPFLAGS="-DHAVE_ASAN";
 	export CFLAGS="-fno-omit-frame-pointer -fsanitize=address -g";
 	export LDFLAGS="-fsanitize=address -g";
