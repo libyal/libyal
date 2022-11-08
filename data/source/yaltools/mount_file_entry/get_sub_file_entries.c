@@ -48,7 +48,7 @@ int mount_file_entry_get_number_of_sub_file_entries(
 			return( -1 );
 		}
 		if( ( number_of_${mount_tool_file_entry_type}s < 0 )
-		 || ( number_of_${mount_tool_file_entry_type}s > 99 ) )
+		 || ( number_of_${mount_tool_file_entry_type}s > 999 ) )
 		{
 			libcerror_error_set(
 			 error,
