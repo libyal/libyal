@@ -28,7 +28,8 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_XTS_DUPLICATE_KEYS_SUPPORT],
     LIBS="$LIBS $ac_cv_libcrypto_LIBADD"
     AC_RUN_IFELSE(
       [AC_LANG_PROGRAM(
-        [[#include <openssl/err.h>
+        [[#include <stdlib.h>
+#include <openssl/err.h>
 #include <openssl/evp.h>]],
         [[unsigned char key[ 16 ] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 int result = 0;
@@ -49,7 +50,7 @@ EVP_CIPHER_CTX_cleanup( &ctx );
 EVP_CIPHER_CTX_free( ctx );
 #endif
 
-return( result == 1 ); ]] )],
+return( result == 1 ? EXIT_SUCCESS : EXIT_FAILURE ); ]] )],
       [ac_cv_openssl_xts_duplicate_keys=yes],
       [ac_cv_openssl_xts_duplicate_keys=no])
     LIBS="$ac_cv_libcrypto_backup_LIBS"
