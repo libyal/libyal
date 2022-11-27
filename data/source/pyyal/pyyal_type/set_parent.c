@@ -53,6 +53,11 @@ PyObject *${python_module_name}_${type_name}_set_parent(
 
 		return( NULL );
 	}
+	${python_module_name}_${type_name}->parent_${type_name}_object = ${value_name};
+
+	Py_IncRef(
+	 ${python_module_name}_${type_name}->parent_${type_name}_object );
+
 	Py_IncRef(
 	 Py_None );
 
