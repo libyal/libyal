@@ -1,8 +1,4 @@
-- ps: If ($$env:BUILD_ENVIRONMENT -eq "cygwin") {
-    (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86.exe", "C:\\cygwin\\setup-x86.exe") }
 - ps: If ($$env:BUILD_ENVIRONMENT -eq "cygwin64") {
-    (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86_64.exe", "C:\\cygwin\\setup-x86_64.exe") }
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\setup-x86.exe --allow-unsupported-windows -qgnNdO -l C:\cygwin\var\cache\setup -R c:\cygwin -s https://mirrors.kernel.org/sourceware/cygwin-archive/20221123 ${cygwin_build_dependencies} )
+    (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86_64.exe", "C:\\cygwin64\\setup-x86_64.exe") }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com ${cygwin_build_dependencies} )

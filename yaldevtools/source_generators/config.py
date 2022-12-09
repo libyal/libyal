@@ -166,17 +166,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasPythonModule():
       template_names.append('environment-setup_py.yml')
 
-    template_names.append('environment-cygwin.yml')
-
-    # if project_configuration.HasDependencyCrypto():
-    # TODO: add environment-cygwin-openssl.yml
-
-    if project_configuration.HasPythonModule():
-      template_names.append('environment-cygwin-python.yml')
-
-    if project_configuration.HasTools():
-      template_names.append('environment-cygwin-static-executables.yml')
-
     template_names.append('environment-cygwin64.yml')
 
     # if project_configuration.HasDependencyCrypto():

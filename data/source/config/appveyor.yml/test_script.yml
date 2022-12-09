@@ -4,8 +4,6 @@ test_script:
     .\runtests.ps1 }
 - sh: if test $${BUILD_ENVIRONMENT} = "xcode" && test $${TARGET} != "macos-pkgbuild"; then tests/runtests.sh; fi
 - sh: if test $${TARGET} = "macos-pkgbuild"; then tests/pkgbuild.sh; fi
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     C:\cygwin64\bin\bash -l -c "cd ${library_name} && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (

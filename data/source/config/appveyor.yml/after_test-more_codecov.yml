@@ -1,7 +1,4 @@
 after_test:
-- cmd: if [%TARGET%]==[cygwin] (
-    copy C:\projects\codecov-bash\codecov C:\cygwin\home\appveyor\${library_name}\codecov.sh &&
-    C:\cygwin\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && ./codecov.sh -n cygwin" )
 - cmd: if [%TARGET%]==[cygwin64] (
     copy C:\projects\codecov-bash\codecov C:\cygwin64\home\appveyor\${library_name}\codecov.sh &&
     C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && ./codecov.sh -n cygwin64" )

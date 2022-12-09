@@ -1,6 +1,3 @@
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    xcopy /i /q /s C:\projects\${library_name} C:\cygwin\home\appveyor\${library_name} &&
-    C:\cygwin\bin\bash -e -l -c "cd ${library_name} && tests/build.sh $${CONFIGURE_OPTIONS}" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\${library_name} C:\cygwin64\home\appveyor\${library_name} &&
     C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && tests/build.sh $${CONFIGURE_OPTIONS}" )

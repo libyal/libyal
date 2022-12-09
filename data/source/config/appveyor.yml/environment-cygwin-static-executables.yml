@@ -1,4 +1,0 @@
-  - TARGET: cygwin-gcc-static-executables
-    BUILD_ENVIRONMENT: cygwin
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-static-executables"
