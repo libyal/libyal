@@ -1852,7 +1852,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     # TODO: sequence object rename ${type_name}_index to item_index
     # TODO: generate non type files.
     # TODO: generate pyyal/Makefile.am
-    # TODO: generate pyyal-python2/Makefile.am
     # TODO: generate pyyal-python3/Makefile.am
 
     if not project_configuration.HasPythonModule():

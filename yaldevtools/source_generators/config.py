@@ -1477,7 +1477,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       cygwin_build_dependencies.append('libssl-devel')
 
     if project_configuration.HasPythonModule():
-      cygwin_build_dependencies.append('python2-devel')
       cygwin_build_dependencies.append('python3-devel')
 
     if ('uuid' in project_configuration.library_build_dependencies or
