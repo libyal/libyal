@@ -6,10 +6,33 @@
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     PYTHON: "C:\\Python310-x64\\python.exe"
-  - TARGET: python311-x64
-    BUILD_ENVIRONMENT: python
+  - TARGET: macos-tox-py37
+    BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-    PYTHON: "/usr/local/bin/python3"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
-    CFLAGS: "-I/usr/local/include"
-    LDFLAGS: "-L/usr/local/lib"
+    PYTHON_VERSION: 3.7
+    TOXENV: py37
+  - TARGET: macos-tox-py38
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.8
+    TOXENV: py38
+  - TARGET: macos-tox-py39
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.9
+    TOXENV: py39
+  - TARGET: macos-tox-py310
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.10
+    TOXENV: py310
+  - TARGET: macos-tox-py311
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.11
+    TOXENV: py311

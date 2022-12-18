@@ -1,5 +1,6 @@
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\${library_name} C:\cygwin64\home\appveyor\${library_name} &&
+    C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O './config.guess' && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O './config.sub'" &&
     C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && tests/build.sh $${CONFIGURE_OPTIONS}" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\${library_name} C:\msys64\home\appveyor\${library_name} &&

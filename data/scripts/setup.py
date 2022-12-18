@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Script to build and install Python-bindings.
-# Version: 20221210
+# Version: 20221217
 
 from __future__ import print_function
 
@@ -99,7 +99,7 @@ class custom_build_ext(build_ext):
       ]
 
     else:
-      command = "sh configure --disable-shared-libs"
+      command = "sh configure --disable-nls --disable-shared-libs"
       output = self._RunCommand(command)
 
       print_line = False
@@ -113,7 +113,6 @@ class custom_build_ext(build_ext):
 
       self.define = [
           ("HAVE_CONFIG_H", ""),
-          ("LOCALEDIR", "\"/usr/share/locale\""),
       ]
 
     build_ext.run(self)

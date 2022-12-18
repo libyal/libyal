@@ -1456,7 +1456,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     cygwin_build_dependencies = list(
         project_configuration.cygwin_build_dependencies)
 
-    cygwin_build_dependencies.append('gettext-devel')
+    cygwin_build_dependencies.extend(['gettext-devel', 'wget'])
 
     if project_configuration.HasDependencyYacc():
       cygwin_build_dependencies.append('bison')
