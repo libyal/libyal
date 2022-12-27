@@ -1,16 +1,50 @@
 ## Source distribution package
+
 To retrieve the source distribution package go to the [downloads](${project_downloads_url}) page and download the file named:
+
 ```
 ${project_name}${project_status}-<version>.tar.gz
 ```
 
 To extract the source distribution package run:
+
 ```
 tar xfv ${project_name}${project_status}-<version>.tar.gz
 ```
 
 This will create the source directory:
+
 ```
 ${project_name}-<version>
+```
+
+### Verification
+
+The source distribution package can be verified with the corresponding .asc file:
+
+```
+gpg --verify ${project_name}${project_status}-<version>.tar.gz.asc ${project_name}${project_status}-<version>.tar.gz
+```
+
+Where the corresponding public key can be found on [keyserver.ubuntu.com](http://keyserver.ubuntu.com:11371/pks/lookup?fingerprint=on&op=index&search=0x0ED9020DA90D3F6E70BD3945D9625E5D7AD0177E)
+
+A successful verification will look similar to:
+
+```
+gpg: Signature made Sun 01 Jan 2017 09:28:04 AM CET using RSA key ID 7AD0177E
+gpg: lookup_hashtable failed: eof
+gpg: Good signature from "Joachim Metz <joachim.metz@gmail.com>"
+gpg: lookup_hashtable failed: eof
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 0ED9 020D A90D 3F6E 70BD  3945 D962 5E5D 7AD0 177E
+```
+
+An unsuccessful verification will look similar to:
+
+```
+gpg: Signature made Sun 01 Jan 2017 09:28:04 AM CET using RSA key ID 7AD0177E
+gpg: lookup_hashtable failed: eof
+gpg: BAD signature from "Joachim Metz <joachim.metz@gmail.com>"
 ```
 
