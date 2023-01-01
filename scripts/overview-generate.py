@@ -7,7 +7,6 @@ import abc
 import argparse
 import configparser
 import glob
-import io
 import json
 import logging
 import os
@@ -133,7 +132,7 @@ class ConfigureAcFile(object):
     Returns:
       bool: True if the version was read from the file.
     """
-    with io.open(self._path, 'r', encoding='utf8') as file_object:
+    with open(self._path, 'r', encoding='utf8') as file_object:
       line_count = 0
       for line in file_object.readlines():
         line = line.strip()
@@ -183,7 +182,7 @@ class DefinitionsHeaderFile(object):
     library_name, _, _ = self.name.partition('_')
     version_line = '#define {0:s}_VERSION'.format(library_name.upper())
 
-    with io.open(self._path, 'r', encoding='utf8') as file_object:
+    with open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
         if line.startswith(version_line):
@@ -224,7 +223,7 @@ class M4ScriptFile(object):
     Returns:
       bool: True if the version was read from the file.
     """
-    with io.open(self._path, 'r', encoding='utf8') as file_object:
+    with open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
         if line.startswith('dnl Version: '):
@@ -264,7 +263,7 @@ class ScriptFile(object):
     Returns:
       bool: True if the version was read from the file.
     """
-    with io.open(self._path, 'r', encoding='utf8') as file_object:
+    with open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
         if line.startswith('# Version: '):
@@ -362,7 +361,7 @@ class WikiPageGenerator(object):
     """
     path = os.path.join(self._template_directory, filename)
 
-    with io.open(path, 'r', encoding='utf8') as file_object:
+    with open(path, 'r', encoding='utf8') as file_object:
       file_data = file_object.read()
 
     return string.Template(file_data)
@@ -1076,7 +1075,7 @@ class FileWriter(object):
     Returns:
       bool: True if successful or False if not.
     """
-    self._file_object = io.open(self._name, 'w', encoding='utf8')
+    self._file_object = open(self._name, 'w', encoding='utf8')
     return True
 
   def Close(self):

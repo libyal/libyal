@@ -235,7 +235,8 @@ class SourceGenerator(object):
           self._templates_path, 'runtime_structure.h', template_name)
 
       self._GenerateSection(
-          template_filename, template_mappings, output_filename, access_mode='a')
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
 
       del template_mappings['structure_member_data_size']
       del template_mappings['structure_member_data_type']
@@ -246,10 +247,12 @@ class SourceGenerator(object):
 
     if not has_structure_members:
       template_filename = os.path.join(
-          self._templates_path, 'runtime_structure.h', 'structure_member-dummy.h')
+          self._templates_path, 'runtime_structure.h',
+          'structure_member-dummy.h')
 
       self._GenerateSection(
-          template_filename, template_mappings, output_filename, access_mode='a')
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
 
     template_filename = os.path.join(
         self._templates_path, 'runtime_structure.h', 'structure-end.h')
@@ -665,7 +668,7 @@ class SourceGenerator(object):
     for member_definition in data_type_definition.members:
       member_name = member_definition.name
 
-      data_type = getattr(member_definition, 'member_data_type', None)
+      # data_type = getattr(member_definition, 'member_data_type', None)
       data_type_size = member_definition.GetByteSize()
 
       member_data_type_definition = getattr(
@@ -1338,7 +1341,8 @@ class SourceGenerator(object):
         lines.append(line)
 
       if self._generate_structure_member_contents_hint:
-        if data_type_definition.TYPE_INDICATOR == definitions.TYPE_INDICATOR_UUID:
+        type_indicator = data_type_definition.TYPE_INDICATOR
+        if type_indicator == definitions.TYPE_INDICATOR_UUID:
           lines.append('\t * Contains a UUID')
 
       lines.append('\t */')

@@ -10,7 +10,6 @@ import os
 import re
 import sys
 
-from yaldevtools import source_formatter
 from yaldevtools import template_string
 
 
@@ -18,7 +17,7 @@ class SourceGenerator(object):
   """Generates libuna source files based on a codepage definition."""
 
   _CODEPAGE_MAPPINGS_REGEX = re.compile(
-      '([0-9A-F]{2,4}) = U\+([0-9A-F]{4}) : ', re.IGNORECASE)
+      '([0-9A-F]{2,4}) = U\\+([0-9A-F]{4}) : ', re.IGNORECASE)
 
   def __init__(self, templates_path):
     """Initializes a source generator.
@@ -406,11 +405,7 @@ class SourceGenerator(object):
     return template_mappings
 
   def Generate(self):
-    """Generates source code from the codepage definitions.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
+    """Generates source code from the codepage definitions."""
     self._GenerateSourceFile()
     self._GenerateSourceHeaderFile()
     self._GenerateTestHeaderFile()

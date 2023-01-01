@@ -2,7 +2,6 @@
 """The source file generator for python module source files."""
 
 import collections
-import io
 import logging
 import os
 
@@ -35,7 +34,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     if function_index is None:
       return False
 
-    with io.open(output_filename, 'a', encoding='utf8') as file_object:
+    with open(output_filename, 'a', encoding='utf8') as file_object:
       line = lines[function_index]
       while not line.startswith('}'):
         file_object.write(line)
@@ -605,7 +604,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     lines = []
     if os.path.exists(output_filename):
-      with io.open(output_filename, 'r', encoding='utf8') as file_object:
+      with open(output_filename, 'r', encoding='utf8') as file_object:
         lines = file_object.readlines()
 
     bfio_support = 'open_file_object' in python_function_prototypes

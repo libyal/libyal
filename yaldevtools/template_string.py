@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Template string generator."""
 
-import io
 import string
 
 
@@ -17,7 +16,7 @@ class TemplateStringGenerator(object):
     Returns:
       string.Template: template string.
     """
-    with io.open(filename, 'r', encoding='utf8') as file_object:
+    with open(filename, 'r', encoding='utf8') as file_object:
       file_data = file_object.read()
 
     return string.Template(file_data)
@@ -43,5 +42,5 @@ class TemplateStringGenerator(object):
 
     except (KeyError, ValueError) as exception:
       raise RuntimeError(
-          u'Unable to format template: {0:s} with error: {1!s}'.format(
+          'Unable to format template: {0:s} with error: {1!s}'.format(
               template_filename, exception))

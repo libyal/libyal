@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The output writers."""
 
-import io
-
 
 class FileWriter(object):
   """File output writer."""
@@ -24,7 +22,7 @@ class FileWriter(object):
       file_data (bytes): to write.
       access_mode (Optional[str]): output file access mode.
     """
-    with io.open(file_path, access_mode, encoding='utf8') as file_object:
+    with open(file_path, access_mode, encoding='utf8') as file_object:
       file_object.write(file_data)
 
 

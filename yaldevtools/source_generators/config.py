@@ -2,7 +2,6 @@
 """The source file generator for configuration files."""
 
 import glob
-import io
 import logging
 import os
 
@@ -33,10 +32,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     m4_file = os.path.join(self._data_directory, 'm4', m4_file)
 
     if os.path.exists(m4_file):
-      with io.open(m4_file, 'r', encoding='utf8') as file_object:
+      with open(m4_file, 'r', encoding='utf8') as file_object:
         input_lines = file_object.readlines()
 
-      with io.open(output_filename, 'w', encoding='utf8') as file_object:
+      with open(output_filename, 'w', encoding='utf8') as file_object:
         # Generate the first line
         input_lines.pop(0)
         file_object.write('dnl Checks for required headers and functions\n')
@@ -1278,6 +1277,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if include_header_file.have_wide_character_type:
       template_names.append('build_ubuntu-wide_character_type.yml')
+
+    if project_configuration.HasDependencyZlib():
+      template_names.append('build_ubuntu-zlib.yml')
 
     if project_configuration.HasDependencyCrypto():
       template_names.append('build_ubuntu-openssl.yml')

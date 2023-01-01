@@ -5,7 +5,6 @@
 
 import abc
 import argparse
-import io
 import os
 import re
 import string
@@ -688,12 +687,12 @@ class WikiPageGenerator(object):
           project_configuration.development_main_object_pre_open_python)
 
     if project_configuration.development_main_object_post_open_python:
-      development_main_object_post_open_python = '{0:s}\n'.format(
-          '\n'.join(project_configuration.development_main_object_post_open_python))
+      development_main_object_post_open_python = '{0:s}\n'.format('\n'.join(
+          project_configuration.development_main_object_post_open_python))
 
     if project_configuration.development_main_object_post_open_file_object_python:
-      development_main_object_post_open_file_object_python = '{0:s}\n'.format(
-          '\n'.join(project_configuration.development_main_object_post_open_file_object_python))
+      development_main_object_post_open_file_object_python = '{0:s}\n'.format('\n'.join(
+          project_configuration.development_main_object_post_open_file_object_python))
     elif project_configuration.development_main_object_post_open_python:
       development_main_object_post_open_file_object_python = '{0:s}\n'.format(
           '\n'.join(project_configuration.development_main_object_post_open_python))
@@ -874,7 +873,7 @@ class WikiPageGenerator(object):
     """
     path = os.path.join(self._template_directory, filename)
 
-    with io.open(path, 'r', encoding='utf8') as file_object:
+    with open(path, 'r', encoding='utf8') as file_object:
       file_data = file_object.read()
 
     return string.Template(file_data)
@@ -991,7 +990,7 @@ class BuildingPageGenerator(WikiPageGenerator):
     if project_configuration.HasPythonModule():
       self._GenerateSection('setup_py.txt', template_mappings, output_writer)
 
-  def HasContent(self, unused_project_configuration):
+  def HasContent(self, project_configuration):
     """Determines if the generator will generate content.
 
     Args:
@@ -1054,7 +1053,7 @@ class CDevelopmentPageGenerator(WikiPageGenerator):
 
     self._GenerateSection('also_see.txt', template_mappings, output_writer)
 
-  def HasContent(self, unused_project_configuration):
+  def HasContent(self, project_configuration):
     """Determines if the generator will generate content.
 
     Args:
@@ -1127,7 +1126,7 @@ class HomePageGenerator(WikiPageGenerator):
     template_mappings = self._GetTemplateMappings(project_configuration)
     self._GenerateSection('introduction.txt', template_mappings, output_writer)
 
-  def HasContent(self, unused_project_configuration):
+  def HasContent(self, project_configuration):
     """Determines if the generator will generate content.
 
     Args:
@@ -1285,7 +1284,7 @@ class TroubleshootingPageGenerator(WikiPageGenerator):
       self._GenerateSection(
           'crashes.txt', template_mappings, output_writer)
 
-  def HasContent(self, unused_project_configuration):
+  def HasContent(self, project_configuration):
     """Determines if the generator will generate content.
 
     Args:
@@ -1316,7 +1315,7 @@ class FileWriter(object):
     Returns:
       bool: True if successful or False if not.
     """
-    self._file_object = io.open(self._name, 'w', encoding='utf8')
+    self._file_object = open(self._name, 'w', encoding='utf8')
     return True
 
   def Close(self):
@@ -1407,7 +1406,7 @@ def Main():
 
   project_description = []
   if os.path.exists(readme_file):
-    with io.open(readme_file, 'r', encoding='utf8') as file_object:
+    with open(readme_file, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         if line.startswith('For more information see:'):
           project_description.pop()

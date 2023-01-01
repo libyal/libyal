@@ -1,0 +1,3 @@
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--with-zlib=no'

@@ -2,7 +2,6 @@
 """The source file generator for man page files."""
 
 import difflib
-import io
 import logging
 import os
 import shutil
@@ -159,11 +158,11 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
         template_filename, template_mappings, output_writer, output_filename,
         access_mode='a')
 
-    backup_file = io.open(backup_filename, 'r', encoding='utf8')
-    backup_lines = backup_file.readlines()
+    with open(backup_filename, 'r', encoding='utf8') as backup_file:
+      backup_lines = backup_file.readlines()
 
-    output_file = io.open(output_filename, 'r', encoding='utf8')
-    output_lines = output_file.readlines()
+    with open(output_filename, 'r', encoding='utf8') as output_file:
+      output_lines = output_file.readlines()
 
     diff_lines = list(difflib.ndiff(backup_lines[1:], output_lines[1:]))
     diff_lines = [line for line in diff_lines if line[0] in ('-', '+')]

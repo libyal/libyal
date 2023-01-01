@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """The source file generator for test source files."""
 
-import io
 import logging
 import os
 import stat
@@ -3069,13 +3068,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     Args:
       output_filename (str): path of the output file.
     """
-    with io.open(output_filename, 'r', encoding='utf8') as file_object:
+    with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
     sources = None
     in_sources = False
 
-    with io.open(output_filename, 'w', encoding='utf8') as file_object:
+    with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
         stripped_line = line.strip()
         if stripped_line.endswith('_SOURCES = \\'):

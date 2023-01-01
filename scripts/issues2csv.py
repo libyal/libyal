@@ -4,7 +4,6 @@
 
 import argparse
 import configparser
-import io
 import json
 import logging
 import os
@@ -138,19 +137,19 @@ class GithubIssueHelper(object):
       return None, None
 
     try:
-      url_object = urlopen(download_url)
+      with urlopen(download_url) as url_object:
+        if url_object.code == 200:
+          return url_object.read(), url_object.info()
+
+        logging.warning(
+            'Unable to download URL: {0:s} with status code: {1:d}'.format(
+                download_url, url_object.code))
+        return None, None
+
     except urllib_error.URLError as exception:
       logging.warning('Unable to download URL: {0:s} with error: {1!s}'.format(
           download_url, exception))
       return None, None
-
-    if url_object.code != 200:
-      logging.warning(
-          'Unable to download URL: {0:s} with status code: {1:d}'.format(
-              download_url, url_object.code))
-      return None, None
-
-    return url_object.read(), url_object.info()
 
   def _ListIssuesForProject(self, project_name, output_writer):
     """Lists the issues of a specific project.
@@ -360,7 +359,7 @@ class FileWriter(object):
     Returns:
       bool: True if successful or False if not.
     """
-    self._file_object = io.open(self._name, 'w', encoding='utf8')
+    self._file_object = open(self._name, 'w', encoding='utf8')  # pylint: disable=consider-using-with
     return True
 
   def Close(self):

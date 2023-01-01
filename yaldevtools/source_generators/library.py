@@ -2,7 +2,6 @@
 """The source file generator for library source files."""
 
 import logging
-import io
 import os
 
 from yaldevtools.source_generators import interface
@@ -58,7 +57,7 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
 
     internal_types = []
     if os.path.exists(output_filename):
-      with io.open(output_filename, 'r', encoding='utf8') as file_object:
+      with open(output_filename, 'r', encoding='utf8') as file_object:
         for line in file_object.readlines():
           line = line.rstrip()
 

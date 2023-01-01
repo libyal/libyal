@@ -4,7 +4,6 @@
 """Script to format a source file."""
 
 import argparse
-import io
 import sys
 
 from yaldevtools import source_formatter
@@ -30,7 +29,7 @@ class SourceFileParser(object):
     state = self._STATE_NONE
     group = []
 
-    with io.open(path, 'r', encoding='utf8') as file_object:
+    with open(path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         stripped_line = line.strip()
 
@@ -78,7 +77,7 @@ def Main():
 
   # return
 
-  with io.open(options.source_file, 'r', encoding='utf8') as file_object:
+  with open(options.source_file, 'r', encoding='utf8') as file_object:
     file_content = file_object.read()
 
   lines = file_content.split('\n')
@@ -87,7 +86,7 @@ def Main():
   formatted_lines = formatter.FormatSource(lines)
   formatted_file_content = '\n'.join(formatted_lines)
 
-  with io.open(options.source_file, 'w', encoding='utf8') as file_object:
+  with open(options.source_file, 'w', encoding='utf8') as file_object:
     file_object.write(formatted_file_content)
 
   return True

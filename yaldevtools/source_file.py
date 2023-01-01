@@ -2,7 +2,6 @@
 """The source file classes."""
 
 import collections
-import io
 import os
 
 from yaldevtools import source_code
@@ -41,7 +40,7 @@ class DefinitionsIncludeHeaderFile(object):
     in_enum = False
     enum_declaration = None
 
-    with io.open(self._path, 'r', encoding='utf8') as file_object:
+    with open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
@@ -322,9 +321,9 @@ class LibraryHeaderFile(object):
       raise IOError('Missing include header file: {0:s}'.format(self.path))
 
     source_file_path = '{0:s}.c'.format(self.path[:-2])
-    with io.open(header_file_path, 'r', encoding='utf8') as header_file_object:
+    with open(header_file_path, 'r', encoding='utf8') as header_file_object:
       if os.path.exists(source_file_path):
-        source_file_object = io.open(source_file_path, 'r', encoding='utf8')
+        source_file_object = open(source_file_path, 'r', encoding='utf8')
       else:
         source_file_object = None
 
@@ -616,7 +615,7 @@ class LibraryIncludeHeaderFile(object):
     in_section = False
     section_name = None
 
-    with io.open(self._path, 'r', encoding='utf8') as file_object:
+    with open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
@@ -757,7 +756,7 @@ class LibraryMakefileAMFile(object):
 
     in_section = None
 
-    with io.open(self._path, 'r', encoding='utf8') as file_object:
+    with open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
@@ -825,7 +824,7 @@ class MainMakefileAMFile(object):
     in_subdirs = False
     in_library_dependencies = True
 
-    with io.open(self._path, 'r', encoding='utf8') as file_object:
+    with open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
 
@@ -932,7 +931,7 @@ class TestSourceFile(object):
     if not os.path.exists(self.path):
       raise IOError('Missing test source file: {0:s}'.format(self.path))
 
-    with io.open(self.path, 'r', encoding='utf8') as source_file_object:
+    with open(self.path, 'r', encoding='utf8') as source_file_object:
       self._ReadFileObject(project_configuration, source_file_object)
 
 
@@ -967,7 +966,7 @@ class TypesIncludeHeaderFile(object):
     typedef_prefix = 'typedef intptr_t {0:s}_'.format(self._library_name)
     typedef_prefix_length = len(typedef_prefix)
 
-    with io.open(self._path, 'r', encoding='utf8') as file_object:
+    with open(self._path, 'r', encoding='utf8') as file_object:
       for line in file_object.readlines():
         line = line.strip()
         if line.startswith(typedef_prefix) and line.endswith('_t;'):
