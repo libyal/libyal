@@ -1,5 +1,5 @@
 - ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild") {
-    If (($$env:TARGET -eq "vs2017") -Or ($$env:TARGET -eq "vs2019")) {
+    If (($$env:TARGET -eq "vs2017") -Or ($$env:TARGET -eq "vs2019") -Or ($$env:TARGET -eq "vs2022")) {
       .\syncdokan.ps1 }
     Else {
       .\syncdokan.ps1 -UseLegacyVersion }
@@ -33,7 +33,7 @@
     ren vs2015 msvscpp &&
     popd )
 - ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild") {
-    If (($$env:TARGET -eq "vs2017") -Or ($$env:TARGET -eq "vs2019")) {
+    If (($$env:TARGET -eq "vs2017") -Or ($$env:TARGET -eq "vs2019") -Or ($$env:TARGET -eq "vs2022")) {
       $$Configuration = $$env:CONFIGURATION;
       If ($${Configuration} -eq "VSDebug") {
         $$Configuration = "Debug" }

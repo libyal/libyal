@@ -1,6 +1,6 @@
 # Script that builds ${library_name}
 #
-# Version: 20200130
+# Version: 20230410
 
 Param (
 	[string]$$Configuration = $${Env:Configuration},
@@ -56,11 +56,11 @@ If (-Not (Test-Path $${MSVSCppConvert}))
 }
 If (-Not $${VisualStudioVersion})
 {
-	$$VisualStudioVersion = "2019"
+	$$VisualStudioVersion = "2022"
 
 	Write-Host "Visual Studio version not set defauting to: $${VisualStudioVersion}" -foreground Red
 }
-If (($${VisualStudioVersion} -ne "2008") -And ($${VisualStudioVersion} -ne "2010") -And ($${VisualStudioVersion} -ne "2012") -And ($${VisualStudioVersion} -ne "2013") -And ($${VisualStudioVersion} -ne "2015") -And ($${VisualStudioVersion} -ne "2017") -And ($${VisualStudioVersion} -ne "2019"))
+If (($${VisualStudioVersion} -ne "2008") -And ($${VisualStudioVersion} -ne "2010") -And ($${VisualStudioVersion} -ne "2012") -And ($${VisualStudioVersion} -ne "2013") -And ($${VisualStudioVersion} -ne "2015") -And ($${VisualStudioVersion} -ne "2017") -And ($${VisualStudioVersion} -ne "2019") -And ($${VisualStudioVersion} -ne "2022"))
 {
 	Write-Host "Unsupported Visual Studio version: $${VisualStudioVersion}" -foreground Red
 
@@ -86,17 +86,25 @@ ElseIf ($${VisualStudioVersion} -eq "2015")
 }
 ElseIf ($${VisualStudioVersion} -eq "2017")
 {
-	$$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\2017\*\MSBuild\15.0\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+	$$Results = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio\$${VisualStudioVersion}\*\MSBuild\15.0\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
 
+	If ($$Results.Count -eq 0)
+	{
+		$$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\$${VisualStudioVersion}\*\MSBuild\15.0\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+	}
 	If ($$Results.Count -gt 0)
 	{
 		$$MSBuild = $$Results[0].FullName
 	}
 }
-ElseIf ($${VisualStudioVersion} -eq "2019")
+ElseIf ($${VisualStudioVersion} -eq "2019" -Or $${VisualStudioVersion} -eq "2022")
 {
-	$$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\2019\*\MSBuild\Current\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+	$$Results = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio\$${VisualStudioVersion}\*\MSBuild\Current\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
 
+	If ($$Results.Count -eq 0)
+	{
+		$$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\$${VisualStudioVersion}\*\MSBuild\Current\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+	}
 	If ($$Results.Count -gt 0)
 	{
 		$$MSBuild = $$Results[0].FullName
@@ -165,6 +173,10 @@ If (-Not $${PlatformToolset})
 	ElseIf ($${VisualStudioVersion} -eq "2019")
 	{
 		$$PlatformToolset = "v142"
+	}
+	ElseIf ($${VisualStudioVersion} -eq "2022")
+	{
+		$$PlatformToolset = "v143"
 	}
 	Write-Host "PlatformToolset not set defauting to: $${PlatformToolset}"
 }

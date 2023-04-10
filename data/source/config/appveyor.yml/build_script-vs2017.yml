@@ -3,3 +3,5 @@
     .\build.ps1 -VisualStudioVersion 2017 -Platform x64 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - ps: If ($$env:TARGET -eq "vs2019") {
     .\build.ps1 -VisualStudioVersion 2019 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
+- ps: If ($$env:TARGET -eq "vs2022") {
+    .\build.ps1 -VisualStudioVersion 2022 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
