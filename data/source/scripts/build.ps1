@@ -1,12 +1,12 @@
 # Script that builds ${library_name}
 #
-# Version: 20230410
+# Version: 20230411
 
 Param (
 	[string]$$Configuration = $${Env:Configuration},
 	[string]$$Platform = $${Env:Platform},
 	[string]$$PlatformToolset = "",
-	[string]$$PythonPath = "C:\Python37",
+	[string]$$PythonPath = "C:\Python311",
 	[string]$$VisualStudioVersion = "",
 	[string]$$VSToolsOptions = "--extend-with-x64",
 	[string]$$VSToolsPath = "..\vstools"
@@ -32,7 +32,7 @@ If (-Not (Test-Path $${VSToolsPath}))
 {
 	# PowerShell will raise NativeCommandError if git writes to stdout or stderr
 	# therefore 2>&1 is added and the output is stored in a variable.
-	$$Output = Invoke-Expression -Command "$${Git} clone $${GitUrl} $${VSToolsPath} 2>&1"
+	$$Output = Invoke-Expression -Command "$${Git} clone $${GitUrl} $${VSToolsPath} 2>&1" | %{ "$$_" }
 }
 Else
 {
@@ -41,7 +41,7 @@ Else
 	Try
 	{
 		# Make sure vstools are up to date.
-		$$Output = Invoke-Expression -Command "$${Git} pull 2>&1"
+		$$Output = Invoke-Expression -Command "$${Git} pull 2>&1" | %{ "$$_" }
 	}
 	Finally
 	{
@@ -135,7 +135,7 @@ Else
 	{
 		$${Env:PYTHONPATH} = $${VSToolsPath}
 
-		Invoke-Expression -Command "& '$${Python}' $${MSVSCppConvert} --output-format $${VisualStudioVersion} $${VSToolsOptions} msvscpp\${library_name}.sln 2>&1 | %{ '$$_' }"
+		Invoke-Expression -Command "& '$${Python}' $${MSVSCppConvert} --output-format $${VisualStudioVersion} $${VSToolsOptions} msvscpp\${library_name}.sln 2>&1" | %{ "$$_" }
 	}
 }
 $$VSSolutionFile = "$${VSSolutionPath}\${library_name}.sln"
@@ -188,11 +188,11 @@ If ($${PlatformToolset})
 }
 If ($${Env:APPVEYOR} -eq "True")
 {
-	Invoke-Expression -Command "& '$${MSBuild}' $${MSBuildOptions} $${VSSolutionFile} /logger:'C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll'";
+	Invoke-Expression -Command "& '$${MSBuild}' $${MSBuildOptions} $${VSSolutionFile} /logger:'C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll' 2>&1" | %{ "$$_" }
 }
 Else
 {
-	Invoke-Expression -Command "& '$${MSBuild}' $${MSBuildOptions} $${VSSolutionFile}"
+	Invoke-Expression -Command "& '$${MSBuild}' $${MSBuildOptions} $${VSSolutionFile} 2>&1" | %{ "$$_" }
 }
 
 Exit $${ExitSuccess}

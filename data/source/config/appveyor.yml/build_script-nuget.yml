@@ -1,6 +1,6 @@
 - ps: If ($$env:TARGET -eq "vs2022-nuget") {
-    .\build.ps1 -VisualStudioVersion $$env:TARGET.Substring(2, 4) -Configuration $$env:CONFIGURATION -Platform Win32 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany";
-    .\build.ps1 -VisualStudioVersion $$env:TARGET.Substring(2, 4) -Configuration $$env:CONFIGURATION -Platform x64 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
+    .\build.ps1 -VisualStudioVersion $$env:TARGET.Substring(2, 4) -Configuration $$env:CONFIGURATION -Platform Win32 -PythonPath $$env:PythonPath -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany";
+    .\build.ps1 -VisualStudioVersion $$env:TARGET.Substring(2, 4) -Configuration $$env:CONFIGURATION -Platform x64 -PythonPath $$env:PythonPath -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - cmd: if [%TARGET%]==[vs2022-nuget] (
     move msvscpp vs2008 &&
     move vs2022 msvscpp &&

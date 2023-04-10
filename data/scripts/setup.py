@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Script to build and install Python-bindings.
-# Version: 20221217
+# Version: 20230410
 
 from __future__ import print_function
 
@@ -96,6 +96,7 @@ class custom_build_ext(build_ext):
     if compiler.compiler_type == "msvc":
       self.define = [
           ("UNICODE", ""),
+          ("HAVE_PYCONFIG_H", ""),
       ]
 
     else:

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Script to generate the Borland's C++ Compiler 5.5 Makefiles
 
 EXIT_SUCCESS=0;
