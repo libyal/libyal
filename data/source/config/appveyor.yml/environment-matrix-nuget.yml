@@ -1,0 +1,5 @@
+  - TARGET: vs2022-nuget
+    BUILD_ENVIRONMENT: msbuild
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    VisualStudioVersion: 17.0
+    configuration: Release

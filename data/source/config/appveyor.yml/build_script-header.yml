@@ -4,12 +4,8 @@ build_script:
     .\synclibs.ps1;
     .\autogen.ps1 }
 - ps: If ($$env:TARGET -eq "vs2008") {
-    .\build.ps1 -VisualStudioVersion 2008 -VSToolsOptions "" }
-- ps: If ($$env:TARGET -eq "vs2010") {
-    .\build.ps1 -VisualStudioVersion 2010 -VSToolsOptions "--no-python-dll" }
-- ps: If ($$env:TARGET -eq "vs2012") {
-    .\build.ps1 -VisualStudioVersion 2012 -VSToolsOptions "--extend-with-x64 --python-path C:\\Python27-x64" }
-- ps: If ($$env:TARGET -eq "vs2013") {
-    .\build.ps1 -VisualStudioVersion 2013 -VSToolsOptions "" }
-- ps: If ($$env:TARGET -eq "vs2015") {
-    .\build.ps1 -VisualStudioVersion 2015 -VSToolsOptions "" }
+    .\build.ps1 -VisualStudioVersion 2008 -VSToolsOptions "--no-python-dll" }
+- ps: If ( ( "vs2010", "vs2012", "vs2013", "vs2015" ).Contains( $$env:TARGET ) ) {
+    .\build.ps1 -VisualStudioVersion $$env:TARGET.Substring(2, 4) -Configuration $$env:CONFIGURATION -Platform $$env:PLATFORM -VSToolsOptions "--extend-with-x64 --no-python-dll" }
+- ps: If ( ( "vs2017", "vs2019", "vs2022", "vs2022-vsdebug", "vs2022-x64" ).Contains( $$env:TARGET ) ) {
+    .\build.ps1 -VisualStudioVersion $$env:TARGET.Substring(2, 4) -Configuration $$env:CONFIGURATION -Platform $$env:PLATFORM -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }

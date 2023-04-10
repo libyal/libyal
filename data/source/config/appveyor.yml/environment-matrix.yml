@@ -10,12 +10,12 @@
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 10.0
     platform: Win32
-    configuration: VSDebug
+    configuration: Release
   - TARGET: vs2012
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 11.0
-    platform: x64
+    platform: Win32
     configuration: Release
   - TARGET: vs2013
     BUILD_ENVIRONMENT: msbuild
@@ -33,14 +33,29 @@
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     VisualStudioVersion: 15.0
+    platform: Win32
     configuration: Release
   - TARGET: vs2019
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     VisualStudioVersion: 16.0
+    platform: Win32
     configuration: Release
   - TARGET: vs2022
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     VisualStudioVersion: 17.0
+    platform: Win32
+    configuration: Release
+  - TARGET: vs2022-vsdebug
+    BUILD_ENVIRONMENT: msbuild
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    VisualStudioVersion: 17.0
+    platform: Win32
+    configuration: VSDebug
+  - TARGET: vs2022-x64
+    BUILD_ENVIRONMENT: msbuild
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    VisualStudioVersion: 17.0
+    platform: x64
     configuration: Release

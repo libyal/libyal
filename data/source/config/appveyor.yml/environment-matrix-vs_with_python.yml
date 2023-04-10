@@ -1,0 +1,7 @@
+  - TARGET: vs2022-python
+    BUILD_ENVIRONMENT: msbuild
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    VisualStudioVersion: 17.0
+    platform: x64
+    configuration: Release
+    PythonPath: "C:\\Python311-x64"

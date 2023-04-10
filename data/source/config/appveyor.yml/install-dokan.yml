@@ -1,8 +1,8 @@
 - ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild") {
-    If (($$env:TARGET -eq "vs2017") -Or ($$env:TARGET -eq "vs2019") -Or ($$env:TARGET -eq "vs2022")) {
-      .\syncdokan.ps1 }
-    Else {
+    If ( ( "vs2008", "vs2010", "vs2012", "vs2013", "vs2015" ).Contains( $$env:TARGET ) ) {
       .\syncdokan.ps1 -UseLegacyVersion }
+    Else {
+      .\syncdokan.ps1 }
     }
 - cmd: if [%TARGET%]==[vs2010] (
     pushd ..\dokan &&
@@ -33,12 +33,12 @@
     ren vs2015 msvscpp &&
     popd )
 - ps: If ($$env:BUILD_ENVIRONMENT -eq "msbuild") {
-    If (($$env:TARGET -eq "vs2017") -Or ($$env:TARGET -eq "vs2019") -Or ($$env:TARGET -eq "vs2022")) {
+    If ( ( "vs2008", "vs2010", "vs2012", "vs2013", "vs2015" ).Contains( $$env:TARGET ) ) {
+      .\builddokan.ps1 -UseLegacyVersion }
+    Else {
       $$Configuration = $$env:CONFIGURATION;
       If ($${Configuration} -eq "VSDebug") {
         $$Configuration = "Debug" }
       .\builddokan.ps1 -Configuration $${Configuration} -Platform "Win32";
       .\builddokan.ps1 -Configuration $${Configuration} -Platform "x64"; }
-    Else {
-      .\builddokan.ps1 -UseLegacyVersion }
     }

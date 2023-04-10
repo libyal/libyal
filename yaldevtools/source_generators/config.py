@@ -155,31 +155,39 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('environment-matrix.yml')
 
-    template_names.append('environment-macos.yml')
+    if project_configuration.HasPythonModule():
+      template_names.append('environment-matrix-vs_with_python.yml')
+
+    if project_configuration.deploy_to_nuget:
+      template_names.append('environment-matrix-nuget.yml')
+
+    template_names.append('environment-matrix-macos.yml')
 
     if project_configuration.HasPythonModule():
-      template_names.append('environment-macos-python.yml')
+      template_names.append('environment-matrix-macos-python.yml')
     else:
-      template_names.append('environment-macos-pkgbuild.yml')
+      template_names.append('environment-matrix-macos-pkgbuild.yml')
 
     if project_configuration.HasPythonModule():
-      template_names.append('environment-setup_py.yml')
+      template_names.append('environment-matrix-setup_py.yml')
 
-    template_names.append('environment-cygwin64.yml')
+    template_names.append('environment-matrix-cygwin64.yml')
 
     # if project_configuration.HasDependencyCrypto():
     # TODO: add environment-cygwin64-openssl.yml
 
     if project_configuration.HasPythonModule():
-      template_names.append('environment-cygwin64-python.yml')
+      template_names.append('environment-matrix-cygwin64-python.yml')
 
     if project_configuration.HasTools():
-      template_names.append('environment-cygwin64-static-executables.yml')
+      template_names.append(
+          'environment-matrix-cygwin64-static-executables.yml')
 
-    template_names.append('environment-mingw-w64.yml')
+    template_names.append('environment-matrix-mingw-w64.yml')
 
     if project_configuration.HasTools():
-      template_names.append('environment-mingw-w64-static-executables.yml')
+      template_names.append(
+          'environment-matrix-mingw-w64-static-executables.yml')
 
     template_names.append('install-header.yml')
 
@@ -254,10 +262,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('build_script-header.yml')
 
+    if project_configuration.HasPythonModule():
+      template_names.append('build_script-vs_with_python.yml')
+
     if project_configuration.deploy_to_nuget:
-      template_names.append('build_script-vs2017-nuget.yml')
-    else:
-      template_names.append('build_script-vs2017.yml')
+      template_names.append('build_script-nuget.yml')
 
     template_names.append('build_script-macos.yml')
 
