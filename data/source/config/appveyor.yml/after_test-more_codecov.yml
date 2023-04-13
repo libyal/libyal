@@ -1,8 +1,8 @@
 after_test:
 - cmd: if [%TARGET%]==[cygwin64] (
-    copy C:\projects\codecov-bash\codecov C:\cygwin64\home\appveyor\${library_name}\codecov.sh &&
-    C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && ./codecov.sh -n cygwin64" )
-- cmd: if [%TARGET%]==[mingw-w64] (
-    copy C:\projects\codecov-bash\codecov C:\msys64\home\appveyor\${library_name}\codecov.sh &&
-    C:\msys64\usr\bin\bash -e -l -c "cd ${library_name} && chmod a+x ./codecov.sh && ./codecov.sh -n mingw-w64" )
+    # TODO
+    C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && wget -q 'https://uploader.codecov.io/latest/linux/codecov' -O codecov && chmod a+x ./codecov && ./codecov -n cygwin64" )
+- cmd: if [%TARGET%]==[mingw-w64-gcc-no-optimization] (
+    C:\msys64\usr\bin\bash -e -l -c "cd libcerror && for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd $${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done" &&
+    C:\projects\codecov.exe -R \msys64\home\appveyor\libcerror --name $${TARGET} )
 

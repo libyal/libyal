@@ -19,7 +19,7 @@
         for DIRECTORY in `find . -maxdepth 1 -type d`; do \
           (cd $${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
         done
-    - name: Upload coverage data
-      run: |
-        git clone https://github.com/codecov/codecov-bash.git ../codecov-bash
-        /bin/bash ../codecov-bash/codecov -n linux-$${{ matrix.architecture }}-gcc-no-optimization -X gcov;
+    - name: Upload coverage report to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        name: linux-$${{ matrix.architecture }}-gcc-no-optimization

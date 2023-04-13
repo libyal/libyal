@@ -76,6 +76,7 @@ class ProjectConfiguration(BaseConfiguration):
     dpkg_build_dependencies (str): dpkg build dependencies.
     dotnet_bindings_name (str): name of the .Net bindings.
     dtfabric_configuration (DTFabricConfiguration): dtFabric configuration.
+    freebsd_build_dependencies (str): FreeBSD build dependencies.
     gcc_build_dependencies (list[str]): GCC build dependencies.
     gcc_static_build_dependencies (list[str]): GCC build dependencies for
         building static binaries.
@@ -294,6 +295,9 @@ class ProjectConfiguration(BaseConfiguration):
     # DPKG specific configuration.
     self.dpkg_build_dependencies = None
 
+    # FreeBSD pkg specific configuration.
+    self.freebsd_build_dependencies = None
+
     # Visual Studio specific configuration.
     self.msvscpp_build_dependencies = None
     self.msvscpp_dll_dependencies = None
@@ -405,6 +409,19 @@ class ProjectConfiguration(BaseConfiguration):
       config_parser (ConfigParser): configuration file parser.
     """
     self.dotnet_bindings_name = '{0:s}.net'.format(self.library_name_suffix)
+
+  def _ReadFreeBSDConfiguration(self, config_parser):
+    """Reads the FreeBSD configuration.
+
+    Args:
+      config_parser (ConfigParser): configuration file parser.
+    """
+    self.freebsd_build_dependencies = self._GetOptionalConfigValue(
+        config_parser, 'freebsd', 'build_dependencies', default_value=[])
+
+    # Remove trailing comments.
+    self.freebsd_build_dependencies = [
+        name.split(' ')[0] for name in self.freebsd_build_dependencies]
 
   def _ReadGCCConfiguration(self, config_parser):
     """Reads the GCC configuration.
@@ -1107,6 +1124,7 @@ class ProjectConfiguration(BaseConfiguration):
     self._ReadTroubleshootingConfiguration(config_parser)
 
     self._ReadCygwinConfiguration(config_parser)
+    self._ReadFreeBSDConfiguration(config_parser)
     self._ReadGCCConfiguration(config_parser)
     self._ReadMinGWConfiguration(config_parser)
     self._ReadMinGWMSYS2Configuration(config_parser)

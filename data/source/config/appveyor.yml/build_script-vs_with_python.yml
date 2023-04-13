@@ -1,2 +1,2 @@
 - ps: If ($$env:TARGET -eq "vs2022-python") {
-    .\build.ps1 -VisualStudioVersion $$env:TARGET.Substring(2, 4) -Configuration $$env:CONFIGURATION -Platform $$env:PLATFORM -PythonPath $$env:PythonPath -VSToolsOptions "--extend-with-x64 --python-path $$env:PythonPath --with-dokany" }
+    .\build.ps1 -VisualStudioVersion $$env:TARGET.Substring(2, 4) -Configuration $$env:CONFIGURATION -Platform $$env:PLATFORM -PythonPath $$env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --python-path $$env:PYTHON_PATH --with-dokany" }

@@ -1278,7 +1278,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
 
+    freebsd_build_dependencies = self._GetFreeBSDBuildDependencies(
+        project_configuration)
+
     template_names = ['header.yml']
+
+    template_names.append('build_freebsd.yml')
+
+    template_names.append('build_ubuntu-header.yml')
 
     # TODO: improve check.
     if project_configuration.library_name in ('libbfio', 'libcdata'):
@@ -1316,11 +1323,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
+    template_mappings['freebsd_build_dependencies'] = ' '.join(
+        freebsd_build_dependencies)
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['dpkg_build_dependencies']
+    del template_mappings['freebsd_build_dependencies']
 
   def _GenerateGitHubActionsBuildSharedYML(
       self, project_configuration, template_mappings, include_header_file,
@@ -1376,6 +1386,47 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       brew_build_dependencies.append('osxfuse')
 
     return brew_build_dependencies
+
+  def _GetCygwinBuildDependencies(self, project_configuration):
+    """Retrieves the Cygwin build dependencies.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+
+    Returns:
+      list[str]: Cygwin build dependencies.
+    """
+    cygwin_build_dependencies = list(
+        project_configuration.cygwin_build_dependencies)
+
+    cygwin_build_dependencies.extend(['gettext-devel', 'wget'])
+
+    if project_configuration.HasDependencyYacc():
+      cygwin_build_dependencies.append('bison')
+    if project_configuration.HasDependencyLex():
+      cygwin_build_dependencies.append('flex')
+
+    if project_configuration.HasDependencyZlib():
+      cygwin_build_dependencies.append('zlib-devel')
+    if project_configuration.HasDependencyBzip2():
+      cygwin_build_dependencies.append('libbz2-devel')
+
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      # On Cygwin also link zlib since libcrypto relies on it.
+      if 'zlib' not in project_configuration.library_build_dependencies:
+        cygwin_build_dependencies.append('zlib-devel')
+
+      cygwin_build_dependencies.append('libssl-devel')
+
+    if project_configuration.HasPythonModule():
+      cygwin_build_dependencies.append('python3-devel')
+
+    if ('uuid' in project_configuration.library_build_dependencies or
+        'uuid' in project_configuration.tools_build_dependencies):
+      cygwin_build_dependencies.append('libuuid-devel')
+
+    return cygwin_build_dependencies
 
   def _GetDpkgBuildDependencies(self, project_configuration):
     """Retrieves the dpkg build dependencies.
@@ -1455,46 +1506,40 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     return dpkg_build_dependencies
 
-  def _GetCygwinBuildDependencies(self, project_configuration):
-    """Retrieves the Cygwin build dependencies.
+  def _GetFreeBSDBuildDependencies(self, project_configuration):
+    """Retrieves the FreeBSD build dependencies.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
 
     Returns:
-      list[str]: Cygwin build dependencies.
+      list[str]: FreeBSD build dependencies in alphabetical order.
     """
-    cygwin_build_dependencies = list(
-        project_configuration.cygwin_build_dependencies)
-
-    cygwin_build_dependencies.extend(['gettext-devel', 'wget'])
+    freebsd_build_dependencies = [
+        'autoconf',
+        'automake',
+        'bash',
+        'gettext',
+        'git',
+        'libtool',
+        'pkgconf']
 
     if project_configuration.HasDependencyYacc():
-      cygwin_build_dependencies.append('bison')
+      freebsd_build_dependencies.append('byacc')
     if project_configuration.HasDependencyLex():
-      cygwin_build_dependencies.append('flex')
-
-    if project_configuration.HasDependencyZlib():
-      cygwin_build_dependencies.append('zlib-devel')
-    if project_configuration.HasDependencyBzip2():
-      cygwin_build_dependencies.append('libbz2-devel')
+      freebsd_build_dependencies.append('flex')
 
     if ('crypto' in project_configuration.library_build_dependencies or
         'crypto' in project_configuration.tools_build_dependencies):
-      # On Cygwin also link zlib since libcrypto relies on it.
-      if 'zlib' not in project_configuration.library_build_dependencies:
-        cygwin_build_dependencies.append('zlib-devel')
+      freebsd_build_dependencies.append('openssl')
 
-      cygwin_build_dependencies.append('libssl-devel')
+    if 'fuse' in project_configuration.tools_build_dependencies:
+      freebsd_build_dependencies.append('fusefs-libs')
 
-    if project_configuration.HasPythonModule():
-      cygwin_build_dependencies.append('python3-devel')
+    freebsd_build_dependencies.extend(
+        project_configuration.freebsd_build_dependencies)
 
-    if ('uuid' in project_configuration.library_build_dependencies or
-        'uuid' in project_configuration.tools_build_dependencies):
-      cygwin_build_dependencies.append('libuuid-devel')
-
-    return cygwin_build_dependencies
+    return sorted(freebsd_build_dependencies)
 
   def _GetMinGWMSYS2BuildDependencies(self, project_configuration):
     """Retrieves the MinGW-MSYS2 build dependencies.

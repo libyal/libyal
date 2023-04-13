@@ -1,2 +1,4 @@
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     C:\msys64\usr\bin\pacman -S --noconfirm --needed ${mingw_msys2_build_dependencies} )
+- ps: If ($$env:TARGET -eq "mingw-w64-gcc-no-optimization") {
+    $$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile ..\codecov.exe }

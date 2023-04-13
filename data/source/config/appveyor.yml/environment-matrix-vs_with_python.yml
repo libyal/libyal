@@ -4,4 +4,4 @@
     VisualStudioVersion: 17.0
     platform: x64
     configuration: Release
-    PythonPath: "C:\\Python311-x64"
+    PYTHON_PATH: "C:\\Python311-x64"

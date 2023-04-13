@@ -1,5 +1,4 @@
 
 install:
-- cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash
 - cmd: if [%BUILD_ENVIRONMENT%]==[msbuild] (
     git clone https://github.com/libyal/vstools.git ..\vstools )
