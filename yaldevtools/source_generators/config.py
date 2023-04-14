@@ -260,6 +260,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names = []
 
+    template_names.append('install-codecov.yml')
+
     template_names.append('build_script-header.yml')
 
     if project_configuration.HasPythonModule():

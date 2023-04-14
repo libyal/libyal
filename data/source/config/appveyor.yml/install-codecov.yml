@@ -1,0 +1,2 @@
+- ps: If ( ( "cygwin64-gcc-no-optimization", "mingw-w64-gcc-no-optimization" ).Contains( $$env:TARGET ) ) {
+    $$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile ..\codecov.exe }

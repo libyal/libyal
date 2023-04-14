@@ -1,5 +1,8 @@
 after_test:
+- cmd: if [%TARGET%]==[cygwin64-gcc-no-optimization] (
+    C:\cygwin64\bin\bash -e -l -c "cd ${library_name} && for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd $${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done" &&
+    C:\projects\codecov.exe -R \cygwin64\home\appveyor\${library_name} --name $${TARGET} )
 - cmd: if [%TARGET%]==[mingw-w64-gcc-no-optimization] (
-    C:\msys64\usr\bin\bash -e -l -c "cd libcerror && for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd $${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done" &&
-    C:\projects\codecov.exe -R \msys64\home\appveyor\libcerror --name $${TARGET} )
+    C:\msys64\usr\bin\bash -e -l -c "cd ${library_name} && for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd $${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done" &&
+    C:\projects\codecov.exe -R \msys64\home\appveyor\${library_name} --name $${TARGET} )
 
