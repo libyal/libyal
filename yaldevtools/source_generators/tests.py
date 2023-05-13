@@ -423,7 +423,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           project_configuration.library_name_suffix, tool_name_suffix)
       if tool_name in project_configuration.tools_names:
         if not with_tools:
-          test_scripts.append('test_tools.sh')
+          test_scripts.extend(['test_tools.ps1', 'test_tools.sh'])
           with_tools = True
 
         test_script = 'test_{0:s}.sh'.format(tool_name)
