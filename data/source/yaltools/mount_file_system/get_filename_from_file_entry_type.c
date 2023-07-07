@@ -96,19 +96,18 @@ int mount_file_system_get_filename_from_${mount_tool_file_entry_type}(
 
 		goto on_error;
 	}
-	if( mount_file_system_get_filename_from_name(
-	     file_system,
-	     ${mount_tool_file_entry_type}_name,
-	     ${mount_tool_file_entry_type}_name_size - 1,
+	if( mount_path_string_copy_from_file_entry_path(
 	     filename,
 	     filename_size,
+	     ${mount_tool_file_entry_type}_name,
+	     ${mount_tool_file_entry_type}_name_size - 1,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve a filename from the ${mount_tool_file_entry_type_description} name.",
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy filename from the ${mount_tool_file_entry_type_description} name.",
 		 function );
 
 		goto on_error;

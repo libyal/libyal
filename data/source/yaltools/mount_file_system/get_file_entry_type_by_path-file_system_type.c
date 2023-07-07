@@ -25,8 +25,7 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 
 		return( -1 );
 	}
-	if( mount_file_system_get_${mount_tool_file_entry_type}_path_from_path(
-	     file_system,
+	if( mount_path_string_copy_to_file_entry_path(
 	     path,
 	     path_length,
 	     &${mount_tool_file_entry_type}_path,
@@ -36,8 +35,8 @@ int mount_file_system_get_${mount_tool_file_entry_type}_by_path(
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve ${mount_tool_file_entry_type_description} path from path.",
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy path to ${mount_tool_file_entry_type_description} path.",
 		 function );
 
 		goto on_error;

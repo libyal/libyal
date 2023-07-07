@@ -732,8 +732,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if not project_configuration.mount_tool_file_system_type:
       template_names.extend([
           'get_number_of_file_entry_types.h', 'get_file_entry_type_by_index.h'])
-    else:
-      template_names.append('get_file_entry_type_path_from_path.h')
 
     template_names.append('get_file_entry_type_by_path.h')
 
@@ -741,8 +739,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       template_names.extend([
           'append_file_entry_type.h', 'get_path_from_file_entry_index.h'])
     else:
-      template_names.extend([
-          'get_filename_from_name.h', 'get_filename_from_file_entry_type.h'])
+      template_names.append('get_filename_from_file_entry_type.h')
 
     template_names.append('footer.h')
 
@@ -837,9 +834,8 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
           'get_path_from_file_entry_index.c'])
     else:
       template_names.extend([
-          'get_file_entry_type_path_from_path.c',
           'get_file_entry_type_by_path-file_system_type.c',
-          'get_filename_from_name.c', 'get_filename_from_file_entry_type.c'])
+          'get_filename_from_file_entry_type.c'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -1374,6 +1370,49 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     self._SortVariableDeclarations(output_filename)
     self._VerticalAlignFunctionArguments(output_filename)
 
+  def _GenerateMountPathStringHeaderFile(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates a mount path string header file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(
+        self._template_directory, 'mount_path_string')
+
+    template_filename = os.path.join(template_directory, 'mount_path_string.h')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    self._SortIncludeHeaders(project_configuration, output_filename)
+
+  def _GenerateMountPathStringSourceFile(
+      self, project_configuration, template_mappings, mount_tool_name,
+      output_writer, output_filename):
+    """Generates a mount path string source file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      mount_tool_name (str): name of the mount tool.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(
+        self._template_directory, 'mount_path_string')
+
+    template_filename = os.path.join(template_directory, 'mount_path_string.c')
+    self._GenerateSection(
+        template_filename, template_mappings, output_writer, output_filename)
+
+    self._SortIncludeHeaders(project_configuration, output_filename)
+
   def _GenerateMountTool(
       self, project_configuration, template_mappings, output_writer):
     """Generates a mount tool.
@@ -1392,6 +1431,19 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.tools_directory, mount_tool_filename)
 
     if os.path.exists(mount_tool_filename):
+      if project_configuration.mount_tool_file_system_type:
+        output_filename = os.path.join(
+            project_configuration.tools_directory, 'mount_path_string.h')
+        self._GenerateMountPathStringHeaderFile(
+            project_configuration, template_mappings, output_writer,
+            output_filename)
+
+        output_filename = os.path.join(
+            project_configuration.tools_directory, 'mount_path_string.c')
+        self._GenerateMountPathStringSourceFile(
+            project_configuration, template_mappings, output_writer,
+            output_filename)
+
       output_filename = os.path.join(
           project_configuration.tools_directory, 'mount_file_entry.h')
       self._GenerateMountFileEntryHeaderFile(
