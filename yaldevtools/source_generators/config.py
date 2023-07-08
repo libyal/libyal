@@ -1556,7 +1556,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         project_configuration.mingw_msys2_build_dependencies)
 
     mingw_msys2_build_dependencies.extend([
-        'autoconf', 'automake', 'gcc', 'gettext-devel', 'libtool', 'make'])
+        'autoconf', 'automake', 'gettext-devel', 'libtool', 'make',
+        'mingw-w64-x86_64-gcc'])
 
     if project_configuration.HasDependencyYacc():
       mingw_msys2_build_dependencies.append('msys/bison')

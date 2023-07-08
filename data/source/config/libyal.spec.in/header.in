@@ -3,7 +3,6 @@ Version: @VERSION@
 Release: 1
 Summary: ${library_description}
 Group: System Environment/Libraries
-License: LGPLv3+
+License: LGPL-3.0-or-later
 Source: %{name}-%{version}.tar.gz
 URL: https://github.com/libyal/${library_name}
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
