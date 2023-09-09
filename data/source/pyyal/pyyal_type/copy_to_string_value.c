@@ -8,7 +8,6 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	PyObject *string_object      = NULL;
 	libcerror_error_t *error     = NULL;
 	char *utf8_string            = NULL;
-	const char *errors           = NULL;
 	static char *function        = "${python_module_name}_${type_name}_get_${value_name}";
 	size_t string_size           = 0;
 	uint32_t string_format_flags = 0;
@@ -98,7 +97,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	string_object = PyUnicode_DecodeUTF8(
 	                 utf8_string,
 	                 (Py_ssize_t) string_size - 1,
-	                 errors );
+	                 NULL );
 
 	if( string_object == NULL )
 	{

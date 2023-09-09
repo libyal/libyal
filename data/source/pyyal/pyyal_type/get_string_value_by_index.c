@@ -8,7 +8,6 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
 	libcerror_error_t *error = NULL;
 	PyObject *string_object  = NULL;
 	uint8_t *utf8_string     = NULL;
-	const char *errors       = NULL;
 	static char *function    = "${python_module_name}_${type_name}_get_${value_name}_by_index";
 	size_t utf8_string_size  = 0;
 	int result               = 0;
@@ -97,7 +96,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_by_index(
 	string_object = PyUnicode_DecodeUTF8(
 	                 (char *) utf8_string,
 	                 (Py_ssize_t) utf8_string_size - 1,
-	                 errors );
+	                 NULL );
 
 	if( string_object == NULL )
 	{

@@ -1,6 +1,6 @@
 dnl Checks for libfwps required headers and functions
 dnl
-dnl Version: 20230130
+dnl Version: 20230711
 
 dnl Function to detect if libfwps is available
 dnl ac_libfwps_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -26,7 +26,7 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
         [PKG_CHECK_MODULES(
           [libfwps],
-          [libfwps >= 20230130],
+          [libfwps >= 20230711],
           [ac_cv_libfwps=yes],
           [ac_cv_libfwps=check])
         ])
@@ -169,6 +169,26 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
         AC_CHECK_LIB(
           fwps,
           libfwps_record_get_data_as_utf16_string,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_data_as_utf8_path_string_size,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_data_as_utf8_path_string,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_data_as_utf16_path_string_size,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_data_as_utf16_path_string,
           [ac_cv_libfwps_dummy=yes],
           [ac_cv_libfwps=no])
         AC_CHECK_LIB(

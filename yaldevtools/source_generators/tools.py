@@ -1392,15 +1392,14 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     self._SortIncludeHeaders(project_configuration, output_filename)
 
   def _GenerateMountPathStringSourceFile(
-      self, project_configuration, template_mappings, mount_tool_name,
-      output_writer, output_filename):
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
     """Generates a mount path string source file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      mount_tool_name (str): name of the mount tool.
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """

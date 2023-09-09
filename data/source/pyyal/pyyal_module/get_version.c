@@ -5,7 +5,6 @@ PyObject *${python_module_name}_get_version(
            PyObject *self ${python_module_name_upper_case}_ATTRIBUTE_UNUSED,
            PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
 {
-	const char *errors           = NULL;
 	const char *version_string   = NULL;
 	size_t version_string_length = 0;
 
@@ -28,6 +27,6 @@ PyObject *${python_module_name}_get_version(
 	return( PyUnicode_DecodeUTF8(
 	         version_string,
 	         (Py_ssize_t) version_string_length,
-	         errors ) );
+	         NULL ) );
 }
 

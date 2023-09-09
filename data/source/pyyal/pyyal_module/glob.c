@@ -13,7 +13,6 @@ PyObject *${python_module_name}_glob(
 	PyObject *string_object          = NULL;
 	static char *function            = "${python_module_name}_glob";
 	static char *keyword_list[]      = { "filename", NULL };
-	const char *errors               = NULL;
 	const char *filename_narrow      = NULL;
 	size_t filename_length           = 0;
 	int filename_index               = 0;
@@ -63,9 +62,14 @@ PyObject *${python_module_name}_glob(
 		PyErr_Clear();
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		filename_wide = (wchar_t *) PyUnicode_AsWideCharString(
+		                             string_object,
+		                             NULL );
+#else
 		filename_wide = (wchar_t *) PyUnicode_AsUnicode(
 		                             string_object );
-
+#endif
 		filename_length = wide_string_length(
 		                   filename_wide );
 
@@ -80,6 +84,11 @@ PyObject *${python_module_name}_glob(
 			  &error );
 
 		Py_END_ALLOW_THREADS
+
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		PyMem_Free(
+		 filename_wide );
+#endif
 #else
 		utf8_string_object = PyUnicode_AsUTF8String(
 		                      string_object );
@@ -91,7 +100,7 @@ PyObject *${python_module_name}_glob(
 			 "%s: unable to convert Unicode string to UTF-8.",
 			 function );
 
-			return( NULL );
+			goto on_error;
 		}
 #if PY_MAJOR_VERSION >= 3
 		filename_narrow = PyBytes_AsString(
@@ -156,7 +165,7 @@ PyObject *${python_module_name}_glob(
 			filename_string_object = PyUnicode_DecodeUTF8(
 			                          filenames_narrow[ filename_index ],
 			                          filename_length,
-			                          errors );
+			                          NULL );
 #endif
 			if( filename_string_object == NULL )
 			{
@@ -287,7 +296,7 @@ PyObject *${python_module_name}_glob(
 						  filenames_narrow[ filename_index ],
 						  filename_length,
 						  PyUnicode_GetDefaultEncoding(),
-						  errors );
+						  NULL );
 
 			if( filename_string_object == NULL )
 			{
