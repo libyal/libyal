@@ -1,54 +1,54 @@
 # Script that synchronizes zlib.
 #
-# Version: 20221022
+# Version: 20230926
 
-Function ExtractZip($$Filename)
+Function ExtractZip($Filename)
 {
 	# AppVeyor does not seem to support extraction using "native ZIP" so we use 7z instead.
-	$$SevenZip = "C:\Program Files\7-Zip\7z.exe"
+	$SevenZip = "C:\Program Files\7-Zip\7z.exe"
 
-	If (Test-Path $${SevenZip})
+	If (Test-Path ${SevenZip})
 	{
 		# PowerShell will raise NativeCommandError if 7z writes to stdout or stderr
 		# therefore 2>&1 is added and the output is stored in a variable.
 		# The leading & and single quotes are necessary to compensate for the spaces in the path.
-		$$Output = Invoke-Expression -Command "& '$${SevenZip}' -y x $${Filename} 2>&1"
+		$Output = Invoke-Expression -Command "& '${SevenZip}' -y x ${Filename} 2>&1"
 	}
 	else
 	{
-		$$Shell = New-Object -ComObject Shell.Application
-		$$Archive = $${Shell}.NameSpace($${Filename})
-		$$Directory = $${Shell}.Namespace("$${pwd}")
+		$Shell = New-Object -ComObject Shell.Application
+		$Archive = ${Shell}.NameSpace(${Filename})
+		$Directory = ${Shell}.Namespace("${pwd}")
 
-		ForEach($$FileEntry in $${Archive}.items())
+		ForEach($FileEntry in ${Archive}.items())
 		{
-			$${Directory}.CopyHere($${FileEntry})
+			${Directory}.CopyHere(${FileEntry})
 		}
 	}
 }
 
-$$Filename = "$${pwd}\zlib1213.zip"
-$$Url = "http://zlib.net/zlib1213.zip"
-$$ExtractedPath = "zlib-1.2.13"
-$$DestinationPath = "..\zlib"
+$Filename = "${pwd}\zlib13.zip"
+$Url = "http://zlib.net/zlib13.zip"
+$ExtractedPath = "zlib-1.3"
+$DestinationPath = "..\zlib"
 
-If (Test-Path $${Filename})
+If (Test-Path ${Filename})
 {
-	Remove-Item -Path $${Filename} -Force
+	Remove-Item -Path ${Filename} -Force
 }
-Invoke-WebRequest -Uri $${Url} -OutFile $${Filename}
+Invoke-WebRequest -Uri ${Url} -OutFile ${Filename}
 
-If (Test-Path $${ExtractedPath})
+If (Test-Path ${ExtractedPath})
 {
-	Remove-Item -Path $${ExtractedPath} -Force -Recurse
+	Remove-Item -Path ${ExtractedPath} -Force -Recurse
 }
-ExtractZip -Filename $${Filename}
+ExtractZip -Filename ${Filename}
 
-Remove-Item -Path $${Filename} -Force
+Remove-Item -Path ${Filename} -Force
 
-If (Test-Path $${DestinationPath})
+If (Test-Path ${DestinationPath})
 {
-	Remove-Item -Path $${DestinationPath} -Force -Recurse
+	Remove-Item -Path ${DestinationPath} -Force -Recurse
 }
-Move-Item $${ExtractedPath} $${DestinationPath}
+Move-Item ${ExtractedPath} ${DestinationPath}
 

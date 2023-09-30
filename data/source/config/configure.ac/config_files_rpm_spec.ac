@@ -1,0 +1,2 @@
+AC_CONFIG_FILES([${library_name}.pc])
+AC_CONFIG_FILES([${library_name}.spec])

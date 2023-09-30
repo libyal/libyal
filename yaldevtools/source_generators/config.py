@@ -652,6 +652,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasDotNetBindings():
       template_names.append('config_files_dotnet_rc.ac')
 
+    template_names.append('config_files_rpm_spec.ac')
+
+    if project_configuration.HasPythonModule():
+      template_names.append('config_files_setup_cfg.ac')
+
     template_names.append('config_files_end.ac')
 
     template_filenames = [
