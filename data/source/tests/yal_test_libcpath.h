@@ -42,7 +42,7 @@
 
 #include <libcpath.h>
 
-#endif /* !defined( _${library_name_suffix_upper_case}_TEST_LIBCPATH_H ) */
+#endif /* defined( HAVE_LOCAL_LIBCPATH ) */
 
 #endif /* !defined( _${library_name_suffix_upper_case}_TEST_LIBCPATH_H ) */
 

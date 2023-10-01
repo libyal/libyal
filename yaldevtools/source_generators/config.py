@@ -1378,6 +1378,131 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     del template_mappings['dpkg_build_dependencies']
 
+  def _GenerateGitHubActionsBuildWheelYML(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the .github/workflows/build_wheel.yml configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(
+        self._template_directory, 'github_workflows', 'build_wheel.yml')
+
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
+    template_names = ['body.yml']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    template_mappings['dpkg_build_dependencies'] = ' '.join(
+        dpkg_build_dependencies)
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['dpkg_build_dependencies']
+
+  def _GeneratePyprojectToml(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the pyproject.toml configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory)
+
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
+    template_names = ['pyproject.toml']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    template_mappings['dpkg_build_dependencies'] = ' '.join(
+        dpkg_build_dependencies)
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['dpkg_build_dependencies']
+
+  def _GenerateSetupCfgIn(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the setup.cfg.in configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'setup.cfg.in')
+
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
+    template_names = ['body']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    template_mappings['dpkg_build_dependencies'] = ' '.join(
+        dpkg_build_dependencies)
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['dpkg_build_dependencies']
+
+  def _GenerateToxIni(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the tox.ini configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(self._template_directory, 'tox.ini')
+
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
+    template_names = ['body.ini']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    template_mappings['dpkg_build_dependencies'] = ' '.join(
+        dpkg_build_dependencies)
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['dpkg_build_dependencies']
+
   def _GetBrewBuildDependencies(self, project_configuration):
     """Retrieves the brew build dependencies.
 
@@ -1663,6 +1788,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         project_configuration, template_mappings, include_header_file,
         output_writer, output_filename)
 
+    if project_configuration.HasPythonModule():
+      output_filename = os.path.join('.github', 'workflows', 'build_wheel.yml')
+      self._GenerateGitHubActionsBuildWheelYML(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer, 'appveyor.yml')
 
@@ -1679,3 +1810,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     self._GenerateRpmSpec(
         project_configuration, template_mappings, output_writer,
         output_filename)
+
+    if project_configuration.HasPythonModule():
+      self._GeneratePyprojectToml(
+          project_configuration, template_mappings, output_writer,
+          "pyproject.toml")
+
+      self._GenerateSetupCfgIn(
+          project_configuration, template_mappings, output_writer,
+          "setup.cfg.in")
+
+      self._GenerateToxIni(
+          project_configuration, template_mappings, output_writer, "tox.ini")

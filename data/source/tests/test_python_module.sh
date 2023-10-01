@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests Python module functions and types.
 #
-# Version: 20230410
+# Version: 20231001
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -68,37 +68,22 @@ test_python_function_with_input()
 
 		local TEST_SET_DIRECTORY=$$(get_test_set_directory "$${TEST_PROFILE_DIRECTORY}" "$${TEST_SET_INPUT_DIRECTORY}");
 
-		local OLDIFS=$${IFS};
-
-		# IFS="\n"; is not supported by all platforms.
-		IFS="
-";
-
 		if test -f "$${TEST_SET_DIRECTORY}/files";
 		then
-			for INPUT_FILE in `cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?"`;
-			do
-				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_SCRIPT}" "$${INPUT_FILE}";
-				RESULT=$$?;
-
-				if test $${RESULT} -ne $${EXIT_SUCCESS};
-				then
-					break;
-				fi
-			done
+			IFS=$$'\n' INPUT_FILES=( $$(cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?") );
 		else
-			for INPUT_FILE in `ls -1d $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB}`;
-			do
-				run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_SCRIPT}" "$${INPUT_FILE}";
-				RESULT=$$?;
-
-				if test $${RESULT} -ne $${EXIT_SUCCESS};
-				then
-					break;
-				fi
-			done
+			IFS=$$'\n' INPUT_FILES=( $$(ls -1d $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB}) );
 		fi
-		IFS=$${OLDIFS};
+		for INPUT_FILE in $${INPUT_FILES[@]};
+		do
+			run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_SCRIPT}" "$${INPUT_FILE}";
+			RESULT=$$?;
+
+			if test $${RESULT} -ne $${EXIT_SUCCESS};
+			then
+				break;
+			fi
+		done
 
 		if test $${RESULT} -ne $${EXIT_SUCCESS};
 		then

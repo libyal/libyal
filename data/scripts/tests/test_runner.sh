@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20230410
+# Version: 20231001
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -1258,35 +1258,22 @@ run_test_on_test_set_with_options()
 
 	local RESULT=${EXIT_SUCCESS};
 
-	# IFS="\n"; is not supported by all platforms.
-	IFS="
-";
-
 	if test -f "${TEST_SET_DIRECTORY}/files";
 	then
-		for INPUT_FILE in `cat ${TEST_SET_DIRECTORY}/files | sed "s?^?${TEST_SET_INPUT_DIRECTORY}/?"`;
-		do
-			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
-			RESULT=$?;
-
-			if test ${RESULT} -ne ${EXIT_SUCCESS};
-			then
-				break;
-			fi
-		done
+		IFS=$'\n' INPUT_FILES=( $(cat ${TEST_SET_DIRECTORY}/files | sed "s?^?${TEST_SET_INPUT_DIRECTORY}/?") );
 	else
-		for INPUT_FILE in `ls -1d ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
-		do
-			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
-			RESULT=$?;
-
-			if test ${RESULT} -ne ${EXIT_SUCCESS};
-			then
-				break;
-			fi
-		done
+		IFS=$'\n' INPUT_FILES=( $(ls -1d ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}) );
 	fi
-	IFS=${OLDIFS};
+	for INPUT_FILE in ${INPUT_FILES[@]};
+	do
+		run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			break;
+		fi
+	done
 
 	return ${RESULT};
 }
