@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests library functions and types.
 #
-# Version: 20231001
+# Version: 20231002
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -9,7 +9,7 @@ EXIT_IGNORE=77;
 
 LIBRARY_TESTS="${library_tests}";
 LIBRARY_TESTS_WITH_INPUT="${library_tests_with_input}";
-OPTION_SETS="${tests_option_sets}";
+OPTION_SETS=(${tests_option_sets});
 
 INPUT_GLOB="${tests_input_glob}";
 
@@ -91,8 +91,31 @@ run_test_with_input()
 				# A test executable built with MinGW expects a Windows path.
 				INPUT_FILE=`echo $${INPUT_FILE} | sed 's?/?\\\\?g'`;
 			fi
-			run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
-			RESULT=$$?;
+			local TESTED_WITH_OPTIONS=0;
+
+			for OPTION_SET in $${OPTION_SETS[@]};
+			do
+				local TEST_DATA_OPTION_FILE=$$(get_test_data_option_file "$${TEST_SET_DIRECTORY}" "$${INPUT_FILE}" "$${OPTION_SET}");
+
+				if test -f $${TEST_DATA_OPTION_FILE};
+				then
+					TESTED_WITH_OPTIONS=1;
+
+					run_test_on_input_file "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SET}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+					RESULT=$$?;
+
+					if test $${RESULT} -ne $${EXIT_SUCCESS};
+					then
+						break;
+					fi
+				fi
+			done
+
+			if $${TESTED_WITH_OPTIONS} -eq 0;
+			then
+				run_test_on_input_file "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+				RESULT=$$?;
+			fi
 
 			if test $${RESULT} -ne $${EXIT_SUCCESS};
 			then

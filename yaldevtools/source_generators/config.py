@@ -1748,6 +1748,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
+      if (directory_entry in ('pyproject.toml', 'setup.py') and
+          not project_configuration.HasPythonModule()):
+        continue
+
       if directory_entry == 'libyal.nuspec':
         output_filename = '{0:s}.nuspec'.format(
             project_configuration.library_name)
@@ -1812,10 +1816,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         output_filename)
 
     if project_configuration.HasPythonModule():
-      self._GeneratePyprojectToml(
-          project_configuration, template_mappings, output_writer,
-          "pyproject.toml")
-
       self._GenerateSetupCfgIn(
           project_configuration, template_mappings, output_writer,
           "setup.cfg.in")

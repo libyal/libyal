@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests Python module functions and types.
 #
-# Version: 20231001
+# Version: 20231002
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -9,7 +9,7 @@ EXIT_IGNORE=77;
 
 TEST_FUNCTIONS="${test_python_functions}";
 TEST_FUNCTIONS_WITH_INPUT="${test_python_functions_with_input}";
-OPTION_SETS="${tests_option_sets}";
+OPTION_SETS=(${tests_option_sets});
 
 TEST_TOOL_DIRECTORY=".";
 INPUT_GLOB="${tests_input_glob}";
@@ -76,8 +76,32 @@ test_python_function_with_input()
 		fi
 		for INPUT_FILE in $${INPUT_FILES[@]};
 		do
-			run_test_on_input_file_with_options "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SETS}" "$${TEST_SCRIPT}" "$${INPUT_FILE}";
-			RESULT=$$?;
+			local TESTED_WITH_OPTIONS=0;
+
+			for OPTION_SET in $${OPTION_SETS[@]};
+			do
+				local TEST_DATA_OPTION_FILE=$$(get_test_data_option_file "$${TEST_SET_DIRECTORY}" "$${INPUT_FILE}" "$${OPTION_SET}");
+
+				if test -f $${TEST_DATA_OPTION_FILE};
+				then
+					TESTED_WITH_OPTIONS=1;
+
+					run_test_on_input_file "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SET}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+					RESULT=$$?;
+
+					if test $${RESULT} -ne $${EXIT_SUCCESS};
+					then
+						break;
+					fi
+				fi
+			done
+
+			if $${TESTED_WITH_OPTIONS} -eq 0;
+			then
+				run_test_on_input_file "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+				RESULT=$$?;
+			fi
+
 
 			if test $${RESULT} -ne $${EXIT_SUCCESS};
 			then

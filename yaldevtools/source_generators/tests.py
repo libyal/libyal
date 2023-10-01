@@ -2901,8 +2901,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['test_python_functions_with_input'] = ' '.join(
         sorted(python_functions_with_input))
 
-    template_mappings['tests_option_sets'] = ' '.join(
-        project_configuration.tests_option_sets)
+    template_mappings['tests_option_sets'] = ' '.join([
+        "\"{0:s}\"".format(test_option_set)
+        for test_option_set in project_configuration.tests_option_sets])
 
     template_mappings['tests_input_glob'] = (
         project_configuration.tests_input_glob)
