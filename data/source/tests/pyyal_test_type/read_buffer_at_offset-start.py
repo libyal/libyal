@@ -1,7 +1,7 @@
 
   def test_read_buffer_at_offset(self):
     """Tests the read_buffer_at_offset function."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       raise unittest.SkipTest("missing source")
 

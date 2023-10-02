@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests Python module functions and types.
 #
-# Version: 20231002
+# Version: 20231001
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -70,11 +70,11 @@ test_python_function_with_input()
 
 		if test -f "$${TEST_SET_DIRECTORY}/files";
 		then
-			IFS=$$'\n' INPUT_FILES=( $$(cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?") );
+			IFS=$$'\n' read -a INPUT_FILES <<< $$(cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?");
 		else
-			IFS=$$'\n' INPUT_FILES=( $$(ls -1d $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB}) );
+			IFS=$$'\n' read -a INPUT_FILES <<< $$(ls -1d $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB});
 		fi
-		for INPUT_FILE in $${INPUT_FILES[@]};
+		for INPUT_FILE in "$${INPUT_FILES[@]}";
 		do
 			local TESTED_WITH_OPTIONS=0;
 
@@ -86,7 +86,9 @@ test_python_function_with_input()
 				then
 					TESTED_WITH_OPTIONS=1;
 
-					run_test_on_input_file "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SET}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+					IFS=" " read -a OPTIONS <<< $$(read_test_data_option_file "$${TEST_SET_DIRECTORY}" "$${INPUT_FILE}" "$${OPTION_SET}");
+
+					run_test_on_input_file "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "$${OPTION_SET}" "$${TEST_SCRIPT}" "$${INPUT_FILE}" "$${OPTIONS[@]}";
 					RESULT=$$?;
 
 					if test $${RESULT} -ne $${EXIT_SUCCESS};
@@ -96,12 +98,11 @@ test_python_function_with_input()
 				fi
 			done
 
-			if $${TESTED_WITH_OPTIONS} -eq 0;
+			if test $${TESTED_WITH_OPTIONS} -eq 0;
 			then
-				run_test_on_input_file "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+				run_test_on_input_file "$${TEST_SET_DIRECTORY}" "$${TEST_DESCRIPTION}" "default" "" "$${TEST_SCRIPT}" "$${INPUT_FILE}";
 				RESULT=$$?;
 			fi
-
 
 			if test $${RESULT} -ne $${EXIT_SUCCESS};
 			then

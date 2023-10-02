@@ -406,9 +406,12 @@ read_test_data_option_file()
 		TEST_DATA_OPTION_FILE=$(get_test_data_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
 	fi
 
-	local OPTIONS=()
-	local OPTIONS_STRING=`cat "${TEST_DATA_OPTION_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
+	local OPTIONS_STRING=`head -n 1 "${TEST_DATA_OPTION_FILE}" | sed 's/[\r\n]*$//'`;
 
+	if test "${OPTIONS_STRING}" = "# libyal test data options";
+	then
+		OPTIONS_STRING=`tail -n +2 "${TEST_DATA_OPTION_FILE}" | sed 's/^offset=/-o/;s/^password=/-p/;s/^recovery_password=/-r/;s/^startup_key=/-s/' | tr '\n' ' '`;
+	fi
 	echo "${OPTIONS_STRING}";
 }
 
@@ -1073,14 +1076,10 @@ run_test_on_input_file()
 	local ARGUMENTS=("$@");
 
 	local INPUT_NAME=`basename "${INPUT_FILE}"`;
-	local OPTIONS=();
 	local TEST_OUTPUT="${INPUT_NAME}";
 
 	if test -n "${OPTION_SET}";
 	then
-		OPTIONS_STRING=$(read_test_data_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
-		IFS=" " read -a OPTIONS <<< "${OPTIONS_STRING}";
-
 		TEST_OUTPUT="${INPUT_NAME}-${OPTION_SET}";
 	fi
 
@@ -1092,7 +1091,7 @@ run_test_on_input_file()
 
 	if test "${TEST_MODE}" = "with_callback";
 	then
-		test_callback "${TMPDIR}" "${TEST_SET_DIRECTORY}" "${TEST_OUTPUT}" "${TEST_EXECUTABLE}" "${TEST_INPUT}" ${ARGUMENTS[@]} "${OPTIONS[@]}";
+		test_callback "${TMPDIR}" "${TEST_SET_DIRECTORY}" "${TEST_OUTPUT}" "${TEST_EXECUTABLE}" "${TEST_INPUT}" ${ARGUMENTS[@]};
 		RESULT=$?;
 
 	elif test "${TEST_MODE}" = "with_stdout_reference";
@@ -1109,7 +1108,7 @@ run_test_on_input_file()
 		local INPUT_FILE_FULL_PATH=$( readlink_f "${INPUT_FILE}" );
 		local TEST_LOG="${TEST_OUTPUT}.log";
 
-		(cd ${TMPDIR} && run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE_FULL_PATH}" ${ARGUMENTS[@]} "${OPTIONS[@]}" > "${TEST_LOG}");
+		(cd ${TMPDIR} && run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE_FULL_PATH}" ${ARGUMENTS[@]} > "${TEST_LOG}");
 		RESULT=$?;
 
 		# Compare output if test ran successfully.
@@ -1135,7 +1134,7 @@ run_test_on_input_file()
 		fi
 
 	else
-		run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]} "${OPTIONS[@]}";
+		run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
 		RESULT=$?;
 	fi
 
@@ -1144,22 +1143,12 @@ run_test_on_input_file()
 	if test -n "${TEST_DESCRIPTION}";
 	then
 		ARGUMENTS=`echo "${ARGUMENTS[*]}" | tr '\n' ' ' | sed 's/[ ]\$//'`;
-		OPTIONS=`echo "${OPTIONS[*]}" | tr '\n' ' ' | sed 's/[ ]\$//'`;
 
-		if test -z "${ARGUMENTS}" && test -z "${OPTIONS}";
+		if test -z "${ARGUMENTS}";
 		then
 			echo -n "${TEST_DESCRIPTION} with input: ${INPUT_FILE}";
-
-		elif test -z "${ARGUMENTS}";
-		then
-			echo -n "${TEST_DESCRIPTION} with options: '${OPTIONS}' and input: ${INPUT_FILE}";
-
-		elif test -z "${OPTIONS}";
-		then
-			echo -n "${TEST_DESCRIPTION} with options: '${ARGUMENTS}' and input: ${INPUT_FILE}";
-
 		else
-			echo -n "${TEST_DESCRIPTION} with options: '${ARGUMENTS} ${OPTIONS}' and input: ${INPUT_FILE}";
+			echo -n "${TEST_DESCRIPTION} with options: '${ARGUMENTS}' and input: ${INPUT_FILE}";
 		fi
 
 		if test ${RESULT} -ne ${EXIT_SUCCESS};

@@ -1,7 +1,7 @@
 
   def test_seek_offset(self):
     """Tests the seek_offset function."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       raise unittest.SkipTest("missing source")
 

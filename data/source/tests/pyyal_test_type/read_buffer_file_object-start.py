@@ -1,7 +1,7 @@
 
   def test_read_buffer_file_object(self):
     """Tests the read_buffer function on a file-like object."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       raise unittest.SkipTest("missing source")
 

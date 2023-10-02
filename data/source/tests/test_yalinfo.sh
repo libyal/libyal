@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Info tool testing script
 #
-# Version: 20231002
+# Version: 20231001
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -71,7 +71,7 @@ do
 
 	IGNORE_LIST=$$(read_ignore_list "$${TEST_PROFILE_DIRECTORY}");
 
-	IFS=" " read -a OPTIONS <<< $${OPTIONS_PER_PROFILE[$${PROFILE_INDEX}]};
+	IFS=" " read -a PROFILE_OPTIONS <<< $${OPTIONS_PER_PROFILE[$${PROFILE_INDEX}]};
 
 	RESULT=$${EXIT_SUCCESS};
 
@@ -93,11 +93,11 @@ do
 
 		if test -f "$${TEST_SET_DIRECTORY}/files";
 		then
-			IFS=$$'\n' INPUT_FILES=( $$(cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?") );
+			IFS=$$'\n' read -a INPUT_FILES <<< $$(cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?");
 		else
-			IFS=$$'\n' INPUT_FILES=( $$(ls -1d $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB}) );
+			IFS=$$'\n' read -a INPUT_FILES <<< $$(ls -1d $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB});
 		fi
-		for INPUT_FILE in $${INPUT_FILES[@]};
+		for INPUT_FILE in "$${INPUT_FILES[@]}";
 		do
 			TESTED_WITH_OPTIONS=0;
 
@@ -109,7 +109,9 @@ do
 				then
 					TESTED_WITH_OPTIONS=1;
 
-					run_test_on_input_file "$${TEST_SET_DIRECTORY}" "${library_name_suffix}info" "with_stdout_reference" "$${OPTION_SET}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+					IFS=" " read -a OPTIONS <<< $$(read_test_data_option_file "$${TEST_SET_DIRECTORY}" "$${INPUT_FILE}" "$${OPTION_SET}");
+
+					run_test_on_input_file "$${TEST_SET_DIRECTORY}" "${library_name_suffix}info" "with_stdout_reference" "$${OPTION_SET}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}" "$${PROFILE_OPTIONS[@]}" "$${OPTIONS[@]}";
 					RESULT=$$?;
 
 					if test $${RESULT} -ne $${EXIT_SUCCESS};
@@ -119,23 +121,23 @@ do
 				fi
 			done
 
-			if $${TESTED_WITH_OPTIONS} -eq 0;
+			if test $${TESTED_WITH_OPTIONS} -eq 0;
 			then
-				run_test_on_input_file "$${TEST_SET_DIRECTORY}" "${library_name_suffix}info" "with_stdout_reference" "" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}";
+				run_test_on_input_file "$${TEST_SET_DIRECTORY}" "${library_name_suffix}info" "with_stdout_reference" "" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}" "$${PROFILE_OPTIONS[@]}";
 				RESULT=$$?;
 			fi
 
-			# Ignore failures due to corrupted data.
-			if test "$${TEST_SET}" = "corrupted";
-			then
-				RESULT=$${EXIT_SUCCESS};
-			fi
 			if test $${RESULT} -ne $${EXIT_SUCCESS};
 			then
 				break;
 			fi
 		done
 
+		# Ignore failures due to corrupted data.
+		if test "$${TEST_SET}" = "corrupted";
+		then
+			RESULT=$${EXIT_SUCCESS};
+		fi
 		if test $${RESULT} -ne $${EXIT_SUCCESS};
 		then
 			break;
