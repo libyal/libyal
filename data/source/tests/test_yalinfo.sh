@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Info tool testing script
 #
-# Version: 20231001
+# Version: 20231005
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -93,9 +93,9 @@ do
 
 		if test -f "$${TEST_SET_DIRECTORY}/files";
 		then
-			IFS=$$'\n' read -a INPUT_FILES <<< $$(cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?");
+			IFS="" read -a INPUT_FILES <<< $$(cat $${TEST_SET_DIRECTORY}/files | sed "s?^?$${TEST_SET_INPUT_DIRECTORY}/?");
 		else
-			IFS=$$'\n' read -a INPUT_FILES <<< $$(ls -1d $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB});
+			IFS="" read -a INPUT_FILES <<< $$(ls -1d $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB});
 		fi
 		for INPUT_FILE in "$${INPUT_FILES[@]}";
 		do

@@ -1455,22 +1455,18 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'setup.cfg.in')
 
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
-
     template_names = ['body']
 
     template_filenames = [
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['dpkg_build_dependencies'] = ' '.join(
-        dpkg_build_dependencies)
+    template_mappings['library_name'] = project_configuration.library_name
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
-    del template_mappings['dpkg_build_dependencies']
+    del template_mappings['library_name']
 
   def _GenerateToxIni(
       self, project_configuration, template_mappings, output_writer,
@@ -1486,22 +1482,18 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'tox.ini')
 
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
-
     template_names = ['body.ini']
 
     template_filenames = [
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
-    template_mappings['dpkg_build_dependencies'] = ' '.join(
-        dpkg_build_dependencies)
+    template_mappings['library_name'] = project_configuration.library_name
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
-    del template_mappings['dpkg_build_dependencies']
+    del template_mappings['library_name']
 
   def _GetBrewBuildDependencies(self, project_configuration):
     """Retrieves the brew build dependencies.
