@@ -3,9 +3,14 @@
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     CC: clang
+    CFLAGS: "-I/usr/local/include"
+    LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: ""
   - TARGET: macos-x64-gcc
     BUILD_ENVIRONMENT: xcode
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CC: gcc
+    CFLAGS: "-I/usr/local/include"
+    LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: ""

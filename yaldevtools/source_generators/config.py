@@ -1504,12 +1504,17 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     Returns:
       list[str]: dpkg build dependencies.
     """
-    brew_build_dependencies = ['gettext', 'gnu-sed']
+    brew_build_dependencies = [
+        'autoconf', 'automake', 'gettext', 'gnu-sed', 'libtool', 'pkg-config']
+
+    if ('crypto' in project_configuration.library_build_dependencies or
+        'crypto' in project_configuration.tools_build_dependencies):
+      brew_build_dependencies.append('openssl')
 
     if 'fuse' in project_configuration.tools_build_dependencies:
       brew_build_dependencies.append('osxfuse')
 
-    return brew_build_dependencies
+    return sorted(brew_build_dependencies)
 
   def _GetCygwinBuildDependencies(self, project_configuration):
     """Retrieves the Cygwin build dependencies.
