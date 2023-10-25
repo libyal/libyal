@@ -14,9 +14,9 @@ MAINTAINERCLEANFILES = \
 	Makefile.in
 
 distclean: clean
-	/bin/rm -f ${library_name}.h
-	/bin/rm -f ${library_name}/definitions.h
-	/bin/rm -f ${library_name}/features.h
-	/bin/rm -f ${library_name}/types.h
-	/bin/rm -f Makefile
+	-rm -f ${library_name}.h
+	-rm -f ${library_name}/definitions.h
+	-rm -f ${library_name}/features.h
+	-rm -f ${library_name}/types.h
+	-rm -f Makefile
 
