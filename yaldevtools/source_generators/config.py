@@ -213,6 +213,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasPythonModule():
       template_names.append('install-python.yml')
 
+    brew_build_dependencies = self._GetBrewBuildDependencies(
+        project_configuration)
+
+    template_mappings['brew_build_dependencies'] = ' '.join(
+        sorted(brew_build_dependencies))
     template_mappings['pypi_token'] = getattr(
         project_configuration, 'pypi_token_appveyor', '')
 
@@ -224,6 +229,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['pypi_token']
+    del template_mappings['brew_build_dependencies']
 
     cygwin_build_dependencies = self._GetCygwinBuildDependencies(
         project_configuration)
