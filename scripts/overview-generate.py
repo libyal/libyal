@@ -410,6 +410,7 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
       for project in projects_per_category[category]:
         appveyor_build_status = ''
         codecov_status = ''
+        github_actions_status = ''
 
         if project.documentation_only:
           project_description = (
@@ -419,6 +420,11 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
         else:
           project_description = project.description
+
+          github_actions_status = (
+              '[![build](https://github.com/libyal/{0:s}/actions/workflows/'
+              'build.yml/badge.svg)](https://github.com/libyal/{0:s}/actions/'
+              'workflows/build.yml)').format(project.name)
 
           if project.appveyor_identifier:
             appveyor_build_status = (
@@ -435,6 +441,7 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
         template_mappings = {
             'appveyor_build_status': appveyor_build_status,
             'codecov_status': codecov_status,
+            'github_actions_status': github_actions_status,
             'project_description': project_description,
             'project_name': project.name,
         }

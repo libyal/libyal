@@ -1,12 +1,15 @@
+# Build from source on FreeBSD.
+name: build_freebsd
+on: [push]
+permissions: read-all
+jobs:
   build_freebsd:
-    # FreeBSD support is provided via virtualization on MacOS 12
-    # See https://github.com/vmactions/freebsd-vm#under-the-hood.
-    runs-on: macos-12
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
     - name: Building from source
       id: build_freebsd
-      uses: vmactions/freebsd-vm@v0
+      uses: vmactions/freebsd-vm@v1
       with:
         usesh: true
         mem: 4096

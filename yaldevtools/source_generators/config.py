@@ -1291,12 +1291,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
 
-    freebsd_build_dependencies = self._GetFreeBSDBuildDependencies(
-        project_configuration)
-
     template_names = ['header.yml']
-
-    template_names.append('build_freebsd.yml')
 
     template_names.append('build_ubuntu-header.yml')
 
@@ -1336,13 +1331,44 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
+
+    del template_mappings['dpkg_build_dependencies']
+
+  def _GenerateGitHubActionsBuildFreeBSDYML(
+      self, project_configuration, template_mappings, include_header_file,
+      output_writer, output_filename):
+    """Generates the .github/workflows/build_freebsd.yml configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      include_header_file (LibraryIncludeHeaderFile): library include header
+          file.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(
+        self._template_directory, 'github_workflows', 'build_freebsd.yml')
+
+    freebsd_build_dependencies = self._GetFreeBSDBuildDependencies(
+        project_configuration)
+
+    template_names = ['main.yml']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
     template_mappings['freebsd_build_dependencies'] = ' '.join(
         freebsd_build_dependencies)
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
-    del template_mappings['dpkg_build_dependencies']
     del template_mappings['freebsd_build_dependencies']
 
   def _GenerateGitHubActionsBuildSharedYML(
@@ -1518,7 +1544,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       brew_build_dependencies.append('openssl')
 
     if 'fuse' in project_configuration.tools_build_dependencies:
-      brew_build_dependencies.append('osxfuse')
+      brew_build_dependencies.append('macfuse')
 
     return sorted(brew_build_dependencies)
 
@@ -1787,6 +1813,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     output_filename = os.path.join('.github', 'workflows', 'build.yml')
     self._GenerateGitHubActionsBuildYML(
+        project_configuration, template_mappings, include_header_file,
+        output_writer, output_filename)
+
+    output_filename = os.path.join('.github', 'workflows', 'build_freebsd.yml')
+    self._GenerateGitHubActionsBuildFreeBSDYML(
         project_configuration, template_mappings, include_header_file,
         output_writer, output_filename)
 
