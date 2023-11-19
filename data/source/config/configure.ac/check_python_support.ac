@@ -2,7 +2,7 @@ dnl Check if ${library_name} Python bindings (${python_module_name}) required he
 AX_PYTHON_CHECK_ENABLE
 
 AS_IF(
-  [test "x$${ac_cv_enable_python}" != xno || test "x$${ac_cv_enable_python2}" != xno || test "x$${ac_cv_enable_python3}" != xno],
+  [test "x$${ac_cv_enable_python}" != xno],
   [dnl Headers included in ${python_module_name}/${python_module_name}_error.c
   AC_CHECK_HEADERS([stdarg.h varargs.h])
 
