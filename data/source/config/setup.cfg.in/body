@@ -3,12 +3,13 @@ name = ${library_name}-python
 version = @VERSION@
 description = Python bindings module for ${library_name}
 long_description = Python bindings module for ${library_name}
+long_description_content_type = text/plain
 author = Joachim Metz
 author_email = joachim.metz@gmail.com
 license = GNU Lesser General Public License v3 or later (LGPLv3+)
 license_files = COPYING COPYING.LESSER
 classifiers =
-  Development Status :: 3 - Alpha
+  Development Status :: ${python_module_development_status}
   Programming Language :: Python
 
 [options]

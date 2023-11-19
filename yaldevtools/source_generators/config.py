@@ -1487,6 +1487,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'setup.cfg.in')
 
+    if project_configuration.project_status == 'experimental':
+      python_module_development_status = '2 - Pre-Alpha'
+    elif project_configuration.project_status == 'alpha':
+      python_module_development_status = '3 - Alpha'
+    elif project_configuration.project_status == 'beta':
+      python_module_development_status = '4 - Beta'
+    else:
+      python_module_development_status = '5 - Production/Stable'
+
     template_names = ['body']
 
     template_filenames = [
@@ -1494,11 +1503,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         for template_name in template_names]
 
     template_mappings['library_name'] = project_configuration.library_name
+    template_mappings['python_module_development_status'] = (
+        python_module_development_status)
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['library_name']
+    del template_mappings['python_module_development_status']
 
   def _GenerateToxIni(
       self, project_configuration, template_mappings, output_writer,
