@@ -1,3 +1,3 @@
-- cmd: if [%BUILD_ENVIRONMENT%]==[python] (
-    "%PYTHON%" setup.py bdist_wheel )
+- cmd: if [%BUILD_ENVIRONMENT%]==[python-tox] (
+    "%PYTHON%" -m tox -e%TOXENV% )
 - sh: if test $${BUILD_ENVIRONMENT} = "python-tox"; then export PATH="/usr/local/opt/gettext/bin:$$PATH"; export SED="/usr/local/bin/gsed"; ./synclibs.sh && ./autogen.sh && ./configure --disable-nls --disable-shared-libs && make sources >/dev/null && tox -e$${TOXENV}; fi

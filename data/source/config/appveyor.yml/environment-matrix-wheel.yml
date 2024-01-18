@@ -1,11 +1,15 @@
-  - TARGET: python311
-    BUILD_ENVIRONMENT: python
+  - TARGET: windows-tox-py311-32bit
+    BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     PYTHON: "C:\\Python311\\python.exe"
-  - TARGET: python311-x64
-    BUILD_ENVIRONMENT: python
+    PYTHON_VERSION: 3.11
+    TOXENV: py311
+  - TARGET: windows-tox-py311-64bit
+    BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     PYTHON: "C:\\Python311-x64\\python.exe"
+    PYTHON_VERSION: 3.11
+    TOXENV: py311
   - TARGET: macos-tox-py38
     BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey

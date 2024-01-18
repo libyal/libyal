@@ -169,7 +169,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_names.append('environment-matrix-macos-pkgbuild.yml')
 
     if project_configuration.HasPythonModule():
-      template_names.append('environment-matrix-setup_py.yml')
+      template_names.append('environment-matrix-wheel.yml')
 
     template_names.append('environment-matrix-cygwin64.yml')
 
