@@ -1,3 +1,39 @@
+  - TARGET: windows-tox-py38-32bit
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python38\\python.exe"
+    PYTHON_VERSION: 3.8
+    TOXENV: py38
+  - TARGET: windows-tox-py38-64bit
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python38-x64\\python.exe"
+    PYTHON_VERSION: 3.8
+    TOXENV: py38
+  - TARGET: windows-tox-py39-32bit
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python39\\python.exe"
+    PYTHON_VERSION: 3.9
+    TOXENV: py39
+  - TARGET: windows-tox-py39-64bit
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python39-x64\\python.exe"
+    PYTHON_VERSION: 3.9
+    TOXENV: py39
+  - TARGET: windows-tox-py310-32bit
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python310\\python.exe"
+    PYTHON_VERSION: 3.10
+    TOXENV: py310
+  - TARGET: windows-tox-py310-64bit
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python310-x64\\python.exe"
+    PYTHON_VERSION: 3.10
+    TOXENV: py310
   - TARGET: windows-tox-py311-32bit
     BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -10,6 +46,18 @@
     PYTHON: "C:\\Python311-x64\\python.exe"
     PYTHON_VERSION: 3.11
     TOXENV: py311
+  - TARGET: windows-tox-py312-32bit
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python312\\python.exe"
+    PYTHON_VERSION: 3.12
+    TOXENV: py312
+  - TARGET: windows-tox-py312-64bit
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python312-x64\\python.exe"
+    PYTHON_VERSION: 3.12
+    TOXENV: py312
   - TARGET: macos-tox-py38
     BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -40,3 +88,8 @@
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     PYTHON_VERSION: 3.12
     TOXENV: py312
+  - TARGET: linux-tox-py310
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2204
+    PYTHON_VERSION: 3.10
+    TOXENV: py310
