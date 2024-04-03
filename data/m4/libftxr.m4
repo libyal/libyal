@@ -1,6 +1,6 @@
 dnl Functions for libftxr
 dnl
-dnl Version: 20190308
+dnl Version: 20240314
 
 dnl Function to detect if libftxr is available
 dnl ac_libftxr_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -10,8 +10,10 @@ AC_DEFUN([AX_LIBFTXR_CHECK_LIB],
     [ac_cv_libftxr=no],
     [ac_cv_libftxr=check
     dnl Check if the directory provided as parameter exists
+    dnl For both --with-libftxr which returns "yes" and --with-libftxr= which returns ""
+    dnl treat them as auto-detection.
     AS_IF(
-      [test "x$ac_cv_with_libftxr" != x && test "x$ac_cv_with_libftxr" != xauto-detect],
+      [test "x$ac_cv_with_libftxr" != x && test "x$ac_cv_with_libftxr" != xauto-detect && test "x$ac_cv_with_libftxr" != xyes],
       [AS_IF(
         [test -d "$ac_cv_with_libftxr"],
         [CFLAGS="$CFLAGS -I${ac_cv_with_libftxr}/include"
@@ -73,8 +75,9 @@ AC_DEFUN([AX_LIBFTXR_CHECK_LIB],
 
         ac_cv_libftxr_LIBADD="-lftxr"])
       ])
+
     AS_IF(
-      [test "x$ac_cv_with_libftxr" != x && test "x$ac_cv_with_libftxr" != xauto-detect && test "x$ac_cv_libftxr" != xyes],
+      [test "x$ac_cv_libftxr" != xyes && test "x$ac_cv_with_libftxr" != x && test "x$ac_cv_with_libftxr" != xauto-detect && test "x$ac_cv_with_libftxr" != xyes],
       [AC_MSG_FAILURE(
         [unable to find supported libftxr in directory: $ac_cv_with_libftxr],
         [1])

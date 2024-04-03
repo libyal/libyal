@@ -125,9 +125,10 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
 
       output_filename = directory_entry
 
-      if not os.path.exists(output_filename) and directory_entry in (
+      if directory_entry in (
           'syncbzip2.ps1', 'syncwinflexbison.ps1', 'synczlib.ps1'):
-        continue
+        if not os.path.exists(output_filename):
+          continue
 
       if directory_entry in ('builddokan.ps1', 'syncdokan.ps1'):
         if not os.path.exists(mount_tool_filename):

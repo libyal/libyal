@@ -1,6 +1,6 @@
 dnl Checks for libfwsi required headers and functions
 dnl
-dnl Version: 20190308
+dnl Version: 20240314
 
 dnl Function to detect if libfwsi is available
 dnl ac_libfwsi_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -10,8 +10,10 @@ AC_DEFUN([AX_LIBFWSI_CHECK_LIB],
     [ac_cv_libfwsi=no],
     [ac_cv_libfwsi=check
     dnl Check if the directory provided as parameter exists
+    dnl For both --with-libfwsi which returns "yes" and --with-libfwsi= which returns ""
+    dnl treat them as auto-detection.
     AS_IF(
-      [test "x$ac_cv_with_libfwsi" != x && test "x$ac_cv_with_libfwsi" != xauto-detect],
+      [test "x$ac_cv_with_libfwsi" != x && test "x$ac_cv_with_libfwsi" != xauto-detect & test "x$ac_cv_with_libfwsi" != xyes],
       [AS_IF(
         [test -d "$ac_cv_with_libfwsi"],
         [CFLAGS="$CFLAGS -I${ac_cv_with_libfwsi}/include"
@@ -89,8 +91,9 @@ AC_DEFUN([AX_LIBFWSI_CHECK_LIB],
 
         ac_cv_libfwsi_LIBADD="-lfwsi"])
       ])
+
     AS_IF(
-      [test "x$ac_cv_with_libfwsi" != x && test "x$ac_cv_with_libfwsi" != xauto-detect && test "x$ac_cv_libfwsi" != xyes],
+      [test "x$ac_cv_libfwsi" != xyes && test "x$ac_cv_with_libfwsi" != x && test "x$ac_cv_with_libfwsi" != xauto-detect && test "x$ac_cv_with_libfwsi" != xyes],
       [AC_MSG_FAILURE(
         [unable to find supported libfwsi in directory: $ac_cv_with_libfwsi],
         [1])

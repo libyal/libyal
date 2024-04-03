@@ -1,6 +1,6 @@
 dnl Checks for libftxf required headers and functions
 dnl
-dnl Version: 20190308
+dnl Version: 20240314
 
 dnl Function to detect if libftxf is available
 dnl ac_libftxf_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -10,8 +10,10 @@ AC_DEFUN([AX_LIBFTXF_CHECK_LIB],
     [ac_cv_libftxf=no],
     [ac_cv_libftxf=check
     dnl Check if the directory provided as parameter exists
+    dnl For both --with-libftxf which returns "yes" and --with-libftxf= which returns ""
+    dnl treat them as auto-detection.
     AS_IF(
-      [test "x$ac_cv_with_libftxf" != x && test "x$ac_cv_with_libftxf" != xauto-detect],
+      [test "x$ac_cv_with_libftxf" != x && test "x$ac_cv_with_libftxf" != xauto-detect && test "x$ac_cv_with_libftxf" != xyes],
       [AS_IF(
         [test -d "$ac_cv_with_libftxf"],
         [CFLAGS="$CFLAGS -I${ac_cv_with_libftxf}/include"
@@ -73,8 +75,9 @@ AC_DEFUN([AX_LIBFTXF_CHECK_LIB],
 
         ac_cv_libftxf_LIBADD="-lftxf"])
       ])
+
     AS_IF(
-      [test "x$ac_cv_with_libftxf" != x && test "x$ac_cv_with_libftxf" != xauto-detect && test "x$ac_cv_libftxf" != xyes],
+      [test "x$ac_cv_libftxf" != xyes && test "x$ac_cv_with_libftxf" != x && test "x$ac_cv_with_libftxf" != xauto-detect && test "x$ac_cv_with_libftxf" != xyes],
       [AC_MSG_FAILURE(
         [unable to find supported libftxf in directory: $ac_cv_with_libftxf],
         [1])

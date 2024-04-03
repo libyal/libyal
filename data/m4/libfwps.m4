@@ -1,6 +1,6 @@
 dnl Checks for libfwps required headers and functions
 dnl
-dnl Version: 20230711
+dnl Version: 20240314
 
 dnl Function to detect if libfwps is available
 dnl ac_libfwps_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -10,8 +10,10 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
     [ac_cv_libfwps=no],
     [ac_cv_libfwps=check
     dnl Check if the directory provided as parameter exists
+    dnl For both --with-libfwps which returns "yes" and --with-libfwps= which returns ""
+    dnl treat them as auto-detection.
     AS_IF(
-      [test "x$ac_cv_with_libfwps" != x && test "x$ac_cv_with_libfwps" != xauto-detect],
+      [test "x$ac_cv_with_libfwps" != x && test "x$ac_cv_with_libfwps" != xauto-detect && test "x$ac_cv_with_libfwps" != xyes],
       [AS_IF(
         [test -d "$ac_cv_with_libfwps"],
         [CFLAGS="$CFLAGS -I${ac_cv_with_libfwps}/include"
@@ -26,7 +28,7 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
         [PKG_CHECK_MODULES(
           [libfwps],
-          [libfwps >= 20230711],
+          [libfwps >= 20240224],
           [ac_cv_libfwps=yes],
           [ac_cv_libfwps=check])
         ])
@@ -107,7 +109,47 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
 
         AC_CHECK_LIB(
           fwps,
+          libfwps_record_get_utf8_entry_name_size,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_utf8_entry_name,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_utf16_entry_name_size,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_utf16_entry_name,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
           libfwps_record_get_entry_type,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_utf8_value_name_size,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_utf8_value_name,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_utf16_value_name_size,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_utf16_value_name,
           [ac_cv_libfwps_dummy=yes],
           [ac_cv_libfwps=no])
         AC_CHECK_LIB(
@@ -116,6 +158,16 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
           [ac_cv_libfwps_dummy=yes],
           [ac_cv_libfwps=no])
 
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_data,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
+        AC_CHECK_LIB(
+          fwps,
+          libfwps_record_get_data_size,
+          [ac_cv_libfwps_dummy=yes],
+          [ac_cv_libfwps=no])
         AC_CHECK_LIB(
           fwps,
           libfwps_record_get_data_as_boolean,
@@ -200,7 +252,7 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
         ac_cv_libfwps_LIBADD="-lfwps"])
       ])
     AS_IF(
-      [test "x$ac_cv_with_libfwps" != x && test "x$ac_cv_with_libfwps" != xauto-detect && test "x$ac_cv_libfwps" != xyes],
+      [test "x$ac_cv_libfwps" != xyes && test "x$ac_cv_with_libfwps" != x && test "x$ac_cv_with_libfwps" != xauto-detect && test "x$ac_cv_with_libfwps" != xyes],
       [AC_MSG_FAILURE(
         [unable to find supported libfwps in directory: $ac_cv_with_libfwps],
         [1])

@@ -1,6 +1,6 @@
 dnl Checks for libfole required headers and functions
 dnl
-dnl Version: 20190308
+dnl Version: 20240314
 
 dnl Function to detect if libfole is available
 dnl ac_libfole_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -10,8 +10,10 @@ AC_DEFUN([AX_LIBFOLE_CHECK_LIB],
     [ac_cv_libfole=no],
     [ac_cv_libfole=check
     dnl Check if the directory provided as parameter exists
+    dnl For both --with-libfole which returns "yes" and --with-libfole= which returns ""
+    dnl treat them as auto-detection.
     AS_IF(
-      [test "x$ac_cv_with_libfole" != x && test "x$ac_cv_with_libfole" != xauto-detect],
+      [test "x$ac_cv_with_libfole" != x && test "x$ac_cv_with_libfole" != xauto-detect && test "x$ac_cv_with_libfole" != xyes],
       [AS_IF(
         [test -d "$ac_cv_with_libfole"],
         [CFLAGS="$CFLAGS -I${ac_cv_with_libfole}/include"
@@ -57,8 +59,9 @@ AC_DEFUN([AX_LIBFOLE_CHECK_LIB],
 
         ac_cv_libfole_LIBADD="-lfole"])
       ])
+
     AS_IF(
-      [test "x$ac_cv_with_libfole" != x && test "x$ac_cv_with_libfole" != xauto-detect && test "x$ac_cv_libfole" != xyes],
+      [test "x$ac_cv_libfole" != xyes && test "x$ac_cv_with_libfole" != x && test "x$ac_cv_with_libfole" != xauto-detect && test "x$ac_cv_with_libfole" != xyes],
       [AC_MSG_FAILURE(
         [unable to find supported libfole in directory: $ac_cv_with_libfole],
         [1])

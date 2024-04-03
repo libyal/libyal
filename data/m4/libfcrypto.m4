@@ -1,6 +1,6 @@
 dnl Checks for libfcrypto required headers and functions
 dnl
-dnl Version: 20200104
+dnl Version: 20240314
 
 dnl Function to detect if libfcrypto is available
 dnl ac_libfcrypto_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -9,8 +9,10 @@ AC_DEFUN([AX_LIBFCRYPTO_CHECK_LIB],
     [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libfcrypto" = xno],
     [ac_cv_libfcrypto=no],
     [dnl Check if the directory provided as parameter exists
+    dnl For both --with-libfcrypto which returns "yes" and --with-libfcrypto= which returns ""
+    dnl treat them as auto-detection.
     AS_IF(
-      [test "x$ac_cv_with_libfcrypto" != x && test "x$ac_cv_with_libfcrypto" != xauto-detect],
+      [test "x$ac_cv_with_libfcrypto" != x && test "x$ac_cv_with_libfcrypto" != xauto-detect && test "x$ac_cv_with_libfcrypto" != xyes],
       [AS_IF(
         [test -d "$ac_cv_with_libfcrypto"],
         [CFLAGS="$CFLAGS -I${ac_cv_with_libfcrypto}/include"
@@ -107,8 +109,9 @@ AC_DEFUN([AX_LIBFCRYPTO_CHECK_LIB],
 
         ac_cv_libfcrypto_LIBADD="-lfcrypto"])
       ])
+
     AS_IF(
-      [test "x$ac_cv_with_libfcrypto" != x && test "x$ac_cv_with_libfcrypto" != xauto-detect && test "x$ac_cv_libfcrypto" != xyes],
+      [test "x$ac_cv_libfcrypto" != xyes && test "x$ac_cv_with_libfcrypto" != x && test "x$ac_cv_with_libfcrypto" != xauto-detect && test "x$ac_cv_with_libfcrypto" != xyes],
       [AC_MSG_FAILURE(
         [unable to find supported libfcrypto in directory: $ac_cv_with_libfcrypto],
         [1])

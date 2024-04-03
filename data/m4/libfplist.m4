@@ -1,6 +1,6 @@
 dnl Functions for libfplist
 dnl
-dnl Version: 20230218
+dnl Version: 20240314
 
 dnl Function to detect if libfplist is available
 dnl ac_libfplist_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -10,8 +10,10 @@ AC_DEFUN([AX_LIBFPLIST_CHECK_LIB],
     [ac_cv_libfplist=no],
     [ac_cv_libfplist=check
     dnl Check if the directory provided as parameter exists
+    dnl For both --with-libfplist which returns "yes" and --with-libfplist= which returns ""
+    dnl treat them as auto-detection.
     AS_IF(
-      [test "x$ac_cv_with_libfplist" != x && test "x$ac_cv_with_libfplist" != xauto-detect],
+      [test "x$ac_cv_with_libfplist" != x && test "x$ac_cv_with_libfplist" != xauto-detect && test "x$ac_cv_with_libfplist" != xyes],
       [AS_IF(
         [test -d "$ac_cv_with_libfplist"],
         [CFLAGS="$CFLAGS -I${ac_cv_with_libfplist}/include"
@@ -138,6 +140,13 @@ AC_DEFUN([AX_LIBFPLIST_CHECK_LIB],
 
         ac_cv_libfplist_LIBADD="-lfplist"
         ])
+      ])
+
+    AS_IF(
+      [test "x$ac_cv_libfplist" != xyes && test "x$ac_cv_with_libfplist" != x && test "x$ac_cv_with_libfplist" != xauto-detect && test "x$ac_cv_with_libfplist" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libfplist in directory: $ac_cv_with_libfplist],
+        [1])
       ])
     ])
 
