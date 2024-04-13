@@ -2,8 +2,16 @@
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations ${mount_tool_name}_fuse_operations;
 
+#if FUSE_USE_VERSION >= 30
+	/* Need to set this to 1 even if there no arguments, otherwise this causes
+	 * fuse: empty argv passed to fuse_session_new()
+	 */
+	char *fuse_argv[ 2 ]                               = { program, NULL };
+	struct fuse_args ${mount_tool_name}_fuse_arguments = FUSE_ARGS_INIT(1, fuse_argv);
+#else
 	struct fuse_args ${mount_tool_name}_fuse_arguments = FUSE_ARGS_INIT(0, NULL);
 	struct fuse_chan *${mount_tool_name}_fuse_channel  = NULL;
+#endif
 	struct fuse *${mount_tool_name}_fuse_handle        = NULL;
 
 #elif defined( HAVE_LIBDOKAN )

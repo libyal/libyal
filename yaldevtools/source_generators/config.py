@@ -1313,6 +1313,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('build_ubuntu-end.yml')
 
+    if 'fuse' in project_configuration.tools_build_dependencies:
+      template_names.append('build_ubuntu-fuse.yml')
+
     if project_configuration.HasPythonModule():
       template_names.append('build_python_ubuntu.yml')
 
@@ -1599,7 +1602,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         'uuid' in project_configuration.tools_build_dependencies):
       cygwin_build_dependencies.append('libuuid-devel')
 
-    return cygwin_build_dependencies
+    if 'fuse' in project_configuration.tools_build_dependencies:
+      cygwin_build_dependencies.append('cygfuse')
+
+    return sorted(cygwin_build_dependencies)
 
   def _GetDpkgBuildDependencies(self, project_configuration):
     """Retrieves the dpkg build dependencies.
@@ -1631,8 +1637,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         'crypto' in project_configuration.tools_build_dependencies):
       dpkg_build_dependencies.append('libssl-dev')
 
-    if 'fuse' in project_configuration.tools_build_dependencies:
-      dpkg_build_dependencies.append('libfuse-dev')
+    # TODO: removed in favor of fuse and fuse3 specific tests.
+    # if 'fuse' in project_configuration.tools_build_dependencies:
+    #   dpkg_build_dependencies.append('libfuse-dev')
 
     if 'sgutils' in project_configuration.library_build_dependencies:
       dpkg_build_dependencies.append('libsgutils2-dev')

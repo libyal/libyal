@@ -54,6 +54,34 @@
 	${mount_tool_name}_fuse_operations.getattr    = &mount_fuse_getattr;
 	${mount_tool_name}_fuse_operations.destroy    = &mount_fuse_destroy;
 
+#if FUSE_USE_VERSION >= 30
+	${mount_tool_name}_fuse_handle = fuse_new(
+	                                  &${mount_tool_name}_fuse_arguments,
+	                                  &${mount_tool_name}_fuse_operations,
+	                                  sizeof( struct fuse_operations ),
+	                                  ${mount_tool_name}_mount_handle );
+
+	if( ${mount_tool_name}_fuse_handle == NULL )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to create fuse handle.\n" );
+
+		goto on_error;
+	}
+	result = fuse_mount(
+	          ${mount_tool_name}_fuse_handle,
+	          mount_point );
+
+	if( result != 0 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to fuse mount file system.\n" );
+
+		goto on_error;
+	}
+#else
 	${mount_tool_name}_fuse_channel = fuse_mount(
 	                                   mount_point,
 	                                   &${mount_tool_name}_fuse_arguments );
@@ -81,6 +109,8 @@
 
 		goto on_error;
 	}
+#endif /* FUSE_USE_VERSION >= 30 */
+
 	if( verbose == 0 )
 	{
 		if( fuse_daemonize(
