@@ -1,6 +1,6 @@
 dnl Checks for libfmos required headers and functions
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libfmos is available
 dnl ac_libfmos_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -110,7 +110,7 @@ dnl Function to detect if libfmos dependencies are available
 AC_DEFUN([AX_LIBFMOS_CHECK_LOCAL],
   [dnl No additional checks.
 
-  ac_cv_libfmos_CPPFLAGS="-I../libfmos";
+  ac_cv_libfmos_CPPFLAGS="-I../libfmos -I\$(top_srcdir)/libfmos";
   ac_cv_libfmos_LIBADD="../libfmos/libfmos.la";
 
   ac_cv_libfmos=local

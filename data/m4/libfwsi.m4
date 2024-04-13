@@ -1,6 +1,6 @@
 dnl Checks for libfwsi required headers and functions
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libfwsi is available
 dnl ac_libfwsi_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -123,7 +123,7 @@ dnl Function to detect if libfwsi dependencies are available
 AC_DEFUN([AX_LIBFWSI_CHECK_LOCAL],
   [dnl No additional checks.
 
-  ac_cv_libfwsi_CPPFLAGS="-I../libfwsi";
+  ac_cv_libfwsi_CPPFLAGS="-I../libfwsi -I\$(top_srcdir)/libfwsi";
   ac_cv_libfwsi_LIBADD="../libfwsi/libfwsi.la";
 
   ac_cv_libfwsi=local

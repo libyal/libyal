@@ -45,7 +45,7 @@ then
 	exit $${EXIT_IGNORE};
 fi
 
-TEST_DIRECTORY=`dirname $0`;
+TEST_DIRECTORY=`dirname $$0`;
 
 TEST_RUNNER="$${TEST_DIRECTORY}/test_runner.sh";
 

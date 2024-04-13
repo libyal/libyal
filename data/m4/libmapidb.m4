@@ -1,6 +1,6 @@
 dnl Checks for libmapidb required headers and functions
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libmapidb is available
 dnl ac_libmapidb_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -89,7 +89,7 @@ AC_DEFUN([AX_LIBMAPIDB_CHECK_LIB],
 
 dnl Function to detect if libmapidb dependencies are available
 AC_DEFUN([AX_LIBMAPIDB_CHECK_LOCAL],
-  [ac_cv_libmapidb_CPPFLAGS="-I../libmapidb";
+  [ac_cv_libmapidb_CPPFLAGS="-I../libmapidb -I\$(top_srcdir)/libmapidb";
   ac_cv_libmapidb_LIBADD="../libmapidb/libmapidb.la";
 
   ac_cv_libmapidb=local

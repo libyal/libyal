@@ -134,7 +134,7 @@ SED_SCRIPT="/^$$/ {
 	then
 		if ! test -f "m4/libuna.m4";
 		then
-			sed -i'~' 's?@LIBUNA_CPPFLAGS@?-I$$(top_builddir)/libuna -I$$(top_srcdir)/libuna?' $${LOCAL_LIB_MAKEFILE_AM};
+			sed -i'~' 's?@LIBUNA_CPPFLAGS@?-I../libuna -I$$(top_srcdir)/libuna?' $${LOCAL_LIB_MAKEFILE_AM};
 		fi
 	fi
 

@@ -32,7 +32,7 @@ then
 	exit $${EXIT_FAILURE};
 fi
 
-TEST_DIRECTORY=`dirname $0`;
+TEST_DIRECTORY=`dirname $$0`;
 
 TEST_RUNNER="$${TEST_DIRECTORY}/test_runner.sh";
 

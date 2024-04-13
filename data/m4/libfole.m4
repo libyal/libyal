@@ -1,6 +1,6 @@
 dnl Checks for libfole required headers and functions
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libfole is available
 dnl ac_libfole_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -91,7 +91,7 @@ dnl Function to detect if libfole dependencies are available
 AC_DEFUN([AX_LIBFOLE_CHECK_LOCAL],
   [dnl No additional checks.
 
-  ac_cv_libfole_CPPFLAGS="-I../libfole";
+  ac_cv_libfole_CPPFLAGS="-I../libfole -I\$(top_srcdir)/libfole";
   ac_cv_libfole_LIBADD="../libfole/libfole.la";
 
   ac_cv_libfole=local

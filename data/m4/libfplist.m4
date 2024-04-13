@@ -1,6 +1,6 @@
 dnl Functions for libfplist
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libfplist is available
 dnl ac_libfplist_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -174,7 +174,7 @@ AC_DEFUN([AX_LIBFPLIST_CHECK_LOCAL],
   [AC_PROG_LEX(noyywrap)
   AC_PROG_YACC
 
-  ac_cv_libfplist_CPPFLAGS="-I../libfplist";
+  ac_cv_libfplist_CPPFLAGS="-I../libfplist -I\$(top_srcdir)/libfplist";
   ac_cv_libfplist_LIBADD="../libfplist/libfplist.la";
 
   ac_cv_libfplist=local

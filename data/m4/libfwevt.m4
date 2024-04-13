@@ -1,6 +1,6 @@
 dnl Checks for libfwevt required headers and functions
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libfwevt is available
 dnl ac_libfwevt_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -593,7 +593,7 @@ dnl Function to detect if libfwevt dependencies are available
 AC_DEFUN([AX_LIBFWEVT_CHECK_LOCAL],
   [dnl No additional checks.
 
-  ac_cv_libfwevt_CPPFLAGS="-I../libfwevt";
+  ac_cv_libfwevt_CPPFLAGS="-I../libfwevt -I\$(top_srcdir)/libfwevt";
   ac_cv_libfwevt_LIBADD="../libfwevt/libfwevt.la";
 
   ac_cv_libfwevt=local

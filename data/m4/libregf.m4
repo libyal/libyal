@@ -1,6 +1,6 @@
 dnl Checks for libregf required headers and functions
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libregf is available
 dnl ac_libregf_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -104,7 +104,7 @@ AC_DEFUN([AX_LIBREGF_CHECK_LOCAL],
       [1])
     ])
 
-  ac_cv_libregf_CPPFLAGS="-I../libregf";
+  ac_cv_libregf_CPPFLAGS="-I../libregf -I\$(top_srcdir)/libregf";
   ac_cv_libregf_LIBADD="../libregf/libregf.la";
 
   ac_cv_libregf=local

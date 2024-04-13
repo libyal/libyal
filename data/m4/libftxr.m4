@@ -1,6 +1,6 @@
 dnl Functions for libftxr
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libftxr is available
 dnl ac_libftxr_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -107,7 +107,7 @@ dnl Function to detect if libftxr dependencies are available
 AC_DEFUN([AX_LIBFTXR_CHECK_LOCAL],
   [dnl No additional checks.
 
-  ac_cv_libftxr_CPPFLAGS="-I../libftxr";
+  ac_cv_libftxr_CPPFLAGS="-I../libftxr -I\$(top_srcdir)/libftxr";
   ac_cv_libftxr_LIBADD="../libftxr/libftxr.la";
 
   ac_cv_libftxr=local

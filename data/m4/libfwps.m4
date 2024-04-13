@@ -1,6 +1,6 @@
 dnl Checks for libfwps required headers and functions
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libfwps is available
 dnl ac_libfwps_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -298,7 +298,7 @@ dnl Function to detect if libfwps dependencies are available
 AC_DEFUN([AX_LIBFWPS_CHECK_LOCAL],
   [dnl No additional checks.
 
-  ac_cv_libfwps_CPPFLAGS="-I../libfwps";
+  ac_cv_libfwps_CPPFLAGS="-I../libfwps -I\$(top_srcdir)/libfwps";
   ac_cv_libfwps_LIBADD="../libfwps/libfwps.la";
 
   ac_cv_libfwps=local

@@ -1,6 +1,6 @@
 dnl Checks for libfcrypto required headers and functions
 dnl
-dnl Version: 20240314
+dnl Version: 20240413
 
 dnl Function to detect if libfcrypto is available
 dnl ac_libfcrypto_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -141,7 +141,7 @@ dnl Function to detect if libfcrypto dependencies are available
 AC_DEFUN([AX_LIBFCRYPTO_CHECK_LOCAL],
   [dnl No additional checks.
 
-  ac_cv_libfcrypto_CPPFLAGS="-I../libfcrypto";
+  ac_cv_libfcrypto_CPPFLAGS="-I../libfcrypto -I\$(top_srcdir)/libfcrypto";
   ac_cv_libfcrypto_LIBADD="../libfcrypto/libfcrypto.la";
 
   ac_cv_libfcrypto=local
