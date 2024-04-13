@@ -1,4 +1,4 @@
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 	if( option_extended_options != NULL )
 	{
 		/* This argument is required but ignored
@@ -54,7 +54,7 @@
 	${mount_tool_name}_fuse_operations.getattr    = &mount_fuse_getattr;
 	${mount_tool_name}_fuse_operations.destroy    = &mount_fuse_destroy;
 
-#if FUSE_USE_VERSION >= 30
+#if defined( HAVE_LIBFUSE3 )
 	${mount_tool_name}_fuse_handle = fuse_new(
 	                                  &${mount_tool_name}_fuse_arguments,
 	                                  &${mount_tool_name}_fuse_operations,
@@ -109,7 +109,7 @@
 
 		goto on_error;
 	}
-#endif /* FUSE_USE_VERSION >= 30 */
+#endif /* defined( HAVE_LIBFUSE3 ) */
 
 	if( verbose == 0 )
 	{

@@ -10,13 +10,11 @@ EXTRA_DIST = \
 	${library_name}/features.h.in \
 	${library_name}/types.h.in
 
-MAINTAINERCLEANFILES = \
+DISTCLEANFILES = \
+	${library_name}.h \
+	${library_name}/definitions.h \
+	${library_name}/features.h \
+	${library_name}/types.h \
+	Makefile \
 	Makefile.in
-
-distclean: clean
-	-rm -f ${library_name}.h
-	-rm -f ${library_name}/definitions.h
-	-rm -f ${library_name}/features.h
-	-rm -f ${library_name}/types.h
-	-rm -f Makefile
 

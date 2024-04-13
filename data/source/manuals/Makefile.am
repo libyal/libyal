@@ -4,9 +4,7 @@ man_MANS = \
 EXTRA_DIST = \
 	${library_name}.3
 
-MAINTAINERCLEANFILES = \
+DISTCLEANFILES = \
+	Makefile \
 	Makefile.in
-
-distclean: clean
-	-rm -f Makefile
 
