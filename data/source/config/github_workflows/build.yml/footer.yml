@@ -1,5 +1,5 @@
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install build dependencies
       run: |
         sudo apt-get -y install ${dpkg_build_dependencies}
@@ -20,6 +20,6 @@
           (cd $${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
         done
     - name: Upload coverage report to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         name: linux-$${{ matrix.architecture }}-gcc-no-optimization

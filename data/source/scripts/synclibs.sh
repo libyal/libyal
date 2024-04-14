@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the local library dependencies
 #
-# Version: 20240413
+# Version: 20240414
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -93,6 +93,13 @@ endif
 	i\\
 endif
 	d
+}
+
+/DISTCLEANFILES = / {
+	n
+	/$${LOCAL_LIB}_definitions.h/ {
+		d
+	}
 }";
 	echo "$${SED_SCRIPT}" >> $${LOCAL_LIB}-$$$$.sed;
 	sed -i'~' -f $${LOCAL_LIB}-$$$$.sed $${LOCAL_LIB_MAKEFILE_AM};
