@@ -185,6 +185,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('environment-matrix-mingw-w64.yml')
 
+    if project_configuration.HasPythonModule():
+      template_names.append('environment-matrix-mingw-w64-python.yml')
+
     if project_configuration.HasTools():
       template_names.append(
           'environment-matrix-mingw-w64-static-executables.yml')
@@ -1745,6 +1748,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for other dependencies.
     if project_configuration.HasDependencyZlib():
       mingw_msys2_build_dependencies.append('msys/zlib-devel')
+
+    if project_configuration.HasPythonModule():
+      mingw_msys2_build_dependencies.extend([
+          'mingw-w64-x86_64-python3'])
 
     return mingw_msys2_build_dependencies
 
