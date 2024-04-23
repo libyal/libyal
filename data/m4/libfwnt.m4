@@ -1,6 +1,6 @@
 dnl Checks for libfwnt required headers and functions
 dnl
-dnl Version: 20240403
+dnl Version: 20240413
 
 dnl Function to detect if libfwnt is available
 dnl ac_libfwnt_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments

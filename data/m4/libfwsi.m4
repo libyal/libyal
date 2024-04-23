@@ -13,7 +13,7 @@ AC_DEFUN([AX_LIBFWSI_CHECK_LIB],
     dnl For both --with-libfwsi which returns "yes" and --with-libfwsi= which returns ""
     dnl treat them as auto-detection.
     AS_IF(
-      [test "x$ac_cv_with_libfwsi" != x && test "x$ac_cv_with_libfwsi" != xauto-detect & test "x$ac_cv_with_libfwsi" != xyes],
+      [test "x$ac_cv_with_libfwsi" != x && test "x$ac_cv_with_libfwsi" != xauto-detect && test "x$ac_cv_with_libfwsi" != xyes],
       [AS_IF(
         [test -d "$ac_cv_with_libfwsi"],
         [CFLAGS="$CFLAGS -I${ac_cv_with_libfwsi}/include"

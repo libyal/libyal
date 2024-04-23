@@ -192,6 +192,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_names.append(
           'environment-matrix-mingw-w64-static-executables.yml')
 
+    if project_configuration.HasPythonModule():
+      template_names.append('matrix-allow_failures.yml')
+
     template_names.append('install-header.yml')
 
     # TODO: check test more generic.
@@ -1043,7 +1046,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         project_configuration.library_name_suffix)
     source_glob = os.path.join('tests', source_glob)
 
-    tests_files = ['/tests/tmp*']
+    tests_files = [
+        '/tests/notify_stream.log',
+        '/tests/tmp*']
     if os.path.exists(os.path.join('tests', 'input')):
       tests_files.append('/tests/input')
 

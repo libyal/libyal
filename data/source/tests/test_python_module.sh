@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests Python module functions and types.
 #
-# Version: 20240413
+# Version: 20240417
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -15,12 +15,15 @@ OPTION_SETS=(${tests_option_sets});
 TEST_TOOL_DIRECTORY=".";
 INPUT_GLOB="${tests_input_glob}";
 
+LIBRARY_NAME="${library_name}";
+PYTHON_MODULE="${python_module_name}";
+
 test_python_function()
 {
 	local TEST_FUNCTION=$$1;
 
 	local TEST_DESCRIPTION="Testing Python-bindings functions: $${TEST_FUNCTION}";
-	local TEST_SCRIPT="$${TEST_TOOL_DIRECTORY}/${python_module_name}_test_$${TEST_FUNCTION}.py";
+	local TEST_SCRIPT="$${TEST_TOOL_DIRECTORY}/$${PYTHON_MODULE}_test_$${TEST_FUNCTION}.py";
 
 	run_test_with_arguments "$${TEST_DESCRIPTION}" "$${TEST_SCRIPT}";
 	local RESULT=$$?;
@@ -33,7 +36,7 @@ test_python_function_with_input()
 	local TEST_FUNCTION=$$1;
 
 	local TEST_DESCRIPTION="Testing Python-bindings functions: $${TEST_FUNCTION}";
-	local TEST_SCRIPT="$${TEST_TOOL_DIRECTORY}/${python_module_name}_test_$${TEST_FUNCTION}.py";
+	local TEST_SCRIPT="$${TEST_TOOL_DIRECTORY}/$${PYTHON_MODULE}_test_$${TEST_FUNCTION}.py";
 
 	if ! test -d "input";
 	then
@@ -50,7 +53,7 @@ test_python_function_with_input()
 		return $${EXIT_IGNORE};
 	fi
 
-	local TEST_PROFILE_DIRECTORY=$$(get_test_profile_directory "input" "${python_module_name}");
+	local TEST_PROFILE_DIRECTORY=$$(get_test_profile_directory "input" "$${PYTHON_MODULE}");
 
 	local IGNORE_LIST=$$(read_ignore_list "$${TEST_PROFILE_DIRECTORY}");
 
@@ -137,6 +140,14 @@ then
 fi
 
 source $${TEST_RUNNER};
+
+PLATFORM=`uname -s | sed 's/-.*$$//'`;
+
+if test "$${PLATFORM}" = "MINGW64_NT" || test "$${PLATFORM}" = "MSYS_NT";
+then
+	cp ../$${LIBRARY_NAME}/.libs/*.dll ../$${PYTHON_MODULE}/.libs/;
+	cp ../$${PYTHON_MODULE}/.libs/$${PYTHON_MODULE}.dll ../$${PYTHON_MODULE}/.libs/$${PYTHON_MODULE}.pyd;
+fi
 
 RESULT=$${EXIT_IGNORE};
 

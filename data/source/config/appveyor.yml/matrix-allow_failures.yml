@@ -1,0 +1,4 @@
+
+matrix:
+  allow_failures:
+  - TARGET: mingw-w64-gcc-python
