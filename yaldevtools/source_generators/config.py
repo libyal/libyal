@@ -180,8 +180,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_names.append('environment-matrix-cygwin64-python.yml')
 
     if project_configuration.HasTools():
-      template_names.append(
-          'environment-matrix-cygwin64-static-executables.yml')
+      if 'fuse' in project_configuration.tools_build_dependencies:
+        template_names.append(
+            'environment-matrix-cygwin64-static-executables-fuse.yml')
+      else:
+        template_names.append(
+            'environment-matrix-cygwin64-static-executables.yml')
 
     template_names.append('environment-matrix-mingw-w64.yml')
 

@@ -2879,8 +2879,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     library_tests_with_input = sorted(library_tests_with_input)
 
     shared_libs = list(makefile_am_file.libraries)
+    if 'libcrypto' in shared_libs:
+      shared_libs.remove('libcrypto')
+    if 'libdl' in shared_libs:
+      shared_libs.remove('libdl')
     if 'pthread' in shared_libs:
       shared_libs.remove('pthread')
+    if 'zlib' in shared_libs:
+      shared_libs.remove('zlib')
 
     template_mappings = super(
         TestSourceFileGenerator, self)._GetTemplateMappings(
