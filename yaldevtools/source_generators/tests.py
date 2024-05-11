@@ -2879,10 +2879,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     library_tests_with_input = sorted(library_tests_with_input)
 
     shared_libs = list(makefile_am_file.libraries)
+    if 'bzip2' in shared_libs:
+      shared_libs.remove('bzip2')
     if 'libcrypto' in shared_libs:
       shared_libs.remove('libcrypto')
     if 'libdl' in shared_libs:
       shared_libs.remove('libdl')
+    if 'lzma' in shared_libs:
+      shared_libs.remove('lzma')
     if 'pthread' in shared_libs:
       shared_libs.remove('pthread')
     if 'zlib' in shared_libs:
