@@ -1,6 +1,6 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20240511
+dnl Version: 20240512
 
 dnl Function to test if a certain feature was disabled
 AC_DEFUN([AX_COMMON_ARG_DISABLE],
@@ -562,6 +562,39 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
   dnl Check for printf conversion specifier support
   AX_COMMON_CHECK_FUNC_PRINTF_JD
   AX_COMMON_CHECK_FUNC_PRINTF_ZD
+  ])
+
+dnl Function to test if a library with a specific definition is available
+AC_DEFUN([AX_CHECK_LIB_DEFINITION],
+  [AC_CACHE_CHECK(
+    [if `$2' is defined],
+    [ac_cv_$1_definition_$2],
+    [AC_LANG_PUSH(C)
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+        [[#include <$1.h>]],
+        [[int test = $2;
+
+return( 0 ); ]]
+      )],
+      [ac_cv_$1_definition_$2=yes],
+      [ac_cv_$1_definition_$2=no])
+    AC_LANG_POP(C)])
+
+  AS_IF(
+    [test "x$ac_cv_$1_definition_$2" != xyes],
+    [ac_cv_$1=no])
+  ])
+
+dnl Function to test if a library with specific definitions is available
+AC_DEFUN([AX_CHECK_LIB_DEFINITIONS],
+  [m4_foreach(
+    [definition],
+    [$2],
+    [AX_CHECK_LIB_DEFINITION(
+      [$1],
+      [definition])
+    ])
   ])
 
 dnl Function to test if a library with specific functions is available
