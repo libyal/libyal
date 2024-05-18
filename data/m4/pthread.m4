@@ -1,6 +1,6 @@
 dnl Functions for pthread
 dnl
-dnl Version: 20240511
+dnl Version: 20240513
 
 dnl Function to detect if pthread is available
 AC_DEFUN([AX_PTHREAD_CHECK_LIB],
@@ -24,7 +24,9 @@ AC_DEFUN([AX_PTHREAD_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_pthread_h" = xno],
         [ac_cv_pthread=no],
-        [AX_CHECK_LIB_FUNCTIONS(
+        [ac_cv_pthread=yes
+
+        AX_CHECK_LIB_FUNCTIONS(
           [pthread],
           [pthread],
           [[pthread_create],

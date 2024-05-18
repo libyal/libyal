@@ -1,6 +1,6 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20240512
+dnl Version: 20240513
 
 dnl Function to test if a certain feature was disabled
 AC_DEFUN([AX_COMMON_ARG_DISABLE],
@@ -599,9 +599,7 @@ AC_DEFUN([AX_CHECK_LIB_DEFINITIONS],
 
 dnl Function to test if a library with specific functions is available
 AC_DEFUN([AX_CHECK_LIB_FUNCTIONS],
-  [ac_cv_$1=yes
-
-  m4_foreach(
+  [m4_foreach(
     [function],
     [$3],
     [AC_CHECK_LIB(

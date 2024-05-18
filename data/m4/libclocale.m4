@@ -1,6 +1,6 @@
 dnl Checks for libclocale required headers and functions
 dnl
-dnl Version: 20240512
+dnl Version: 20240513
 
 dnl Function to detect if libclocale is available
 dnl ac_libclocale_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -59,7 +59,9 @@ AC_DEFUN([AX_LIBCLOCALE_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libclocale_h" = xno],
         [ac_cv_libclocale=no],
-        [AX_CHECK_LIB_FUNCTIONS(
+        [ac_cv_libclocale=yes
+
+        AX_CHECK_LIB_FUNCTIONS(
           [libclocale],
           [clocale],
           [[libclocale_get_version],
