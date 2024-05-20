@@ -32,9 +32,9 @@
 /* Ensure FUSE_USE_VERSION is defined before including fuse.h
  */
 #if defined( HAVE_LIBFUSE3 )
-#define FUSE_USE_VERSION        30
+#define FUSE_USE_VERSION	30
 #else
-#define FUSE_USE_VERSION        26
+#define FUSE_USE_VERSION	26
 #endif
 
 #endif /* !defined( FUSE_USE_VERSION ) && !defined( CYGFUSE ) */

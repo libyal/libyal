@@ -650,7 +650,7 @@ class ProjectConfiguration(BaseConfiguration):
         config_parser, 'mount_tool', 'source_type')
 
     if self.mount_tool_source_type and self.mount_tool_source_type not in (
-        'container', 'file', 'image', 'volume'):
+        'container', 'descriptor file', 'file', 'image', 'volume'):
       raise errors.ConfigurationError(
           'unsupported mount tool source type: {0:s}'.format(
               self.mount_tool_source_type))

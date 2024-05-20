@@ -1,5 +1,5 @@
 /*
- * Mounts ${mount_tool_source_description_long}
+ * Mounts ${mount_tool_source_description_long}.
  *
  * Copyright (C) ${copyright}, ${tools_authors}
  *

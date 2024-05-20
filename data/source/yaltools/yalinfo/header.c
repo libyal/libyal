@@ -1,5 +1,5 @@
 /*
- * Shows information obtained from ${info_tool_source_description}
+ * Shows information obtained from ${info_tool_source_description}.
  *
  * Copyright (C) ${copyright}, ${tools_authors}
  *

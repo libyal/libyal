@@ -21,10 +21,14 @@
 
 		goto on_error;
 	}
-	${mount_tool_name}_dokan_options.Version     = DOKAN_VERSION;
-	${mount_tool_name}_dokan_options.ThreadCount = 0;
-	${mount_tool_name}_dokan_options.MountPoint  = mount_point;
+	${mount_tool_name}_dokan_options.Version    = DOKAN_VERSION;
+	${mount_tool_name}_dokan_options.MountPoint = mount_point;
 
+#if DOKAN_MINIMUM_COMPATIBLE_VERSION >= 200
+	${mount_tool_name}_dokan_options.SingleThread = TRUE;
+#else
+	${mount_tool_name}_dokan_options.ThreadCount  = 0;
+#endif
 	if( verbose != 0 )
 	{
 		${mount_tool_name}_dokan_options.Options |= DOKAN_OPTION_STDERR;
@@ -94,10 +98,16 @@
 
 #endif /* ( DOKAN_VERSION >= 600 ) && ( DOKAN_VERSION < 800 ) */
 
+#if DOKAN_MINIMUM_COMPATIBLE_VERSION >= 200
+	DokanInit();
+#endif
 	result = DokanMain(
 	          &${mount_tool_name}_dokan_options,
 	          &${mount_tool_name}_dokan_operations );
 
+#if DOKAN_MINIMUM_COMPATIBLE_VERSION >= 200
+	DokanShutdown();
+#endif
 	switch( result )
 	{
 		case DOKAN_SUCCESS:
