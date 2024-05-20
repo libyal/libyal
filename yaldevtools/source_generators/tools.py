@@ -438,9 +438,17 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_dokan')
 
-    template_filename = os.path.join(template_directory, 'mount_dokan.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_names = [
+        'header.h', 'CreateFile.h', 'OpenDirectory.h', 'CloseFile.h',
+        'ReadFile.h', 'FindFiles.h', 'GetFileInformation.h',
+        'GetVolumeInformation.h', 'Umount.h', 'footer.h']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     self._SortIncludeHeaders(project_configuration, output_filename)
 
@@ -459,11 +467,19 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_dokan')
 
+    template_names = [
+        'header.c', 'CreateFile.c', 'OpenDirectory.c', 'CloseFile.c',
+        'ReadFile.c', 'FindFiles.c', 'GetFileInformation.c',
+        'GetVolumeInformation.c', 'Umount.c', 'footer.c']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
     template_mappings['mount_tool_name'] = mount_tool_name
 
-    template_filename = os.path.join(template_directory, 'mount_dokan.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_name']
 
@@ -525,9 +541,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if not project_configuration.mount_tool_file_system_type:
       template_names.extend(['free.c', 'get_parent_file_entry.c'])
     else:
-      template_names.extend([
-          'free-file_system_type.c',
-          'get_parent_file_entry-file_system_type.c'])
+      template_names.append('free-file_system_type.c')
+
+      # TODO: set option via configuration
+      if project_configuration.library_name != 'libfsext':
+        template_names.append('get_parent_file_entry-file_system_type.c')
 
     file_entry_creation_time_type = (
         project_configuration.mount_tool_file_entry_creation_time_type)
@@ -891,9 +909,31 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_fuse')
 
-    template_filename = os.path.join(template_directory, 'mount_fuse.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_names = [
+        'header.h', 'set_stat_info.h', 'filldir.h', 'open.h', 'read.h',
+        'release.h']
+
+    # TODO: set option via configuration
+    if project_configuration.library_name in (
+        'libfsapfs', 'libfsext'):
+      template_names.extend(['getxattr.h', 'listxattr.h'])
+
+    template_names.extend([
+        'opendir.h', 'readdir.h', 'releasedir.h', 'getattr.h'])
+
+    # TODO: set option via configuration
+    if project_configuration.library_name in (
+        'libfsapfs', 'libfsext'):
+      template_names.append('readlink.h')
+
+    template_names.extend(['destroy.h', 'footer.h'])
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     self._SortIncludeHeaders(project_configuration, output_filename)
 
@@ -912,11 +952,46 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_fuse')
 
+    template_names = ['header.c']
+
+    # TODO: set option via configuration
+    if project_configuration.library_name in (
+        'libfsapfs', 'libfsext'):
+      template_names.append('header-getxattr.c')
+
+    template_names.extend([
+        'set_stat_info.c', 'filldir.c', 'open.c', 'read.c', 'release.c'])
+
+    # TODO: set option via configuration
+    if project_configuration.library_name in (
+        'libfsapfs', 'libfsext'):
+      template_names.extend(['getxattr.c', 'listxattr.c'])
+
+    template_names.append('opendir.c')
+
+    # TODO: set option via configuration
+    if project_configuration.library_name == 'libfsext':
+      template_names.append('readdir-without_parent.c')
+    else:
+      template_names.append('readdir-with_parent.c')
+
+    template_names.extend(['releasedir.c', 'getattr.c'])
+
+    # TODO: set option via configuration
+    if project_configuration.library_name in (
+        'libfsapfs', 'libfsext'):
+      template_names.append('readlink.c')
+
+    template_names.extend(['destroy.c', 'footer.c'])
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
     template_mappings['mount_tool_name'] = mount_tool_name
 
-    template_filename = os.path.join(template_directory, 'mount_fuse.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_name']
 
@@ -943,7 +1018,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names.append('includes-end.h')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       template_names.append('definitions-format.h')
 
@@ -960,11 +1035,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
       template_names.append('struct-encrypted_root_plist.h')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('struct-file_system_index.h')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       template_names.append('struct-format.h')
 
@@ -1005,11 +1080,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
       template_names.append('set_encrypted_root_plist.h')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('set_file_system_index.h')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       template_names.append('set_format.h')
 
@@ -1109,7 +1184,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureCodepage():
       template_names.append('initialize-codepage.c')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       template_names.append('initialize-format.c')
 
@@ -1134,11 +1209,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
       template_names.append('set_encrypted_root_plist.c')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libfsapfs':
       template_names.append('set_file_system_index.c')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       template_names.append('set_format.c')
 
@@ -1236,7 +1311,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureUnlock():
       template_names.append('open-is_locked.c')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       template_names.append('open-format.c')
 
@@ -1524,7 +1599,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names = ['header.c', 'includes-start.c']
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       template_names.append('includes-rlimit.c')
 
@@ -1606,7 +1681,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names = ['main-start.c']
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       template_names.append('main-variables-rlimit.c')
 
@@ -1659,7 +1734,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureStartupKey():
       template_names.append('main-option_startup_key.c')
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       template_names.append('main-set_maximum_number_of_open_handles.c')
 
@@ -1852,14 +1927,14 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
       mount_tool_options.append(option)
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libfsapfs':
       option = ('f', 'file_system_index', (
           'specify a specific file system or \\"all\\"'))
 
       mount_tool_options.append(option)
 
-    # TODO: set option via configuation
+    # TODO: set option via configuration
     if project_configuration.library_name == 'libewf':
       option = ('f', 'format', (
           'specify the input format, options: raw (default), files (restricted '
@@ -1870,7 +1945,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     mount_tool_options.append(('h', '', 'shows this help'))
 
     if project_configuration.HasMountToolsFeatureKeys():
-      # TODO: set keys option description via configuation
+      # TODO: set keys option description via configuration
       if project_configuration.library_name == 'libbde':
         option = ('k', 'keys', (
             'specify the full volume encryption key and tweak key formatted in '

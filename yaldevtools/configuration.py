@@ -52,7 +52,7 @@ class DTFabricConfiguration(BaseConfiguration):
   """
 
   def __init__(self):
-    """Initializes a dtFabric configuation."""
+    """Initializes a dtFabric configuration."""
     super(DTFabricConfiguration, self).__init__()
     self.data_types = {}
 
@@ -176,7 +176,7 @@ class ProjectConfiguration(BaseConfiguration):
   """
 
   def __init__(self):
-    """Initializes a project configuation."""
+    """Initializes a project configuration."""
     super(ProjectConfiguration, self).__init__()
     self._configuration_file_path = None
     self._has_dpkg = None

@@ -625,7 +625,7 @@ int mount_path_string_copy_to_file_entry_path(
 
 				if( ( ( escaped_value >= 0x01 )
 				  &&  ( escaped_value <= 0x1f ) )
-				 || ( escaped_value == LIBCPATH_SEPARATOR )
+				 || ( escaped_value == (uint32_t) LIBCPATH_SEPARATOR )
 #if defined( WINAPI )
 				 || ( escaped_value == (uint32_t) '<' )
 				 || ( escaped_value == (uint32_t) '>' )
