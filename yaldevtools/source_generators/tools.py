@@ -469,8 +469,17 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names = [
         'header.c', 'CreateFile.c', 'OpenDirectory.c', 'CloseFile.c',
-        'ReadFile.c', 'FindFiles.c', 'GetFileInformation.c',
-        'GetVolumeInformation.c', 'Umount.c', 'footer.c']
+        'ReadFile.c']
+
+    # TODO: set option via configuration
+    if project_configuration.library_name == 'libfsext':
+      template_names.append('FindFiles-without_parent.c')
+    else:
+      template_names.append('FindFiles-with_parent.c')
+
+    template_names.extend([
+        'GetFileInformation.c', 'GetVolumeInformation.c', 'Umount.c',
+        'footer.c'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -500,6 +509,30 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_directory = os.path.join(
         self._template_directory, 'mount_file_entry')
 
+    template_names = ['header.h', 'initialize.h', 'free.h']
+
+    # TODO: set option via configuration
+    if project_configuration.library_name != 'libfsext':
+      template_names.append('get_parent_file_entry.h')
+
+    template_names.extend([
+        'get_creation_time.h', 'get_access_time.h', 'get_modification_time.h',
+        'get_inode_change_time.h', 'get_file_mode.h', 'get_name_size.h',
+        'get_name.h'])
+
+    # TODO: set option via configuration
+    if project_configuration.library_name in (
+        'libfsapfs', 'libfsext'):
+      template_names.append('get_symbolic_link_target.h')
+
+    template_names.extend([
+        'get_sub_file_entries.h', 'read_buffer_at_offset.h', 'get_size.h',
+        'footer.h'])
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
     mount_tool_file_entry_type = (
         project_configuration.mount_tool_file_entry_type or '')
 
@@ -509,9 +542,8 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
         project_configuration.library_name_suffix, mount_tool_file_entry_type)
 
-    template_filename = os.path.join(template_directory, 'mount_file_entry.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
@@ -615,6 +647,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       template_names.append('get_file_mode-file_system_type.c')
 
     template_names.append('get_name.c')
+
+    # TODO: set option via configuration
+    if project_configuration.library_name in (
+        'libfsapfs', 'libfsext'):
+      template_names.append('get_symbolic_link_target.c')
 
     if not project_configuration.mount_tool_file_system_type:
       template_names.append('get_sub_file_entries.c')
@@ -988,11 +1025,19 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
+    mount_tool_file_entry_type = (
+        project_configuration.mount_tool_file_entry_type or '')
+
+    template_mappings['mount_tool_file_entry_type'] = mount_tool_file_entry_type
+    template_mappings['mount_tool_file_entry_type_name'] = '{0:s}_{1:s}'.format(
+        project_configuration.library_name_suffix, mount_tool_file_entry_type)
     template_mappings['mount_tool_name'] = mount_tool_name
 
     self._GenerateSections(
         template_filenames, template_mappings, output_writer, output_filename)
 
+    del template_mappings['mount_tool_file_entry_type']
+    del template_mappings['mount_tool_file_entry_type_name']
     del template_mappings['mount_tool_name']
 
     self._SortIncludeHeaders(project_configuration, output_filename)

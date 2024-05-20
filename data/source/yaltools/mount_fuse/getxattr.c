@@ -93,7 +93,7 @@ int mount_fuse_getxattr(
 	               name );
 
 	result = ${library_name}_file_entry_get_extended_attribute_by_utf8_name(
-	          file_entry->${library_name_suffix}_file_entry,
+	          file_entry->${mount_tool_file_entry_type_name},
 	          (uint8_t *) name,
 	          name_length,
 	          &extended_attribute,

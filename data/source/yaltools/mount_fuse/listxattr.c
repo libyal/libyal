@@ -94,7 +94,7 @@ int mount_fuse_listxattr(
 		return( -ENOENT );
 	}
 	if( ${library_name}_file_entry_get_number_of_extended_attributes(
-	     file_entry->${library_name_suffix}_file_entry,
+	     file_entry->${mount_tool_file_entry_type_name},
 	     &number_of_extended_attributes,
 	     &error ) != 1 )
 	{
@@ -114,7 +114,7 @@ int mount_fuse_listxattr(
 	     extended_attribute_index++ )
 	{
 		if( ${library_name}_file_entry_get_extended_attribute_by_index(
-		     file_entry->${library_name_suffix}_file_entry,
+		     file_entry->${mount_tool_file_entry_type_name},
 		     extended_attribute_index,
 		     &extended_attribute,
 		     &error ) != 1 )
