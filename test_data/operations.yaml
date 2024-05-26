@@ -1,0 +1,26 @@
+# yaldevtools generator specification.
+---
+identifier: mount_fuse.h
+type: group
+operations:
+- header
+- xattr
+---
+identifier: xattr
+type: group
+condition:
+operations:
+- getxattr
+- listxattr
+---
+identifier: header
+type: template
+file: mount_fuse.h/header.h
+---
+identifier: getxattr
+type: template
+file: mount_fuse.h/getxattr.h
+---
+identifier: listxattr
+type: template
+file: mount_fuse.h/listxattr.h

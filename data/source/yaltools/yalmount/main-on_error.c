@@ -1,7 +1,7 @@
 #else
 	fprintf(
 	 stderr,
-	 "No sub system to mount ${library_name_suffix_upper_case} format.\n" );
+	 "No sub system to mount ${data_format} format.\n" );
 
 	return( EXIT_FAILURE );
 

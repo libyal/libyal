@@ -1,6 +1,6 @@
 dnl Checks for libfole required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240526
 
 dnl Function to detect if libfole is available
 dnl ac_libfole_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBFOLE_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libfole" != x && test "x$ac_cv_with_libfole" != xauto-detect && test "x$ac_cv_with_libfole" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libfole"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libfole}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libfole}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libfole],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libfole])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -46,26 +38,18 @@ AC_DEFUN([AX_LIBFOLE_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libfole_h" = xno],
         [ac_cv_libfole=no],
-        [dnl Check for the individual functions
-        ac_cv_libfole=yes
+        [ac_cv_libfole=yes
 
-        AC_CHECK_LIB(
-          fole,
-          libfole_get_version,
-          [ac_cv_libfole_dummy=yes],
-          [ac_cv_libfole=no])
-
-        dnl TODO add functions
+        dnl TODO add more functions
+        AX_CHECK_LIB_FUNCTIONS(
+          [libfole],
+          [fole],
+          [[libfole_get_version]])
 
         ac_cv_libfole_LIBADD="-lfole"])
       ])
 
-    AS_IF(
-      [test "x$ac_cv_libfole" != xyes && test "x$ac_cv_with_libfole" != x && test "x$ac_cv_with_libfole" != xauto-detect && test "x$ac_cv_with_libfole" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libfole in directory: $ac_cv_with_libfole],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libfole])
     ])
 
   AS_IF(

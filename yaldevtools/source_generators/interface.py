@@ -10,6 +10,7 @@ import time
 
 from yaldevtools import source_file
 from yaldevtools import source_formatter
+from yaldevtools import yaml_operations_file
 
 
 class SourceFileGenerator(object):
@@ -69,48 +70,121 @@ class SourceFileGenerator(object):
         file_object.write(line)
 
   def _GenerateSection(
-      self, template_filename, template_mappings, output_writer,
+      self, template_file_path, template_mappings, output_writer,
       output_filename, access_mode='w'):
     """Generates a section from template filename.
 
     Args:
-      template_filename (str): name of the template file.
+      template_file_path (str): path of the template file.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       output_writer (OutputWriter): output writer.
       output_filename (str): name of the output file.
       access_mode (Optional[str]): output file access mode.
     """
-    template_string = self._ReadTemplateFile(template_filename)
+    template_string = self._ReadTemplateFile(template_file_path)
     try:
       output_data = template_string.substitute(template_mappings)
     except (KeyError, ValueError) as exception:
       logging.error(
           'Unable to format template: {0:s} with error: {1!s}'.format(
-              template_filename, exception))
+              template_file_path, exception))
       return
 
     output_writer.WriteFile(
         output_filename, output_data, access_mode=access_mode)
 
   def _GenerateSections(
-      self, template_filenames, template_mappings, output_writer,
+      self, template_file_paths, template_mappings, output_writer,
       output_filename, access_mode='w'):
-    """Generates a section from template filenames.
+    """Generates sections from template filenames.
 
     Args:
-      template_filenames (list[str])): names of the template files.
+      template_file_paths (list[str])): paths of the template files.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       output_writer (OutputWriter): output writer.
       output_filename (str): name of the output file.
       access_mode (Optional[str]): output file access mode.
     """
-    for template_filename in template_filenames:
+    for template_file_path in template_file_paths:
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_file_path, template_mappings, output_writer, output_filename,
           access_mode=access_mode)
       access_mode = 'a'
+
+  def _GenerateSectionsFromGroupOperation(
+      self, group_operation, operations, template_mappings, output_writer,
+      output_filename, access_mode='w'):
+    """Generates sections based on a group operation.
+
+    Args:
+      group_operation (GeneratorOperation): group operation.
+      operations (dict[str, GeneratorOperation]): operations per identifier.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): name of the output file.
+      access_mode (Optional[str]): output file access mode.
+    """
+    for operation_name in group_operation.operations:
+      operation = operations.get(operation_name, None)
+      if not operation:
+        logging.warning((
+            f'Missing operation: {operation_name:s} in '
+            f'{operations_file_path:s}'))
+        return
+      
+      # TODO: if operation has condition see if match
+
+      if operation.type == 'group':
+        self._GenerateSectionsFromGroupOperation(
+            operation, operations, access_mode=access_mode)
+
+      elif operation.type == 'template':
+        template_file_path = os.path.join(
+            self._template_directory, operation.file)
+
+        # TODO: check/set template_mappings based on operation
+
+        self._GenerateSection(
+            template_file_path, template_mappings, output_writer,
+            output_filename, access_mode=access_mode)
+
+      access_mode = 'a'
+
+  def _GenerateSectionsFromOperationsFile(
+      self, operations_file_name, main_operation_name, project_configuration,
+      template_mappings, output_writer, output_filename):
+    """Generates sections based on an operations file.
+
+    Args:
+      operations_file_name (str): name of the operations file.
+      main_operation_name (str): name of the main operations.
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): name of the output file.
+    """
+    operations_file_path = os.path.join(
+        self._template_directory, operations_file_name)
+
+    operations_file = yaml_operations_file.YAMLGeneratorOperationsFile()
+    operations = {
+         operation.identifier: operation
+         for operation in operations_file.ReadFromFile(operations_file_path)}
+
+    main_operation = operations.get(main_operation_name, None)
+    if not main_operation:
+      logging.warning((
+          f'Missing main operation: {main_operation_name:s} in '
+          f'{operations_file_path:s}'))
+      return
+
+    self._GenerateSectionsFromGroupOperation(
+        main_operation, operations, template_mappings, output_writer,
+        output_filename)
 
   def _GetDefinitionsIncludeHeaderFile(self, project_configuration):
     """Retrieves the definitions include header file.

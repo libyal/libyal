@@ -472,7 +472,8 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         'ReadFile.c']
 
     # TODO: set option via configuration
-    if project_configuration.library_name == 'libfsext':
+    if project_configuration.library_name in (
+        'libfsext', 'libfsfat', 'libfsxfs'):
       template_names.append('FindFiles-without_parent.c')
     else:
       template_names.append('FindFiles-with_parent.c')
@@ -512,7 +513,8 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_names = ['header.h', 'initialize.h', 'free.h']
 
     # TODO: set option via configuration
-    if project_configuration.library_name != 'libfsext':
+    if project_configuration.library_name not in (
+        'libfsext', 'libfsfat'):
       template_names.append('get_parent_file_entry.h')
 
     template_names.extend([
@@ -576,7 +578,8 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       template_names.append('free-file_system_type.c')
 
       # TODO: set option via configuration
-      if project_configuration.library_name != 'libfsext':
+      if project_configuration.library_name not in (
+          'libfsext', 'libfsfat'):
         template_names.append('get_parent_file_entry-file_system_type.c')
 
     file_entry_creation_time_type = (
@@ -950,17 +953,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         'header.h', 'set_stat_info.h', 'filldir.h', 'open.h', 'read.h',
         'release.h']
 
-    # TODO: set option via configuration
-    if project_configuration.library_name in (
-        'libfsapfs', 'libfsext'):
+    if project_configuration.HasMountToolsFeatureExtendedAttributes():
       template_names.extend(['getxattr.h', 'listxattr.h'])
 
     template_names.extend([
         'opendir.h', 'readdir.h', 'releasedir.h', 'getattr.h'])
 
-    # TODO: set option via configuration
-    if project_configuration.library_name in (
-        'libfsapfs', 'libfsext'):
+    if project_configuration.HasMountToolsFeatureSymbolicLink():
       template_names.append('readlink.h')
 
     template_names.extend(['destroy.h', 'footer.h'])
@@ -991,32 +990,27 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
     template_names = ['header.c']
 
-    # TODO: set option via configuration
-    if project_configuration.library_name in (
-        'libfsapfs', 'libfsext'):
+    if project_configuration.HasMountToolsFeatureExtendedAttributes():
       template_names.append('header-getxattr.c')
 
     template_names.extend([
         'set_stat_info.c', 'filldir.c', 'open.c', 'read.c', 'release.c'])
 
-    # TODO: set option via configuration
-    if project_configuration.library_name in (
-        'libfsapfs', 'libfsext'):
+    if project_configuration.HasMountToolsFeatureExtendedAttributes():
       template_names.extend(['getxattr.c', 'listxattr.c'])
 
     template_names.append('opendir.c')
 
     # TODO: set option via configuration
-    if project_configuration.library_name == 'libfsext':
+    if project_configuration.library_name in (
+        'libfsext', 'libfsfat', 'libfsxfs'):
       template_names.append('readdir-without_parent.c')
     else:
       template_names.append('readdir-with_parent.c')
 
     template_names.extend(['releasedir.c', 'getattr.c'])
 
-    # TODO: set option via configuration
-    if project_configuration.library_name in (
-        'libfsapfs', 'libfsext'):
+    if project_configuration.HasMountToolsFeatureSymbolicLink():
       template_names.append('readlink.c')
 
     template_names.extend(['destroy.c', 'footer.c'])
@@ -1616,6 +1610,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       self._GenerateMountFuseHeaderFile(
           project_configuration, template_mappings, output_writer,
           output_filename)
+      # TODO
+      # self._GenerateSectionsFromOperationsFile(
+      #     'mount_fuse.yaml', 'mount_fuse.h', project_configuration,
+      #     template_mappings, output_writer, output_filename)
 
       output_filename = os.path.join(
           project_configuration.tools_directory, 'mount_fuse.c')
@@ -1797,8 +1795,19 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureGlob():
       template_names.append('main-glob_free.c')
 
+    template_names.append('main-fuse-start.c')
+
+    if project_configuration.HasMountToolsFeatureExtendedAttributes():
+      template_names.append('main-fuse-operations-xattr.c')
+
+    # TODO: add fuse_operations write support
+    template_names.append('main-fuse-operations.c')
+
+    if project_configuration.HasMountToolsFeatureSymbolicLink():
+      template_names.append('main-fuse-operations-readlink.c')
+
     template_names.extend([
-        'main-fuse.c', 'main-dokan.c', 'main-on_error.c'])
+        'main-fuse-end.c', 'main-dokan.c', 'main-on_error.c'])
 
     if project_configuration.HasMountToolsFeatureGlob():
       template_names.append('main-on_error-glob.c')
@@ -1809,6 +1818,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         os.path.join(template_directory, template_name)
         for template_name in template_names]
 
+    template_mappings['data_format'] = project_configuration.project_data_format
     template_mappings['mount_tool_getopt_string'] = getopt_string
     template_mappings['mount_tool_options_switch'] = getopt_switch
     template_mappings['mount_tool_options_variable_declarations'] = (
@@ -1818,6 +1828,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_filenames, template_mappings, output_writer, output_filename,
         access_mode='a')
 
+    del template_mappings['data_format']
     del template_mappings['mount_tool_getopt_string']
     del template_mappings['mount_tool_options_switch']
     del template_mappings['mount_tool_options_variable_declarations']

@@ -972,6 +972,14 @@ class ProjectConfiguration(BaseConfiguration):
     """
     return 'encrypted_root_plist' in self._mount_tool_features
 
+  def HasMountToolsFeatureExtendedAttributes(self):
+    """Determines if the mount tool has an extended attributes feature.
+
+    Returns:
+      bool: True if the mount tools has an extended attributes feature.
+    """
+    return 'extended_attributes' in self._mount_tool_features
+
   def HasMountToolsFeatureGlob(self):
     """Determines if the mount tool has a glob feature.
 
@@ -1035,6 +1043,14 @@ class ProjectConfiguration(BaseConfiguration):
       bool: True if the mount tools has a startup key feature.
     """
     return 'startup_key' in self._mount_tool_features
+
+  def HasMountToolsFeatureSymbolicLink(self):
+    """Determines if the mount tool has a symbolic link feature.
+
+    Returns:
+      bool: True if the mount tools has a symbolic link feature.
+    """
+    return 'symbolic_link' in self._mount_tool_features
 
   def HasMountToolsFeatureUnlock(self):
     """Determines if the mount tool has a feature to unlock encrypted source.

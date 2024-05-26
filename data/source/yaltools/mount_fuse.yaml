@@ -1,0 +1,127 @@
+# yaldevtools generator specification.
+---
+identifier: mount_fuse.h
+type: group
+operations:
+- header
+- set_stat_info
+- filldir
+- open
+- read
+- release
+- xattr
+- opendir
+- readdir
+- releasedir
+- getattr
+- readlink
+- destroy
+- footer
+---
+identifier: xattr
+type: group
+condition: 
+operations:
+- getxattr
+- listxattr
+---
+identifier: header
+type: template
+file: mount_fuse/header.h
+mappings:
+- copyright
+- library_name
+- tools_authors
+- tools_name
+---
+identifier: set_stat_info
+type: template
+file: mount_fuse/set_stat_info.h
+---
+identifier: filldir
+type: template
+file: mount_fuse/filldir.h
+---
+identifier: open
+type: template
+file: mount_fuse/open.h
+mappings:
+- mount_tool_name
+---
+identifier: read
+type: template
+file: mount_fuse/read.h
+---
+identifier: release
+type: template
+file: mount_fuse/release.h
+---
+identifier: getxattr
+type: template
+file: mount_fuse/getxattr.h
+mappings:
+- library_name
+- mount_tool_file_entry_type_name
+- mount_tool_name
+- tools_name_upper_case
+---
+identifier: listxattr
+type: template
+file: mount_fuse/listxattr.h
+mappings:
+- library_name
+- mount_tool_file_entry_type_name
+- mount_tool_name
+- tools_name_upper_case
+---
+identifier: opendir
+type: template
+file: mount_fuse/opendir.h
+mappings:
+- mount_tool_name
+---
+identifier: readdir
+type: group
+operations:
+- readdir_with_parent
+- readdir_without_parent
+---
+identifier: readdir_with_parent
+type: template
+file: mount_fuse/readdir-with_parent.c
+mappings:
+- tools_name_upper_case
+---
+identifier: readdir_without_parent
+type: template
+file: mount_fuse/readdir-without_parent.c
+mappings:
+- tools_name_upper_case
+---
+identifier: releasedir
+type: template
+file: mount_fuse/releasedir.h
+---
+identifier: getattr
+type: template
+file: mount_fuse/getattr.h
+mappings:
+- mount_tool_name
+- tools_name_upper_case
+---
+identifier: readlink
+type: template
+file: mount_fuse/readlink.h
+mappings:
+- mount_tool_name
+---
+identifier: destroy
+type: template
+file: mount_fuse/destroy.h
+mappings:
+- mount_tool_name
+- tools_name_upper_case
+---
+identifier: footer
+type: template
+file: mount_fuse/footer.h

@@ -26,7 +26,13 @@ class BaseTestCase(unittest.TestCase):
     Returns:
       DataTypeDefinitionsRegistry: data type definition registry or None
           on error.
+
+    Raises:
+      SkipTest: if the data definition file does not exist and the test should
+          be skipped.
     """
+    self._SkipIfPathNotExists(path)
+
     definitions_registry = registry.DataTypeDefinitionsRegistry()
 
     self._FillDefinitionRegistryFromFile(definitions_registry, path)
@@ -40,11 +46,10 @@ class BaseTestCase(unittest.TestCase):
       definitions_registry (DataTypeDefinitionsRegistry): data type definitions
           registry.
       path (str): path to the data definition file.
-
     """
     definitions_reader = reader.YAMLDataTypeDefinitionsFileReader()
 
-    with open(path, 'r', encoding='utf8') as file_object:
+    with open(path, 'rb') as file_object:
       definitions_reader.ReadFileObject(definitions_registry, file_object)
 
   def _GetTestFilePath(self, path_segments):
@@ -59,3 +64,16 @@ class BaseTestCase(unittest.TestCase):
     # Note that we need to pass the individual path segments to os.path.join
     # and not a list.
     return os.path.join(self._TEST_DATA_PATH, *path_segments)
+
+  def _SkipIfPathNotExists(self, path):
+    """Skips the test if the path does not exist.
+
+    Args:
+      path (str): path of a test file.
+
+    Raises:
+      SkipTest: if the path does not exist and the test should be skipped.
+    """
+    if not os.path.exists(path):
+      filename = os.path.basename(path)
+      raise unittest.SkipTest(f'missing test file: {filename:s}')

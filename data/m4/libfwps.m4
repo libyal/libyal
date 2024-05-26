@@ -1,6 +1,6 @@
 dnl Checks for libfwps required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240526
 
 dnl Function to detect if libfwps is available
 dnl ac_libfwps_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libfwps" != x && test "x$ac_cv_with_libfwps" != xauto-detect && test "x$ac_cv_with_libfwps" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libfwps"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libfwps}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libfwps}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libfwps],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libfwps])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -46,217 +38,54 @@ AC_DEFUN([AX_LIBFWPS_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libfwps_h" = xno],
         [ac_cv_libfwps=no],
-        [dnl Check for the individual functions
-        ac_cv_libfwps=yes
+        [ac_cv_libfwps=yes
 
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_get_version,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-
-        dnl Store functions
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_store_initialize,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_store_free,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_store_copy_from_byte_stream,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_store_get_number_of_sets,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_store_get_set_by_index,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-
-        dnl Set functions
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_set_initialize,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_set_free,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_set_copy_from_byte_stream,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-
-        dnl Record functions
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_free,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_utf8_entry_name_size,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_utf8_entry_name,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_utf16_entry_name_size,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_utf16_entry_name,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_entry_type,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_utf8_value_name_size,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_utf8_value_name,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_utf16_value_name_size,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_utf16_value_name,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_value_type,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_size,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_boolean,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_8bit_integer,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_16bit_integer,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_32bit_integer,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_64bit_integer,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_filetime,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_floating_point,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_utf8_string_size,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_utf8_string,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_utf16_string_size,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_utf16_string,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_utf8_path_string_size,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_utf8_path_string,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_utf16_path_string_size,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_utf16_path_string,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
-        AC_CHECK_LIB(
-          fwps,
-          libfwps_record_get_data_as_guid,
-          [ac_cv_libfwps_dummy=yes],
-          [ac_cv_libfwps=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [libfwps],
+          [fwps],
+          [[libfwps_get_version],
+           [libfwps_store_initialize],
+           [libfwps_store_free],
+           [libfwps_store_copy_from_byte_stream],
+           [libfwps_store_get_number_of_sets],
+           [libfwps_store_get_set_by_index],
+           [libfwps_set_initialize],
+           [libfwps_set_free],
+           [libfwps_set_copy_from_byte_stream],
+           [libfwps_record_free],
+           [libfwps_record_get_utf8_entry_name_size],
+           [libfwps_record_get_utf8_entry_name],
+           [libfwps_record_get_utf16_entry_name_size],
+           [libfwps_record_get_utf16_entry_name],
+           [libfwps_record_get_entry_type],
+           [libfwps_record_get_utf8_value_name_size],
+           [libfwps_record_get_utf8_value_name],
+           [libfwps_record_get_utf16_value_name_size],
+           [libfwps_record_get_utf16_value_name],
+           [libfwps_record_get_value_type],
+           [libfwps_record_get_data],
+           [libfwps_record_get_data_size],
+           [libfwps_record_get_data_as_boolean],
+           [libfwps_record_get_data_as_8bit_integer],
+           [libfwps_record_get_data_as_16bit_integer],
+           [libfwps_record_get_data_as_32bit_integer],
+           [libfwps_record_get_data_as_64bit_integer],
+           [libfwps_record_get_data_as_filetime],
+           [libfwps_record_get_data_as_floating_point],
+           [libfwps_record_get_data_as_utf8_string_size],
+           [libfwps_record_get_data_as_utf8_string],
+           [libfwps_record_get_data_as_utf16_string_size],
+           [libfwps_record_get_data_as_utf16_string],
+           [libfwps_record_get_data_as_utf8_path_string_size],
+           [libfwps_record_get_data_as_utf8_path_string],
+           [libfwps_record_get_data_as_utf16_path_string_size],
+           [libfwps_record_get_data_as_utf16_path_string],
+           [libfwps_record_get_data_as_guid]])
 
         ac_cv_libfwps_LIBADD="-lfwps"])
       ])
-    AS_IF(
-      [test "x$ac_cv_libfwps" != xyes && test "x$ac_cv_with_libfwps" != x && test "x$ac_cv_with_libfwps" != xauto-detect && test "x$ac_cv_with_libfwps" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libfwps in directory: $ac_cv_with_libfwps],
-        [1])
-      ])
+
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libfwps])
     ])
 
   dnl Check for debug functions

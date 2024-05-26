@@ -83,8 +83,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		return( -1 );
 	}
-/* TODO refactor to ${library_name}_${mount_tool_file_entry_type}_get_sub_${mount_tool_file_entry_type}_by_index */
-	if( ${library_name}_${mount_tool_file_entry_type}_get_sub_${mount_tool_file_entry_type}(
+	if( ${library_name}_${mount_tool_file_entry_type}_get_sub_${mount_tool_file_entry_type}_by_index(
 	     file_entry->${mount_tool_file_entry_type_name},
 	     sub_file_entry_index,
 	     &sub_${mount_tool_file_entry_type_name},
