@@ -1,0 +1,99 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body_end
+type: template
+file: mount_fuse/body-end.h
+---
+identifier: generate_body_start
+type: template
+file: mount_fuse/body-start.h
+---
+identifier: generate_destroy
+type: template
+file: mount_fuse/destroy.h
+---
+identifier: generate_filldir
+type: template
+file: mount_fuse/filldir.h
+---
+identifier: generate_getattr
+type: template
+file: mount_fuse/getattr.h
+---
+identifier: generate_getxattr
+type: template
+condition: "'extended_attributes' in mount_tool_features"
+file: mount_fuse/getxattr.h
+---
+identifier: generate_header
+type: template
+file: mount_fuse/header.h
+mappings:
+- copyright
+- library_name
+- tools_authors
+- tools_name
+---
+identifier: generate_includes
+type: template
+file: mount_fuse/includes.h
+modifiers: [sort_lines]
+---
+identifier: generate_listxattr
+type: template
+condition: "'extended_attributes' in mount_tool_features"
+file: mount_fuse/listxattr.h
+---
+identifier: generate_open
+type: template
+file: mount_fuse/open.h
+---
+identifier: generate_opendir
+type: template
+file: mount_fuse/opendir.h
+---
+identifier: generate_read
+type: template
+file: mount_fuse/read.h
+---
+identifier: generate_readdir
+type: template
+file: mount_fuse/readdir.h
+---
+identifier: generate_readlink
+type: template
+condition: "'symbolic_link' in mount_tool_features"
+file: mount_fuse/readlink.h
+---
+identifier: generate_release
+type: template
+file: mount_fuse/release.h
+---
+identifier: generate_releasedir
+type: template
+file: mount_fuse/releasedir.h
+---
+identifier: generate_set_stat_info
+type: template
+file: mount_fuse/set_stat_info.h
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_includes
+- generate_body_start
+- generate_set_stat_info
+- generate_filldir
+- generate_open
+- generate_read
+- generate_release
+- generate_getxattr
+- generate_listxattr
+- generate_opendir
+- generate_readdir
+- generate_releasedir
+- generate_getattr
+- generate_readlink
+- generate_destroy
+- generate_body_end

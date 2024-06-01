@@ -935,44 +935,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     self._SortVariableDeclarations(output_filename)
     self._VerticalAlignFunctionArguments(output_filename)
 
-  def _GenerateMountFuseHeaderFile(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
-    """Generates a mount fuse header file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
-    """
-    template_directory = os.path.join(self._template_directory, 'mount_fuse')
-
-    template_names = [
-        'header.h', 'set_stat_info.h', 'filldir.h', 'open.h', 'read.h',
-        'release.h']
-
-    if project_configuration.HasMountToolsFeatureExtendedAttributes():
-      template_names.extend(['getxattr.h', 'listxattr.h'])
-
-    template_names.extend([
-        'opendir.h', 'readdir.h', 'releasedir.h', 'getattr.h'])
-
-    if project_configuration.HasMountToolsFeatureSymbolicLink():
-      template_names.append('readlink.h')
-
-    template_names.extend(['destroy.h', 'footer.h'])
-
-    template_filenames = [
-        os.path.join(template_directory, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
-
-    self._SortIncludeHeaders(project_configuration, output_filename)
-
   def _GenerateMountFuseSourceFile(
       self, project_configuration, template_mappings, mount_tool_name,
       output_writer, output_filename):
@@ -988,10 +950,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     """
     template_directory = os.path.join(self._template_directory, 'mount_fuse')
 
-    template_names = ['header.c']
+    template_names = ['header.c', 'includes.c', 'body-start.c']
 
     if project_configuration.HasMountToolsFeatureExtendedAttributes():
-      template_names.append('header-getxattr.c')
+      template_names.append('defines-getxattr.c')
 
     template_names.extend([
         'set_stat_info.c', 'filldir.c', 'open.c', 'read.c', 'release.c'])
@@ -999,21 +961,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasMountToolsFeatureExtendedAttributes():
       template_names.extend(['getxattr.c', 'listxattr.c'])
 
-    template_names.append('opendir.c')
-
-    # TODO: set option via configuration
-    if project_configuration.library_name in (
-        'libfsext', 'libfsfat', 'libfsxfs'):
-      template_names.append('readdir-without_parent.c')
-    else:
-      template_names.append('readdir-with_parent.c')
-
-    template_names.extend(['releasedir.c', 'getattr.c'])
+    template_names.extend([
+        'opendir.c', 'readdir.c', 'releasedir.c', 'getattr.c'])
 
     if project_configuration.HasMountToolsFeatureSymbolicLink():
       template_names.append('readlink.c')
 
-    template_names.extend(['destroy.c', 'footer.c'])
+    template_names.extend(['destroy.c', 'body-end.c'])
 
     template_filenames = [
         os.path.join(template_directory, template_name)
@@ -1607,19 +1561,18 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
       output_filename = os.path.join(
           project_configuration.tools_directory, 'mount_fuse.h')
-      self._GenerateMountFuseHeaderFile(
-          project_configuration, template_mappings, output_writer,
-          output_filename)
-      # TODO
-      # self._GenerateSectionsFromOperationsFile(
-      #     'mount_fuse.yaml', 'mount_fuse.h', project_configuration,
-      #     template_mappings, output_writer, output_filename)
+      self._GenerateSectionsFromOperationsFile(
+          'mount_fuse.h.yaml', 'main', project_configuration,
+          template_mappings, output_writer, output_filename)
 
       output_filename = os.path.join(
           project_configuration.tools_directory, 'mount_fuse.c')
       self._GenerateMountFuseSourceFile(
           project_configuration, template_mappings, mount_tool_name,
           output_writer, output_filename)
+      # self._GenerateSectionsFromOperationsFile(
+      #     'mount_fuse.c.yaml', 'main', project_configuration,
+      #     template_mappings, output_writer, output_filename)
 
       self._GenerateMountToolSourceFile(
           project_configuration, template_mappings, mount_tool_name,

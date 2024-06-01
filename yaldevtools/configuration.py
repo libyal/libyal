@@ -97,6 +97,7 @@ class ProjectConfiguration(BaseConfiguration):
         the mount tool.
         a password option.
     mount_tool_base_type (str): base type used by the mount tool.
+    mount_tool_features (list[str]): features of the mount tool.
     mount_tool_file_entry_access_time_type (str): type of the access date
         and time value provided by the file entry.
     mount_tool_file_entry_access_time_value (str): name of the access date
@@ -236,7 +237,7 @@ class ProjectConfiguration(BaseConfiguration):
     self.info_tool_source_type = None
 
     # Mount tool configuration.
-    self._mount_tool_features = []
+    self.mount_tool_features = []
     self.mount_tool_additional_arguments = None
     self.mount_tool_base_type = None
     self.mount_tool_file_entry_access_time_type = None
@@ -537,11 +538,11 @@ class ProjectConfiguration(BaseConfiguration):
       ConfigurationError: if the mount tool features or source type is not
           supported.
     """
-    self._mount_tool_features = self._GetOptionalConfigValue(
+    self.mount_tool_features = self._GetOptionalConfigValue(
         config_parser, 'mount_tool', 'features', default_value=[])
 
-    if ('offset' in self._mount_tool_features and
-        'parent' in self._mount_tool_features):
+    if ('offset' in self.mount_tool_features and
+        'parent' in self.mount_tool_features):
       raise errors.ConfigurationError(
           'unsupported mount tool features - offset and parent cannot be '
           'combined.')
@@ -962,7 +963,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has a codepage feature.
     """
-    return 'codepage' in self._mount_tool_features
+    return 'codepage' in self.mount_tool_features
 
   def HasMountToolsFeatureEncryptedRootPlist(self):
     """Determines if the mount tool has an encrypted root plist feature.
@@ -970,7 +971,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has an encrypted root plist feature.
     """
-    return 'encrypted_root_plist' in self._mount_tool_features
+    return 'encrypted_root_plist' in self.mount_tool_features
 
   def HasMountToolsFeatureExtendedAttributes(self):
     """Determines if the mount tool has an extended attributes feature.
@@ -978,7 +979,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has an extended attributes feature.
     """
-    return 'extended_attributes' in self._mount_tool_features
+    return 'extended_attributes' in self.mount_tool_features
 
   def HasMountToolsFeatureGlob(self):
     """Determines if the mount tool has a glob feature.
@@ -986,7 +987,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has a glob feature.
     """
-    return 'glob' in self._mount_tool_features
+    return 'glob' in self.mount_tool_features
 
   def HasMountToolsFeatureKeys(self):
     """Determines if the mount tool has a keys feature.
@@ -994,7 +995,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has a keys feature.
     """
-    return 'keys' in self._mount_tool_features
+    return 'keys' in self.mount_tool_features
 
   def HasMountToolsFeatureMultiSource(self):
     """Determines if the mount tool has a multi source feature.
@@ -1002,7 +1003,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has a multi source feature.
     """
-    return 'multi_source' in self._mount_tool_features
+    return 'multi_source' in self.mount_tool_features
 
   def HasMountToolsFeatureOffset(self):
     """Determines if the mount tool has an offset feature.
@@ -1010,7 +1011,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has an offset feature.
     """
-    return 'offset' in self._mount_tool_features
+    return 'offset' in self.mount_tool_features
 
   def HasMountToolsFeatureParent(self):
     """Determines if the mount tool has a parent feature.
@@ -1018,7 +1019,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has a parent feature.
     """
-    return 'parent' in self._mount_tool_features
+    return 'parent' in self.mount_tool_features
 
   def HasMountToolsFeaturePassword(self):
     """Determines if the mount tool has a password feature.
@@ -1026,7 +1027,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has a password feature.
     """
-    return 'password' in self._mount_tool_features
+    return 'password' in self.mount_tool_features
 
   def HasMountToolsFeatureRecoveryPassword(self):
     """Determines if the mount tool has a recovery password feature.
@@ -1034,7 +1035,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has a recovery password feature.
     """
-    return 'recovery_password' in self._mount_tool_features
+    return 'recovery_password' in self.mount_tool_features
 
   def HasMountToolsFeatureStartupKey(self):
     """Determines if the mount tool has a startup key feature.
@@ -1042,7 +1043,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has a startup key feature.
     """
-    return 'startup_key' in self._mount_tool_features
+    return 'startup_key' in self.mount_tool_features
 
   def HasMountToolsFeatureSymbolicLink(self):
     """Determines if the mount tool has a symbolic link feature.
@@ -1050,7 +1051,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the mount tools has a symbolic link feature.
     """
-    return 'symbolic_link' in self._mount_tool_features
+    return 'symbolic_link' in self.mount_tool_features
 
   def HasMountToolsFeatureUnlock(self):
     """Determines if the mount tool has a feature to unlock encrypted source.

@@ -35,14 +35,3 @@
 #include <unistd.h>
 #endif
 
-#include "mount_fuse.h"
-#include "mount_handle.h"
-#include "${tools_name}_libcerror.h"
-#include "${tools_name}_libcnotify.h"
-#include "${tools_name}_${library_name}.h"
-#include "${tools_name}_unused.h"
-
-extern mount_handle_t *${mount_tool_name}_mount_handle;
-
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
-

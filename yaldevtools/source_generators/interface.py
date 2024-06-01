@@ -16,6 +16,9 @@ from yaldevtools import yaml_operations_file
 class SourceFileGenerator(object):
   """Source file generator."""
 
+  _SUPPORTED_MODIFIERS = frozenset([
+      'sort_lines'])
+
   def __init__(
       self, projects_directory, data_directory, template_directory,
       experimental=False):
@@ -61,8 +64,8 @@ class SourceFileGenerator(object):
       lines = file_object.readlines()
 
     name = name.replace('_', ' ')
-    description = ' a {0:s}'.format(name)
-    corrected_description = ' an {0:s}'.format(name)
+    description = f' a {name:s}'
+    corrected_description = f' an {name:s}'
 
     with open(output_filename, 'w', encoding='utf8') as file_object:
       for line in lines:
@@ -86,9 +89,9 @@ class SourceFileGenerator(object):
     try:
       output_data = template_string.substitute(template_mappings)
     except (KeyError, ValueError) as exception:
-      logging.error(
-          'Unable to format template: {0:s} with error: {1!s}'.format(
-              template_file_path, exception))
+      logging.error((
+          f'Unable to format template: {template_file_path:s} with error: '
+          f'{exception!s}'))
       return
 
     output_writer.WriteFile(
@@ -114,13 +117,14 @@ class SourceFileGenerator(object):
       access_mode = 'a'
 
   def _GenerateSectionsFromGroupOperation(
-      self, group_operation, operations, template_mappings, output_writer,
-      output_filename, access_mode='w'):
+      self, group_operation, operations, project_configuration, template_mappings,
+      output_writer, output_filename, access_mode='w'):
     """Generates sections based on a group operation.
 
     Args:
       group_operation (GeneratorOperation): group operation.
       operations (dict[str, GeneratorOperation]): operations per identifier.
+      project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       output_writer (OutputWriter): output writer.
@@ -135,21 +139,59 @@ class SourceFileGenerator(object):
             f'{operations_file_path:s}'))
         return
       
-      # TODO: if operation has condition see if match
+      if operation.condition:
+        expression = operation.GetConditionExpression()
+
+        namespace = dict(project_configuration.__dict__)
+        # Make sure __builtins__ contains an empty dictionary.
+        namespace['__builtins__'] = {}
+
+        try:
+          result = eval(expression, namespace)  # pylint: disable=eval-used
+        except Exception as exception:
+          logging.warning(
+              f'Unable to check condition for operation: {operation_name:s}')
+          result = False
+
+        if not result:
+          continue
 
       if operation.type == 'group':
         self._GenerateSectionsFromGroupOperation(
-            operation, operations, access_mode=access_mode)
+            operation, operations, project_configuration, template_mappings,
+            output_writer, output_filename, access_mode=access_mode)
 
       elif operation.type == 'template':
         template_file_path = os.path.join(
             self._template_directory, operation.file)
 
-        # TODO: check/set template_mappings based on operation
+        template_string = self._ReadTemplateFile(template_file_path)
 
-        self._GenerateSection(
-            template_file_path, template_mappings, output_writer,
-            output_filename, access_mode=access_mode)
+        for mapping in operation.mappings or []:
+          if mapping not in template_mappings:
+            # TODO: generate template_mappings
+            template_mappings[mapping] = None
+
+        try:
+          output_data = template_string.substitute(template_mappings)
+        except (KeyError, ValueError) as exception:
+          logging.error((
+              f'Unable to format template: {template_file_path:s} with error: '
+              f'{exception!s}'))
+          return
+
+        for modifier in operation.modifiers or []:
+          if modifier not in self._SUPPORTED_MODIFIERS:
+            logging.error((
+                f'Unsupported modifier: {modifier:s} in template: '
+                f'{template_file_path:s}.'))
+            continue
+
+          if modifier == 'sort_lines':
+            output_data = self._SortLines(output_data)
+
+        output_writer.WriteFile(
+            output_filename, output_data, access_mode=access_mode)
 
       access_mode = 'a'
 
@@ -183,8 +225,8 @@ class SourceFileGenerator(object):
       return
 
     self._GenerateSectionsFromGroupOperation(
-        main_operation, operations, template_mappings, output_writer,
-        output_filename)
+        main_operation, operations, project_configuration, template_mappings,
+        output_writer, output_filename)
 
   def _GetDefinitionsIncludeHeaderFile(self, project_configuration):
     """Retrieves the definitions include header file.
@@ -220,11 +262,9 @@ class SourceFileGenerator(object):
           the library include header file cannot be found.
     """
     if not self._library_include_header_file:
-      self._library_include_header_path = '{0:s}.h.in'.format(
-          project_configuration.library_name)
       self._library_include_header_path = os.path.join(
           self._projects_directory, project_configuration.library_name,
-          'include', self._library_include_header_path)
+          'include', f'{project_configuration.library_name:s}.h.in')
 
       if os.path.exists(self._library_include_header_path):
         self._library_include_header_file = (
@@ -294,19 +334,14 @@ class SourceFileGenerator(object):
     if project_configuration.project_year_of_creation > date.year:
       raise ValueError('Year of creation value out of bounds.')
 
-    if project_configuration.project_year_of_creation == date.year:
-      project_copyright = '{0:d}'.format(
-          project_configuration.project_year_of_creation)
-    else:
-      project_copyright = '{0:d}-{1:d}'.format(
-          project_configuration.project_year_of_creation, date.year)
+    project_copyright = f'{project_configuration.project_year_of_creation:d}'
+    if project_configuration.project_year_of_creation != date.year:
+      project_copyright = f'{project_copyright:s}-{date.year:d}'
 
-    if project_configuration.python_module_year_of_creation == date.year:
-      python_module_copyright = '{0:d}'.format(
-          project_configuration.python_module_year_of_creation)
-    else:
-      python_module_copyright = '{0:d}-{1:d}'.format(
-          project_configuration.python_module_year_of_creation, date.year)
+    python_module_copyright = (
+        f'{project_configuration.python_module_year_of_creation:d}')
+    if project_configuration.python_module_year_of_creation != date.year:
+      python_module_copyright = f'{python_module_copyright:s}-{date.year:d}'
 
     authors = authors_separator.join(project_configuration.project_authors)
     python_module_authors = authors_separator.join(
@@ -314,9 +349,9 @@ class SourceFileGenerator(object):
     tools_authors = authors_separator.join(project_configuration.tools_authors)
     tests_authors = authors_separator.join(project_configuration.tests_authors)
 
-    library_description_lower_case = '{0:s}{1:s}'.format(
+    library_description_lower_case = ''.join([
         project_configuration.library_description[0].lower(),
-        project_configuration.library_description[1:])
+        project_configuration.library_description[1:]])
 
     library_version = time.strftime('%Y%m%d', time.gmtime())
 
@@ -366,17 +401,17 @@ class SourceFileGenerator(object):
             self._projects_directory, project_configuration.library_name,
             project_configuration.library_name)
 
-      header_file_path = '{0:s}_{1:s}.h'.format(
-          project_configuration.library_name, type_name)
-      header_file_path = os.path.join(self._library_path, header_file_path)
+      header_file_path = os.path.join(
+          self._library_path,
+          f'{project_configuration.library_name:s}_{type_name:s}.h')
       header_file = source_file.LibraryHeaderFile(header_file_path)
 
       # TODO: handle types in non-matching header files.
       try:
         header_file.Read(project_configuration)
       except IOError:
-        logging.warning('Unable to read library header file: {0:s}'.format(
-            header_file.path))
+        logging.warning(
+            f'Unable to read library header file: {header_file.path:s}')
         return None
 
       self._library_type_header_files[type_name] = header_file
@@ -580,17 +615,14 @@ class SourceFileGenerator(object):
     with open(output_filename, 'r', encoding='utf8') as file_object:
       lines = file_object.readlines()
 
-    library_include_header_start = '#include "{0:s}_'.format(
-        project_configuration.library_name)
-
-    python_module_include_header_start = '#include "{0:s}_'.format(
-        project_configuration.python_module_name)
-
-    test_include_header_start = '#include "{0:s}_test_'.format(
-        project_configuration.library_name_suffix)
-
-    tools_include_header_start = '#include "{0:s}tools_'.format(
-        project_configuration.library_name_suffix)
+    library_include_header_start = (
+        f'#include "{project_configuration.library_name:s}_')
+    python_module_include_header_start = (
+        f'#include "{project_configuration.python_module_name:s}_')
+    test_include_header_start = (
+        f'#include "{project_configuration.library_name_suffix:s}_test_')
+    tools_include_header_start = (
+        f'#include "{project_configuration.library_name_suffix:s}tools_')
 
     include_headers = []
     in_include_headers = False
@@ -613,6 +645,29 @@ class SourceFileGenerator(object):
 
         else:
           file_object.write(line)
+
+  def _SortLines(self, text):
+    """Sorts lines of text.
+
+    Args:
+      text (str): text.
+
+    Returns:
+      str: text sorted by line.
+    """
+    lines = text.split('\n')
+
+    if lines[-1] == '':
+      last_line = lines.pop(-1)
+    else:
+      last_line = None
+
+    sorted_lines = sorted(lines)
+
+    if last_line is not None:
+      sorted_lines.append(last_line)
+
+    return '\n'.join(sorted_lines)
 
   def _SortVariableDeclarations(self, output_filename):
     """Sorts the variable declarations within a source file.
@@ -688,8 +743,8 @@ class SourceFileGenerator(object):
               prefix = prefix.rstrip()
               alignment_length = alignment_offset - len(prefix)
 
-              assigment_statement_line = '{0:s}{1:s}={2:s}'.format(
-                  prefix, ' ' * alignment_length, suffix)
+              assigment_statement_line = ''.join([
+                  prefix, ' ' * alignment_length, '=', suffix])
               file_object.write(assigment_statement_line)
 
           in_assigment_statements_block = False
@@ -725,10 +780,9 @@ class SourceFileGenerator(object):
             in_function_call = False
 
           stripped_line = line.lstrip()
-          line = '{0:s}{1:s}{2:s}'.format(
-              '\t' * alignment_number_of_tabs,
-              ' ' * alignment_number_of_spaces,
-              stripped_line)
+          line = ''.join([
+              '\t' * alignment_number_of_tabs, ' ' * alignment_number_of_spaces,
+              stripped_line])
 
         elif stripped_line.endswith('('):
           in_function_call = True
@@ -783,9 +837,7 @@ class SourceFileGenerator(object):
           if remainder > 0:
             alignment_size += 1
 
-          alignment = '\t' * alignment_size
-
-          line = '{0:s}{1:s}{2:s}'.format(prefix, alignment, suffix)
+          line = ''.join([prefix, '\t' * alignment_size, suffix])
 
         file_object.write(line)
 

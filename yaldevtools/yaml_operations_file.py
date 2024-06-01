@@ -28,6 +28,7 @@ class YAMLGeneratorOperationsFile(object):
       'identifier',
       'file',
       'mappings',
+      'modifiers',
       'operations',
       'type'])
 
@@ -38,9 +39,11 @@ class YAMLGeneratorOperationsFile(object):
       'type'])
 
   _SUPPORTED_KEYS_TYPE_TEMPLATE = frozenset([
+      'condition',
       'identifier',
       'file',
       'mappings',
+      'modifiers',
       'type'])
 
   _SUPPORTED_TYPES = frozenset([
@@ -90,6 +93,7 @@ class YAMLGeneratorOperationsFile(object):
     if operation_type == 'group':
       different_keys = keys - self._SUPPORTED_KEYS_TYPE_GROUP
       if different_keys:
+        different_keys = ', '.join(different_keys)
         raise RuntimeError('Unsupported keys: {0:s}'.format(different_keys))
 
       generator_operation.condition = yaml_generator_operation.get(
@@ -100,11 +104,16 @@ class YAMLGeneratorOperationsFile(object):
     elif operation_type == 'template':
       different_keys = keys - self._SUPPORTED_KEYS_TYPE_TEMPLATE
       if different_keys:
+        different_keys = ', '.join(different_keys)
         raise RuntimeError('Unsupported keys: {0:s}'.format(different_keys))
 
+      generator_operation.condition = yaml_generator_operation.get(
+          'condition', None)
       generator_operation.file = yaml_generator_operation.get('file', None)
       generator_operation.mappings = yaml_generator_operation.get(
           'mappings', None)
+      generator_operation.modifiers = yaml_generator_operation.get(
+          'modifiers', None)
 
     return generator_operation
 

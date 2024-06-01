@@ -1,0 +1,6 @@
+#include "mount_fuse.h"
+#include "mount_handle.h"
+#include "${tools_name}_libcerror.h"
+#include "${tools_name}_libcnotify.h"
+#include "${tools_name}_${library_name}.h"
+#include "${tools_name}_unused.h"
