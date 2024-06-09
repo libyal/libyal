@@ -26,11 +26,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_directory = os.path.join(self._template_directory, 'acinclude.m4')
 
     library_name = project_configuration.library_name
-    tools_name = '{0:s}tools'.format(project_configuration.library_name_suffix)
 
-    m4_file = '{0:s}.m4'.format(library_name)
-    m4_file = os.path.join(self._data_directory, 'm4', m4_file)
-
+    m4_file = os.path.join(self._data_directory, 'm4', f'{library_name:s}.m4')
     if os.path.exists(m4_file):
       with open(m4_file, 'r', encoding='utf8') as file_object:
         input_lines = file_object.readlines()
@@ -49,8 +46,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         # Find the line with the start of the definition of the
         # AX_${library_name}_CHECK_LOCAL macro.
-        m4_macro_definition = 'AC_DEFUN([AX_{0:s}_CHECK_LOCAL],'.format(
-            library_name.upper())
+        library_name_upper = library_name.upper()
+        m4_macro_definition = (
+            f'AC_DEFUN([AX_{library_name_upper:s}_CHECK_LOCAL],')
 
         macro_start_line_number = None
         for line_number, line in enumerate(input_lines):
@@ -83,14 +81,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       if project_configuration.HasTools():
         template_names.append('check_tools.m4-start')
 
+        tools_name = f'{project_configuration.library_name_suffix:s}tools'
         log_handle_path = os.path.join(tools_name, 'log_handle.c')
         if os.path.exists(log_handle_path):
           template_names.append('check_tools.m4-log_handle')
 
-        mount_tool_name = '{0:s}mount'.format(
-            project_configuration.library_name_suffix)
-        mount_tool_path = os.path.join(
-            tools_name, '{0:s}.c'.format(mount_tool_name))
+        mount_tool_name = f'{project_configuration.library_name_suffix:s}mount'
+        mount_tool_path = os.path.join(tools_name, f'{mount_tool_name:s}.c')
         if os.path.exists(mount_tool_path):
           template_names.append('check_tools.m4-mount_tool')
 
@@ -246,7 +243,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if cygwin_build_dependencies:
       cygwin_build_dependencies = ' '.join([
-          '-P {0:s}'.format(name) for name in cygwin_build_dependencies])
+          f'-P {name:s}' for name in cygwin_build_dependencies])
       template_mappings['cygwin_build_dependencies'] = cygwin_build_dependencies
 
       template_filename = os.path.join(template_directory, 'install-cygwin.yml')
@@ -342,7 +339,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     ignore_paths.append('tests')
 
     template_mappings['codecov_ignore'] = '\n'.join([
-        '    - "{0:s}/*"'.format(path) for path in sorted(ignore_paths)])
+        f'    - "{path:s}/*"' for path in sorted(ignore_paths)])
 
     template_filename = os.path.join(
         template_directory, 'body.yml')
@@ -542,9 +539,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       local_library_tests = []
       for name in library_dependencies:
         if name in makefile_am_file.library_dependencies:
-          local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
+          local_library_test = f'test "x$ac_cv_{name:s}" = xyes'
         else:
-          local_library_test = 'test "x$ac_cv_{0:s}" != xno'.format(name)
+          local_library_test = f'test "x$ac_cv_{name:s}" != xno'
 
         local_library_tests.append(local_library_test)
 
@@ -575,9 +572,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         local_library_tests = []
         for name in tools_dependencies:
           if name in ('libcrypto', 'libfuse'):
-            local_library_test = 'test "x$ac_cv_{0:s}" != xno'.format(name)
+            local_library_test = f'test "x$ac_cv_{name:s}" != xno'
           else:
-            local_library_test = 'test "x$ac_cv_{0:s}" = xyes'.format(name)
+            local_library_test = f'test "x$ac_cv_{name:s}" = xyes'
 
           local_library_tests.append(local_library_test)
 
@@ -688,8 +685,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     build_options = []
     for name in libraries:
       if name not in ('bzip2', 'libcrypto', 'zlib'):
-        build_options.append((
-            '{0:s} support'.format(name), '$ac_cv_{0:s}'.format(name)))
+        build_options.append((f'{name:s} support', f'$ac_cv_{name:s}'))
 
       if name == 'bzip2':
         build_options.append(('BZIP2 compression support', '$ac_cv_bzip2'))
@@ -805,8 +801,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           maximum_description_length, len(description))
 
     if project_configuration.HasTools():
-      description = '{0:s} are build as static executables'.format(
-          project_configuration.tools_directory)
+      description = (
+          f'{project_configuration.tools_directory:s} are build as static '
+          f'executables')
       value = '$ac_cv_enable_static_executables'
       features_information.append((description, value))
 
@@ -814,8 +811,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           maximum_description_length, len(description))
 
     if project_configuration.HasPythonModule():
-      description = 'Python ({0:s}) support'.format(
-          project_configuration.python_module_name)
+      description = (
+          f'Python ({project_configuration.python_module_name:s}) support')
       value = '$ac_cv_enable_python'
       features_information.append((description, value))
 
@@ -843,11 +840,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       notice_message.append('Building:')
 
       for description, value in build_information:
-        padding_length = maximum_description_length - len(description)
-        padding = ' ' * padding_length
+        padding = ' ' * (maximum_description_length - len(description))
 
-        notice_line = '   {0:s}: {1:s}{2:s}'.format(description, padding, value)
-        notice_message.append(notice_line)
+        notice_message.append(f'   {description:s}: {padding:s}{value:s}')
 
       notice_message.append('')
 
@@ -855,11 +850,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       notice_message.append('Features:')
 
       for description, value in features_information:
-        padding_length = maximum_description_length - len(description)
-        padding = ' ' * padding_length
+        padding = ' ' * (maximum_description_length - len(description))
 
-        notice_line = '   {0:s}: {1:s}{2:s}'.format(description, padding, value)
-        notice_message.append(notice_line)
+        notice_message.append(f'   {description:s}: {padding:s}{value:s}')
 
     template_filename = os.path.join(template_directory, 'output.ac')
     self._GenerateSection(
@@ -1050,9 +1043,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         project_configuration.library_name_suffix)
     source_glob = os.path.join('tests', source_glob)
 
-    tests_files = [
-        '/tests/notify_stream.log',
-        '/tests/tmp*']
+    tests_files = ['/tests/tmp*']
+
+    if project_configuration.library_name != 'libcnotify':
+      makefile_am_file = self._GetMainMakefileAM(project_configuration)
+
+      if 'libcnotify' in makefile_am_file.library_dependencies:
+        tests_files.append('/tests/notify_stream.log')
+
     if os.path.exists(os.path.join('tests', 'input')):
       tests_files.append('/tests/input')
 
@@ -1385,6 +1383,33 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_filenames, template_mappings, output_writer, output_filename)
 
     del template_mappings['freebsd_build_dependencies']
+
+  def _GenerateGitHubActionsBuildOSSFuzzYML(
+      self, project_configuration, template_mappings, output_writer,
+      output_filename):
+    """Generates the .github/workflows/build_ossfuzz.yml configuration file.
+
+    Args:
+      project_configuration (ProjectConfiguration): project configuration.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      output_writer (OutputWriter): output writer.
+      output_filename (str): path of the output file.
+    """
+    template_directory = os.path.join(
+        self._template_directory, 'github_workflows', 'build_ossfuzz.yml')
+
+    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
+        project_configuration)
+
+    template_names = ['body.yml']
+
+    template_filenames = [
+        os.path.join(template_directory, template_name)
+        for template_name in template_names]
+
+    self._GenerateSections(
+        template_filenames, template_mappings, output_writer, output_filename)
 
   def _GenerateGitHubActionsBuildSharedYML(
       self, project_configuration, template_mappings, include_header_file,
@@ -1864,6 +1889,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasPythonModule():
       output_filename = os.path.join('.github', 'workflows', 'build_wheel.yml')
       self._GenerateGitHubActionsBuildWheelYML(
+          project_configuration, template_mappings, output_writer,
+          output_filename)
+
+    if os.path.isdir('ossfuzz'):
+      output_filename = os.path.join('.github', 'workflows', 'build_ossfuzz.yml')
+      self._GenerateGitHubActionsBuildOSSFuzzYML(
           project_configuration, template_mappings, output_writer,
           output_filename)
 
