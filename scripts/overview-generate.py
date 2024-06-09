@@ -325,16 +325,16 @@ class WikiPageGenerator(object):
   _ORDER_OF_OTHER_CATEGORIES = (
       'other', 'knowledge_base')
 
-  def __init__(self, data_directory, template_directory):
+  def __init__(self, data_directory, templates_path):
     """Initialize a wiki page generator.
 
     Args:
       data_directory (str): path of the data directory.
-      template_directory (str): path of the template directory.
+      templates_path (str): path of the directory containing the template files.
     """
     super(WikiPageGenerator, self).__init__()
     self._data_directory = data_directory
-    self._template_directory = template_directory
+    self._templates_path = templates_path
 
   def _GenerateSection(
       self, template_filename, template_mappings, output_writer):
@@ -359,7 +359,7 @@ class WikiPageGenerator(object):
     Returns:
       string.Template: a template string.
     """
-    path = os.path.join(self._template_directory, filename)
+    path = os.path.join(self._templates_path, filename)
 
     with open(path, 'r', encoding='utf8') as file_object:
       file_data = file_object.read()
@@ -1184,8 +1184,8 @@ def Main():
 
   for page_name, page_generator_class in wiki_pages:
     data_directory = os.path.join(libyal_directory, 'data')
-    template_directory = os.path.join(data_directory, 'wiki', page_name)
-    wiki_page = page_generator_class(data_directory, template_directory)
+    templates_path = os.path.join(data_directory, 'wiki', page_name)
+    wiki_page = page_generator_class(data_directory, templates_path)
 
     if options.output_directory:
       filename = '{0:s}.md'.format(page_name)

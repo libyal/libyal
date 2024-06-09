@@ -23,13 +23,12 @@ class CommonSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration, authors_separator=self._AUTHORS_SEPARATOR)
     template_mappings['authors'] = self._AUTHORS
 
-    for directory_entry in os.listdir(self._template_directory):
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
+    for directory_entry in os.listdir(self._templates_path):
+      template_filename = os.path.join(self._templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
       output_filename = os.path.join('common', directory_entry)
 
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)

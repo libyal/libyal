@@ -87,17 +87,15 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
-    template_directory = os.path.join(
-        self._template_directory, 'pyyal_definitions')
+    templates_path = os.path.join(self._templates_path, 'pyyal_definitions')
 
     template_mappings['definitions_name'] = definitions_name
     template_mappings['definitions_name_upper_case'] = definitions_name.upper()
     template_mappings['definitions_description'] = definitions_name.replace(
         '_', ' ')
 
-    template_filename = os.path.join(template_directory, 'pyyal_definitions.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'pyyal_definitions.h')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(definitions_name, output_filename)
@@ -122,8 +120,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
-    template_directory = os.path.join(
-        self._template_directory, 'pyyal_definitions')
+    templates_path = os.path.join(self._templates_path, 'pyyal_definitions')
 
     template_mappings['definitions_name'] = definitions_name
     template_mappings['definitions_name_upper_case'] = definitions_name.upper()
@@ -134,9 +131,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['definition_name_upper_case'] = (
         definitions_name[:-1].upper())
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.c')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     constant_name_prefix = '{0:s}_{1:s}_'.format(
         project_configuration.library_name, definitions_name[:-1])
@@ -155,16 +151,15 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       template_mappings['constant_name'] = constant_name
       template_mappings['constant_name_upper_case'] = constant_name.upper()
 
-      template_filename = os.path.join(template_directory, 'constant.c')
+      template_filename = os.path.join(templates_path, 'constant.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
       self._CorrectDescriptionSpelling(constant_name, output_filename)
 
-    template_filename = os.path.join(template_directory, 'footer.c')
+    template_filename = os.path.join(templates_path, 'footer.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(definitions_name, output_filename)
@@ -188,7 +183,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     has_glob = self._HasGlob(project_configuration, signature_type)
 
-    template_directory = os.path.join(self._template_directory, 'pyyal_module')
+    templates_path = os.path.join(self._templates_path, 'pyyal_module')
 
     output_filename = '{0:s}.h'.format(project_configuration.python_module_name)
     output_filename = os.path.join(
@@ -211,11 +206,11 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     template_names.extend(['init.h', 'footer.h'])
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     if signature_type:
       del template_mappings['signature_type']
@@ -241,7 +236,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     has_glob = self._HasGlob(project_configuration, signature_type)
 
-    template_directory = os.path.join(self._template_directory, 'pyyal_module')
+    templates_path = os.path.join(self._templates_path, 'pyyal_module')
 
     output_filename = '{0:s}.c'.format(project_configuration.python_module_name)
     output_filename = os.path.join(
@@ -264,19 +259,18 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       template_names.append('includes-file_object_io_handle.c')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     for type_name in sorted(python_module_types):
       self._SetTypeNameInTemplateMappings(template_mappings, type_name)
 
-      template_filename = os.path.join(
-          template_directory, 'includes-type_object.c')
+      template_filename = os.path.join(templates_path, 'includes-type_object.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     template_names = ['includes-end.c']
@@ -310,12 +304,11 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     template_names.extend(['module_definition.c', 'init-start.c'])
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
     for type_name in sorted(python_module_types):
       self._SetTypeNameInTemplateMappings(template_mappings, type_name)
@@ -325,15 +318,14 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       else:
         template_filename = 'init-type_object.c'
 
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'init-end.c')
+    template_filename = os.path.join(templates_path, 'init-end.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if signature_type:
       del template_mappings['signature_type']
@@ -359,16 +351,13 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
-    template_directory = os.path.join(
-        self._template_directory, 'pyyal_sequence_type')
+    templates_path = os.path.join(self._templates_path, 'pyyal_sequence_type')
 
     self._SetSequenceTypeNameInTemplateMappings(
         template_mappings, sequence_type_name)
 
-    template_filename = os.path.join(
-        template_directory, 'pyyal_sequence_type.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'pyyal_sequence_type.h')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(sequence_type_name, output_filename)
@@ -396,8 +385,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     output_filename = os.path.join(
         project_configuration.python_module_name, output_filename)
 
-    template_directory = os.path.join(
-        self._template_directory, 'pyyal_sequence_type')
+    templates_path = os.path.join(self._templates_path, 'pyyal_sequence_type')
 
     python_module_include_names = set([
         project_configuration.library_name, sequence_type_name, 'libcerror',
@@ -418,10 +406,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['python_module_includes'] = '\n'.join(
         python_module_includes)
 
-    template_filename = os.path.join(
-        template_directory, 'pyyal_sequence_type.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'pyyal_sequence_type.c')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
@@ -465,10 +451,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       with_parent = without_initialize_and_with_free
 
     if is_pseudo_type:
-      template_directory = os.path.join(
-          self._template_directory, 'pyyal_pseudo_type')
+      templates_path = os.path.join(self._templates_path, 'pyyal_pseudo_type')
     else:
-      template_directory = os.path.join(self._template_directory, 'pyyal_type')
+      templates_path = os.path.join(self._templates_path, 'pyyal_type')
 
     if is_pseudo_type:
       base_type_name = 'item'
@@ -504,11 +489,11 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       template_names.extend(['init.h', 'free.h'])
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     for type_function, python_function_prototype in iter(
         python_function_prototypes.items()):
@@ -519,7 +504,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       value_name = python_function_prototype.value_name
 
       template_filename = '{0:s}.h'.format(type_function)
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       if not os.path.exists(template_filename):
         template_filename = None
         if python_function_prototype.function_type == (
@@ -550,8 +535,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_filename = 'type_object_function.h'
 
         if template_filename:
-          template_filename = os.path.join(
-              template_directory, template_filename)
+          template_filename = os.path.join(templates_path, template_filename)
 
       if not template_filename or not os.path.exists(template_filename):
         logging.warning((
@@ -563,16 +547,15 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       self._SetTypeFunctionInTemplateMappings(template_mappings, type_function)
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
 
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
       self._CorrectDescriptionSpelling(value_name, output_filename)
 
-    template_filename = os.path.join(template_directory, 'footer.h')
+    template_filename = os.path.join(templates_path, 'footer.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
@@ -680,10 +663,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           python_module_include_names.add(sequence_type_name)
 
     if is_pseudo_type:
-      template_directory = os.path.join(
-          self._template_directory, 'pyyal_pseudo_type')
+      templates_path = os.path.join(self._templates_path, 'pyyal_pseudo_type')
     else:
-      template_directory = os.path.join(self._template_directory, 'pyyal_type')
+      templates_path = os.path.join(self._templates_path, 'pyyal_type')
 
     if is_pseudo_type:
       base_type_name = 'item'
@@ -695,9 +677,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       template_mappings['base_type_description'] = base_type_name
       template_mappings['base_type_indicator'] = base_type_indicator
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.c')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     # TODO: include header of sub types
 
@@ -715,15 +696,14 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     else:
       template_filename = 'includes.c'
 
-    template_filename = os.path.join(template_directory, template_filename)
+    template_filename = os.path.join(templates_path, template_filename)
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if bfio_support:
-      template_filename = os.path.join(template_directory, 'have_bfio.c')
+      template_filename = os.path.join(templates_path, 'have_bfio.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     self._GenerateTypeSourceFileTypeObjectMethods(
@@ -734,25 +714,23 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration, template_mappings, type_name,
         python_function_prototypes, output_writer, output_filename)
 
-    template_filename = os.path.join(template_directory, 'type_object.c')
+    template_filename = os.path.join(templates_path, 'type_object.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if not is_pseudo_type:
       if has_pseudo_sub_types:
         template_filename = os.path.join(
-            template_directory, 'new-with_type_object.c')
+            templates_path, 'new-with_type_object.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
       elif with_parent:
-        template_filename = os.path.join(
-            template_directory, 'new-with_parent.c')
+        template_filename = os.path.join(templates_path, 'new-with_parent.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
       if bfio_support:
         template_filename = 'init-with_file_io_handle.c'
@@ -761,9 +739,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       else:
         template_filename = 'init.c'
 
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       if open_support:
@@ -773,9 +751,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       else:
         template_filename = 'free.c'
 
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     generate_get_value_type_object = False
@@ -798,7 +776,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_mappings, python_function_prototype.value_type)
 
       template_filename = '{0:s}.c'.format(type_function)
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       if not os.path.exists(template_filename):
         template_filename = None
 
@@ -915,8 +893,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           template_filename = 'is_value.c'
 
         if template_filename:
-          template_filename = os.path.join(
-              template_directory, template_filename)
+          template_filename = os.path.join(templates_path, template_filename)
 
       if not template_filename:
         logging.warning((
@@ -955,10 +932,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         if not result:
           additional_template_filename = 'get_value_type_object.c'
           additional_template_filename = os.path.join(
-              template_directory, additional_template_filename)
+              templates_path, additional_template_filename)
           self._GenerateSection(
-              additional_template_filename, template_mappings, output_writer,
-              output_filename, access_mode='a')
+              additional_template_filename, template_mappings, output_filename,
+              access_mode='a')
 
         generate_get_value_type_object = False
 
@@ -976,8 +953,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
       if not result:
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
@@ -1000,7 +977,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'pyyal_type')
+    templates_path = os.path.join(self._templates_path, 'pyyal_type')
 
     python_type_object_methods = []
     python_type_object_get_set_definitions = []
@@ -1142,11 +1119,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['python_type_object_methods'] = '\n'.join(
         python_type_object_methods)
 
-    template_filename = os.path.join(
-        template_directory, 'type_object_methods.c')
+    template_filename = os.path.join(templates_path, 'type_object_methods.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GenerateTypeSourceFileTypeObjectGetSetDefinitions(
       self, project_configuration, template_mappings, type_name,
@@ -1164,7 +1139,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'pyyal_type')
+    templates_path = os.path.join(self._templates_path, 'pyyal_type')
 
     python_type_object_get_set_definitions = []
     for type_function, python_function_prototype in iter(
@@ -1253,10 +1228,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         python_type_object_get_set_definitions)
 
     template_filename = os.path.join(
-        template_directory, 'type_object_get_set_definitions.c')
+        templates_path, 'type_object_get_set_definitions.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GetPythonTypeObjectFunctionPrototype(
       self, project_configuration, type_name, type_function, function_prototype,
@@ -1862,12 +1836,11 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     else:
       template_mappings['guid_byte_order'] = 'LITTLE'
 
-    for directory_entry in os.listdir(self._template_directory):
+    for directory_entry in os.listdir(self._templates_path):
       if not directory_entry.startswith('pyyal_'):
         continue
 
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
+      template_filename = os.path.join(self._templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
@@ -1888,7 +1861,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         continue
 
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)
 
       if directory_entry == 'pyyal_file_object_io_handle.c':
         self._SortVariableDeclarations(output_filename)

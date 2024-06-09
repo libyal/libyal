@@ -135,6 +135,7 @@ class ProjectConfiguration(BaseConfiguration):
     project_description (str): description of the project.
     project_documenation_url (str): URL of the documentation of the project.
     project_downloads_url (str): URL of the downloads of the project.
+    project_features (list[str]): features of the project.
     project_git_url (str): URL of the git repository of the project.
     project_name (str): name of the project, such as "libyal".
     project_status (str): status of the project, such as "experimental".
@@ -181,12 +182,8 @@ class ProjectConfiguration(BaseConfiguration):
     super(ProjectConfiguration, self).__init__()
     self._configuration_file_path = None
     self._has_dpkg = None
-    self._has_dotnet_bindings = None
-    self._has_java_bindings = None
-    self._has_python_module = None
     self._has_rpm = None
     self._has_tests = None
-    self._has_tools = None
 
     # Project configuration.
     self.project_authors = None
@@ -194,6 +191,7 @@ class ProjectConfiguration(BaseConfiguration):
     self.project_description = None
     self.project_documentation_url = None
     self.project_downloads_url = None
+    self.project_features = []
     self.project_git_url = None
     self.project_name = None
     self.project_status = None
@@ -355,12 +353,11 @@ class ProjectConfiguration(BaseConfiguration):
     if not config_parser.has_section('development'):
       return
 
-    features = self._GetOptionalConfigValue(
+    development_features = self._GetOptionalConfigValue(
         config_parser, 'development', 'features', default_value=[])
 
-    if features:
-      self.development_glob = 'glob' in features
-      self.development_pytsk3 = 'pytsk3' in features
+    self.development_glob = 'glob' in development_features
+    self.development_pytsk3 = 'pytsk3' in development_features
 
     self.development_item_object = self._GetOptionalConfigValue(
         config_parser, 'development', 'item_object')
@@ -711,11 +708,11 @@ class ProjectConfiguration(BaseConfiguration):
           'Invalid project year of creation: {0!s}'.format(
               self.project_year_of_creation))
 
-    features = self._GetOptionalConfigValue(
+    self.project_features = self._GetOptionalConfigValue(
         config_parser, 'project', 'features', default_value=[])
 
-    self.supports_debug_output = 'debug_output' in features
-    self.deploy_to_nuget = 'nuget' in features
+    self.supports_debug_output = 'debug_output' in self.project_features
+    self.deploy_to_nuget = 'nuget' in self.project_features
 
   def _ReadPythonModuleConfiguration(self, config_parser):
     """Reads the Python module configuration.
@@ -935,27 +932,17 @@ class ProjectConfiguration(BaseConfiguration):
     """Determines if the project provides .Net bindings.
 
     Returns:
-      bool: True if the .Net binding directory exits.
+      bool: True if the project provides .Net bindings.
     """
-    if self._has_dotnet_bindings is None:
-      path = os.path.join(
-          self._configuration_file_path, self.dotnet_bindings_name)
-      self._has_dotnet_bindings = os.path.exists(path)
-
-    return self._has_dotnet_bindings
+    return 'dotnet_bindings' in self.project_features
 
   def HasJavaBindings(self):
     """Determines if the project provides Java bindings.
 
     Returns:
-      bool: True if the Java binding directory exits.
+      bool: True if the project provides Java bindings.
     """
-    if self._has_java_bindings is None:
-      path = os.path.join(
-          self._configuration_file_path, self.java_bindings_name)
-      self._has_java_bindings = os.path.exists(path)
-
-    return self._has_java_bindings
+    return 'java_bindings' in self.project_features
 
   def HasMountToolsFeatureCodepage(self):
     """Determines if the mount tool has a codepage feature.
@@ -1069,14 +1056,9 @@ class ProjectConfiguration(BaseConfiguration):
     """Determines if the project provides a Python module.
 
     Returns:
-      bool: True if the Python module directory exits.
+      bool: True if the project provides a Python module.
     """
-    if self._has_python_module is None:
-      path = os.path.join(
-          self._configuration_file_path, self.python_module_name)
-      self._has_python_module = os.path.exists(path)
-
-    return self._has_python_module
+    return 'python_bindings' in self.project_features
 
   def HasRpm(self):
     """Determines if the project provides rpm configuration files.
@@ -1109,11 +1091,7 @@ class ProjectConfiguration(BaseConfiguration):
     Returns:
       bool: True if the tools directory exits.
     """
-    if self._has_tools is None:
-      path = os.path.join(self._configuration_file_path, self.tools_directory)
-      self._has_tools = os.path.exists(path)
-
-    return self._has_tools
+    return self.tools_names != []
 
   def ReadFromFile(self, filename):
     """Reads the configuration from file.

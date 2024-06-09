@@ -13,79 +13,35 @@ from yaldevtools import source_formatter
 from yaldevtools import yaml_operations_file
 
 
-class SourceFileGenerator(object):
+class BaseSourceFileGenerator(object):
   """Source file generator."""
 
   _SUPPORTED_MODIFIERS = frozenset([
       'sort_lines'])
 
-  def __init__(
-      self, projects_directory, data_directory, template_directory,
-      experimental=False):
+  def __init__(self, templates_path):
     """Initializes a source file generator.
 
     Args:
-      projects_directory (str): path of the projects directory.
-      data_directory (str): path of the data directory.
-      template_directory (str): path of the template directory.
-      experimental (bool): True if experimental features should be enabled.
+      templates_path (str): path of the directory containing the template files.
     """
-    super(SourceFileGenerator, self).__init__()
-    self._data_directory = data_directory
-    self._definitions_include_header_file = None
-    self._definitions_include_header_path = None
-    self._experimental = experimental
-    self._has_tests = None
-    self._library_include_header_file = None
-    self._library_include_header_path = None
-    self._library_makefile_am_file = None
-    self._library_makefile_am_path = None
-    self._library_path = None
-    self._library_type_header_files = {}
-    self._projects_directory = projects_directory
-    self._python_module_path = None
-    self._template_directory = template_directory
-    self._tests_path = None
-    self._tools_path = None
-    self._types_include_header_file = None
-    self._types_include_header_path = None
-
-  def _CorrectDescriptionSpelling(self, name, output_filename):
-    """Corrects the spelling of a type or value decription.
-
-    Args:
-      name (str): type or value name.
-      output_filename (str): path of the output file.
-    """
-    if not name or name[0] not in ('a', 'e', 'i', 'o', ''):
-      return
-
-    with open(output_filename, 'r', encoding='utf8') as file_object:
-      lines = file_object.readlines()
-
-    name = name.replace('_', ' ')
-    description = f' a {name:s}'
-    corrected_description = f' an {name:s}'
-
-    with open(output_filename, 'w', encoding='utf8') as file_object:
-      for line in lines:
-        line = line.replace(description, corrected_description)
-        file_object.write(line)
+    super(BaseSourceFileGenerator, self).__init__()
+    self._templates_path = templates_path
 
   def _GenerateSection(
-      self, template_file_path, template_mappings, output_writer,
-      output_filename, access_mode='w'):
+      self, template_file_path, template_mappings, output_file_path,
+      access_mode='w'):
     """Generates a section from template filename.
 
     Args:
       template_file_path (str): path of the template file.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): name of the output file.
+      output_file_path (str): path of the output file.
       access_mode (Optional[str]): output file access mode.
     """
     template_string = self._ReadTemplateFile(template_file_path)
+
     try:
       output_data = template_string.substitute(template_mappings)
     except (KeyError, ValueError) as exception:
@@ -94,31 +50,30 @@ class SourceFileGenerator(object):
           f'{exception!s}'))
       return
 
-    output_writer.WriteFile(
-        output_filename, output_data, access_mode=access_mode)
+    with open(output_file_path, access_mode, encoding='utf8') as file_object:
+      file_object.write(output_data)
 
   def _GenerateSections(
-      self, template_file_paths, template_mappings, output_writer,
-      output_filename, access_mode='w'):
+      self, template_file_paths, template_mappings, output_file_path,
+      access_mode='w'):
     """Generates sections from template filenames.
 
     Args:
       template_file_paths (list[str])): paths of the template files.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): name of the output file.
+      output_file_path (str): path of the output file.
       access_mode (Optional[str]): output file access mode.
     """
     for template_file_path in template_file_paths:
       self._GenerateSection(
-          template_file_path, template_mappings, output_writer, output_filename,
+          template_file_path, template_mappings, output_file_path,
           access_mode=access_mode)
       access_mode = 'a'
 
   def _GenerateSectionsFromGroupOperation(
       self, group_operation, operations, project_configuration, template_mappings,
-      output_writer, output_filename, access_mode='w'):
+      output_file_path, access_mode='w'):
     """Generates sections based on a group operation.
 
     Args:
@@ -127,8 +82,7 @@ class SourceFileGenerator(object):
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): name of the output file.
+      output_file_path (str): path of the output file.
       access_mode (Optional[str]): output file access mode.
     """
     for operation_name in group_operation.operations:
@@ -138,7 +92,7 @@ class SourceFileGenerator(object):
             f'Missing operation: {operation_name:s} in '
             f'{operations_file_path:s}'))
         return
-      
+
       if operation.condition:
         expression = operation.GetConditionExpression()
 
@@ -159,11 +113,10 @@ class SourceFileGenerator(object):
       if operation.type == 'group':
         self._GenerateSectionsFromGroupOperation(
             operation, operations, project_configuration, template_mappings,
-            output_writer, output_filename, access_mode=access_mode)
+            output_file_path, access_mode=access_mode)
 
       elif operation.type == 'template':
-        template_file_path = os.path.join(
-            self._template_directory, operation.file)
+        template_file_path = os.path.join(self._templates_path, operation.file)
 
         template_string = self._ReadTemplateFile(template_file_path)
 
@@ -190,14 +143,14 @@ class SourceFileGenerator(object):
           if modifier == 'sort_lines':
             output_data = self._SortLines(output_data)
 
-        output_writer.WriteFile(
-            output_filename, output_data, access_mode=access_mode)
+        with open(output_file_path, access_mode, encoding='utf8') as file_object:
+          file_object.write(output_data)
 
       access_mode = 'a'
 
   def _GenerateSectionsFromOperationsFile(
       self, operations_file_name, main_operation_name, project_configuration,
-      template_mappings, output_writer, output_filename):
+      template_mappings, output_file_path):
     """Generates sections based on an operations file.
 
     Args:
@@ -206,11 +159,10 @@ class SourceFileGenerator(object):
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): name of the output file.
+      output_file_path (str): path of the output file.
     """
     operations_file_path = os.path.join(
-        self._template_directory, operations_file_name)
+        self._templates_path, operations_file_name)
 
     operations_file = yaml_operations_file.YAMLGeneratorOperationsFile()
     operations = {
@@ -226,7 +178,104 @@ class SourceFileGenerator(object):
 
     self._GenerateSectionsFromGroupOperation(
         main_operation, operations, project_configuration, template_mappings,
-        output_writer, output_filename)
+        output_file_path)
+
+  def _ReadTemplateFile(self, path):
+    """Reads a template string from file.
+
+    Args:
+      path (str): path of the file containing the template string.
+
+    Returns:
+      string.Template: template string.
+    """
+    # Read with binary mode to make sure end of line characters are not
+    # converted.
+    with open(path, 'rb') as file_object:
+      file_data = file_object.read()
+
+    file_data = file_data.decode('utf8')
+
+    return string.Template(file_data)
+
+  def _SortLines(self, text):
+    """Sorts lines of text.
+
+    Args:
+      text (str): text.
+
+    Returns:
+      str: text sorted by line.
+    """
+    lines = text.split('\n')
+
+    if lines[-1] == '':
+      last_line = lines.pop(-1)
+    else:
+      last_line = None
+
+    sorted_lines = sorted(lines)
+
+    if last_line is not None:
+      sorted_lines.append(last_line)
+
+    return '\n'.join(sorted_lines)
+
+
+class SourceFileGenerator(BaseSourceFileGenerator):
+  """Source file generator."""
+
+  def __init__(
+      self, projects_directory, data_directory, templates_path,
+      experimental=False):
+    """Initializes a source file generator.
+
+    Args:
+      projects_directory (str): path of the projects directory.
+      data_directory (str): path of the data directory.
+      templates_path (str): path of the directory containing the template files.
+      experimental (bool): True if experimental features should be enabled.
+    """
+    super(SourceFileGenerator, self).__init__(templates_path)
+    self._data_directory = data_directory
+    self._definitions_include_header_file = None
+    self._definitions_include_header_path = None
+    self._experimental = experimental
+    self._has_tests = None
+    self._library_include_header_file = None
+    self._library_include_header_path = None
+    self._library_makefile_am_file = None
+    self._library_makefile_am_path = None
+    self._library_path = None
+    self._library_type_header_files = {}
+    self._projects_directory = projects_directory
+    self._python_module_path = None
+    self._tests_path = None
+    self._tools_path = None
+    self._types_include_header_file = None
+    self._types_include_header_path = None
+
+  def _CorrectDescriptionSpelling(self, name, output_filename):
+    """Corrects the spelling of a type or value decription.
+
+    Args:
+      name (str): type or value name.
+      output_filename (str): path of the output file.
+    """
+    if not name or name[0] not in ('a', 'e', 'i', 'o', ''):
+      return
+
+    with open(output_filename, 'r', encoding='utf8') as file_object:
+      lines = file_object.readlines()
+
+    name = name.replace('_', ' ')
+    description = f' a {name:s}'
+    corrected_description = f' an {name:s}'
+
+    with open(output_filename, 'w', encoding='utf8') as file_object:
+      for line in lines:
+        line = line.replace(description, corrected_description)
+        file_object.write(line)
 
   def _GetDefinitionsIncludeHeaderFile(self, project_configuration):
     """Retrieves the definitions include header file.
@@ -475,24 +524,6 @@ class SourceFileGenerator(object):
 
     return self._has_tests
 
-  def _ReadTemplateFile(self, filename):
-    """Reads a template string from file.
-
-    Args:
-      filename (str): name of the file containing the template string.
-
-    Returns:
-      string.Template: template string.
-    """
-    # Read with binary mode to make sure end of line characters are
-    # not converted.
-    with open(filename, 'rb') as file_object:
-      file_data = file_object.read()
-
-    file_data = file_data.decode('utf8')
-
-    return string.Template(file_data)
-
   def _SetSequenceTypeNameInTemplateMappings(
       self, template_mappings, type_name):
     """Sets the sequence type name in template mappings.
@@ -645,29 +676,6 @@ class SourceFileGenerator(object):
 
         else:
           file_object.write(line)
-
-  def _SortLines(self, text):
-    """Sorts lines of text.
-
-    Args:
-      text (str): text.
-
-    Returns:
-      str: text sorted by line.
-    """
-    lines = text.split('\n')
-
-    if lines[-1] == '':
-      last_line = lines.pop(-1)
-    else:
-      last_line = None
-
-    sorted_lines = sorted(lines)
-
-    if last_line is not None:
-      sorted_lines.append(last_line)
-
-    return '\n'.join(sorted_lines)
 
   def _SortVariableDeclarations(self, output_filename):
     """Sorts the variable declarations within a source file.

@@ -20,8 +20,7 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
           maps to the name of a template variable.
       output_writer (OutputWriter): output writer.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'runtests.sh')
+    templates_path = os.path.join(self._templates_path, 'runtests.sh')
     output_filename = os.path.join('runtests.sh')
 
     template_names = ['header.sh', 'functions.sh']
@@ -77,11 +76,11 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
         coverage_configure_options)
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['asan_configure_options']
     del template_mappings['coverage_configure_options']
@@ -129,9 +128,8 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
       self._GenerateRunTestsSh(
           project_configuration, template_mappings, output_writer)
 
-    for directory_entry in os.listdir(self._template_directory):
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
+    for directory_entry in os.listdir(self._templates_path):
+      template_filename = os.path.join(self._templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
@@ -147,7 +145,7 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
           continue
 
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)
 
       if output_filename.endswith('.sh'):
         # Set the x-bit for a shell script (.sh).

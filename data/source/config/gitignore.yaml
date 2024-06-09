@@ -1,0 +1,61 @@
+# yaldevtools generator specification.
+---
+identifier: generate_dotnet_bindings
+type: template
+condition: "'dotnet_bindings' in project_features"
+file: gitignore/dotnet_bindings
+mappings:
+- library_name_suffix
+---
+identifier: generate_header
+type: template
+file: gitignore/header
+---
+identifier: generate_java_bindings
+type: template
+condition: "'java_bindings' in project_features"
+file: gitignore/java_bindings
+---
+identifier: generate_library
+type: template
+file: gitignore/library
+mappings:
+- library_name
+---
+identifier: generate_local_libraries
+type: template
+file: gitignore/local_libraries
+mappings:
+- local_libraries
+---
+identifier: generate_python_module
+type: template
+condition: "'python_bindings' in project_features"
+file: gitignore/python_module
+---
+identifier: generate_tools
+type: template
+condition: "tools_names != []"
+file: gitignore/tools
+mappings:
+- tools_executables
+- tools_name
+---
+identifier: generate_tests
+type: template
+file: gitignore/tests
+mappings:
+- tests_files
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_library
+# TODO: add support for lex yacc BUILT_SOURCES
+- generate_python_module
+- generate_dotnet_bindings
+- generate_java_bindings
+- generate_tools
+- generate_tests
+- generate_local_libraries

@@ -25,38 +25,35 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'libyal', 'features.h.in')
+    templates_path = os.path.join(
+        self._templates_path, 'libyal', 'features.h.in')
 
-    template_filename = os.path.join(template_directory, 'header.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.h')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     # TODO: fix check for libsigscan.
     if include_header_file.have_wide_character_type:
-      template_filename = os.path.join(
-          template_directory, 'wide_character_type.h')
+      template_filename = os.path.join(templates_path, 'wide_character_type.h')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     # TODO: improve detection if include is needed.
     if 'libcthreads' in makefile_am_file.libraries:
-      template_filename = os.path.join(template_directory, 'multi_thread.h')
+      template_filename = os.path.join(templates_path, 'multi_thread.h')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if include_header_file.have_bfio:
-      template_filename = os.path.join(template_directory, 'bfio.h')
+      template_filename = os.path.join(templates_path, 'bfio.h')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'footer.h')
+    template_filename = os.path.join(templates_path, 'footer.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GenerateMakefileAM(
       self, project_configuration, template_mappings, include_header_file,
@@ -104,11 +101,10 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
 
     template_mappings['pkginclude_headers'] = '\n'.join(pkginclude_headers)
 
-    template_filename = os.path.join(self._template_directory, 'Makefile.am')
+    template_filename = os.path.join(self._templates_path, 'Makefile.am')
 
     output_filename = os.path.join('include', 'Makefile.am')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
   def _GenerateTypesHeader(
       self, project_configuration, template_mappings, include_header_file,
@@ -124,8 +120,7 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'libyal', 'types.h.in')
+    templates_path = os.path.join(self._templates_path, 'libyal', 'types.h.in')
 
     type_definitions = []
     # TODO: deprecate project_configuration.library_public_types ?
@@ -137,20 +132,18 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['library_type_definitions'] = '\n'.join(
         type_definitions)
 
-    template_filename = os.path.join(template_directory, 'header.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.h')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     if type_definitions:
-      template_filename = os.path.join(template_directory, 'public_types.h')
+      template_filename = os.path.join(templates_path, 'public_types.h')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'footer.h')
+    template_filename = os.path.join(templates_path, 'footer.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def Generate(self, project_configuration, output_writer):
     """Generates include source files.
@@ -181,9 +174,9 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
 
     output_directory = os.path.join(
         'include', project_configuration.library_name)
-    template_directory = os.path.join(self._template_directory, 'libyal')
-    for directory_entry in os.listdir(template_directory):
-      template_filename = os.path.join(template_directory, directory_entry)
+    templates_path = os.path.join(self._templates_path, 'libyal')
+    for directory_entry in os.listdir(templates_path):
+      template_filename = os.path.join(templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
@@ -196,8 +189,7 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
       if (directory_entry != 'definitions.h.in' and
           os.path.exists(output_filename)):
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename)
+            template_filename, template_mappings, output_filename)
 
       if directory_entry in ('codepage.h', 'definitions.h.in', 'error.h'):
         self._VerticalAlignTabs(output_filename)

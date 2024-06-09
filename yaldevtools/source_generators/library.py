@@ -36,8 +36,7 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for libuna/libuna_types.h
     # TODO: types.h alignment of debug types?
 
-    template_directory = os.path.join(
-        self._template_directory, 'libyal_types.h')
+    templates_path = os.path.join(self._templates_path, 'libyal_types.h')
 
     library_path = self._GetLibraryPath(project_configuration)
     output_filename = '{0:s}_types.h'.format(project_configuration.library_name)
@@ -70,20 +69,18 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
           if line == internal_types_start_line:
             in_internal_types = True
 
-    template_filename = os.path.join(template_directory, 'header.h')
+    template_filename = os.path.join(templates_path, 'header.h')
 
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     if internal_types:
       output_data = '\n'.join(internal_types)
       output_writer.WriteFile(output_filename, output_data, access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'footer.h')
+    template_filename = os.path.join(templates_path, 'footer.h')
 
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     self._VerticalAlignTabs(output_filename)
 
@@ -152,7 +149,7 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
     self._GenerateTypesHeader(
         project_configuration, template_mappings, output_writer)
 
-    for directory_entry in os.listdir(self._template_directory):
+    for directory_entry in os.listdir(self._templates_path):
       if not directory_entry.startswith('libyal'):
         continue
 
@@ -183,8 +180,7 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
                project_configuration.library_name == 'libcsplit')):
         continue
 
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
+      template_filename = os.path.join(self._templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
@@ -207,7 +203,7 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
         template_mappings['authors'] = authors_template_mapping
 
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)
 
       if directory_entry == 'libyal_codepage.h':
         self._VerticalAlignTabs(output_filename)

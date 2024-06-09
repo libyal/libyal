@@ -126,9 +126,7 @@ class YAMLGeneratorOperationsFile(object):
     Yields:
       GeneratorOperation: generator operation.
     """
-    yaml_generator = yaml.safe_load_all(file_object)
-
-    for yaml_generator_operation in yaml_generator:
+    for yaml_generator_operation in yaml.safe_load_all(file_object):
       yield self._ReadGeneratorOperation(yaml_generator_operation)
 
   def ReadFromFile(self, path):
@@ -141,5 +139,4 @@ class YAMLGeneratorOperationsFile(object):
       GeneratorOperation: generator operation.
     """
     with open(path, 'r', encoding='utf-8') as file_object:
-      for yaml_generator_operation in self._ReadFromFileObject(file_object):
-        yield yaml_generator_operation
+      yield from self._ReadFromFileObject(file_object)

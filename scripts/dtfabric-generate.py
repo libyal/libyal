@@ -16,13 +16,13 @@ from dtfabric import registry
 
 from yaldevtools import configuration
 from yaldevtools import source_formatter
-from yaldevtools import template_string
+from yaldevtools.source_generators import interface
 
 
 # TODO: put signature into constants: libyal_constants.[ch]
 
 
-class SourceGenerator(object):
+class SourceGenerator(interface.BaseSourceFileGenerator):
   """Generates source based on dtFabric format definitions."""
 
   _DEBUG_FORMAT_DECIMAL = 'decimal'
@@ -97,15 +97,13 @@ class SourceGenerator(object):
     """Initializes a source generator.
 
     Args:
-      templates_path (str): templates path.
+      templates_path (str): path of the directory containing the template files.
     """
-    super(SourceGenerator, self).__init__()
+    super(SourceGenerator, self).__init__(templates_path)
     self._definitions_registry = registry.DataTypeDefinitionsRegistry()
     self._generate_structure_member_contents_hint = True
     self._generate_structure_member_size_hint = False
     self._prefix = None
-    self._templates_path = templates_path
-    self._template_string_generator = template_string.TemplateStringGenerator()
 
   def _FormatTestData(self, data):
     """Formats the test data as a C byte array.
@@ -1058,24 +1056,6 @@ class SourceGenerator(object):
         template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['variables']
-
-  def _GenerateSection(
-      self, template_filename, template_mappings, output_filename,
-      access_mode='w'):
-    """Generates a section from template filename.
-
-    Args:
-      template_filename (str): name of the template file.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_filename (str): name of the output file.
-      access_mode (Optional[str]): output file access mode.
-    """
-    output_data = self._template_string_generator.Generate(
-        template_filename, template_mappings)
-
-    with open(output_filename, access_mode, encoding='utf8') as file_object:
-      file_object.write(output_data)
 
   def _GenerateRuntimeStructureTestSourceFile(
       self, data_type_definition, members_configuration):

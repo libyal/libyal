@@ -16,14 +16,14 @@ from yaldevtools import configuration
 class WikiPageGenerator(object):
   """Generates wiki pages."""
 
-  def __init__(self, template_directory):
+  def __init__(self, templates_path):
     """Initializes a wiki page generator.
 
     Args:
-      template_directory (str): path of the template directory.
+      templates_path (str): path of the directory containing the template files.
     """
     super(WikiPageGenerator, self).__init__()
-    self._template_directory = template_directory
+    self._templates_path = templates_path
 
   def _GenerateSection(
       self, template_filename, template_mappings, output_writer):
@@ -871,7 +871,7 @@ class WikiPageGenerator(object):
     Returns:
       string.Template: template string.
     """
-    path = os.path.join(self._template_directory, filename)
+    path = os.path.join(self._templates_path, filename)
 
     with open(path, 'r', encoding='utf8') as file_object:
       file_data = file_object.read()
@@ -1444,9 +1444,9 @@ def Main():
   ]
 
   for page_name, page_generator_class in wiki_pages:
-    template_directory = os.path.join(
+    templates_path = os.path.join(
         libyal_directory, 'data', 'wiki', page_name)
-    wiki_page = page_generator_class(template_directory)
+    wiki_page = page_generator_class(templates_path)
 
     if not wiki_page.HasContent(project_configuration):
       continue

@@ -95,45 +95,40 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'info_handle')
+    templates_path = os.path.join(self._templates_path, 'info_handle')
 
-    template_filename = os.path.join(template_directory, 'header.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.h')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
-    template_filename = os.path.join(template_directory, 'includes.h')
+    template_filename = os.path.join(templates_path, 'includes.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     template_mappings['info_tool_source_type'] = (
         project_configuration.info_tool_source_type)
 
     for template_name in (
         'struct.h', 'initialize.h', 'free.h', 'signal_abort.h'):
-      template_filename = os.path.join(template_directory, template_name)
+      template_filename = os.path.join(templates_path, template_name)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     # TODO: add condition
-    template_filename = os.path.join(template_directory, 'set_ascii_codepage.h')
+    template_filename = os.path.join(templates_path, 'set_ascii_codepage.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     for template_name in ('open.h', 'close.h'):
-      template_filename = os.path.join(template_directory, template_name)
+      template_filename = os.path.join(templates_path, template_name)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+          template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['info_tool_source_type']
 
-    template_filename = os.path.join(template_directory, 'footer.h')
+    template_filename = os.path.join(templates_path, 'footer.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GenerateInfoHandleSourceFile(
       self, project_configuration, template_mappings, output_writer,
@@ -147,37 +142,32 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'info_handle')
+    templates_path = os.path.join(self._templates_path, 'info_handle')
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.c')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
-    template_filename = os.path.join(template_directory, 'includes.c')
+    template_filename = os.path.join(templates_path, 'includes.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     template_mappings['info_tool_source_type'] = (
         project_configuration.info_tool_source_type)
 
     for template_name in ('initialize.c', 'free.c', 'signal_abort.c'):
-      template_filename = os.path.join(template_directory, template_name)
+      template_filename = os.path.join(templates_path, template_name)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+          template_filename, template_mappings, output_filename, access_mode='a')
 
     # TODO: add condition
-    template_filename = os.path.join(template_directory, 'set_ascii_codepage.c')
+    template_filename = os.path.join(templates_path, 'set_ascii_codepage.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     for template_name in ('open.c', 'close.c'):
-      template_filename = os.path.join(template_directory, template_name)
+      template_filename = os.path.join(templates_path, template_name)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+          template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['info_tool_source_type']
 
@@ -228,7 +218,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'yalinfo')
+    templates_path = os.path.join(self._templates_path, 'yalinfo')
 
     info_tool_options = self._GetInfoToolOptions(
         project_configuration, info_tool_name)
@@ -239,23 +229,20 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['info_tool_source_type'] = (
         project_configuration.info_tool_source_type)
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.c')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
-    template_filename = os.path.join(template_directory, 'includes.c')
+    template_filename = os.path.join(templates_path, 'includes.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     self._GenerateInfoToolSourceUsageFunction(
         project_configuration, template_mappings, info_tool_name,
         info_tool_options, output_writer, output_filename)
 
-    template_filename = os.path.join(template_directory, 'signal_handler.c')
+    template_filename = os.path.join(templates_path, 'signal_handler.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     self._GenerateInfoToolSourceMainFunction(
         project_configuration, template_mappings, info_tool_name,
@@ -282,7 +269,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'yalinfo')
+    templates_path = os.path.join(self._templates_path, 'yalinfo')
 
     variable_declarations = self._GenerateMainFunctionVariableDeclarations(
         info_tool_options)
@@ -295,26 +282,22 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['info_tool_options_variable_declarations'] = (
         variable_declarations)
 
-    template_filename = os.path.join(template_directory, 'main-start.c')
+    template_filename = os.path.join(templates_path, 'main-start.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['info_tool_getopt_string']
     del template_mappings['info_tool_options_switch']
     del template_mappings['info_tool_options_variable_declarations']
 
     # TODO: add condition
-    template_filename = os.path.join(
-        template_directory, 'main-option_codepage.c')
+    template_filename = os.path.join(templates_path, 'main-option_codepage.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'main-end.c')
+    template_filename = os.path.join(templates_path, 'main-end.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def _GenerateInfoToolSourceUsageFunction(
       self, project_configuration, template_mappings, info_tool_name,
@@ -330,7 +313,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'yalinfo')
+    templates_path = os.path.join(self._templates_path, 'yalinfo')
 
     alignment_padding = '          '
     width = 80 - len(alignment_padding)
@@ -392,10 +375,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['info_tool_options'] = '\n'.join(options_details)
     template_mappings['info_tool_usage'] = '\n'.join(info_tool_usage)
 
-    template_filename = os.path.join(template_directory, 'usage.c')
+    template_filename = os.path.join(templates_path, 'usage.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['info_tool_options']
     del template_mappings['info_tool_usage']
@@ -436,7 +418,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'mount_dokan')
+    templates_path = os.path.join(self._templates_path, 'mount_dokan')
 
     template_names = [
         'header.h', 'CreateFile.h', 'OpenDirectory.h', 'CloseFile.h',
@@ -444,11 +426,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         'GetVolumeInformation.h', 'Umount.h', 'footer.h']
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     self._SortIncludeHeaders(project_configuration, output_filename)
 
@@ -465,7 +447,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'mount_dokan')
+    templates_path = os.path.join(self._templates_path, 'mount_dokan')
 
     template_names = [
         'header.c', 'CreateFile.c', 'OpenDirectory.c', 'CloseFile.c',
@@ -483,13 +465,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         'footer.c'])
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['mount_tool_name'] = mount_tool_name
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['mount_tool_name']
 
@@ -507,8 +489,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'mount_file_entry')
+    templates_path = os.path.join(self._templates_path, 'mount_file_entry')
 
     template_names = ['header.h', 'initialize.h', 'free.h']
 
@@ -532,7 +513,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         'footer.h'])
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     mount_tool_file_entry_type = (
@@ -545,7 +526,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.library_name_suffix, mount_tool_file_entry_type)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
@@ -567,8 +548,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'mount_file_entry')
+    templates_path = os.path.join(self._templates_path, 'mount_file_entry')
 
     template_names = ['header.c', 'includes.c', 'initialize.c']
 
@@ -669,7 +649,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       template_names.append('get_size-file_system_type.c')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     file_entry_access_time_value = (
@@ -721,7 +701,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         mount_tool_file_entry_type_size_value.replace('_', ' '))
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['mount_tool_file_entry_access_time_value']
     del template_mappings['mount_tool_file_entry_access_time_value_description']
@@ -757,8 +737,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'mount_file_system')
+    templates_path = os.path.join(self._templates_path, 'mount_file_system')
 
     template_names = ['header.h', 'includes-start.h']
 
@@ -802,7 +781,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_names.append('footer.h')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     mount_tool_file_entry_type = (
@@ -826,7 +805,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             project_configuration.library_name_suffix, file_system_type))
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
@@ -851,8 +830,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'mount_file_system')
+    templates_path = os.path.join(self._templates_path, 'mount_file_system')
 
     template_names = ['header.c', 'includes-start.c']
 
@@ -896,7 +874,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
           'get_filename_from_file_entry_type.c'])
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     mount_tool_file_entry_type = (
@@ -920,7 +898,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             project_configuration.library_name_suffix, file_system_type))
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_description']
@@ -948,7 +926,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'mount_fuse')
+    templates_path = os.path.join(self._templates_path, 'mount_fuse')
 
     template_names = ['header.c', 'includes.c', 'body-start.c']
 
@@ -970,7 +948,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_names.extend(['destroy.c', 'body-end.c'])
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     mount_tool_file_entry_type = (
@@ -982,7 +960,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['mount_tool_name'] = mount_tool_name
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_name']
@@ -1002,7 +980,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'mount_handle')
+    templates_path = os.path.join(self._templates_path, 'mount_handle')
 
     template_names = ['header.h', 'includes-start.h']
 
@@ -1115,7 +1093,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_names.extend(['get_file_entry_by_path.h', 'footer.h'])
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     mount_tool_file_entry_type = (
@@ -1128,7 +1106,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.mount_tool_source_type)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['mount_tool_file_entry_type']
     del template_mappings['mount_tool_file_entry_type_name']
@@ -1148,7 +1126,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'mount_handle')
+    templates_path = os.path.join(self._templates_path, 'mount_handle')
 
     template_names = ['header.c', 'includes-start.c']
 
@@ -1370,7 +1348,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       template_names.append('get_file_entry_by_path-end-file_system_type.c')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     mount_tool_file_entry_type = (
@@ -1411,7 +1389,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.mount_tool_source_type.replace('_', ' '))
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['mount_tool_base_type']
     del template_mappings['mount_tool_base_type_description']
@@ -1450,12 +1428,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'mount_path_string')
+    templates_path = os.path.join(self._templates_path, 'mount_path_string')
 
-    template_filename = os.path.join(template_directory, 'mount_path_string.h')
+    template_filename = os.path.join(templates_path, 'mount_path_string.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+        template_filename, template_mappings, output_filename)
 
     self._SortIncludeHeaders(project_configuration, output_filename)
 
@@ -1471,12 +1448,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'mount_path_string')
+    templates_path = os.path.join(self._templates_path, 'mount_path_string')
 
-    template_filename = os.path.join(template_directory, 'mount_path_string.c')
+    template_filename = os.path.join(templates_path, 'mount_path_string.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+        template_filename, template_mappings, output_filename)
 
     self._SortIncludeHeaders(project_configuration, output_filename)
 
@@ -1563,7 +1539,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
           project_configuration.tools_directory, 'mount_fuse.h')
       self._GenerateSectionsFromOperationsFile(
           'mount_fuse.h.yaml', 'main', project_configuration,
-          template_mappings, output_writer, output_filename)
+          template_mappings, output_filename)
 
       output_filename = os.path.join(
           project_configuration.tools_directory, 'mount_fuse.c')
@@ -1572,7 +1548,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
           output_writer, output_filename)
       # self._GenerateSectionsFromOperationsFile(
       #     'mount_fuse.c.yaml', 'main', project_configuration,
-      #     template_mappings, output_writer, output_filename)
+      #     template_mappings, output_filename)
 
       self._GenerateMountToolSourceFile(
           project_configuration, template_mappings, mount_tool_name,
@@ -1591,7 +1567,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'yalmount')
+    templates_path = os.path.join(self._templates_path, 'yalmount')
 
     template_names = ['header.c', 'includes-start.c']
 
@@ -1607,7 +1583,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_names.append('includes-end.c')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     mount_tool_options = self._GetMountToolOptions(
@@ -1626,16 +1602,15 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         project_configuration.mount_tool_source_type)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     self._GenerateMountToolSourceUsageFunction(
         project_configuration, template_mappings, mount_tool_name,
         mount_tool_options, output_writer, output_filename)
 
-    template_filename = os.path.join(template_directory, 'signal_handler.c')
+    template_filename = os.path.join(templates_path, 'signal_handler.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     self._GenerateMountToolSourceMainFunction(
         project_configuration, template_mappings, mount_tool_name,
@@ -1665,7 +1640,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'yalmount')
+    templates_path = os.path.join(self._templates_path, 'yalmount')
 
     file_system_type = project_configuration.mount_tool_file_system_type
 
@@ -1768,7 +1743,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_names.append('main-end.c')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['data_format'] = project_configuration.project_data_format
@@ -1778,8 +1753,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         variable_declarations)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['data_format']
     del template_mappings['mount_tool_getopt_string']
@@ -1804,7 +1778,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'yalmount')
+    templates_path = os.path.join(self._templates_path, 'yalmount')
 
     alignment_padding = '          '
     width = 80 - len(alignment_padding)
@@ -1870,10 +1844,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         mount_tool_source_alignment)
     template_mappings['mount_tool_usage'] = '\n'.join(mount_tool_usage)
 
-    template_filename = os.path.join(template_directory, 'usage.c')
+    template_filename = os.path.join(templates_path, 'usage.c')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['mount_tool_options']
     del template_mappings['mount_tool_source_alignment']
@@ -2024,13 +1997,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
     # TODO: add support for ouput.[ch]
 
-    for directory_entry in os.listdir(self._template_directory):
+    for directory_entry in os.listdir(self._templates_path):
       # Ignore yaltools_library.h in favor of yaltools_libyal.h
       if directory_entry == library_header:
         continue
 
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
+      template_filename = os.path.join(self._templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
@@ -2050,7 +2022,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         continue
 
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)
 
     self._GenerateInfoTool(
         project_configuration, template_mappings, output_writer)

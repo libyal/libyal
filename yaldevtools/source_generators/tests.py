@@ -62,8 +62,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     """
     signature_type = include_header_file.GetCheckSignatureType()
 
-    template_directory = os.path.join(
-        self._template_directory, 'yal_test_support')
+    templates_path = os.path.join(self._templates_path, 'yal_test_support')
 
     output_filename = '{0:s}_test_support.c'.format(
         project_configuration.library_name_suffix)
@@ -74,19 +73,16 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     if signature_type:
       template_mappings['signature_type'] = signature_type
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.c')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     if signature_type:
-      template_filename = os.path.join(
-          template_directory, 'includes-with_input.c')
+      template_filename = os.path.join(templates_path, 'includes-with_input.c')
     else:
-      template_filename = os.path.join(template_directory, 'includes.c')
+      template_filename = os.path.join(templates_path, 'includes.c')
 
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     for support_function in (
         'get_version', 'get_access_flags_read', 'get_codepage',
@@ -95,15 +91,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         continue
 
       template_filename = '{0:s}.c'.format(support_function)
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if signature_type:
-      template_filename = os.path.join(template_directory, 'check_signature.c')
+      template_filename = os.path.join(templates_path, 'check_signature.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       test_getopt_string = []
@@ -131,9 +127,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           sorted(test_options_variable_declarations))
 
       template_filename = os.path.join(
-          template_directory, 'main-start-with_source-start.c')
+          templates_path, 'main-start-with_source-start.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       del template_mappings['test_getopt_string']
@@ -146,10 +142,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_mappings['test_option_argument'] = argument
 
           template_filename = os.path.join(
-              template_directory, 'main-start-with_source-switch_case.c')
+              templates_path, 'main-start-with_source-switch_case.c')
           self._GenerateSection(
-              template_filename, template_mappings, output_writer,
-              output_filename, access_mode='a')
+              template_filename, template_mappings, output_filename,
+              access_mode='a')
 
           del template_mappings['test_option']
           del template_mappings['test_option_argument']
@@ -163,30 +159,28 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             switch_case_unused)
 
         template_filename = os.path.join(
-            template_directory, 'main-start-with_source-switch_case_unused.c')
+            templates_path, 'main-start-with_source-switch_case_unused.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
         del template_mappings['test_options_switch_case_unused']
 
       template_filename = os.path.join(
-          template_directory, 'main-start-with_source-end.c')
+          templates_path, 'main-start-with_source-end.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       if 'offset' in [argument for _, argument in test_options]:
-        template_filename = os.path.join(
-            template_directory, 'main-option_offset.c')
+        template_filename = os.path.join(templates_path, 'main-option_offset.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
-      template_filename = os.path.join(
-          template_directory, 'main-body_with_input.c')
+      template_filename = os.path.join(templates_path, 'main-body_with_input.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       if 'offset' in [argument for _, argument in test_options]:
@@ -194,15 +188,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       else:
         template_filename = 'main-end_with_input.c'
 
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     else:
-      template_filename = os.path.join(template_directory, 'main.c')
+      template_filename = os.path.join(templates_path, 'main.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if signature_type:
@@ -284,38 +278,35 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     if not with_input:
       return
 
-    template_directory = os.path.join(
-        self._template_directory, 'yal_test_functions')
+    templates_path = os.path.join(self._templates_path, 'yal_test_functions')
 
-    template_filename = os.path.join(template_directory, 'header.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.h')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     if with_offset:
-      template_filename = os.path.join(template_directory, 'with_offset.h')
+      template_filename = os.path.join(templates_path, 'with_offset.h')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     # TODO: make check more generic based on the source itself.
     if project_configuration.library_name == 'libcfile':
-      template_filename = os.path.join(
-          template_directory, 'get_temporary_filename.h')
+      template_filename = os.path.join(templates_path, 'get_temporary_filename.h')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     # TODO: make check more generic based on the source itself.
     if project_configuration.library_name not in (
         'libcfile', 'libsmdev', 'libtableau'):
-      template_filename = os.path.join(template_directory, 'file_io_handle.h')
+      template_filename = os.path.join(templates_path, 'file_io_handle.h')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'footer.h')
+    template_filename = os.path.join(templates_path, 'footer.h')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
+        template_filename, template_mappings, output_filename,
         access_mode='a')
 
   def _GenerateTestFunctionsSource(
@@ -335,33 +326,31 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     if not with_input:
       return
 
-    template_directory = os.path.join(
-        self._template_directory, 'yal_test_functions')
+    templates_path = os.path.join(self._templates_path, 'yal_test_functions')
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(templates_path, 'header.c')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     if with_offset:
-      template_filename = os.path.join(template_directory, 'with_offset.c')
+      template_filename = os.path.join(templates_path, 'with_offset.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     # TODO: make check more generic based on the source itself.
     if project_configuration.library_name == 'libcfile':
       template_filename = os.path.join(
-          template_directory, 'get_temporary_filename.c')
+          templates_path, 'get_temporary_filename.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     # TODO: make check more generic based on the source itself.
     if project_configuration.library_name not in (
         'libcfile', 'libsmdev', 'libtableau'):
-      template_filename = os.path.join(template_directory, 'file_io_handle.c')
+      template_filename = os.path.join(templates_path, 'file_io_handle.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
   def _GenerateMakefileAM(
@@ -402,8 +391,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     tests = tests.union(set(internal_types))
     tests = tests.union(set(internal_types_with_bfio))
 
-    template_directory = os.path.join(
-        self._template_directory, 'Makefile.am')
+    templates_path = os.path.join(self._templates_path, 'Makefile.am')
     output_filename = os.path.join('tests', 'Makefile.am')
 
     test_scripts = []
@@ -523,11 +511,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_names.append('body.am')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     # TODO: add support for read_file_io_handle tests
     # TODO: add support for rwlock tests
@@ -600,15 +588,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             'error: missing template').format(group_name))
         continue
 
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'footer.am')
+    template_filename = os.path.join(templates_path, 'footer.am')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     self._SortSources(output_filename)
 
@@ -631,8 +618,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     test_options = self._GetTestOptions(project_configuration, 'support')
     test_options = [argument for _, argument in test_options]
 
-    template_directory = os.path.join(
-        self._template_directory, 'pyyal_test_support')
+    templates_path = os.path.join(self._templates_path, 'pyyal_test_support')
 
     output_filename = '{0:s}_test_support.py'.format(
         project_configuration.python_module_name)
@@ -648,11 +634,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_names.append('test_case.py')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     for support_function in (
         'get_version', 'check_file_signature', 'open'):
@@ -660,9 +646,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         continue
 
       template_filename = '{0:s}.py'.format(support_function)
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if with_input:
@@ -715,10 +701,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         argument_parser_options)
     template_mappings['unittest_options'] = '\n'.join(unittest_options)
 
-    template_filename = os.path.join(template_directory, template_filename)
+    template_filename = os.path.join(templates_path, template_filename)
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['argument_parser_options']
     del template_mappings['unittest_options']
@@ -751,8 +736,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     test_options = self._GetTestOptions(project_configuration, type_name)
     test_options = [argument for _, argument in test_options]
 
-    template_directory = os.path.join(
-        self._template_directory, 'pyyal_test_type')
+    templates_path = os.path.join(self._templates_path, 'pyyal_test_type')
 
     output_filename = '{0:s}_test_{1:s}.py'.format(
         project_configuration.python_module_name, type_name)
@@ -870,7 +854,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_names.append('seek_offset-end.py')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     type_size_name = self._GetTypeSizeName(project_configuration, type_name)
@@ -883,8 +867,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['type_size_name'] = type_size_name
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer,
-        output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['type_size_name']
 
@@ -924,14 +907,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           template_names.append('getter_with_property-end.py')
 
       template_filenames = [
-          os.path.join(template_directory, template_name)
+          os.path.join(templates_path, template_name)
           for template_name in template_names]
 
       template_mappings['value_name'] = value_name
 
       self._GenerateSections(
-          template_filenames, template_mappings, output_writer,
-          output_filename, access_mode='a')
+          template_filenames, template_mappings, output_filename,
+          access_mode='a')
 
       del template_mappings['value_name']
 
@@ -984,12 +967,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['unittest_options'] = '\n'.join(unittest_options)
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer,
-        output_filename, access_mode='a')
+        template_filenames, template_mappings, output_filename,
+        access_mode='a')
 
     del template_mappings['argument_parser_options']
     del template_mappings['unittest_options']
@@ -1266,7 +1249,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     if free_function:
       value_name, _, _ = free_function.rpartition('_free_function')
 
-    template_directory = os.path.join(self._template_directory, 'yal_test_type')
+    templates_path = os.path.join(self._templates_path, 'yal_test_type')
 
     # TODO: add support for functions that don't return 0 to not use is_set in
     # tests.
@@ -1300,14 +1283,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     body_template_filename = None
     if body_template_name:
-      body_template_filename = os.path.join(
-          template_directory, body_template_name)
+      body_template_filename = os.path.join(templates_path, body_template_name)
 
     if not body_template_filename or not os.path.exists(body_template_filename):
       template_filename = None
       if function_template:
         template_filename = '{0:s}.c'.format(function_template)
-        template_filename = os.path.join(template_directory, template_filename)
+        template_filename = os.path.join(templates_path, template_filename)
 
       # Generate the test function based on a single template.
       if template_filename and os.path.exists(template_filename):
@@ -1325,8 +1307,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 type_name, type_function, function_template))
 
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
         return function_name, test_function_name, have_extern
 
@@ -1529,7 +1511,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_names.append('function-end-footer.c')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['function_name'] = function_template
@@ -1555,8 +1537,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             type_name, type_function, ', '.join(template_names)))
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['function_name']
     del template_mappings['function_variables']
@@ -1618,10 +1599,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings, last_have_extern, have_extern, output_writer,
         output_filename)
 
-    template_directory = os.path.join(self._template_directory, 'yal_test_type')
+    templates_path = os.path.join(self._templates_path, 'yal_test_type')
     # os.path.join will fail if template_filename is None.
     if template_filename:
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
 
     if not template_filename or not os.path.exists(template_filename):
       if self._GenerateExistingFunction(
@@ -1642,8 +1623,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       return function_name, None, have_extern
 
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     return function_name, test_function_name, have_extern
 
@@ -1663,12 +1643,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       output_filename (str): path of the output file.
     """
     if have_extern and not last_have_extern:
-      template_directory = os.path.join(
-          self._template_directory, 'yal_test_type')
-      template_filename = os.path.join(
-          template_directory, 'define_internal-end.c')
+      templates_path = os.path.join(self._templates_path, 'yal_test_type')
+      template_filename = os.path.join(templates_path, 'define_internal-end.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
   def _GenerateTypeTestDefineInternalStart(
@@ -1687,12 +1665,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       output_filename (str): path of the output file.
     """
     if not have_extern and last_have_extern:
-      template_directory = os.path.join(
-          self._template_directory, 'yal_test_type')
-      template_filename = os.path.join(
-          template_directory, 'define_internal-start.c')
+      templates_path = os.path.join(self._templates_path, 'yal_test_type')
+      template_filename = os.path.join(templates_path, 'define_internal-start.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
   def _GenerateTypeTestDefineWideCharacterTypeEnd(
@@ -1711,12 +1687,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       output_filename (str): path of the output file.
     """
     if not have_wide_character_type and last_have_wide_character_type:
-      template_directory = os.path.join(
-          self._template_directory, 'yal_test_type')
+      templates_path = os.path.join(self._templates_path, 'yal_test_type')
       template_filename = os.path.join(
-          template_directory, 'define_wide_character_type-end.c')
+          templates_path, 'define_wide_character_type-end.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
   def _GenerateTypeTestDefineWideCharacterTypeStart(
@@ -1735,12 +1710,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       output_filename (str): path of the output file.
     """
     if have_wide_character_type and not last_have_wide_character_type:
-      template_directory = os.path.join(
-          self._template_directory, 'yal_test_type')
+      templates_path = os.path.join(self._templates_path, 'yal_test_type')
       template_filename = os.path.join(
-          template_directory, 'define_wide_character_type-start.c')
+          templates_path, 'define_wide_character_type-start.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
   def _GenerateTypeTestInitializeFunction(
@@ -1875,7 +1849,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'yal_test_type')
+    templates_path = os.path.join(self._templates_path, 'yal_test_type')
 
     has_glob = self._HasGlob(project_configuration, type_name)
 
@@ -1909,7 +1883,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_names.append('{0:s}-end.c'.format(test_name))
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     test_options_function_arguments = [
@@ -1926,8 +1900,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         test_options_function_variables)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['test_options_function_arguments']
     del template_mappings['test_options_function_variables']
@@ -1980,7 +1953,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     type_size_name = self._GetTypeSizeName(project_configuration, type_name)
 
-    template_directory = os.path.join(self._template_directory, 'yal_test_type')
+    templates_path = os.path.join(self._templates_path, 'yal_test_type')
 
     template_names = []
 
@@ -2052,11 +2025,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_names.append('includes_internal.c')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     if with_input:
       include_header_file = self._GetLibraryIncludeHeaderFile(
@@ -2133,11 +2106,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
     if template_names:
       template_filenames = [
-          os.path.join(template_directory, template_name)
+          os.path.join(templates_path, template_name)
           for template_name in template_names]
 
       self._GenerateSections(
-          template_filenames, template_mappings, output_writer, output_filename,
+          template_filenames, template_mappings, output_filename,
           access_mode='a')
 
     if with_input:
@@ -2166,10 +2139,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings['test_data_index'] = test_data_index
         template_mappings['test_data_suffix'] = test_data_suffix
 
-        template_filename = os.path.join(template_directory, 'test_data.c')
+        template_filename = os.path.join(templates_path, 'test_data.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
     # Generate a clone, compare and/or free test function if necessary.
     clone_function = None
@@ -2196,27 +2169,27 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       value_name, _, _ = free_function.rpartition('_free_function')
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
 
-      template_filename = os.path.join(template_directory, 'free_function.c')
+      template_filename = os.path.join(templates_path, 'free_function.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if clone_function:
       value_name, _, _ = clone_function.rpartition('_clone_function')
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
 
-      template_filename = os.path.join(template_directory, 'clone_function.c')
+      template_filename = os.path.join(templates_path, 'clone_function.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if compare_function:
       value_name, _, _ = compare_function.rpartition('_compare_function')
       self._SetValueNameInTemplateMappings(template_mappings, value_name)
 
-      template_filename = os.path.join(template_directory, 'compare_function.c')
+      template_filename = os.path.join(templates_path, 'compare_function.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     have_extern = True
@@ -2355,7 +2328,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): name of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'yal_test_type')
+    templates_path = os.path.join(self._templates_path, 'yal_test_type')
 
     has_glob = self._HasGlob(project_configuration, type_name)
     with_offset = 'offset' in [argument for _, argument in test_options]
@@ -2395,9 +2368,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           sorted(test_options_variable_declarations))
 
       template_filename = os.path.join(
-          template_directory, 'main-start-with_source-start.c')
+          templates_path, 'main-start-with_source-start.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       del template_mappings['test_getopt_string']
@@ -2408,43 +2381,43 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings['test_option_argument'] = argument
 
         template_filename = os.path.join(
-            template_directory, 'main-start-with_source-switch_case.c')
+            templates_path, 'main-start-with_source-switch_case.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
         del template_mappings['test_option']
         del template_mappings['test_option_argument']
 
       template_filename = os.path.join(
-          template_directory, 'main-start-with_source-end.c')
+          templates_path, 'main-start-with_source-end.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       if with_offset:
         template_filename = os.path.join(
-            template_directory, 'main-option_offset.c')
+            templates_path, 'main-option_offset.c')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
-      template_filename = os.path.join(template_directory, 'main-notify_set.c')
+      template_filename = os.path.join(templates_path, 'main-notify_set.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     elif tests_to_run_with_args:
       template_filename = os.path.join(
-          template_directory, 'main-start-with_test_data.c')
+          templates_path, 'main-start-with_test_data.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     else:
-      template_filename = os.path.join(template_directory, 'main-start.c')
+      template_filename = os.path.join(templates_path, 'main-start.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     self._GenerateTypeTestsMainTestsToRun(
@@ -2473,9 +2446,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_mappings['signature_type'] = signature_type
       template_mappings['test_data_size'] = len(test_data)
 
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       del template_mappings['signature_type']
@@ -2504,9 +2477,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       else:
         template_filename = 'main-with_source-tests.c'
 
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       del template_mappings['test_options_open_source_arguments']
@@ -2531,9 +2504,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_filename = None
 
     if template_filename:
-      template_filename = os.path.join(template_directory, template_filename)
+      template_filename = os.path.join(templates_path, template_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if tests_to_run_with_source and has_glob:
@@ -2545,9 +2518,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     else:
       template_filename = 'main-end.c'
 
-    template_filename = os.path.join(template_directory, template_filename)
+    template_filename = os.path.join(templates_path, template_filename)
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
+        template_filename, template_mappings, output_filename,
         access_mode='a')
 
   def _GenerateTypeTestsMainTestsToRun(
@@ -2575,7 +2548,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     if not tests_to_run:
       return
 
-    template_directory = os.path.join(self._template_directory, 'yal_test_type')
+    templates_path = os.path.join(self._templates_path, 'yal_test_type')
 
     library_name_suffix = project_configuration.library_name_suffix.upper()
 
@@ -2607,10 +2580,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           tests_to_run_mappings = []
 
           template_filename = os.path.join(
-              template_directory, 'main-tests_to_run.c')
+              templates_path, 'main-tests_to_run.c')
           self._GenerateSection(
-              template_filename, template_mappings, output_writer,
-              output_filename, access_mode='a')
+              template_filename, template_mappings, output_filename,
+              access_mode='a')
 
         self._GenerateTypeTestDefineWideCharacterTypeEnd(
             template_mappings, last_have_wide_character_type,
@@ -2689,10 +2662,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
       template_mappings['tests_to_run'] = '\n'.join(tests_to_run_mappings)
       tests_to_run_mappings = []
 
-      template_filename = os.path.join(
-          template_directory, 'main-tests_to_run.c')
+      template_filename = os.path.join(templates_path, 'main-tests_to_run.c')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       self._GenerateTypeTestDefineWideCharacterTypeEnd(
@@ -2741,7 +2713,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings, last_have_extern, have_extern, output_writer,
         output_filename)
 
-    template_directory = os.path.join(self._template_directory, 'yal_test_type')
+    templates_path = os.path.join(self._templates_path, 'yal_test_type')
 
     if free_function:
       value_name, _, _ = free_function.rpartition('_free_function')
@@ -2751,10 +2723,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     else:
       template_filename = '{0:s}.c'.format(type_function)
 
-    template_filename = os.path.join(template_directory, template_filename)
+    template_filename = os.path.join(templates_path, template_filename)
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     function_name = self._GetFunctionName(
         project_configuration, type_name, type_function)
@@ -3240,7 +3211,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         api_pseudo_types, internal_functions, internal_types,
         test_python_functions, test_python_functions_with_input)
 
-    for directory_entry in os.listdir(self._template_directory):
+    for directory_entry in os.listdir(self._templates_path):
       # Ignore yal_test_library.h in favor of yal_test_libyal.h
       if directory_entry == library_header:
         continue
@@ -3250,8 +3221,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           project_configuration.library_name == 'libcerror'):
         continue
 
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
+      template_filename = os.path.join(self._templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
@@ -3308,7 +3278,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         continue
 
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)
 
       if output_filename.endswith('.c'):
         self._SortIncludeHeaders(project_configuration, output_filename)

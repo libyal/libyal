@@ -23,7 +23,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'acinclude.m4')
+    templates_path = os.path.join(self._templates_path, 'acinclude.m4')
 
     library_name = project_configuration.library_name
 
@@ -100,11 +100,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_mappings['tools_name_upper_case'] = tools_name.upper()
 
       template_filenames = [
-          os.path.join(template_directory, template_name)
+          os.path.join(templates_path, template_name)
           for template_name in template_names]
 
       self._GenerateSections(
-          template_filenames, template_mappings, output_writer, output_filename)
+          template_filenames, template_mappings, output_filename)
 
       del template_mappings['library_name']
       del template_mappings['library_name_upper_case']
@@ -120,10 +120,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     else:
       template_filename = 'check_dll_support.m4'
 
-    template_filename = os.path.join(template_directory, template_filename)
+    template_filename = os.path.join(templates_path, template_filename)
     self._GenerateSection(
-        template_filename, template_mappings, output_writer,
-        output_filename, access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['library_name']
     del template_mappings['library_name_upper_case']
@@ -140,7 +139,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'appveyor.yml')
+    templates_path = os.path.join(self._templates_path, 'appveyor.yml')
 
     template_names = ['environment.yml']
 
@@ -229,11 +228,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         project_configuration, 'pypi_token_appveyor', '')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['pypi_token']
     del template_mappings['brew_build_dependencies']
@@ -246,10 +245,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           f'-P {name:s}' for name in cygwin_build_dependencies])
       template_mappings['cygwin_build_dependencies'] = cygwin_build_dependencies
 
-      template_filename = os.path.join(template_directory, 'install-cygwin.yml')
+      template_filename = os.path.join(templates_path, 'install-cygwin.yml')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+          template_filename, template_mappings, output_filename, access_mode='a')
 
       del template_mappings['cygwin_build_dependencies']
 
@@ -262,10 +260,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           mingw_msys2_build_dependencies)
 
       template_filename = os.path.join(
-          template_directory, 'install-mingw-msys2.yml')
+          templates_path, 'install-mingw-msys2.yml')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
+          template_filename, template_mappings, output_filename, access_mode='a')
 
       del template_mappings['mingw_msys2_build_dependencies']
 
@@ -312,27 +309,20 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_names.append('deploy_script-footer.yml')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
-  def _GenerateCodecovYML(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
+  def _GenerateCodecovYML(self, project_configuration, template_mappings):
     """Generates the .codecov.yml configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, '.codecov.yml')
-
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
     ignore_paths = list(makefile_am_file.libraries)
@@ -341,10 +331,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_mappings['codecov_ignore'] = '\n'.join([
         f'    - "{path:s}/*"' for path in sorted(ignore_paths)])
 
-    template_filename = os.path.join(
-        template_directory, 'body.yml')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSectionsFromOperationsFile(
+        'codecov.yml.yaml', 'main', project_configuration, template_mappings,
+        '.codecov.yml')
 
     del template_mappings['codecov_ignore']
 
@@ -405,7 +394,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         libraries.append('zlib')
         library_dependencies.append('zlib')
 
-    template_directory = os.path.join(self._template_directory, 'configure.ac')
+    templates_path = os.path.join(self._templates_path, 'configure.ac')
 
     template_names = ['header.ac', 'programs.ac-start']
 
@@ -430,11 +419,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names.extend(['check_types_support.ac', 'check_common_support.ac'])
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     # TODO: refactor code below to use template_names
 
@@ -464,10 +453,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_mappings['local_library_name'] = name
         template_mappings['local_library_name_upper_case'] = name.upper()
 
-        template_filename = os.path.join(template_directory, template_filename)
+        template_filename = os.path.join(templates_path, template_filename)
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
         del template_mappings['local_library_name']
         del template_mappings['local_library_name_upper_case']
@@ -481,12 +470,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_names.append('check_java_support.ac')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
     # TODO: refactor code below to use template_names
 
@@ -504,19 +492,18 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           template_mappings['local_library_name_upper_case'] = name.upper()
 
           template_filename = os.path.join(
-              template_directory, 'check_dependency_support.ac')
+              templates_path, 'check_dependency_support.ac')
           self._GenerateSection(
-              template_filename, template_mappings, output_writer,
-              output_filename, access_mode='a')
+              template_filename, template_mappings, output_filename,
+              access_mode='a')
 
         del template_mappings['local_library_name']
         del template_mappings['local_library_name_upper_case']
 
-      template_filename = os.path.join(
-          template_directory, 'check_tools_support.ac')
+      template_filename = os.path.join(templates_path, 'check_tools_support.ac')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer,
-          output_filename, access_mode='a')
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
 
     template_names = ['check_dll_support.ac', 'check_tests_support.ac']
 
@@ -526,12 +513,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names.append('compiler_flags.ac')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
     # TODO: refactor code below to use template_names
 
@@ -552,9 +538,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           local_library_tests)
 
       template_filename = os.path.join(
-          template_directory, 'spec_requires_library.ac')
+          templates_path, 'spec_requires_library.ac')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       del template_mappings['local_library_tests']
@@ -582,22 +568,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             local_library_tests)
 
         template_filename = os.path.join(
-            template_directory, 'spec_requires_tools.ac')
+            templates_path, 'spec_requires_tools.ac')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
         del template_mappings['local_library_tests']
 
     template_names = ['dates.ac', 'config_files_start.ac']
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
     # TODO: refactor code below to use template_names
 
@@ -606,10 +591,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_mappings['local_library_name'] = name
 
         template_filename = os.path.join(
-            template_directory, 'config_files_dependency.ac')
+            templates_path, 'config_files_dependency.ac')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
       del template_mappings['local_library_name']
 
@@ -625,12 +610,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_names.append('config_files_java.ac')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
     # TODO: refactor code below to use template_names
 
@@ -640,18 +624,17 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           template_mappings['local_library_name'] = name
 
           template_filename = os.path.join(
-              template_directory, 'config_files_dependency.ac')
+              templates_path, 'config_files_dependency.ac')
           self._GenerateSection(
-              template_filename, template_mappings, output_writer,
-              output_filename, access_mode='a')
+              template_filename, template_mappings, output_filename,
+              access_mode='a')
 
         del template_mappings['local_library_name']
 
-      template_filename = os.path.join(
-          template_directory, 'config_files_tools.ac')
+      template_filename = os.path.join(templates_path, 'config_files_tools.ac')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer,
-          output_filename, access_mode='a')
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
 
     # TODO: add support for Makefile in documents (libuna)
 
@@ -673,12 +656,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names.append('config_files_end.ac')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filenames, template_mappings, output_filename, access_mode='a')
 
     # TODO: add support for build options configuration
 
@@ -854,18 +836,17 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         notice_message.append(f'   {description:s}: {padding:s}{value:s}')
 
-    template_filename = os.path.join(template_directory, 'output.ac')
+    template_filename = os.path.join(templates_path, 'output.ac')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     # TODO: improve this condition
     if project_configuration.library_name != 'libcerror':
       template_mappings['notice_message'] = '\n'.join(notice_message)
 
-      template_filename = os.path.join(template_directory, 'notice.ac')
+      template_filename = os.path.join(templates_path, 'notice.ac')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       del template_mappings['notice_message']
@@ -887,13 +868,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     library_name = project_configuration.library_name
 
-    template_directory = os.path.join(self._template_directory, 'dpkg')
+    templates_path = os.path.join(self._templates_path, 'dpkg')
 
     template_mappings['library_name'] = library_name
     template_mappings['library_name_upper_case'] = library_name.upper()
 
-    for directory_entry in os.listdir(template_directory):
-      template_filename = os.path.join(template_directory, directory_entry)
+    for directory_entry in os.listdir(templates_path):
+      template_filename = os.path.join(templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
@@ -917,7 +898,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
       output_filename = os.path.join(output_directory, output_filename)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)
 
     dpkg_build_dependencies = self._GetDpkgBuildDependenciesDpkgControl(
         project_configuration)
@@ -925,25 +906,25 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_mappings['dpkg_build_dependencies'] = ', '.join(
         dpkg_build_dependencies)
 
-    template_filename = os.path.join(template_directory, 'control')
+    template_filename = os.path.join(templates_path, 'control')
     output_filename = os.path.join(output_directory, 'control')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+        template_filename, template_mappings, output_filename)
 
     del template_mappings['dpkg_build_dependencies']
 
     if project_configuration.HasTools():
-      template_filename = os.path.join(template_directory, 'control-tools')
+      template_filename = os.path.join(templates_path, 'control-tools')
       output_filename = os.path.join(output_directory, 'control')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(template_directory, 'control-python')
+      template_filename = os.path.join(templates_path, 'control-python')
       output_filename = os.path.join(output_directory, 'control')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if (project_configuration.HasPythonModule() and
@@ -956,104 +937,52 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     else:
       template_filename = 'rules'
 
-    template_filename = os.path.join(template_directory, template_filename)
+    template_filename = os.path.join(templates_path, template_filename)
     output_filename = os.path.join(output_directory, 'rules')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
-    template_directory = os.path.join(
-        self._template_directory, 'dpkg', 'source')
+    templates_path = os.path.join(self._templates_path, 'dpkg', 'source')
     output_directory = os.path.join(output_directory, 'source')
 
-    for directory_entry in os.listdir(template_directory):
-      template_filename = os.path.join(template_directory, directory_entry)
+    for directory_entry in os.listdir(templates_path):
+      template_filename = os.path.join(templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
       output_filename = os.path.join(output_directory, directory_entry)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)
 
     del template_mappings['library_name']
     del template_mappings['library_name_upper_case']
 
-  def _GenerateGitignore(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
+  def _GenerateGitignore(self, project_configuration, template_mappings):
     """Generates the .gitignore configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
     include_header_file = self._GetLibraryIncludeHeaderFile(
         project_configuration)
 
-    template_directory = os.path.join(self._template_directory, '.gitignore')
+    makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
-    template_filename = os.path.join(template_directory, 'header')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
-
-    template_filename = os.path.join(template_directory, 'library')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
-
-    # TODO: add support for lex yacc BUILT_SOURCES
-
-    if project_configuration.HasPythonModule():
-      template_filename = os.path.join(template_directory, 'python_module')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
-
-    if project_configuration.HasDotNetBindings():
-      template_filename = os.path.join(template_directory, 'dotnet_bindings')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
-
-    if project_configuration.HasJavaBindings():
-      template_filename = os.path.join(template_directory, 'java_bindings')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
-
-    if project_configuration.HasTools():
-      tools_executables = []
-      for name in sorted(project_configuration.tools_names):
-        tools_executable = '/{0:s}/{1:s}'.format(
-            project_configuration.tools_directory, name)
-        tools_executables.append(tools_executable)
-
-      template_mappings['tools_executables'] = '\n'.join(tools_executables)
-
-      template_filename = os.path.join(template_directory, 'tools')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
-
-      del template_mappings['tools_executables']
-
-    source_glob = '{0:s}_test_*.c'.format(
-        project_configuration.library_name_suffix)
-    source_glob = os.path.join('tests', source_glob)
+    local_libraries = [
+        '/'.join(['', name]) for name in sorted(makefile_am_file.libraries)]
 
     tests_files = ['/tests/tmp*']
 
-    if project_configuration.library_name != 'libcnotify':
-      makefile_am_file = self._GetMainMakefileAM(project_configuration)
-
-      if 'libcnotify' in makefile_am_file.library_dependencies:
-        tests_files.append('/tests/notify_stream.log')
+    if (project_configuration.library_name != 'libcnotify' and
+        'libcnotify' in makefile_am_file.library_dependencies):
+      tests_files.append('/tests/notify_stream.log')
 
     if os.path.exists(os.path.join('tests', 'input')):
       tests_files.append('/tests/input')
 
+    source_glob = os.path.join(
+        'tests', f'{project_configuration.library_name_suffix:s}_test_*.c')
     for source_file_path in sorted(glob.glob(source_glob)):
       if (source_file_path.endswith('_functions.c') or
           source_file_path.endswith('_getopt.c') or
@@ -1065,29 +994,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       source_file_path = '/{0:s}'.format(source_file_path[:-2])
       tests_files.append(source_file_path)
 
+    tools_executables = [
+        '/'.join(['', project_configuration.tools_directory, name])
+        for name in sorted(project_configuration.tools_names)]
+
+    template_mappings['local_libraries'] = '\n'.join(sorted(local_libraries))
     template_mappings['tests_files'] = '\n'.join(sorted(tests_files))
+    template_mappings['tools_executables'] = '\n'.join(tools_executables)
 
-    template_filename = os.path.join(template_directory, 'tests')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+    self._GenerateSectionsFromOperationsFile(
+        'gitignore.yaml', 'main', project_configuration, template_mappings,
+        '.gitignore')
 
+    del template_mappings['local_libraries']
     del template_mappings['tests_files']
-
-    makefile_am_file = self._GetMainMakefileAM(project_configuration)
-
-    libraries = [
-        '/{0:s}'.format(name) for name in sorted(makefile_am_file.libraries)]
-
-    if libraries:
-      template_mappings['local_libraries'] = '\n'.join(libraries)
-
-      template_filename = os.path.join(template_directory, 'local_libraries')
-      self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
-          access_mode='a')
-
-      del template_mappings['local_libraries']
+    del template_mappings['tools_executables']
 
   def _GenerateRpmSpec(
       self, project_configuration, template_mappings, output_writer,
@@ -1105,8 +1026,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
-    template_directory = os.path.join(
-        self._template_directory, 'libyal.spec.in')
+    templates_path = os.path.join(self._templates_path, 'libyal.spec.in')
 
     library_dependencies = list(makefile_am_file.library_dependencies)
 
@@ -1121,16 +1041,16 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_mappings['library_name_upper_case'] = library_name.upper()
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     if not library_dependencies:
-      template_filename = os.path.join(template_directory, 'build_requires.in')
+      template_filename = os.path.join(templates_path, 'build_requires.in')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     else:
@@ -1146,23 +1066,23 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_mappings['spec_requires'] = ' '.join(spec_requires)
       template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
 
-      template_filename = os.path.join(template_directory, 'requires.in')
+      template_filename = os.path.join(templates_path, 'requires.in')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       del template_mappings['spec_requires']
       del template_mappings['spec_build_requires']
 
-    template_filename = os.path.join(template_directory, 'package.in')
+    template_filename = os.path.join(templates_path, 'package.in')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
+        template_filename, template_mappings, output_filename,
         access_mode='a')
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(template_directory, 'package-python.in')
+      template_filename = os.path.join(templates_path, 'package-python.in')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if project_configuration.HasTools():
@@ -1187,9 +1107,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_mappings['spec_requires'] = ' '.join(spec_requires)
 
       template_filename = os.path.join(
-          template_directory, 'package-tools-header.in')
+          templates_path, 'package-tools-header.in')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
       del template_mappings['spec_requires']
@@ -1198,58 +1118,53 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
 
         template_filename = os.path.join(
-            template_directory, 'package-tools-requires.in')
+            templates_path, 'package-tools-requires.in')
         self._GenerateSection(
-            template_filename, template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, template_mappings, output_filename,
+            access_mode='a')
 
         del template_mappings['spec_build_requires']
 
       template_filename = os.path.join(
-          template_directory, 'package-tools-footer.in')
+          templates_path, 'package-tools-footer.in')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'prep.in')
+    template_filename = os.path.join(templates_path, 'prep.in')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(template_directory, 'build-python.in')
+      template_filename = os.path.join(templates_path, 'build-python.in')
     else:
-      template_filename = os.path.join(template_directory, 'build.in')
+      template_filename = os.path.join(templates_path, 'build.in')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'install.in')
+    template_filename = os.path.join(templates_path, 'install.in')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'files.in')
+    template_filename = os.path.join(templates_path, 'files.in')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if project_configuration.HasPythonModule():
-      template_filename = os.path.join(template_directory, 'files-python.in')
+      template_filename = os.path.join(templates_path, 'files-python.in')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if project_configuration.HasTools():
-      template_filename = os.path.join(template_directory, 'files-tools.in')
+      template_filename = os.path.join(templates_path, 'files-tools.in')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(template_directory, 'changelog.in')
+    template_filename = os.path.join(templates_path, 'changelog.in')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     del template_mappings['library_name']
     del template_mappings['library_name_upper_case']
@@ -1267,19 +1182,18 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           file.
       output_writer (OutputWriter): output writer.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'github_workflows')
+    templates_path = os.path.join(self._templates_path, 'github_workflows')
 
     output_directory = os.path.join('.github', 'workflows')
 
-    for directory_entry in os.listdir(template_directory):
-      template_filename = os.path.join(template_directory, directory_entry)
+    for directory_entry in os.listdir(templates_path):
+      template_filename = os.path.join(templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
       output_filename = os.path.join(output_directory, directory_entry)
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)
 
   def _GenerateGitHubActionsBuildYML(
       self, project_configuration, template_mappings, include_header_file,
@@ -1295,8 +1209,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'github_workflows', 'build.yml')
+    templates_path = os.path.join(
+        self._templates_path, 'github_workflows', 'build.yml')
 
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
@@ -1339,14 +1253,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names.append('footer.yml')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['dpkg_build_dependencies']
 
@@ -1364,8 +1278,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'github_workflows', 'build_freebsd.yml')
+    templates_path = os.path.join(
+        self._templates_path, 'github_workflows', 'build_freebsd.yml')
 
     freebsd_build_dependencies = self._GetFreeBSDBuildDependencies(
         project_configuration)
@@ -1373,14 +1287,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names = ['main.yml']
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['freebsd_build_dependencies'] = ' '.join(
         freebsd_build_dependencies)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['freebsd_build_dependencies']
 
@@ -1396,8 +1310,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'github_workflows', 'build_ossfuzz.yml')
+    templates_path = os.path.join(
+        self._templates_path, 'github_workflows', 'build_ossfuzz.yml')
 
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
@@ -1405,11 +1319,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names = ['body.yml']
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
   def _GenerateGitHubActionsBuildSharedYML(
       self, project_configuration, template_mappings, include_header_file,
@@ -1425,8 +1339,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'github_workflows', 'build_shared.yml')
+    templates_path = os.path.join(
+        self._templates_path, 'github_workflows', 'build_shared.yml')
 
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
@@ -1439,14 +1353,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names.append('footer.yml')
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['dpkg_build_dependencies']
 
@@ -1462,8 +1376,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(
-        self._template_directory, 'github_workflows', 'build_wheel.yml')
+    templates_path = os.path.join(
+        self._templates_path, 'github_workflows', 'build_wheel.yml')
 
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
@@ -1471,14 +1385,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names = ['body.yml']
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['dpkg_build_dependencies']
 
@@ -1494,7 +1408,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory)
+    templates_path = os.path.join(self._templates_path)
 
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
@@ -1502,14 +1416,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names = ['pyproject.toml']
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['dpkg_build_dependencies']
 
@@ -1525,7 +1439,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'setup.cfg.in')
+    templates_path = os.path.join(self._templates_path, 'setup.cfg.in')
 
     if project_configuration.project_status == 'experimental':
       python_module_development_status = '2 - Pre-Alpha'
@@ -1539,7 +1453,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_names = ['body']
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['library_name'] = project_configuration.library_name
@@ -1547,7 +1461,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         python_module_development_status)
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['library_name']
     del template_mappings['python_module_development_status']
@@ -1564,18 +1478,18 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    template_directory = os.path.join(self._template_directory, 'tox.ini')
+    templates_path = os.path.join(self._templates_path, 'tox.ini')
 
     template_names = ['body.ini']
 
     template_filenames = [
-        os.path.join(template_directory, template_name)
+        os.path.join(templates_path, template_name)
         for template_name in template_names]
 
     template_mappings['library_name'] = project_configuration.library_name
 
     self._GenerateSections(
-        template_filenames, template_mappings, output_writer, output_filename)
+        template_filenames, template_mappings, output_filename)
 
     del template_mappings['library_name']
 
@@ -1831,10 +1745,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_mappings['pc_libs_private'] = ' '.join(pc_libs_private)
 
-    for directory_entry in os.listdir(self._template_directory):
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
+    for directory_entry in os.listdir(self._templates_path):
+      template_filename = os.path.join(self._templates_path, directory_entry)
       if not os.path.isfile(template_filename):
+        continue
+
+      if directory_entry in ('codecov.yml.yaml', 'gitignore.yaml'):
         continue
 
       if (directory_entry in ('pyproject.toml', 'setup.py') and
@@ -1857,15 +1773,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         output_filename = directory_entry
 
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename)
+          template_filename, template_mappings, output_filename)
 
     del template_mappings['pc_libs_private']
 
-    self._GenerateCodecovYML(
-        project_configuration, template_mappings, output_writer, '.codecov.yml')
+    self._GenerateCodecovYML(project_configuration, template_mappings)
 
-    self._GenerateGitignore(
-        project_configuration, template_mappings, output_writer, '.gitignore')
+    self._GenerateGitignore(project_configuration, template_mappings)
 
     self._GenerateGitHubActions(
         project_configuration, template_mappings, include_header_file,

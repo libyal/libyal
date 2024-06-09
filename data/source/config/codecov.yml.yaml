@@ -1,0 +1,12 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: codecov.yml/body.yml
+mappings:
+- codecov_ignore
+---
+identifier: main
+type: group
+operations:
+- generate_body

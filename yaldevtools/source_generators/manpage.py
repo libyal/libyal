@@ -33,9 +33,8 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
     template_mappings['date'] = time.strftime(
         '%B %d, %Y', time.gmtime()).replace(' 0', '  ')
 
-    template_filename = os.path.join(self._template_directory, 'header.txt')
-    self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+    template_filename = os.path.join(self._templates_path, 'header.txt')
+    self._GenerateSection(template_filename, template_mappings, output_filename)
 
     have_wide_character_type_functions = False
     for section_name in include_header_file.section_names:
@@ -48,10 +47,10 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
       section_template_mappings = {
           'section_name': section_name,
       }
-      template_filename = os.path.join(self._template_directory, 'section.txt')
+      template_filename = os.path.join(self._templates_path, 'section.txt')
       self._GenerateSection(
-          template_filename, section_template_mappings, output_writer,
-          output_filename, access_mode='a')
+          template_filename, section_template_mappings, output_filename,
+          access_mode='a')
 
       bfio_functions = []
       debug_output_functions = []
@@ -74,11 +73,10 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
             'function_name': function_prototype.name,
             'function_return_type': function_prototype.return_type,
         }
-        template_filename = os.path.join(
-            self._template_directory, 'function.txt')
+        template_filename = os.path.join(self._templates_path, 'function.txt')
         self._GenerateSection(
-            template_filename, function_template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, function_template_mappings, output_filename,
+            access_mode='a')
 
       if wide_character_type_functions:
         have_wide_character_type_functions = True
@@ -89,11 +87,10 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
               'section_name': (
                   'Available when compiled with wide character string support:')
           }
-          template_filename = os.path.join(
-              self._template_directory, 'section.txt')
+          template_filename = os.path.join(self._templates_path, 'section.txt')
           self._GenerateSection(
-              template_filename, section_template_mappings, output_writer,
-              output_filename, access_mode='a')
+              template_filename, section_template_mappings, output_filename,
+              access_mode='a')
 
         for function_prototype in wide_character_type_functions:
           function_arguments_string = function_prototype.CopyToManpageString()
@@ -102,22 +99,20 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
               'function_name': function_prototype.name,
               'function_return_type': function_prototype.return_type,
           }
-          template_filename = os.path.join(
-              self._template_directory, 'function.txt')
+          template_filename = os.path.join(self._templates_path, 'function.txt')
           self._GenerateSection(
-              template_filename, function_template_mappings, output_writer,
-              output_filename, access_mode='a')
+              template_filename, function_template_mappings, output_filename,
+              access_mode='a')
 
       if bfio_functions:
         section_template_mappings = {
             'section_name': (
                 'Available when compiled with libbfio support:')
         }
-        template_filename = os.path.join(
-            self._template_directory, 'section.txt')
+        template_filename = os.path.join(self._templates_path, 'section.txt')
         self._GenerateSection(
-            template_filename, section_template_mappings, output_writer,
-            output_filename, access_mode='a')
+            template_filename, section_template_mappings, output_filename,
+            access_mode='a')
 
         for function_prototype in bfio_functions:
           function_arguments_string = function_prototype.CopyToManpageString()
@@ -126,37 +121,32 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
               'function_name': function_prototype.name,
               'function_return_type': function_prototype.return_type,
           }
-          template_filename = os.path.join(
-              self._template_directory, 'function.txt')
+          template_filename = os.path.join(self._templates_path, 'function.txt')
           self._GenerateSection(
-              template_filename, function_template_mappings, output_writer,
-              output_filename, access_mode='a')
+              template_filename, function_template_mappings, output_filename,
+              access_mode='a')
 
       # TODO: add support for debug output functions.
 
-    template_filename = os.path.join(
-        self._template_directory, 'description.txt')
+    template_filename = os.path.join(self._templates_path, 'description.txt')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     if have_wide_character_type_functions:
-      template_filename = os.path.join(self._template_directory, 'notes.txt')
+      template_filename = os.path.join(self._templates_path, 'notes.txt')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
     if have_wide_character_type_functions:
-      template_filename = os.path.join(
-          self._template_directory, 'notes_wchar.txt')
+      template_filename = os.path.join(self._templates_path, 'notes_wchar.txt')
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, output_filename,
+          template_filename, template_mappings, output_filename,
           access_mode='a')
 
-    template_filename = os.path.join(self._template_directory, 'footer.txt')
+    template_filename = os.path.join(self._templates_path, 'footer.txt')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
     with open(backup_filename, 'r', encoding='utf8') as backup_file:
       backup_lines = backup_file.readlines()

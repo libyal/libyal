@@ -31,14 +31,14 @@ class DocumentFileGenerator(interface.SourceFileGenerator):
 
       original_data = original_data[4:]
 
-    template_directory = os.path.join(self._template_directory, 'AUTHORS')
+    templates_path = os.path.join(self._templates_path, 'AUTHORS')
 
     # TODO: move authors to project_configuration
     template_mappings['authors'] = self._AUTHORS
 
-    template_filename = os.path.join(template_directory, 'header')
+    template_filename = os.path.join(templates_path, 'header')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+        template_filename, template_mappings, output_filename)
 
     del template_mappings['authors']
 
@@ -65,15 +65,15 @@ class DocumentFileGenerator(interface.SourceFileGenerator):
 
       original_data = original_data[7:-5]
 
-    template_directory = os.path.join(self._template_directory, 'README')
+    templates_path = os.path.join(self._templates_path, 'README')
 
     template_mappings['project_description'] = (
         project_configuration.project_description)
     template_mappings['project_status'] = project_configuration.project_status
 
-    template_filename = os.path.join(template_directory, 'header')
+    template_filename = os.path.join(templates_path, 'header')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename)
+        template_filename, template_mappings, output_filename)
 
     del template_mappings['project_description']
     del template_mappings['project_status']
@@ -82,10 +82,9 @@ class DocumentFileGenerator(interface.SourceFileGenerator):
       with open(output_filename, 'a', encoding='utf8') as file_object:
         file_object.writelines(original_data)
 
-    template_filename = os.path.join(template_directory, 'footer')
+    template_filename = os.path.join(templates_path, 'footer')
     self._GenerateSection(
-        template_filename, template_mappings, output_writer, output_filename,
-        access_mode='a')
+        template_filename, template_mappings, output_filename, access_mode='a')
 
   def Generate(self, project_configuration, output_writer):
     """Generates document files.
@@ -97,14 +96,13 @@ class DocumentFileGenerator(interface.SourceFileGenerator):
     template_mappings = self._GetTemplateMappings(
         project_configuration, authors_separator=self._AUTHORS_SEPARATOR)
 
-    for directory_entry in os.listdir(self._template_directory):
-      template_filename = os.path.join(
-          self._template_directory, directory_entry)
+    for directory_entry in os.listdir(self._templates_path):
+      template_filename = os.path.join(self._templates_path, directory_entry)
       if not os.path.isfile(template_filename):
         continue
 
       self._GenerateSection(
-          template_filename, template_mappings, output_writer, directory_entry)
+          template_filename, template_mappings, directory_entry)
 
     self._GenerateAuthors(
         project_configuration, template_mappings, output_writer, 'AUTHORS')
