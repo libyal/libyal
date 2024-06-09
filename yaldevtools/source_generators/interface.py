@@ -72,14 +72,17 @@ class BaseSourceFileGenerator(object):
       access_mode = 'a'
 
   def _GenerateSectionsFromGroupOperation(
-      self, group_operation, operations, project_configuration, template_mappings,
+      self, operations_file_name, group_operation, operations,
+      project_configuration, templates_path, template_mappings,
       output_file_path, access_mode='w'):
     """Generates sections based on a group operation.
 
     Args:
+      operations_file_name (str): name of the operations file.
       group_operation (GeneratorOperation): group operation.
       operations (dict[str, GeneratorOperation]): operations per identifier.
       project_configuration (ProjectConfiguration): project configuration.
+      templates_path (str): path of the directory containing the template files.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
       output_file_path (str): path of the output file.
@@ -90,8 +93,10 @@ class BaseSourceFileGenerator(object):
       if not operation:
         logging.warning((
             f'Missing operation: {operation_name:s} in '
-            f'{operations_file_path:s}'))
+            f'{operations_file_name:s}'))
         return
+
+      operation_file = getattr(operation, 'file', None)
 
       if operation.condition:
         expression = operation.GetConditionExpression()
@@ -108,15 +113,19 @@ class BaseSourceFileGenerator(object):
           result = False
 
         if not result:
-          continue
+          fallback_file = getattr(operation, 'fallback_file', None)
+          if not fallback_file:
+            continue
+
+          operation_file = fallback_file
 
       if operation.type == 'group':
         self._GenerateSectionsFromGroupOperation(
-            operation, operations, project_configuration, template_mappings,
-            output_file_path, access_mode=access_mode)
+            operations_file_name, operation, operations, project_configuration,
+            template_mappings, output_file_path, access_mode=access_mode)
 
       elif operation.type == 'template':
-        template_file_path = os.path.join(self._templates_path, operation.file)
+        template_file_path = os.path.join(templates_path, operation_file)
 
         template_string = self._ReadTemplateFile(template_file_path)
 
@@ -176,9 +185,11 @@ class BaseSourceFileGenerator(object):
           f'{operations_file_path:s}'))
       return
 
+    templates_path = os.path.dirname(operations_file_path)
+
     self._GenerateSectionsFromGroupOperation(
-        main_operation, operations, project_configuration, template_mappings,
-        output_file_path)
+        operations_file_name, main_operation, operations, project_configuration,
+        templates_path, template_mappings, output_file_path)
 
   def _ReadTemplateFile(self, path):
     """Reads a template string from file.

@@ -1,3 +1,0 @@
-        - architecture: 'x64'
-          compiler: 'gcc'
-          configure_options: '--enable-wide-character-type'

@@ -1169,165 +1169,56 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     del template_mappings['library_name']
     del template_mappings['library_name_upper_case']
 
-  def _GenerateGitHubActions(
-      self, project_configuration, template_mappings, include_header_file,
-      output_writer):
-    """Generates the .github/workflows/*.yml configuration files.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      include_header_file (LibraryIncludeHeaderFile): library include header
-          file.
-      output_writer (OutputWriter): output writer.
-    """
-    templates_path = os.path.join(self._templates_path, 'github_workflows')
-
-    output_directory = os.path.join('.github', 'workflows')
-
-    for directory_entry in os.listdir(templates_path):
-      template_filename = os.path.join(templates_path, directory_entry)
-      if not os.path.isfile(template_filename):
-        continue
-
-      output_filename = os.path.join(output_directory, directory_entry)
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename)
-
   def _GenerateGitHubActionsBuildYML(
-      self, project_configuration, template_mappings, include_header_file,
-      output_writer, output_filename):
+      self, project_configuration, template_mappings):
     """Generates the .github/workflows/build.yml configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      include_header_file (LibraryIncludeHeaderFile): library include header
-          file.
-      output_writer (OutputWriter): output writer.
       output_filename (str): path of the output file.
     """
-    templates_path = os.path.join(
-        self._templates_path, 'github_workflows', 'build.yml')
-
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
-
-    template_names = ['header.yml']
-
-    template_names.append('build_ubuntu-header.yml')
-
-    # TODO: improve check.
-    if project_configuration.library_name in ('libbfio', 'libcdata'):
-      template_names.append('build_ubuntu-no_pthread.yml')
-
-    if include_header_file.have_wide_character_type:
-      template_names.append('build_ubuntu-wide_character_type.yml')
-
-    if project_configuration.HasDependencyZlib():
-      template_names.append('build_ubuntu-zlib.yml')
-
-    if project_configuration.HasDependencyCrypto():
-      template_names.append('build_ubuntu-openssl.yml')
-
-    if project_configuration.HasTools():
-      template_names.append('build_ubuntu-static_executables.yml')
-
-    template_names.append('build_ubuntu-end.yml')
-
-    if 'fuse' in project_configuration.tools_build_dependencies:
-      template_names.append('build_ubuntu-fuse.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('build_python_ubuntu.yml')
-
-    template_names.append('coverage_ubuntu-start.yml')
-
-    if include_header_file.have_wide_character_type:
-      template_names.append('coverage_ubuntu-wide_character_type.yml')
-    else:
-      template_names.append('coverage_ubuntu.yml')
-
-    template_names.append('footer.yml')
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
 
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
 
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
+    operations_file_name = os.path.join('github_workflows', 'build.yml.yaml')
+    output_filename = os.path.join('.github', 'workflows', 'build.yml')
+    self._GenerateSectionsFromOperationsFile(
+        operations_file_name, 'main', project_configuration, template_mappings,
+        output_filename)
 
     del template_mappings['dpkg_build_dependencies']
 
   def _GenerateGitHubActionsBuildFreeBSDYML(
-      self, project_configuration, template_mappings, include_header_file,
-      output_writer, output_filename):
+      self, project_configuration, template_mappings):
     """Generates the .github/workflows/build_freebsd.yml configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      include_header_file (LibraryIncludeHeaderFile): library include header
-          file.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
-    templates_path = os.path.join(
-        self._templates_path, 'github_workflows', 'build_freebsd.yml')
-
     freebsd_build_dependencies = self._GetFreeBSDBuildDependencies(
         project_configuration)
-
-    template_names = ['main.yml']
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
 
     template_mappings['freebsd_build_dependencies'] = ' '.join(
         freebsd_build_dependencies)
 
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
+    operations_file_name = os.path.join(
+        'github_workflows', 'build_freebsd.yml.yaml')
+    output_filename = os.path.join('.github', 'workflows', 'build_freebsd.yml')
+    self._GenerateSectionsFromOperationsFile(
+        operations_file_name, 'main', project_configuration, template_mappings,
+        output_filename)
 
     del template_mappings['freebsd_build_dependencies']
 
-  def _GenerateGitHubActionsBuildOSSFuzzYML(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
-    """Generates the .github/workflows/build_ossfuzz.yml configuration file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
-    """
-    templates_path = os.path.join(
-        self._templates_path, 'github_workflows', 'build_ossfuzz.yml')
-
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
-
-    template_names = ['body.yml']
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
-
   def _GenerateGitHubActionsBuildSharedYML(
-      self, project_configuration, template_mappings, include_header_file,
-      output_writer, output_filename):
+      self, project_configuration, template_mappings, include_header_file):
     """Generates the .github/workflows/build_shared.yml configuration file.
 
     Args:
@@ -1336,45 +1227,37 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           maps to the name of a template variable.
       include_header_file (LibraryIncludeHeaderFile): library include header
           file.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
-    templates_path = os.path.join(
-        self._templates_path, 'github_workflows', 'build_shared.yml')
-
     dpkg_build_dependencies = self._GetDpkgBuildDependencies(
         project_configuration)
 
-    template_names = ['header.yml']
+    if 'wide_character_type' in project_configuration.library_features:
+      configure_options = '--enable-wide-character-type'
+    else:
+      configure_options = ''
 
-    if include_header_file.have_wide_character_type:
-      template_names.append('build_shared_ubuntu-wide_character_type.yml')
-
-    template_names.append('footer.yml')
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
+    template_mappings['configure_options'] = configure_options
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
 
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
+    operations_file_name = os.path.join(
+        'github_workflows', 'build_shared.yml.yaml')
+    output_filename = os.path.join('.github', 'workflows', 'build_shared.yml')
+    self._GenerateSectionsFromOperationsFile(
+        operations_file_name, 'main', project_configuration, template_mappings,
+        output_filename)
 
+    del template_mappings['configure_options']
     del template_mappings['dpkg_build_dependencies']
 
   def _GenerateGitHubActionsBuildWheelYML(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
+      self, project_configuration, template_mappings):
     """Generates the .github/workflows/build_wheel.yml configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
     templates_path = os.path.join(
         self._templates_path, 'github_workflows', 'build_wheel.yml')
@@ -1391,6 +1274,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_mappings['dpkg_build_dependencies'] = ' '.join(
         dpkg_build_dependencies)
 
+    output_filename = os.path.join('.github', 'workflows', 'build_wheel.yml')
     self._GenerateSections(
         template_filenames, template_mappings, output_filename)
 
@@ -1781,36 +1665,27 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateGitignore(project_configuration, template_mappings)
 
-    self._GenerateGitHubActions(
-        project_configuration, template_mappings, include_header_file,
-        output_writer)
-
-    output_filename = os.path.join('.github', 'workflows', 'build.yml')
     self._GenerateGitHubActionsBuildYML(
-        project_configuration, template_mappings, include_header_file,
-        output_writer, output_filename)
+        project_configuration, template_mappings)
 
-    output_filename = os.path.join('.github', 'workflows', 'build_freebsd.yml')
     self._GenerateGitHubActionsBuildFreeBSDYML(
-        project_configuration, template_mappings, include_header_file,
-        output_writer, output_filename)
+        project_configuration, template_mappings)
 
-    output_filename = os.path.join('.github', 'workflows', 'build_shared.yml')
     self._GenerateGitHubActionsBuildSharedYML(
-        project_configuration, template_mappings, include_header_file,
-        output_writer, output_filename)
+        project_configuration, template_mappings, include_header_file)
 
     if project_configuration.HasPythonModule():
-      output_filename = os.path.join('.github', 'workflows', 'build_wheel.yml')
       self._GenerateGitHubActionsBuildWheelYML(
-          project_configuration, template_mappings, output_writer,
-          output_filename)
+          project_configuration, template_mappings)
 
     if os.path.isdir('ossfuzz'):
-      output_filename = os.path.join('.github', 'workflows', 'build_ossfuzz.yml')
-      self._GenerateGitHubActionsBuildOSSFuzzYML(
-          project_configuration, template_mappings, output_writer,
-          output_filename)
+      operations_file_name = os.path.join(
+          'github_workflows', 'build_ossfuzz.yml.yaml')
+      output_filename = os.path.join(
+          '.github', 'workflows', 'build_ossfuzz.yml')
+      self._GenerateSectionsFromOperationsFile(
+          operations_file_name, 'main', project_configuration,
+          template_mappings, output_filename)
 
     self._GenerateAppVeyorYML(
         project_configuration, template_mappings, output_writer, 'appveyor.yml')

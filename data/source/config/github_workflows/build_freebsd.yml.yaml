@@ -1,0 +1,12 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: build_freebsd.yml/body.yml
+mappings:
+- freebsd_build_dependencies
+---
+identifier: main
+type: group
+operations:
+- generate_body

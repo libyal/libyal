@@ -1,3 +1,8 @@
+  coverage_ubuntu:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
         - architecture: 'x86'
           compiler: 'gcc'
           configure_options: ''

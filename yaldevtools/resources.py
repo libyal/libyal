@@ -9,6 +9,8 @@ class GeneratorOperation(object):
 
   Attributes:
     condition (str): condition under which the operation applies.
+    fallback_file (str): path of a fallback template file related to the
+        operation.
     file (str): path of a template file related to the operation.
     identifier (str): identifier of the generator operation.
     mappings (str): template mappings related to the operation.
@@ -27,6 +29,7 @@ class GeneratorOperation(object):
     super(GeneratorOperation, self).__init__()
     self._condition_expression = None
     self.condition = None
+    self.fallback_file = None
     self.file = None
     self.identifier = identifier
     self.mappings = None

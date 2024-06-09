@@ -26,6 +26,7 @@ class YAMLGeneratorOperationsFile(object):
   _SUPPORTED_KEYS = frozenset([
       'condition',
       'identifier',
+      'fallback_file',
       'file',
       'mappings',
       'modifiers',
@@ -41,6 +42,7 @@ class YAMLGeneratorOperationsFile(object):
   _SUPPORTED_KEYS_TYPE_TEMPLATE = frozenset([
       'condition',
       'identifier',
+      'fallback_file',
       'file',
       'mappings',
       'modifiers',
@@ -109,6 +111,8 @@ class YAMLGeneratorOperationsFile(object):
 
       generator_operation.condition = yaml_generator_operation.get(
           'condition', None)
+      generator_operation.fallback_file = yaml_generator_operation.get(
+          'fallback_file', None)
       generator_operation.file = yaml_generator_operation.get('file', None)
       generator_operation.mappings = yaml_generator_operation.get(
           'mappings', None)

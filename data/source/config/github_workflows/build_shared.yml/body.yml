@@ -1,3 +1,18 @@
+# Build from source with libyal dependencies as shared libraries.
+name: build_shared
+on:
+  push:
+    branches: [main]
+permissions: read-all
+jobs:
+  build_shared_ubuntu:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '${configure_options}'
     steps:
     - uses: actions/checkout@v4
     - name: Install build dependencies

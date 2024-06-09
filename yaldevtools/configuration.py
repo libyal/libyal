@@ -86,6 +86,7 @@ class ProjectConfiguration(BaseConfiguration):
     java_bindings_name (str): name of the Java bindings.
     library_build_dependencies (str): library build dependencies.
     library_description (str): description of the library.
+    library_features (list[str]): features of the library.
     library_name (str): name of the library.
     library_name_suffix (str): suffix of the name of the library.
     library_public_types (str): types publicly exported by the library.
@@ -207,6 +208,7 @@ class ProjectConfiguration(BaseConfiguration):
     # Library configuration.
     self.library_build_dependencies = None
     self.library_description = None
+    self.library_features = []
     self.library_name = None
     self.library_name_suffix = None
     # TODO: determine public types based on include header.
@@ -483,6 +485,10 @@ class ProjectConfiguration(BaseConfiguration):
 
     self.library_build_dependencies = self._GetOptionalConfigValue(
         config_parser, 'library', 'build_dependencies', default_value=[])
+
+    self.library_features = self._GetOptionalConfigValue(
+        config_parser, 'library', 'features', default_value=[])
+
     self.library_name = self.project_name
     self.library_name_suffix = self.library_name[3:]
     self.library_public_types = self._GetOptionalConfigValue(
