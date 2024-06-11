@@ -1,0 +1,100 @@
+# yaldevtools generator specification.
+---
+identifier: generate_header
+type: template
+file: runtime_structure_test.c/header.c
+mappings:
+- authors
+- copyright
+- structure_name
+---
+identifier: generate_includes
+type: template
+file: runtime_structure_test.c/includes.c
+mappings:
+- library_name
+- prefix
+- structure_name
+---
+identifier: generate_main_function
+type: template
+file: runtime_structure_test.c/main.c
+mappings:
+- library_name
+- library_name_upper_case
+- prefix
+- prefix_upper_case
+- structure_name
+---
+identifier: generate_test_data
+type: template
+file: runtime_structure_test.c/test_data.c
+mappings:
+- prefix
+- structure_name
+- test_data
+- test_data_size
+---
+identifier: generate_test_function_free
+type: template
+file: runtime_structure_test.c/free.c
+mappings:
+- library_name
+- prefix
+- prefix_upper_case
+- structure_name
+---
+identifier: generate_test_function_initialize
+type: template
+file: runtime_structure_test.c/initialize.c
+mappings:
+- library_name
+- prefix
+- prefix_upper_case
+- structure_name
+---
+identifier: generate_test_function_read_data
+type: template
+file: runtime_structure_test.c/read_data.c
+mappings:
+- library_name
+- prefix
+- prefix_upper_case
+- structure_name
+- test_data_size
+---
+identifier: generate_test_function_read_file_io_handle
+type: template
+file: runtime_structure_test.c/read_file_io_handle.c
+mappings:
+- library_name
+- prefix
+- prefix_upper_case
+- structure_name
+- test_data_size
+---
+identifier: generate_test_functions_end
+type: template
+file: runtime_structure_test.c/functions-end.c
+mappings:
+- library_name_upper_case
+---
+identifier: generate_test_functions_start
+type: template
+file: runtime_structure_test.c/functions-start.c
+mappings:
+- library_name_upper_case
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_includes
+- generate_test_data
+- generate_test_functions_start
+- generate_test_function_initialize
+- generate_test_function_free
+- generate_test_function_read_data
+- generate_test_function_read_file_io_handle
+- generate_test_functions_end
+- generate_main_function

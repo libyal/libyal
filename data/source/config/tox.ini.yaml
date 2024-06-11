@@ -1,0 +1,12 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: tox.ini/body
+mappings:
+- library_name
+---
+identifier: main
+type: group
+operations:
+- generate_body

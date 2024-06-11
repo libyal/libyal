@@ -11,17 +11,13 @@ from yaldevtools.source_generators import interface
 class ConfigurationFileGenerator(interface.SourceFileGenerator):
   """Configuration file generator."""
 
-  def _GenerateACIncludeM4(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
+  def _GenerateACIncludeM4(self, project_configuration, template_mappings):
     """Generates the acinclude.m4 configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
     templates_path = os.path.join(self._templates_path, 'acinclude.m4')
 
@@ -32,7 +28,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       with open(m4_file, 'r', encoding='utf8') as file_object:
         input_lines = file_object.readlines()
 
-      with open(output_filename, 'w', encoding='utf8') as file_object:
+      with open('acinclude.m4', 'w', encoding='utf8') as file_object:
         # Generate the first line
         input_lines.pop(0)
         file_object.write('dnl Checks for required headers and functions\n')
@@ -76,41 +72,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           file_object.write(line)
 
     else:
-      template_names = ['header.m4', 'check_library.m4']
-
-      if project_configuration.HasTools():
-        template_names.append('check_tools.m4-start')
-
-        tools_name = f'{project_configuration.library_name_suffix:s}tools'
-        log_handle_path = os.path.join(tools_name, 'log_handle.c')
-        if os.path.exists(log_handle_path):
-          template_names.append('check_tools.m4-log_handle')
-
-        mount_tool_name = f'{project_configuration.library_name_suffix:s}mount'
-        mount_tool_path = os.path.join(tools_name, f'{mount_tool_name:s}.c')
-        if os.path.exists(mount_tool_path):
-          template_names.append('check_tools.m4-mount_tool')
-
-        template_names.append('check_tools.m4-end')
-
       template_mappings['library_name'] = library_name
       template_mappings['library_name_upper_case'] = library_name.upper()
-      template_mappings['mount_tool_name'] = mount_tool_name
-      template_mappings['tools_name'] = tools_name
-      template_mappings['tools_name_upper_case'] = tools_name.upper()
 
-      template_filenames = [
-          os.path.join(templates_path, template_name)
-          for template_name in template_names]
-
-      self._GenerateSections(
-          template_filenames, template_mappings, output_filename)
+      self._GenerateSectionsFromOperationsFile(
+          'acinclude.m4.yaml', 'main', project_configuration, template_mappings,
+          'acinclude.m4')
 
       del template_mappings['library_name']
       del template_mappings['library_name_upper_case']
-      del template_mappings['mount_tool_name']
-      del template_mappings['tools_name']
-      del template_mappings['tools_name_upper_case']
 
     template_mappings['library_name'] = library_name
     template_mappings['library_name_upper_case'] = library_name.upper()
@@ -122,198 +92,53 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_filename = os.path.join(templates_path, template_filename)
     self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
+        template_filename, template_mappings, 'acinclude.m4', access_mode='a')
 
     del template_mappings['library_name']
     del template_mappings['library_name_upper_case']
 
-  def _GenerateAppVeyorYML(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
+  def _GenerateAppVeyorYML(self, project_configuration, template_mappings):
     """Generates the appveyor.yml configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
     templates_path = os.path.join(self._templates_path, 'appveyor.yml')
-
-    template_names = ['environment.yml']
-
-    if project_configuration.deploy_to_nuget:
-      template_names.append('environment-nuget.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('environment-pypi.yml')
-
-    template_names.append('environment-matrix.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('environment-matrix-vs_with_python.yml')
-
-    if project_configuration.deploy_to_nuget:
-      template_names.append('environment-matrix-nuget.yml')
-
-    template_names.append('environment-matrix-macos.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('environment-matrix-macos-python.yml')
-    else:
-      template_names.append('environment-matrix-macos-pkgbuild.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('environment-matrix-wheel.yml')
-
-    template_names.append('environment-matrix-cygwin64.yml')
 
     # if project_configuration.HasDependencyCrypto():
     # TODO: add environment-cygwin64-openssl.yml
 
-    if project_configuration.HasPythonModule():
-      template_names.append('environment-matrix-cygwin64-python.yml')
-
-    if project_configuration.HasTools():
-      if 'fuse' in project_configuration.tools_build_dependencies:
-        template_names.append(
-            'environment-matrix-cygwin64-static-executables-fuse.yml')
-      else:
-        template_names.append(
-            'environment-matrix-cygwin64-static-executables.yml')
-
-    template_names.append('environment-matrix-mingw-w64.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('environment-matrix-mingw-w64-python.yml')
-
-    if project_configuration.HasTools():
-      template_names.append(
-          'environment-matrix-mingw-w64-static-executables.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('matrix-allow_failures.yml')
-
-    template_names.append('install-header.yml')
-
-    # TODO: check test more generic.
-    if project_configuration.library_name == 'libfsntfs':
-      template_names.append('install-testdata.yml')
-
-    if (project_configuration.HasDependencyLex() or
-        project_configuration.HasDependencyYacc()):
-      template_names.append('install-winflexbison.yml')
-
-    if project_configuration.HasDependencyZlib():
-      template_names.append('install-zlib.yml')
-
-    if project_configuration.HasDependencyBzip2():
-      template_names.append('install-bzip2.yml')
-
-    if project_configuration.HasDependencyDokan():
-      template_names.append('install-dokan.yml')
-
-    template_names.append('install-macos.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('install-python.yml')
-
     brew_build_dependencies = self._GetBrewBuildDependencies(
         project_configuration)
-
-    template_mappings['brew_build_dependencies'] = ' '.join(
-        sorted(brew_build_dependencies))
-    template_mappings['pypi_token'] = getattr(
-        project_configuration, 'pypi_token_appveyor', '')
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
-
-    del template_mappings['pypi_token']
-    del template_mappings['brew_build_dependencies']
 
     cygwin_build_dependencies = self._GetCygwinBuildDependencies(
         project_configuration)
 
-    if cygwin_build_dependencies:
-      cygwin_build_dependencies = ' '.join([
-          f'-P {name:s}' for name in cygwin_build_dependencies])
-      template_mappings['cygwin_build_dependencies'] = cygwin_build_dependencies
-
-      template_filename = os.path.join(templates_path, 'install-cygwin.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename, access_mode='a')
-
-      del template_mappings['cygwin_build_dependencies']
-
     mingw_msys2_build_dependencies = self._GetMinGWMSYS2BuildDependencies(
         project_configuration)
 
-    if mingw_msys2_build_dependencies:
-      mingw_msys2_build_dependencies = ' '.join(mingw_msys2_build_dependencies)
-      template_mappings['mingw_msys2_build_dependencies'] = (
-          mingw_msys2_build_dependencies)
+    template_mappings['brew_build_dependencies'] = ' '.join(
+        sorted(brew_build_dependencies))
 
-      template_filename = os.path.join(
-          templates_path, 'install-mingw-msys2.yml')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename, access_mode='a')
+    template_mappings['cygwin_build_dependencies'] = ' '.join([
+        f'-P {name:s}' for name in cygwin_build_dependencies])
 
-      del template_mappings['mingw_msys2_build_dependencies']
+    template_mappings['mingw_msys2_build_dependencies'] = ' '.join(
+        mingw_msys2_build_dependencies)
 
-    # TODO: refactor code above to use template_names
+    template_mappings['pypi_token'] = getattr(
+        project_configuration, 'pypi_token_appveyor', '')
 
-    template_names = []
+    self._GenerateSectionsFromOperationsFile(
+        'appveyor.yml.yaml', 'main', project_configuration, template_mappings,
+        'appveyor.yml')
 
-    template_names.append('install-codecov.yml')
-
-    template_names.append('build_script-header.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('build_script-vs_with_python.yml')
-
-    if project_configuration.deploy_to_nuget:
-      template_names.append('build_script-nuget.yml')
-
-    template_names.append('build_script-macos.yml')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('build_script-python.yml')
-
-    template_names.extend([
-        'build_script-footer.yml', 'test_script.yml', 'after_test.yml'])
-
-    if (project_configuration.deploy_to_nuget or
-        project_configuration.HasPythonModule()):
-      template_names.append('artifacts.yml')
-
-      if project_configuration.deploy_to_nuget:
-        template_names.append('artifacts-nuget.yml')
-
-      if project_configuration.HasPythonModule():
-        template_names.append('artifacts-pypi.yml')
-
-      template_names.append('deploy_script-header.yml')
-
-      if project_configuration.deploy_to_nuget:
-        template_names.append('deploy_script-nuget.yml')
-
-      if project_configuration.HasPythonModule():
-        template_names.append('deploy_script-pypi.yml')
-
-      template_names.append('deploy_script-footer.yml')
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename, access_mode='a')
+    del template_mappings['brew_build_dependencies']
+    del template_mappings['cygwin_build_dependencies']
+    del template_mappings['mingw_msys2_build_dependencies']
+    del template_mappings['pypi_token']
 
   def _GenerateCodecovYML(self, project_configuration, template_mappings):
     """Generates the .codecov.yml configuration file.
@@ -1280,51 +1105,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     del template_mappings['dpkg_build_dependencies']
 
-  def _GeneratePyprojectToml(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
-    """Generates the pyproject.toml configuration file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
-    """
-    templates_path = os.path.join(self._templates_path)
-
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
-
-    template_names = ['pyproject.toml']
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    template_mappings['dpkg_build_dependencies'] = ' '.join(
-        dpkg_build_dependencies)
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
-
-    del template_mappings['dpkg_build_dependencies']
-
-  def _GenerateSetupCfgIn(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
+  def _GenerateSetupCfgIn(self, project_configuration, template_mappings):
     """Generates the setup.cfg.in configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
-    templates_path = os.path.join(self._templates_path, 'setup.cfg.in')
-
     if project_configuration.project_status == 'experimental':
       python_module_development_status = '2 - Pre-Alpha'
     elif project_configuration.project_status == 'alpha':
@@ -1334,48 +1122,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     else:
       python_module_development_status = '5 - Production/Stable'
 
-    template_names = ['body']
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    template_mappings['library_name'] = project_configuration.library_name
     template_mappings['python_module_development_status'] = (
         python_module_development_status)
 
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
+    self._GenerateSectionsFromOperationsFile(
+        'setup.cfg.in.yaml', 'main', project_configuration,
+        template_mappings, 'setup.cfg.in')
 
-    del template_mappings['library_name']
     del template_mappings['python_module_development_status']
-
-  def _GenerateToxIni(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
-    """Generates the tox.ini configuration file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
-    """
-    templates_path = os.path.join(self._templates_path, 'tox.ini')
-
-    template_names = ['body.ini']
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    template_mappings['library_name'] = project_configuration.library_name
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
-
-    del template_mappings['library_name']
 
   def _GetBrewBuildDependencies(self, project_configuration):
     """Retrieves the brew build dependencies.
@@ -1634,7 +1388,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      if directory_entry in ('codecov.yml.yaml', 'gitignore.yaml'):
+      # TODO: skip operator definitons files based on header.
+      if directory_entry in (
+          'acinclude.m4.yaml', 'appveyor.yml.yaml', 'codecov.yml.yaml',
+          'gitignore.yaml', 'setup.cfg.in.yaml', 'tox.ini.yaml'):
         continue
 
       if (directory_entry in ('pyproject.toml', 'setup.py') and
@@ -1687,14 +1444,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           operations_file_name, 'main', project_configuration,
           template_mappings, output_filename)
 
-    self._GenerateAppVeyorYML(
-        project_configuration, template_mappings, output_writer, 'appveyor.yml')
+    self._GenerateAppVeyorYML(project_configuration, template_mappings)
 
     self._GenerateConfigureAC(
         project_configuration, template_mappings, output_writer, 'configure.ac')
 
-    self._GenerateACIncludeM4(
-        project_configuration, template_mappings, output_writer, 'acinclude.m4')
+    self._GenerateACIncludeM4(project_configuration, template_mappings)
 
     self._GenerateDpkg(
         project_configuration, template_mappings, output_writer, 'dpkg')
@@ -1705,9 +1460,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         output_filename)
 
     if project_configuration.HasPythonModule():
-      self._GenerateSetupCfgIn(
-          project_configuration, template_mappings, output_writer,
-          "setup.cfg.in")
+      self._GenerateSetupCfgIn(project_configuration, template_mappings)
 
-      self._GenerateToxIni(
-          project_configuration, template_mappings, output_writer, "tox.ini")
+      self._GenerateSectionsFromOperationsFile(
+          'tox.ini.yaml', 'main', project_configuration, template_mappings,
+          'tox.ini')

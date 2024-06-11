@@ -1,0 +1,13 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: setup.cfg.in/body
+mappings:
+- library_name
+- python_module_development_status
+---
+identifier: main
+type: group
+operations:
+- generate_body

@@ -230,6 +230,7 @@ class ProjectConfiguration(BaseConfiguration):
     self.tools_build_dependencies = None
     self.tools_description = None
     self.tools_directory = None
+    self.tools_features = []
     self.tools_names = []
 
     # Info tool configuration.
@@ -821,6 +822,9 @@ class ProjectConfiguration(BaseConfiguration):
     self.tools_directory = self._GetOptionalConfigValue(
         config_parser, 'tools', 'directory', default_value=tools_directory)
 
+    self.tools_features = self._GetOptionalConfigValue(
+        config_parser, 'tools', 'features', default_value=[])
+
     self.tools_names = self._GetOptionalConfigValue(
         config_parser, 'tools', 'names', default_value=[])
 
@@ -949,6 +953,14 @@ class ProjectConfiguration(BaseConfiguration):
       bool: True if the project provides Java bindings.
     """
     return 'java_bindings' in self.project_features
+
+  def HasMountTool(self):
+    """Determines if the project provides a mount tool.
+
+    Returns:
+      bool: True if the project provides a mount tool.
+    """
+    return 'mount_tool' in self.tools_features
 
   def HasMountToolsFeatureCodepage(self):
     """Determines if the mount tool has a codepage feature.
@@ -1095,9 +1107,9 @@ class ProjectConfiguration(BaseConfiguration):
     """Determines if the project provides tools.
 
     Returns:
-      bool: True if the tools directory exits.
+      bool: True if the project provides tools.
     """
-    return self.tools_names != []
+    return 'tools' in self.project_features
 
   def ReadFromFile(self, filename):
     """Reads the configuration from file.

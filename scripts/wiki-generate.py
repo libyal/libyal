@@ -515,6 +515,7 @@ class WikiPageGenerator(object):
           'And the following executables:\n'
           '```\n')
 
+      # TODO: use tools_features to generate tools_names
       for name in project_configuration.tools_names:
         cygwin_executables += (
             '{0:s}/.libs/{1:s}.exe\n'.format(
@@ -557,6 +558,7 @@ class WikiPageGenerator(object):
           'And the following executables:\n'
           '```\n')
 
+      # TODO: use tools_features to generate tools_names
       for name in project_configuration.tools_names:
         mingw_executables += (
             '{0:s}/.libs/{1:s}.exe\n'.format(

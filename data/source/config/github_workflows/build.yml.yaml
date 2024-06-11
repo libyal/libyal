@@ -26,7 +26,7 @@ mappings:
 ---
 identifier: generate_build_with_static_executables
 type: template
-condition: "tools_names != []"
+condition: "'tools' in project_features"
 file: build.yml/build_ubuntu-static_executables.yml
 ---
 identifier: generate_build_with_openssl

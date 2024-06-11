@@ -1,5 +1,5 @@
-dnl Function to detect if ${tools_name} dependencies are available
-AC_DEFUN([AX_${tools_name_upper_case}_CHECK_LOCAL],
+dnl Function to detect if ${library_name_suffix}tools dependencies are available
+AC_DEFUN([AX_${library_name_suffix_upper_case}TOOLS_CHECK_LOCAL],
   [AC_CHECK_HEADERS([signal.h sys/signal.h unistd.h])
 
   AC_CHECK_FUNCS([close getopt setvbuf])

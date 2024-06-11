@@ -90,7 +90,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
   _NON_PRINTABLE_CHARACTERS = list(range(0, 0x20)) + list(range(0x7f, 0xa0))
   _ESCAPE_CHARACTERS = str.maketrans({
-      value: '\\x{0:02x}'.format(value)
+      value: f'\\x{value:02x}'
       for value in _NON_PRINTABLE_CHARACTERS})
 
   def __init__(self, templates_path):
@@ -122,13 +122,12 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       data_string = data[block_index:block_index + 16]
 
       hexadecimal_string = ', '.join([
-          '0x{0:02x}'.format(byte_value)
-          for byte_value in data_string[0:16]])
+          f'0x{byte_value:02x}' for byte_value in data_string[0:16]])
 
       if len(data_string) < 16 or block_index + 16 == data_size:
-        hexadecimal_lines.append('\t{0:s}'.format(hexadecimal_string))
+        hexadecimal_lines.append(f'\t{hexadecimal_string:s}')
       else:
-        hexadecimal_lines.append('\t{0:s},'.format(hexadecimal_string))
+        hexadecimal_lines.append('\t{hexadecimal_string:s},')
 
     return '\n'.join(hexadecimal_lines)
 
@@ -145,9 +144,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
           configuration of the structure members.
       output_filename (str): name of the output file.
     """
-    library_name = 'lib{0:s}'.format(self._prefix)
     template_mappings = self._GetTemplateMappings(
-        library_name=library_name, structure_name=data_type_definition_name)
+        library_name=f'lib{self._prefix:s}',
+        structure_name=data_type_definition_name)
 
     template_filename = os.path.join(
         self._templates_path, 'runtime_structure.h', 'structure-start.h')
@@ -272,25 +271,29 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.h')
 
-    library_name = 'lib{0:s}'.format(self._prefix)
     template_mappings = self._GetTemplateMappings(
-        library_name=library_name, structure_name=data_type_definition.name)
+        library_name=f'lib{self._prefix:s}',
+        structure_name=data_type_definition.name)
 
     if not self._prefix:
       output_filename = 'runtime_structure.h'
     else:
       output_filename = os.path.join(
-          'lib{0:s}'.format(self._prefix),
-          'lib{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
+          f'lib{self._prefix:s}',
+          f'lib{self._prefix:s}_{data_type_definition.name:s}.h')
 
-    logging.info('Writing: {0:s}'.format(output_filename))
+    logging.info(f'Writing: {output_filename:s}')
 
     structure_description = self._GetStructureDescription(data_type_definition)
-    structure_description_title = '{0:s}{1:s}'.format(
-        structure_description[0].upper(), structure_description[1:])
+    structure_description_title = ''.join([
+        structure_description[0].upper(), structure_description[1:]])
 
     template_mappings['structure_description_title'] = (
         structure_description_title)
+
+    # self._GenerateSectionsFromOperationsFile(
+    #     'runtime_structure.h.yaml', 'main', project_configuration,
+    #     template_mappings, output_filename)
 
     template_filename = os.path.join(template_directory, 'header.h')
     self._GenerateSection(template_filename, template_mappings, output_filename)
@@ -428,9 +431,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       if member_data_type in ('filetime', 'posix_time'):
         has_datetime_member = True
 
-    library_name = 'lib{0:s}'.format(self._prefix)
     template_mappings = self._GetTemplateMappings(
-        library_name=library_name, structure_name=data_type_definition.name)
+        library_name=f'lib{self._prefix:s}',
+        structure_name=data_type_definition.name)
 
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
@@ -439,18 +442,18 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       output_filename = 'runtime_structure.c'
     else:
       output_filename = os.path.join(
-          'lib{0:s}'.format(self._prefix),
-          'lib{0:s}_{1:s}.c'.format(self._prefix, data_type_definition.name))
+          f'lib{self._prefix:s}',
+          f'lib{self._prefix:s}_{data_type_definition.name:s}.c')
 
     structure_description = self._GetStructureDescription(data_type_definition)
-    structure_description_title = '{0:s}{1:s}'.format(
-        structure_description[0].upper(), structure_description[1:])
+    structure_description_title = ''.join([
+        structure_description[0].upper(), structure_description[1:]])
 
     template_mappings['structure_description'] = structure_description
     template_mappings['structure_description_title'] = (
         structure_description_title)
 
-    logging.info('Writing: {0:s}'.format(output_filename))
+    logging.info(f'Writing: {output_filename:s}')
 
     template_filename = os.path.join(template_directory, 'header.c')
     self._GenerateSection(template_filename, template_mappings, output_filename)
@@ -840,9 +843,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.c')
 
-    library_name = 'lib{0:s}'.format(self._prefix)
     template_mappings = self._GetTemplateMappings(
-        library_name=library_name, structure_name=data_type_definition_name)
+        library_name=f'lib{self._prefix:s}',
+        structure_name=data_type_definition_name)
 
     function_name = 'lib{0:s}_{1:s}_read_data'.format(
         self._prefix, data_type_definition_name)
@@ -1042,9 +1045,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     variables = sorted(variables)
     variables.append('')
 
-    library_name = 'lib{0:s}'.format(self._prefix)
     template_mappings = self._GetTemplateMappings(
-        library_name=library_name, structure_name=data_type_definition_name)
+        library_name=f'lib{self._prefix:s}',
+        structure_name=data_type_definition_name)
 
     structure_description = self._GetStructureDescription(data_type_definition)
     template_mappings['structure_description'] = structure_description
@@ -1058,75 +1061,38 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     del template_mappings['variables']
 
   def _GenerateRuntimeStructureTestSourceFile(
-      self, data_type_definition, members_configuration):
+      self, project_configuration, data_type_definition, members_configuration):
     """Generates a runtime structure test source file.
 
     Args:
+      project_configuration (ProjectConfiguration): project configuration.
       data_type_definition (DataTypeDefinition): structure data type definition.
       members_configuration (dict[dict[str: str]]): code generation
           configuration of the structure members.
     """
-    library_name = 'lib{0:s}'.format(self._prefix)
-    template_mappings = self._GetTemplateMappings(
-        library_name=library_name, structure_name=data_type_definition.name)
-
-    template_directory = os.path.join(
-        self._templates_path, 'runtime_structure_test.c')
-
+    # TODO: handle multiple data file.
     test_data = self._ReadTestDataFile(data_type_definition.name)
-
-    template_mappings['test_data'] = self._FormatTestData(test_data)
-    template_mappings['test_data_size'] = len(test_data)
 
     if not self._prefix:
       output_filename = 'runtime_structure_test.c'
     else:
-      output_filename = os.path.join('tests', '{0:s}_test_{1:s}.c'.format(
-          self._prefix, data_type_definition.name))
+      output_filename = os.path.join(
+          'tests', f'{self._prefix:s}_test_{data_type_definition.name:s}.c')
 
-    logging.info('Writing: {0:s}'.format(output_filename))
+    logging.info(f'Writing: {output_filename:s}')
 
-    template_filename = os.path.join(template_directory, 'header.c')
-    self._GenerateSection(template_filename, template_mappings, output_filename)
+    template_mappings = self._GetTemplateMappings(
+        library_name=f'lib{self._prefix:s}',
+        structure_name=data_type_definition.name)
 
-    template_filename = os.path.join(template_directory, 'includes.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    template_filename = os.path.join(template_directory, 'test_data.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    template_filename = os.path.join(template_directory, 'body-start.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    template_filename = os.path.join(template_directory, 'initialize.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    template_filename = os.path.join(template_directory, 'free.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    template_filename = os.path.join(template_directory, 'read_data.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    template_filename = os.path.join(
-        template_directory, 'read_file_io_handle.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
+    template_mappings['test_data'] = self._FormatTestData(test_data)
+    template_mappings['test_data_size'] = len(test_data)
 
     # TODO: add support for get functions.
 
-    template_filename = os.path.join(template_directory, 'body-end.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    template_filename = os.path.join(template_directory, 'main.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
+    self._GenerateSectionsFromOperationsFile(
+        'runtime_structure_test.c.yaml', 'main', project_configuration,
+        template_mappings, output_filename)
 
     del template_mappings['test_data']
     del template_mappings['test_data_size']
@@ -1175,19 +1141,19 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       output_filename = 'stored_structure.h'
     else:
       output_filename = os.path.join(
-          'lib{0:s}'.format(self._prefix),
-          '{0:s}_{1:s}.h'.format(self._prefix, data_type_definition.name))
+          f'lib{self._prefix:s}',
+          f'{self._prefix:s}_{data_type_definition.name:s}.h')
 
-    logging.info('Writing: {0:s}'.format(output_filename))
+    logging.info(f'Writing: {output_filename:s}')
 
     structure_description = self._GetStructureDescription(data_type_definition)
-    structure_description = '{0:s}{1:s}'.format(
-        structure_description[0].upper(), structure_description[1:])
+    structure_description = ''.join([
+        structure_description[0].upper(), structure_description[1:]])
 
     format_definition = self._GetFormatDefinitions()
     if format_definition.description:
-      structure_description = '{0:s} of the {1:s}'.format(
-          structure_description, format_definition.description)
+      structure_description = (
+          f'{structure_description:s} of the {format_definition.description:s}')
 
     template_mappings['structure_description'] = structure_description
 
@@ -1607,7 +1573,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       self._GenerateRuntimeStructureSourceFile(
           definition, members_configuration)
       self._GenerateRuntimeStructureTestSourceFile(
-          definition, members_configuration)
+          project_configuration, definition, members_configuration)
       self._GenerateStoredStructureHeaderFile(definition, members_configuration)
 
     return result

@@ -1,0 +1,53 @@
+# yaldevtools generator specification.
+---
+identifier: generate_check_library
+type: template
+file: acinclude.m4/check_library.m4
+mappings:
+- library_name
+- library_name_upper_case
+---
+identifier: generate_check_tools
+type: group
+condition: "'tools' in project_features"
+operations:
+- generate_check_tools_start
+- generate_check_tools_log_handle
+- generate_check_tools_mount_tool
+- generate_check_tools_end
+---
+identifier: generate_check_tools_end
+type: template
+file: acinclude.m4/check_tools.m4-end
+---
+identifier: generate_check_tools_log_handle
+type: template
+condition: "'log_handle' in tools_features"
+file: acinclude.m4/check_tools.m4-log_handle
+mappings:
+- library_name_suffix
+---
+identifier: generate_check_tools_mount_tool
+type: template
+condition: "'mount_tool' in tools_features"
+file: acinclude.m4/check_tools.m4-mount_tool
+mappings:
+- library_name_suffix
+---
+identifier: generate_check_tools_start
+type: template
+file: acinclude.m4/check_tools.m4-start
+mappings:
+- library_name_suffix
+- library_name_suffix_upper_case
+---
+identifier: generate_header
+type: template
+file: acinclude.m4/header.m4
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_check_library
+- generate_check_tools

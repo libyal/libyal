@@ -1,5 +1,5 @@
 
-  dnl Headers included in ${tools_name}/log_handle.c
+  dnl Headers included in ${library_name_suffix}tools/log_handle.c
   AC_CHECK_HEADERS([stdarg.h varargs.h])
 
   AS_IF(

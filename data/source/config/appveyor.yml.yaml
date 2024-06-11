@@ -1,0 +1,274 @@
+# yaldevtools generator specification.
+---
+identifier: generate_artifacts_and_deploy_script
+type: group
+condition: "'nuget' in project_features or 'python_bindings' in project_features"
+operations:
+- generate_artifacts_start
+- generate_artifacts_nuget
+- generate_artifacts_pypi
+- generate_deploy_script_start
+- generate_deploy_script_nuget
+- generate_deploy_script_pypi
+- generate_deploy_script_end
+---
+identifier: generate_artifacts_nuget
+type: template
+condition: "'nuget' in project_features"
+file: appveyor.yml/artifacts-nuget.yml
+---
+identifier: generate_artifacts_pypi
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/artifacts-pypi.yml
+---
+identifier: generate_artifacts_start
+type: template
+file: appveyor.yml/artifacts-start.yml
+---
+identifier: generate_after_test
+type: template
+file: appveyor.yml/after_test.yml
+mappings:
+- library_name
+---
+identifier: generate_build_script_end
+type: template
+file: appveyor.yml/build_script-end.yml
+mappings:
+- library_name
+---
+identifier: generate_build_script_macos
+type: template
+file: appveyor.yml/build_script-macos.yml
+---
+identifier: generate_build_script_nuget
+type: template
+condition: "'nuget' in project_features"
+file: appveyor.yml/build_script-nuget.yml
+mappings:
+- library_name
+---
+identifier: generate_build_script_python
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/build_script-python.yml
+---
+identifier: generate_build_script_start
+type: template
+file: appveyor.yml/build_script-start.yml
+---
+identifier: generate_build_script_vs_with_python
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/build_script-vs_with_python.yml
+---
+identifier: generate_deploy_script_end
+type: template
+file: appveyor.yml/deploy_script-end.yml
+---
+identifier: generate_deploy_script_nuget
+type: template
+condition: "'nuget' in project_features"
+file: appveyor.yml/deploy_script-nuget.yml
+---
+identifier: generate_deploy_script_pypi
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/deploy_script-pypi.yml
+---
+identifier: generate_deploy_script_start
+type: template
+file: appveyor.yml/deploy_script-start.yml
+---
+identifier: generate_environment
+type: template
+file: appveyor.yml/environment.yml
+---
+identifier: generate_environment_matrix
+type: template
+file: appveyor.yml/environment-matrix.yml
+---
+identifier: generate_environment_matrix_allow_failures
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/matrix-allow_failures.yml
+---
+identifier: generate_environment_matrix_cygwin
+type: template
+file: appveyor.yml/environment-matrix-cygwin64.yml
+---
+identifier: generate_environment_matrix_cygwin_python
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/environment-matrix-cygwin64-python.yml
+---
+identifier: generate_environment_matrix_cygwin_tools
+type: group
+condition: "'tools' in project_features"
+operations:
+- generate_environment_matrix_cygwin_tools_static_executables
+---
+identifier: generate_environment_matrix_cygwin_tools_static_executables
+type: template
+condition: "'mount_tool' in tools_features"
+file: appveyor.yml/environment-matrix-cygwin64-static-executables-fuse.yml
+fallback_file: appveyor.yml/environment-matrix-cygwin64-static-executables.yml
+---
+identifier: generate_environment_matrix_macos
+type: template
+file: appveyor.yml/environment-matrix-macos.yml
+---
+identifier: generate_environment_matrix_macos_python
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/environment-matrix-macos-python.yml
+fallback_file: appveyor.yml/environment-matrix-macos-pkgbuild.yml
+---
+identifier: generate_environment_matrix_mingw
+type: template
+file: appveyor.yml/environment-matrix-mingw-w64.yml
+---
+identifier: generate_environment_matrix_mingw_python
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/environment-matrix-mingw-w64-python.yml
+---
+identifier: generate_environment_matrix_mingw_tools
+type: group
+condition: "'tools' in project_features"
+operations:
+- generate_environment_matrix_mingw_tools_static_executables
+---
+identifier: generate_environment_matrix_mingw_tools_static_executables
+type: template
+file: appveyor.yml/environment-matrix-mingw-w64-static-executables.yml
+---
+identifier: generate_environment_matrix_nuget
+type: template
+condition: "'nuget' in project_features"
+file: appveyor.yml/environment-matrix-nuget.yml
+---
+identifier: generate_environment_matrix_vs_with_python
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/environment-matrix-vs_with_python.yml
+---
+identifier: generate_environment_matrix_wheel
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/environment-matrix-wheel.yml
+---
+identifier: generate_environment_nuget
+type: template
+condition: "'nuget' in project_features"
+file: appveyor.yml/environment-nuget.yml
+---
+identifier: generate_environment_pypi
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/environment-pypi.yml
+mappings:
+- pypi_token
+---
+identifier: generate_install_bzip2
+type: template
+condition: "'bzip2' in library_build_dependencies"
+file: appveyor.yml/install-bzip2.yml
+---
+identifier: generate_install_codecov
+type: template
+file: appveyor.yml/install-codecov.yml
+---
+identifier: generate_install_cygwin
+type: template
+file: appveyor.yml/install-cygwin.yml
+mappings:
+- cygwin_build_dependencies
+---
+identifier: generate_install_dokan
+type: template
+condition: "'mount_tool' in tools_features"
+file: appveyor.yml/install-dokan.yml
+---
+identifier: generate_install_macos
+type: template
+file: appveyor.yml/install-macos.yml
+mappings:
+- brew_build_dependencies
+---
+identifier: generate_install_mingw
+type: template
+file: appveyor.yml/install-mingw-msys2.yml
+mappings:
+- mingw_msys2_build_dependencies
+---
+identifier: generate_install_python
+type: template
+condition: "'python_bindings' in project_features"
+file: appveyor.yml/install-python.yml
+---
+identifier: generate_install_start
+type: template
+file: appveyor.yml/install-start.yml
+---
+identifier: generate_install_testdata
+type: template
+# TODO: add condition
+file: appveyor.yml/install-testdata.yml
+---
+identifier: generate_install_winflexbison
+type: template
+condition: "'lex' in library_build_dependencies or 'lex' or 'yacc' in library_build_dependencies"
+file: appveyor.yml/install-winflexbison.yml
+---
+identifier: generate_install_zlib
+type: template
+condition: "'zlib' in library_build_dependencies"
+file: appveyor.yml/install-zlib.yml
+---
+identifier: generate_test_script
+type: template
+file: appveyor.yml/test_script.yml
+mappings:
+- library_name
+---
+identifier: main
+type: group
+operations:
+- generate_environment
+- generate_environment_nuget
+- generate_environment_pypi
+- generate_environment_matrix
+- generate_environment_matrix_vs_with_python
+- generate_environment_matrix_nuget
+- generate_environment_matrix_macos
+- generate_environment_matrix_macos_python
+- generate_environment_matrix_wheel
+- generate_environment_matrix_cygwin
+- generate_environment_matrix_cygwin_python
+- generate_environment_matrix_cygwin_tools
+- generate_environment_matrix_mingw
+- generate_environment_matrix_mingw_python
+- generate_environment_matrix_mingw_tools
+- generate_environment_matrix_allow_failures
+- generate_install_start
+- generate_install_testdata
+- generate_install_winflexbison
+- generate_install_zlib
+- generate_install_bzip2
+- generate_install_dokan
+- generate_install_macos
+- generate_install_python
+- generate_install_cygwin
+- generate_install_mingw
+- generate_install_codecov
+- generate_build_script_start
+- generate_build_script_vs_with_python
+- generate_build_script_nuget
+- generate_build_script_macos
+- generate_build_script_python
+- generate_build_script_end
+- generate_test_script
+- generate_after_test
+- generate_artifacts_and_deploy_script

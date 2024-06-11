@@ -35,7 +35,7 @@ file: gitignore/python_module
 ---
 identifier: generate_tools
 type: template
-condition: "tools_names != []"
+condition: "'tools' in project_features"
 file: gitignore/tools
 mappings:
 - tools_executables

@@ -407,8 +407,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     with_tools = False
     with_info_tool = False
     for tool_name_suffix in ('export', 'info', 'verify'):
-      tool_name = '{0:s}{1:s}'.format(
-          project_configuration.library_name_suffix, tool_name_suffix)
+      tool_name = ''.join([
+          project_configuration.library_name_suffix, tool_name_suffix])
+      # TODO: use tools_features to generate tools_names
       if tool_name in project_configuration.tools_names:
         if not with_tools:
           test_scripts.extend(['test_tools.ps1', 'test_tools.sh'])
@@ -3257,9 +3258,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         force_create = bool(public_functions) or bool(public_types)
 
       elif directory_entry in ('test_yalinfo.ps1', 'test_yalinfo.sh'):
-        tool_name = '{0:s}info'.format(
-            project_configuration.library_name_suffix)
-        force_create = tool_name in project_configuration.tools_names
+        tool_name = f'{project_configuration.library_name_suffix:s}info'
+        force_create = 'info_tool' in project_configuration.tools_features
 
       elif directory_entry == 'yal_test_error.c':
         force_create = 'error' in api_functions

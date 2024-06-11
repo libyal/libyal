@@ -72,38 +72,36 @@ class BaseSourceFileGenerator(object):
       access_mode = 'a'
 
   def _GenerateSectionsFromGroupOperation(
-      self, operations_file_name, group_operation, operations,
-      project_configuration, templates_path, template_mappings,
-      output_file_path, access_mode='w'):
+      self, operations_file_name, group_operation, operations, namespace,
+      templates_path, template_mappings):
     """Generates sections based on a group operation.
 
     Args:
       operations_file_name (str): name of the operations file.
       group_operation (GeneratorOperation): group operation.
       operations (dict[str, GeneratorOperation]): operations per identifier.
-      project_configuration (ProjectConfiguration): project configuration.
+      namespace (dict[str, object])): expression namespace.
       templates_path (str): path of the directory containing the template files.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_file_path (str): path of the output file.
-      access_mode (Optional[str]): output file access mode.
+
+    Return:
+      str: output data.
     """
+    output_data = ''
+
     for operation_name in group_operation.operations:
       operation = operations.get(operation_name, None)
       if not operation:
         logging.warning((
             f'Missing operation: {operation_name:s} in '
             f'{operations_file_name:s}'))
-        return
+        break
 
       operation_file = getattr(operation, 'file', None)
 
       if operation.condition:
         expression = operation.GetConditionExpression()
-
-        namespace = dict(project_configuration.__dict__)
-        # Make sure __builtins__ contains an empty dictionary.
-        namespace['__builtins__'] = {}
 
         try:
           result = eval(expression, namespace)  # pylint: disable=eval-used
@@ -120,27 +118,32 @@ class BaseSourceFileGenerator(object):
           operation_file = fallback_file
 
       if operation.type == 'group':
-        self._GenerateSectionsFromGroupOperation(
-            operations_file_name, operation, operations, project_configuration,
-            template_mappings, output_file_path, access_mode=access_mode)
+        operation_output_data = self._GenerateSectionsFromGroupOperation(
+            operations_file_name, operation, operations, namespace,
+            templates_path, template_mappings)
 
       elif operation.type == 'template':
         template_file_path = os.path.join(templates_path, operation_file)
 
         template_string = self._ReadTemplateFile(template_file_path)
 
+        template_values = {}
         for mapping in operation.mappings or []:
-          if mapping not in template_mappings:
-            # TODO: generate template_mappings
-            template_mappings[mapping] = None
+          value = self._GetPlaceholderValue(namespace, template_mappings, mapping)
+          if value is None:
+            logging.warning((
+                f'Missing template mapping: {mapping:s} defined in operation: '
+                f'{operation_name:s} in {operations_file_name:s}'))
+
+          template_values[mapping] = value
 
         try:
-          output_data = template_string.substitute(template_mappings)
+          operation_output_data = template_string.substitute(template_values)
         except (KeyError, ValueError) as exception:
           logging.error((
               f'Unable to format template: {template_file_path:s} with error: '
               f'{exception!s}'))
-          return
+          break
 
         for modifier in operation.modifiers or []:
           if modifier not in self._SUPPORTED_MODIFIERS:
@@ -150,12 +153,11 @@ class BaseSourceFileGenerator(object):
             continue
 
           if modifier == 'sort_lines':
-            output_data = self._SortLines(output_data)
+            operation_output_data = self._SortLines(operation_output_data)
 
-        with open(output_file_path, access_mode, encoding='utf8') as file_object:
-          file_object.write(output_data)
+      output_data = ''.join([output_data, operation_output_data])
 
-      access_mode = 'a'
+    return output_data
 
   def _GenerateSectionsFromOperationsFile(
       self, operations_file_name, main_operation_name, project_configuration,
@@ -187,9 +189,40 @@ class BaseSourceFileGenerator(object):
 
     templates_path = os.path.dirname(operations_file_path)
 
-    self._GenerateSectionsFromGroupOperation(
-        operations_file_name, main_operation, operations, project_configuration,
-        templates_path, template_mappings, output_file_path)
+    namespace = dict(project_configuration.__dict__)
+    # Make sure __builtins__ contains an empty dictionary.
+    namespace['__builtins__'] = {}
+
+    output_data = self._GenerateSectionsFromGroupOperation(
+        operations_file_name, main_operation, operations, namespace,
+        templates_path, template_mappings)
+
+    if output_data:
+      with open(output_file_path, 'w', encoding='utf8') as file_object:
+        file_object.write(output_data)
+
+  def _GetPlaceholderValue(self, namespace, template_mappings, identifier):
+    """Retrieves the value of a template placeholder.
+
+    Args:
+      namespace (dict[str, object])): expression namespace.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+      identifier (str): identifier of the value in the template.
+
+    Returns:
+      str: value or None if not available.
+    """
+    # TODO: generate values on demand fall back to project configuration.
+
+    value = template_mappings.get(identifier, None)
+    if value is None:
+      # TODO: handle _lower_case and _upper_case modifiers
+      # if identifier.endswith('_lower_case'):
+      # if identifier.endswith('_upper_case'):
+      value = namespace.get(identifier, None)
+
+    return value
 
   def _ReadTemplateFile(self, path):
     """Reads a template string from file.
