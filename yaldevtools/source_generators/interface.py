@@ -106,8 +106,9 @@ class BaseSourceFileGenerator(object):
         try:
           result = eval(expression, namespace)  # pylint: disable=eval-used
         except Exception as exception:
-          logging.warning(
-              f'Unable to check condition for operation: {operation_name:s}')
+          logging.warning((
+              f'Unable to check condition for operation: {operation_name:s} '
+              f'with error: {exception!s}'))
           result = False
 
         if not result:

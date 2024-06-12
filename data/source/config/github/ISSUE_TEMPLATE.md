@@ -5,7 +5,7 @@ Please describe the problem in as much detail as possible.
 **Version:**
 
 Please provide the version you experienced the problem with, for example:
-libyal 20180101
+libyal 20240611
 
 **Command and arguments:**
 
@@ -23,7 +23,7 @@ For publicly available source data please provide URLs.
 Please provide the name and version of the operating system you experienced
 the problem on, for example:
 
-Fedora Core 27, Linux 4.15.3
+Fedora 40, Linux 6.8.11
 
 **Verbose and debug output:**
 

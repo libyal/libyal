@@ -1,4 +1,4 @@
 %package -n ${library_name}-tools
 Summary: ${tools_description}
 Group: Applications/System
-Requires: ${spec_requires}
+Requires: ${tools_spec_requires}

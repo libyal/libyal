@@ -219,38 +219,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         libraries.append('zlib')
         library_dependencies.append('zlib')
 
-    templates_path = os.path.join(self._templates_path, 'configure.ac')
-
-    template_names = ['header.ac', 'programs.ac-start']
-
-    if os.path.isdir('ossfuzz'):
-      template_names.append('programs.ac-ossfuzz')
-
-    template_names.extend([
-        'programs.ac-end', 'compiler_language.ac', 'build_features.ac'])
-
-    if project_configuration.HasTools():
-      template_names.append('check_static_executables.ac')
-
-    template_names.append('check_winapi.ac')
-
-    if (include_header_file and include_header_file.have_wide_character_type or
-        project_configuration.HasTools()):
-      template_names.append('check_wide_character_support.ac')
-
-    if project_configuration.HasDebugOutput():
-      template_names.append('check_debug_output.ac')
-
-    template_names.extend(['check_types_support.ac', 'check_common_support.ac'])
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
+    self._GenerateSectionsFromOperationsFile(
+        'configure.ac.yaml', 'main', project_configuration, template_mappings,
+        'configure.ac')
 
     # TODO: refactor code below to use template_names
+
+    templates_path = os.path.join(self._templates_path, 'configure.ac')
 
     if library_dependencies:
       for name in library_dependencies:
@@ -835,164 +810,61 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     del template_mappings['tests_files']
     del template_mappings['tools_executables']
 
-  def _GenerateRpmSpec(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
+  def _GenerateRpmSpec(self, project_configuration, template_mappings):
     """Generates the RPM spec file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
-    library_name = project_configuration.library_name
-
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
-    templates_path = os.path.join(self._templates_path, 'libyal.spec.in')
-
     library_dependencies = list(makefile_am_file.library_dependencies)
-
     if project_configuration.HasDependencyCrypto():
       library_dependencies.append('libcrypto')
     if project_configuration.HasDependencyZlib():
       library_dependencies.append('zlib')
 
-    template_names = ['header.in']
-
-    template_mappings['library_name'] = library_name
-    template_mappings['library_name_upper_case'] = library_name.upper()
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
-
-    if not library_dependencies:
-      template_filename = os.path.join(templates_path, 'build_requires.in')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-    else:
-      spec_requires = []
-      spec_build_requires = []
-      for name in sorted(library_dependencies):
-        requires = '@ax_{0:s}_spec_requires@'.format(name)
-        spec_requires.append(requires)
-
-        build_requires = '@ax_{0:s}_spec_build_requires@'.format(name)
-        spec_build_requires.append(build_requires)
-
-      template_mappings['spec_requires'] = ' '.join(spec_requires)
-      template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
-
-      template_filename = os.path.join(templates_path, 'requires.in')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-      del template_mappings['spec_requires']
-      del template_mappings['spec_build_requires']
-
-    template_filename = os.path.join(templates_path, 'package.in')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename,
-        access_mode='a')
-
-    if project_configuration.HasPythonModule():
-      template_filename = os.path.join(templates_path, 'package-python.in')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
+    tools_dependencies = []
     if project_configuration.HasTools():
-      requires_library = '{0:s} = %{{version}}-%{{release}}'.format(
-          project_configuration.library_name)
-
       tools_dependencies = list(makefile_am_file.tools_dependencies)
       if 'crypto' in project_configuration.tools_build_dependencies:
         tools_dependencies.append('libcrypto')
       if 'fuse' in project_configuration.tools_build_dependencies:
         tools_dependencies.append('libfuse')
 
-      spec_requires = [requires_library]
-      spec_build_requires = []
-      for name in sorted(tools_dependencies):
-        requires = '@ax_{0:s}_spec_requires@'.format(name)
-        spec_requires.append(requires)
+    tools_spec_build_requires = []
+    tools_spec_requires = [
+        f'{project_configuration.library_name:s} = %{{version}}-%{{release}}']
+    for name in sorted(tools_dependencies):
+      tools_spec_build_requires.append(f'@ax_{name:s}_spec_build_requires@')
+      tools_spec_requires.append(f'@ax_{name:s}_spec_requires@')
 
-        build_requires = '@ax_{0:s}_spec_build_requires@'.format(name)
-        spec_build_requires.append(build_requires)
+    spec_build_requires = ['gcc']
+    spec_requires = []
+    for name in sorted(library_dependencies):
+      spec_build_requires.append(f'@ax_{name:s}_spec_build_requires@')
+      spec_requires.append(f'@ax_{name:s}_spec_requires@')
 
-      template_mappings['spec_requires'] = ' '.join(spec_requires)
+    template_mappings['library_name'] = project_configuration.library_name
+    template_mappings['library_name_upper_case'] = (
+        project_configuration.library_name.upper())
+    template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
+    template_mappings['spec_requires'] = ' '.join(spec_requires)
+    template_mappings['tools_spec_build_requires'] = ' '.join(tools_spec_build_requires)
+    template_mappings['tools_spec_requires'] = ' '.join(tools_spec_requires)
 
-      template_filename = os.path.join(
-          templates_path, 'package-tools-header.in')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-      del template_mappings['spec_requires']
-
-      if tools_dependencies:
-        template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
-
-        template_filename = os.path.join(
-            templates_path, 'package-tools-requires.in')
-        self._GenerateSection(
-            template_filename, template_mappings, output_filename,
-            access_mode='a')
-
-        del template_mappings['spec_build_requires']
-
-      template_filename = os.path.join(
-          templates_path, 'package-tools-footer.in')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-    template_filename = os.path.join(templates_path, 'prep.in')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    if project_configuration.HasPythonModule():
-      template_filename = os.path.join(templates_path, 'build-python.in')
-    else:
-      template_filename = os.path.join(templates_path, 'build.in')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    template_filename = os.path.join(templates_path, 'install.in')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    template_filename = os.path.join(templates_path, 'files.in')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    if project_configuration.HasPythonModule():
-      template_filename = os.path.join(templates_path, 'files-python.in')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-    if project_configuration.HasTools():
-      template_filename = os.path.join(templates_path, 'files-tools.in')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-    template_filename = os.path.join(templates_path, 'changelog.in')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
+    self._GenerateSectionsFromOperationsFile(
+        'libyal.spec.in.yaml', 'main', project_configuration, template_mappings,
+        f'{project_configuration.library_name:s}.spec.in')
 
     del template_mappings['library_name']
     del template_mappings['library_name_upper_case']
+    del template_mappings['spec_build_requires']
+    del template_mappings['spec_requires']
+    del template_mappings['tools_spec_build_requires']
+    del template_mappings['tools_spec_requires']
 
   def _GenerateGitHubActionsBuildYML(
       self, project_configuration, template_mappings):
@@ -1073,36 +945,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         output_filename)
 
     del template_mappings['configure_options']
-    del template_mappings['dpkg_build_dependencies']
-
-  def _GenerateGitHubActionsBuildWheelYML(
-      self, project_configuration, template_mappings):
-    """Generates the .github/workflows/build_wheel.yml configuration file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-    """
-    templates_path = os.path.join(
-        self._templates_path, 'github_workflows', 'build_wheel.yml')
-
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
-
-    template_names = ['body.yml']
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    template_mappings['dpkg_build_dependencies'] = ' '.join(
-        dpkg_build_dependencies)
-
-    output_filename = os.path.join('.github', 'workflows', 'build_wheel.yml')
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
-
     del template_mappings['dpkg_build_dependencies']
 
   def _GenerateSetupCfgIn(self, project_configuration, template_mappings):
@@ -1391,7 +1233,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       # TODO: skip operator definitons files based on header.
       if directory_entry in (
           'acinclude.m4.yaml', 'appveyor.yml.yaml', 'codecov.yml.yaml',
-          'gitignore.yaml', 'setup.cfg.in.yaml', 'tox.ini.yaml'):
+          'configure.ac.yaml', 'gitignore.yaml', 'libyal.spec.in.yaml',
+          'setup.cfg.in.yaml', 'tox.ini.yaml'):
         continue
 
       if (directory_entry in ('pyproject.toml', 'setup.py') and
@@ -1432,8 +1275,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         project_configuration, template_mappings, include_header_file)
 
     if project_configuration.HasPythonModule():
-      self._GenerateGitHubActionsBuildWheelYML(
-          project_configuration, template_mappings)
+      operations_file_name = os.path.join(
+          'github_workflows', 'build_wheel.yml.yaml')
+      output_filename = os.path.join('.github', 'workflows', 'build_wheel.yml')
+      self._GenerateSectionsFromOperationsFile(
+          operations_file_name, 'main', project_configuration,
+          template_mappings, output_filename)
 
     if os.path.isdir('ossfuzz'):
       operations_file_name = os.path.join(
@@ -1454,10 +1301,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     self._GenerateDpkg(
         project_configuration, template_mappings, output_writer, 'dpkg')
 
-    output_filename = '{0:s}.spec.in'.format(project_configuration.library_name)
-    self._GenerateRpmSpec(
-        project_configuration, template_mappings, output_writer,
-        output_filename)
+    self._GenerateRpmSpec(project_configuration, template_mappings)
 
     if project_configuration.HasPythonModule():
       self._GenerateSetupCfgIn(project_configuration, template_mappings)

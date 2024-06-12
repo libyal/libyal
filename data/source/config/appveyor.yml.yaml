@@ -219,7 +219,7 @@ file: appveyor.yml/install-testdata.yml
 ---
 identifier: generate_install_winflexbison
 type: template
-condition: "'lex' in library_build_dependencies or 'lex' or 'yacc' in library_build_dependencies"
+condition: "'lex' in library_build_dependencies or 'yacc' in library_build_dependencies"
 file: appveyor.yml/install-winflexbison.yml
 ---
 identifier: generate_install_zlib

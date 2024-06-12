@@ -1,0 +1,124 @@
+# yaldevtools generator specification.
+---
+identifier: generate_build
+type: template
+condition: "'python_bindings' in project_features"
+file: libyal.spec.in/build-python.in
+fallback_file: libyal.spec.in/build.in
+---
+identifier: generate_build_requires
+type: template
+file: libyal.spec.in/build_requires.in
+mappings:
+- spec_build_requires
+---
+identifier: generate_changelog
+type: template
+file: libyal.spec.in/changelog.in
+---
+identifier: generate_files
+type: template
+file: libyal.spec.in/files.in
+mappings:
+- library_name
+---
+identifier: generate_files_python
+type: template
+condition: "'python_bindings' in project_features"
+file: libyal.spec.in/files-python.in
+mappings:
+- library_name
+---
+identifier: generate_files_tools
+type: template
+condition: "'tools' in project_features"
+file: libyal.spec.in/files-tools.in
+mappings:
+- library_name
+---
+identifier: generate_header
+type: template
+file: libyal.spec.in/header.in
+mappings:
+- library_description
+- library_name
+---
+identifier: generate_install
+type: template
+file: libyal.spec.in/install.in
+---
+identifier: generate_package
+type: template
+file: libyal.spec.in/package.in
+mappings:
+- library_description
+- library_name
+---
+identifier: generate_package_python
+type: template
+condition: "'python_bindings' in project_features"
+file: libyal.spec.in/package-python.in
+mappings:
+- library_name
+---
+identifier: generate_package_tools
+type: group
+condition: "'tools' in project_features"
+operations:
+- generate_package_tools_start
+- generate_package_tools_build_requires
+- generate_package_tools_end
+---
+identifier: generate_package_tools_end
+type: template
+file: libyal.spec.in/package-tools-end.in
+mappings:
+- library_name
+- tools_description
+---
+identifier: generate_package_tools_build_requires
+type: template
+# TODO: improve condition.
+condition: "tools_build_dependencies != []"
+file: libyal.spec.in/package-tools-build_requires.in
+mappings:
+- library_name
+- tools_description
+- tools_spec_requires
+---
+identifier: generate_package_tools_start
+type: template
+file: libyal.spec.in/package-tools-start.in
+mappings:
+- library_name
+- tools_description
+- tools_spec_requires
+---
+identifier: generate_prep
+type: template
+file: libyal.spec.in/prep.in
+---
+identifier: generate_requires
+type: template
+# TODO: improve condition.
+condition: "rpm_build_dependencies != []"
+file: libyal.spec.in/requires.in
+mappings:
+- spec_requires
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_requires
+- generate_build_requires
+- generate_package
+- generate_package_python
+- generate_package_tools
+- generate_prep
+- generate_build
+- generate_install
+- generate_files
+- generate_files_python
+- generate_files_tools
+- generate_changelog

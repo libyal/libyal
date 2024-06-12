@@ -1,2 +1,1 @@
 @${library_name}_spec_requires@ ${spec_requires}
-BuildRequires: gcc ${spec_build_requires}

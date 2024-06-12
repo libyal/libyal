@@ -1,0 +1,72 @@
+# yaldevtools generator specification.
+---
+identifier: generate_build_features
+type: template
+file: configure.ac/build_features.ac
+---
+identifier: generate_check_common_support
+type: template
+file: configure.ac/check_common_support.ac
+---
+identifier: generate_check_debug_output
+type: template
+condition: "'debug_output' in project_features"
+file: configure.ac/check_debug_output.ac
+---
+identifier: generate_check_static_executables
+type: template
+condition: "'tools' in project_features"
+file: configure.ac/check_static_executables.ac
+---
+identifier: generate_check_types_support
+type: template
+file: configure.ac/check_types_support.ac
+---
+identifier: generate_check_wide_character_support
+type: template
+condition: "'wide_character_type' in library_features or 'tools' in project_features"
+file: configure.ac/check_wide_character_support.ac
+---
+identifier: generate_check_winapi
+type: template
+file: configure.ac/check_winapi.ac
+---
+identifier: generate_compiler_language
+type: template
+file: configure.ac/compiler_language.ac
+---
+identifier: generate_header
+type: template
+file: configure.ac/header.ac
+mappings:
+- library_name
+- library_version
+---
+identifier: generate_programs_end
+type: template
+file: configure.ac/programs.ac-end
+---
+identifier: generate_programs_ossfuzz
+type: template
+# TODO: add condition
+file: configure.ac/programs.ac-ossfuzz
+---
+identifier: generate_programs_start
+type: template
+file: configure.ac/programs.ac-start
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_programs_start
+- generate_programs_ossfuzz
+- generate_programs_end
+- generate_compiler_language
+- generate_build_features
+- generate_check_static_executables
+- generate_check_winapi
+- generate_check_wide_character_support
+- generate_check_debug_output
+- generate_check_types_support
+- generate_check_common_support

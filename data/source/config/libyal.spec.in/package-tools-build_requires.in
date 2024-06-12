@@ -1,0 +1,1 @@
+@${library_name}_spec_tools_build_requires@ ${tools_spec_build_requires}
