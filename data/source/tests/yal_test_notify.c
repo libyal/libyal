@@ -61,12 +61,12 @@ int ${library_name_suffix}_test_notify_set_stream(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -100,12 +100,12 @@ int ${library_name_suffix}_test_notify_stream_open(
 	          "notify_stream.log",
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -115,12 +115,12 @@ int ${library_name_suffix}_test_notify_stream_open(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -132,12 +132,12 @@ int ${library_name_suffix}_test_notify_stream_open(
 	result = ${library_name}_notify_stream_close(
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -166,12 +166,12 @@ int ${library_name_suffix}_test_notify_stream_close(
 	result = ${library_name}_notify_stream_close(
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -194,30 +194,30 @@ on_error:
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     wchar_t * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     wchar_t * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #else
 int main(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     char * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     char * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_notify_set_verbose",
 	 ${library_name_suffix}_test_notify_set_verbose )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_notify_set_stream",
 	 ${library_name_suffix}_test_notify_set_stream )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_notify_stream_open",
 	 ${library_name_suffix}_test_notify_stream_open )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_notify_stream_close",
 	 ${library_name_suffix}_test_notify_stream_close )
 

@@ -37,7 +37,7 @@
 
 #include "../${library_name}/${library_name}_system_string.h"
 
-#if defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT )
 
 /* Tests the ${library_name}_system_string_size_to_narrow_string function
  * Returns 1 if successful or 0 if not
@@ -55,17 +55,17 @@ int ${library_name_suffix}_test_system_string_size_to_narrow_string(
 	          &narrow_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SIZE(
 	 "narrow_string_size",
 	 narrow_string_size,
 	 (size_t) 12 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -77,12 +77,12 @@ int ${library_name_suffix}_test_system_string_size_to_narrow_string(
 	          &narrow_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -95,12 +95,12 @@ int ${library_name_suffix}_test_system_string_size_to_narrow_string(
 	          &narrow_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -113,12 +113,12 @@ int ${library_name_suffix}_test_system_string_size_to_narrow_string(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -154,12 +154,12 @@ int ${library_name_suffix}_test_system_string_copy_to_narrow_string(
 	          32,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -172,12 +172,12 @@ int ${library_name_suffix}_test_system_string_copy_to_narrow_string(
 	          32,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -191,12 +191,12 @@ int ${library_name_suffix}_test_system_string_copy_to_narrow_string(
 	          32,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -210,12 +210,12 @@ int ${library_name_suffix}_test_system_string_copy_to_narrow_string(
 	          32,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -229,12 +229,12 @@ int ${library_name_suffix}_test_system_string_copy_to_narrow_string(
 	          (size_t) -1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -248,12 +248,12 @@ int ${library_name_suffix}_test_system_string_copy_to_narrow_string(
 	          8,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -289,17 +289,17 @@ int ${library_name_suffix}_test_system_string_size_from_narrow_string(
 	          &system_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SIZE(
 	 "system_string_size",
 	 system_string_size,
 	 (size_t) 12 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -311,12 +311,12 @@ int ${library_name_suffix}_test_system_string_size_from_narrow_string(
 	          &system_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -329,12 +329,12 @@ int ${library_name_suffix}_test_system_string_size_from_narrow_string(
 	          &system_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -347,12 +347,12 @@ int ${library_name_suffix}_test_system_string_size_from_narrow_string(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -388,12 +388,12 @@ int ${library_name_suffix}_test_system_string_copy_from_narrow_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -406,12 +406,12 @@ int ${library_name_suffix}_test_system_string_copy_from_narrow_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -425,12 +425,12 @@ int ${library_name_suffix}_test_system_string_copy_from_narrow_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -444,12 +444,12 @@ int ${library_name_suffix}_test_system_string_copy_from_narrow_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -463,12 +463,12 @@ int ${library_name_suffix}_test_system_string_copy_from_narrow_string(
 	          (size_t) -1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -482,12 +482,12 @@ int ${library_name_suffix}_test_system_string_copy_from_narrow_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -525,17 +525,17 @@ int ${library_name_suffix}_test_system_string_size_to_wide_string(
 	          &wide_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SIZE(
 	 "wide_string_size",
 	 wide_string_size,
 	 (size_t) 12 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -547,12 +547,12 @@ int ${library_name_suffix}_test_system_string_size_to_wide_string(
 	          &wide_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -565,12 +565,12 @@ int ${library_name_suffix}_test_system_string_size_to_wide_string(
 	          &wide_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -583,12 +583,12 @@ int ${library_name_suffix}_test_system_string_size_to_wide_string(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -624,12 +624,12 @@ int ${library_name_suffix}_test_system_string_copy_to_wide_string(
 	          32,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -642,12 +642,12 @@ int ${library_name_suffix}_test_system_string_copy_to_wide_string(
 	          32,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -661,12 +661,12 @@ int ${library_name_suffix}_test_system_string_copy_to_wide_string(
 	          32,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -680,12 +680,12 @@ int ${library_name_suffix}_test_system_string_copy_to_wide_string(
 	          32,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -699,12 +699,12 @@ int ${library_name_suffix}_test_system_string_copy_to_wide_string(
 	          (size_t) -1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -718,12 +718,12 @@ int ${library_name_suffix}_test_system_string_copy_to_wide_string(
 	          8,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -759,17 +759,17 @@ int ${library_name_suffix}_test_system_string_size_from_wide_string(
 	          &system_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SIZE(
 	 "system_string_size",
 	 system_string_size,
 	 (size_t) 12 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -781,12 +781,12 @@ int ${library_name_suffix}_test_system_string_size_from_wide_string(
 	          &system_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -799,12 +799,12 @@ int ${library_name_suffix}_test_system_string_size_from_wide_string(
 	          &system_string_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -817,12 +817,12 @@ int ${library_name_suffix}_test_system_string_size_from_wide_string(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -858,12 +858,12 @@ int ${library_name_suffix}_test_system_string_copy_from_wide_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -876,12 +876,12 @@ int ${library_name_suffix}_test_system_string_copy_from_wide_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -895,12 +895,12 @@ int ${library_name_suffix}_test_system_string_copy_from_wide_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -914,12 +914,12 @@ int ${library_name_suffix}_test_system_string_copy_from_wide_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -933,12 +933,12 @@ int ${library_name_suffix}_test_system_string_copy_from_wide_string(
 	          (size_t) -1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -952,12 +952,12 @@ int ${library_name_suffix}_test_system_string_copy_from_wide_string(
 	          12,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -979,70 +979,70 @@ on_error:
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
-#endif /* defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) */
+#endif /* defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) */
 
 /* The main program
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     wchar_t * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     wchar_t * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #else
 int main(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     char * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     char * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
-#if defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_system_string_size_to_narrow_string",
 	 ${library_name_suffix}_test_system_string_size_to_narrow_string );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_system_string_copy_to_narrow_string",
 	 ${library_name_suffix}_test_system_string_copy_to_narrow_string );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_system_string_size_from_narrow_string",
 	 ${library_name_suffix}_test_system_string_size_from_narrow_string );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_system_string_copy_from_narrow_string",
 	 ${library_name_suffix}_test_system_string_copy_from_narrow_string );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_system_string_size_to_wide_string",
 	 ${library_name_suffix}_test_system_string_size_to_wide_string );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_system_string_copy_to_wide_string",
 	 ${library_name_suffix}_test_system_string_copy_to_wide_string );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_system_string_size_from_wide_string",
 	 ${library_name_suffix}_test_system_string_size_from_wide_string );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_system_string_copy_from_wide_string",
 	 ${library_name_suffix}_test_system_string_copy_from_wide_string );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
-#endif /* defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) */
+#endif /* defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
-#if defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT )
 
 on_error:
 	return( EXIT_FAILURE );
 
-#endif /* defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) */
+#endif /* defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) */
 }
 

@@ -4,22 +4,22 @@
 	result = ${library_name}_${type_name}_open_wide(
 	          ${type_name},
 	          source,
-	          ${library_name_upper_case}_OPEN_READ,
+	          ${library_name:upper_case}_OPEN_READ,
 	          &error );
 #else
 	result = ${library_name}_${type_name}_open(
 	          ${type_name},
 	          source,
-	          ${library_name_upper_case}_OPEN_READ,
+	          ${library_name:upper_case}_OPEN_READ,
 	          &error );
 #endif
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -27,12 +27,12 @@
 	          ${type_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -42,22 +42,22 @@
 	result = ${library_name}_${type_name}_open_wide(
 	          ${type_name},
 	          source,
-	          ${library_name_upper_case}_OPEN_READ,
+	          ${library_name:upper_case}_OPEN_READ,
 	          &error );
 #else
 	result = ${library_name}_${type_name}_open(
 	          ${type_name},
 	          source,
-	          ${library_name_upper_case}_OPEN_READ,
+	          ${library_name:upper_case}_OPEN_READ,
 	          &error );
 #endif
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -65,12 +65,12 @@
 	          ${type_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -80,16 +80,16 @@
 	          &${type_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "${type_name}",
 	 ${type_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 

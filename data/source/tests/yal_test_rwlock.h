@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_suffix_upper_case}_TEST_RWLOCK_H )
-#define _${library_name_suffix_upper_case}_TEST_RWLOCK_H
+#if !defined( _${library_name_suffix:upper_case}_TEST_RWLOCK_H )
+#define _${library_name_suffix:upper_case}_TEST_RWLOCK_H
 
 #include <common.h>
 
@@ -30,11 +30,11 @@
 extern "C" {
 #endif
 
-#if defined( ${library_name_upper_case}_HAVE_MULTI_THREAD_SUPPORT ) && defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
-#define HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK		1
+#if defined( ${library_name:upper_case}_HAVE_MULTI_THREAD_SUPPORT ) && defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+#define HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK		1
 #endif
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK )
 
 extern int ${library_name_suffix}_test_pthread_rwlock_init_attempts_before_fail;
 
@@ -46,11 +46,11 @@ extern int ${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fai
 
 extern int ${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail;
 
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _${library_name_suffix_upper_case}_TEST_RWLOCK_H ) */
+#endif /* !defined( _${library_name_suffix:upper_case}_TEST_RWLOCK_H ) */
 

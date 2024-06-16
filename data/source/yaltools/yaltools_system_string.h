@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${tools_name_upper_case}_SYSTEM_STRING_H )
-#define _${tools_name_upper_case}_SYSTEM_STRING_H
+#if !defined( _${tools_name:upper_case}_SYSTEM_STRING_H )
+#define _${tools_name:upper_case}_SYSTEM_STRING_H
 
 #include <common.h>
 #include <types.h>
@@ -41,5 +41,5 @@ int ${tools_name}_system_string_decimal_copy_to_64_bit(
 }
 #endif
 
-#endif /* !defined( _${tools_name_upper_case}_SYSTEM_STRING_H ) */
+#endif /* !defined( _${tools_name:upper_case}_SYSTEM_STRING_H ) */
 

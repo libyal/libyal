@@ -11,10 +11,10 @@ int ${library_name_suffix}_test_get_version(
 
 	result = narrow_string_compare(
 	          version_string,
-	          ${library_name_upper_case}_VERSION_STRING,
+	          ${library_name:upper_case}_VERSION_STRING,
 	          9 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );

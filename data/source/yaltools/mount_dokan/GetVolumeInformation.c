@@ -10,7 +10,7 @@ int __stdcall mount_dokan_GetVolumeInformation(
                DWORD *file_system_flags,
                wchar_t *file_system_name,
                DWORD file_system_name_size,
-               DOKAN_FILE_INFO *file_info ${tools_name_upper_case}_ATTRIBUTE_UNUSED )
+               DOKAN_FILE_INFO *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #else
 NTSTATUS __stdcall mount_dokan_GetVolumeInformation(
                     wchar_t *volume_name,
@@ -20,7 +20,7 @@ NTSTATUS __stdcall mount_dokan_GetVolumeInformation(
                     DWORD *file_system_flags,
                     wchar_t *file_system_name,
                     DWORD file_system_name_size,
-                    DOKAN_FILE_INFO *file_info ${tools_name_upper_case}_ATTRIBUTE_UNUSED )
+                    DOKAN_FILE_INFO *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #endif
 {
 	libcerror_error_t *error = NULL;
@@ -29,7 +29,7 @@ NTSTATUS __stdcall mount_dokan_GetVolumeInformation(
 	size_t name_size         = 0;
 	int result               = 0;
 
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( file_info )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( file_info )
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -40,7 +40,7 @@ NTSTATUS __stdcall mount_dokan_GetVolumeInformation(
 		 volume_name );
 	}
 #endif
-	name      = L"${library_name_suffix_upper_case}";
+	name      = L"${library_name_suffix:upper_case}";
 	name_size = 1 + wide_string_length(
 	                 name );
 

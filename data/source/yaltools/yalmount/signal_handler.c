@@ -1,12 +1,12 @@
 /* Signal handler for ${mount_tool_name}
  */
 void ${mount_tool_name}_signal_handler(
-      ${tools_name}_signal_t signal ${tools_name_upper_case}_ATTRIBUTE_UNUSED )
+      ${tools_name}_signal_t signal ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "${mount_tool_name}_signal_handler";
 
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( signal )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( signal )
 
 	${mount_tool_name}_abort = 1;
 

@@ -3,6 +3,6 @@
 #endif
 
 /* Define to make ${library_name_suffix}_test_${type_name} generate verbose output
-#define ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_VERBOSE
+#define ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_VERBOSE
  */
 

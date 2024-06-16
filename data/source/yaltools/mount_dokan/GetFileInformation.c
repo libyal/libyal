@@ -5,12 +5,12 @@
 int __stdcall mount_dokan_GetFileInformation(
                const wchar_t *path,
                BY_HANDLE_FILE_INFORMATION *file_information,
-               DOKAN_FILE_INFO *file_info ${tools_name_upper_case}_ATTRIBUTE_UNUSED )
+               DOKAN_FILE_INFO *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #else
 NTSTATUS __stdcall mount_dokan_GetFileInformation(
                     const wchar_t *path,
                     BY_HANDLE_FILE_INFORMATION *file_information,
-                    DOKAN_FILE_INFO *file_info ${tools_name_upper_case}_ATTRIBUTE_UNUSED )
+                    DOKAN_FILE_INFO *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #endif
 {
 	libcerror_error_t *error       = NULL;
@@ -23,7 +23,7 @@ NTSTATUS __stdcall mount_dokan_GetFileInformation(
 	uint16_t file_mode             = 0;
 	int result                     = 0;
 
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( file_info )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( file_info )
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )

@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_suffix_upper_case}_TEST_GETOPT_H )
-#define _${library_name_suffix_upper_case}_TEST_GETOPT_H
+#if !defined( _${library_name_suffix:upper_case}_TEST_GETOPT_H )
+#define _${library_name_suffix:upper_case}_TEST_GETOPT_H
 
 #include <common.h>
 #include <types.h>
@@ -64,5 +64,5 @@ system_integer_t ${library_name_suffix}_test_getopt(
 }
 #endif
 
-#endif /* !defined( _${library_name_suffix_upper_case}_TEST_GETOPT_H ) */
+#endif /* !defined( _${library_name_suffix:upper_case}_TEST_GETOPT_H ) */
 

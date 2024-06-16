@@ -204,7 +204,7 @@ uint8_t ${library_name_suffix}_test_huffman_tree_data[ 2627 ] = {
 	0x7d, 0x8a, 0x87, 0xf9, 0x9d, 0x74, 0x33, 0x0e, 0x79, 0xc5, 0xf8, 0x73, 0xcd, 0xff, 0x00, 0x30,
 	0x4a, 0x56, 0xa4 };
 
-#if defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT )
 
 /* Tests the ${library_name}_huffman_tree_initialize function
  * Returns 1 if successful or 0 if not
@@ -216,7 +216,7 @@ int ${library_name_suffix}_test_huffman_tree_initialize(
 	${library_name}_huffman_tree_t *huffman_tree = NULL;
 	int result                           = 0;
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 	int number_of_malloc_fail_tests      = 1;
 	int number_of_memset_fail_tests      = 1;
 	int test_number                      = 0;
@@ -230,16 +230,16 @@ int ${library_name_suffix}_test_huffman_tree_initialize(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "huffman_tree",
 	 huffman_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -247,16 +247,16 @@ int ${library_name_suffix}_test_huffman_tree_initialize(
 	          &huffman_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "huffman_tree",
 	 huffman_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -268,12 +268,12 @@ int ${library_name_suffix}_test_huffman_tree_initialize(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -290,19 +290,19 @@ int ${library_name_suffix}_test_huffman_tree_initialize(
 
 	huffman_tree = NULL;
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 	for( test_number = 0;
 	     test_number < number_of_malloc_fail_tests;
@@ -331,16 +331,16 @@ int ${library_name_suffix}_test_huffman_tree_initialize(
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 			 "huffman_tree",
 			 huffman_tree );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -375,16 +375,16 @@ int ${library_name_suffix}_test_huffman_tree_initialize(
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 			 "huffman_tree",
 			 huffman_tree );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -392,7 +392,7 @@ int ${library_name_suffix}_test_huffman_tree_initialize(
 			 &error );
 		}
 	}
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 
 	return( 1 );
 
@@ -426,12 +426,12 @@ int ${library_name_suffix}_test_huffman_tree_free(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -495,16 +495,16 @@ int ${library_name_suffix}_test_huffman_tree_build(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "huffman_tree",
 	 huffman_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -516,12 +516,12 @@ int ${library_name_suffix}_test_huffman_tree_build(
 	          288,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -533,12 +533,12 @@ int ${library_name_suffix}_test_huffman_tree_build(
 	          288,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -551,12 +551,12 @@ int ${library_name_suffix}_test_huffman_tree_build(
 	          288,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -569,19 +569,19 @@ int ${library_name_suffix}_test_huffman_tree_build(
 	          -1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 	/* Test ${library_name}_huffman_tree_build with malloc failing
 	 */
@@ -599,12 +599,12 @@ int ${library_name_suffix}_test_huffman_tree_build(
 	}
 	else
 	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 -1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 		 "error",
 		 error );
 
@@ -629,12 +629,12 @@ int ${library_name_suffix}_test_huffman_tree_build(
 	}
 	else
 	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 -1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 		 "error",
 		 error );
 
@@ -642,7 +642,7 @@ int ${library_name_suffix}_test_huffman_tree_build(
 		 &error );
 	}
 #endif /* defined( OPTIMIZATION_DISABLED ) */
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 
 	/* TODO test errornous data */
 
@@ -652,16 +652,16 @@ int ${library_name_suffix}_test_huffman_tree_build(
 	          &huffman_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "huffman_tree",
 	 huffman_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -698,19 +698,19 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 	          ${library_name_suffix}_test_huffman_tree_data,
 	          2627,
 	          2,
-	          ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -745,16 +745,16 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "huffman_tree",
 	 huffman_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -764,12 +764,12 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 	          288,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -783,17 +783,17 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 	          &symbol,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT16(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT16(
 	 "symbol",
 	 symbol,
 	 (uint16_t) 141 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -807,12 +807,12 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 	          &symbol,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -825,12 +825,12 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 	          &symbol,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -843,12 +843,12 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -867,12 +867,12 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 
         bit_stream->byte_stream_offset = 2;
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -885,16 +885,16 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 	          &huffman_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "huffman_tree",
 	 huffman_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -902,16 +902,16 @@ int ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream(
 	          &bit_stream,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -933,50 +933,50 @@ on_error:
 	return( 0 );
 }
 
-#endif /* defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) */
+#endif /* defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) */
 
 /* The main program
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     wchar_t * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     wchar_t * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #else
 int main(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     char * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     char * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
-#if defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_huffman_tree_initialize",
 	 ${library_name_suffix}_test_huffman_tree_initialize );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_huffman_tree_free",
 	 ${library_name_suffix}_test_huffman_tree_free );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_huffman_tree_build",
 	 ${library_name_suffix}_test_huffman_tree_build );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_huffman_tree_get_symbol_from_bit_stream",
 	 ${library_name_suffix}_test_huffman_tree_get_symbol_from_bit_stream );
 
-#endif /* defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) */
+#endif /* defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
-#if defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT )
 
 on_error:
 	return( EXIT_FAILURE );
 
-#endif /* defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) */
+#endif /* defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) */
 }
 

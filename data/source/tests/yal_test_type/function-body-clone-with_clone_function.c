@@ -7,16 +7,16 @@
 	          &${library_name_suffix}_test_${type_name}_${value_name}_clone_function,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "destination_${type_name}",
 	 destination_${type_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -25,16 +25,16 @@
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "destination_${type_name}",
 	 destination_${type_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -47,16 +47,16 @@
 	          &${library_name_suffix}_test_${type_name}_${value_name}_clone_function,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "destination_${type_name}",
 	 destination_${type_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -69,16 +69,16 @@
 	          &${library_name_suffix}_test_${type_name}_${value_name}_clone_function,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "destination_${type_name}",
 	 destination_${type_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -96,12 +96,12 @@
 
 	destination_${type_name} = NULL;
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -115,12 +115,12 @@
 	          &${library_name_suffix}_test_${type_name}_${value_name}_clone_function,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -134,19 +134,19 @@
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 	for( test_number = 0;
 	     test_number < number_of_memcpy_fail_tests;
@@ -176,16 +176,16 @@
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 			 "destination_${type_name}",
 			 destination_${type_name} );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -223,16 +223,16 @@
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 			 "destination_${type_name}",
 			 destination_${type_name} );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -241,5 +241,5 @@
 		}
 	}
 #endif /* defined( OPTIMIZATION_DISABLED ) */
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 

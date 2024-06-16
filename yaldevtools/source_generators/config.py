@@ -73,17 +73,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     else:
       template_mappings['library_name'] = library_name
-      template_mappings['library_name_upper_case'] = library_name.upper()
 
       self._GenerateSectionsFromOperationsFile(
           'acinclude.m4.yaml', 'main', project_configuration, template_mappings,
           'acinclude.m4')
 
       del template_mappings['library_name']
-      del template_mappings['library_name_upper_case']
 
     template_mappings['library_name'] = library_name
-    template_mappings['library_name_upper_case'] = library_name.upper()
 
     if project_configuration.HasTools():
       template_filename = 'check_dll_support.m4-tools'
@@ -95,7 +92,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_filename, template_mappings, 'acinclude.m4', access_mode='a')
 
     del template_mappings['library_name']
-    del template_mappings['library_name_upper_case']
 
   def _GenerateAppVeyorYML(self, project_configuration, template_mappings):
     """Generates the appveyor.yml configuration file.
@@ -486,12 +482,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for projects without Python bindings.
     # TODO: fix lintian issues.
 
-    library_name = project_configuration.library_name
-
     templates_path = os.path.join(self._templates_path, 'dpkg')
 
-    template_mappings['library_name'] = library_name
-    template_mappings['library_name_upper_case'] = library_name.upper()
+    template_mappings['library_name'] = project_configuration.library_name
 
     for directory_entry in os.listdir(templates_path):
       template_filename = os.path.join(templates_path, directory_entry)
@@ -525,6 +518,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     template_mappings['dpkg_build_dependencies'] = ', '.join(
         dpkg_build_dependencies)
+    template_mappings['dpkg_library_description'] = ''.join([
+        project_configuration.library_name, ' is a ',
+        project_configuration.library_description[0].lower(),
+        project_configuration.library_description[1:]])
 
     template_filename = os.path.join(templates_path, 'control')
     output_filename = os.path.join(output_directory, 'control')
@@ -532,6 +529,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_filename, template_mappings, output_filename)
 
     del template_mappings['dpkg_build_dependencies']
+    del template_mappings['dpkg_library_description']
 
     if project_configuration.HasTools():
       template_filename = os.path.join(templates_path, 'control-tools')
@@ -574,7 +572,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           template_filename, template_mappings, output_filename)
 
     del template_mappings['library_name']
-    del template_mappings['library_name_upper_case']
 
   def _GenerateGitignore(self, project_configuration, template_mappings):
     """Generates the .gitignore configuration file.
@@ -667,8 +664,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       spec_requires.append(f'@ax_{name:s}_spec_requires@')
 
     template_mappings['library_name'] = project_configuration.library_name
-    template_mappings['library_name_upper_case'] = (
-        project_configuration.library_name.upper())
     template_mappings['spec_build_requires'] = ' '.join(spec_build_requires)
     template_mappings['spec_requires'] = ' '.join(spec_requires)
     template_mappings['tools_spec_build_requires'] = ' '.join(tools_spec_build_requires)
@@ -679,7 +674,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         f'{project_configuration.library_name:s}.spec.in')
 
     del template_mappings['library_name']
-    del template_mappings['library_name_upper_case']
     del template_mappings['spec_build_requires']
     del template_mappings['spec_requires']
     del template_mappings['tools_spec_build_requires']

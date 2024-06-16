@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${tools_name_upper_case}_GETOPT_H )
-#define _${tools_name_upper_case}_GETOPT_H
+#if !defined( _${tools_name:upper_case}_GETOPT_H )
+#define _${tools_name:upper_case}_GETOPT_H
 
 #include <common.h>
 #include <types.h>
@@ -64,5 +64,5 @@ system_integer_t ${tools_name}_getopt(
 }
 #endif
 
-#endif /* !defined( _${tools_name_upper_case}_GETOPT_H ) */
+#endif /* !defined( _${tools_name:upper_case}_GETOPT_H ) */
 

@@ -1,3 +1,3 @@
 dnl Check if ${dependency_name} or required headers and functions are available
-AX_${dependency_name_upper_case}_CHECK_ENABLE
+AX_${dependency_name:upper_case}_CHECK_ENABLE
 

@@ -39,7 +39,7 @@
 #include "../${library_name}/${library_name}_huffman_tree.h"
 
 /* Define to make ${library_name_suffix}_test_deflate generate verbose output
-#define ${library_name_suffix_upper_case}_TEST_DEFLATE
+#define ${library_name_suffix:upper_case}_TEST_DEFLATE
  */
 
 uint8_t ${library_name_suffix}_test_deflate_compressed_data[ 2627 ] = {
@@ -689,7 +689,7 @@ uint8_t ${library_name_suffix}_test_deflate_uncompressed_data[ 7640 ] = {
 	0x72, 0x73, 0x69, 0x6f, 0x6e, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x74, 0x68, 0x65, 0x0a, 0x4c, 0x69,
 	0x62, 0x72, 0x61, 0x72, 0x79, 0x2e, 0x0a, 0x0a };
 
-#if defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT )
 
 /* Tests the ${library_name}_deflate_build_dynamic_huffman_trees function
  * Returns 1 if successful or 0 if not
@@ -704,7 +704,7 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	uint32_t value_32bit                   = 0;
 	int result                             = 0;
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 	int number_of_memset_fail_tests        = 6;
 	int test_number                        = 0;
 #endif
@@ -716,19 +716,19 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          ${library_name_suffix}_test_deflate_compressed_data,
 	          2627,
 	          2,
-	          ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -738,16 +738,16 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "literals_tree",
 	 literals_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -757,16 +757,16 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "distances_tree",
 	 distances_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -778,17 +778,17 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          &value_32bit,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT32(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT32(
 	 "value_32bit",
 	 value_32bit,
 	 (uint32_t) 0x00000005UL );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -798,12 +798,12 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -813,16 +813,16 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          &bit_stream,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -833,19 +833,19 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          ${library_name_suffix}_test_deflate_compressed_data,
 	          2627,
 	          2,
-	          ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -857,17 +857,17 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          &value_32bit,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT32(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT32(
 	 "value_32bit",
 	 value_32bit,
 	 (uint32_t) 0x00000005UL );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -877,12 +877,12 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -895,12 +895,12 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -913,19 +913,19 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 	for( test_number = 0;
 	     test_number < number_of_memset_fail_tests;
@@ -947,12 +947,12 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -960,7 +960,7 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 			 &error );
 		}
 	}
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 
 	/* Clean up
 	 */
@@ -968,16 +968,16 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          &distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "distances_tree",
 	 distances_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -985,16 +985,16 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          &literals_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "literals_tree",
 	 literals_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1002,16 +1002,16 @@ int ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees(
 	          &bit_stream,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1055,7 +1055,7 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 	libcerror_error_t *error               = NULL;
 	int result                             = 0;
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 	int number_of_memset_fail_tests        = 4;
 	int test_number                        = 0;
 #endif
@@ -1068,16 +1068,16 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "literals_tree",
 	 literals_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1087,16 +1087,16 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "distances_tree",
 	 distances_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1107,12 +1107,12 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 	          distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1123,12 +1123,12 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 	          distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1140,19 +1140,19 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 	for( test_number = 0;
 	     test_number < number_of_memset_fail_tests;
@@ -1173,12 +1173,12 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -1186,7 +1186,7 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 			 &error );
 		}
 	}
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 
 	/* Clean up
 	 */
@@ -1194,16 +1194,16 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 	          &distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "distances_tree",
 	 distances_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1211,16 +1211,16 @@ int ${library_name_suffix}_test_deflate_build_fixed_huffman_trees(
 	          &literals_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "literals_tree",
 	 literals_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1270,19 +1270,19 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          ${library_name_suffix}_test_deflate_compressed_data,
 	          2627,
 	          2,
-	          ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1292,16 +1292,16 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "literals_tree",
 	 literals_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1311,16 +1311,16 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "distances_tree",
 	 distances_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1332,17 +1332,17 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &value_32bit,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT32(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT32(
 	 "value_32bit",
 	 value_32bit,
 	 (uint32_t) 0x00000005UL );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1352,12 +1352,12 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1370,12 +1370,12 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1385,16 +1385,16 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &bit_stream,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1405,19 +1405,19 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          ${library_name_suffix}_test_deflate_compressed_data,
 	          2627,
 	          2,
-	          ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1429,17 +1429,17 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &value_32bit,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT32(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT32(
 	 "value_32bit",
 	 value_32bit,
 	 (uint32_t) 0x00000005UL );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1449,12 +1449,12 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1467,12 +1467,12 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1488,12 +1488,12 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1509,12 +1509,12 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1530,12 +1530,12 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1551,12 +1551,12 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1572,12 +1572,12 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1590,16 +1590,16 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "distances_tree",
 	 distances_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1607,16 +1607,16 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &literals_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "literals_tree",
 	 literals_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1624,16 +1624,16 @@ int ${library_name_suffix}_test_deflate_decode_huffman(
 	          &bit_stream,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1685,17 +1685,17 @@ int ${library_name_suffix}_test_deflate_calculate_adler32(
 	          1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT32(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT32(
 	 "checksum",
 	 checksum,
 	 (uint32_t) 0x304a56a4UL );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1708,12 +1708,12 @@ int ${library_name_suffix}_test_deflate_calculate_adler32(
 	          1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1727,12 +1727,12 @@ int ${library_name_suffix}_test_deflate_calculate_adler32(
 	          1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1746,12 +1746,12 @@ int ${library_name_suffix}_test_deflate_calculate_adler32(
 	          1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1789,17 +1789,17 @@ int ${library_name_suffix}_test_deflate_read_data_header(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SIZE(
 	 "uncompressed_data_offset",
 	 uncompressed_data_offset,
 	 (size_t) 2 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1813,12 +1813,12 @@ int ${library_name_suffix}_test_deflate_read_data_header(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1831,12 +1831,12 @@ int ${library_name_suffix}_test_deflate_read_data_header(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1849,12 +1849,12 @@ int ${library_name_suffix}_test_deflate_read_data_header(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1867,12 +1867,12 @@ int ${library_name_suffix}_test_deflate_read_data_header(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -1912,19 +1912,19 @@ int ${library_name_suffix}_test_deflate_read_block_header(
 	          ${library_name_suffix}_test_deflate_compressed_data,
 	          2627,
 	          2,
-	          ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1936,12 +1936,12 @@ int ${library_name_suffix}_test_deflate_read_block_header(
 	          &last_block_flag,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1951,16 +1951,16 @@ int ${library_name_suffix}_test_deflate_read_block_header(
 	          &bit_stream,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1971,19 +1971,19 @@ int ${library_name_suffix}_test_deflate_read_block_header(
 	          ${library_name_suffix}_test_deflate_compressed_data,
 	          2627,
 	          2,
-	          ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -1995,12 +1995,12 @@ int ${library_name_suffix}_test_deflate_read_block_header(
 	          &last_block_flag,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2013,12 +2013,12 @@ int ${library_name_suffix}_test_deflate_read_block_header(
 	          &last_block_flag,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2031,12 +2031,12 @@ int ${library_name_suffix}_test_deflate_read_block_header(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2049,16 +2049,16 @@ int ${library_name_suffix}_test_deflate_read_block_header(
 	          &bit_stream,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2104,19 +2104,19 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          ${library_name_suffix}_test_deflate_compressed_data,
 	          2627,
 	          2,
-	          ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2126,16 +2126,16 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "fixed_literals_tree",
 	 fixed_literals_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2145,16 +2145,16 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          15,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "fixed_distances_tree",
 	 fixed_distances_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2163,12 +2163,12 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          fixed_distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2178,12 +2178,12 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          &last_block_flag,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2199,17 +2199,17 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SIZE(
 	 "uncompressed_data_size",
 	 uncompressed_data_size,
 	 (size_t) 7640 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2221,16 +2221,16 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          &bit_stream,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2241,19 +2241,19 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          ${library_name_suffix}_test_deflate_compressed_data,
 	          2627,
 	          2,
-	          ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2269,12 +2269,12 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2291,12 +2291,12 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2313,12 +2313,12 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          &uncompressed_data_offset,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2335,12 +2335,12 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2353,16 +2353,16 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          &fixed_distances_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "fixed_distances_tree",
 	 fixed_distances_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2370,16 +2370,16 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          &fixed_literals_tree,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "fixed_literals_tree",
 	 fixed_literals_tree );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2387,16 +2387,16 @@ int ${library_name_suffix}_test_deflate_read_block(
 	          &bit_stream,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "bit_stream",
 	 bit_stream );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2450,17 +2450,17 @@ int ${library_name_suffix}_test_deflate_decompress(
 	          &uncompressed_data_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SIZE(
 	 "uncompressed_data_size",
 	 uncompressed_data_size,
 	 (size_t) 7640 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2475,12 +2475,12 @@ int ${library_name_suffix}_test_deflate_decompress(
 	          &uncompressed_data_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2494,12 +2494,12 @@ int ${library_name_suffix}_test_deflate_decompress(
 	          &uncompressed_data_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2513,12 +2513,12 @@ int ${library_name_suffix}_test_deflate_decompress(
 	          &uncompressed_data_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2532,12 +2532,12 @@ int ${library_name_suffix}_test_deflate_decompress(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2576,17 +2576,17 @@ int ${library_name_suffix}_test_deflate_decompress_zlib(
 	          &uncompressed_data_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SIZE(
 	 "uncompressed_data_size",
 	 uncompressed_data_size,
 	 (size_t) 7640 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -2601,12 +2601,12 @@ int ${library_name_suffix}_test_deflate_decompress_zlib(
 	          &uncompressed_data_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2620,12 +2620,12 @@ int ${library_name_suffix}_test_deflate_decompress_zlib(
 	          &uncompressed_data_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2639,12 +2639,12 @@ int ${library_name_suffix}_test_deflate_decompress_zlib(
 	          &uncompressed_data_size,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2658,12 +2658,12 @@ int ${library_name_suffix}_test_deflate_decompress_zlib(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -2681,24 +2681,24 @@ on_error:
 	return( 0 );
 }
 
-#endif /* defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) */
+#endif /* defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) */
 
 /* The main program
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     wchar_t * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     wchar_t * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #else
 int main(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     char * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     char * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
-#if defined( HAVE_DEBUG_OUTPUT ) && defined( ${library_name_suffix_upper_case}_TEST_DEFLATE )
+#if defined( HAVE_DEBUG_OUTPUT ) && defined( ${library_name_suffix:upper_case}_TEST_DEFLATE )
 	libcnotify_verbose_set(
 	 1 );
 	libcnotify_stream_set(
@@ -2706,49 +2706,49 @@ int main(
 	 NULL );
 #endif
 
-#if defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_deflate_build_dynamic_huffman_trees",
 	 ${library_name_suffix}_test_deflate_build_dynamic_huffman_trees );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_deflate_build_fixed_huffman_trees",
 	 ${library_name_suffix}_test_deflate_build_fixed_huffman_trees );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_deflate_decode_huffman",
 	 ${library_name_suffix}_test_deflate_decode_huffman );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_deflate_calculate_adler32",
 	 ${library_name_suffix}_test_deflate_calculate_adler32 );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_deflate_read_data_header",
 	 ${library_name_suffix}_test_deflate_read_data_header );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_deflate_read_block",
 	 ${library_name_suffix}_test_deflate_read_block );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_deflate_decompress",
 	 ${library_name_suffix}_test_deflate_decompress );
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name}_deflate_decompress_zlib",
 	 ${library_name_suffix}_test_deflate_decompress_zlib );
 
-#endif /* defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) */
+#endif /* defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
-#if defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT )
 
 on_error:
 	return( EXIT_FAILURE );
 
-#endif /* defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) */
+#endif /* defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) */
 }
 

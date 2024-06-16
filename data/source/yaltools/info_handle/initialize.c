@@ -71,7 +71,7 @@ int info_handle_initialize(
 
 		goto on_error;
 	}
-	( *info_handle )->ascii_codepage = ${library_name_upper_case}_CODEPAGE_WINDOWS_1252;
+	( *info_handle )->ascii_codepage = ${library_name:upper_case}_CODEPAGE_WINDOWS_1252;
 	( *info_handle )->notify_stream  = INFO_HANDLE_NOTIFY_STREAM;
 
 	return( 1 );

@@ -5,7 +5,6 @@ type: template
 file: acinclude.m4/check_library.m4
 placeholders:
 - library_name
-- library_name_upper_case
 ---
 identifier: generate_check_tools
 type: group
@@ -39,7 +38,6 @@ type: template
 file: acinclude.m4/check_tools.m4-start
 placeholders:
 - library_name_suffix
-- library_name_suffix_upper_case
 ---
 identifier: generate_header
 type: template

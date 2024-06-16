@@ -1,5 +1,5 @@
 #if defined( WINAPI )
-	path_prefix = _SYSTEM_STRING( "\\${mount_tool_path_prefix_upper_case}" );
+	path_prefix = _SYSTEM_STRING( "\\${mount_tool_path_prefix:upper_case}" );
 #else
 	path_prefix = _SYSTEM_STRING( "/${mount_tool_path_prefix}" );
 #endif

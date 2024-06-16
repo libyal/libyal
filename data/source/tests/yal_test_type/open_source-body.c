@@ -1,7 +1,7 @@
 	result = ${library_name}_${type_name}_open_file_io_${bfio_type}(
 	          *${type_name},
 	          file_io_${bfio_type},
-	          ${library_name_upper_case}_OPEN_READ,
+	          ${library_name:upper_case}_OPEN_READ,
 	          error );
 
 	if( result != 1 )

@@ -195,13 +195,13 @@ int mount_handle_open_parent(
 	if( ${library_name}_${mount_tool_file_system_type}_open_wide(
 	     parent_${mount_tool_file_system_type_name},
 	     parent_path,
-	     ${library_name_upper_case}_OPEN_READ,
+	     ${library_name:upper_case}_OPEN_READ,
 	     error ) != 1 )
 #else
 	if( ${library_name}_${mount_tool_file_system_type}_open(
 	     parent_${mount_tool_file_system_type_name},
 	     parent_path,
-	     ${library_name_upper_case}_OPEN_READ,
+	     ${library_name:upper_case}_OPEN_READ,
 	     error ) != 1 )
 #endif
 	{

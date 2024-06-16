@@ -4,7 +4,7 @@
 int ${library_name_suffix}_test_${type_name}_read_buffer(
      ${library_name}_${type_name}_t *${type_name} )
 {
-	uint8_t buffer[ ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE ];
+	uint8_t buffer[ ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_READ_BUFFER_SIZE ];
 
 	libcerror_error_t *error             = NULL;
 	time_t timestamp                     = 0;
@@ -26,12 +26,12 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	          &${type_size_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -43,35 +43,35 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	          SEEK_SET,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
 	/* Test regular cases
 	 */
-	read_size = ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE;
+	read_size = ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_READ_BUFFER_SIZE;
 
-	if( ${type_size_name} < ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE )
+	if( ${type_size_name} < ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_READ_BUFFER_SIZE )
 	{
 		read_size = (size_t) ${type_size_name};
 	}
 	read_count = ${library_name}_${type_name}_read_buffer(
 	              ${type_name},
 	              buffer,
-	              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
+	              ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_READ_BUFFER_SIZE,
 	              &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE(
 	 "read_count",
 	 read_count,
 	 (ssize_t) read_size );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -85,12 +85,12 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 		          SEEK_END,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 		 "offset",
 		 offset,
 		 (int64_t) ${type_size_name} - 8 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -99,15 +99,15 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 		read_count = ${library_name}_${type_name}_read_buffer(
 		              ${type_name},
 		              buffer,
-		              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
+		              ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_READ_BUFFER_SIZE,
 		              &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE(
 		 "read_count",
 		 read_count,
 		 (ssize_t) 8 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -116,15 +116,15 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 		read_count = ${library_name}_${type_name}_read_buffer(
 		              ${type_name},
 		              buffer,
-		              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
+		              ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_READ_BUFFER_SIZE,
 		              &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE(
 		 "read_count",
 		 read_count,
 		 (ssize_t) 0 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 	}
@@ -142,12 +142,12 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	          SEEK_SET,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -159,14 +159,14 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	{
 		random_number = rand();
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_GREATER_THAN_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_GREATER_THAN_INT(
 		 "random_number",
 		 random_number,
 		 -1 );
 
-		read_size = (size_t) random_number % ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE;
+		read_size = (size_t) random_number % ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_READ_BUFFER_SIZE;
 
-#if defined( ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_VERBOSE )
+#if defined( ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_VERBOSE )
 		fprintf(
 		 stdout,
 		 "${library_name}_${type_name}_read_buffer: at offset: %" PRIi64 " (0x%08" PRIx64 ") of size: %" PRIzd "\n",
@@ -184,12 +184,12 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 		{
 			read_size = (size_t) remaining_${type_size_name};
 		}
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE(
 		 "read_count",
 		 read_count,
 		 (ssize_t) read_size );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -200,17 +200,17 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 		          &offset,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 		 "offset",
 		 offset,
 		 read_offset );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -224,12 +224,12 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 			          SEEK_SET,
 			          &error );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 			 "offset",
 			 offset,
 			 (int64_t) 0 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 			 "error",
 			 error );
 
@@ -246,12 +246,12 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	          SEEK_SET,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -260,15 +260,15 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	read_count = ${library_name}_${type_name}_read_buffer(
 	              NULL,
 	              buffer,
-	              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
+	              ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_READ_BUFFER_SIZE,
 	              &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE(
 	 "read_count",
 	 read_count,
 	 (ssize_t) -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -278,15 +278,15 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	read_count = ${library_name}_${type_name}_read_buffer(
 	              ${type_name},
 	              NULL,
-	              ${library_name_suffix_upper_case}_TEST_${type_name_upper_case}_READ_BUFFER_SIZE,
+	              ${library_name_suffix:upper_case}_TEST_${type_name:upper_case}_READ_BUFFER_SIZE,
 	              &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE(
 	 "read_count",
 	 read_count,
 	 (ssize_t) -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -299,19 +299,19 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	              (size_t) SSIZE_MAX + 1,
 	              &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE(
 	 "read_count",
 	 read_count,
 	 (ssize_t) -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK )
 
 	/* Test ${library_name}_${type_name}_read_buffer with pthread_rwlock_wrlock failing in libcthreads_read_write_lock_grab_for_write
 	 */
@@ -320,7 +320,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	read_count = ${library_name}_${type_name}_read_buffer(
 	              ${type_name},
 	              buffer,
-	              ${library_name_suffix_upper_case}_TEST_PARTITION_READ_BUFFER_SIZE,
+	              ${library_name_suffix:upper_case}_TEST_PARTITION_READ_BUFFER_SIZE,
 	              &error );
 
 	if( ${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fail != -1 )
@@ -329,12 +329,12 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	}
 	else
 	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE(
 		 "read_count",
 		 read_count,
 		 (ssize_t) -1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 		 "error",
 		 error );
 
@@ -348,7 +348,7 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	read_count = ${library_name}_${type_name}_read_buffer(
 	              ${type_name},
 	              buffer,
-	              ${library_name_suffix_upper_case}_TEST_PARTITION_READ_BUFFER_SIZE,
+	              ${library_name_suffix:upper_case}_TEST_PARTITION_READ_BUFFER_SIZE,
 	              &error );
 
 	if( ${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail != -1 )
@@ -357,19 +357,19 @@ int ${library_name_suffix}_test_${type_name}_read_buffer(
 	}
 	else
 	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE(
 		 "read_count",
 		 read_count,
 		 (ssize_t) -1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 		 "error",
 		 error );
 
 		libcerror_error_free(
 		 &error );
 	}
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK ) */
 
 	return( 1 );
 

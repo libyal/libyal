@@ -1,3 +1,3 @@
 dnl Check if DLL support is needed
-AX_${library_name_upper_case}_CHECK_DLL_SUPPORT
+AX_${library_name:upper_case}_CHECK_DLL_SUPPORT
 

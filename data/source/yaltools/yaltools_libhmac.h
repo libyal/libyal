@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${tools_name_upper_case}_LIBHMAC_H )
-#define _${tools_name_upper_case}_LIBHMAC_H
+#if !defined( _${tools_name:upper_case}_LIBHMAC_H )
+#define _${tools_name:upper_case}_LIBHMAC_H
 
 #include <common.h>
 
@@ -47,5 +47,5 @@
 
 #endif /* defined( HAVE_LOCAL_LIBHMAC ) */
 
-#endif /* !defined( _${tools_name_upper_case}_LIBHMAC_H ) */
+#endif /* !defined( _${tools_name:upper_case}_LIBHMAC_H ) */
 

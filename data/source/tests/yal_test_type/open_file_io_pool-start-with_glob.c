@@ -35,21 +35,21 @@ ${test_options_function_arguments} )
 	          &error );
 #endif
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "filenames",
 	 filenames );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_GREATER_THAN_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_GREATER_THAN_INT(
 	 "number_of_filenames",
 	 number_of_filenames,
 	 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -59,16 +59,16 @@ ${test_options_function_arguments} )
 	          LIBBFIO_POOL_UNLIMITED_NUMBER_OF_OPEN_HANDLES,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "file_io_pool",
 	 file_io_pool );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -80,16 +80,16 @@ ${test_options_function_arguments} )
 		          &file_io_handle,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	        ${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	         "file_io_handle",
 	         file_io_handle );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	        ${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	         "error",
 	         error );
 
@@ -109,12 +109,12 @@ ${test_options_function_arguments} )
 		          string_length,
 		          &error );
 #endif
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -125,12 +125,12 @@ ${test_options_function_arguments} )
 		          LIBBFIO_OPEN_READ,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	        ${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	         "error",
 	         error );
 
@@ -140,16 +140,16 @@ ${test_options_function_arguments} )
 	          &${type_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "${type_name}",
 	 ${type_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 

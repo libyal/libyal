@@ -4,16 +4,16 @@
 		          &${type_name},
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 0 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "${type_name}",
 		 ${type_name} );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -21,16 +21,16 @@
 		          &file_io_${bfio_type},
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	         "file_io_${bfio_type}",
 	         file_io_${bfio_type} );
 
-	        ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	        ${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	         "error",
 	         error );
 
@@ -46,12 +46,12 @@
 		          &error );
 #endif
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 	}

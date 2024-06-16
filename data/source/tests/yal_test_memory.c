@@ -33,7 +33,7 @@
 
 #include "${library_name_suffix}_test_memory.h"
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 static void *(*${library_name_suffix}_test_real_malloc)(size_t)                       = NULL;
 static void *(*${library_name_suffix}_test_real_memcpy)(void *, const void *, size_t) = NULL;
@@ -173,5 +173,5 @@ void *realloc(
 	return( ptr );
 }
 
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 

@@ -3,14 +3,14 @@
 	          ${mount_tool_base_type_name},
 	          filenames,
 	          number_of_filenames,
-	          ${library_name_upper_case}_OPEN_READ,
+	          ${library_name:upper_case}_OPEN_READ,
 	          error );
 #else
 	result = ${library_name}_${mount_tool_base_type}_open(
 	          ${mount_tool_base_type_name},
 	          filenames,
 	          number_of_filenames,
-	          ${library_name_upper_case}_OPEN_READ,
+	          ${library_name:upper_case}_OPEN_READ,
 	          error );
 #endif
 	if( result != 1 )

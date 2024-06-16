@@ -19,32 +19,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_suffix_upper_case}_TEST_UNUSED_H )
-#define _${library_name_suffix_upper_case}_TEST_UNUSED_H
+#if !defined( _${library_name_suffix:upper_case}_TEST_UNUSED_H )
+#define _${library_name_suffix:upper_case}_TEST_UNUSED_H
 
 #include <common.h>
 
-#if !defined( ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+#if !defined( ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 
 #if defined( __GNUC__ ) && __GNUC__ >= 3
-#define ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED	__attribute__ ((__unused__))
+#define ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED	__attribute__ ((__unused__))
 
 #else
-#define ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED
+#define ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED
 
 #endif /* defined( __GNUC__ ) && __GNUC__ >= 3 */
 
-#endif /* !defined( ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED ) */
+#endif /* !defined( ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED ) */
 
 #if defined( _MSC_VER )
-#define ${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( parameter ) \
+#define ${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( parameter ) \
 	UNREFERENCED_PARAMETER( parameter );
 
 #else
-#define ${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( parameter ) \
+#define ${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( parameter ) \
 	/* parameter */
 
 #endif /* defined( _MSC_VER ) */
 
-#endif /* !defined( _${library_name_suffix_upper_case}_TEST_UNUSED_H ) */
+#endif /* !defined( _${library_name_suffix:upper_case}_TEST_UNUSED_H ) */
 

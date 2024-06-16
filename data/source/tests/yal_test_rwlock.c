@@ -35,7 +35,7 @@
 
 #include "${library_name_suffix}_test_rwlock.h"
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK )
 
 static int (*${library_name_suffix}_test_real_pthread_rwlock_destroy)(pthread_rwlock_t *) = NULL;
 static int (*${library_name_suffix}_test_real_pthread_rwlock_rdlock)(pthread_rwlock_t *)  = NULL;
@@ -214,5 +214,5 @@ int pthread_rwlock_unlock(
 	return( result );
 }
 
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK ) */
 

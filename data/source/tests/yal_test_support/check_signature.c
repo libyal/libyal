@@ -19,12 +19,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 		          256,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -34,12 +34,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 		          narrow_source,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 	}
@@ -49,12 +49,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -65,12 +65,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 	          "",
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -79,7 +79,7 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 
 	if( source != NULL )
 	{
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 		/* Test ${library_name}_check_${signature_type}_signature with malloc failing in libbfio_file_initialize
 		 */
@@ -95,19 +95,19 @@ int ${library_name_suffix}_test_check_${signature_type}_signature(
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
 			libcerror_error_free(
 			 &error );
 		}
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 	}
 	return( 1 );
 
@@ -143,12 +143,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 		          256,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -158,12 +158,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 		          wide_source,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 	}
@@ -173,12 +173,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -189,12 +189,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 	          L"",
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -203,7 +203,7 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 
 	if( source != NULL )
 	{
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 		/* Test ${library_name}_check_${signature_type}_signature_wide with malloc failing in libbfio_file_initialize
 		 */
@@ -219,19 +219,19 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_wide(
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
 			libcerror_error_free(
 			 &error );
 		}
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 	}
 	return( 1 );
 
@@ -267,7 +267,7 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	                 0,
 	                 sizeof( uint8_t ) * 8192 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "memset_result",
 	 memset_result );
 
@@ -279,16 +279,16 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 		          &file_io_handle,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 		 "file_io_handle",
 		 file_io_handle );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -308,12 +308,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 		          source_length,
 		          &error );
 #endif
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -322,12 +322,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 		          LIBBFIO_OPEN_READ,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -337,12 +337,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 		          file_io_handle,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 	}
@@ -352,12 +352,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -372,12 +372,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 		          file_io_handle,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 0 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 
@@ -385,16 +385,16 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 		          &file_io_handle,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "file_io_handle",
 		 file_io_handle );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 	}
@@ -406,16 +406,16 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	          sizeof( uint8_t ) * 1,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "file_io_handle",
 	 file_io_handle );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -423,12 +423,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	          file_io_handle,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -439,12 +439,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	          &file_io_handle,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -456,16 +456,16 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	          sizeof( uint8_t ) * 8192,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "file_io_handle",
 	 file_io_handle );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -473,12 +473,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	          file_io_handle,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -486,12 +486,12 @@ int ${library_name_suffix}_test_check_${signature_type}_signature_file_io_handle
 	          &file_io_handle,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 

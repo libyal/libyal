@@ -16,12 +16,12 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	          SEEK_END,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_NOT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -33,12 +33,12 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	          SEEK_SET,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) 1024 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -48,12 +48,12 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	          SEEK_CUR,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) 512 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -63,12 +63,12 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	          SEEK_SET,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) ( size + 512 ) );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -80,12 +80,12 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	          SEEK_SET,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) 0 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -97,12 +97,12 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	          SEEK_SET,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -115,12 +115,12 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	          SEEK_SET,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -133,12 +133,12 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	          SEEK_CUR,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -148,19 +148,19 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	          SEEK_END,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 	 "offset",
 	 offset,
 	 (int64_t) -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK )
 
 	/* Test ${library_name}_${type_name}_seek_offset with pthread_rwlock_wrlock failing in libcthreads_read_write_lock_grab_for_write
 	 */
@@ -178,12 +178,12 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	}
 	else
 	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 		 "offset",
 		 (int64_t) offset,
 		 (int64_t) -1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 		 "error",
 		 error );
 
@@ -206,19 +206,19 @@ int ${library_name_suffix}_test_${type_name}_seek_offset(
 	}
 	else
 	{
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64(
 		 "offset",
 		 (int64_t) offset,
 		 (int64_t) -1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 		 "error",
 		 error );
 
 		libcerror_error_free(
 		 &error );
 	}
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_RWLOCK ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK ) */
 
 	return( 1 );
 

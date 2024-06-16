@@ -9,7 +9,7 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	${value_type}_t *${value_name}                 = NULL;
 	int result                                     = 0;
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 	int number_of_malloc_fail_tests                = 1;
 	int number_of_memset_fail_tests                = 1;
 	int test_number                                = 0;
@@ -21,16 +21,16 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	          &${value_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "${value_name}",
 	 ${value_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -41,16 +41,16 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	          ${value_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "${type_name}",
 	 ${type_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -58,16 +58,16 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	          &${type_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "${type_name}",
 	 ${type_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -78,12 +78,12 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	          ${value_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -99,12 +99,12 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 
 	${type_name} = NULL;
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -116,19 +116,19 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 	for( test_number = 0;
 	     test_number < number_of_malloc_fail_tests;
@@ -156,16 +156,16 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 			 "${type_name}",
 			 ${type_name} );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -199,16 +199,16 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 		}
 		else
 		{
-			${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 			 "${type_name}",
 			 ${type_name} );
 
-			${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -216,7 +216,7 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 			 &error );
 		}
 	}
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 
 	/* Clean up
 	 */
@@ -224,16 +224,16 @@ int ${library_name_suffix}_test_${type_name}_initialize(
 	          &${value_name},
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "${value_name}",
 	 ${value_name} );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 

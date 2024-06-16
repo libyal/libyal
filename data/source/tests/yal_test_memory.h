@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_suffix_upper_case}_TEST_MEMORY_H )
-#define _${library_name_suffix_upper_case}_TEST_MEMORY_H
+#if !defined( _${library_name_suffix:upper_case}_TEST_MEMORY_H )
+#define _${library_name_suffix:upper_case}_TEST_MEMORY_H
 
 #include <common.h>
 
@@ -28,11 +28,11 @@
 extern "C" {
 #endif
 
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( ${library_name_upper_case}_DLL_IMPORT ) && !defined( __arm__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) && !defined( __hppa__ ) && !defined( __loongarch__ ) && !defined( __mips__ ) && !defined( __riscv ) && !defined( __sparc__ ) && !defined( HAVE_ASAN )
-#define HAVE_${library_name_suffix_upper_case}_TEST_MEMORY		1
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( ${library_name:upper_case}_DLL_IMPORT ) && !defined( __arm__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) && !defined( __hppa__ ) && !defined( __loongarch__ ) && !defined( __mips__ ) && !defined( __riscv ) && !defined( __sparc__ ) && !defined( HAVE_ASAN )
+#define HAVE_${library_name_suffix:upper_case}_TEST_MEMORY		1
 #endif
 
-#if defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY )
 
 extern int ${library_name_suffix}_test_malloc_attempts_before_fail;
 
@@ -42,11 +42,11 @@ extern int ${library_name_suffix}_test_memset_attempts_before_fail;
 
 extern int ${library_name_suffix}_test_realloc_attempts_before_fail;
 
-#endif /* defined( HAVE_${library_name_suffix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_MEMORY ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _${library_name_suffix_upper_case}_TEST_MEMORY_H ) */
+#endif /* !defined( _${library_name_suffix:upper_case}_TEST_MEMORY_H ) */
 

@@ -1,12 +1,12 @@
 /* Cleans up when fuse is done
  */
 void mount_fuse_destroy(
-      void *private_data ${tools_name_upper_case}_ATTRIBUTE_UNUSED )
+      void *private_data ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "mount_fuse_destroy";
 
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( private_data )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( private_data )
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )

@@ -1,5 +1,5 @@
 dnl Check if ${local_library_name} or required headers and functions are available
-AX_${local_library_name_upper_case}_CHECK_ENABLE
+AX_${local_library_name:upper_case}_CHECK_ENABLE
 AX_ZLIB_CHECK_ADLER32
 AX_ZLIB_CHECK_COMPRESS2
 AX_ZLIB_CHECK_COMPRESSBOUND

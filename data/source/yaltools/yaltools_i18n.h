@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${tools_name_upper_case}_I18N_H )
-#define _${tools_name_upper_case}_I18N_H
+#if !defined( _${tools_name:upper_case}_I18N_H )
+#define _${tools_name:upper_case}_I18N_H
 
 #include <common.h>
 
@@ -44,5 +44,5 @@ extern "C" {
 }
 #endif
 
-#endif /* !defined( _${tools_name_upper_case}_I18N_H ) */
+#endif /* !defined( _${tools_name:upper_case}_I18N_H ) */
 

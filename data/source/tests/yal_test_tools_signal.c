@@ -34,9 +34,9 @@
 #include "../${library_name_suffix}tools/${library_name_suffix}tools_signal.h"
 
 void ${library_name_suffix}_test_tools_signal_handler_function(
-      ${library_name_suffix}tools_signal_t signal ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+      ${library_name_suffix}tools_signal_t signal ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 {
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( signal )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( signal )
 }
 
 #if defined( WINAPI )
@@ -54,7 +54,7 @@ int ${library_name_suffix}_test_tools_signal_handler(
 	result = ${library_name_suffix}tools_signal_handler(
 	          CTRL_C_EVENT );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 (int) TRUE );
@@ -62,7 +62,7 @@ int ${library_name_suffix}_test_tools_signal_handler(
 	result = ${library_name_suffix}tools_signal_handler(
 	          CTRL_LOGOFF_EVENT );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 (int) FALSE );
@@ -96,12 +96,12 @@ int ${library_name_suffix}_test_tools_signal_attach(
 	          ${library_name_suffix}_test_tools_signal_handler_function,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -111,12 +111,12 @@ int ${library_name_suffix}_test_tools_signal_attach(
 	          NULL,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -148,12 +148,12 @@ int ${library_name_suffix}_test_tools_signal_detach(
 	result = ${library_name_suffix}tools_signal_detach(
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -172,20 +172,20 @@ on_error:
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     wchar_t * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     wchar_t * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #else
 int main(
-     int argc ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED,
-     char * const argv[] ${library_name_suffix_upper_case}_TEST_ATTRIBUTE_UNUSED )
+     int argc ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED,
+     char * const argv[] ${library_name_suffix:upper_case}_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
-	${library_name_suffix_upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argc )
+	${library_name_suffix:upper_case}_TEST_UNREFERENCED_PARAMETER( argv )
 
 #if defined( WINAPI )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name_suffix}tools_signal_handler",
 	 ${library_name_suffix}_test_tools_signal_handler )
 
@@ -197,11 +197,11 @@ int main(
 
 #endif /* defined( WINAPI ) */
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name_suffix}tools_signal_attach",
 	 ${library_name_suffix}_test_tools_signal_attach )
 
-	${library_name_suffix_upper_case}_TEST_RUN(
+	${library_name_suffix:upper_case}_TEST_RUN(
 	 "${library_name_suffix}tools_signal_detach",
 	 ${library_name_suffix}_test_tools_signal_detach )
 

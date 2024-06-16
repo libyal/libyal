@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_suffix_upper_case}_TEST_LIBCERROR_H )
-#define _${library_name_suffix_upper_case}_TEST_LIBCERROR_H
+#if !defined( _${library_name_suffix:upper_case}_TEST_LIBCERROR_H )
+#define _${library_name_suffix:upper_case}_TEST_LIBCERROR_H
 
 #include <common.h>
 
@@ -46,5 +46,5 @@
 
 #endif /* defined( HAVE_LOCAL_LIBCERROR ) */
 
-#endif /* !defined( _${library_name_suffix_upper_case}_TEST_LIBCERROR_H ) */
+#endif /* !defined( _${library_name_suffix:upper_case}_TEST_LIBCERROR_H ) */
 

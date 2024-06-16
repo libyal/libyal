@@ -5,12 +5,61 @@ import abc
 import datetime
 import logging
 import os
+import re
 import string
 import time
 
 from yaldevtools import source_file
 from yaldevtools import source_formatter
 from yaldevtools import yaml_operations_file
+
+
+class TemplateString(string.Template):
+  """Template string."""
+
+  idpattern = r'(?a:[_a-z][_a-z0-9]*(|:[_a-z][_a-z0-9]*))'
+
+  def substitute(self, mapping=None):
+    """Substitutes placeholders in the template string.
+
+    Args:
+      mapping (dict[str, str]): values of placeholders.
+    """
+    def convert_placeholder(match):
+      """Converts a placeholder into a mapped value.
+
+      Args:
+        match (re.Match): expression match.
+
+      Returns:
+        str: mapped value.
+
+      Raises:
+        ValueError: if the pattern is not supported.
+      """
+      identifier = match.group('named') or match.group('braced')
+      if identifier is not None:
+        value_identifier, _, modifier = identifier.partition(':')
+        value = str(mapping[value_identifier])
+
+        if modifier == 'lower_case':
+          value = value.lower()
+        elif modifier == 'upper_case':
+          value = value.upper()
+        elif modifier:
+          raise ValueError('Unrecognized modifier in pattern', self.pattern)
+
+        return value
+
+      if match.group('escaped') is not None:
+        return self.delimiter
+
+      if match.group('invalid') is not None:
+        self._invalid(match)
+
+      raise ValueError('Unrecognized named group in pattern', self.pattern)
+
+    return self.pattern.sub(convert_placeholder, self.template)
 
 
 class BaseSourceFileGenerator(object):
@@ -43,7 +92,7 @@ class BaseSourceFileGenerator(object):
     template_string = self._ReadTemplateFile(template_file_path)
 
     try:
-      output_data = template_string.substitute(template_mappings)
+      output_data = template_string.substitute(mapping=template_mappings)
     except (KeyError, ValueError) as exception:
       logging.error((
           f'Unable to format template: {template_file_path:s} with error: '
@@ -308,14 +357,14 @@ class BaseSourceFileGenerator(object):
       value = self._GetPlaceholderValue(namespace, identifier)
       if value is None:
         logging.warning((
-            f'Missing template placeholder: {indentifier:s} defined in '
+            f'Missing template placeholder: {identifier:s} defined in '
             f'operation: {template_operation.identifier:s} in file: '
             f'{operations_file_name:s}'))
 
       template_values[identifier] = value
 
     try:
-      output_data = template_string.substitute(template_values)
+      output_data = template_string.substitute(mapping=template_values)
     except (KeyError, ValueError) as exception:
       logging.error((
           f'Unable to format template: {template_file_path:s} with error: '
@@ -345,13 +394,20 @@ class BaseSourceFileGenerator(object):
       str: value or None if not available.
     """
     modifier = None
+    # TODO: remove support for _lower_case and _upper_case
     if identifier.endswith('_lower_case'):
       value_identifier = identifier[:-11]
       modifier = 'lower'
+
     elif identifier.endswith('_upper_case'):
       value_identifier = identifier[:-11]
       modifier = 'upper'
+
     else:
+      if ':' in identifier:
+        logging.warning(
+            f'Unsupported placeholder modififier in: {identifier:s}')
+
       value_identifier = identifier
 
     value = namespace.get(value_identifier, None)
@@ -370,7 +426,7 @@ class BaseSourceFileGenerator(object):
       path (str): path of the file containing the template string.
 
     Returns:
-      string.Template: template string.
+      TemplateString: template string.
     """
     # Read with binary mode to make sure end of line characters are not
     # converted.
@@ -379,7 +435,7 @@ class BaseSourceFileGenerator(object):
 
     file_data = file_data.decode('utf8')
 
-    return string.Template(file_data)
+    return TemplateString(file_data)
 
   def _SortLines(self, text):
     """Sorts lines of text.

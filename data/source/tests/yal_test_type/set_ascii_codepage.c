@@ -5,40 +5,40 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
      ${library_name}_${type_name}_t *${type_name} )
 {
 	int supported_codepages[ 15 ] = {
-		${library_name_upper_case}_CODEPAGE_ASCII,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_874,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_932,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_936,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_949,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_950,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_1250,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_1251,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_1252,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_1253,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_1254,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_1255,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_1256,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_1257,
-		${library_name_upper_case}_CODEPAGE_WINDOWS_1258 };
+		${library_name:upper_case}_CODEPAGE_ASCII,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_874,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_932,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_936,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_949,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_950,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_1250,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_1251,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_1252,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_1253,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_1254,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_1255,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_1256,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_1257,
+		${library_name:upper_case}_CODEPAGE_WINDOWS_1258 };
 
 	int unsupported_codepages[ 17 ] = {
-		${library_name_upper_case}_CODEPAGE_ISO_8859_1,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_2,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_3,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_4,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_5,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_6,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_7,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_8,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_9,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_10,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_11,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_13,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_14,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_15,
-		${library_name_upper_case}_CODEPAGE_ISO_8859_16,
-		${library_name_upper_case}_CODEPAGE_KOI8_R,
-		${library_name_upper_case}_CODEPAGE_KOI8_U };
+		${library_name:upper_case}_CODEPAGE_ISO_8859_1,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_2,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_3,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_4,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_5,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_6,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_7,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_8,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_9,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_10,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_11,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_13,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_14,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_15,
+		${library_name:upper_case}_CODEPAGE_ISO_8859_16,
+		${library_name:upper_case}_CODEPAGE_KOI8_R,
+		${library_name:upper_case}_CODEPAGE_KOI8_U };
 
 	libcerror_error_t *error = NULL;
 	int codepage             = 0;
@@ -58,12 +58,12 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
 		          codepage,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
 	}
@@ -71,15 +71,15 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
 	 */
 	result = ${library_name}_${type_name}_set_ascii_codepage(
 	          NULL,
-	          ${library_name_upper_case}_CODEPAGE_ASCII,
+	          ${library_name:upper_case}_CODEPAGE_ASCII,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -97,12 +97,12 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
 		          codepage,
 		          &error );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 -1 );
 
-		${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 		 "error",
 		 error );
 
@@ -113,15 +113,15 @@ int ${library_name_suffix}_test_${type_name}_set_ascii_codepage(
 	 */
 	result = ${library_name}_${type_name}_set_ascii_codepage(
 	          ${type_name},
-	          ${library_name_upper_case}_CODEPAGE_WINDOWS_1252,
+	          ${library_name:upper_case}_CODEPAGE_WINDOWS_1252,
 	          &error );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL(
+	${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 

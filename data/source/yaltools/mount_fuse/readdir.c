@@ -6,16 +6,16 @@ int mount_fuse_readdir(
      const char *path,
      void *buffer,
      fuse_fill_dir_t filler,
-     off_t offset ${tools_name_upper_case}_ATTRIBUTE_UNUSED,
-     struct fuse_file_info *file_info ${tools_name_upper_case}_ATTRIBUTE_UNUSED,
-     enum fuse_readdir_flags flags ${tools_name_upper_case}_ATTRIBUTE_UNUSED )
+     off_t offset ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
+     struct fuse_file_info *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
+     enum fuse_readdir_flags flags ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #else
 int mount_fuse_readdir(
      const char *path,
      void *buffer,
      fuse_fill_dir_t filler,
-     off_t offset ${tools_name_upper_case}_ATTRIBUTE_UNUSED,
-     struct fuse_file_info *file_info ${tools_name_upper_case}_ATTRIBUTE_UNUSED )
+     off_t offset ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
+     struct fuse_file_info *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #endif
 {
 	struct stat *stat_info                = NULL;
@@ -29,10 +29,10 @@ int mount_fuse_readdir(
 	int result                            = 0;
 	int sub_file_entry_index              = 0;
 
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( offset )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( offset )
 
 #if defined( HAVE_LIBFUSE3 )
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( flags )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( flags )
 #endif
 
 #if defined( HAVE_DEBUG_OUTPUT )

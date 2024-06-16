@@ -18,7 +18,7 @@ type: template
 file: mount_fuse/destroy.c
 placeholders:
 - mount_tool_name
-- tools_name_upper_case
+- tools_name
 ---
 identifier: generate_filldir
 type: template
@@ -29,7 +29,7 @@ type: template
 file: mount_fuse/getattr.c
 placeholders:
 - mount_tool_name
-- tools_name_upper_case
+- tools_name
 ---
 identifier: generate_getxattr
 type: template
@@ -85,7 +85,7 @@ identifier: generate_readdir
 type: template
 file: mount_fuse/readdir.c
 placeholders:
-- tools_name_upper_case
+- tools_name
 ---
 identifier: generate_readlink
 type: template

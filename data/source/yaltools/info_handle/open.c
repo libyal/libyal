@@ -37,13 +37,13 @@ int info_handle_open(
 	if( ${library_name}_${info_tool_source_type}_open_wide(
 	     info_handle->${info_tool_source_type},
 	     filename,
-	     ${library_name_upper_case}_OPEN_READ,
+	     ${library_name:upper_case}_OPEN_READ,
 	     error ) != 1 )
 #else
 	if( ${library_name}_${info_tool_source_type}_open(
 	     info_handle->${info_tool_source_type},
 	     filename,
-	     ${library_name_upper_case}_OPEN_READ,
+	     ${library_name:upper_case}_OPEN_READ,
 	     error ) != 1 )
 #endif
 	{

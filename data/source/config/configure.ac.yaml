@@ -18,13 +18,12 @@ type: template
 file: configure.ac/check_dependency_support.ac
 placeholders:
 - dependency_name
-- dependency_name_upper_case
 ---
 identifier: generate_check_dll_support
 type: template
 file: configure.ac/check_dll_support.ac
 placeholders:
-- library_name_upper_case
+- library_name
 ---
 identifier: generate_check_library_dependencies
 type: sequence
@@ -43,7 +42,6 @@ type: template
 file: configure.ac/check_library_support.ac
 placeholders:
 - library_name
-- library_name_upper_case
 ---
 identifier: generate_check_ossfuzz_support
 type: template
@@ -81,7 +79,6 @@ condition: "'tools' in project_features"
 file: configure.ac/check_tools_support.ac
 placeholders:
 - tools_name
-- tools_name_upper_case
 ---
 identifier: generate_check_types_support
 type: template

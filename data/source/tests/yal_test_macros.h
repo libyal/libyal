@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_suffix_upper_case}_TEST_MACROS_H )
-#define _${library_name_suffix_upper_case}_TEST_MACROS_H
+#if !defined( _${library_name_suffix:upper_case}_TEST_MACROS_H )
+#define _${library_name_suffix:upper_case}_TEST_MACROS_H
 
 #include <common.h>
 #include <file_stream.h>
@@ -29,210 +29,210 @@
 #include <stdlib.h>
 #endif
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%d) != %d\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_NOT_EQUAL_INT( name, value, expected_value ) \
 	if( value == expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%d) == %d\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_GREATER_THAN_INT( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_GREATER_THAN_INT( name, value, expected_value ) \
 	if( value <= expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%d) <= %d\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_LESS_THAN_INT( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_LESS_THAN_INT( name, value, expected_value ) \
 	if( value >= expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%d) >= %d\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INTPTR( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INTPTR( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (0x%08x" PRIjx ") != 0x%08x" PRIjx "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INTPTR( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_NOT_EQUAL_INTPTR( name, value, expected_value ) \
 	if( value == expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (0x%08x" PRIjx ") == 0x%08x" PRIjx "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_FLOAT( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_FLOAT( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%f) != %f\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_FLOAT( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_NOT_EQUAL_FLOAT( name, value, expected_value ) \
 	if( value == expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%f) == %f\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SIZE( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SIZE( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIzd ") != %" PRIzd "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_SSIZE( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_SSIZE( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIzd ") != %" PRIzd "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_SSIZE( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_NOT_EQUAL_SSIZE( name, value, expected_value ) \
 	if( value == expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIzd ") == %" PRIzd "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT8( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT8( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi8 ") != %" PRIi8 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT8( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_NOT_EQUAL_INT8( name, value, expected_value ) \
 	if( value == expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi8 ") == %" PRIi8 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT8( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT8( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi8 ") != %" PRIu8 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_LESS_THAN_UINT8( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_LESS_THAN_UINT8( name, value, expected_value ) \
 	if( value >= expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi8 ") >= %" PRIu8 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT16( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT16( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi16 ") != %" PRIi16 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT16( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_NOT_EQUAL_INT16( name, value, expected_value ) \
 	if( value == expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi16 ") == %" PRIi16 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT16( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT16( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi16 ") != %" PRIu16 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_LESS_THAN_UINT16( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_LESS_THAN_UINT16( name, value, expected_value ) \
 	if( value >= expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi16 ") >= %" PRIu16 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT32( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT32( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi32 ") != %" PRIi32 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT32( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_NOT_EQUAL_INT32( name, value, expected_value ) \
 	if( value == expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi32 ") == %" PRIi32 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT32( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT32( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIu32 ") != %" PRIu32 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_LESS_THAN_UINT32( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_LESS_THAN_UINT32( name, value, expected_value ) \
 	if( value >= expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIu32 ") >= %" PRIu32 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_INT64( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_INT64( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi64 ") != %" PRIi64 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_NOT_EQUAL_INT64( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_NOT_EQUAL_INT64( name, value, expected_value ) \
 	if( value == expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIi64 ") == %" PRIi64 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_EQUAL_UINT64( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_EQUAL_UINT64( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIu64 ") != %" PRIu64 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_LESS_THAN_UINT64( name, value, expected_value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_LESS_THAN_UINT64( name, value, expected_value ) \
 	if( value >= expected_value ) \
 	{ \
 		fprintf( stdout, "%s:%d %s (%" PRIu64 ") >= %" PRIu64 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NOT_NULL( name, value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_IS_NOT_NULL( name, value ) \
 	if( value == NULL ) \
 	{ \
 		fprintf( stdout, "%s:%d %s == NULL\n", __FILE__, __LINE__, name ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_ASSERT_IS_NULL( name, value ) \
+#define ${library_name_suffix:upper_case}_TEST_ASSERT_IS_NULL( name, value ) \
 	if( value != NULL ) \
 	{ \
 		fprintf( stdout, "%s:%d %s != NULL\n", __FILE__, __LINE__, name ); \
 		goto on_error; \
 	}
 
-#define ${library_name_suffix_upper_case}_TEST_RUN( name, function ) \
+#define ${library_name_suffix:upper_case}_TEST_RUN( name, function ) \
 	if( function() != 1 ) \
 	{ \
 		fprintf( stdout, "Unable to run test: %s\n", name ); \
@@ -241,7 +241,7 @@
 
 #if !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 )
 
-#define ${library_name_suffix_upper_case}_TEST_RUN_WITH_ARGS( name, function, ... ) \
+#define ${library_name_suffix:upper_case}_TEST_RUN_WITH_ARGS( name, function, ... ) \
 	if( function( __VA_ARGS__ ) != 1 ) \
 	{ \
 		fprintf( stdout, "Unable to run test: %s\n", name ); \
@@ -250,8 +250,8 @@
 
 #endif /* !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 ) */
 
-#define ${library_name_suffix_upper_case}_TEST_FPRINT_ERROR( error ) \
+#define ${library_name_suffix:upper_case}_TEST_FPRINT_ERROR( error ) \
 	libcerror_error_backtrace_fprint( error, stdout );
 
-#endif /* !defined( _${library_name_suffix_upper_case}_TEST_MACROS_H ) */
+#endif /* !defined( _${library_name_suffix:upper_case}_TEST_MACROS_H ) */
 

@@ -6,17 +6,17 @@
 int __stdcall mount_dokan_CreateFile(
                const wchar_t *path,
                DWORD desired_access,
-               DWORD share_mode ${tools_name_upper_case}_ATTRIBUTE_UNUSED,
+               DWORD share_mode ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
                DWORD creation_disposition,
-               DWORD attribute_flags ${tools_name_upper_case}_ATTRIBUTE_UNUSED,
+               DWORD attribute_flags ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
                DOKAN_FILE_INFO *file_info )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "mount_dokan_CreateFile";
 	int result               = 0;
 
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( share_mode )
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( attribute_flags )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( share_mode )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( attribute_flags )
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -139,22 +139,22 @@ on_error:
  */
 NTSTATUS __stdcall mount_dokan_ZwCreateFile(
                     const wchar_t *path,
-                    DOKAN_IO_SECURITY_CONTEXT *security_context ${tools_name_upper_case}_ATTRIBUTE_UNUSED,
+                    DOKAN_IO_SECURITY_CONTEXT *security_context ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
                     ACCESS_MASK desired_access,
-                    ULONG file_attributes ${tools_name_upper_case}_ATTRIBUTE_UNUSED,
-                    ULONG share_access ${tools_name_upper_case}_ATTRIBUTE_UNUSED,
+                    ULONG file_attributes ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
+                    ULONG share_access ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
                     ULONG creation_disposition,
-                    ULONG creation_options ${tools_name_upper_case}_ATTRIBUTE_UNUSED,
+                    ULONG creation_options ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
                     DOKAN_FILE_INFO *file_info )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "mount_dokan_ZwCreateFile";
 	int result               = 0;
 
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( security_context )
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( file_attributes )
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( share_access )
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( creation_options )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( security_context )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( file_attributes )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( share_access )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( creation_options )
 
 	if( path == NULL )
 	{

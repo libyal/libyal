@@ -5,7 +5,7 @@
 int mount_fuse_getattr(
      const char *path,
      struct stat *stat_info,
-     struct fuse_file_info *file_info ${tools_name_upper_case}_ATTRIBUTE_UNUSED )
+     struct fuse_file_info *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #else
 int mount_fuse_getattr(
      const char *path,
@@ -23,7 +23,7 @@ int mount_fuse_getattr(
 	int result                     = 0;
 
 #if defined( HAVE_LIBFUSE3 )
-	${tools_name_upper_case}_UNREFERENCED_PARAMETER( file_info )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( file_info )
 #endif
 
 #if defined( HAVE_DEBUG_OUTPUT )

@@ -1,7 +1,7 @@
 	result = ${library_name}_${mount_tool_base_type}_open_file_io_handle(
 	          ${mount_tool_base_type_name},
 	          file_io_handle,
-	          ${library_name_upper_case}_OPEN_READ,
+	          ${library_name:upper_case}_OPEN_READ,
 	          error );
 
 	if( result == -1 )
