@@ -11,6 +11,14 @@ from yaldevtools.source_generators import interface
 class ConfigurationFileGenerator(interface.SourceFileGenerator):
   """Configuration file generator."""
 
+  _PLACEHOLDER_VALUE_CALLBACKS = {
+      'brew_build_dependencies': '_GetBrewBuildDependencies',
+      'cygwin_build_dependencies': '_GetCygwinBuildDependencies',
+      'dpkg_build_dependencies': '_GetDpkgBuildDependencies',
+      'freebsd_build_dependencies': '_GetFreeBSDBuildDependencies',
+      'mingw_msys2_build_dependencies': '_GetMinGWMSYS2BuildDependencies',
+      'python_module_development_status': '_GetPythonModuleDevelopmentStatus'}
+
   def _GenerateACIncludeM4(self, project_configuration, template_mappings):
     """Generates the acinclude.m4 configuration file.
 
@@ -106,24 +114,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     # if project_configuration.HasDependencyCrypto():
     # TODO: add environment-cygwin64-openssl.yml
 
-    brew_build_dependencies = self._GetBrewBuildDependencies(
-        project_configuration)
-
-    cygwin_build_dependencies = self._GetCygwinBuildDependencies(
-        project_configuration)
-
-    mingw_msys2_build_dependencies = self._GetMinGWMSYS2BuildDependencies(
-        project_configuration)
-
-    template_mappings['brew_build_dependencies'] = ' '.join(
-        sorted(brew_build_dependencies))
-
-    template_mappings['cygwin_build_dependencies'] = ' '.join([
-        f'-P {name:s}' for name in cygwin_build_dependencies])
-
-    template_mappings['mingw_msys2_build_dependencies'] = ' '.join(
-        mingw_msys2_build_dependencies)
-
     template_mappings['pypi_token'] = getattr(
         project_configuration, 'pypi_token_appveyor', '')
 
@@ -131,9 +121,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         'appveyor.yml.yaml', 'main', project_configuration, template_mappings,
         'appveyor.yml')
 
-    del template_mappings['brew_build_dependencies']
-    del template_mappings['cygwin_build_dependencies']
-    del template_mappings['mingw_msys2_build_dependencies']
     del template_mappings['pypi_token']
 
   def _GenerateCodecovYML(self, project_configuration, template_mappings):
@@ -149,26 +136,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     ignore_paths = list(makefile_am_file.libraries)
     ignore_paths.append('tests')
 
-    template_mappings['codecov_ignore'] = '\n'.join([
-        f'    - "{path:s}/*"' for path in sorted(ignore_paths)])
+    template_mappings['ignore_paths'] = sorted(ignore_paths)
 
     self._GenerateSectionsFromOperationsFile(
         'codecov.yml.yaml', 'main', project_configuration, template_mappings,
         '.codecov.yml')
 
-    del template_mappings['codecov_ignore']
+    del template_mappings['ignore_paths']
 
-  def _GenerateConfigureAC(
-      self, project_configuration, template_mappings, output_writer,
-      output_filename):
+  def _GenerateConfigureAC(self, project_configuration, template_mappings):
     """Generates the configure.ac configuration file.
 
     Args:
       project_configuration (ProjectConfiguration): project configuration.
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
-      output_writer (OutputWriter): output writer.
-      output_filename (str): path of the output file.
     """
     # TODO: change indentation of templates.
 
@@ -679,54 +661,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     del template_mappings['tools_spec_build_requires']
     del template_mappings['tools_spec_requires']
 
-  def _GenerateGitHubActionsBuildYML(
-      self, project_configuration, template_mappings):
-    """Generates the .github/workflows/build.yml configuration file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      output_filename (str): path of the output file.
-    """
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
-
-    template_mappings['dpkg_build_dependencies'] = ' '.join(
-        dpkg_build_dependencies)
-
-    operations_file_name = os.path.join('github_workflows', 'build.yml.yaml')
-    output_filename = os.path.join('.github', 'workflows', 'build.yml')
-    self._GenerateSectionsFromOperationsFile(
-        operations_file_name, 'main', project_configuration, template_mappings,
-        output_filename)
-
-    del template_mappings['dpkg_build_dependencies']
-
-  def _GenerateGitHubActionsBuildFreeBSDYML(
-      self, project_configuration, template_mappings):
-    """Generates the .github/workflows/build_freebsd.yml configuration file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-    """
-    freebsd_build_dependencies = self._GetFreeBSDBuildDependencies(
-        project_configuration)
-
-    template_mappings['freebsd_build_dependencies'] = ' '.join(
-        freebsd_build_dependencies)
-
-    operations_file_name = os.path.join(
-        'github_workflows', 'build_freebsd.yml.yaml')
-    output_filename = os.path.join('.github', 'workflows', 'build_freebsd.yml')
-    self._GenerateSectionsFromOperationsFile(
-        operations_file_name, 'main', project_configuration, template_mappings,
-        output_filename)
-
-    del template_mappings['freebsd_build_dependencies']
-
   def _GenerateGitHubActionsBuildSharedYML(
       self, project_configuration, template_mappings, include_header_file):
     """Generates the .github/workflows/build_shared.yml configuration file.
@@ -738,17 +672,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       include_header_file (LibraryIncludeHeaderFile): library include header
           file.
     """
-    dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-        project_configuration)
-
     if 'wide_character_type' in project_configuration.library_features:
       configure_options = '--enable-wide-character-type'
     else:
       configure_options = ''
 
     template_mappings['configure_options'] = configure_options
-    template_mappings['dpkg_build_dependencies'] = ' '.join(
-        dpkg_build_dependencies)
 
     operations_file_name = os.path.join(
         'github_workflows', 'build_shared.yml.yaml')
@@ -758,140 +687,124 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         output_filename)
 
     del template_mappings['configure_options']
-    del template_mappings['dpkg_build_dependencies']
 
-  def _GenerateSetupCfgIn(self, project_configuration, template_mappings):
-    """Generates the setup.cfg.in configuration file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-    """
-    if project_configuration.project_status == 'experimental':
-      python_module_development_status = '2 - Pre-Alpha'
-    elif project_configuration.project_status == 'alpha':
-      python_module_development_status = '3 - Alpha'
-    elif project_configuration.project_status == 'beta':
-      python_module_development_status = '4 - Beta'
-    else:
-      python_module_development_status = '5 - Production/Stable'
-
-    template_mappings['python_module_development_status'] = (
-        python_module_development_status)
-
-    self._GenerateSectionsFromOperationsFile(
-        'setup.cfg.in.yaml', 'main', project_configuration,
-        template_mappings, 'setup.cfg.in')
-
-    del template_mappings['python_module_development_status']
-
-  def _GetBrewBuildDependencies(self, project_configuration):
+  def _GetBrewBuildDependencies(self, namespace):
     """Retrieves the brew build dependencies.
 
     Args:
-      project_configuration (ProjectConfiguration): project configuration.
+      namespace (dict[str, object])): expression namespace.
 
     Returns:
-      list[str]: dpkg build dependencies.
+      str: brew build dependencies.
     """
+    library_build_dependencies = namespace.get(
+        'library_build_dependencies', None) or []
+    tools_build_dependencies = namespace.get(
+        'tools_build_dependencies', None) or []
+
     brew_build_dependencies = [
         'autoconf', 'automake', 'gettext', 'gnu-sed', 'libtool', 'pkg-config']
 
-    if ('crypto' in project_configuration.library_build_dependencies or
-        'crypto' in project_configuration.tools_build_dependencies):
+    if ('crypto' in library_build_dependencies or
+        'crypto' in tools_build_dependencies):
       brew_build_dependencies.append('openssl')
 
-    if 'fuse' in project_configuration.tools_build_dependencies:
+    if 'fuse' in tools_build_dependencies:
       brew_build_dependencies.append('macfuse')
 
-    return sorted(brew_build_dependencies)
+    return ' '.join(sorted(brew_build_dependencies))
 
-  def _GetCygwinBuildDependencies(self, project_configuration):
+  def _GetCygwinBuildDependencies(self, namespace):
     """Retrieves the Cygwin build dependencies.
 
     Args:
-      project_configuration (ProjectConfiguration): project configuration.
+      namespace (dict[str, object])): expression namespace.
 
     Returns:
-      list[str]: Cygwin build dependencies.
+      str: Cygwin build dependencies.
     """
-    cygwin_build_dependencies = list(
-        project_configuration.cygwin_build_dependencies)
+    library_build_dependencies = namespace.get(
+        'library_build_dependencies', None) or []
+    tools_build_dependencies = namespace.get(
+        'tools_build_dependencies', None) or []
+    project_features = namespace.get('project_features', None) or []
 
-    cygwin_build_dependencies.extend(['gettext-devel', 'wget'])
+    cygwin_build_dependencies = ['gettext-devel', 'wget']
 
-    if project_configuration.HasDependencyYacc():
+    cygwin_build_dependencies.extend(
+        namespace.get('cygwin_build_dependencies', None) or [])
+
+    if 'yacc' in library_build_dependencies:
       cygwin_build_dependencies.append('bison')
-    if project_configuration.HasDependencyLex():
+    if 'lex' in library_build_dependencies:
       cygwin_build_dependencies.append('flex')
 
-    if project_configuration.HasDependencyZlib():
+    if 'zlib' in library_build_dependencies:
       cygwin_build_dependencies.append('zlib-devel')
-    if project_configuration.HasDependencyBzip2():
+    if 'bzip2' in library_build_dependencies:
       cygwin_build_dependencies.append('libbz2-devel')
 
-    if ('crypto' in project_configuration.library_build_dependencies or
-        'crypto' in project_configuration.tools_build_dependencies):
+    if ('crypto' in library_build_dependencies or
+        'crypto' in tools_build_dependencies):
       # On Cygwin also link zlib since libcrypto relies on it.
-      if 'zlib' not in project_configuration.library_build_dependencies:
+      if 'zlib' not in library_build_dependencies:
         cygwin_build_dependencies.append('zlib-devel')
 
       cygwin_build_dependencies.append('libssl-devel')
 
-    if project_configuration.HasPythonModule():
+    if 'python_bindings' in project_features:
       cygwin_build_dependencies.append('python3-devel')
 
-    if ('uuid' in project_configuration.library_build_dependencies or
-        'uuid' in project_configuration.tools_build_dependencies):
+    if ('uuid' in library_build_dependencies or
+        'uuid' in tools_build_dependencies):
       cygwin_build_dependencies.append('libuuid-devel')
 
-    if 'fuse' in project_configuration.tools_build_dependencies:
+    if 'fuse' in tools_build_dependencies:
       cygwin_build_dependencies.append('cygfuse')
 
-    return sorted(cygwin_build_dependencies)
+    return ' '.join([
+        f'-P {name:s}' for name in sorted(cygwin_build_dependencies)])
 
-  def _GetDpkgBuildDependencies(self, project_configuration):
+  def _GetDpkgBuildDependencies(self, namespace):
     """Retrieves the dpkg build dependencies.
 
     Args:
-      project_configuration (ProjectConfiguration): project configuration.
+      namespace (dict[str, object])): expression namespace.
 
     Returns:
       list[str]: dpkg build dependencies in alphabetical order.
     """
+    library_build_dependencies = namespace.get(
+        'library_build_dependencies', None) or []
+    tools_build_dependencies = namespace.get(
+        'tools_build_dependencies', None) or []
+
     dpkg_build_dependencies = [
-        'autoconf',
-        'automake',
-        'autopoint',
-        'build-essential',
-        'git',
-        'libtool',
-        'pkg-config']
-
-    if project_configuration.HasDependencyYacc():
-      dpkg_build_dependencies.append('byacc')
-    if project_configuration.HasDependencyLex():
-      dpkg_build_dependencies.append('flex')
-
-    if project_configuration.HasDependencyZlib():
-      dpkg_build_dependencies.append('zlib1g-dev')
-
-    if ('crypto' in project_configuration.library_build_dependencies or
-        'crypto' in project_configuration.tools_build_dependencies):
-      dpkg_build_dependencies.append('libssl-dev')
-
-    # TODO: removed in favor of fuse and fuse3 specific tests.
-    # if 'fuse' in project_configuration.tools_build_dependencies:
-    #   dpkg_build_dependencies.append('libfuse-dev')
-
-    if 'sgutils' in project_configuration.library_build_dependencies:
-      dpkg_build_dependencies.append('libsgutils2-dev')
+        'autoconf', 'automake', 'autopoint', 'build-essential', 'git',
+        'libtool', 'pkg-config']
 
     dpkg_build_dependencies.extend(
-        project_configuration.dpkg_build_dependencies)
+        namespace.get('dpkg_build_dependencies', None) or [])
 
-    return sorted(dpkg_build_dependencies)
+    if 'yacc' in library_build_dependencies:
+      dpkg_build_dependencies.append('byacc')
+    if 'lex' in library_build_dependencies:
+      dpkg_build_dependencies.append('flex')
+
+    if 'zlib' in library_build_dependencies:
+      dpkg_build_dependencies.append('zlib1g-dev')
+
+    if ('crypto' in library_build_dependencies or
+        'crypto' in tools_build_dependencies):
+      dpkg_build_dependencies.append('libssl-dev')
+
+    if 'fuse' in tools_build_dependencies:
+      dpkg_build_dependencies.append('libfuse3-dev')
+
+    if 'sgutils' in library_build_dependencies:
+      dpkg_build_dependencies.append('libsgutils2-dev')
+
+    return ' '.join(sorted(dpkg_build_dependencies))
 
   def _GetDpkgBuildDependenciesDpkgControl(self, project_configuration):
     """Retrieves the dpkg build dependencies for the dpkg/control file.
@@ -930,71 +843,95 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     return dpkg_build_dependencies
 
-  def _GetFreeBSDBuildDependencies(self, project_configuration):
+  def _GetFreeBSDBuildDependencies(self, namespace):
     """Retrieves the FreeBSD build dependencies.
 
     Args:
-      project_configuration (ProjectConfiguration): project configuration.
+      namespace (dict[str, object])): expression namespace.
 
     Returns:
-      list[str]: FreeBSD build dependencies in alphabetical order.
+      str: FreeBSD build dependencies.
     """
+    library_build_dependencies = namespace.get(
+        'library_build_dependencies', None) or []
+    tools_build_dependencies = namespace.get(
+        'tools_build_dependencies', None) or []
+
     freebsd_build_dependencies = [
-        'autoconf',
-        'automake',
-        'bash',
-        'gettext',
-        'git',
-        'libtool',
-        'pkgconf']
-
-    if project_configuration.HasDependencyYacc():
-      freebsd_build_dependencies.append('byacc')
-    if project_configuration.HasDependencyLex():
-      freebsd_build_dependencies.append('flex')
-
-    if ('crypto' in project_configuration.library_build_dependencies or
-        'crypto' in project_configuration.tools_build_dependencies):
-      freebsd_build_dependencies.append('openssl')
-
-    if 'fuse' in project_configuration.tools_build_dependencies:
-      freebsd_build_dependencies.append('fusefs-libs')
+        'autoconf', 'automake', 'bash', 'gettext', 'git', 'libtool', 'pkgconf']
 
     freebsd_build_dependencies.extend(
-        project_configuration.freebsd_build_dependencies)
+        namespace.get('freebsd_build_dependencies', None) or [])
 
-    return sorted(freebsd_build_dependencies)
+    if 'yacc' in library_build_dependencies:
+      freebsd_build_dependencies.append('byacc')
+    if 'lex' in library_build_dependencies:
+      freebsd_build_dependencies.append('flex')
 
-  def _GetMinGWMSYS2BuildDependencies(self, project_configuration):
+    if ('crypto' in library_build_dependencies or
+        'crypto' in tools_build_dependencies):
+      freebsd_build_dependencies.append('openssl')
+
+    if 'fuse' in tools_build_dependencies:
+      freebsd_build_dependencies.append('fusefs-libs')
+
+    return ' '.join(sorted(freebsd_build_dependencies))
+
+  def _GetMinGWMSYS2BuildDependencies(self, namespace):
     """Retrieves the MinGW-MSYS2 build dependencies.
 
     Args:
-      project_configuration (ProjectConfiguration): project configuration.
+      namespace (dict[str, object])): expression namespace.
 
     Returns:
-      list[str]: MinGW-MSYS2 build dependencies.
+      str: MinGW-MSYS2 build dependencies.
     """
-    mingw_msys2_build_dependencies = list(
-        project_configuration.mingw_msys2_build_dependencies)
+    library_build_dependencies = namespace.get(
+        'library_build_dependencies', None) or []
+    project_features = namespace.get('project_features', None) or []
 
-    mingw_msys2_build_dependencies.extend([
+    mingw_msys2_build_dependencies = [
         'autoconf', 'automake', 'gettext-devel', 'libtool', 'make',
-        'mingw-w64-x86_64-gcc'])
+        'mingw-w64-x86_64-gcc']
 
-    if project_configuration.HasDependencyYacc():
+    mingw_msys2_build_dependencies.extend(
+        namespace.get('mingw_msys2_build_dependencies', None) or [])
+
+    if 'yacc' in library_build_dependencies:
       mingw_msys2_build_dependencies.append('msys/bison')
-    if project_configuration.HasDependencyLex():
+    if 'lex' in library_build_dependencies:
       mingw_msys2_build_dependencies.append('msys/flex')
 
     # TODO: add support for other dependencies.
-    if project_configuration.HasDependencyZlib():
+    if 'zlib' in library_build_dependencies:
       mingw_msys2_build_dependencies.append('msys/zlib-devel')
 
-    if project_configuration.HasPythonModule():
-      mingw_msys2_build_dependencies.extend([
-          'mingw-w64-x86_64-python3'])
+    if 'python_bindings' in project_features:
+      mingw_msys2_build_dependencies.append('mingw-w64-x86_64-python3')
 
-    return mingw_msys2_build_dependencies
+    return ' '.join(sorted(mingw_msys2_build_dependencies))
+
+  def _GetPythonModuleDevelopmentStatus(self, namespace):
+    """Retrieves the Python module development status.
+
+    Args:
+      namespace (dict[str, object])): expression namespace.
+
+    Returns:
+      str: Python module development status.
+    """
+    project_status = namespace.get('project_status', None)
+
+    if project_status == 'experimental':
+      return '2 - Pre-Alpha'
+
+    if project_status == 'alpha':
+      return '3 - Alpha'
+
+    if project_status == 'beta':
+      return '4 - Beta'
+
+    return '5 - Production/Stable'
 
   def Generate(self, project_configuration, output_writer):
     """Generates configuration files.
@@ -1073,11 +1010,18 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateGitignore(project_configuration, template_mappings)
 
-    self._GenerateGitHubActionsBuildYML(
-        project_configuration, template_mappings)
+    operations_file_name = os.path.join('github_workflows', 'build.yml.yaml')
+    output_filename = os.path.join('.github', 'workflows', 'build.yml')
+    self._GenerateSectionsFromOperationsFile(
+        operations_file_name, 'main', project_configuration, template_mappings,
+        output_filename)
 
-    self._GenerateGitHubActionsBuildFreeBSDYML(
-        project_configuration, template_mappings)
+    operations_file_name = os.path.join(
+        'github_workflows', 'build_freebsd.yml.yaml')
+    output_filename = os.path.join('.github', 'workflows', 'build_freebsd.yml')
+    self._GenerateSectionsFromOperationsFile(
+        operations_file_name, 'main', project_configuration, template_mappings,
+        output_filename)
 
     self._GenerateGitHubActionsBuildSharedYML(
         project_configuration, template_mappings, include_header_file)
@@ -1101,8 +1045,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateAppVeyorYML(project_configuration, template_mappings)
 
-    self._GenerateConfigureAC(
-        project_configuration, template_mappings, output_writer, 'configure.ac')
+    self._GenerateConfigureAC(project_configuration, template_mappings)
 
     self._GenerateACIncludeM4(project_configuration, template_mappings)
 
@@ -1112,7 +1055,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     self._GenerateRpmSpec(project_configuration, template_mappings)
 
     if project_configuration.HasPythonModule():
-      self._GenerateSetupCfgIn(project_configuration, template_mappings)
+      self._GenerateSectionsFromOperationsFile(
+          'setup.cfg.in.yaml', 'main', project_configuration,
+          template_mappings, 'setup.cfg.in')
 
       self._GenerateSectionsFromOperationsFile(
           'tox.ini.yaml', 'main', project_configuration, template_mappings,

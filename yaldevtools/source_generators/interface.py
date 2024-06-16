@@ -17,7 +17,7 @@ from yaldevtools import yaml_operations_file
 class TemplateString(string.Template):
   """Template string."""
 
-  idpattern = r'(?a:[_a-z][_a-z0-9]*(|:[_a-z][_a-z0-9]*))'
+  idpattern = r'(?a:[_a-z][_a-z0-9.]*(|:[_a-z][_a-z0-9]*))'
 
   def substitute(self, mapping=None):
     """Substitutes placeholders in the template string.
@@ -39,8 +39,13 @@ class TemplateString(string.Template):
       """
       identifier = match.group('named') or match.group('braced')
       if identifier is not None:
-        value_identifier, _, modifier = identifier.partition(':')
-        value = str(mapping[value_identifier])
+        identifier, _, modifier = identifier.partition(':')
+
+        identifiers = identifier.split('.')
+        value = mapping[identifiers[0]]
+        for attribute_name in identifiers[1:]:
+          value = getattr(value, attribute_name, None)
+        value = str(value)
 
         if modifier == 'lower_case':
           value = value.lower()
@@ -64,6 +69,8 @@ class TemplateString(string.Template):
 
 class BaseSourceFileGenerator(object):
   """Source file generator."""
+
+  _PLACEHOLDER_VALUE_CALLBACKS = {}
 
   _SUPPORTED_MODIFIERS = frozenset([
       'sort_lines'])
@@ -393,29 +400,18 @@ class BaseSourceFileGenerator(object):
     Returns:
       str: value or None if not available.
     """
-    modifier = None
-    # TODO: remove support for _lower_case and _upper_case
-    if identifier.endswith('_lower_case'):
-      value_identifier = identifier[:-11]
-      modifier = 'lower'
+    identifiers = identifier.split('.')
+    base_identifier = identifiers[0]
 
-    elif identifier.endswith('_upper_case'):
-      value_identifier = identifier[:-11]
-      modifier = 'upper'
-
+    callback = self._PLACEHOLDER_VALUE_CALLBACKS.get(base_identifier, None)
+    if not callback:
+      value = namespace.get(base_identifier, None)
     else:
-      if ':' in identifier:
-        logging.warning(
-            f'Unsupported placeholder modififier in: {identifier:s}')
+      callback_function = getattr(self, callback, None)
+      value = callback_function(namespace)
 
-      value_identifier = identifier
-
-    value = namespace.get(value_identifier, None)
-
-    if modifier == 'lower':
-      value = value.lower()
-    elif modifier == 'upper':
-      value = value.upper()
+    for attribute_name in identifiers[1:]:
+      value = getattr(value, attribute_name, None)
 
     return value
 

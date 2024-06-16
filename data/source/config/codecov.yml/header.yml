@@ -7,4 +7,3 @@ coverage:
     patch: true
     changes: false
   ignore:
-${codecov_ignore}

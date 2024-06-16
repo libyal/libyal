@@ -1,12 +1,24 @@
 # yaldevtools generator specification.
 ---
-identifier: generate_body
+identifier: generate_header
 type: template
-file: codecov.yml/body.yml
+file: codecov.yml/header.yml
+---
+identifier: generate_ignore
+type: sequence
+input: ignore_paths
+placeholder: ignore_path
+operations:
+- generate_ignore_path
+---
+identifier: generate_ignore_path
+type: template
+file: codecov.yml/ignore_path.yml
 placeholders:
-- codecov_ignore
+- ignore_path
 ---
 identifier: main
 type: group
 operations:
-- generate_body
+- generate_header
+- generate_ignore
