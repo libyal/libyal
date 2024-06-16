@@ -8,6 +8,72 @@ identifier: generate_extern_start
 type: template
 file: runtime_structure.h/extern-start.h
 ---
+identifier: generate_functions_common
+type: template
+file: runtime_structure.h/functions-common.h
+placeholders:
+- library_name
+- structure_name
+---
+identifier: generate_structure_get_data_type
+type: template
+file: runtime_structure.h/functions-get_data_type.h
+placeholders:
+- library_name
+- structure_name
+- structure_member
+---
+identifier: generate_functions_get_fixed_size_string
+type: template
+file: runtime_structure.h/functions-get_fixed_size_string.h
+placeholders:
+- library_name
+- structure_name
+- structure_member
+---
+identifier: generate_functions_getter
+type: selection
+input: structure_member.data_type
+options:
+- value: fixed_size_string
+  operation: generate_functions_get_fixed_size_string
+# TODO: add support for filetime
+- value: int8_t
+  operation: generate_structure_get_data_type
+- value: int16_t
+  operation: generate_structure_get_data_type
+- value: int32_t
+  operation: generate_structure_get_data_type
+- value: int64_t
+  operation: generate_structure_get_data_type
+# TODO: add support for posix_time
+# TODO: add support for string
+- value: uint8_t
+  operation: generate_structure_get_data_type
+- value: uint16_t
+  operation: generate_structure_get_data_type
+- value: uint32_t
+  operation: generate_structure_get_data_type
+- value: uint64_t
+  operation: generate_structure_get_data_type
+# TODO: add support for uuid
+---
+identifier: generate_functions_getters
+type: sequence
+condition: "structure_members != []"
+input: structure_members
+placeholder: structure_member
+operations:
+- generate_functions_getter
+---
+identifier: generate_functions_read_file_io_handle
+type: template
+condition: "'file_io_handle' in structure_options"
+file: runtime_structure.h/functions-read_file_io_handle.h
+placeholders:
+- library_name
+- structure_name
+---
 identifier: generate_footer
 type: template
 file: runtime_structure.h/footer.h
@@ -28,20 +94,20 @@ placeholders:
 identifier: generate_includes
 type: group
 operations:
-- generate_includes_libcerror
-- generate_includes_libbfio
+- generate_includes_common
+- generate_includes_file_io_handle
 modifiers: [sort_lines]
 ---
-identifier: generate_includes_libbfio
+identifier: generate_includes_file_io_handle
 type: template
 condition: "'file_io_handle' in structure_options"
 file: runtime_structure.h/includes-libbfio.h
 placeholders:
 - library_name
 ---
-identifier: generate_includes_libcerror
+identifier: generate_includes_common
 type: template
-file: runtime_structure.h/includes-libcerror.h
+file: runtime_structure.h/includes-common.h
 placeholders:
 - library_name
 ---
@@ -153,5 +219,8 @@ operations:
 - generate_structure_start
 - generate_structure_members
 - generate_structure_end
-# - generate_extern_end
-# - generate_footer
+- generate_functions_common
+- generate_functions_read_file_io_handle
+- generate_functions_getters
+- generate_extern_end
+- generate_footer

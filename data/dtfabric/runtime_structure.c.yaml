@@ -1,0 +1,122 @@
+# yaldevtools generator specification.
+---
+identifier: generate_functions_free
+type: template
+file: runtime_structure.c/free.c
+placeholders:
+- library_name
+- structure_description
+- structure_name
+---
+identifier: generate_functions_initialize
+type: template
+file: runtime_structure.c/initialize.c
+placeholders:
+- library_name
+- memory_allocate_indentation
+- structure_description
+- structure_name
+---
+identifier: generate_functions_read_data
+type: group
+operations:
+- generate_functions_read_data_start
+- generate_functions_read_data_variables
+---
+identifier: generate_functions_read_data_start
+type: template
+file: runtime_structure.c/read_data-start.c
+placeholders:
+- library_name
+- structure_description
+- structure_name
+---
+# TODO: change to sequence
+identifier: generate_functions_read_data_variables
+type: template
+file: runtime_structure.c/read_data-variables.c
+placeholders:
+- library_name
+- structure_name
+- variables
+# TODO: add modifier to vertical align variables
+---
+identifier: generate_header
+type: template
+file: runtime_structure.c/header.c
+placeholders:
+- authors
+- copyright
+- structure_description_title
+---
+identifier: generate_includes
+type: group
+operations:
+- generate_includes_common
+- generate_includes_debug
+- generate_includes_datetime
+- generate_includes_file_io_handle
+- generate_includes_string
+- generate_includes_uuid
+modifiers: [sort_lines]
+---
+identifier: generate_includes_common
+type: template
+file: runtime_structure.c/includes-common.c
+placeholders:
+- library_name
+- structure_name
+---
+identifier: generate_includes_datetime
+type: template
+condition: "has_datetime_member == True"
+file: runtime_structure.c/includes-libfdatetime.c
+placeholders:
+- library_name
+---
+identifier: generate_includes_debug
+type: template
+condition: "has_datetime_member == True or has_string_member == True or has_uuid_member == True"
+file: runtime_structure.c/includes-debug.c
+placeholders:
+- library_name
+---
+identifier: generate_includes_file_io_handle
+type: template
+condition: "'file_io_handle' in structure_options"
+file: runtime_structure.c/includes-libbfio.c
+placeholders:
+- library_name
+---
+identifier: generate_includes_string
+type: template
+condition: "has_string_member == True"
+file: runtime_structure.c/includes-libuna.c
+placeholders:
+- library_name
+---
+identifier: generate_includes_stored_structure
+type: template
+file: runtime_structure.c/includes-stored_structure.c
+placeholders:
+- prefix
+- structure_name
+---
+identifier: generate_includes_uuid
+type: template
+condition: "has_uuid_member == True"
+file: runtime_structure.c/includes-libfguid.c
+placeholders:
+- library_name
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_includes
+- generate_includes_stored_structure
+- generate_functions_initialize
+- generate_functions_free
+# - generate_functions_read_data
+# - generate_functions_read_file_io_handle
+# - generate_functions_getters

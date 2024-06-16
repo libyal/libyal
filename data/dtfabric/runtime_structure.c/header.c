@@ -19,3 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <common.h>
+#include <byte_stream.h>
+#include <memory.h>
+#include <types.h>
+
