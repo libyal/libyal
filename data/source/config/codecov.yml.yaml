@@ -3,7 +3,7 @@
 identifier: generate_body
 type: template
 file: codecov.yml/body.yml
-mappings:
+placeholders:
 - codecov_ignore
 ---
 identifier: main

@@ -13,10 +13,75 @@ type: template
 condition: "'debug_output' in project_features"
 file: configure.ac/check_debug_output.ac
 ---
+identifier: generate_check_dependency_support
+type: template
+file: configure.ac/check_dependency_support.ac
+placeholders:
+- dependency_name
+- dependency_name_upper_case
+---
+identifier: generate_check_dll_support
+type: template
+file: configure.ac/check_dll_support.ac
+placeholders:
+- library_name_upper_case
+---
+identifier: generate_check_library_dependencies
+type: sequence
+input: library_dependencies
+placeholder: dependency_name
+operations:
+- generate_check_dependency_support
+---
+identifier: generate_check_java_support
+type: template
+condition: "'java_bindings' in project_features"
+file: configure.ac/check_java_support.ac
+---
+identifier: generate_check_library_support
+type: template
+file: configure.ac/check_library_support.ac
+placeholders:
+- library_name
+- library_name_upper_case
+---
+identifier: generate_check_ossfuzz_support
+type: template
+condition: "'ossfuzz' in project_features"
+file: configure.ac/check_ossfuzz_support.ac
+---
+identifier: generate_check_python_support
+type: template
+condition: "'python_bindings' in project_features"
+file: configure.ac/check_python_support.ac
+placeholders:
+- library_name
+- python_module_name
+---
 identifier: generate_check_static_executables
 type: template
 condition: "'tools' in project_features"
 file: configure.ac/check_static_executables.ac
+---
+identifier: generate_check_tests_support
+type: template
+file: configure.ac/check_tests_support.ac
+---
+identifier: generate_check_tools_dependencies
+type: sequence
+condition: "'tools' in project_features"
+input: tools_dependencies
+placeholder: dependency_name
+operations:
+- generate_check_dependency_support
+---
+identifier: generate_check_tools_support
+type: template
+condition: "'tools' in project_features"
+file: configure.ac/check_tools_support.ac
+placeholders:
+- tools_name
+- tools_name_upper_case
 ---
 identifier: generate_check_types_support
 type: template
@@ -31,14 +96,112 @@ identifier: generate_check_winapi
 type: template
 file: configure.ac/check_winapi.ac
 ---
+identifier: generate_compiler_flags
+type: template
+file: configure.ac/compiler_flags.ac
+---
 identifier: generate_compiler_language
 type: template
 file: configure.ac/compiler_language.ac
 ---
+identifier: generate_config_files_dependency
+type: template
+file: configure.ac/config_files_dependency.ac
+placeholders:
+- dependency_name
+---
+identifier: generate_config_files_common
+type: template
+file: configure.ac/config_files_common.ac
+---
+identifier: generate_config_files_dotnet
+type: template
+condition: "'dotnet_bindings' in project_features"
+file: configure.ac/config_files_dotnet.ac
+---
+identifier: generate_config_files_dotnet_rc
+type: template
+condition: "'dotnet_bindings' in project_features"
+file: configure.ac/config_files_dotnet_rc.ac
+---
+identifier: generate_config_files_end
+type: template
+file: configure.ac/config_files_end.ac
+---
+identifier: generate_config_files_headers
+type: template
+file: configure.ac/config_files_headers.ac
+placeholders:
+- library_name
+---
+identifier: generate_config_files_java
+type: template
+condition: "'java_bindings' in project_features"
+file: configure.ac/config_files_java.ac
+---
+identifier: generate_config_files_library
+type: template
+file: configure.ac/config_files_library.ac
+placeholders:
+- library_name
+---
+identifier: generate_config_files_library_dependencies
+type: sequence
+input: library_dependencies
+placeholder: dependency_name
+operations:
+- generate_config_files_dependency
+---
+identifier: generate_config_files_ossfuzz
+type: template
+condition: "'ossfuzz' in project_features"
+file: configure.ac/config_files_ossfuzz.ac
+---
+identifier: generate_config_files_python
+type: template
+condition: "'python_bindings' in project_features"
+file: configure.ac/config_files_python.ac
+placeholders:
+- python_module_name
+---
+identifier: generate_config_files_rpm_spec
+type: template
+file: configure.ac/config_files_rpm_spec.ac
+placeholders:
+- library_name
+---
+identifier: generate_config_files_setup_cfg
+type: template
+condition: "'python_bindings' in project_features"
+file: configure.ac/config_files_setup_cfg.ac
+---
+identifier: generate_config_files_start
+type: template
+file: configure.ac/config_files_start.ac
+---
+identifier: generate_config_files_tools
+type: template
+condition: "'tools' in project_features"
+file: configure.ac/config_files_tools.ac
+placeholders:
+- tools_name
+---
+identifier: generate_config_files_tools_dependencies
+type: sequence
+condition: "'tools' in project_features"
+input: tools_dependencies
+placeholder: dependency_name
+operations:
+- generate_config_files_dependency
+---
+identifier: generate_dates
+type: template
+file: configure.ac/dates.ac
+---
 identifier: generate_header
 type: template
 file: configure.ac/header.ac
-mappings:
+placeholders:
 - library_name
 - library_version
 ---
@@ -48,12 +211,27 @@ file: configure.ac/programs.ac-end
 ---
 identifier: generate_programs_ossfuzz
 type: template
-# TODO: add condition
+condition: "'ossfuzz' in project_features"
 file: configure.ac/programs.ac-ossfuzz
 ---
 identifier: generate_programs_start
 type: template
 file: configure.ac/programs.ac-start
+---
+identifier: generate_spec_requires
+type: template
+file: configure.ac/spec_requires_library.ac
+placeholders:
+- library_name
+- spec_library_tests
+---
+identifier: generate_tools_spec_requires
+type: template
+condition: "spec_tools_tests != ''"
+file: configure.ac/spec_requires_tools.ac
+placeholders:
+- library_name
+- spec_tools_tests
 ---
 identifier: main
 type: group
@@ -70,3 +248,31 @@ operations:
 - generate_check_debug_output
 - generate_check_types_support
 - generate_check_common_support
+- generate_check_library_dependencies
+- generate_check_library_support
+- generate_check_python_support
+- generate_check_java_support
+- generate_check_tools_dependencies
+- generate_check_tools_support
+- generate_check_dll_support
+- generate_check_tests_support
+- generate_check_ossfuzz_support
+- generate_compiler_flags
+- generate_spec_requires
+- generate_tools_spec_requires
+- generate_dates
+- generate_config_files_start
+- generate_config_files_library_dependencies
+- generate_config_files_library
+- generate_config_files_python
+- generate_config_files_dotnet
+- generate_config_files_java
+- generate_config_files_tools_dependencies
+- generate_config_files_tools
+- generate_config_files_common
+- generate_config_files_ossfuzz
+- generate_config_files_headers
+- generate_config_files_dotnet_rc
+- generate_config_files_rpm_spec
+- generate_config_files_setup_cfg
+- generate_config_files_end

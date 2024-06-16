@@ -3,7 +3,7 @@
 identifier: generate_body
 type: template
 file: tox.ini/body
-mappings:
+placeholders:
 - library_name
 ---
 identifier: main

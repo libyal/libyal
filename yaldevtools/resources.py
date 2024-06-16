@@ -13,8 +13,9 @@ class GeneratorOperation(object):
         operation.
     file (str): path of a template file related to the operation.
     identifier (str): identifier of the generator operation.
-    mappings (str): template mappings related to the operation.
     operations (str): names of sub operations.
+    placeholders (str): name of the template placeholders related to the
+        operation.
     modifiers (str): names of modifiers.
     type (str): operation type.
   """
@@ -32,9 +33,9 @@ class GeneratorOperation(object):
     self.fallback_file = None
     self.file = None
     self.identifier = identifier
-    self.mappings = None
     self.modifiers = None
     self.operations = None
+    self.placeholders = None
     self.type = type
 
   def GetConditionExpression(self):

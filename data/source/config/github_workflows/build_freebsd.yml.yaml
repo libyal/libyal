@@ -3,7 +3,7 @@
 identifier: generate_body
 type: template
 file: build_freebsd.yml/body.yml
-mappings:
+placeholders:
 - freebsd_build_dependencies
 ---
 identifier: main

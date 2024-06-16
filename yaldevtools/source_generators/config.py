@@ -182,6 +182,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
     libraries = list(makefile_am_file.libraries)
+
     library_dependencies = list(makefile_am_file.library_dependencies)
 
     libcrypto_index = len(library_dependencies)
@@ -219,248 +220,80 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         libraries.append('zlib')
         library_dependencies.append('zlib')
 
+    tools_dependencies = []
+    if project_configuration.HasTools():
+      tools_dependencies = list(makefile_am_file.tools_dependencies)
+
+      if 'uuid' in project_configuration.tools_build_dependencies:
+        tools_dependencies.append('libuuid')
+
+      if 'fuse' in project_configuration.tools_build_dependencies:
+        tools_dependencies.append('libfuse')
+
+    spec_library_tests = []
+    for name in library_dependencies:
+      if name in makefile_am_file.library_dependencies:
+        spec_dependency_test = f'test "x$ac_cv_{name:s}" = xyes'
+      else:
+        spec_dependency_test = f'test "x$ac_cv_{name:s}" != xno'
+
+      spec_library_tests.append(spec_dependency_test)
+
+    if 'libcaes' in library_dependencies or 'libhmac' in library_dependencies:
+      spec_library_tests.append('test "x$ac_cv_libcrypto" != xno')
+
+    spec_tools_tests = []
+    if project_configuration.HasTools():
+      spec_tools_dependencies = list(tools_dependencies)
+      if 'crypto' in project_configuration.tools_build_dependencies:
+        spec_tools_dependencies.append('libcrypto')
+
+      for name in spec_tools_dependencies:
+        if name in ('libcrypto', 'libfuse'):
+          spec_dependency_test = f'test "x$ac_cv_{name:s}" != xno'
+        else:
+          spec_dependency_test = f'test "x$ac_cv_{name:s}" = xyes'
+
+        spec_tools_tests.append(spec_dependency_test)
+
+    template_mappings['library_dependencies'] = library_dependencies
+    template_mappings['spec_library_tests'] = ' || '.join(spec_library_tests)
+    template_mappings['spec_tools_tests'] = ' || '.join(spec_tools_tests)
+    template_mappings['tools_dependencies'] = tools_dependencies
+
     self._GenerateSectionsFromOperationsFile(
         'configure.ac.yaml', 'main', project_configuration, template_mappings,
         'configure.ac')
 
-    # TODO: refactor code below to use template_names
+    del template_mappings['library_dependencies']
+    del template_mappings['spec_library_tests']
+    del template_mappings['spec_tools_tests']
+    del template_mappings['tools_dependencies']
+
+    # TODO: move conditions below to configure.ac.yaml
+
+    # for name in library_dependencies:
+    #   if (name == 'libcrypto' and
+    #       project_configuration.library_name == 'libcaes'):
+    #     continue
+
+    #   if name == 'zlib':
+    #     # TODO: make check more generic based on the source itself.
+    #     if project_configuration.library_name == 'libewf':
+    #       template_filename = 'check_zlib_compress.ac'
+
+    #     # TODO: determine deflate function via configuration setting?
+    #     elif project_configuration.library_name in (
+    #         'libfsapfs', 'libfshfs', 'libfvde', 'libmodi', 'libpff',
+    #         'libvmdk'):
+    #       template_filename = 'check_zlib_uncompress.ac'
+
+    #     else:
+    #       template_filename = 'check_zlib_inflate.ac'
 
     templates_path = os.path.join(self._templates_path, 'configure.ac')
 
-    if library_dependencies:
-      for name in library_dependencies:
-        if (name == 'libcrypto' and
-            project_configuration.library_name == 'libcaes'):
-          continue
-
-        if name == 'zlib':
-          # TODO: make check more generic based on the source itself.
-          if project_configuration.library_name == 'libewf':
-            template_filename = 'check_zlib_compress.ac'
-
-          # TODO: determine deflate function via configuration setting?
-          elif project_configuration.library_name in (
-              'libfsapfs', 'libfshfs', 'libfvde', 'libmodi', 'libpff',
-              'libvmdk'):
-            template_filename = 'check_zlib_uncompress.ac'
-
-          else:
-            template_filename = 'check_zlib_inflate.ac'
-
-        else:
-          template_filename = 'check_dependency_support.ac'
-
-        template_mappings['local_library_name'] = name
-        template_mappings['local_library_name_upper_case'] = name.upper()
-
-        template_filename = os.path.join(templates_path, template_filename)
-        self._GenerateSection(
-            template_filename, template_mappings, output_filename,
-            access_mode='a')
-
-        del template_mappings['local_library_name']
-        del template_mappings['local_library_name_upper_case']
-
-    template_names = ['check_library_support.ac']
-
-    if project_configuration.HasPythonModule():
-      template_names.append('check_python_support.ac')
-
-    if project_configuration.HasJavaBindings():
-      template_names.append('check_java_support.ac')
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename, access_mode='a')
-
-    # TODO: refactor code below to use template_names
-
-    if project_configuration.HasTools():
-      tools_dependencies = list(makefile_am_file.tools_dependencies)
-      if 'uuid' in project_configuration.tools_build_dependencies:
-        tools_dependencies.append('libuuid')
-
-      if 'fuse' in project_configuration.tools_build_dependencies:
-        tools_dependencies.append('libfuse')
-
-      if tools_dependencies:
-        for name in tools_dependencies:
-          template_mappings['local_library_name'] = name
-          template_mappings['local_library_name_upper_case'] = name.upper()
-
-          template_filename = os.path.join(
-              templates_path, 'check_dependency_support.ac')
-          self._GenerateSection(
-              template_filename, template_mappings, output_filename,
-              access_mode='a')
-
-        del template_mappings['local_library_name']
-        del template_mappings['local_library_name_upper_case']
-
-      template_filename = os.path.join(templates_path, 'check_tools_support.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-    template_names = ['check_dll_support.ac', 'check_tests_support.ac']
-
-    if os.path.isdir('ossfuzz'):
-      template_names.append('check_ossfuzz_support.ac')
-
-    template_names.append('compiler_flags.ac')
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename, access_mode='a')
-
-    # TODO: refactor code below to use template_names
-
-    if library_dependencies:
-      local_library_tests = []
-      for name in library_dependencies:
-        if name in makefile_am_file.library_dependencies:
-          local_library_test = f'test "x$ac_cv_{name:s}" = xyes'
-        else:
-          local_library_test = f'test "x$ac_cv_{name:s}" != xno'
-
-        local_library_tests.append(local_library_test)
-
-      if 'libcaes' in library_dependencies or 'libhmac' in library_dependencies:
-        local_library_tests.append('test "x$ac_cv_libcrypto" != xno')
-
-      template_mappings['local_library_tests'] = ' || '.join(
-          local_library_tests)
-
-      template_filename = os.path.join(
-          templates_path, 'spec_requires_library.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-      del template_mappings['local_library_tests']
-
-    if project_configuration.HasTools():
-      tools_dependencies = list(makefile_am_file.tools_dependencies)
-      if 'crypto' in project_configuration.tools_build_dependencies:
-        tools_dependencies.append('libcrypto')
-      if 'fuse' in project_configuration.tools_build_dependencies:
-        tools_dependencies.append('libfuse')
-      if 'uuid' in project_configuration.tools_build_dependencies:
-        tools_dependencies.append('libuuid')
-
-      if tools_dependencies:
-        local_library_tests = []
-        for name in tools_dependencies:
-          if name in ('libcrypto', 'libfuse'):
-            local_library_test = f'test "x$ac_cv_{name:s}" != xno'
-          else:
-            local_library_test = f'test "x$ac_cv_{name:s}" = xyes'
-
-          local_library_tests.append(local_library_test)
-
-        template_mappings['local_library_tests'] = ' || '.join(
-            local_library_tests)
-
-        template_filename = os.path.join(
-            templates_path, 'spec_requires_tools.ac')
-        self._GenerateSection(
-            template_filename, template_mappings, output_filename,
-            access_mode='a')
-
-        del template_mappings['local_library_tests']
-
-    template_names = ['dates.ac', 'config_files_start.ac']
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename, access_mode='a')
-
-    # TODO: refactor code below to use template_names
-
-    if makefile_am_file.library_dependencies:
-      for name in makefile_am_file.library_dependencies:
-        template_mappings['local_library_name'] = name
-
-        template_filename = os.path.join(
-            templates_path, 'config_files_dependency.ac')
-        self._GenerateSection(
-            template_filename, template_mappings, output_filename,
-            access_mode='a')
-
-      del template_mappings['local_library_name']
-
-    template_names = ['config_files_library.ac']
-
-    if project_configuration.HasPythonModule():
-      template_names.append('config_files_python.ac')
-
-    if project_configuration.HasDotNetBindings():
-      template_names.append('config_files_dotnet.ac')
-
-    if project_configuration.HasJavaBindings():
-      template_names.append('config_files_java.ac')
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename, access_mode='a')
-
-    # TODO: refactor code below to use template_names
-
-    if project_configuration.HasTools():
-      if makefile_am_file.tools_dependencies:
-        for name in makefile_am_file.tools_dependencies:
-          template_mappings['local_library_name'] = name
-
-          template_filename = os.path.join(
-              templates_path, 'config_files_dependency.ac')
-          self._GenerateSection(
-              template_filename, template_mappings, output_filename,
-              access_mode='a')
-
-        del template_mappings['local_library_name']
-
-      template_filename = os.path.join(templates_path, 'config_files_tools.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
     # TODO: add support for Makefile in documents (libuna)
-
-    template_names = ['config_files_common.ac']
-
-    if os.path.isdir('ossfuzz'):
-      template_names.append('config_files_ossfuzz.ac')
-
-    template_names.append('config_files_headers.ac')
-
-    if project_configuration.HasDotNetBindings():
-      template_names.append('config_files_dotnet_rc.ac')
-
-    template_names.append('config_files_rpm_spec.ac')
-
-    if project_configuration.HasPythonModule():
-      template_names.append('config_files_setup_cfg.ac')
-
-    template_names.append('config_files_end.ac')
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename, access_mode='a')
 
     # TODO: add support for build options configuration
 
@@ -693,8 +526,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
       output_filename = directory_entry
       if output_filename.startswith('libyal'):
-        output_filename = '{0:s}{1:s}'.format(
-            project_configuration.library_name, output_filename[6:])
+        output_filename = ''.join([
+            project_configuration.library_name, output_filename[6:]])
 
       output_filename = os.path.join(output_directory, output_filename)
       self._GenerateSection(
@@ -791,8 +624,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           source_file_path.endswith('_rwlock.c')):
         continue
 
-      source_file_path = '/{0:s}'.format(source_file_path[:-2])
-      tests_files.append(source_file_path)
+      tests_files.append(f'/{source_file_path[:-2]:s}')
 
     tools_executables = [
         '/'.join(['', project_configuration.tools_directory, name])
@@ -1196,26 +1028,23 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         project_configuration)
 
     if not include_header_file:
-      logging.warning(
-          'Missing: {0:s} skipping generation of configuration files.'.format(
-              self._library_include_header_path))
+      logging.warning((
+          f'Missing: {self._library_include_header_path:s} skipping '
+          f'generation of configuration files.'))
       return
 
     makefile_am_file = self._GetLibraryMakefileAM(project_configuration)
 
     if not makefile_am_file:
-      logging.warning(
-          'Missing: {0:s} skipping generation of configuration files.'.format(
-              self._library_makefile_am_path))
+      logging.warning((
+          f'Missing: {self._library_makefile_am_path:s} skipping generation '
+          f'of configuration files.'))
       return
 
     pc_libs_private = []
     for library in sorted(makefile_am_file.libraries):
-      if library == 'libdl':
-        continue
-
-      pc_lib_private = '@ax_{0:s}_pc_libs_private@'.format(library)
-      pc_libs_private.append(pc_lib_private)
+      if library != 'libdl':
+        pc_libs_private.append(f'@ax_{library:s}_pc_libs_private@')
 
     template_mappings = self._GetTemplateMappings(
         project_configuration,
@@ -1242,16 +1071,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         continue
 
       if directory_entry == 'libyal.nuspec':
-        output_filename = '{0:s}.nuspec'.format(
-            project_configuration.library_name)
+        output_filename = f'{project_configuration.library_name:s}.nuspec'
 
         if not project_configuration.deploy_to_nuget:
-          logging.warning('Skipping: {0:s}'.format(output_filename))
+          logging.warning(f'Skipping: {output_filename:s}')
           continue
 
       elif directory_entry == 'libyal.pc.in':
-        output_filename = '{0:s}.pc.in'.format(
-            project_configuration.library_name)
+        output_filename = f'{project_configuration.library_name:s}.pc.in'
 
       else:
         output_filename = directory_entry

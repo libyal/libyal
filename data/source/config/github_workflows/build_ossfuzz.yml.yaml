@@ -3,7 +3,7 @@
 identifier: generate_body
 type: template
 file: build_ossfuzz.yml/body.yml
-mappings:
+placeholders:
 - library_name
 ---
 identifier: main

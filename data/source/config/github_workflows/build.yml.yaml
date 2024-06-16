@@ -3,14 +3,14 @@
 identifier: generate_build_end
 type: template
 file: build.yml/build_ubuntu-end.yml
-mappings:
+placeholders:
 - dpkg_build_dependencies
 ---
 identifier: generate_build_python_module
 type: template
 condition: "'python_bindings' in project_features"
 file: build.yml/build_python_ubuntu.yml
-mappings:
+placeholders:
 - dpkg_build_dependencies
 ---
 identifier: generate_build_start
@@ -21,7 +21,7 @@ identifier: generate_build_with_fuse
 type: template
 condition: "'fuse' in tools_build_dependencies"
 file: build.yml/build_ubuntu-fuse.yml
-mappings:
+placeholders:
 - dpkg_build_dependencies
 ---
 identifier: generate_build_with_static_executables
@@ -58,7 +58,7 @@ fallback_file: build.yml/coverage_ubuntu.yml
 identifier: generate_footer
 type: template
 file: build.yml/footer.yml
-mappings:
+placeholders:
 - dpkg_build_dependencies
 ---
 identifier: generate_header

@@ -3,7 +3,7 @@
 identifier: generate_body
 type: template
 file: build_shared.yml/body.yml
-mappings:
+placeholders:
 - configure_options
 - dpkg_build_dependencies
 ---

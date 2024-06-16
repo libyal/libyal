@@ -3,7 +3,7 @@
 identifier: generate_body
 type: template
 file: setup.cfg.in/body
-mappings:
+placeholders:
 - library_name
 - python_module_development_status
 ---

@@ -71,9 +71,47 @@ class BaseSourceFileGenerator(object):
           access_mode=access_mode)
       access_mode = 'a'
 
+  def _GenerateSectionsFromGeneratorOperation(
+      self, operations_file_name, generator_operation, operations, namespace,
+      templates_path):
+    """Generates sections based on a generator operation.
+
+    Args:
+      operations_file_name (str): name of the operations file.
+      generator_operation (GeneratorOperation): generator operation.
+      operations (dict[str, GeneratorOperation]): operations per identifier.
+      namespace (dict[str, object])): expression namespace.
+      templates_path (str): path of the directory containing the template files.
+
+    Return:
+      str: output data.
+    """
+    if generator_operation.type == 'group':
+      output_data = self._GenerateSectionsFromGroupOperation(
+          operations_file_name, generator_operation, operations, namespace,
+          templates_path)
+
+    elif generator_operation.type == 'sequence':
+      output_data = self._GenerateSectionsFromSequenceOperation(
+          operations_file_name, generator_operation, operations, namespace,
+          templates_path)
+
+    elif generator_operation.type == 'template':
+      output_data = self._GenerateSectionsFromTemplateOperation(
+          operations_file_name, generator_operation, operations, namespace,
+          templates_path)
+
+    else:
+      logging.warning((
+          f'Unsupported operation type: {generator_operation.type:s} in file: '
+          f'{operations_file_name:s}'))
+      output_data = ''
+
+    return output_data
+
   def _GenerateSectionsFromGroupOperation(
       self, operations_file_name, group_operation, operations, namespace,
-      templates_path, template_mappings):
+      templates_path):
     """Generates sections based on a group operation.
 
     Args:
@@ -82,12 +120,25 @@ class BaseSourceFileGenerator(object):
       operations (dict[str, GeneratorOperation]): operations per identifier.
       namespace (dict[str, object])): expression namespace.
       templates_path (str): path of the directory containing the template files.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
 
     Return:
       str: output data.
     """
+    if group_operation.condition:
+      expression = group_operation.GetConditionExpression()
+
+      try:
+        result = eval(expression, namespace)  # pylint: disable=eval-used
+      except Exception as exception:
+        logging.warning((
+            f'Unable to check condition for operation: '
+            f'{group_operation.identifier:s} in file: '
+            f'{operations_file_name:s} with error: {exception!s}'))
+        result = False
+
+      if not result:
+        return ''
+
     output_data = ''
 
     for operation_name in group_operation.operations:
@@ -95,66 +146,13 @@ class BaseSourceFileGenerator(object):
       if not operation:
         logging.warning((
             f'Missing operation: {operation_name:s} in '
+            f'{group_operation.identifier:s} in file: '
             f'{operations_file_name:s}'))
-        break
+        return ''
 
-      operation_file = getattr(operation, 'file', None)
-
-      if operation.condition:
-        expression = operation.GetConditionExpression()
-
-        try:
-          result = eval(expression, namespace)  # pylint: disable=eval-used
-        except Exception as exception:
-          logging.warning((
-              f'Unable to check condition for operation: {operation_name:s} '
-              f'with error: {exception!s}'))
-          result = False
-
-        if not result:
-          fallback_file = getattr(operation, 'fallback_file', None)
-          if not fallback_file:
-            continue
-
-          operation_file = fallback_file
-
-      if operation.type == 'group':
-        operation_output_data = self._GenerateSectionsFromGroupOperation(
-            operations_file_name, operation, operations, namespace,
-            templates_path, template_mappings)
-
-      elif operation.type == 'template':
-        template_file_path = os.path.join(templates_path, operation_file)
-
-        template_string = self._ReadTemplateFile(template_file_path)
-
-        template_values = {}
-        for mapping in operation.mappings or []:
-          value = self._GetPlaceholderValue(namespace, template_mappings, mapping)
-          if value is None:
-            logging.warning((
-                f'Missing template mapping: {mapping:s} defined in operation: '
-                f'{operation_name:s} in {operations_file_name:s}'))
-
-          template_values[mapping] = value
-
-        try:
-          operation_output_data = template_string.substitute(template_values)
-        except (KeyError, ValueError) as exception:
-          logging.error((
-              f'Unable to format template: {template_file_path:s} with error: '
-              f'{exception!s}'))
-          break
-
-        for modifier in operation.modifiers or []:
-          if modifier not in self._SUPPORTED_MODIFIERS:
-            logging.error((
-                f'Unsupported modifier: {modifier:s} in template: '
-                f'{template_file_path:s}.'))
-            continue
-
-          if modifier == 'sort_lines':
-            operation_output_data = self._SortLines(operation_output_data)
+      operation_output_data = self._GenerateSectionsFromGeneratorOperation(
+          operations_file_name, operation, operations, namespace,
+          templates_path)
 
       output_data = ''.join([output_data, operation_output_data])
 
@@ -162,15 +160,14 @@ class BaseSourceFileGenerator(object):
 
   def _GenerateSectionsFromOperationsFile(
       self, operations_file_name, main_operation_name, project_configuration,
-      template_mappings, output_file_path):
+      template_configuration, output_file_path):
     """Generates sections based on an operations file.
 
     Args:
       operations_file_name (str): name of the operations file.
       main_operation_name (str): name of the main operations.
       project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
+      template_configuration (dict[str, str]): template configuration.
       output_file_path (str): path of the output file.
     """
     operations_file_path = os.path.join(
@@ -191,37 +188,178 @@ class BaseSourceFileGenerator(object):
     templates_path = os.path.dirname(operations_file_path)
 
     namespace = dict(project_configuration.__dict__)
+    namespace.update(template_configuration)
     # Make sure __builtins__ contains an empty dictionary.
     namespace['__builtins__'] = {}
 
-    output_data = self._GenerateSectionsFromGroupOperation(
+    output_data = self._GenerateSectionsFromGeneratorOperation(
         operations_file_name, main_operation, operations, namespace,
-        templates_path, template_mappings)
+        templates_path)
 
     if output_data:
       with open(output_file_path, 'w', encoding='utf8') as file_object:
         file_object.write(output_data)
 
-  def _GetPlaceholderValue(self, namespace, template_mappings, identifier):
+  def _GenerateSectionsFromSequenceOperation(
+      self, operations_file_name, sequence_operation, operations, namespace,
+      templates_path):
+    """Generates sections based on a sequence operation.
+
+    Args:
+      operations_file_name (str): name of the operations file.
+      sequence_operation (GeneratorOperation): sequence operation.
+      operations (dict[str, GeneratorOperation]): operations per identifier.
+      namespace (dict[str, object])): expression namespace.
+      templates_path (str): path of the directory containing the template files.
+
+    Return:
+      str: output data.
+    """
+    if sequence_operation.condition:
+      expression = sequence_operation.GetConditionExpression()
+
+      try:
+        result = eval(expression, namespace)  # pylint: disable=eval-used
+      except Exception as exception:
+        logging.warning((
+            f'Unable to check condition for operation: '
+            f'{sequence_operation.identifier:s} in file: '
+            f'{operations_file_name:s} with error: {exception!s}'))
+        result = False
+
+      if not result:
+        return ''
+
+    sequence_input = self._GetPlaceholderValue(
+        namespace, sequence_operation.input)
+    if not sequence_input:
+      if sequence_input is None:
+        logging.error((
+            f'Missing input: {sequence_operation.input} in '
+            f'{sequence_operation.identifier:s} in file: '
+            f'{operations_file_name:s}'))
+      return ''
+
+    output_data = ''
+
+    for value in sequence_input:
+      namespace[sequence_operation.placeholder] = value
+
+      for operation_name in sequence_operation.operations:
+        operation = operations.get(operation_name, None)
+        if not operation:
+          logging.warning((
+              f'Missing operation: {operation_name:s} in file: '
+              f'{operations_file_name:s}'))
+          return ''
+
+        operation_output_data = self._GenerateSectionsFromGeneratorOperation(
+            operations_file_name, operation, operations, namespace,
+            templates_path)
+
+        output_data = ''.join([output_data, operation_output_data])
+
+    del namespace[sequence_operation.placeholder]
+
+    return output_data
+
+  def _GenerateSectionsFromTemplateOperation(
+      self, operations_file_name, template_operation, operations, namespace,
+      templates_path):
+    """Generates sections based on a template operation.
+
+    Args:
+      operations_file_name (str): name of the operations file.
+      template_operation (GeneratorOperation): template operation.
+      operations (dict[str, GeneratorOperation]): operations per identifier.
+      namespace (dict[str, object])): expression namespace.
+      templates_path (str): path of the directory containing the template files.
+
+    Return:
+      str: output data.
+    """
+    operation_file = getattr(template_operation, 'file', None)
+
+    if template_operation.condition:
+      expression = template_operation.GetConditionExpression()
+
+      try:
+        result = eval(expression, namespace)  # pylint: disable=eval-used
+      except Exception as exception:
+        logging.warning((
+            f'Unable to check condition for operation: '
+            f'{template_operation.identifier:s} in file: '
+            f'{operations_file_name:s} with error: {exception!s}'))
+        result = False
+
+      if not result:
+        fallback_file = getattr(template_operation, 'fallback_file', None)
+        if not fallback_file:
+          return ''
+
+        operation_file = fallback_file
+
+    template_file_path = os.path.join(templates_path, operation_file)
+
+    template_string = self._ReadTemplateFile(template_file_path)
+
+    template_values = {}
+    for identifier in template_operation.placeholders or []:
+      value = self._GetPlaceholderValue(namespace, identifier)
+      if value is None:
+        logging.warning((
+            f'Missing template placeholder: {indentifier:s} defined in '
+            f'operation: {template_operation.identifier:s} in file: '
+            f'{operations_file_name:s}'))
+
+      template_values[identifier] = value
+
+    try:
+      output_data = template_string.substitute(template_values)
+    except (KeyError, ValueError) as exception:
+      logging.error((
+          f'Unable to format template: {template_file_path:s} with error: '
+          f'{exception!s}'))
+      return ''
+
+    for modifier in template_operation.modifiers or []:
+      if modifier not in self._SUPPORTED_MODIFIERS:
+        logging.error((
+            f'Unsupported modifier: {modifier:s} in template: '
+            f'{template_file_path:s}.'))
+        continue
+
+      if modifier == 'sort_lines':
+        output_data = self._SortLines(output_data)
+
+    return output_data
+
+  def _GetPlaceholderValue(self, namespace, identifier):
     """Retrieves the value of a template placeholder.
 
     Args:
       namespace (dict[str, object])): expression namespace.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
       identifier (str): identifier of the value in the template.
 
     Returns:
       str: value or None if not available.
     """
-    # TODO: generate values on demand fall back to project configuration.
+    modifier = None
+    if identifier.endswith('_lower_case'):
+      value_identifier = identifier[:-11]
+      modifier = 'lower'
+    elif identifier.endswith('_upper_case'):
+      value_identifier = identifier[:-11]
+      modifier = 'upper'
+    else:
+      value_identifier = identifier
 
-    value = template_mappings.get(identifier, None)
-    if value is None:
-      # TODO: handle _lower_case and _upper_case modifiers
-      # if identifier.endswith('_lower_case'):
-      # if identifier.endswith('_upper_case'):
-      value = namespace.get(identifier, None)
+    value = namespace.get(value_identifier, None)
+
+    if modifier == 'lower':
+      value = value.lower()
+    elif modifier == 'upper':
+      value = value.upper()
 
     return value
 

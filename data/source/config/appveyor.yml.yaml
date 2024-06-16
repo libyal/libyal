@@ -29,13 +29,13 @@ file: appveyor.yml/artifacts-start.yml
 identifier: generate_after_test
 type: template
 file: appveyor.yml/after_test.yml
-mappings:
+placeholders:
 - library_name
 ---
 identifier: generate_build_script_end
 type: template
 file: appveyor.yml/build_script-end.yml
-mappings:
+placeholders:
 - library_name
 ---
 identifier: generate_build_script_macos
@@ -46,7 +46,7 @@ identifier: generate_build_script_nuget
 type: template
 condition: "'nuget' in project_features"
 file: appveyor.yml/build_script-nuget.yml
-mappings:
+placeholders:
 - library_name
 ---
 identifier: generate_build_script_python
@@ -168,7 +168,7 @@ identifier: generate_environment_pypi
 type: template
 condition: "'python_bindings' in project_features"
 file: appveyor.yml/environment-pypi.yml
-mappings:
+placeholders:
 - pypi_token
 ---
 identifier: generate_install_bzip2
@@ -183,7 +183,7 @@ file: appveyor.yml/install-codecov.yml
 identifier: generate_install_cygwin
 type: template
 file: appveyor.yml/install-cygwin.yml
-mappings:
+placeholders:
 - cygwin_build_dependencies
 ---
 identifier: generate_install_dokan
@@ -194,13 +194,13 @@ file: appveyor.yml/install-dokan.yml
 identifier: generate_install_macos
 type: template
 file: appveyor.yml/install-macos.yml
-mappings:
+placeholders:
 - brew_build_dependencies
 ---
 identifier: generate_install_mingw
 type: template
 file: appveyor.yml/install-mingw-msys2.yml
-mappings:
+placeholders:
 - mingw_msys2_build_dependencies
 ---
 identifier: generate_install_python
@@ -230,7 +230,7 @@ file: appveyor.yml/install-zlib.yml
 identifier: generate_test_script
 type: template
 file: appveyor.yml/test_script.yml
-mappings:
+placeholders:
 - library_name
 ---
 identifier: main

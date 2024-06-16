@@ -8,8 +8,9 @@ fallback_file: libyal.spec.in/build.in
 ---
 identifier: generate_build_requires
 type: template
+condition: "spec_build_requires != ''"
 file: libyal.spec.in/build_requires.in
-mappings:
+placeholders:
 - spec_build_requires
 ---
 identifier: generate_changelog
@@ -19,27 +20,27 @@ file: libyal.spec.in/changelog.in
 identifier: generate_files
 type: template
 file: libyal.spec.in/files.in
-mappings:
+placeholders:
 - library_name
 ---
 identifier: generate_files_python
 type: template
 condition: "'python_bindings' in project_features"
 file: libyal.spec.in/files-python.in
-mappings:
+placeholders:
 - library_name
 ---
 identifier: generate_files_tools
 type: template
 condition: "'tools' in project_features"
 file: libyal.spec.in/files-tools.in
-mappings:
+placeholders:
 - library_name
 ---
 identifier: generate_header
 type: template
 file: libyal.spec.in/header.in
-mappings:
+placeholders:
 - library_description
 - library_name
 ---
@@ -50,7 +51,7 @@ file: libyal.spec.in/install.in
 identifier: generate_package
 type: template
 file: libyal.spec.in/package.in
-mappings:
+placeholders:
 - library_description
 - library_name
 ---
@@ -58,7 +59,7 @@ identifier: generate_package_python
 type: template
 condition: "'python_bindings' in project_features"
 file: libyal.spec.in/package-python.in
-mappings:
+placeholders:
 - library_name
 ---
 identifier: generate_package_tools
@@ -72,24 +73,22 @@ operations:
 identifier: generate_package_tools_end
 type: template
 file: libyal.spec.in/package-tools-end.in
-mappings:
+placeholders:
 - library_name
 - tools_description
 ---
 identifier: generate_package_tools_build_requires
 type: template
-# TODO: improve condition.
-condition: "tools_build_dependencies != []"
+condition: "tools_spec_build_requires != ''"
 file: libyal.spec.in/package-tools-build_requires.in
-mappings:
+placeholders:
 - library_name
-- tools_description
-- tools_spec_requires
+- tools_spec_build_requires
 ---
 identifier: generate_package_tools_start
 type: template
 file: libyal.spec.in/package-tools-start.in
-mappings:
+placeholders:
 - library_name
 - tools_description
 - tools_spec_requires
@@ -100,10 +99,10 @@ file: libyal.spec.in/prep.in
 ---
 identifier: generate_requires
 type: template
-# TODO: improve condition.
-condition: "rpm_build_dependencies != []"
+condition: "spec_requires != ''"
 file: libyal.spec.in/requires.in
-mappings:
+placeholders:
+- library_name
 - spec_requires
 ---
 identifier: main

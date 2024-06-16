@@ -4,7 +4,7 @@ identifier: generate_dotnet_bindings
 type: template
 condition: "'dotnet_bindings' in project_features"
 file: gitignore/dotnet_bindings
-mappings:
+placeholders:
 - library_name_suffix
 ---
 identifier: generate_header
@@ -19,13 +19,13 @@ file: gitignore/java_bindings
 identifier: generate_library
 type: template
 file: gitignore/library
-mappings:
+placeholders:
 - library_name
 ---
 identifier: generate_local_libraries
 type: template
 file: gitignore/local_libraries
-mappings:
+placeholders:
 - local_libraries
 ---
 identifier: generate_python_module
@@ -37,14 +37,14 @@ identifier: generate_tools
 type: template
 condition: "'tools' in project_features"
 file: gitignore/tools
-mappings:
+placeholders:
 - tools_executables
 - tools_name
 ---
 identifier: generate_tests
 type: template
 file: gitignore/tests
-mappings:
+placeholders:
 - tests_files
 ---
 identifier: main
