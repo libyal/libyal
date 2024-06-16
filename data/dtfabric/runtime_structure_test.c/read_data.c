@@ -14,16 +14,16 @@ int ${prefix}_test_${structure_name}_read_data(
 	          &${structure_name},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "${structure_name}",
 	 ${structure_name} );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -35,16 +35,16 @@ int ${prefix}_test_${structure_name}_read_data(
 	          ${test_data_size},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_UINT32(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_UINT32(
 	 "${structure_name}->file_size",
 	 ${structure_name}->file_size,
 	 709904 );
@@ -57,12 +57,12 @@ int ${prefix}_test_${structure_name}_read_data(
 	          ${test_data_size},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -75,12 +75,12 @@ int ${prefix}_test_${structure_name}_read_data(
 	          ${test_data_size},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -93,12 +93,12 @@ int ${prefix}_test_${structure_name}_read_data(
 	          0,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -111,19 +111,19 @@ int ${prefix}_test_${structure_name}_read_data(
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${prefix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${prefix:upper_case}_TEST_MEMORY )
 
 	/* Test ${prefix}_test_${structure_name}_read_data with memcpy failing
 	 */
@@ -141,19 +141,19 @@ int ${prefix}_test_${structure_name}_read_data(
 	}
 	else
 	{
-		${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+		${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 -1 );
 
-		${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+		${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 		 "error",
 		 error );
 
 		libcerror_error_free(
 		 &error );
 	}
-#endif /* defined( HAVE_${prefix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${prefix:upper_case}_TEST_MEMORY ) */
 
 	/* Test error case where header size is invalid
 	 */
@@ -171,12 +171,12 @@ int ${prefix}_test_${structure_name}_read_data(
 	 ${prefix}_test_${structure_name}_data1,
 	 0x0000004cUL );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -199,12 +199,12 @@ int ${prefix}_test_${structure_name}_read_data(
 	 &( ${prefix}_test_${structure_name}_data1[ 4 ] ),
 	 0x00021401UL );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -217,16 +217,16 @@ int ${prefix}_test_${structure_name}_read_data(
 	          &${structure_name},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "${structure_name}",
 	 ${structure_name} );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 

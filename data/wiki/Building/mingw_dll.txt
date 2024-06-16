@@ -1,5 +1,5 @@
 ## Using the DLL
-Make sure you use define ${project_name_upper_case}_DLL_IMPORT before including <${project_name}.h>.
+Make sure you use define ${project_name:upper_case}_DLL_IMPORT before including <${project_name}.h>.
 
 To be able to use the DLL on other systems than the build system you'll also need to provide:
 

@@ -400,7 +400,6 @@ class SourceGenerator(object):
 
     template_mappings['codepage_description'] = codepage_description
     template_mappings['codepage_name'] = self._codepage_name
-    template_mappings['codepage_name_upper_case'] = self._codepage_name.upper()
 
     return template_mappings
 

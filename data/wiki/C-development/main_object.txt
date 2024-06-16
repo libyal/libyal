@@ -48,7 +48,7 @@ The function will also close the ${development_main_object} if it was opened.
 ```
 filename = "${development_main_object_filename}";
 
-if( ${project_name}_${development_main_object}_open(${development_main_object}, filename, ${project_name_upper_case}_OPEN_READ, &error) != 1 )
+if( ${project_name}_${development_main_object}_open(${development_main_object}, filename, ${project_name:upper_case}_OPEN_READ, &error) != 1 )
 {
     fprintf(stderr, "Unable to open ${development_main_object}.\n" );
 
@@ -70,7 +70,7 @@ To compile with wide character support add --enable-wide-character-type=yes to c
 
 Or on Windows define WINAPI and either ``` _UNICODE ``` or ``` UNICODE ```
 
-When wide character string support is enabled ${project_name_upper_case}_HAVE_WIDE_CHARACTER_TYPE is defined in <${project_name}/features.h>
+When wide character string support is enabled ${project_name:upper_case}_HAVE_WIDE_CHARACTER_TYPE is defined in <${project_name}/features.h>
 
 ### Open ${development_main_object} using a file-like object
 
@@ -79,7 +79,7 @@ When wide character string support is enabled ${project_name_upper_case}_HAVE_WI
 ${project_name} allows to be compiled with file-like object support using libbfio.
 The ${project_name} configure script will automatically detect if a compatible version of libbfio is available.
 
-When libbfio is support is enabled ${project_name_upper_case}_HAVE_BFIO is defined in <${project_name}/features.h>
+When libbfio is support is enabled ${project_name:upper_case}_HAVE_BFIO is defined in <${project_name}/features.h>
 
 ### Close ${development_main_object}
 

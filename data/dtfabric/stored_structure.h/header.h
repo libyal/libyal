@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${prefix_upper_case}_${structure_name_upper_case}_H )
-#define _${prefix_upper_case}_${structure_name_upper_case}_H
+#if !defined( _${prefix:upper_case}_${structure_name:upper_case}_H )
+#define _${prefix:upper_case}_${structure_name:upper_case}_H
 
 #include <common.h>
 #include <types.h>

@@ -3,8 +3,8 @@
 identifier: generate_build
 type: template
 condition: "'python_bindings' in project_features"
+fallback: libyal.spec.in/build.in
 file: libyal.spec.in/build-python.in
-fallback_file: libyal.spec.in/build.in
 ---
 identifier: generate_build_requires
 type: template

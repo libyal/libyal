@@ -23,28 +23,28 @@ class YAMLGeneratorOperationsFile(object):
   * TODO: describe additional values.
   """
 
-  _SUPPORTED_KEYS = frozenset([
-      'condition',
-      'identifier',
-      'input',
-      'fallback_file',
-      'file',
-      'modifiers',
-      'operations',
-      'placeholder',
-      'placeholders',
-      'type'])
-
   _SUPPORTED_KEYS_TYPE_GROUP = frozenset([
       'condition',
       'identifier',
+      'modifiers',
       'operations',
+      'type'])
+
+  _SUPPORTED_KEYS_TYPE_SELECTION = frozenset([
+      'condition',
+      'default',
+      'identifier',
+      'input',
+      'modifiers',
+      'options',
       'type'])
 
   _SUPPORTED_KEYS_TYPE_SEQUENCE = frozenset([
       'condition',
       'identifier',
       'input',
+      'fallback',
+      'modifiers',
       'operations',
       'placeholder',
       'type'])
@@ -52,14 +52,21 @@ class YAMLGeneratorOperationsFile(object):
   _SUPPORTED_KEYS_TYPE_TEMPLATE = frozenset([
       'condition',
       'identifier',
-      'fallback_file',
+      'fallback',
       'file',
       'modifiers',
       'placeholders',
       'type'])
 
+  _SUPPORTED_KEYS = set(
+      _SUPPORTED_KEYS_TYPE_GROUP).union(
+      _SUPPORTED_KEYS_TYPE_SELECTION).union(
+      _SUPPORTED_KEYS_TYPE_SEQUENCE).union(
+      _SUPPORTED_KEYS_TYPE_TEMPLATE)
+
   _SUPPORTED_TYPES = frozenset([
       'group',
+      'selection',
       'sequence',
       'template'])
 
@@ -102,6 +109,10 @@ class YAMLGeneratorOperationsFile(object):
 
     generator_operation = resources.GeneratorOperation(
         identifier=operation_identifier, type=operation_type)
+    generator_operation.condition = yaml_generator_operation.get(
+        'condition', None)
+    generator_operation.modifiers = yaml_generator_operation.get(
+        'modifiers', None)
 
     if operation_type == 'group':
       different_keys = keys - self._SUPPORTED_KEYS_TYPE_GROUP
@@ -114,9 +125,27 @@ class YAMLGeneratorOperationsFile(object):
       if not operations:
         raise RuntimeError(f'Missing operations in {operation_identifier:s}')
 
-      generator_operation.condition = yaml_generator_operation.get(
-          'condition', None)
       generator_operation.operations = operations
+
+    elif operation_type == 'selection':
+      different_keys = keys - self._SUPPORTED_KEYS_TYPE_SELECTION
+      if different_keys:
+        different_keys = ', '.join(different_keys)
+        raise RuntimeError(
+            f'Unsupported keys: {different_keys:s} in {operation_identifier:s}')
+
+      operation_input = yaml_generator_operation.get('input', None)
+      if not operation_input:
+        raise RuntimeError(f'Missing input in {operation_identifier:s}')
+
+      yaml_options = yaml_generator_operation.get('options', None)
+      if not yaml_options:
+        raise RuntimeError(f'Missing options in {operation_identifier:s}')
+
+      generator_operation.input = operation_input
+      generator_operation.options = {
+         yaml_option['value']: yaml_option['operation']
+         for yaml_option in yaml_options}
 
     elif operation_type == 'sequence':
       different_keys = keys - self._SUPPORTED_KEYS_TYPE_SEQUENCE
@@ -137,8 +166,8 @@ class YAMLGeneratorOperationsFile(object):
       if not placeholder:
         raise RuntimeError(f'Missing placeholder in {operation_identifier:s}')
 
-      generator_operation.condition = yaml_generator_operation.get(
-          'condition', None)
+      generator_operation.fallback = yaml_generator_operation.get(
+          'fallback', None)
       generator_operation.input = operation_input
       generator_operation.operations = operations
       generator_operation.placeholder = placeholder
@@ -154,13 +183,9 @@ class YAMLGeneratorOperationsFile(object):
       if not file:
         raise RuntimeError(f'Missing file in {operation_identifier:s}')
 
-      generator_operation.condition = yaml_generator_operation.get(
-          'condition', None)
-      generator_operation.fallback_file = yaml_generator_operation.get(
-          'fallback_file', None)
+      generator_operation.fallback = yaml_generator_operation.get(
+          'fallback', None)
       generator_operation.file = file
-      generator_operation.modifiers = yaml_generator_operation.get(
-          'modifiers', None)
       generator_operation.placeholders = yaml_generator_operation.get(
           'placeholders', None)
 

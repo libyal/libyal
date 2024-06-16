@@ -22,6 +22,25 @@ from yaldevtools.source_generators import interface
 # TODO: put signature into constants: libyal_constants.[ch]
 
 
+class TemplateRuntimeStructureMember(object):
+  """Runtime structure member.
+
+  Attributes:
+    data_size (str): data size.
+    data_type (str): data type.
+    description (str): description.
+    name (str): name.
+  """
+
+  def __init__(self):
+    """Initializes a runtime structure member."""
+    super(TemplateRuntimeStructureMember, self).__init__()
+    self.data_size = None
+    self.data_type = None
+    self.description = None
+    self.name = None
+
+
 class SourceGenerator(interface.BaseSourceFileGenerator):
   """Generates source based on dtFabric format definitions."""
 
@@ -131,31 +150,18 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
     return '\n'.join(hexadecimal_lines)
 
-  def _GenerateRuntimeStructureHeader(
-      self, data_type_definition, data_type_definition_name,
-      members_configuration, output_filename):
-    """Generates a runtime structure header.
+  def _GenerateRuntimeStructureHeaderFile(
+      self, data_type_definition, members_configuration):
+    """Generates a runtime structure header file.
 
     Args:
       data_type_definition (DataTypeDefinition): structure data type definition.
-      data_type_definition_name (str): name of the structure data type
-          definition.
       members_configuration (dict[dict[str: str]]): code generation
           configuration of the structure members.
-      output_filename (str): name of the output file.
     """
-    template_mappings = self._GetTemplateMappings(
-        library_name=f'lib{self._prefix:s}',
-        structure_name=data_type_definition_name)
+    structure_options = members_configuration.get('__options__', {})
 
-    template_filename = os.path.join(
-        self._templates_path, 'runtime_structure.h', 'structure-start.h')
-
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    has_structure_members = False
-
+    structure_members = []
     for member_definition in data_type_definition.members:
       member_name = member_definition.name
       member_configuration = members_configuration.get(member_name, {})
@@ -165,15 +171,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         continue
 
       member_options = member_configuration.get('__options__', [])
-
-      if has_structure_members:
-        template_filename = os.path.join(
-            self._templates_path, 'runtime_structure.h',
-            'structure_member-separator.h')
-
-        self._GenerateSection(
-            template_filename, template_mappings, output_filename,
-            access_mode='a')
 
       if member_definition.description:
         description = member_definition.description
@@ -188,7 +185,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
       member_data_size = 0
       member_data_type = None
-      template_name = None
 
       # TODO: handle stream / string type
       # TODO: handle padding type
@@ -198,75 +194,32 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       type_indicator = member_data_type_definition.TYPE_INDICATOR
 
       if member_data_type_definition.name == 'filetime':
-        template_name = 'structure_member-filetime.h'
-
+        member_data_type = 'filetime'
       elif member_data_type_definition.name == 'posix_time':
-        template_name = 'structure_member-posix_time.h'
+        member_data_type = 'posix_time'
 
-      elif type_indicator in (
-          definitions.TYPE_INDICATOR_STREAM, definitions.TYPE_INDICATOR_STRING):
+      elif type_indicator in (definitions.TYPE_INDICATOR_STREAM,
+                              definitions.TYPE_INDICATOR_STRING):
         if 'fixed_size' in member_options:
           member_data_size = member_data_type_definition.GetByteSize() + 1
 
-          template_name = 'structure_member-fixed_size_string.h'
+          member_data_type = 'fixed_size_string'
         else:
-          template_name = 'structure_member-string.h'
+          member_data_type = 'string'
 
       elif type_indicator == definitions.TYPE_INDICATOR_UUID:
-        template_name = 'structure_member-uuid.h'
+        member_data_type = 'uuid'
 
       else:
         member_data_type = self._GetRuntimeDataType(member_data_type_definition)
-        if member_data_type:
-          template_name = 'structure_member-data_type.h'
 
-      if not template_name:
-        template_name = 'structure_member-todo.h'
+      structure_member = TemplateRuntimeStructureMember()
+      structure_member.data_size = member_data_size
+      structure_member.data_type = member_data_type
+      structure_member.description = description
+      structure_member.name = member_name
 
-      template_mappings['structure_member_data_size'] = member_data_size
-      template_mappings['structure_member_data_type'] = member_data_type
-      template_mappings['structure_member_description'] = description
-      template_mappings['structure_member_name'] = member_name
-
-      template_filename = os.path.join(
-          self._templates_path, 'runtime_structure.h', template_name)
-
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-      del template_mappings['structure_member_data_size']
-      del template_mappings['structure_member_data_type']
-      del template_mappings['structure_member_description']
-      del template_mappings['structure_member_name']
-
-      has_structure_members = True
-
-    if not has_structure_members:
-      template_filename = os.path.join(
-          self._templates_path, 'runtime_structure.h',
-          'structure_member-dummy.h')
-
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-    template_filename = os.path.join(
-        self._templates_path, 'runtime_structure.h', 'structure-end.h')
-
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-  def _GenerateRuntimeStructureHeaderFile(
-      self, data_type_definition, members_configuration):
-    """Generates a runtime structure header file.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
-      members_configuration (dict[dict[str: str]]): code generation
-          configuration of the structure members.
-    """
-    structure_options = members_configuration.get('__options__', {})
+      structure_members.append(structure_member)
 
     template_directory = os.path.join(
         self._templates_path, 'runtime_structure.h')
@@ -290,39 +243,22 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
     template_mappings['structure_description_title'] = (
         structure_description_title)
+    template_mappings['structure_members'] = structure_members
+    template_mappings['structure_options'] = structure_options
 
-    # self._GenerateSectionsFromOperationsFile(
-    #     'runtime_structure.h.yaml', 'main', project_configuration,
-    #     template_mappings, output_filename)
-
-    template_filename = os.path.join(template_directory, 'header.h')
-    self._GenerateSection(template_filename, template_mappings, output_filename)
+    self._GenerateSectionsFromOperationsFile(
+        'runtime_structure.h.yaml', 'main', None, template_mappings,
+        output_filename)
 
     del template_mappings['structure_description_title']
-
-    template_filename = os.path.join(template_directory, 'includes.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    if 'file_io_handle' in structure_options:
-      template_filename = os.path.join(template_directory, 'includes-libbfio.h')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-    template_filename = os.path.join(template_directory, 'extern-start.h')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
+    del template_mappings['structure_members']
+    del template_mappings['structure_options']
 
     if data_type_definition.TYPE_INDICATOR == (
         definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
       structure_definition = data_type_definition.runtime
     else:
       structure_definition = data_type_definition
-
-    self._GenerateRuntimeStructureHeader(
-        structure_definition, data_type_definition.name, members_configuration,
-        output_filename)
 
     template_filename = os.path.join(template_directory, 'functions.h')
     self._GenerateSection(
@@ -1381,15 +1317,12 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       template_mappings['copyright'] = copyright_years
 
     template_mappings['prefix'] = self._prefix
-    template_mappings['prefix_upper_case'] = self._prefix.upper()
 
     if library_name:
       template_mappings['library_name'] = library_name
-      template_mappings['library_name_upper_case'] = library_name.upper()
 
     if structure_name:
       template_mappings['structure_name'] = structure_name
-      template_mappings['structure_name_upper_case'] = structure_name.upper()
 
     return template_mappings
 

@@ -13,12 +13,12 @@ int ${prefix}_test_${structure_name}_free(
 	          NULL,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 

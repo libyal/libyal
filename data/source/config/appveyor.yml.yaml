@@ -112,8 +112,8 @@ operations:
 identifier: generate_environment_matrix_cygwin_tools_static_executables
 type: template
 condition: "'mount_tool' in tools_features"
+fallback: appveyor.yml/environment-matrix-cygwin64-static-executables.yml
 file: appveyor.yml/environment-matrix-cygwin64-static-executables-fuse.yml
-fallback_file: appveyor.yml/environment-matrix-cygwin64-static-executables.yml
 ---
 identifier: generate_environment_matrix_macos
 type: template
@@ -122,8 +122,8 @@ file: appveyor.yml/environment-matrix-macos.yml
 identifier: generate_environment_matrix_macos_python
 type: template
 condition: "'python_bindings' in project_features"
+fallback: appveyor.yml/environment-matrix-macos-pkgbuild.yml
 file: appveyor.yml/environment-matrix-macos-python.yml
-fallback_file: appveyor.yml/environment-matrix-macos-pkgbuild.yml
 ---
 identifier: generate_environment_matrix_mingw
 type: template

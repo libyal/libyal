@@ -52,8 +52,8 @@ file: build.yml/build_ubuntu-no_pthread.yml
 identifier: generate_coverage
 type: template
 condition: "'wide_character_type' in library_features"
+fallback: build.yml/coverage_ubuntu.yml
 file: build.yml/coverage_ubuntu-wide_character_type.yml
-fallback_file: build.yml/coverage_ubuntu.yml
 ---
 identifier: generate_footer
 type: template

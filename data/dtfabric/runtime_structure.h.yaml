@@ -4,25 +4,154 @@ identifier: generate_extern_end
 type: template
 file: runtime_structure.h/extern-end.h
 ---
+identifier: generate_extern_start
+type: template
+file: runtime_structure.h/extern-start.h
+---
 identifier: generate_footer
 type: template
 file: runtime_structure.h/footer.h
 placeholders:
-- library_name_upper_case
-- structure_name_upper_case
+- library_name
+- structure_name
 ---
 identifier: generate_header
 type: template
 file: runtime_structure.h/header.h
+placeholders:
+- authors
+- copyright
+- library_name
+- structure_description_title
+- structure_name
 ---
 identifier: generate_includes
-type: template
-file: runtime_structure.h/includes.h
+type: group
+operations:
+- generate_includes_libcerror
+- generate_includes_libbfio
 modifiers: [sort_lines]
+---
+identifier: generate_includes_libbfio
+type: template
+condition: "'file_io_handle' in structure_options"
+file: runtime_structure.h/includes-libbfio.h
+placeholders:
+- library_name
+---
+identifier: generate_includes_libcerror
+type: template
+file: runtime_structure.h/includes-libcerror.h
+placeholders:
+- library_name
+---
+identifier: generate_structure_end
+type: template
+file: runtime_structure.h/structure-end.h
+---
+identifier: generate_structure_member
+type: selection
+input: structure_member.data_type
+default: generate_structure_member_placeholder
+options:
+- value: filetime
+  operation: generate_structure_member_filetime
+- value: fixed_size_string
+  operation: generate_structure_member_fixed_size_string
+- value: int8_t
+  operation: generate_structure_member_data_type
+- value: int16_t
+  operation: generate_structure_member_data_type
+- value: int32_t
+  operation: generate_structure_member_data_type
+- value: int64_t
+  operation: generate_structure_member_data_type
+- value: posix_time
+  operation: generate_structure_member_posix_file
+- value: string
+  operation: generate_structure_member_string
+- value: uint8_t
+  operation: generate_structure_member_data_type
+- value: uint16_t
+  operation: generate_structure_member_data_type
+- value: uint32_t
+  operation: generate_structure_member_data_type
+- value: uint64_t
+  operation: generate_structure_member_data_type
+- value: uuid
+  operation: generate_structure_member_uuid
+---
+identifier: generate_structure_member_data_type
+type: template
+file: runtime_structure.h/structure_member-data_type.h
+placeholders:
+- structure_member
+---
+identifier: generate_structure_member_dummy
+type: template
+file: runtime_structure.h/structure_member-dummy.h
+---
+identifier: generate_structure_member_filetime
+type: template
+file: runtime_structure.h/structure_member-filetime.h
+placeholders:
+- structure_member
+---
+identifier: generate_structure_member_fixed_size_string
+type: template
+file: runtime_structure.h/structure_member-fixed_size_string.h
+placeholders:
+- structure_member
+---
+identifier: generate_structure_member_placeholder
+type: template
+file: runtime_structure.h/structure_member-placeholder.h
+placeholders:
+- structure_member
+---
+identifier: generate_structure_member_posix_time
+type: template
+file: runtime_structure.h/structure_member-posix_time.h
+placeholders:
+- structure_member
+---
+identifier: generate_structure_member_string
+type: template
+file: runtime_structure.h/structure_member-string.h
+placeholders:
+- structure_member
+---
+identifier: generate_structure_member_uuid
+type: template
+file: runtime_structure.h/structure_member-uuid.h
+placeholders:
+- structure_member
+---
+identifier: generate_structure_members
+type: sequence
+condition: "structure_members != []"
+fallback: generate_structure_member_dummy
+input: structure_members
+placeholder: structure_member
+operations:
+- generate_structure_member
+modifiers: [remove_trailing_empty_lines]
+---
+identifier: generate_structure_start
+type: template
+file: runtime_structure.h/structure-start.h
+placeholders:
+- library_name
+- structure_name
 ---
 identifier: main
 type: group
 operations:
 - generate_header
+- generate_includes
+- generate_extern_start
+- generate_structure_start
+- generate_structure_members
+- generate_structure_end
 # - generate_extern_end
 # - generate_footer

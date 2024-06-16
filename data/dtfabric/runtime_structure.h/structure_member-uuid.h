@@ -1,3 +1,4 @@
-	/* ${structure_member_description}
+	/* ${structure_member.description}
 	 */
-	uint8_t ${structure_member_name}[ 16 ];
+	uint8_t ${structure_member.name}[ 16 ];
+

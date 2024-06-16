@@ -8,7 +8,7 @@ int ${prefix}_test_${structure_name}_initialize(
 	${library_name}_${structure_name}_t *${structure_name} = NULL;
 	int result                        = 0;
 
-#if defined( HAVE_${prefix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${prefix:upper_case}_TEST_MEMORY )
 	int number_of_malloc_fail_tests   = 1;
 	int number_of_memset_fail_tests   = 1;
 	int test_number                   = 0;
@@ -20,16 +20,16 @@ int ${prefix}_test_${structure_name}_initialize(
 	          &${structure_name},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "${structure_name}",
 	 ${structure_name} );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -37,16 +37,16 @@ int ${prefix}_test_${structure_name}_initialize(
 	          &${structure_name},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "${structure_name}",
 	 ${structure_name} );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -56,12 +56,12 @@ int ${prefix}_test_${structure_name}_initialize(
 	          NULL,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -76,19 +76,19 @@ int ${prefix}_test_${structure_name}_initialize(
 
 	${structure_name} = NULL;
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
 	libcerror_error_free(
 	 &error );
 
-#if defined( HAVE_${prefix_upper_case}_TEST_MEMORY )
+#if defined( HAVE_${prefix:upper_case}_TEST_MEMORY )
 
 	for( test_number = 0;
 	     test_number < number_of_malloc_fail_tests;
@@ -115,16 +115,16 @@ int ${prefix}_test_${structure_name}_initialize(
 		}
 		else
 		{
-			${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+			${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 			 "${structure_name}",
 			 ${structure_name} );
 
-			${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -157,16 +157,16 @@ int ${prefix}_test_${structure_name}_initialize(
 		}
 		else
 		{
-			${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+			${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 			 "result",
 			 result,
 			 -1 );
 
-			${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+			${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 			 "${structure_name}",
 			 ${structure_name} );
 
-			${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+			${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
 			 error );
 
@@ -174,7 +174,7 @@ int ${prefix}_test_${structure_name}_initialize(
 			 &error );
 		}
 	}
-#endif /* defined( HAVE_${prefix_upper_case}_TEST_MEMORY ) */
+#endif /* defined( HAVE_${prefix:upper_case}_TEST_MEMORY ) */
 
 	return( 1 );
 

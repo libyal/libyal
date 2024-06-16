@@ -90,7 +90,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     templates_path = os.path.join(self._templates_path, 'pyyal_definitions')
 
     template_mappings['definitions_name'] = definitions_name
-    template_mappings['definitions_name_upper_case'] = definitions_name.upper()
     template_mappings['definitions_description'] = definitions_name.replace(
         '_', ' ')
 
@@ -123,13 +122,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     templates_path = os.path.join(self._templates_path, 'pyyal_definitions')
 
     template_mappings['definitions_name'] = definitions_name
-    template_mappings['definitions_name_upper_case'] = definitions_name.upper()
     template_mappings['definitions_description'] = definitions_name.replace(
         '_', ' ')
 
     template_mappings['definition_name'] = definitions_name[:-1]
-    template_mappings['definition_name_upper_case'] = (
-        definitions_name[:-1].upper())
 
     template_filename = os.path.join(templates_path, 'header.c')
     self._GenerateSection(template_filename, template_mappings, output_filename)
@@ -149,7 +145,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         continue
 
       template_mappings['constant_name'] = constant_name
-      template_mappings['constant_name_upper_case'] = constant_name.upper()
 
       template_filename = os.path.join(templates_path, 'constant.c')
       self._GenerateSection(

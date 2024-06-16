@@ -42,11 +42,16 @@ class TemplateString(string.Template):
         identifier, _, modifier = identifier.partition(':')
 
         identifiers = identifier.split('.')
-        value = mapping[identifiers[0]]
+        try:
+          value = mapping[identifiers[0]]
+        except KeyError:
+          raise ValueError(f'No mapping for placeholder: {identifiers[0]:s}')
+
         for attribute_name in identifiers[1:]:
           value = getattr(value, attribute_name, None)
         value = str(value)
 
+        # TODO: add support for camel_case
         if modifier == 'lower_case':
           value = value.lower()
         elif modifier == 'upper_case':
@@ -73,6 +78,7 @@ class BaseSourceFileGenerator(object):
   _PLACEHOLDER_VALUE_CALLBACKS = {}
 
   _SUPPORTED_MODIFIERS = frozenset([
+      'remove_trailing_empty_lines',
       'sort_lines'])
 
   def __init__(self, templates_path):
@@ -147,6 +153,11 @@ class BaseSourceFileGenerator(object):
           operations_file_name, generator_operation, operations, namespace,
           templates_path)
 
+    elif generator_operation.type == 'selection':
+      output_data = self._GenerateSectionsFromSelectionOperation(
+          operations_file_name, generator_operation, operations, namespace,
+          templates_path)
+
     elif generator_operation.type == 'sequence':
       output_data = self._GenerateSectionsFromSequenceOperation(
           operations_file_name, generator_operation, operations, namespace,
@@ -162,6 +173,18 @@ class BaseSourceFileGenerator(object):
           f'Unsupported operation type: {generator_operation.type:s} in file: '
           f'{operations_file_name:s}'))
       output_data = ''
+
+    for modifier in generator_operation.modifiers or []:
+      if modifier not in self._SUPPORTED_MODIFIERS:
+        logging.error((
+            f'Unsupported modifier: {modifier:s} in file: '
+            f'{operations_file_name:s}'))
+        continue
+
+      if modifier == 'remove_trailing_empty_lines':
+        output_data = self._RemoveTrailingEmptyLines(output_data)
+      elif modifier == 'sort_lines':
+        output_data = self._SortLines(output_data)
 
     return output_data
 
@@ -243,7 +266,9 @@ class BaseSourceFileGenerator(object):
 
     templates_path = os.path.dirname(operations_file_path)
 
-    namespace = dict(project_configuration.__dict__)
+    namespace = dict()
+    if project_configuration:
+      namespace.update(project_configuration.__dict__)
     namespace.update(template_configuration)
     # Make sure __builtins__ contains an empty dictionary.
     namespace['__builtins__'] = {}
@@ -255,6 +280,61 @@ class BaseSourceFileGenerator(object):
     if output_data:
       with open(output_file_path, 'w', encoding='utf8') as file_object:
         file_object.write(output_data)
+
+  def _GenerateSectionsFromSelectionOperation(
+      self, operations_file_name, selection_operation, operations, namespace,
+      templates_path):
+    """Generates sections based on a selection operation.
+
+    Args:
+      operations_file_name (str): name of the operations file.
+      selection_operation (GeneratorOperation): selection operation.
+      operations (dict[str, GeneratorOperation]): operations per identifier.
+      namespace (dict[str, object])): expression namespace.
+      templates_path (str): path of the directory containing the template files.
+
+    Return:
+      str: output data.
+    """
+    if selection_operation.condition:
+      expression = selection_operation.GetConditionExpression()
+
+      try:
+        result = eval(expression, namespace)  # pylint: disable=eval-used
+      except Exception as exception:
+        logging.warning((
+            f'Unable to check condition for operation: '
+            f'{selection_operation.identifier:s} in file: '
+            f'{operations_file_name:s} with error: {exception!s}'))
+        result = False
+
+      if not result:
+        return ''
+
+    selection_input = self._GetPlaceholderValue(
+        namespace, selection_operation.input)
+
+    operation_name = selection_operation.options.get(
+        selection_input, selection_operation.default)
+    if not operation_name:
+      logging.warning((
+          f'Unable to determine option {selection_input:s} for operation: '
+          f'{selection_operation.identifier:s} in file: '
+          f'{operations_file_name:s}'))
+      return ''
+
+    operation = operations.get(operation_name, None)
+    if not operation:
+      logging.warning((
+          f'Missing operation: {operation_name:s} in file: '
+          f'{operations_file_name:s}'))
+      return ''
+
+    output_data = self._GenerateSectionsFromGeneratorOperation(
+        operations_file_name, operation, operations, namespace,
+        templates_path)
+
+    return output_data
 
   def _GenerateSectionsFromSequenceOperation(
       self, operations_file_name, sequence_operation, operations, namespace,
@@ -334,7 +414,7 @@ class BaseSourceFileGenerator(object):
     Return:
       str: output data.
     """
-    operation_file = getattr(template_operation, 'file', None)
+    operation_file = template_operation.file
 
     if template_operation.condition:
       expression = template_operation.GetConditionExpression()
@@ -349,11 +429,10 @@ class BaseSourceFileGenerator(object):
         result = False
 
       if not result:
-        fallback_file = getattr(template_operation, 'fallback_file', None)
-        if not fallback_file:
+        if not template_operation.fallback:
           return ''
 
-        operation_file = fallback_file
+        operation_file = template_operation.fallback
 
     template_file_path = os.path.join(templates_path, operation_file)
 
@@ -377,16 +456,6 @@ class BaseSourceFileGenerator(object):
           f'Unable to format template: {template_file_path:s} with error: '
           f'{exception!s}'))
       return ''
-
-    for modifier in template_operation.modifiers or []:
-      if modifier not in self._SUPPORTED_MODIFIERS:
-        logging.error((
-            f'Unsupported modifier: {modifier:s} in template: '
-            f'{template_file_path:s}.'))
-        continue
-
-      if modifier == 'sort_lines':
-        output_data = self._SortLines(output_data)
 
     return output_data
 
@@ -432,6 +501,24 @@ class BaseSourceFileGenerator(object):
     file_data = file_data.decode('utf8')
 
     return TemplateString(file_data)
+
+  def _RemoveTrailingEmptyLines(self, text):
+    """Removes trailing empty lines from text.
+
+    Args:
+      text (str): text.
+
+    Returns:
+      str: text without trailing empty lines.
+    """
+    lines = text.split('\n')
+
+    while lines and not lines[-1]:
+      lines.pop(-1)
+
+    lines.append('')
+
+    return '\n'.join(lines)
 
   def _SortLines(self, text):
     """Sorts lines of text.
@@ -633,10 +720,6 @@ class SourceFileGenerator(BaseSourceFileGenerator):
     tools_authors = authors_separator.join(project_configuration.tools_authors)
     tests_authors = authors_separator.join(project_configuration.tests_authors)
 
-    library_description_lower_case = ''.join([
-        project_configuration.library_description[0].lower(),
-        project_configuration.library_description[1:]])
-
     library_version = time.strftime('%Y%m%d', time.gmtime())
 
     template_mappings = {
@@ -644,23 +727,16 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         'copyright': project_copyright,
 
         'library_name': project_configuration.library_name,
-        'library_name_upper_case': project_configuration.library_name.upper(),
         'library_name_suffix': project_configuration.library_name_suffix,
-        'library_name_suffix_upper_case': (
-            project_configuration.library_name_suffix.upper()),
         'library_description': project_configuration.library_description,
-        'library_description_lower_case': library_description_lower_case,
         'library_version': library_version,
 
         'python_module_authors': python_module_authors,
         'python_module_name': project_configuration.python_module_name,
-        'python_module_name_upper_case': (
-            project_configuration.python_module_name.upper()),
         'python_module_copyright': python_module_copyright,
 
         'tools_authors': tools_authors,
         'tools_name': project_configuration.tools_directory,
-        'tools_name_upper_case': project_configuration.tools_directory.upper(),
         'tools_description': project_configuration.tools_description,
 
         'tests_authors': tests_authors,
@@ -772,14 +848,12 @@ class SourceFileGenerator(BaseSourceFileGenerator):
       template_mappings['sequence_type_description'] = ''
       template_mappings['sequence_type_name'] = ''
       template_mappings['sequence_type_name_camel_case'] = ''
-      template_mappings['sequence_type_name_upper_case'] = ''
     else:
       template_mappings['sequence_type_description'] = type_name.replace(
           '_', ' ')
       template_mappings['sequence_type_name'] = type_name
       template_mappings['sequence_type_name_camel_case'] = ''.join([
           word.title() for word in type_name.split('_')])
-      template_mappings['sequence_type_name_upper_case'] = type_name.upper()
 
   def _SetSequenceValueNameInTemplateMappings(
       self, template_mappings, value_name):
@@ -793,12 +867,10 @@ class SourceFileGenerator(BaseSourceFileGenerator):
     if not value_name:
       template_mappings['sequence_value_description'] = ''
       template_mappings['sequence_value_name'] = ''
-      template_mappings['sequence_value_name_upper_case'] = ''
     else:
       template_mappings['sequence_value_description'] = value_name.replace(
           '_', ' ')
       template_mappings['sequence_value_name'] = value_name
-      template_mappings['sequence_value_name_upper_case'] = value_name.upper()
 
   def _SetTypeFunctionInTemplateMappings(
       self, template_mappings, type_function):
@@ -811,10 +883,8 @@ class SourceFileGenerator(BaseSourceFileGenerator):
     """
     if not type_function:
       template_mappings['type_function'] = ''
-      template_mappings['type_function_upper_case'] = ''
     else:
       template_mappings['type_function'] = type_function
-      template_mappings['type_function_upper_case'] = type_function.upper()
 
   def _SetTypeNameInTemplateMappings(self, template_mappings, type_name):
     """Sets the type name in template mappings.
@@ -828,13 +898,11 @@ class SourceFileGenerator(BaseSourceFileGenerator):
       template_mappings['type_description'] = ''
       template_mappings['type_name'] = ''
       template_mappings['type_name_camel_case'] = ''
-      template_mappings['type_name_upper_case'] = ''
     else:
       template_mappings['type_description'] = type_name.replace('_', ' ')
       template_mappings['type_name'] = type_name
       template_mappings['type_name_camel_case'] = ''.join([
           word.title() for word in type_name.split('_')])
-      template_mappings['type_name_upper_case'] = type_name.upper()
 
   def _SetValueNameInTemplateMappings(self, template_mappings, value_name):
     """Sets value name in template mappings.
@@ -847,11 +915,9 @@ class SourceFileGenerator(BaseSourceFileGenerator):
     if not value_name:
       template_mappings['value_description'] = ''
       template_mappings['value_name'] = ''
-      template_mappings['value_name_upper_case'] = ''
     else:
       template_mappings['value_description'] = value_name.replace('_', ' ')
       template_mappings['value_name'] = value_name
-      template_mappings['value_name_upper_case'] = value_name.upper()
 
   def _SetValueTypeInTemplateMappings(self, template_mappings, value_type):
     """Sets value type in template mappings.
@@ -864,12 +930,10 @@ class SourceFileGenerator(BaseSourceFileGenerator):
     if not value_type:
       template_mappings['value_type'] = ''
       template_mappings['value_type_description'] = ''
-      template_mappings['value_type_upper_case'] = ''
     else:
       template_mappings['value_type'] = value_type
       template_mappings['value_type_description'] = value_type.replace(
           '_', ' ')
-      template_mappings['value_type_upper_case'] = value_type.upper()
 
   def _SortIncludeHeaders(self, project_configuration, output_filename):
     """Sorts the include headers within a source file.

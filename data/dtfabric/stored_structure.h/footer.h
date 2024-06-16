@@ -2,5 +2,5 @@
 }
 #endif
 
-#endif /* !defined( _${prefix_upper_case}_${structure_name_upper_case}_H ) */
+#endif /* !defined( _${prefix:upper_case}_${structure_name:upper_case}_H ) */
 

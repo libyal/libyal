@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBUNA_CODEPAGE_${codepage_name_upper_case}_H )
-#define _LIBUNA_CODEPAGE_${codepage_name_upper_case}_H
+#if !defined( _LIBUNA_CODEPAGE_${codepage_name:upper_case}_H )
+#define _LIBUNA_CODEPAGE_${codepage_name:upper_case}_H
 
 #include <common.h>
 #include <types.h>
@@ -50,5 +50,5 @@ int libuna_codepage_${codepage_name}_copy_to_byte_stream(
 }
 #endif
 
-#endif /* !defined( _LIBUNA_CODEPAGE_${codepage_name_upper_case}_H ) */
+#endif /* !defined( _LIBUNA_CODEPAGE_${codepage_name:upper_case}_H ) */
 

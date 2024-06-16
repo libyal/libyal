@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _UNA_TEST_CODEPAGE_${codepage_name_upper_case}_H )
-#define _UNA_TEST_CODEPAGE_${codepage_name_upper_case}_H
+#if !defined( _UNA_TEST_CODEPAGE_${codepage_name:upper_case}_H )
+#define _UNA_TEST_CODEPAGE_${codepage_name:upper_case}_H
 
 #include <common.h>
 #include <types.h>
@@ -39,5 +39,5 @@ ${test_mappings}
 }
 #endif
 
-#endif /* !defined( _UNA_TEST_CODEPAGE_${codepage_name_upper_case}_H ) */
+#endif /* !defined( _UNA_TEST_CODEPAGE_${codepage_name:upper_case}_H ) */
 

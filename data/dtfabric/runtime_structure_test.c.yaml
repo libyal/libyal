@@ -21,9 +21,7 @@ type: template
 file: runtime_structure_test.c/main.c
 placeholders:
 - library_name
-- library_name_upper_case
 - prefix
-- prefix_upper_case
 - structure_name
 ---
 identifier: generate_test_data
@@ -41,7 +39,6 @@ file: runtime_structure_test.c/free.c
 placeholders:
 - library_name
 - prefix
-- prefix_upper_case
 - structure_name
 ---
 identifier: generate_test_function_initialize
@@ -50,7 +47,6 @@ file: runtime_structure_test.c/initialize.c
 placeholders:
 - library_name
 - prefix
-- prefix_upper_case
 - structure_name
 ---
 identifier: generate_test_function_read_data
@@ -59,7 +55,6 @@ file: runtime_structure_test.c/read_data.c
 placeholders:
 - library_name
 - prefix
-- prefix_upper_case
 - structure_name
 - test_data_size
 ---
@@ -69,7 +64,6 @@ file: runtime_structure_test.c/read_file_io_handle.c
 placeholders:
 - library_name
 - prefix
-- prefix_upper_case
 - structure_name
 - test_data_size
 ---
@@ -77,13 +71,13 @@ identifier: generate_test_functions_end
 type: template
 file: runtime_structure_test.c/functions-end.c
 placeholders:
-- library_name_upper_case
+- library_name
 ---
 identifier: generate_test_functions_start
 type: template
 file: runtime_structure_test.c/functions-start.c
 placeholders:
-- library_name_upper_case
+- library_name
 ---
 identifier: main
 type: group

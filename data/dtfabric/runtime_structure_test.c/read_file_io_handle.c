@@ -15,16 +15,16 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          &${structure_name},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "${structure_name}",
 	 ${structure_name} );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -36,16 +36,16 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          ${test_data_size},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "file_io_handle",
 	 file_io_handle );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -57,12 +57,12 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          0,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -74,12 +74,12 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          0,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -92,12 +92,12 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          0,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -110,12 +110,12 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          &file_io_handle,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -127,16 +127,16 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          ${test_data_size} - 1,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "file_io_handle",
 	 file_io_handle );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -146,12 +146,12 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          0,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 -1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NOT_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
 
@@ -162,12 +162,12 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          &file_io_handle,
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 0 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
@@ -177,16 +177,16 @@ int ${prefix}_test_${structure_name}_read_file_io_handle(
 	          &${structure_name},
 	          &error );
 
-	${prefix_upper_case}_TEST_ASSERT_EQUAL_INT(
+	${prefix:upper_case}_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
 	 1 );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "${structure_name}",
 	 ${structure_name} );
 
-	${prefix_upper_case}_TEST_ASSERT_IS_NULL(
+	${prefix:upper_case}_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 

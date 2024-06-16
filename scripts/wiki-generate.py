@@ -727,9 +727,6 @@ class WikiPageGenerator(object):
 
         'project_name': project_configuration.project_name,
         'project_name_suffix': project_configuration.project_name[3:],
-        'project_name_suffix_upper_case': (
-            project_configuration.project_name[3:].upper()),
-        'project_name_upper_case': project_configuration.project_name.upper(),
         'project_status': project_status,
         'project_description': project_configuration.project_description,
         'project_git_url': project_configuration.project_git_url,

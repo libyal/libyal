@@ -1592,8 +1592,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['mount_tool_name'] = mount_tool_name
     template_mappings['mount_tool_path_prefix'] = (
         project_configuration.mount_tool_path_prefix)
-    template_mappings['mount_tool_path_prefix_upper_case'] = (
-        project_configuration.mount_tool_path_prefix.upper())
     template_mappings['mount_tool_source_description'] = (
         project_configuration.mount_tool_source_description)
     template_mappings['mount_tool_source_description_long'] = (
@@ -1618,7 +1616,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
     del template_mappings['mount_tool_name']
     del template_mappings['mount_tool_path_prefix']
-    del template_mappings['mount_tool_path_prefix_upper_case']
     del template_mappings['mount_tool_source_description']
     del template_mappings['mount_tool_source_description_long']
     del template_mappings['mount_tool_source_type']
