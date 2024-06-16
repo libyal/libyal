@@ -205,6 +205,27 @@ placeholders:
 - library_name
 - library_version
 ---
+identifier: generate_notice
+type: group
+condition: "notice_message != ''"
+operations:
+- generate_notice_start
+- generate_notice_end
+---
+identifier: generate_notice_end
+type: template
+file: configure.ac/notice-end.ac
+---
+identifier: generate_notice_start
+type: template
+file: configure.ac/notice-start.ac
+placeholders:
+- notice_message
+---
+identifier: generate_output
+type: template
+file: configure.ac/output.ac
+---
 identifier: generate_programs_end
 type: template
 file: configure.ac/programs.ac-end
@@ -276,3 +297,5 @@ operations:
 - generate_config_files_rpm_spec
 - generate_config_files_setup_cfg
 - generate_config_files_end
+- generate_output
+- generate_notice

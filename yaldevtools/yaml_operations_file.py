@@ -23,14 +23,12 @@ class YAMLGeneratorOperationsFile(object):
   * TODO: describe additional values.
   """
 
-  # TODO: rename mappings to placeholders
   _SUPPORTED_KEYS = frozenset([
       'condition',
       'identifier',
       'input',
       'fallback_file',
       'file',
-      'mappings',
       'modifiers',
       'operations',
       'placeholder',
@@ -56,7 +54,6 @@ class YAMLGeneratorOperationsFile(object):
       'identifier',
       'fallback_file',
       'file',
-      'mappings',
       'modifiers',
       'placeholders',
       'type'])
@@ -166,11 +163,6 @@ class YAMLGeneratorOperationsFile(object):
           'modifiers', None)
       generator_operation.placeholders = yaml_generator_operation.get(
           'placeholders', None)
-
-      if not generator_operation.placeholders:
-        # TODO: remove backwards compatibility support for mappings
-        generator_operation.placeholders = yaml_generator_operation.get(
-            'mappings', None)
 
     return generator_operation
 

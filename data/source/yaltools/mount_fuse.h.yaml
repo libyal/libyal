@@ -28,7 +28,7 @@ file: mount_fuse/getxattr.h
 identifier: generate_header
 type: template
 file: mount_fuse/header.h
-mappings:
+placeholders:
 - copyright
 - library_name
 - tools_authors

@@ -256,20 +256,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         spec_tools_tests.append(spec_dependency_test)
 
-    template_mappings['library_dependencies'] = library_dependencies
-    template_mappings['spec_library_tests'] = ' || '.join(spec_library_tests)
-    template_mappings['spec_tools_tests'] = ' || '.join(spec_tools_tests)
-    template_mappings['tools_dependencies'] = tools_dependencies
-
-    self._GenerateSectionsFromOperationsFile(
-        'configure.ac.yaml', 'main', project_configuration, template_mappings,
-        'configure.ac')
-
-    del template_mappings['library_dependencies']
-    del template_mappings['spec_library_tests']
-    del template_mappings['spec_tools_tests']
-    del template_mappings['tools_dependencies']
-
     # TODO: move conditions below to configure.ac.yaml
 
     # for name in library_dependencies:
@@ -469,20 +455,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         notice_message.append(f'   {description:s}: {padding:s}{value:s}')
 
-    template_filename = os.path.join(templates_path, 'output.ac')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
+    template_mappings['library_dependencies'] = library_dependencies
+    template_mappings['notice_message'] = '\n'.join(notice_message)
+    template_mappings['spec_library_tests'] = ' || '.join(spec_library_tests)
+    template_mappings['spec_tools_tests'] = ' || '.join(spec_tools_tests)
+    template_mappings['tools_dependencies'] = tools_dependencies
 
-    # TODO: improve this condition
-    if project_configuration.library_name != 'libcerror':
-      template_mappings['notice_message'] = '\n'.join(notice_message)
+    self._GenerateSectionsFromOperationsFile(
+        'configure.ac.yaml', 'main', project_configuration, template_mappings,
+        'configure.ac')
 
-      template_filename = os.path.join(templates_path, 'notice.ac')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-      del template_mappings['notice_message']
+    del template_mappings['library_dependencies']
+    del template_mappings['notice_message']
+    del template_mappings['spec_library_tests']
+    del template_mappings['spec_tools_tests']
+    del template_mappings['tools_dependencies']
 
   def _GenerateDpkg(
       self, project_configuration, template_mappings, output_writer,

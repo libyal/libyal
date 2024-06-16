@@ -3,7 +3,7 @@
 identifier: generate_header
 type: template
 file: runtime_structure_test.c/header.c
-mappings:
+placeholders:
 - authors
 - copyright
 - structure_name
@@ -11,7 +11,7 @@ mappings:
 identifier: generate_includes
 type: template
 file: runtime_structure_test.c/includes.c
-mappings:
+placeholders:
 - library_name
 - prefix
 - structure_name
@@ -19,7 +19,7 @@ mappings:
 identifier: generate_main_function
 type: template
 file: runtime_structure_test.c/main.c
-mappings:
+placeholders:
 - library_name
 - library_name_upper_case
 - prefix
@@ -29,7 +29,7 @@ mappings:
 identifier: generate_test_data
 type: template
 file: runtime_structure_test.c/test_data.c
-mappings:
+placeholders:
 - prefix
 - structure_name
 - test_data
@@ -38,7 +38,7 @@ mappings:
 identifier: generate_test_function_free
 type: template
 file: runtime_structure_test.c/free.c
-mappings:
+placeholders:
 - library_name
 - prefix
 - prefix_upper_case
@@ -47,7 +47,7 @@ mappings:
 identifier: generate_test_function_initialize
 type: template
 file: runtime_structure_test.c/initialize.c
-mappings:
+placeholders:
 - library_name
 - prefix
 - prefix_upper_case
@@ -56,7 +56,7 @@ mappings:
 identifier: generate_test_function_read_data
 type: template
 file: runtime_structure_test.c/read_data.c
-mappings:
+placeholders:
 - library_name
 - prefix
 - prefix_upper_case
@@ -66,7 +66,7 @@ mappings:
 identifier: generate_test_function_read_file_io_handle
 type: template
 file: runtime_structure_test.c/read_file_io_handle.c
-mappings:
+placeholders:
 - library_name
 - prefix
 - prefix_upper_case
@@ -76,13 +76,13 @@ mappings:
 identifier: generate_test_functions_end
 type: template
 file: runtime_structure_test.c/functions-end.c
-mappings:
+placeholders:
 - library_name_upper_case
 ---
 identifier: generate_test_functions_start
 type: template
 file: runtime_structure_test.c/functions-start.c
-mappings:
+placeholders:
 - library_name_upper_case
 ---
 identifier: main

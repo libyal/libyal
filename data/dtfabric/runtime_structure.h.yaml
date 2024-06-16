@@ -7,7 +7,7 @@ file: runtime_structure.h/extern-end.h
 identifier: generate_footer
 type: template
 file: runtime_structure.h/footer.h
-mappings:
+placeholders:
 - library_name_upper_case
 - structure_name_upper_case
 ---

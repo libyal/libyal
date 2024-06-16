@@ -16,7 +16,7 @@ file: mount_fuse/defines-getxattr.c
 identifier: generate_destroy
 type: template
 file: mount_fuse/destroy.c
-mappings:
+placeholders:
 - mount_tool_name
 - tools_name_upper_case
 ---
@@ -27,7 +27,7 @@ file: mount_fuse/filldir.c
 identifier: generate_getattr
 type: template
 file: mount_fuse/getattr.c
-mappings:
+placeholders:
 - mount_tool_name
 - tools_name_upper_case
 ---
@@ -35,7 +35,7 @@ identifier: generate_getxattr
 type: template
 condition: "'extended_attributes' in mount_tool_features"
 file: mount_fuse/getxattr.c
-mappings:
+placeholders:
 - library_name
 - mount_tool_file_entry_type_name
 - mount_tool_name
@@ -44,7 +44,7 @@ mappings:
 identifier: generate_header
 type: template
 file: mount_fuse/header.c
-mappings:
+placeholders:
 - copyright
 - library_name
 - tools_authors
@@ -59,7 +59,7 @@ identifier: generate_listxattr
 type: template
 condition: "'extended_attributes' in mount_tool_features"
 file: mount_fuse/listxattr.c
-mappings:
+placeholders:
 - library_name
 - mount_tool_file_entry_type_name
 - mount_tool_name
@@ -68,13 +68,13 @@ mappings:
 identifier: generate_open
 type: template
 file: mount_fuse/open.c
-mappings:
+placeholders:
 - mount_tool_name
 ---
 identifier: generate_opendir
 type: template
 file: mount_fuse/opendir.c
-mappings:
+placeholders:
 - mount_tool_name
 ---
 identifier: generate_read
@@ -84,14 +84,14 @@ file: mount_fuse/read.c
 identifier: generate_readdir
 type: template
 file: mount_fuse/readdir.c
-mappings:
+placeholders:
 - tools_name_upper_case
 ---
 identifier: generate_readlink
 type: template
 condition: "'symbolic_link' in mount_tool_features"
 file: mount_fuse/readlink.c
-mappings:
+placeholders:
 - mount_tool_name
 ---
 identifier: generate_release
