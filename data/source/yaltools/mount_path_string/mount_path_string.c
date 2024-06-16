@@ -555,7 +555,7 @@ int mount_path_string_copy_to_file_entry_path(
 		}
 		if( unicode_character == (libuna_unicode_character_t) LIBCPATH_SEPARATOR )
 		{
-			unicode_character = (libuna_unicode_character_t) ${library_name_upper_case}_SEPARATOR;
+			unicode_character = (libuna_unicode_character_t) ${library_name:upper_case}_SEPARATOR;
 		}
 		else if( unicode_character == (libuna_unicode_character_t) ESCAPE_CHARACTER )
 		{

@@ -3,13 +3,13 @@
  */
 PyObject *${python_module_name}_${type_name}_close(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
-           PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+           PyObject *arguments ${python_module_name:upper_case}_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "${python_module_name}_${type_name}_close";
 	int result               = 0;
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( arguments )
 
 	if( ${python_module_name}_${type_name} == NULL )
 	{

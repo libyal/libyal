@@ -31,7 +31,7 @@
 #include "${library_name}_libcnotify.h"
 #include "${library_name}_notify.h"
 
-#if !defined( HAVE_LOCAL_${library_name_upper_case} )
+#if !defined( HAVE_LOCAL_${library_name:upper_case} )
 
 /* Sets the verbose notification
  */
@@ -116,5 +116,5 @@ int ${library_name}_notify_stream_close(
 	return( 0 );
 }
 
-#endif /* !defined( HAVE_LOCAL_${library_name_upper_case} ) */
+#endif /* !defined( HAVE_LOCAL_${library_name:upper_case} ) */
 

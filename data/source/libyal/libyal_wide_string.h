@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_WIDE_STRING_H )
-#define _${library_name_upper_case}_WIDE_STRING_H
+#if !defined( _${library_name:upper_case}_WIDE_STRING_H )
+#define _${library_name:upper_case}_WIDE_STRING_H
 
 #include <common.h>
 #include <wide_string.h>
@@ -50,5 +50,5 @@ int ${library_name}_wide_string_compare_no_case(
 }
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_WIDE_STRING_H ) */
+#endif /* !defined( _${library_name:upper_case}_WIDE_STRING_H ) */
 

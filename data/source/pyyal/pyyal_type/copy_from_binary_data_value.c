@@ -92,7 +92,7 @@ PyObject *${python_module_name}_${type_name}_copy_from_${value_name}(
 	          ${python_module_name}_${type_name}->${type_name},
 	          (uint8_t *) ${value_name},
 	          (size_t) ${value_name}_size,
-	          ${library_name_upper_case}_ENDIAN_LITTLE,
+	          ${library_name:upper_case}_ENDIAN_LITTLE,
 	          &error );
 
 	Py_END_ALLOW_THREADS

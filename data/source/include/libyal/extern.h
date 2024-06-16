@@ -22,23 +22,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_EXTERN_H )
-#define _${library_name_upper_case}_EXTERN_H
+#if !defined( _${library_name:upper_case}_EXTERN_H )
+#define _${library_name:upper_case}_EXTERN_H
 
-/* To export functions from the ${library_name} DLL define ${library_name_upper_case}_DLL_EXPORT
- * To import functions from the ${library_name} DLL define ${library_name_upper_case}_DLL_IMPORT
+/* To export functions from the ${library_name} DLL define ${library_name:upper_case}_DLL_EXPORT
+ * To import functions from the ${library_name} DLL define ${library_name:upper_case}_DLL_IMPORT
  * Otherwise use default extern statement
  */
-#if defined( ${library_name_upper_case}_DLL_EXPORT )
-#define ${library_name_upper_case}_EXTERN __declspec(dllexport)
+#if defined( ${library_name:upper_case}_DLL_EXPORT )
+#define ${library_name:upper_case}_EXTERN __declspec(dllexport)
 
-#elif defined( ${library_name_upper_case}_DLL_IMPORT )
-#define ${library_name_upper_case}_EXTERN extern __declspec(dllimport)
+#elif defined( ${library_name:upper_case}_DLL_IMPORT )
+#define ${library_name:upper_case}_EXTERN extern __declspec(dllimport)
 
 #else
-#define ${library_name_upper_case}_EXTERN extern
+#define ${library_name:upper_case}_EXTERN extern
 
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_EXTERN_H ) */
+#endif /* !defined( _${library_name:upper_case}_EXTERN_H ) */
 

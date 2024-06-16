@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${python_module_name_upper_case}_PYTHON_H )
-#define _${python_module_name_upper_case}_PYTHON_H
+#if !defined( _${python_module_name:upper_case}_PYTHON_H )
+#define _${python_module_name:upper_case}_PYTHON_H
 
 #include <common.h>
 
@@ -79,5 +79,5 @@
 
 #endif /* !defined( Py_TYPE ) */
 
-#endif /* !defined( _${python_module_name_upper_case}_PYTHON_H ) */
+#endif /* !defined( _${python_module_name:upper_case}_PYTHON_H ) */
 

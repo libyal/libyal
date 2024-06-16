@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_HUFFMAN_TREE_H )
-#define _${library_name_upper_case}_HUFFMAN_TREE_H
+#if !defined( _${library_name:upper_case}_HUFFMAN_TREE_H )
+#define _${library_name:upper_case}_HUFFMAN_TREE_H
 
 #include <common.h>
 #include <types.h>
@@ -75,5 +75,5 @@ int ${library_name}_huffman_tree_get_symbol_from_bit_stream(
 }
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_HUFFMAN_TREE_H ) */
+#endif /* !defined( _${library_name:upper_case}_HUFFMAN_TREE_H ) */
 

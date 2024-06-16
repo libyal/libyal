@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_BIT_STREAM_H )
-#define _${library_name_upper_case}_BIT_STREAM_H
+#if !defined( _${library_name:upper_case}_BIT_STREAM_H )
+#define _${library_name:upper_case}_BIT_STREAM_H
 
 #include <common.h>
 #include <types.h>
@@ -33,11 +33,11 @@ extern "C" {
 
 /* The storage type
  */
-enum ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPES
+enum ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPES
 {
-	${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_UNKNOWN		= 0x00,
-	${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_FRONT_TO_BACK	= 0x01,
-	${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT	= 0x02
+	${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_UNKNOWN		= 0x00,
+	${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_FRONT_TO_BACK	= 0x01,
+	${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT	= 0x02
 };
 
 typedef struct ${library_name}_bit_stream ${library_name}_bit_stream_t;
@@ -91,5 +91,5 @@ int ${library_name}_bit_stream_get_value(
 }
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_BIT_STREAM_H ) */
+#endif /* !defined( _${library_name:upper_case}_BIT_STREAM_H ) */
 

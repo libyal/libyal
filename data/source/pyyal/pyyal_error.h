@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${python_module_name_upper_case}_ERROR_H )
-#define _${python_module_name_upper_case}_ERROR_H
+#if !defined( _${python_module_name:upper_case}_ERROR_H )
+#define _${python_module_name:upper_case}_ERROR_H
 
 #include <common.h>
 #include <types.h>
@@ -28,7 +28,7 @@
 #include "${python_module_name}_libcerror.h"
 #include "${python_module_name}_python.h"
 
-#define ${python_module_name_upper_case}_ERROR_STRING_SIZE	2048
+#define ${python_module_name:upper_case}_ERROR_STRING_SIZE	2048
 
 #if defined( __cplusplus )
 extern "C" {
@@ -56,5 +56,5 @@ void ${python_module_name}_error_raise(
 }
 #endif
 
-#endif /* !defined( _${python_module_name_upper_case}_ERROR_H ) */
+#endif /* !defined( _${python_module_name:upper_case}_ERROR_H ) */
 

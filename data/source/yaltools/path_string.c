@@ -665,7 +665,7 @@ int path_string_copy_to_file_entry_path(
 		}
 		if( unicode_character == (libuna_unicode_character_t) path_segment_separator )
 		{
-			unicode_character = (libuna_unicode_character_t) ${library_name_upper_case}_SEPARATOR;
+			unicode_character = (libuna_unicode_character_t) ${library_name:upper_case}_SEPARATOR;
 		}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libuna_unicode_character_copy_to_utf16(

@@ -104,7 +104,7 @@ PyObject *${python_module_name}_${type_name}_open_file_object(
 	result = ${library_name}_${type_name}_open_file_io_handle(
 	          ${python_module_name}_${type_name}->${type_name},
 	          ${python_module_name}_${type_name}->file_io_handle,
-	          ${library_name_upper_case}_OPEN_READ,
+	          ${library_name:upper_case}_OPEN_READ,
 	          &error );
 
 	Py_END_ALLOW_THREADS

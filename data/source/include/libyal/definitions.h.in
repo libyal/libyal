@@ -19,16 +19,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_DEFINITIONS_H )
-#define _${library_name_upper_case}_DEFINITIONS_H
+#if !defined( _${library_name:upper_case}_DEFINITIONS_H )
+#define _${library_name:upper_case}_DEFINITIONS_H
 
 #include <${library_name}/types.h>
 
-#define ${library_name_upper_case}_VERSION			@VERSION@
+#define ${library_name:upper_case}_VERSION			@VERSION@
 
 /* The version string
  */
-#define ${library_name_upper_case}_VERSION_STRING		"@VERSION@"
+#define ${library_name:upper_case}_VERSION_STRING		"@VERSION@"
 
-#endif /* !defined( _${library_name_upper_case}_DEFINITIONS_H ) */
+#endif /* !defined( _${library_name:upper_case}_DEFINITIONS_H ) */
 

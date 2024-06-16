@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${python_module_name_upper_case}_GUID_H )
-#define _${python_module_name_upper_case}_GUID_H
+#if !defined( _${python_module_name:upper_case}_GUID_H )
+#define _${python_module_name:upper_case}_GUID_H
 
 #include <common.h>
 #include <types.h>
@@ -39,5 +39,5 @@ PyObject *${python_module_name}_string_new_from_guid(
 }
 #endif
 
-#endif /* !defined( _${python_module_name_upper_case}_GUID_H ) */
+#endif /* !defined( _${python_module_name:upper_case}_GUID_H ) */
 

@@ -88,7 +88,7 @@ PyObject *${python_module_name}_${type_name}_open(
 		result = ${library_name}_${type_name}_open_wide(
 		          ${python_module_name}_${type_name}->${type_name},
 		          filename_wide,
-		          ${library_name_upper_case}_OPEN_READ,
+		          ${library_name:upper_case}_OPEN_READ,
 		          &error );
 
 		Py_END_ALLOW_THREADS
@@ -122,7 +122,7 @@ PyObject *${python_module_name}_${type_name}_open(
 		result = ${library_name}_${type_name}_open(
 		          ${python_module_name}_${type_name}->${type_name},
 		          filename_narrow,
-		          ${library_name_upper_case}_OPEN_READ,
+		          ${library_name:upper_case}_OPEN_READ,
 		          &error );
 
 		Py_END_ALLOW_THREADS
@@ -184,7 +184,7 @@ PyObject *${python_module_name}_${type_name}_open(
 		result = ${library_name}_${type_name}_open(
 		          ${python_module_name}_${type_name}->${type_name},
 		          filename_narrow,
-		          ${library_name_upper_case}_OPEN_READ,
+		          ${library_name:upper_case}_OPEN_READ,
 		          &error );
 
 		Py_END_ALLOW_THREADS

@@ -3,14 +3,14 @@
  */
 PyObject *${python_module_name}_${type_name}_get_data_as_boolean(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
-           PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+           PyObject *arguments ${python_module_name:upper_case}_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "${python_module_name}_${type_name}_get_data_as_boolean";
 	uint8_t value_boolean    = 0;
 	int result               = 0;
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( arguments )
 
 	if( ${python_module_name}_${type_name} == NULL )
 	{

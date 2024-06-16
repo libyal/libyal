@@ -119,14 +119,14 @@ PyObject *${python_module_name}_${type_name}_set_ascii_codepage(
 int ${python_module_name}_${type_name}_set_ascii_codepage_setter(
      ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
      PyObject *string_object,
-     void *closure ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+     void *closure ${python_module_name:upper_case}_ATTRIBUTE_UNUSED )
 {
 	PyObject *utf8_string_object = NULL;
 	static char *function        = "${python_module_name}_${type_name}_set_ascii_codepage_setter";
 	char *codepage_string        = NULL;
 	int result                   = 0;
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( closure )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( closure )
 
 	PyErr_Clear();
 

@@ -1081,22 +1081,22 @@ int ${library_name}_deflate_read_block_header(
 
 		switch( *block_type )
 		{
-			case ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_UNCOMPRESSED:
+			case ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_UNCOMPRESSED:
 				libcnotify_printf(
 				 "Uncompressed" );
 				break;
 
-			case ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED:
+			case ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED:
 				libcnotify_printf(
 				 "Fixed Huffman" );
 				break;
 
-			case ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_DYNAMIC:
+			case ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_DYNAMIC:
 				libcnotify_printf(
 				 "Dynamic Huffman" );
 				break;
 
-			case ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_RESERVED:
+			case ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_RESERVED:
 			default:
 				libcnotify_printf(
 				 "Reserved" );
@@ -1183,7 +1183,7 @@ int ${library_name}_deflate_read_block(
 
 	switch( block_type )
 	{
-		case ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_UNCOMPRESSED:
+		case ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_UNCOMPRESSED:
 			/* Ignore the bits in the buffer upto the next byte
 			 */
 			skip_bits = bit_stream->bit_buffer_size & 0x07;
@@ -1287,7 +1287,7 @@ int ${library_name}_deflate_read_block(
 
 			break;
 
-		case ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED:
+		case ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED:
 			if( ${library_name}_deflate_decode_huffman(
 			     bit_stream,
 			     fixed_huffman_literals_tree,
@@ -1308,7 +1308,7 @@ int ${library_name}_deflate_read_block(
 			}
 			break;
 
-		case ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_DYNAMIC:
+		case ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_DYNAMIC:
 			if( ${library_name}_huffman_tree_initialize(
 			     &dynamic_huffman_literals_tree,
 			     288,
@@ -1400,7 +1400,7 @@ int ${library_name}_deflate_read_block(
 			}
 			break;
 
-		case ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_RESERVED:
+		case ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_RESERVED:
 		default:
 			libcerror_error_set(
 			 error,
@@ -1524,7 +1524,7 @@ int ${library_name}_deflate_decompress(
 	     compressed_data,
 	     compressed_data_size,
 	     compressed_data_offset,
-	     ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	     ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1553,7 +1553,7 @@ int ${library_name}_deflate_decompress(
 
 			goto on_error;
 		}
-		if( block_type == ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED )
+		if( block_type == ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED )
 		{
 			if( ( fixed_huffman_literals_tree == NULL )
 			 && ( fixed_huffman_distances_tree == NULL ) )
@@ -1809,7 +1809,7 @@ int ${library_name}_deflate_decompress_zlib(
 	     compressed_data,
 	     compressed_data_size,
 	     compressed_data_offset,
-	     ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	     ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1838,7 +1838,7 @@ int ${library_name}_deflate_decompress_zlib(
 
 			goto on_error;
 		}
-		if( block_type == ${library_name_upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED )
+		if( block_type == ${library_name:upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED )
 		{
 			if( ( fixed_huffman_literals_tree == NULL )
 			 && ( fixed_huffman_distances_tree == NULL ) )

@@ -34,100 +34,100 @@ const char *${python_module_name}_codepage_to_string(
 {
 	switch( codepage )
 	{
-		case ${library_name_upper_case}_CODEPAGE_ASCII:
+		case ${library_name:upper_case}_CODEPAGE_ASCII:
 			return( "ascii" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_1:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_1:
 			return( "iso-8859-1" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_2:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_2:
 			return( "iso-8859-2" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_3:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_3:
 			return( "iso-8859-3" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_4:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_4:
 			return( "iso-8859-4" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_5:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_5:
 			return( "iso-8859-5" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_6:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_6:
 			return( "iso-8859-6" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_7:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_7:
 			return( "iso-8859-7" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_8:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_8:
 			return( "iso-8859-8" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_9:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_9:
 			return( "iso-8859-9" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_10:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_10:
 			return( "iso-8859-10" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_11:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_11:
 			return( "iso-8859-11" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_13:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_13:
 			return( "iso-8859-13" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_14:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_14:
 			return( "iso-8859-14" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_15:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_15:
 			return( "iso-8859-15" );
 
-		case ${library_name_upper_case}_CODEPAGE_ISO_8859_16:
+		case ${library_name:upper_case}_CODEPAGE_ISO_8859_16:
 			return( "iso-8859-16" );
 
-		case ${library_name_upper_case}_CODEPAGE_KOI8_R:
+		case ${library_name:upper_case}_CODEPAGE_KOI8_R:
 			return( "koi8_r" );
 
-		case ${library_name_upper_case}_CODEPAGE_KOI8_U:
+		case ${library_name:upper_case}_CODEPAGE_KOI8_U:
 			return( "koi8_u" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_874:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_874:
 			return( "cp874" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_932:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_932:
 			return( "cp932" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_936:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_936:
 			return( "cp936" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_949:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_949:
 			return( "cp949" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_950:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_950:
 			return( "cp950" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_1250:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_1250:
 			return( "cp1250" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_1251:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_1251:
 			return( "cp1251" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_1252:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_1252:
 			return( "cp1252" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_1253:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_1253:
 			return( "cp1253" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_1254:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_1254:
 			return( "cp1254" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_1255:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_1255:
 			return( "cp1255" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_1256:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_1256:
 			return( "cp1256" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_1257:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_1257:
 			return( "cp1257" );
 
-		case ${library_name_upper_case}_CODEPAGE_WINDOWS_1258:
+		case ${library_name:upper_case}_CODEPAGE_WINDOWS_1258:
 			return( "cp1258" );
 
 		default:

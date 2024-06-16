@@ -26,7 +26,7 @@
 #include "${library_name}_error.h"
 #include "${library_name}_libcerror.h"
 
-#if !defined( HAVE_LOCAL_${library_name_upper_case} )
+#if !defined( HAVE_LOCAL_${library_name:upper_case} )
 
 /* Free an error and its elements
  */
@@ -107,5 +107,5 @@ int ${library_name}_error_backtrace_sprint(
 	return( print_count );
 }
 
-#endif /* !defined( HAVE_LOCAL_${library_name_upper_case} ) */
+#endif /* !defined( HAVE_LOCAL_${library_name:upper_case} ) */
 

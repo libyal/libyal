@@ -97,8 +97,8 @@ int ${library_name}_bit_stream_initialize(
 
 		return( -1 );
 	}
-	if( ( storage_type != ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT )
-	 && ( storage_type != ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_FRONT_TO_BACK ) )
+	if( ( storage_type != ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT )
+	 && ( storage_type != ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_FRONT_TO_BACK ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -251,11 +251,11 @@ int ${library_name}_bit_stream_get_value(
 
 				return( -1 );
 			}
-			if( bit_stream->storage_type == ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT )
+			if( bit_stream->storage_type == ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT )
 			{
 				bit_stream->bit_buffer |= (uint32_t) bit_stream->byte_stream[ bit_stream->byte_stream_offset ] << bit_stream->bit_buffer_size;
 			}
-			else if( bit_stream->storage_type == ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_FRONT_TO_BACK )
+			else if( bit_stream->storage_type == ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_FRONT_TO_BACK )
 			{
 				bit_stream->bit_buffer <<= 8;
 				bit_stream->bit_buffer  |= bit_stream->byte_stream[ bit_stream->byte_stream_offset ];
@@ -277,7 +277,7 @@ int ${library_name}_bit_stream_get_value(
 		{
 			safe_value_32bit <<= remaining_number_of_bits;
 		}
-		if( bit_stream->storage_type == ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT )
+		if( bit_stream->storage_type == ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT )
 		{
 			if( read_number_of_bits < 32 )
 			{
@@ -289,7 +289,7 @@ int ${library_name}_bit_stream_get_value(
 			}
 			bit_stream->bit_buffer_size -= read_number_of_bits;
 		}
-		else if( bit_stream->storage_type == ${library_name_upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_FRONT_TO_BACK )
+		else if( bit_stream->storage_type == ${library_name:upper_case}_BIT_STREAM_STORAGE_TYPE_BYTE_FRONT_TO_BACK )
 		{
 			bit_stream->bit_buffer_size -= read_number_of_bits;
 			read_value_32bit           >>= bit_stream->bit_buffer_size;

@@ -1,3 +1,3 @@
 
-#endif /* !defined( _${library_name_upper_case}_INTERNAL_TYPES_H ) */
+#endif /* !defined( _${library_name:upper_case}_INTERNAL_TYPES_H ) */
 

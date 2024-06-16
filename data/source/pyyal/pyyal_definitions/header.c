@@ -73,7 +73,7 @@ PyTypeObject ${python_module_name}_${definitions_name}_type_object = {
 	/* tp_flags */
 	Py_TPFLAGS_DEFAULT,
 	/* tp_doc */
-	"${python_module_name} ${definitions_description} object (wraps ${library_name_upper_case}_${definitions_name_upper_case})",
+	"${python_module_name} ${definitions_description} object (wraps ${library_name:upper_case}_${definitions_name:upper_case})",
 	/* tp_traverse */
 	0,
 	/* tp_clear */

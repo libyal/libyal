@@ -19,26 +19,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${python_module_name_upper_case}_UNUSED_H )
-#define _${python_module_name_upper_case}_UNUSED_H
+#if !defined( _${python_module_name:upper_case}_UNUSED_H )
+#define _${python_module_name:upper_case}_UNUSED_H
 
 #include <common.h>
 
-#if !defined( ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+#if !defined( ${python_module_name:upper_case}_ATTRIBUTE_UNUSED )
 #if defined( __GNUC__ ) && __GNUC__ >= 3
-#define ${python_module_name_upper_case}_ATTRIBUTE_UNUSED	__attribute__ ((__unused__))
+#define ${python_module_name:upper_case}_ATTRIBUTE_UNUSED	__attribute__ ((__unused__))
 #else
-#define ${python_module_name_upper_case}_ATTRIBUTE_UNUSED
+#define ${python_module_name:upper_case}_ATTRIBUTE_UNUSED
 #endif
 #endif
 
 #if defined( _MSC_VER )
-#define ${python_module_name_upper_case}_UNREFERENCED_PARAMETER( parameter ) \
+#define ${python_module_name:upper_case}_UNREFERENCED_PARAMETER( parameter ) \
 	UNREFERENCED_PARAMETER( parameter );
 #else
-#define ${python_module_name_upper_case}_UNREFERENCED_PARAMETER( parameter ) \
+#define ${python_module_name:upper_case}_UNREFERENCED_PARAMETER( parameter ) \
 	/* parameter */
 #endif
 
-#endif /* !defined( _${python_module_name_upper_case}_UNUSED_H ) */
+#endif /* !defined( _${python_module_name:upper_case}_UNUSED_H ) */
 

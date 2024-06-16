@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${python_module_name_upper_case}_${sequence_type_name_upper_case}_H )
-#define _${python_module_name_upper_case}_${sequence_type_name_upper_case}_H
+#if !defined( _${python_module_name:upper_case}_${sequence_type_name:upper_case}_H )
+#define _${python_module_name:upper_case}_${sequence_type_name:upper_case}_H
 
 #include <common.h>
 #include <types.h>
@@ -91,5 +91,5 @@ PyObject *${python_module_name}_${sequence_type_name}_iternext(
 }
 #endif
 
-#endif /* !defined( _${python_module_name_upper_case}_${sequence_type_name_upper_case}_H ) */
+#endif /* !defined( _${python_module_name:upper_case}_${sequence_type_name:upper_case}_H ) */
 

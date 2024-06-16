@@ -3,7 +3,7 @@
  */
 PyObject *${python_module_name}_${type_name}_get_${value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
-           PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+           PyObject *arguments ${python_module_name:upper_case}_ATTRIBUTE_UNUSED )
 {
 	PyObject *datetime_object = NULL;
 	libcerror_error_t *error  = NULL;
@@ -11,7 +11,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
 	uint32_t fat_date_time    = 0;
 	int result                = 0;
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( arguments )
 
 	if( ${python_module_name}_${type_name} == NULL )
 	{
@@ -55,7 +55,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}(
  */
 PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
-           PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+           PyObject *arguments ${python_module_name:upper_case}_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	PyObject *integer_object = NULL;
@@ -63,7 +63,7 @@ PyObject *${python_module_name}_${type_name}_get_${value_name}_as_integer(
 	uint32_t fat_date_time   = 0;
 	int result               = 0;
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( arguments )
 
 	if( ${python_module_name}_${type_name} == NULL )
 	{

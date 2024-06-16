@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_LIBFVALUE_H )
-#define _${library_name_upper_case}_LIBFVALUE_H
+#if !defined( _${library_name:upper_case}_LIBFVALUE_H )
+#define _${library_name:upper_case}_LIBFVALUE_H
 
 #include <common.h>
 
@@ -56,5 +56,5 @@
 
 #endif /* defined( HAVE_LOCAL_LIBFVALUE ) */
 
-#endif /* !defined( _${library_name_upper_case}_LIBFVALUE_H ) */
+#endif /* !defined( _${library_name:upper_case}_LIBFVALUE_H ) */
 

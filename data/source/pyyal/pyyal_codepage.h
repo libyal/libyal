@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${python_module_name_upper_case}_CODEPAGE_H )
-#define _${python_module_name_upper_case}_CODEPAGE_H
+#if !defined( _${python_module_name:upper_case}_CODEPAGE_H )
+#define _${python_module_name:upper_case}_CODEPAGE_H
 
 #include <common.h>
 #include <types.h>
@@ -38,5 +38,5 @@ const char *${python_module_name}_codepage_to_string(
 }
 #endif
 
-#endif /* !defined( _${python_module_name_upper_case}_CODEPAGE_H */
+#endif /* !defined( _${python_module_name:upper_case}_CODEPAGE_H */
 

@@ -116,7 +116,7 @@ PyObject *${python_module_name}_${type_name}_get_recovered_${value_name}(
  */
 PyObject *${python_module_name}_${type_name}_get_recovered_${sequence_value_name}(
            ${python_module_name}_${type_name}_t *${python_module_name}_${type_name},
-           PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+           PyObject *arguments ${python_module_name:upper_case}_ATTRIBUTE_UNUSED )
 {
 	PyObject *sequence_object            = NULL;
 	libcerror_error_t *error             = NULL;
@@ -124,7 +124,7 @@ PyObject *${python_module_name}_${type_name}_get_recovered_${sequence_value_name
 	int number_of_${sequence_value_name} = 0;
 	int result                           = 0;
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( arguments )
 
 	if( ${python_module_name}_${type_name} == NULL )
 	{

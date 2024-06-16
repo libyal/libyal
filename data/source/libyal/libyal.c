@@ -27,9 +27,9 @@
 
 #include "${library_name}_unused.h"
 
-/* Define HAVE_LOCAL_${library_name_upper_case} for local use of ${library_name}
+/* Define HAVE_LOCAL_${library_name:upper_case} for local use of ${library_name}
  */
-#if !defined( HAVE_LOCAL_${library_name_upper_case} )
+#if !defined( HAVE_LOCAL_${library_name:upper_case} )
 
 #if defined( WINAPI ) && defined( HAVE_DLLMAIN )
 
@@ -44,7 +44,7 @@ BOOL WINAPI DllMain(
              DWORD fdwReason,
              LPVOID lpvReserved )
 {
-	${library_name_upper_case}_UNREFERENCED_PARAMETER( lpvReserved )
+	${library_name:upper_case}_UNREFERENCED_PARAMETER( lpvReserved )
 
 	switch( fdwReason )
 	{
@@ -76,5 +76,5 @@ int ${library_name}_is_dll(
 
 #endif /* defined( WINAPI ) && defined( HAVE_DLLMAIN ) */
 
-#endif /* !defined( HAVE_LOCAL_${library_name_upper_case} ) */
+#endif /* !defined( HAVE_LOCAL_${library_name:upper_case} ) */
 

@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_TYPES_H )
-#define _${library_name_upper_case}_TYPES_H
+#if !defined( _${library_name:upper_case}_TYPES_H )
+#define _${library_name:upper_case}_TYPES_H
 
 #include <${library_name}/features.h>
 
@@ -187,14 +187,14 @@ typedef int64_t off64_t;
  */
 #if !defined( __USE_UNIX98 )
 #define __USE_UNIX98
-#define ${library_name_upper_case}_DEFINITION_UNIX98
+#define ${library_name:upper_case}_DEFINITION_UNIX98
 #endif
 
 #include <wchar.h>
 
-#if defined( ${library_name_upper_case}_DEFINITION_UNIX98 )
+#if defined( ${library_name:upper_case}_DEFINITION_UNIX98 )
 #undef __USE_UNIX98
-#undef ${library_name_upper_case}_DEFINITION_UNIX98
+#undef ${library_name:upper_case}_DEFINITION_UNIX98
 #endif
 
 #endif

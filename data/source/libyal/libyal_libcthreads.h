@@ -19,16 +19,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_LIBCTHREADS_H )
-#define _${library_name_upper_case}_LIBCTHREADS_H
+#if !defined( _${library_name:upper_case}_LIBCTHREADS_H )
+#define _${library_name:upper_case}_LIBCTHREADS_H
 
 #include <common.h>
 
-#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_${library_name_upper_case} )
-#define HAVE_${library_name_upper_case}_MULTI_THREAD_SUPPORT
+#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_${library_name:upper_case} )
+#define HAVE_${library_name:upper_case}_MULTI_THREAD_SUPPORT
 #endif
 
-#if defined( HAVE_${library_name_upper_case}_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_${library_name:upper_case}_MULTI_THREAD_SUPPORT )
 
 /* Define HAVE_LOCAL_LIBCTHREADS for local use of libcthreads
  */
@@ -58,7 +58,7 @@
 
 #endif /* defined( HAVE_LOCAL_LIBCTHREADS ) */
 
-#endif /* defined( HAVE_${library_name_upper_case}_MULTI_THREAD_SUPPORT ) */
+#endif /* defined( HAVE_${library_name:upper_case}_MULTI_THREAD_SUPPORT ) */
 
-#endif /* !defined( _${library_name_upper_case}_LIBCTHREADS_H ) */
+#endif /* !defined( _${library_name:upper_case}_LIBCTHREADS_H ) */
 

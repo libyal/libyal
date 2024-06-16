@@ -1,5 +1,5 @@
-#if !defined( _${python_module_name_upper_case}_H )
-#define _${python_module_name_upper_case}_H
+#if !defined( _${python_module_name:upper_case}_H )
+#define _${python_module_name:upper_case}_H
 
 #include <common.h>
 #include <types.h>

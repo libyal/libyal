@@ -2,14 +2,14 @@
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_get_version(
-           PyObject *self ${python_module_name_upper_case}_ATTRIBUTE_UNUSED,
-           PyObject *arguments ${python_module_name_upper_case}_ATTRIBUTE_UNUSED )
+           PyObject *self ${python_module_name:upper_case}_ATTRIBUTE_UNUSED,
+           PyObject *arguments ${python_module_name:upper_case}_ATTRIBUTE_UNUSED )
 {
 	const char *version_string   = NULL;
 	size_t version_string_length = 0;
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( self )
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( arguments )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( self )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( arguments )
 
 	Py_BEGIN_ALLOW_THREADS
 

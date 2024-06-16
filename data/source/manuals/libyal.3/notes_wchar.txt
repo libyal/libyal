@@ -8,5 +8,5 @@ To compile ${library_name} with wide character support use:
 .Ar UNICODE
  during compilation.
 .sp
-.Ar ${library_name_upper_case}_WIDE_CHARACTER_TYPE
+.Ar ${library_name:upper_case}_WIDE_CHARACTER_TYPE
  in ${library_name}/features.h can be used to determine if ${library_name} was compiled with wide character support.

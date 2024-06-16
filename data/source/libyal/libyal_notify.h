@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_NOTIFY_H )
-#define _${library_name_upper_case}_NOTIFY_H
+#if !defined( _${library_name:upper_case}_NOTIFY_H )
+#define _${library_name:upper_case}_NOTIFY_H
 
 #include <common.h>
 #include <file_stream.h>
@@ -33,31 +33,31 @@
 extern "C" {
 #endif
 
-#if !defined( HAVE_LOCAL_${library_name_upper_case} )
+#if !defined( HAVE_LOCAL_${library_name:upper_case} )
 
-${library_name_upper_case}_EXTERN \
+${library_name:upper_case}_EXTERN \
 void ${library_name}_notify_set_verbose(
       int verbose );
 
-${library_name_upper_case}_EXTERN \
+${library_name:upper_case}_EXTERN \
 int ${library_name}_notify_set_stream(
      FILE *stream,
      libcerror_error_t **error );
 
-${library_name_upper_case}_EXTERN \
+${library_name:upper_case}_EXTERN \
 int ${library_name}_notify_stream_open(
      const char *filename,
      libcerror_error_t **error );
 
-${library_name_upper_case}_EXTERN \
+${library_name:upper_case}_EXTERN \
 int ${library_name}_notify_stream_close(
      libcerror_error_t **error );
 
-#endif /* !defined( HAVE_LOCAL_${library_name_upper_case} ) */
+#endif /* !defined( HAVE_LOCAL_${library_name:upper_case} ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_NOTIFY_H ) */
+#endif /* !defined( _${library_name:upper_case}_NOTIFY_H ) */
 

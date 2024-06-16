@@ -2,7 +2,7 @@
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_glob(
-           PyObject *self ${python_module_name_upper_case}_ATTRIBUTE_UNUSED,
+           PyObject *self ${python_module_name:upper_case}_ATTRIBUTE_UNUSED,
            PyObject *arguments,
            PyObject *keywords )
 {
@@ -26,7 +26,7 @@ PyObject *${python_module_name}_glob(
 	PyObject *utf8_string_object     = NULL;
 #endif
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( self )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( self )
 
 	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
 	 * On Windows the narrow character strings contains an extended ASCII string with a codepage. Hence we get a conversion
@@ -78,7 +78,7 @@ PyObject *${python_module_name}_glob(
 		result = ${library_name}_glob_wide(
 			  filename_wide,
 			  filename_length,
-			  ${library_name_upper_case}_FORMAT_UNKNOWN,
+			  ${library_name:upper_case}_FORMAT_UNKNOWN,
 			  &filenames_wide,
 			  &number_of_filenames,
 			  &error );
@@ -117,7 +117,7 @@ PyObject *${python_module_name}_glob(
 		result = ${library_name}_glob(
 			  filename_narrow,
 			  filename_length,
-			  ${library_name_upper_case}_FORMAT_UNKNOWN,
+			  ${library_name:upper_case}_FORMAT_UNKNOWN,
 			  &filenames_narrow,
 			  &number_of_filenames,
 			  &error );
@@ -262,7 +262,7 @@ PyObject *${python_module_name}_glob(
 		result = ${library_name}_glob(
 			  filename_narrow,
 			  filename_length,
-			  ${library_name_upper_case}_FORMAT_UNKNOWN,
+			  ${library_name:upper_case}_FORMAT_UNKNOWN,
 			  &filenames_narrow,
 			  &number_of_filenames,
 			  &error );

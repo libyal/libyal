@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${python_module_name_upper_case}_FILE_OBJECTS_IO_POOL_H )
-#define _${python_module_name_upper_case}_FILE_OBJECTS_IO_POOL_H
+#if !defined( _${python_module_name:upper_case}_FILE_OBJECTS_IO_POOL_H )
+#define _${python_module_name:upper_case}_FILE_OBJECTS_IO_POOL_H
 
 #include <common.h>
 #include <types.h>
@@ -43,5 +43,5 @@ int ${python_module_name}_file_objects_pool_initialize(
 }
 #endif
 
-#endif /* !defined( _${python_module_name_upper_case}_FILE_OBJECTS_IO_POOL_H ) */
+#endif /* !defined( _${python_module_name:upper_case}_FILE_OBJECTS_IO_POOL_H ) */
 

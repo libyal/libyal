@@ -2,5 +2,5 @@
 }
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_TYPES_H ) */
+#endif /* !defined( _${library_name:upper_case}_TYPES_H ) */
 

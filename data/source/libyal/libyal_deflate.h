@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_DEFLATE_COMPRESSION_H )
-#define _${library_name_upper_case}_DEFLATE_COMPRESSION_H
+#if !defined( _${library_name:upper_case}_DEFLATE_COMPRESSION_H )
+#define _${library_name:upper_case}_DEFLATE_COMPRESSION_H
 
 #include <common.h>
 #include <types.h>
@@ -35,12 +35,12 @@ extern "C" {
 
 /* The block types
  */
-enum ${library_name_upper_case}_DEFLATE_BLOCK_TYPES
+enum ${library_name:upper_case}_DEFLATE_BLOCK_TYPES
 {
-	${library_name_upper_case}_DEFLATE_BLOCK_TYPE_UNCOMPRESSED	= 0x00,
-	${library_name_upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED	= 0x01,
-	${library_name_upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_DYNAMIC	= 0x02,
-	${library_name_upper_case}_DEFLATE_BLOCK_TYPE_RESERVED		= 0x03
+	${library_name:upper_case}_DEFLATE_BLOCK_TYPE_UNCOMPRESSED	= 0x00,
+	${library_name:upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_FIXED	= 0x01,
+	${library_name:upper_case}_DEFLATE_BLOCK_TYPE_HUFFMAN_DYNAMIC	= 0x02,
+	${library_name:upper_case}_DEFLATE_BLOCK_TYPE_RESERVED		= 0x03
 };
 
 int ${library_name}_deflate_build_dynamic_huffman_trees(
@@ -110,5 +110,5 @@ int ${library_name}_deflate_decompress_zlib(
 }
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_DEFLATE_COMPRESSION_H ) */
+#endif /* !defined( _${library_name:upper_case}_DEFLATE_COMPRESSION_H ) */
 

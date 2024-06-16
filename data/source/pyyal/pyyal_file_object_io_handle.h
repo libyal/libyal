@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${python_module_name_upper_case}_FILE_OBJECT_IO_HANDLE_H )
-#define _${python_module_name_upper_case}_FILE_OBJECT_IO_HANDLE_H
+#if !defined( _${python_module_name:upper_case}_FILE_OBJECT_IO_HANDLE_H )
+#define _${python_module_name:upper_case}_FILE_OBJECT_IO_HANDLE_H
 
 #include <common.h>
 #include <types.h>
@@ -137,5 +137,5 @@ int ${python_module_name}_file_object_io_handle_get_size(
 }
 #endif
 
-#endif /* !defined( _${python_module_name_upper_case}_FILE_OBJECT_IO_HANDLE_H ) */
+#endif /* !defined( _${python_module_name:upper_case}_FILE_OBJECT_IO_HANDLE_H ) */
 

@@ -19,12 +19,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_suffix:upper_case}_TEST_${library_name_upper_case}_H )
-#define _${library_name_suffix:upper_case}_TEST_${library_name_upper_case}_H
+#if !defined( _${library_name_suffix:upper_case}_TEST_${library_name:upper_case}_H )
+#define _${library_name_suffix:upper_case}_TEST_${library_name:upper_case}_H
 
 #include <common.h>
 
 #include <${library_name}.h>
 
-#endif /* !defined( _${library_name_suffix:upper_case}_TEST_${library_name_upper_case}_H ) */
+#endif /* !defined( _${library_name_suffix:upper_case}_TEST_${library_name:upper_case}_H ) */
 

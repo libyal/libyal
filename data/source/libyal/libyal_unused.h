@@ -19,26 +19,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_UNUSED_H )
-#define _${library_name_upper_case}_UNUSED_H
+#if !defined( _${library_name:upper_case}_UNUSED_H )
+#define _${library_name:upper_case}_UNUSED_H
 
 #include <common.h>
 
-#if !defined( ${library_name_upper_case}_ATTRIBUTE_UNUSED )
+#if !defined( ${library_name:upper_case}_ATTRIBUTE_UNUSED )
 #if defined( __GNUC__ ) && __GNUC__ >= 3
-#define ${library_name_upper_case}_ATTRIBUTE_UNUSED	__attribute__ ((__unused__))
+#define ${library_name:upper_case}_ATTRIBUTE_UNUSED	__attribute__ ((__unused__))
 #else
-#define ${library_name_upper_case}_ATTRIBUTE_UNUSED
+#define ${library_name:upper_case}_ATTRIBUTE_UNUSED
 #endif
 #endif
 
 #if defined( _MSC_VER )
-#define ${library_name_upper_case}_UNREFERENCED_PARAMETER( parameter ) \
+#define ${library_name:upper_case}_UNREFERENCED_PARAMETER( parameter ) \
 	UNREFERENCED_PARAMETER( parameter );
 #else
-#define ${library_name_upper_case}_UNREFERENCED_PARAMETER( parameter ) \
+#define ${library_name:upper_case}_UNREFERENCED_PARAMETER( parameter ) \
 	/* parameter */
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_UNUSED_H ) */
+#endif /* !defined( _${library_name:upper_case}_UNUSED_H ) */
 

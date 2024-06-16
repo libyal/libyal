@@ -19,17 +19,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_INTERNAL_TYPES_H )
-#define _${library_name_upper_case}_INTERNAL_TYPES_H
+#if !defined( _${library_name:upper_case}_INTERNAL_TYPES_H )
+#define _${library_name:upper_case}_INTERNAL_TYPES_H
 
 #include <common.h>
 #include <types.h>
 
-/* Define HAVE_LOCAL_${library_name_upper_case} for local use of ${library_name}
+/* Define HAVE_LOCAL_${library_name:upper_case} for local use of ${library_name}
  * The definitions in <${library_name}/types.h> are copied here
  * for local use of ${library_name}
  */
-#if defined( HAVE_LOCAL_${library_name_upper_case} )
+#if defined( HAVE_LOCAL_${library_name:upper_case} )
 
 /* The following type definitions hide internal data structures
  */
@@ -41,4 +41,4 @@ ${library_type_definitions}
 
 #endif /* defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI ) */
 
-#endif /* defined( HAVE_LOCAL_${library_name_upper_case} ) */
+#endif /* defined( HAVE_LOCAL_${library_name:upper_case} ) */

@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _${library_name_upper_case}_I18N_H )
-#define _${library_name_upper_case}_I18N_H
+#if !defined( _${library_name:upper_case}_I18N_H )
+#define _${library_name:upper_case}_I18N_H
 
 #include <common.h>
 #include <types.h>
@@ -51,5 +51,5 @@ int ${library_name}_i18n_initialize(
 }
 #endif
 
-#endif /* !defined( _${library_name_upper_case}_I18N_H ) */
+#endif /* !defined( _${library_name:upper_case}_I18N_H ) */
 

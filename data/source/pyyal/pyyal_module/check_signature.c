@@ -2,7 +2,7 @@
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_check_${signature_type}_signature(
-           PyObject *self ${python_module_name_upper_case}_ATTRIBUTE_UNUSED,
+           PyObject *self ${python_module_name:upper_case}_ATTRIBUTE_UNUSED,
            PyObject *arguments,
            PyObject *keywords )
 {
@@ -19,7 +19,7 @@ PyObject *${python_module_name}_check_${signature_type}_signature(
 	PyObject *utf8_string_object = NULL;
 #endif
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( self )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( self )
 
 	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
 	 * On Windows the narrow character strings contains an extended ASCII string with a codepage. Hence we get a conversion
@@ -209,7 +209,7 @@ PyObject *${python_module_name}_check_${signature_type}_signature(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *${python_module_name}_check_${signature_type}_signature_file_object(
-           PyObject *self ${python_module_name_upper_case}_ATTRIBUTE_UNUSED,
+           PyObject *self ${python_module_name:upper_case}_ATTRIBUTE_UNUSED,
            PyObject *arguments,
            PyObject *keywords )
 {
@@ -220,7 +220,7 @@ PyObject *${python_module_name}_check_${signature_type}_signature_file_object(
 	static char *keyword_list[]      = { "file_object", NULL };
 	int result                       = 0;
 
-	${python_module_name_upper_case}_UNREFERENCED_PARAMETER( self )
+	${python_module_name:upper_case}_UNREFERENCED_PARAMETER( self )
 
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
