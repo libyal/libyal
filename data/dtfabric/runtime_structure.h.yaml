@@ -38,6 +38,7 @@ options:
 - value: fixed_size_string
   operation: generate_functions_get_fixed_size_string
 # TODO: add support for filetime
+# TODO: rename int8_t, etc to integer
 - value: int8_t
   operation: generate_structure_get_data_type
 - value: int16_t
@@ -118,7 +119,7 @@ file: runtime_structure.h/structure-end.h
 identifier: generate_structure_member
 type: selection
 input: structure_member.data_type
-default: generate_structure_member_placeholder
+default: generate_structure_member_unsupported
 options:
 - value: filetime
   operation: generate_structure_member_filetime
@@ -169,12 +170,6 @@ file: runtime_structure.h/structure_member-fixed_size_string.h
 placeholders:
 - structure_member
 ---
-identifier: generate_structure_member_placeholder
-type: template
-file: runtime_structure.h/structure_member-placeholder.h
-placeholders:
-- structure_member
----
 identifier: generate_structure_member_posix_time
 type: template
 file: runtime_structure.h/structure_member-posix_time.h
@@ -184,6 +179,12 @@ placeholders:
 identifier: generate_structure_member_string
 type: template
 file: runtime_structure.h/structure_member-string.h
+placeholders:
+- structure_member
+---
+identifier: generate_structure_member_unsupported
+type: template
+file: runtime_structure.h/structure_member-unsupported.h
 placeholders:
 - structure_member
 ---

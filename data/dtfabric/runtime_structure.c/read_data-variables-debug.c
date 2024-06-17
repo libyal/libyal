@@ -1,4 +1,4 @@
 #if defined( HAVE_DEBUG_OUTPUT )
-${debug_variables}
+${read_data_debug_variables}
 #endif
 

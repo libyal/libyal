@@ -250,8 +250,15 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     template_mappings['has_uuid_member'] = has_uuid_member
 
     # Indentation needs to account for "*name = ".
-    template_mappings['memory_allocate_indentation'] = ' ' * (
+    template_mappings['initialize_memory_allocate_indentation'] = ' ' * (
         len(data_type_definition.name) + 4)
+
+    template_mappings['read_data_debug_variables'] = (
+        self._GetRuntimeStructureSourceFunctionReadDataDebugVariables(
+            data_type_definition, members_configuration))
+    template_mappings['read_data_variables'] = (
+        self._GetRuntimeStructureSourceFunctionReadDataVariables(
+            data_type_definition, members_configuration))
 
     template_mappings['structure_description'] = structure_description
     template_mappings['structure_description_title'] = (
@@ -267,35 +274,89 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     del template_mappings['has_string_member']
     del template_mappings['has_uuid_member']
 
-    del template_mappings['memory_allocate_indentation']
+    del template_mappings['initialize_memory_allocate_indentation']
+
+    del template_mappings['read_data_debug_variables']
+    del template_mappings['read_data_variables']
 
     del template_mappings['structure_description']
     del template_mappings['structure_description_title']
     del template_mappings['structure_options']
 
-    if data_type_definition.TYPE_INDICATOR == (
-        definitions.TYPE_INDICATOR_STRUCTURE_FAMILY):
-      structure_definition = data_type_definition.runtime
-    else:
-      structure_definition = data_type_definition
+    # TODO: refactor
 
-    template_mappings['structure_description'] = structure_description
+    structure_members = []
 
-    self._GenerateRuntimeStructureSourceFunctionReadDataVariables(
-        data_type_definition, data_type_definition.name, members_configuration,
-        output_filename)
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
 
-    self._GenerateRuntimeStructureSourceFunctionReadDataDebugVariables(
-        data_type_definition, data_type_definition.name, members_configuration,
-        output_filename)
+      # data_type = getattr(member_definition, 'member_data_type', None)
+      data_type_size = member_definition.GetByteSize()
 
-    template_filename = os.path.join(
-        template_directory, 'read_data-check_arguments.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
 
-    self._GenerateRuntimeStructureSourceFunctionReadDataCheckSignature(
-        data_type_definition, data_type_definition.name, output_filename)
+      supported_values = getattr(member_definition, 'values', None)
+      if not supported_values:
+        continue
+
+      type_indicator = member_data_type_definition.TYPE_INDICATOR
+      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+        data_type_size = member_definition.GetByteSize()
+
+        template_mappings['bit_size'] = data_type_size * 8
+        member_value = supported_values[0]
+        member_value_size = None
+
+      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
+        member_value = supported_values[0].decode('ascii')
+        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
+        member_value_size = len(supported_values[0])
+
+      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
+        member_value = supported_values[0].decode('ascii')
+        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
+        member_value_size = 16
+
+      if member_definition.description:
+        description = member_definition.description
+      else:
+        description = member_name.replace('_', ' ')
+
+      structure_member = TemplateRuntimeStructureMember()
+      structure_member.description = ''.join([
+          description[0].lower(), description[1:]])
+      structure_member.name = member_name
+      structure_member.type_indicator = type_indicator
+      structure_member.value = member_value
+      structure_member.value_size = member_value_size
+
+      structure_members.append(structure_member)
+
+    for structure_member in structure_members:
+      type_indicator = structure_member.type_indicator
+      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+        template_filename = 'read_data-check_signature-integer.c'
+
+      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
+        # TODO: make sure to escape all bytes in supported_values[0]
+        # things like \x00F can cause issues.
+        template_filename = 'read_data-check_signature-stream.c'
+
+      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
+        template_filename = 'read_data-check_signature-stream.c'
+
+      else:
+        template_filename = 'read_data-check_signature-unsupported.c'
+
+      template_mappings['structure_member'] = structure_member
+
+      template_filename = os.path.join(template_directory, template_filename)
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
+
+      del template_mappings['structure_member']
 
     self._GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
         data_type_definition, data_type_definition.name, members_configuration,
@@ -333,133 +394,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     self._SortIncludeHeaders(output_filename)
     self._SortVariableDeclarations(output_filename)
     self._VerticalAlignAssignmentStatements(output_filename)
-
-  def _GenerateRuntimeStructureSourceFunctionReadDataDebugVariables(
-      self, data_type_definition, data_type_definition_name,
-      members_configuration, output_filename):
-    """Generates the debug variables part of a read_data function.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
-      data_type_definition_name (str): name of the structure data type
-          definition.
-      members_configuration (dict[dict[str: str]]): code generation
-          configuration of the structure members.
-      output_filename (str): name of the output file.
-    """
-    debug_variables = set()
-    for member_definition in data_type_definition.members:
-      member_name = member_definition.name
-      member_usage = members_configuration.get(member_name, {}).get(
-          'usage', self._USAGE_DEBUG)
-      if member_usage != self._USAGE_DEBUG:
-        continue
-
-      data_type_size = member_definition.GetByteSize()
-
-      member_data_type_definition = getattr(
-          member_definition, 'member_data_type_definition', member_definition)
-
-      type_indicator = member_data_type_definition.TYPE_INDICATOR
-      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
-        data_bit_size = data_type_size * 8
-        debug_variables.add(
-            f'\tuint{data_bit_size:d}_t value_{data_bit_size:d}bit = 0;')
-
-      elif type_indicator == definitions.TYPE_INDICATOR_PADDING:
-        debug_variables.add(f'\tconst uint8_t *{member_name:s} = NULL;')
-        debug_variables.add(f'\tsize_t {member_name:s}_size = 0;')
-
-    if not debug_variables:
-      return
-
-    debug_variables = sorted(debug_variables)
-
-    template_mappings = self._GetTemplateMappings(
-        structure_name=data_type_definition_name)
-
-    template_mappings['debug_variables'] = '\n'.join(debug_variables)
-
-    template_filename = os.path.join(
-        self._templates_path, 'runtime_structure.c',
-        'read_data-debug_variables.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    del template_mappings['debug_variables']
-
-  def _GenerateRuntimeStructureSourceFunctionReadDataCheckSignature(
-      self, data_type_definition, data_type_definition_name, output_filename):
-    """Generates the check signature part of a read_data function.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
-      data_type_definition_name (str): name of the structure data type
-          definition.
-      output_filename (str): name of the output file.
-    """
-    template_directory = os.path.join(
-        self._templates_path, 'runtime_structure.c')
-
-    template_mappings = self._GetTemplateMappings(
-        structure_name=data_type_definition_name)
-
-    for member_definition in data_type_definition.members:
-      member_name = member_definition.name
-
-      # data_type = getattr(member_definition, 'member_data_type', None)
-      data_type_size = member_definition.GetByteSize()
-
-      member_data_type_definition = getattr(
-          member_definition, 'member_data_type_definition', member_definition)
-
-      supported_values = getattr(member_definition, 'values', None)
-      if not supported_values:
-        continue
-
-      type_indicator = member_data_type_definition.TYPE_INDICATOR
-      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
-        data_type_size = member_definition.GetByteSize()
-
-        template_filename = 'read_data-check_signature-integer.c'
-
-        template_mappings['bit_size'] = data_type_size * 8
-        template_mappings['member_value'] = supported_values[0]
-
-      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
-        # TODO: make sure to escape all bytes in supported_values[0]
-        # things like \x00F can cause issues.
-        template_filename = 'read_data-check_signature-stream.c'
-
-        member_value = supported_values[0].decode('ascii')
-        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
-        template_mappings['member_value'] = member_value
-        template_mappings['member_value_size'] = len(supported_values[0])
-
-      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
-        template_filename = 'read_data-check_signature-stream.c'
-
-        member_value = supported_values[0].decode('ascii')
-        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
-        template_mappings['member_value'] = member_value
-        template_mappings['member_value_size'] = 16
-
-      else:
-        template_filename = 'read_data-check_signature-unsupported.c'
-
-      if member_definition.description:
-        description = member_definition.description
-      else:
-        description = member_name.replace('_', ' ')
-
-      template_mappings['member_name'] = member_name
-      template_mappings['member_name_description'] = ''.join([
-          description[0].lower(), description[1:]])
-
-      template_filename = os.path.join(template_directory, template_filename)
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
 
   def _GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
       self, data_type_definition, data_type_definition_name,
@@ -722,82 +656,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
           template_filename, template_mappings, output_filename,
           access_mode='a')
 
-  def _GenerateRuntimeStructureSourceFunctionReadDataVariables(
-      self, data_type_definition, data_type_definition_name,
-      members_configuration, output_filename):
-    """Generates the variables part of a read_data function.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
-      data_type_definition_name (str): name of the structure data type
-          definition.
-      members_configuration (dict[dict[str: str]]): code generation
-          configuration of the structure members.
-      output_filename (str): name of the output file.
-    """
-    template_directory = os.path.join(
-        self._templates_path, 'runtime_structure.c')
-
-    variables = set()
-    for member_definition in data_type_definition.members:
-      member_name = member_definition.name
-      member_usage = members_configuration.get(member_name, {}).get(
-          'usage', self._USAGE_DEBUG)
-
-      member_data_type_definition = getattr(
-          member_definition, 'member_data_type_definition', member_definition)
-
-      type_indicator = member_data_type_definition.TYPE_INDICATOR
-      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
-        if member_usage == self._USAGE_IN_FUNCTION:
-          data_type_size = member_definition.GetByteSize()
-          variable = '\tuint{0:d}_t {1:s} = 0;'.format(
-              data_type_size * 8, member_name)
-          variables.add(variable)
-
-      # TODO: add support for padding type?
-
-      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
-        if member_usage in (self._USAGE_IN_FUNCTION, self._USAGE_IN_STRUCT):
-          variable = '\tsize_t data_offset = 0;'
-          variables.add(variable)
-
-        if member_usage == self._USAGE_IN_FUNCTION:
-          variable = '\tconst uint8_t *{0:s} = NULL;'.format(member_name)
-          variables.add(variable)
-
-      elif type_indicator == definitions.TYPE_INDICATOR_STRING:
-        elements_terminator = getattr(
-            member_data_type_definition, 'elements_terminator', None)
-        if elements_terminator is not None:
-          if member_usage in (self._USAGE_IN_FUNCTION, self._USAGE_IN_STRUCT):
-            variable = '\tsize_t data_offset = 0;'
-            variables.add(variable)
-
-            variable = '\tconst uint8_t *{0:s} = NULL;'.format(member_name)
-            variables.add(variable)
-
-            variable = '\tsize_t {0:s}_size = 0;'.format(member_name)
-            variables.add(variable)
-
-    variables = sorted(variables)
-    variables.append('')
-
-    template_mappings = self._GetTemplateMappings(
-        library_name=f'lib{self._prefix:s}',
-        structure_name=data_type_definition_name)
-
-    structure_description = self._GetStructureDescription(data_type_definition)
-    template_mappings['structure_description'] = structure_description
-
-    template_mappings['variables'] = '\n'.join(variables)
-
-    template_filename = os.path.join(template_directory, 'read_data-start.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    del template_mappings['variables']
-
   def _GenerateRuntimeStructureTestSourceFile(
       self, project_configuration, data_type_definition, members_configuration):
     """Generates a runtime structure test source file.
@@ -916,6 +774,56 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
     self._SortIncludeHeaders(output_filename)
 
+  def _GetFormatDefinitions(self):
+    """Retrieves the format definition.
+
+    Returns:
+      FormatDefinition: format definition.
+
+    Raises:
+      RuntimeError: if the format definition is mission or more than 1
+          format definition is defined.
+    """
+    # pylint: disable=protected-access
+
+    if not self._definitions_registry._format_definitions:
+      raise RuntimeError('Missing format definition.')
+
+    if len(self._definitions_registry._format_definitions) > 1:
+      raise RuntimeError('Unsupported multiple format definitions.')
+
+    return self._definitions_registry.GetDefinitionByName(
+        self._definitions_registry._format_definitions[0])
+
+  def _GetRuntimeDataType(self, data_type_definition):
+    """Retrieves a runtime data type.
+
+    Args:
+      data_type_definition (DataTypeDefinition): data type definition.
+
+    Returns:
+      str: runtime data type or None if not available.
+    """
+    type_indicator = data_type_definition.TYPE_INDICATOR
+
+    if type_indicator == definitions.TYPE_INDICATOR_CHARACTER:
+      return self._CHARACTER_DATA_TYPES.get(data_type_definition.size, None)
+
+    if type_indicator == definitions.TYPE_INDICATOR_FLOATING_POINT:
+      return self._FLOATING_POINT_DATA_TYPES.get(
+          data_type_definition.size, None)
+
+    if type_indicator in (definitions.TYPE_INDICATOR_BOOLEAN,
+                          definitions.TYPE_INDICATOR_INTEGER):
+      if data_type_definition.format == definitions.FORMAT_SIGNED:
+        return self._SIGNED_INTEGER_DATA_TYPES.get(
+            data_type_definition.size, None)
+
+      return self._UNSIGNED_INTEGER_DATA_TYPES.get(
+          data_type_definition.size, None)
+
+    return None
+
   def _GetRuntimePrintfFormatIndicator(
       self, data_type_definition, debug_format):
     """Retrieves a runtime printf format indicator.
@@ -958,26 +866,103 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
     return format_indicator
 
-  def _GetFormatDefinitions(self):
-    """Retrieves the format definition.
+  def _GetRuntimeStructureSourceFunctionReadDataDebugVariables(
+      self, data_type_definition, members_configuration):
+    """Retrieves the debug variables part of a read_data function.
+
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
 
     Returns:
-      FormatDefinition: format definition.
-
-    Raises:
-      RuntimeError: if the format definition is mission or more than 1
-          format definition is defined.
+      str: debug variables part of a read_data function.
     """
-    # pylint: disable=protected-access
+    debug_variables = set()
 
-    if not self._definitions_registry._format_definitions:
-      raise RuntimeError('Missing format definition.')
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+      member_usage = members_configuration.get(member_name, {}).get(
+          'usage', self._USAGE_DEBUG)
+      if member_usage != self._USAGE_DEBUG:
+        continue
 
-    if len(self._definitions_registry._format_definitions) > 1:
-      raise RuntimeError('Unsupported multiple format definitions.')
+      data_type_size = member_definition.GetByteSize()
 
-    return self._definitions_registry.GetDefinitionByName(
-        self._definitions_registry._format_definitions[0])
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
+
+      type_indicator = member_data_type_definition.TYPE_INDICATOR
+      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+        data_bit_size = data_type_size * 8
+        debug_variables.add(
+            f'\tuint{data_bit_size:d}_t value_{data_bit_size:d}bit = 0;')
+
+      elif type_indicator == definitions.TYPE_INDICATOR_PADDING:
+        debug_variables.add(f'\tconst uint8_t *{member_name:s} = NULL;')
+        debug_variables.add(f'\tsize_t {member_name:s}_size = 0;')
+
+    return '\n'.join(sorted(debug_variables))
+
+  def _GetRuntimeStructureSourceFunctionReadDataVariables(
+      self, data_type_definition, members_configuration):
+    """Retrieves the variables part of a read_data function.
+
+    Args:
+      data_type_definition (DataTypeDefinition): structure data type definition.
+      members_configuration (dict[dict[str: str]]): code generation
+          configuration of the structure members.
+
+    Returns:
+      str: variables part of a read_data function.
+    """
+    variables = set()
+
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+      member_usage = members_configuration.get(member_name, {}).get(
+          'usage', self._USAGE_DEBUG)
+
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
+
+      type_indicator = member_data_type_definition.TYPE_INDICATOR
+      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+        if member_usage == self._USAGE_IN_FUNCTION:
+          data_type_size = member_definition.GetByteSize()
+          variable = '\tuint{0:d}_t {1:s} = 0;'.format(
+              data_type_size * 8, member_name)
+          variables.add(variable)
+
+      # TODO: add support for padding type?
+
+      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
+        if member_usage in (self._USAGE_IN_FUNCTION, self._USAGE_IN_STRUCT):
+          variable = '\tsize_t data_offset = 0;'
+          variables.add(variable)
+
+        if member_usage == self._USAGE_IN_FUNCTION:
+          variable = '\tconst uint8_t *{0:s} = NULL;'.format(member_name)
+          variables.add(variable)
+
+      elif type_indicator == definitions.TYPE_INDICATOR_STRING:
+        elements_terminator = getattr(
+            member_data_type_definition, 'elements_terminator', None)
+        if elements_terminator is not None:
+          if member_usage in (self._USAGE_IN_FUNCTION, self._USAGE_IN_STRUCT):
+            variable = '\tsize_t data_offset = 0;'
+            variables.add(variable)
+
+            variable = '\tconst uint8_t *{0:s} = NULL;'.format(member_name)
+            variables.add(variable)
+
+            variable = '\tsize_t {0:s}_size = 0;'.format(member_name)
+            variables.add(variable)
+
+    variables = list(sorted(variables))
+    variables.append('')
+
+    return '\n'.join(variables)
 
   def _GetStoredStructureHeaderMembers(
       self, data_type_definition, members_configuration):
@@ -1060,35 +1045,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       structure_description = data_type_definition.name
 
     return structure_description.lower()
-
-  def _GetRuntimeDataType(self, data_type_definition):
-    """Retrieves a runtime data type.
-
-    Args:
-      data_type_definition (DataTypeDefinition): data type definition.
-
-    Returns:
-      str: runtime data type or None if not available.
-    """
-    type_indicator = data_type_definition.TYPE_INDICATOR
-
-    if type_indicator == definitions.TYPE_INDICATOR_CHARACTER:
-      return self._CHARACTER_DATA_TYPES.get(data_type_definition.size, None)
-
-    if type_indicator == definitions.TYPE_INDICATOR_FLOATING_POINT:
-      return self._FLOATING_POINT_DATA_TYPES.get(
-          data_type_definition.size, None)
-
-    if type_indicator in (definitions.TYPE_INDICATOR_BOOLEAN,
-                          definitions.TYPE_INDICATOR_INTEGER):
-      if data_type_definition.format == definitions.FORMAT_SIGNED:
-        return self._SIGNED_INTEGER_DATA_TYPES.get(
-            data_type_definition.size, None)
-
-      return self._UNSIGNED_INTEGER_DATA_TYPES.get(
-          data_type_definition.size, None)
-
-    return None
 
   def _GetTemplateMappings(self, library_name=None, structure_name=None):
     """Retrieves the template mappings.
@@ -1175,6 +1131,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
       if member_data_type_definition.name == 'filetime':
         member_data_type = 'filetime'
+
       elif member_data_type_definition.name == 'posix_time':
         member_data_type = 'posix_time'
 

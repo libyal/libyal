@@ -12,8 +12,8 @@ identifier: generate_functions_initialize
 type: template
 file: runtime_structure.c/initialize.c
 placeholders:
+- initialize_memory_allocate_indentation
 - library_name
-- memory_allocate_indentation
 - structure_description
 - structure_name
 ---
@@ -22,6 +22,15 @@ type: group
 operations:
 - generate_functions_read_data_start
 - generate_functions_read_data_variables
+- generate_functions_read_data_check_arguments
+---
+identifier: generate_functions_read_data_check_arguments
+type: template
+file: runtime_structure.c/read_data-check_arguments.c
+placeholders:
+- prefix
+- structure_description
+- structure_name
 ---
 identifier: generate_functions_read_data_start
 type: template
@@ -31,15 +40,30 @@ placeholders:
 - structure_description
 - structure_name
 ---
-# TODO: change to sequence
 identifier: generate_functions_read_data_variables
+type: group
+operations:
+- generate_functions_read_data_variables_common
+- generate_functions_read_data_variables_debug
+# TODO: add modifier to vertical align variables
+---
+# TODO: change to sequence
+identifier: generate_functions_read_data_variables_common
 type: template
-file: runtime_structure.c/read_data-variables.c
+file: runtime_structure.c/read_data-variables-common.c
 placeholders:
 - library_name
+- read_data_variables
 - structure_name
-- variables
-# TODO: add modifier to vertical align variables
+---
+# TODO: change to sequence
+identifier: generate_functions_read_data_variables_debug
+type: template
+file: runtime_structure.c/read_data-variables-debug.c
+placeholders:
+- library_name
+- read_data_debug_variables
+- structure_name
 ---
 identifier: generate_header
 type: template
@@ -117,6 +141,6 @@ operations:
 - generate_includes_stored_structure
 - generate_functions_initialize
 - generate_functions_free
-# - generate_functions_read_data
+- generate_functions_read_data
 # - generate_functions_read_file_io_handle
 # - generate_functions_getters

@@ -1,2 +1,2 @@
-	/* TODO: check signature ${member_name} */
+	/* TODO: check signature ${structure_member.name} */
 
