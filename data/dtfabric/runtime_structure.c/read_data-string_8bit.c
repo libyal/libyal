@@ -1,9 +1,9 @@
-	${member_name}      = &( data[ data_offset ] );
-	${member_name}_size = 0;
+	${structure_member.name}      = &( data[ data_offset ] );
+	${structure_member.name}_size = 0;
 
 	while( data_offset < data_size )
 	{
-		${member_name}_size += 1;
+		${structure_member.name}_size += 1;
 
 		if( data[ data_offset ] == 0 )
 		{

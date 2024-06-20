@@ -1,4 +1,4 @@
-	byte_stream_copy_to_uint${bit_size}_little_endian(
+	byte_stream_copy_to_uint${structure_member.value_size}_little_endian(
 	 ( (${prefix}_${structure_name}_t *) data )->${structure_member.name},
 	 ${structure_member.name} );
 
@@ -8,7 +8,7 @@
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported ${structure_member.description}: %" PRIu${bit_size} ".",
+		 "%s: unsupported ${structure_member.description}: %" PRIu${structure_member.value_size} ".",
 		 function,
 		 ${structure_member.name} );
 

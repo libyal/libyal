@@ -1,4 +1,4 @@
-	byte_stream_copy_to_${data_type}_${byte_order}(
-	 ( (${prefix}_${structure_name}_t *) data )->${member_name},
-	 ${structure_name}->${member_name} );
+	byte_stream_copy_to_${structure_member.data_type}_${structure_member.byte_order}(
+	 ( (${prefix}_${structure_name}_t *) data )->${structure_member.name},
+	 ${structure_name}->${structure_member.name} );
 

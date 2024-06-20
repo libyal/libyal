@@ -23,6 +23,7 @@ operations:
 - generate_functions_read_data_start
 - generate_functions_read_data_variables
 - generate_functions_read_data_check_arguments
+- generate_functions_read_data_check_signature
 ---
 identifier: generate_functions_read_data_check_arguments
 type: template
@@ -31,6 +32,50 @@ placeholders:
 - prefix
 - structure_description
 - structure_name
+---
+identifier: generate_functions_read_data_check_signature
+type: sequence
+condition: "check_signature_structure_members != []"
+input: check_signature_structure_members
+placeholder: structure_member
+operations:
+- generate_functions_read_data_check_signature_function
+---
+identifier: generate_functions_read_data_check_signature_function
+type: selection
+input: structure_member.value_type
+default: generate_functions_read_data_check_signature_unsupported
+options:
+- value: integer
+  operation: generate_functions_read_data_check_signature_integer
+- value: stream
+  operation: generate_functions_read_data_check_signature_stream
+- value: stream_fixed_size
+  operation: generate_functions_read_data_check_signature_stream
+- value: uuid
+  operation: generate_functions_read_data_check_signature_stream
+---
+identifier: generate_functions_read_data_check_signature_integer
+type: template
+file: runtime_structure.c/read_data-check_signature-integer.c
+placeholders:
+- prefix
+- structure_member
+- structure_name
+---
+identifier: generate_functions_read_data_check_signature_stream
+type: template
+file: runtime_structure.c/read_data-check_signature-stream.c
+placeholders:
+- prefix
+- structure_member
+- structure_name
+---
+identifier: generate_functions_read_data_check_signature_unsupported
+type: template
+file: runtime_structure.c/read_data-check_signature-unsupported.c
+placeholders:
+- structure_member
 ---
 identifier: generate_functions_read_data_start
 type: template

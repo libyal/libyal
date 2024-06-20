@@ -33,30 +33,18 @@ placeholders:
 ---
 identifier: generate_functions_getter
 type: selection
-input: structure_member.data_type
+input: structure_member.value_type
 options:
-- value: fixed_size_string
-  operation: generate_functions_get_fixed_size_string
 # TODO: add support for filetime
-# TODO: rename int8_t, etc to integer
-- value: int8_t
-  operation: generate_structure_get_data_type
-- value: int16_t
-  operation: generate_structure_get_data_type
-- value: int32_t
-  operation: generate_structure_get_data_type
-- value: int64_t
+- value: integer
   operation: generate_structure_get_data_type
 # TODO: add support for posix_time
+# TODO: add support for stream
+- value: stream_fixed_size
+  operation: generate_functions_get_fixed_size_string
 # TODO: add support for string
-- value: uint8_t
-  operation: generate_structure_get_data_type
-- value: uint16_t
-  operation: generate_structure_get_data_type
-- value: uint32_t
-  operation: generate_structure_get_data_type
-- value: uint64_t
-  operation: generate_structure_get_data_type
+- value: string_fixed_size
+  operation: generate_functions_get_fixed_size_string
 # TODO: add support for uuid
 ---
 identifier: generate_functions_getters
@@ -118,33 +106,23 @@ file: runtime_structure.h/structure-end.h
 ---
 identifier: generate_structure_member
 type: selection
-input: structure_member.data_type
+input: structure_member.value_type
 default: generate_structure_member_unsupported
 options:
 - value: filetime
   operation: generate_structure_member_filetime
-- value: fixed_size_string
-  operation: generate_structure_member_fixed_size_string
-- value: int8_t
-  operation: generate_structure_member_data_type
-- value: int16_t
-  operation: generate_structure_member_data_type
-- value: int32_t
-  operation: generate_structure_member_data_type
-- value: int64_t
+- value: integer
   operation: generate_structure_member_data_type
 - value: posix_time
   operation: generate_structure_member_posix_file
+- value: stream
+  operation: generate_structure_member_string
+- value: stream_fixed_size
+  operation: generate_structure_member_fixed_size_string
 - value: string
   operation: generate_structure_member_string
-- value: uint8_t
-  operation: generate_structure_member_data_type
-- value: uint16_t
-  operation: generate_structure_member_data_type
-- value: uint32_t
-  operation: generate_structure_member_data_type
-- value: uint64_t
-  operation: generate_structure_member_data_type
+- value: string_fixed_size
+  operation: generate_structure_member_fixed_size_string
 - value: uuid
   operation: generate_structure_member_uuid
 ---

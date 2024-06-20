@@ -1,2 +1,2 @@
-	/* TODO: ${member_name} */
+	/* TODO: ${structure_member.name} */
 

@@ -30,6 +30,7 @@ class TemplateRuntimeStructureMember(object):
     data_type (str): data type.
     description (str): description.
     name (str): name.
+    value_type (str): value type.
   """
 
   def __init__(self):
@@ -39,6 +40,7 @@ class TemplateRuntimeStructureMember(object):
     self.data_type = None
     self.description = None
     self.name = None
+    self.value_type = None
 
 
 class SourceGenerator(interface.BaseSourceFileGenerator):
@@ -146,7 +148,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       if len(data_string) < 16 or block_index + 16 == data_size:
         hexadecimal_lines.append(f'\t{hexadecimal_string:s}')
       else:
-        hexadecimal_lines.append('\t{hexadecimal_string:s},')
+        hexadecimal_lines.append(f'\t{hexadecimal_string:s},')
 
     return '\n'.join(hexadecimal_lines)
 
@@ -210,6 +212,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     has_datetime_member = False
     has_string_member = False
     has_uuid_member = False
+
     for member_definition in data_type_definition.members:
       member_data_type_definition = getattr(
           member_definition, 'member_data_type_definition', member_definition)
@@ -245,6 +248,65 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     structure_description_title = ''.join([
         structure_description[0].upper(), structure_description[1:]])
 
+    # TODO: refactor move into sub method - start
+
+    check_signature_structure_members = []
+
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+
+      # data_type = getattr(member_definition, 'member_data_type', None)
+      data_type_size = member_definition.GetByteSize()
+
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
+
+      supported_values = getattr(member_definition, 'values', None)
+      if not supported_values:
+        continue
+
+      member_value_type = self._GetRuntimeStructureMemberValueType(
+          member_data_type_definition)
+
+      member_value = None
+      member_value_size = None
+
+      if member_value_type == 'integer':
+        data_type_size = member_definition.GetByteSize()
+
+        member_value = supported_values[0]
+        member_value_size = data_type_size * 8
+
+      elif member_value_type in ('stream', 'stream_fixed_size'):
+        member_value = supported_values[0].decode('ascii')
+        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
+        member_value_size = len(supported_values[0])
+
+      elif member_value_type == 'uuid':
+        member_value = supported_values[0].decode('ascii')
+        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
+        member_value_size = 16
+
+      if member_definition.description:
+        description = member_definition.description
+      else:
+        description = member_name.replace('_', ' ')
+
+      structure_member = TemplateRuntimeStructureMember()
+      structure_member.description = ''.join([
+          description[0].lower(), description[1:]])
+      structure_member.name = member_name
+      structure_member.value = member_value
+      structure_member.value_size = member_value_size
+      structure_member.value_type = member_value_type
+
+      check_signature_structure_members.append(structure_member)
+
+    # TODO: refactor move into sub method - end
+
+    template_mappings['check_signature_structure_members'] = (
+        check_signature_structure_members)
+
     template_mappings['has_datetime_member'] = has_datetime_member
     template_mappings['has_string_member'] = has_string_member
     template_mappings['has_uuid_member'] = has_uuid_member
@@ -270,6 +332,8 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         'runtime_structure.c.yaml', 'main', None, template_mappings,
         output_filename)
 
+    del template_mappings['check_signature_structure_members']
+
     del template_mappings['has_datetime_member']
     del template_mappings['has_string_member']
     del template_mappings['has_uuid_member']
@@ -283,73 +347,105 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     del template_mappings['structure_description_title']
     del template_mappings['structure_options']
 
-    # TODO: refactor
+    # TODO: refactor move to operations file
 
     structure_members = []
 
     for member_definition in data_type_definition.members:
       member_name = member_definition.name
 
-      # data_type = getattr(member_definition, 'member_data_type', None)
+      data_type = getattr(member_definition, 'member_data_type', None)
       data_type_size = member_definition.GetByteSize()
 
       member_data_type_definition = getattr(
           member_definition, 'member_data_type_definition', member_definition)
 
-      supported_values = getattr(member_definition, 'values', None)
-      if not supported_values:
-        continue
+      member_configuration = members_configuration.get(
+          structure_member.name, {})
 
-      type_indicator = member_data_type_definition.TYPE_INDICATOR
-      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
-        data_type_size = member_definition.GetByteSize()
+      member_byte_order = None
+      member_data_type = None
+      member_element_data_size = None
+      member_usage = member_configuration.get('usage', self._USAGE_DEBUG)
+      member_value_type = self._GetRuntimeStructureMemberValueType(
+          member_data_type_definition)
 
-        template_mappings['bit_size'] = data_type_size * 8
-        member_value = supported_values[0]
-        member_value_size = None
+      if member_value_type == 'filetime':
+        # TODO: get byte order from member_data_type_definition.
+        member_byte_order = 'little_endian'
+        member_data_type = 'uint64'
 
-      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
-        member_value = supported_values[0].decode('ascii')
-        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
-        member_value_size = len(supported_values[0])
+      elif member_value_type == 'posix_time':
+        # TODO: get byte order from member_data_type_definition.
+        member_byte_order = 'little_endian'
+        member_data_type = 'uint32'
 
-      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
-        member_value = supported_values[0].decode('ascii')
-        member_value = member_value.translate(self._ESCAPE_CHARACTERS)
-        member_value_size = 16
+      elif (member_value_type == 'integer' and
+            data_type_size and data_type_size > 1):
+        # TODO: get byte order from member_data_type_definition.
+        member_byte_order = 'little_endian'
+        member_data_type = data_type
+
+      elif member_value_type in ('string', 'string_fixed_size'):
+        elements_terminator = getattr(
+            member_data_type_definition, 'elements_terminator', None)
+        if elements_terminator is not None:
+          element_data_type_definition = (
+              member_data_type_definition.element_data_type_definition)
+          member_element_data_size = element_data_type_definition.GetByteSize()
 
       if member_definition.description:
         description = member_definition.description
       else:
         description = member_name.replace('_', ' ')
 
+      description = ''.join([description[0].lower(), description[1:]])
+
       structure_member = TemplateRuntimeStructureMember()
-      structure_member.description = ''.join([
-          description[0].lower(), description[1:]])
+      structure_member.byte_order = member_byte_order
+      structure_member.data_type = member_data_type
+      structure_member.description = description
+      structure_member.element_data_size = member_element_data_size
       structure_member.name = member_name
-      structure_member.type_indicator = type_indicator
-      structure_member.value = member_value
-      structure_member.value_size = member_value_size
+      structure_member.usage = member_usage
+      structure_member.value_type = member_value_type
 
       structure_members.append(structure_member)
 
     for structure_member in structure_members:
-      type_indicator = structure_member.type_indicator
-      if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
-        template_filename = 'read_data-check_signature-integer.c'
-
-      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
-        # TODO: make sure to escape all bytes in supported_values[0]
-        # things like \x00F can cause issues.
-        template_filename = 'read_data-check_signature-stream.c'
-
-      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
-        template_filename = 'read_data-check_signature-stream.c'
-
-      else:
-        template_filename = 'read_data-check_signature-unsupported.c'
+      if structure_member.usage != self._USAGE_IN_STRUCT:
+        continue
 
       template_mappings['structure_member'] = structure_member
+
+      data_offset_is_set = False
+      template_filename = 'read_data-unsupported.c'
+
+      if structure_member.value_type in ('filetime', 'integer', 'posix_time'):
+        if structure_member.data_type.startswith('int'):
+          template_filename = 'read_data-integer.c'
+        else:
+          template_filename = 'read_data-unsigned_integer.c'
+
+      elif structure_member.value_type in ('string', 'string_fixed_size'):
+        if structure_member.element_data_size in (1, 2):
+          if not data_offset_is_set:
+            template_filename = os.path.join(
+                template_directory, 'read_data-data_offset.c')
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename,
+                access_mode='a')
+
+            template_filename = 'read_data-unsupported.c'
+            data_offset_is_set = True
+
+          if structure_member.element_data_size == 1:
+            template_filename = 'read_data-string_8bit.c'
+          elif structure_member.element_data_size == 2:
+            template_filename = 'read_data-string_16bit.c'
+
+      elif structure_member.value_type == 'uuid':
+        template_filename = 'read_data-guid.c'
 
       template_filename = os.path.join(template_directory, template_filename)
       self._GenerateSection(
@@ -358,18 +454,171 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
       del template_mappings['structure_member']
 
-    self._GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
-        data_type_definition, data_type_definition.name, members_configuration,
-        output_filename)
-
     template_filename = os.path.join(
         template_directory, 'read_data-debug_start.c')
     self._GenerateSection(
         template_filename, template_mappings, output_filename, access_mode='a')
 
-    self._GenerateRuntimeStructureSourceFunctionReadDataDebugPrint(
-        data_type_definition, data_type_definition.name, members_configuration,
-        output_filename)
+    # TODO: refactor move to operations file
+
+    # TODO: add support for debug output of trailing units, such as "X bytes"
+
+    function_name = (
+        f'lib{self._prefix:s}_{data_type_definition.name:s}_read_data')
+
+    # Default alignment is 9 tabs.
+    tab_alignment = 9 * 8
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+      debug_line = f'{function_name:s}: {member_name:s}'
+      debug_line_length = len(debug_line)
+      if debug_line_length > tab_alignment:
+        tab_alignment = debug_line_length
+
+    _, remainder = divmod(tab_alignment, 8)
+    if remainder > 0:
+      tab_alignment += 8 - remainder
+
+    structure_members = []
+
+    for member_definition in data_type_definition.members:
+      member_name = member_definition.name
+
+      data_type = getattr(member_definition, 'member_data_type', None)
+      data_type_size = member_definition.GetByteSize()
+
+      member_data_type_definition = getattr(
+          member_definition, 'member_data_type_definition', member_definition)
+
+      member_value_type = self._GetRuntimeStructureMemberValueType(
+          member_data_type_definition)
+
+      member_configuration = members_configuration.get(
+          structure_member.name, {})
+
+      member_byte_order = None
+      member_format_indicator = None
+      member_usage = member_configuration.get('usage', self._USAGE_DEBUG)
+      member_value_size = data_type_size
+
+      if member_value_type == 'integer':
+        # TODO: get byte order from member_data_type_definition.
+        member_byte_order = 'little_endian'
+        member_value_size *= 8
+
+        debug_format = member_configuration.get(
+            'debug_format', self._DEBUG_FORMAT_DECIMAL)
+        member_format_indicator = self._GetRuntimePrintfFormatIndicator(
+            member_definition, debug_format)
+
+      # Use the member name as the debug description.
+      description = member_name.replace('_', ' ')
+
+      structure_member = TemplateRuntimeStructureMember()
+      structure_member.byte_order = member_byte_order
+      structure_member.data_type = data_type
+      structure_member.description = description
+      structure_member.name = member_name
+      structure_member.format_indicator = member_format_indicator
+      structure_member.usage = member_usage
+      structure_member.value_size = member_value_size
+      structure_member.value_type = member_value_type
+
+      structure_members.append(structure_member)
+
+    for structure_member in structure_members:
+      template_filename = 'read_data-debug-unsupported.c'
+
+      if structure_member.value_type == 'filetime':
+        template_filename = 'read_data-debug-filetime.c'
+
+      elif structure_member.value_type == 'integer':
+        if structure_member.usage == self._USAGE_IN_FUNCTION:
+          template_filename = 'read_data-debug-integer-in_function.c'
+
+        elif structure_member.usage == self._USAGE_IN_STRUCT:
+          if structure_member.name.endswith('_flags'):
+            template_filename = 'read_data-debug-integer-in_struct-as_flags.c'
+          else:
+            template_filename = 'read_data-debug-integer-in_struct.c'
+
+        elif structure_member.usage == self._USAGE_IN_FUNCTION:
+          # TODO: improve.
+          template_filename = 'read_data-debug-integer.c'
+
+        else:
+          template_filename = 'read_data-debug-integer.c'
+
+      elif structure_member.value_type == 'padding':
+        template_filename = 'read_data-debug-padding.c'
+
+      elif structure_member.value_type == 'posix_time':
+        template_filename = 'read_data-debug-posix_time.c'
+
+      elif structure_member.value_type in ('stream', 'stream_fixed_size'):
+        supported_values = getattr(member_definition, 'values', None)
+
+        if supported_values:
+          format_indicator = ['%c'] * len(supported_values[0])
+          for supported_value in supported_values:
+            if isinstance(supported_value, str):
+              for index, character in enumerate(supported_value):
+                if not character.isalnum():
+                  format_indicator[index] = '\\x%02" PRIx8 "'
+
+          member_data_arguments = []
+          for byte_index in range(len(supported_values[0])):
+            argument = '\t\t ( ({0:s}_{1:s}_t *) data )->{2:s}[ {3:d} ]'.format(
+                self._prefix, data_type_definition_name, structure_member.name,
+                byte_index)
+            member_data_arguments.append(argument)
+
+          template_filename = 'read_data-debug-signature.c'
+
+          template_mappings['format_indicator'] = ''.join(format_indicator)
+          template_mappings['member_data_arguments'] = ',\n'.join(
+              member_data_arguments)
+
+        elif structure_member.value_size:
+          template_filename = 'read_data-debug-stream_with_data_size.c'
+
+        else:
+          template_filename = 'read_data-debug-stream.c'
+
+      elif structure_member.value_type in ('string', 'string_fixed_size'):
+        # TODO: handle evt "data_size - 4"
+        elements_terminator = getattr(
+            member_data_type_definition, 'elements_terminator', None)
+        if elements_terminator is not None:
+          element_data_type_definition = (
+              member_data_type_definition.element_data_type_definition)
+          element_data_size = element_data_type_definition.GetByteSize()
+          if element_data_size == 2:
+            template_filename = 'read_data-debug-string_16bit.c'
+
+      elif structure_member.value_type == 'uuid':
+        template_filename = 'read_data-debug-guid.c'
+
+      template_filename = os.path.join(template_directory, template_filename)
+
+      # Determine the number of tabs for alignment.
+      debug_line = f'{function_name:s}: {structure_member.description:s}'
+      debug_line_length = len(debug_line)
+
+      number_of_tabs, remainder = divmod(tab_alignment - debug_line_length, 8)
+      if remainder > 0:
+        number_of_tabs += 1
+
+      template_mappings['format_indicator'] = structure_member.format_indicator
+      template_mappings['structure_member'] = structure_member
+      template_mappings['tab_alignment'] = '\\t' * number_of_tabs
+
+      self._GenerateSection(
+          template_filename, template_mappings, output_filename,
+          access_mode='a')
+
+      del template_mappings['structure_member']
+      del template_mappings['tab_alignment']
 
     template_filename = os.path.join(
         template_directory, 'read_data-debug_end.c')
@@ -394,267 +643,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     self._SortIncludeHeaders(output_filename)
     self._SortVariableDeclarations(output_filename)
     self._VerticalAlignAssignmentStatements(output_filename)
-
-  def _GenerateRuntimeStructureSourceFunctionReadDataCopyFromByteStream(
-      self, data_type_definition, data_type_definition_name,
-      members_configuration, output_filename):
-    """Generates the copy from byte stream part of a read_data function.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
-      data_type_definition_name (str): name of the structure data type
-          definition.
-      members_configuration (dict[dict[str: str]]): code generation
-          configuration of the structure members.
-      output_filename (str): name of the output file.
-    """
-    template_directory = os.path.join(
-        self._templates_path, 'runtime_structure.c')
-
-    template_mappings = self._GetTemplateMappings(
-        structure_name=data_type_definition_name)
-
-    date_offset_is_set = False
-
-    for member_definition in data_type_definition.members:
-      member_name = member_definition.name
-      member_usage = members_configuration.get(member_name, {}).get(
-          'usage', self._USAGE_DEBUG)
-      if member_usage != self._USAGE_IN_STRUCT:
-        continue
-
-      data_type = getattr(member_definition, 'member_data_type', None)
-      data_type_size = member_definition.GetByteSize()
-
-      member_data_type_definition = getattr(
-          member_definition, 'member_data_type_definition', member_definition)
-
-      template_filename = 'read_data-unsupported.c'
-
-      type_indicator = member_data_type_definition.TYPE_INDICATOR
-
-      if data_type == 'filetime':
-        template_filename = 'read_data-unsigned_integer.c'
-
-        # TODO: get byte order from member_data_type_definition.
-        template_mappings['byte_order'] = 'little_endian'
-        template_mappings['data_type'] = 'uint64'
-
-      elif data_type == 'posix_time':
-        template_filename = 'read_data-unsigned_integer.c'
-
-        # TODO: get byte order from member_data_type_definition.
-        template_mappings['byte_order'] = 'little_endian'
-        template_mappings['data_type'] = 'uint32'
-
-      elif (type_indicator == definitions.TYPE_INDICATOR_INTEGER and
-            data_type_size and data_type_size > 1):
-        if data_type.startswith('uint'):
-          template_filename = 'read_data-unsigned_integer.c'
-        else:
-          template_filename = 'read_data-integer.c'
-
-        # TODO: get byte order from member_data_type_definition.
-        template_mappings['byte_order'] = 'little_endian'
-        template_mappings['data_type'] = data_type
-
-      elif type_indicator == definitions.TYPE_INDICATOR_STRING:
-        elements_terminator = getattr(
-            member_data_type_definition, 'elements_terminator', None)
-        if elements_terminator is not None:
-          if not date_offset_is_set:
-            template_filename = os.path.join(
-                template_directory, 'read_data-data_offset.c')
-            self._GenerateSection(
-                template_filename, template_mappings, output_filename,
-                access_mode='a')
-
-            template_filename = 'read_data-unsupported.c'
-            date_offset_is_set = True
-
-          element_data_type_definition = (
-              member_data_type_definition.element_data_type_definition)
-          element_data_size = element_data_type_definition.GetByteSize()
-          if element_data_size == 1:
-            template_filename = 'read_data-string_8bit.c'
-          elif element_data_size == 2:
-            template_filename = 'read_data-string_16bit.c'
-
-      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
-        template_filename = 'read_data-guid.c'
-
-      if member_definition.description:
-        description = member_definition.description
-      else:
-        description = member_name.replace('_', ' ')
-
-      template_mappings['member_name'] = member_name
-      template_mappings['member_name_description'] = ''.join([
-          description[0].lower(), description[1:]])
-
-      template_filename = os.path.join(template_directory, template_filename)
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-  def _GenerateRuntimeStructureSourceFunctionReadDataDebugPrint(
-      self, data_type_definition, data_type_definition_name,
-      members_configuration, output_filename):
-    """Generates the debug print part of a read_data function.
-
-    Args:
-      data_type_definition (DataTypeDefinition): structure data type definition.
-      data_type_definition_name (str): name of the structure data type
-          definition.
-      members_configuration (dict[dict[str: str]]): code generation
-          configuration of the structure members.
-      output_filename (str): name of the output file.
-    """
-    # TODO: add support for debug output of trailing units, such as "X bytes"
-
-    template_directory = os.path.join(
-        self._templates_path, 'runtime_structure.c')
-
-    template_mappings = self._GetTemplateMappings(
-        library_name=f'lib{self._prefix:s}',
-        structure_name=data_type_definition_name)
-
-    function_name = (
-        f'lib{self._prefix:s}_{data_type_definition_name:s}_read_data')
-
-    # Default alignment is 9 tabs.
-    tab_alignment = 9 * 8
-    for member_definition in data_type_definition.members:
-      member_name = member_definition.name
-      debug_line = f'{function_name:s}: {member_name:s}'
-      debug_line_length = len(debug_line)
-      if debug_line_length > tab_alignment:
-        tab_alignment = debug_line_length
-
-    _, remainder = divmod(tab_alignment, 8)
-    if remainder > 0:
-      tab_alignment += 8 - remainder
-
-    for member_definition in data_type_definition.members:
-      member_name = member_definition.name
-
-      data_type = getattr(member_definition, 'member_data_type', None)
-      data_type_size = member_definition.GetByteSize()
-
-      member_data_type_definition = getattr(
-          member_definition, 'member_data_type_definition', member_definition)
-
-      template_filename = 'read_data-debug-unsupported.c'
-
-      type_indicator = member_data_type_definition.TYPE_INDICATOR
-
-      if data_type == 'filetime':
-        template_filename = 'read_data-debug-filetime.c'
-
-      elif data_type == 'posix_time':
-        template_filename = 'read_data-debug-posix_time.c'
-
-      elif type_indicator == definitions.TYPE_INDICATOR_INTEGER:
-        debug_format = members_configuration.get(member_name, {}).get(
-            'debug_format', self._DEBUG_FORMAT_DECIMAL)
-
-        printf_format_indicator = self._GetRuntimePrintfFormatIndicator(
-            member_definition, debug_format)
-
-        member_usage = members_configuration.get(member_name, {}).get(
-            'usage', self._USAGE_DEBUG)
-        if member_usage == self._USAGE_IN_FUNCTION:
-          template_filename = 'read_data-debug-integer-in_function.c'
-
-        elif member_usage == self._USAGE_IN_STRUCT:
-          if member_name.endswith('_flags'):
-            template_filename = 'read_data-debug-integer-in_struct-as_flags.c'
-          else:
-            template_filename = 'read_data-debug-integer-in_struct.c'
-
-        elif member_usage == self._USAGE_IN_FUNCTION:
-          # TODO: improve.
-          template_filename = 'read_data-debug-integer.c'
-
-        else:
-          template_filename = 'read_data-debug-integer.c'
-
-        template_mappings['bit_size'] = data_type_size * 8
-        # TODO: get byte order from member_data_type_definition.
-        template_mappings['byte_order'] = 'little_endian'
-        template_mappings['data_type'] = data_type
-        template_mappings['format_indicator'] = printf_format_indicator
-
-      elif type_indicator == definitions.TYPE_INDICATOR_PADDING:
-        template_filename = 'read_data-debug-padding.c'
-
-      elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
-        supported_values = getattr(member_definition, 'values', None)
-
-        if supported_values:
-          format_indicator = ['%c'] * len(supported_values[0])
-          for supported_value in supported_values:
-            if isinstance(supported_value, str):
-              for index, character in enumerate(supported_value):
-                if not character.isalnum():
-                  format_indicator[index] = '\\x%02" PRIx8 "'
-
-          member_data_arguments = []
-          for byte_index in range(len(supported_values[0])):
-            argument = '\t\t ( ({0:s}_{1:s}_t *) data )->{2:s}[ {3:d} ]'.format(
-                self._prefix, data_type_definition_name, member_name,
-                byte_index)
-            member_data_arguments.append(argument)
-
-          template_filename = 'read_data-debug-signature.c'
-
-          template_mappings['format_indicator'] = ''.join(format_indicator)
-          template_mappings['member_data_arguments'] = ',\n'.join(
-              member_data_arguments)
-
-        elif data_type_size:
-          template_filename = 'read_data-debug-stream_with_data_size.c'
-
-          template_mappings['member_data_size'] = data_type_size
-
-        else:
-          template_filename = 'read_data-debug-stream.c'
-
-      elif type_indicator == definitions.TYPE_INDICATOR_STRING:
-        # TODO: handle evt "data_size - 4"
-        elements_terminator = getattr(
-            member_data_type_definition, 'elements_terminator', None)
-        if elements_terminator is not None:
-          element_data_type_definition = (
-              member_data_type_definition.element_data_type_definition)
-          element_data_size = element_data_type_definition.GetByteSize()
-          if element_data_size == 2:
-            template_filename = 'read_data-debug-string_16bit.c'
-
-      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
-        template_filename = 'read_data-debug-guid.c'
-
-      # Use the member name as the debug description.
-      description = member_name.replace('_', ' ')
-
-      template_filename = os.path.join(template_directory, template_filename)
-
-      template_mappings['member_name'] = member_name
-      template_mappings['member_name_description'] = description
-
-      # Determine the number of tabs for alignment.
-      debug_line = f'{function_name:s}: {description:s}'
-      debug_line_length = len(debug_line)
-
-      number_of_tabs, remainder = divmod(tab_alignment - debug_line_length, 8)
-      if remainder > 0:
-        number_of_tabs += 1
-
-      template_mappings['tab_alignment'] = '\\t' * number_of_tabs
-
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
 
   def _GenerateRuntimeStructureTestSourceFile(
       self, project_configuration, data_type_definition, members_configuration):
@@ -865,6 +853,47 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
               data_type_definition.size, None)
 
     return format_indicator
+
+  def _GetRuntimeStructureMemberValueType(self, member_data_type_definition):
+    """Retrieves a runtime structure member value type.
+
+    Args:
+      member_data_type_definition (dtfabric.DataTypeDefinition): member data
+          type definition.
+
+    Returns:
+      str: member value type or None if unknown.
+    """
+    if member_data_type_definition.name == 'filetime':
+      return 'filetime'
+
+    if member_data_type_definition.name == 'posix_time':
+      return 'posix_time'
+
+    type_indicator = member_data_type_definition.TYPE_INDICATOR
+
+    if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
+      return 'integer'
+
+    if type_indicator == definitions.TYPE_INDICATOR_PADDING:
+      return 'padding'
+
+    if type_indicator == definitions.TYPE_INDICATOR_STREAM:
+      if 'fixed_size' in member_options:
+        return 'stream_fixed_size'
+      else:
+        return 'stream'
+
+    if type_indicator == definitions.TYPE_INDICATOR_STRING:
+      if 'fixed_size' in member_options:
+        return 'string_fixed_size'
+      else:
+        return 'string'
+
+    if type_indicator == definitions.TYPE_INDICATOR_UUID:
+      return 'uuid'
+
+    return None
 
   def _GetRuntimeStructureSourceFunctionReadDataDebugVariables(
       self, data_type_definition, members_configuration):
@@ -1119,42 +1148,26 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
       description = 'The {0:s}{1:s}'.format(
           description[0].lower(), description[1:])
 
-      member_data_size = 0
-      member_data_type = None
-
-      # TODO: handle stream / string type
-      # TODO: handle padding type
       member_data_type_definition = getattr(
           member_definition, 'member_data_type_definition', member_definition)
 
       type_indicator = member_data_type_definition.TYPE_INDICATOR
 
-      if member_data_type_definition.name == 'filetime':
-        member_data_type = 'filetime'
+      member_value_type = self._GetRuntimeStructureMemberValueType(
+          member_data_type_definition)
 
-      elif member_data_type_definition.name == 'posix_time':
-        member_data_type = 'posix_time'
-
-      elif type_indicator in (definitions.TYPE_INDICATOR_STREAM,
-                              definitions.TYPE_INDICATOR_STRING):
-        if 'fixed_size' in member_options:
-          member_data_size = member_data_type_definition.GetByteSize() + 1
-
-          member_data_type = 'fixed_size_string'
-        else:
-          member_data_type = 'string'
-
-      elif type_indicator == definitions.TYPE_INDICATOR_UUID:
-        member_data_type = 'uuid'
-
+      if member_value_type in ('stream_fixed_size', 'string_fixed_size'):
+        member_data_size = member_data_type_definition.GetByteSize() + 1
       else:
-        member_data_type = self._GetRuntimeDataType(member_data_type_definition)
+        member_data_size = 0
 
       structure_member = TemplateRuntimeStructureMember()
       structure_member.data_size = member_data_size
-      structure_member.data_type = member_data_type
+      structure_member.data_type = self._GetRuntimeDataType(
+          member_data_type_definition)
       structure_member.description = description
       structure_member.name = member_name
+      structure_member.value_type = member_value_type
 
       structure_members.append(structure_member)
 

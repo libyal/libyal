@@ -1,8 +1,8 @@
 		libcnotify_printf(
-		 "%s: ${member_name_description}\n",
+		 "%s: ${structure_member.description}\n",
 		 function );
 		libcnotify_print_data(
-		 ${structure_name}->${member_name},
-		 ${member_data_size},
+		 ${structure_name}->${structure_member.name},
+		 ${structure_member.value_size},
 		 0 );
 

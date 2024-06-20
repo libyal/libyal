@@ -1,7 +1,7 @@
 		if( ${library_name}_debug_print_posix_time_value(
 		     function,
-		     "${member_name_description}${tab_alignment}",
-		     ( (${prefix}_${structure_name}_t *) data )->${member_name},
+		     "${structure_member.description}${tab_alignment}",
+		     ( (${prefix}_${structure_name}_t *) data )->${structure_member.name},
 		     4,
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_SECONDS_32BIT_SIGNED,

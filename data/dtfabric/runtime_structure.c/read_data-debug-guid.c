@@ -1,7 +1,7 @@
 		if( ${library_name}_debug_print_guid_value(
 		     function,
-		     "${member_name_description}${tab_alignment}",
-		     ( (${prefix}_${structure_name}_t *) data )->${member_name},
+		     "${structure_member.description}${tab_alignment}",
+		     ( (${prefix}_${structure_name}_t *) data )->${structure_member.name},
 		     16,
 		     LIBFGUID_ENDIAN_LITTLE,
 		     LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
