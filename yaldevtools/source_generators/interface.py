@@ -800,6 +800,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
 
     return self._types_include_header_file
 
+  # TODO: remove _HasGlob if no longer used, replace with library_features
   def _HasGlob(self, project_configuration, type_name):
     """Determines if the type has a glob function.
 
@@ -810,7 +811,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
     Returns:
       bool: True if the type needs a glob function.
     """
-    # TODO: determine needs_glog based on function prototypes
+    # TODO: determine needs_glob based on function prototypes
     if (type_name == 'handle' and project_configuration.library_name in (
         'libewf', 'libsmraw')):
       return True

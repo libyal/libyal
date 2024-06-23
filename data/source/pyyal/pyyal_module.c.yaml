@@ -1,0 +1,190 @@
+# yaldevtools generator specification.
+---
+identifier: generate_bfio
+type: template
+condition: "signature_type is not None"
+file: pyyal_module/bfio.c
+placeholders:
+- library_name
+- signature_type
+---
+identifier: generate_functions_check_signature
+type: template
+condition: "signature_type is not None"
+file: pyyal_module/check_signature.c
+placeholders:
+- library_name
+- python_module_name
+- signature_desription
+- signature_type
+---
+identifier: generate_functions_get_version
+type: template
+file: pyyal_module/get_version.c
+placeholders:
+- library_name
+- python_module_name
+---
+identifier: generate_functions_glob
+type: template
+condition: "'source_glob' in library_features"
+file: pyyal_module/glob.c
+placeholders:
+- library_name
+- python_module_name
+---
+identifier: generate_functions_open_new
+type: template
+condition: "signature_type is not None"
+file: pyyal_module/open_new.c
+placeholders:
+- python_module_name
+- signature_type
+---
+identifier: generate_header
+type: template
+file: pyyal_module/header.c
+placeholders:
+- library_name
+- python_module_authors
+- python_module_copyright
+- python_module_name
+---
+identifier: generate_includes
+type: group
+operations:
+- generate_includes_start
+- generate_includes_file_object_io_handle
+- generate_includes_type_objects
+# TODO: add modifier
+---
+identifier: generate_includes_end
+type: template
+file: pyyal_module/includes-end.c
+placeholders:
+- python_module_name
+---
+identifier: generate_includes_file_object_io_handle
+type: template
+condition: "signature_type is not None"
+file: pyyal_module/includes-file_object_io_handle.c
+placeholders:
+- python_module_name
+---
+identifier: generate_includes_start
+type: template
+file: pyyal_module/includes-start.c
+placeholders:
+- python_module_name
+---
+identifier: generate_includes_type_object
+type: template
+file: pyyal_module/includes-type_object.c
+placeholders:
+- python_module_name
+- type_name
+---
+identifier: generate_includes_type_objects
+type: sequence
+input: python_module_types
+placeholder: type_name
+operations:
+- generate_includes_type_object
+---
+identifier: generate_init
+type: group
+operations:
+- generate_init_start
+- generate_init_type_objects
+- generate_init_end
+---
+identifier: generate_init_end
+type: template
+file: pyyal_module/init-end.c
+placeholders:
+- python_module_name
+---
+identifier: generate_init_start
+type: template
+file: pyyal_module/init-start.c
+placeholders:
+- library_name
+- python_module_name
+---
+identifier: generate_init_type_object
+type: template
+condition: "type_name is definition_types"
+fallback: pyyal_module/init-type_object.c
+file: pyyal_module/init-definitions_type_object.c
+placeholders:
+- python_module_name
+- type_name
+---
+identifier: generate_init_type_objects
+type: sequence
+input: python_module_types
+placeholder: type_name
+operations:
+- generate_init_type_object
+---
+identifier: generate_module_definition
+type: template
+file: pyyal_module/module_definition.c
+placeholders:
+- library_name
+- python_module_name
+---
+identifier: generate_module_methods_check_signature
+type: template
+condition: "signature_type is not None"
+file: pyyal_module/module_methods-check_signature.c
+placeholders:
+- python_module_name
+- signature_desription
+- signature_type
+---
+identifier: generate_module_methods_end
+type: template
+file: pyyal_module/module_methods-end.c
+placeholders:
+- python_module_name
+---
+identifier: generate_module_methods_glob
+type: template
+condition: "'source_glob' in library_features"
+file: pyyal_module/module_methods-glob.c
+placeholders:
+- python_module_name
+---
+identifier: generate_module_methods_open_new
+type: template
+condition: "signature_type is not None"
+file: pyyal_module/module_methods-open_new.c
+placeholders:
+- python_module_name
+- signature_type
+---
+identifier: generate_module_methods_start
+type: template
+file: pyyal_module/module_methods-start.c
+placeholders:
+- python_module_name
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_includes
+- generate_bfio
+- generate_module_methods_start
+- generate_module_methods_check_signature
+- generate_module_methods_glob
+# TODO: add multi-file open support if glob is present.
+- generate_module_methods_open_new
+- generate_module_methods_end
+- generate_functions_get_version
+- generate_functions_check_signature
+- generate_functions_glob
+- generate_functions_open_new
+- generate_module_definition
+- generate_init

@@ -432,7 +432,7 @@ class PythonTypeObjectFunctionPrototype(object):
       str: data type description.
     """
     if self.data_type == definitions.DATA_TYPE_BINARY_DATA:
-      data_type_description = 'Binary string'
+      data_type_description = 'Bytes'
 
     elif self.data_type == definitions.DATA_TYPE_BOOLEAN:
       data_type_description = 'Boolean'

@@ -1,0 +1,42 @@
+# yaldevtools generator specification.
+---
+identifier: generate_constant
+type: template
+file: pyyal_definitions/constant.c
+# TODO: add plural modifier
+placeholders:
+- constant_name
+- definition_name
+- library_name
+---
+identifier: generate_constants
+type: sequence
+input: constant_names
+placeholder: constant_name
+operations:
+- generate_constant
+---
+identifier: generate_footer
+type: template
+file: pyyal_definitions/footer.c
+placeholders:
+- definitions_description
+- definitions_name
+- python_module_name
+---
+identifier: generate_header
+type: template
+file: pyyal_definitions/header.c
+placeholders:
+- definitions_name
+- library_name
+- python_module_authors
+- python_module_copyright
+- python_module_name
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_constants
+- generate_footer

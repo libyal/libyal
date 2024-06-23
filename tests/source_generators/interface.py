@@ -37,7 +37,6 @@ class SourceFileGeneratorTest(test_lib.BaseTestCase):
   # TODO: add tests for _GetTemplateMappings function.
   # TODO: add tests for _GetTypeLibraryHeaderFile function.
   # TODO: add tests for _GetTypesIncludeHeaderFile function.
-  # TODO: add tests for _HasGlob function.
   # TODO: add tests for _HasTests function.
   # TODO: add tests for _ReadTemplateFile function.
   # TODO: add tests for _SetSequenceTypeNameInTemplateMappings function.

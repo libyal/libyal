@@ -82,19 +82,19 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       enum_declaration (EnumDeclaration): enumeration type declaration.
       output_writer (OutputWriter): output writer.
     """
-    output_filename = '{0:s}_{1:s}.h'.format(
-        project_configuration.python_module_name, definitions_name)
-    output_filename = os.path.join(
-        project_configuration.python_module_name, output_filename)
-
-    templates_path = os.path.join(self._templates_path, 'pyyal_definitions')
-
     template_mappings['definitions_name'] = definitions_name
     template_mappings['definitions_description'] = definitions_name.replace(
         '_', ' ')
 
-    template_filename = os.path.join(templates_path, 'pyyal_definitions.h')
-    self._GenerateSection(template_filename, template_mappings, output_filename)
+    output_filename = os.path.join(
+        project_configuration.python_module_name,
+        f'{project_configuration.python_module_name:s}_{definitions_name:s}.h')
+    self._GenerateSectionsFromOperationsFile(
+        'pyyal_definitions.h.yaml', 'main', project_configuration,
+        template_mappings, output_filename)
+
+    del template_mappings['definitions_name']
+    del template_mappings['definitions_description']
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(definitions_name, output_filename)
@@ -114,24 +114,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       enum_declaration (EnumDeclaration): enumeration type declaration.
       output_writer (OutputWriter): output writer.
     """
-    output_filename = '{0:s}_{1:s}.c'.format(
-        project_configuration.python_module_name, definitions_name)
-    output_filename = os.path.join(
-        project_configuration.python_module_name, output_filename)
+    constant_names = []
 
-    templates_path = os.path.join(self._templates_path, 'pyyal_definitions')
-
-    template_mappings['definitions_name'] = definitions_name
-    template_mappings['definitions_description'] = definitions_name.replace(
-        '_', ' ')
-
-    template_mappings['definition_name'] = definitions_name[:-1]
-
-    template_filename = os.path.join(templates_path, 'header.c')
-    self._GenerateSection(template_filename, template_mappings, output_filename)
-
-    constant_name_prefix = '{0:s}_{1:s}_'.format(
-        project_configuration.library_name, definitions_name[:-1])
+    constant_name_prefix = (
+        f'{project_configuration.library_name:s}_{definitions_name[:-1]:s}_')
     constant_name_prefix_length = len(constant_name_prefix)
 
     for constant_name in enum_declaration.constants.keys():
@@ -140,21 +126,28 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         continue
 
       constant_name = constant_name[constant_name_prefix_length:]
-
       if constant_name in ('undefined', 'unknown'):
         continue
 
-      template_mappings['constant_name'] = constant_name
+      constant_names.append(constant_name)
 
-      template_filename = os.path.join(templates_path, 'constant.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-      self._CorrectDescriptionSpelling(constant_name, output_filename)
+    template_mappings['constant_names'] = constant_names
+    template_mappings['definition_name'] = definitions_name[:-1]
+    template_mappings['definitions_name'] = definitions_name
+    template_mappings['definitions_description'] = definitions_name.replace(
+        '_', ' ')
 
-    template_filename = os.path.join(templates_path, 'footer.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
+    output_filename = os.path.join(
+        project_configuration.python_module_name,
+        f'{project_configuration.python_module_name:s}_{definitions_name:s}.c')
+    self._GenerateSectionsFromOperationsFile(
+        'pyyal_definitions.h.yaml', 'main', project_configuration,
+        template_mappings, output_filename)
+
+    del template_mappings['constant_names']
+    del template_mappings['definition_name']
+    del template_mappings['definitions_name']
+    del template_mappings['definitions_description']
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(definitions_name, output_filename)
@@ -176,39 +169,16 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     """
     signature_type = include_header_file.GetCheckSignatureType()
 
-    has_glob = self._HasGlob(project_configuration, signature_type)
+    template_mappings['signature_type'] = signature_type
 
-    templates_path = os.path.join(self._templates_path, 'pyyal_module')
-
-    output_filename = '{0:s}.h'.format(project_configuration.python_module_name)
     output_filename = os.path.join(
-        project_configuration.python_module_name, output_filename)
+        project_configuration.python_module_name,
+        f'{project_configuration.python_module_name:s}.h')
+    self._GenerateSectionsFromOperationsFile(
+        'pyyal_module.h.yaml', 'main', project_configuration,
+        template_mappings, output_filename)
 
-    if signature_type:
-      template_mappings['signature_type'] = signature_type
-
-    template_names = ['header.h', 'includes.h', 'get_version.h']
-
-    if signature_type:
-      template_names.append('check_signature.h')
-
-    if has_glob:
-      template_names.append('glob.h')
-
-    if signature_type:
-      template_names.append('open_new.h')
-
-    template_names.extend(['init.h', 'footer.h'])
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
-
-    if signature_type:
-      del template_mappings['signature_type']
+    del template_mappings['signature_type']
 
     self._FormatHeaderFile(project_configuration, output_filename)
 
@@ -227,15 +197,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       definition_types (list[str]): names of Python module definition types.
       output_writer (OutputWriter): output writer.
     """
+    signature_desription = None
     signature_type = include_header_file.GetCheckSignatureType()
-
-    has_glob = self._HasGlob(project_configuration, signature_type)
-
-    templates_path = os.path.join(self._templates_path, 'pyyal_module')
-
-    output_filename = '{0:s}.c'.format(project_configuration.python_module_name)
-    output_filename = os.path.join(
-        project_configuration.python_module_name, output_filename)
 
     if signature_type:
       signature_desription = (
@@ -245,86 +208,31 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         signature_desription = '{0:s} {1:s}'.format(
             signature_desription, signature_type)
 
-      template_mappings['signature_type'] = signature_type
-      template_mappings['signature_desription'] = signature_desription
-
-    template_names = ['header.c', 'includes-start.c']
-
-    if signature_type:
-      template_names.append('includes-file_object_io_handle.c')
-
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
-
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename)
-
     for type_name in sorted(python_module_types):
       self._SetTypeNameInTemplateMappings(template_mappings, type_name)
-
-      template_filename = os.path.join(templates_path, 'includes-type_object.c')
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-    template_names = ['includes-end.c']
-
-    if signature_type:
-      template_names.append('bfio.c')
-
-    template_names.append('module_methods-start.c')
-
-    if signature_type:
-      template_names.append('module_methods-check_signature.c')
-
-    if has_glob:
-      template_names.append('module_methods-glob.c')
 
     # TODO: add multi-file open support if glob is present.
-    if signature_type:
-      template_names.append('module_methods-open_new.c')
 
-    template_names.extend(['module_methods-end.c', 'get_version.c'])
+    template_mappings['definition_types'] = definition_types
 
-    if signature_type:
-      template_names.append('check_signature.c')
+    template_mappings['python_module_types'] = python_module_types
 
-    # TODO: add condition
-    # template_names.append('glob.c')
+    template_mappings['signature_desription'] = signature_desription
+    template_mappings['signature_type'] = signature_type
 
-    if signature_type:
-      template_names.append('open_new.c')
+    output_filename = os.path.join(
+        project_configuration.python_module_name,
+        f'{project_configuration.python_module_name:s}.c')
+    self._GenerateSectionsFromOperationsFile(
+        'pyyal_module.c.yaml', 'main', project_configuration,
+        template_mappings, output_filename)
 
-    template_names.extend(['module_definition.c', 'init-start.c'])
+    del template_mappings['definition_types']
 
-    template_filenames = [
-        os.path.join(templates_path, template_name)
-        for template_name in template_names]
+    del template_mappings['python_module_types']
 
-    self._GenerateSections(
-        template_filenames, template_mappings, output_filename, access_mode='a')
-
-    for type_name in sorted(python_module_types):
-      self._SetTypeNameInTemplateMappings(template_mappings, type_name)
-
-      if type_name in definition_types:
-        template_filename = 'init-definitions_type_object.c'
-      else:
-        template_filename = 'init-type_object.c'
-
-      template_filename = os.path.join(templates_path, template_filename)
-      self._GenerateSection(
-          template_filename, template_mappings, output_filename,
-          access_mode='a')
-
-    template_filename = os.path.join(templates_path, 'init-end.c')
-    self._GenerateSection(
-        template_filename, template_mappings, output_filename, access_mode='a')
-
-    if signature_type:
-      del template_mappings['signature_type']
-      del template_mappings['signature_desription']
+    del template_mappings['signature_desription']
+    del template_mappings['signature_type']
 
     self._FormatSourceFile(project_configuration, output_filename)
 
@@ -1037,7 +945,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             '\t  (PyCFunction) {0:s}_{1:s}_read_buffer,'.format(
                 project_configuration.python_module_name, type_name),
             '\t  METH_VARARGS | METH_KEYWORDS,',
-            '\t  "read(size) -> Binary string\\n"',
+            '\t  "read(size) -> Bytes\\n"',
             '\t  "\\n"',
             '\t  "{0:s}." }},'.format(read_buffer_description[0][:-1]),
             '',

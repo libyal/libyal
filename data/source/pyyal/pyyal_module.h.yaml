@@ -1,0 +1,69 @@
+# yaldevtools generator specification.
+---
+identifier: generate_footer
+type: template
+file: pyyal_module/footer.h
+placeholders:
+- python_module_name
+---
+identifier: generate_functions_check_signature
+type: template
+condition: "signature_type is not None"
+file: pyyal_module/check_signature.h
+placeholders:
+- python_module_name
+- signature_type
+---
+identifier: generate_functions_get_version
+type: template
+file: pyyal_module/get_version.h
+placeholders:
+- python_module_name
+---
+identifier: generate_functions_glob
+type: template
+condition: "'source_glob' in library_features"
+file: pyyal_module/glob.h
+placeholders:
+- python_module_name
+---
+identifier: generate_functions_init
+type: template
+file: pyyal_module/init.h
+placeholders:
+- python_module_name
+---
+identifier: generate_functions_open_new
+type: template
+condition: "signature_type is not None"
+file: pyyal_module/open_new.h
+placeholders:
+- python_module_name
+- signature_type
+---
+identifier: generate_header
+type: template
+file: pyyal_module/header.h
+placeholders:
+- library_name
+- python_module_authors
+- python_module_copyright
+- python_module_name
+---
+identifier: generate_includes
+type: template
+file: pyyal_module/includes.h
+placeholders:
+- python_module_name
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_includes
+- generate_functions_get_version
+- generate_functions_check_signature
+- generate_functions_glob
+- generate_functions_open_new
+- generate_functions_init
+- generate_footer

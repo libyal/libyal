@@ -1,0 +1,17 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: pyyal_definitions/pyyal_definitions.h
+placeholders:
+- definitions_description
+- definitions_name
+- library_name
+- python_module_authors
+- python_module_copyright
+- python_module_name
+---
+identifier: main
+type: group
+operations:
+- generate_body
