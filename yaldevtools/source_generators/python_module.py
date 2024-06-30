@@ -249,18 +249,19 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     """
     sequence_type_name = self._GetSequenceName(type_name)
 
-    output_filename = '{0:s}_{1:s}.h'.format(
-        project_configuration.python_module_name, sequence_type_name)
-    output_filename = os.path.join(
-        project_configuration.python_module_name, output_filename)
+    template_mappings['sequence_type_description'] = sequence_type_name.replace(
+        '_', ' ')
+    template_mappings['sequence_type_name'] = sequence_type_name
 
-    templates_path = os.path.join(self._templates_path, 'pyyal_sequence_type')
+    output_filename = os.path.join(project_configuration.python_module_name, (
+        f'{project_configuration.python_module_name:s}_'
+        f'{sequence_type_name:s}.h'))
+    self._GenerateSectionsFromOperationsFile(
+        'pyyal_sequence_type.h.yaml', 'main', project_configuration,
+        template_mappings, output_filename)
 
-    self._SetSequenceTypeNameInTemplateMappings(
-        template_mappings, sequence_type_name)
-
-    template_filename = os.path.join(templates_path, 'pyyal_sequence_type.h')
-    self._GenerateSection(template_filename, template_mappings, output_filename)
+    del template_mappings['sequence_type_description']
+    del template_mappings['sequence_type_name']
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(sequence_type_name, output_filename)
@@ -283,13 +284,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     """
     sequence_type_name = self._GetSequenceName(type_name)
 
-    output_filename = '{0:s}_{1:s}.c'.format(
-        project_configuration.python_module_name, sequence_type_name)
-    output_filename = os.path.join(
-        project_configuration.python_module_name, output_filename)
-
-    templates_path = os.path.join(self._templates_path, 'pyyal_sequence_type')
-
     python_module_include_names = set([
         project_configuration.library_name, sequence_type_name, 'libcerror',
         'python'])
@@ -299,9 +293,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     python_module_includes = []
     for include_name in sorted(python_module_include_names):
-      include = '#include "{0:s}_{1:s}.h"'.format(
-          project_configuration.python_module_name, include_name)
-      python_module_includes.append(include)
+      python_module_includes.append((
+          f'#include "{project_configuration.python_module_name:s}_'
+          f'{include_name:s}.h"'))
 
     self._SetSequenceTypeNameInTemplateMappings(
         template_mappings, sequence_type_name)
@@ -309,8 +303,19 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['python_module_includes'] = '\n'.join(
         python_module_includes)
 
-    template_filename = os.path.join(templates_path, 'pyyal_sequence_type.c')
-    self._GenerateSection(template_filename, template_mappings, output_filename)
+    template_mappings['sequence_type_description'] = sequence_type_name.replace(
+        '_', ' ')
+    template_mappings['sequence_type_name'] = sequence_type_name
+
+    output_filename = os.path.join(project_configuration.python_module_name, (
+        f'{project_configuration.python_module_name:s}_'
+        f'{sequence_type_name:s}.c'))
+    self._GenerateSectionsFromOperationsFile(
+        'pyyal_sequence_type.c.yaml', 'main', project_configuration,
+        template_mappings, output_filename)
+
+    del template_mappings['sequence_type_description']
+    del template_mappings['sequence_type_name']
 
     # TODO: change to a generic line modifiers approach.
     self._CorrectDescriptionSpelling(type_name, output_filename)
@@ -336,10 +341,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       has_pseudo_sub_types (Optional[bool]): True if type has pseudo sub types.
       is_pseudo_type (Optional[bool]): True if type is a pseudo type.
     """
-    output_filename = '{0:s}_{1:s}.h'.format(
-        project_configuration.python_module_name, type_name)
     output_filename = os.path.join(
-        project_configuration.python_module_name, output_filename)
+        project_configuration.python_module_name,
+        f'{project_configuration.python_module_name:s}_{type_name:s}.h')
 
     open_support = 'open' in python_function_prototypes
     without_initialize_and_with_free = (
@@ -360,8 +364,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
     if is_pseudo_type:
       base_type_name = 'item'
-      base_type_indicator = '{0:s}_{1:s}_TYPE_{2:s}'.format(
-          project_configuration.library_name, base_type_name, type_name)
+      base_type_indicator = (
+          f'{project_configuration.library_name:s}_{base_type_name:s}_'
+          f'TYPE_{type_name:s}')
       base_type_indicator = base_type_indicator.upper()
 
       template_mappings['base_type_name'] = base_type_name

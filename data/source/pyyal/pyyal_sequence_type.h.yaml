@@ -1,0 +1,17 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: pyyal_sequence_type/body.h
+placeholders:
+- library_name
+- python_module_authors
+- python_module_copyright
+- python_module_name
+- sequence_type_description
+- sequence_type_name
+---
+identifier: main
+type: group
+operations:
+- generate_body

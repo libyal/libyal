@@ -51,8 +51,9 @@ class TemplateString(string.Template):
           value = getattr(value, attribute_name, None)
         value = str(value)
 
-        # TODO: add support for camel_case
-        if modifier == 'lower_case':
+        if modifier == 'camel_case':
+          value = ''.join([word.title() for word in value.split('_')])
+        elif modifier == 'lower_case':
           value = value.lower()
         elif modifier == 'upper_case':
           value = value.upper()
@@ -836,6 +837,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
 
     return self._has_tests
 
+  # TODO: remove if no longer used
   def _SetSequenceTypeNameInTemplateMappings(
       self, template_mappings, type_name):
     """Sets the sequence type name in template mappings.
@@ -848,13 +850,10 @@ class SourceFileGenerator(BaseSourceFileGenerator):
     if not type_name:
       template_mappings['sequence_type_description'] = ''
       template_mappings['sequence_type_name'] = ''
-      template_mappings['sequence_type_name_camel_case'] = ''
     else:
       template_mappings['sequence_type_description'] = type_name.replace(
           '_', ' ')
       template_mappings['sequence_type_name'] = type_name
-      template_mappings['sequence_type_name_camel_case'] = ''.join([
-          word.title() for word in type_name.split('_')])
 
   def _SetSequenceValueNameInTemplateMappings(
       self, template_mappings, value_name):
@@ -898,12 +897,9 @@ class SourceFileGenerator(BaseSourceFileGenerator):
     if not type_name:
       template_mappings['type_description'] = ''
       template_mappings['type_name'] = ''
-      template_mappings['type_name_camel_case'] = ''
     else:
       template_mappings['type_description'] = type_name.replace('_', ' ')
       template_mappings['type_name'] = type_name
-      template_mappings['type_name_camel_case'] = ''.join([
-          word.title() for word in type_name.split('_')])
 
   def _SetValueNameInTemplateMappings(self, template_mappings, value_name):
     """Sets value name in template mappings.
