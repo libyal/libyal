@@ -7,9 +7,11 @@ placeholders:
 - library_name
 - python_module_authors
 - python_module_copyright
+- python_module_includes
 - python_module_name
 - sequence_type_description
 - sequence_type_name
+- type_name
 ---
 identifier: main
 type: group

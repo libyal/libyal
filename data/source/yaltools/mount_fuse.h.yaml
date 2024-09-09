@@ -38,6 +38,9 @@ identifier: generate_includes
 type: template
 file: mount_fuse/includes.h
 modifiers: [sort_lines]
+placeholders:
+- library_name
+- tools_name
 ---
 identifier: generate_listxattr
 type: template

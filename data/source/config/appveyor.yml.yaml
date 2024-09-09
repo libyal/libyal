@@ -214,7 +214,7 @@ file: appveyor.yml/install-start.yml
 ---
 identifier: generate_install_testdata
 type: template
-# TODO: add condition
+condition: "has_test_data_script == True"
 file: appveyor.yml/install-testdata.yml
 ---
 identifier: generate_install_winflexbison

@@ -8,6 +8,27 @@ import os
 from yaldevtools.source_generators import interface
 
 
+class Dependency(object):
+  """Dependency.
+
+  Attributes:
+    is_local (bool): True if the library is included as part of the source.
+    name (str): name.
+  """
+
+  def __init__(self, is_local=False, name=None):
+    """Initializes a dependency.
+
+    Args:
+      is_local (Optional[bool]): True if the library is included as part of the
+          source.
+      name (Optional[str]): name.
+    """
+    super(Dependency, self).__init__()
+    self.is_local = is_local
+    self.name = name
+
+
 class ConfigurationFileGenerator(interface.SourceFileGenerator):
   """Configuration file generator."""
 
@@ -109,10 +130,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       template_mappings (dict[str, str]): template mappings, where the key
           maps to the name of a template variable.
     """
-    templates_path = os.path.join(self._templates_path, 'appveyor.yml')
-
     # if project_configuration.HasDependencyCrypto():
     # TODO: add environment-cygwin64-openssl.yml
+
+    template_mappings['has_test_data_script'] = bool(
+        os.path.isfile('synctestdata.sh'))
 
     template_mappings['pypi_token'] = getattr(
         project_configuration, 'pypi_token_appveyor', '')
@@ -121,6 +143,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         'appveyor.yml.yaml', 'main', project_configuration, template_mappings,
         'appveyor.yml')
 
+    del template_mappings['has_test_data_script']
     del template_mappings['pypi_token']
 
   def _GenerateCodecovYML(self, project_configuration, template_mappings):
@@ -159,61 +182,65 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
-    libraries = list(makefile_am_file.libraries)
+    library_dependencies = [
+        Dependency(is_local=True, name=name)
+        for name in makefile_am_file.library_dependencies]
 
-    library_dependencies = list(makefile_am_file.library_dependencies)
+    libcrypto_index = len(makefile_am_file.library_dependencies)
+    if 'libcaes' in makefile_am_file.library_dependencies:
+      libcaes_index = makefile_am_file.library_dependencies.index('libcaes')
+      libcrypto_index = min(libcrypto_index, libcaes_index)
 
-    libcrypto_index = len(library_dependencies)
-    if 'libcaes' in library_dependencies:
-      libcrypto_index = min(
-          libcrypto_index, library_dependencies.index('libcaes'))
-
-    if 'libhmac' in library_dependencies:
-      libcrypto_index = min(
-          libcrypto_index, library_dependencies.index('libhmac'))
+    if 'libhmac' in makefile_am_file.library_dependencies:
+      libhmac_index = makefile_am_file.library_dependencies.index('libhmac')
+      libcrypto_index = min(libcrypto_index, libhmac_index)
 
     if project_configuration.HasDependencyCrypto():
-      if libcrypto_index == len(library_dependencies):
-        libraries.append('libcrypto')
-        library_dependencies.append('libcrypto')
+      if libcrypto_index == len(makefile_am_file.library_dependencies):
+        dependency = Dependency(name='libcrypto')
+        library_dependencies.append(dependency)
 
     if 'sgutils' in project_configuration.library_build_dependencies:
-      libraries.append('sgutils2')
-      library_dependencies.append('sgutils2')
+      dependency = Dependency(name='sgutils2')
+      library_dependencies.append(dependency)
 
     if 'bzip2' in project_configuration.library_build_dependencies:
-      if libcrypto_index < len(library_dependencies):
-        libraries.insert(libcrypto_index, 'bzip2')
-        library_dependencies.insert(libcrypto_index, 'bzip2')
+      dependency = Dependency(name='bzip2')
+
+      if libcrypto_index < len(makefile_am_file.library_dependencies):
+        library_dependencies.insert(libcrypto_index, dependency)
       else:
-        libraries.append('bzip2')
-        library_dependencies.append('bzip2')
+        library_dependencies.append(dependency)
 
     # Have zlib checked before libcrypto.
     if project_configuration.HasDependencyZlib():
-      if libcrypto_index < len(library_dependencies):
-        libraries.insert(libcrypto_index, 'zlib')
-        library_dependencies.insert(libcrypto_index, 'zlib')
+      dependency = Dependency(name='bzip2')
+
+      if libcrypto_index < len(makefile_am_file.library_dependencies):
+        library_dependencies.insert(libcrypto_index, dependency)
       else:
-        libraries.append('zlib')
-        library_dependencies.append('zlib')
+        library_dependencies.append(dependency)
 
     tools_dependencies = []
     if project_configuration.HasTools():
-      tools_dependencies = list(makefile_am_file.tools_dependencies)
+      tools_dependencies = [
+          Dependency(is_local=True, name=name)
+          for name in makefile_am_file.tools_dependencies]
 
       if 'uuid' in project_configuration.tools_build_dependencies:
-        tools_dependencies.append('libuuid')
+        dependency = Dependency(name='libuuid')
+        tools_dependencies.append(dependency)
 
       if 'fuse' in project_configuration.tools_build_dependencies:
-        tools_dependencies.append('libfuse')
+        dependency = Dependency(name='libfuse')
+        tools_dependencies.append(dependency)
 
     spec_library_tests = []
-    for name in library_dependencies:
-      if name in makefile_am_file.library_dependencies:
-        spec_dependency_test = f'test "x$ac_cv_{name:s}" = xyes'
+    for dependency in library_dependencies:
+      if dependency.name in makefile_am_file.library_dependencies:
+        spec_dependency_test = f'test "x$ac_cv_{dependency.name:s}" = xyes'
       else:
-        spec_dependency_test = f'test "x$ac_cv_{name:s}" != xno'
+        spec_dependency_test = f'test "x$ac_cv_{dependency.name:s}" != xno'
 
       spec_library_tests.append(spec_dependency_test)
 
@@ -224,24 +251,25 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     if project_configuration.HasTools():
       spec_tools_dependencies = list(tools_dependencies)
       if 'crypto' in project_configuration.tools_build_dependencies:
-        spec_tools_dependencies.append('libcrypto')
+        dependency = Dependency(name='libcrypto')
+        spec_tools_dependencies.append(dependency)
 
-      for name in spec_tools_dependencies:
-        if name in ('libcrypto', 'libfuse'):
-          spec_dependency_test = f'test "x$ac_cv_{name:s}" != xno'
+      for dependency in spec_tools_dependencies:
+        if dependency.name in ('libcrypto', 'libfuse'):
+          spec_dependency_test = f'test "x$ac_cv_{dependency.name:s}" != xno'
         else:
-          spec_dependency_test = f'test "x$ac_cv_{name:s}" = xyes'
+          spec_dependency_test = f'test "x$ac_cv_{dependency.name:s}" = xyes'
 
         spec_tools_tests.append(spec_dependency_test)
 
     # TODO: move conditions below to configure.ac.yaml
 
-    # for name in library_dependencies:
-    #   if (name == 'libcrypto' and
+    # for dependency in library_dependencies:
+    #   if (dependency.name == 'libcrypto' and
     #       project_configuration.library_name == 'libcaes'):
     #     continue
 
-    #   if name == 'zlib':
+    #   if dependency.name == 'zlib':
     #     # TODO: make check more generic based on the source itself.
     #     if project_configuration.library_name == 'libewf':
     #       template_filename = 'check_zlib_compress.ac'
@@ -262,14 +290,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     # TODO: add support for build options configuration
 
     build_options = []
-    for name in libraries:
-      if name not in ('bzip2', 'libcrypto', 'zlib'):
-        build_options.append((f'{name:s} support', f'$ac_cv_{name:s}'))
+    for dependency in library_dependencies:
+      if dependency.name not in ('bzip2', 'libcrypto', 'zlib'):
+        build_options.append(
+            (f'{dependency.name:s} support', f'$ac_cv_{dependency.name:s}'))
 
-      if name == 'bzip2':
+      if dependency.name == 'bzip2':
         build_options.append(('BZIP2 compression support', '$ac_cv_bzip2'))
 
-      if name == 'libcaes':
+      if dependency.name == 'libcaes':
         if project_configuration.library_name in ('libbde', 'libluksde'):
           build_options.extend([
               ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'),
@@ -288,7 +317,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           build_options.append(
               ('AES-CBC support', '$ac_cv_libcaes_aes_cbc'))
 
-      elif name == 'libhmac':
+      elif dependency.name == 'libhmac':
         # TODO: make check more generic based on the source itself.
         if project_configuration.library_name in (
             'libewf', 'libfsapfs', 'libfsext', 'libfsfat', 'libfshfs',
@@ -310,14 +339,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
               ('SHA256 support', '$ac_cv_libhmac_sha256'),
               ('SHA512 support', '$ac_cv_libhmac_sha512')])
 
-      elif name == 'libfcrypto':
+      elif dependency.name == 'libfcrypto':
         if project_configuration.library_name == 'libluksde':
           build_options.extend([
               ('ARC4-ECB support', '$ac_cv_libfcrypto'),
               ('Serpent-CBC support', '$ac_cv_libfcrypto'),
               ('Serpent-ECB support', '$ac_cv_libfcrypto')])
 
-      elif name == 'zlib':
+      elif dependency.name == 'zlib':
         if project_configuration.library_name == 'libewf':
           build_options.append(('ADLER32 checksum support', '$ac_cv_adler32'))
 

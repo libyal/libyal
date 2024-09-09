@@ -30,6 +30,6 @@ jobs:
         head -n 20 projects/libyal/Dockerfile > projects/${library_name}/Dockerfile
         echo "RUN git clone --depth 1 https://github.com/libyal/${library_name}.git ${library_name}" >> projects/${library_name}/Dockerfile
         tail -n 3 projects/libyal/Dockerfile >> projects/${library_name}/Dockerfile
-        python3 infra/helper.py build_image --pull ${library_name} 
+        python3 infra/helper.py build_image --pull ${library_name}
         python3 infra/helper.py build_fuzzers --sanitizer address ${library_name}
         python3 infra/helper.py check_build ${library_name}

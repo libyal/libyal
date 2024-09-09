@@ -341,10 +341,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       has_pseudo_sub_types (Optional[bool]): True if type has pseudo sub types.
       is_pseudo_type (Optional[bool]): True if type is a pseudo type.
     """
-    output_filename = os.path.join(
-        project_configuration.python_module_name,
-        f'{project_configuration.python_module_name:s}_{type_name:s}.h')
-
     open_support = 'open' in python_function_prototypes
     without_initialize_and_with_free = (
         'initialize' not in python_function_prototypes and
@@ -373,19 +369,18 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
       template_mappings['base_type_description'] = base_type_name
       template_mappings['base_type_indicator'] = base_type_indicator
 
-    template_names = ['header.h']
+    template_mappings['python_function_prototypes'] = python_function_prototypes
 
-    if open_support:
-      template_names.append('includes_with_input.h')
-    else:
-      template_names.append('includes.h')
+    output_filename = os.path.join(
+        project_configuration.python_module_name,
+        f'{project_configuration.python_module_name:s}_{type_name:s}.h')
+    self._GenerateSectionsFromOperationsFile(
+        'pyyal_type.h.yaml', 'main', project_configuration, template_mappings,
+        output_filename)
 
-    if open_support:
-      template_names.append('typedef_with_input.h')
-    elif with_parent:
-      template_names.append('typedef_with_parent.h')
-    else:
-      template_names.append('typedef.h')
+    del template_mappings['python_function_prototypes']
+
+    template_names = []
 
     if not is_pseudo_type:
       if has_pseudo_sub_types:

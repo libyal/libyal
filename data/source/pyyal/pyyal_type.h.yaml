@@ -1,0 +1,75 @@
+# yaldevtools generator specification.
+---
+identifier: generate_header
+type: template
+file: pyyal_type/header.h
+placeholders:
+- library_name
+- python_module_authors
+- python_module_copyright
+- python_module_name
+- type_name
+---
+identifier: generate_includes
+type: group
+operations:
+- generate_includes_with_input
+- generate_includes_common
+modifiers: [sort_lines]
+---
+identifier: generate_includes_common
+type: template
+file: pyyal_type/includes-common.h
+placeholders:
+- library_name
+- python_module_name
+- type_name
+---
+identifier: generate_includes_with_input
+type: template
+condition: "'open' in python_function_prototypes"
+# TODO: change
+# file: pyyal_type/includes-libbfio.h
+file: pyyal_type/includes_with_input.h
+placeholders:
+- library_name
+- python_module_name
+- type_name
+---
+identifier: generate_typedef
+type: group
+operations:
+- generate_typedef_start
+- generate_typedef_end
+---
+identifier: generate_typedef_end
+type: template
+file: pyyal_type/typedef-end.h
+placeholders:
+- python_module_name
+- type_name
+---
+identifier: generate_typedef_start
+type: template
+file: pyyal_type/typedef-start.h
+placeholders:
+- library_name
+- python_module_name
+- type_name
+---
+identifier: generate_typedef_with_input
+type: template
+condition: "'open' in python_function_prototypes"
+file: pyyal_type/typedef_with_input.h
+---
+identifier: generate_typedef_with_parent
+type: template
+condition: "'initialize' not in python_function_prototypes and 'free' in python_function_prototypes"
+file: pyyal_type/typedef_with_parent.h
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_includes
+- generate_typedef

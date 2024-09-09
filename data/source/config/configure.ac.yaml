@@ -17,7 +17,7 @@ identifier: generate_check_dependency_support
 type: template
 file: configure.ac/check_dependency_support.ac
 placeholders:
-- dependency_name
+- dependency
 ---
 identifier: generate_check_dll_support
 type: template
@@ -28,7 +28,7 @@ placeholders:
 identifier: generate_check_library_dependencies
 type: sequence
 input: library_dependencies
-placeholder: dependency_name
+placeholder: dependency
 operations:
 - generate_check_dependency_support
 ---
@@ -69,7 +69,7 @@ identifier: generate_check_tools_dependencies
 type: sequence
 condition: "'tools' in project_features"
 input: tools_dependencies
-placeholder: dependency_name
+placeholder: dependency
 operations:
 - generate_check_dependency_support
 ---
@@ -103,9 +103,10 @@ file: configure.ac/compiler_language.ac
 ---
 identifier: generate_config_files_dependency
 type: template
+condition: "dependency.is_local == True"
 file: configure.ac/config_files_dependency.ac
 placeholders:
-- dependency_name
+- dependency
 ---
 identifier: generate_config_files_common
 type: template
@@ -145,7 +146,7 @@ placeholders:
 identifier: generate_config_files_library_dependencies
 type: sequence
 input: library_dependencies
-placeholder: dependency_name
+placeholder: dependency
 operations:
 - generate_config_files_dependency
 ---
@@ -187,7 +188,7 @@ identifier: generate_config_files_tools_dependencies
 type: sequence
 condition: "'tools' in project_features"
 input: tools_dependencies
-placeholder: dependency_name
+placeholder: dependency
 operations:
 - generate_config_files_dependency
 ---
