@@ -25,6 +25,7 @@ placeholders:
 identifier: generate_local_libraries
 type: template
 file: gitignore/local_libraries
+condition: "local_libraries != ''"
 placeholders:
 - local_libraries
 ---

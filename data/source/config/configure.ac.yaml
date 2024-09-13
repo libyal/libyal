@@ -240,6 +240,7 @@ file: configure.ac/programs.ac-start
 identifier: generate_spec_requires
 type: template
 file: configure.ac/spec_requires_library.ac
+condition: "spec_library_tests != ''"
 placeholders:
 - library_name
 - spec_library_tests
