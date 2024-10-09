@@ -1,13 +1,23 @@
 # yaldevtools generator specification.
 ---
-identifier: generate_body
+identifier: generate_footer
 type: template
-file: build_shared.yml/body.yml
+file: build_shared.yml/footer.yml
 placeholders:
-- configure_options
 - dpkg_build_dependencies
+---
+identifier: generate_header
+type: template
+file: build_shared.yml/header.yml
+---
+identifier: generate_matrix_wide_character
+type: template
+condition: "'wide_character_type' in library_features"
+file: build_shared.yml/matrix_wide_character.yml
 ---
 identifier: main
 type: group
 operations:
-- generate_body
+- generate_header
+- generate_matrix_wide_character
+- generate_footer

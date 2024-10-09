@@ -690,33 +690,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     del template_mappings['tools_spec_build_requires']
     del template_mappings['tools_spec_requires']
 
-  def _GenerateGitHubActionsBuildSharedYML(
-      self, project_configuration, template_mappings, include_header_file):
-    """Generates the .github/workflows/build_shared.yml configuration file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      template_mappings (dict[str, str]): template mappings, where the key
-          maps to the name of a template variable.
-      include_header_file (LibraryIncludeHeaderFile): library include header
-          file.
-    """
-    if 'wide_character_type' in project_configuration.library_features:
-      configure_options = '--enable-wide-character-type'
-    else:
-      configure_options = ''
-
-    template_mappings['configure_options'] = configure_options
-
-    operations_file_name = os.path.join(
-        'github_workflows', 'build_shared.yml.yaml')
-    output_filename = os.path.join('.github', 'workflows', 'build_shared.yml')
-    self._GenerateSectionsFromOperationsFile(
-        operations_file_name, 'main', project_configuration, template_mappings,
-        output_filename)
-
-    del template_mappings['configure_options']
-
   def _GetBrewBuildDependencies(self, namespace):
     """Retrieves the brew build dependencies.
 
@@ -1052,8 +1025,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         operations_file_name, 'main', project_configuration, template_mappings,
         output_filename)
 
-    self._GenerateGitHubActionsBuildSharedYML(
-        project_configuration, template_mappings, include_header_file)
+    operations_file_name = os.path.join(
+        'github_workflows', 'build_shared.yml.yaml')
+    output_filename = os.path.join('.github', 'workflows', 'build_shared.yml')
+    self._GenerateSectionsFromOperationsFile(
+        operations_file_name, 'main', project_configuration, template_mappings,
+        output_filename)
 
     if project_configuration.HasPythonModule():
       operations_file_name = os.path.join(
