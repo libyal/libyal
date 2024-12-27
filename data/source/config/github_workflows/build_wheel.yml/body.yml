@@ -8,8 +8,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - python-version: '3.7'
-          toxenv: 'py37'
         - python-version: '3.8'
           toxenv: 'py38'
         - python-version: '3.9'
@@ -20,6 +18,8 @@ jobs:
           toxenv: 'py311'
         - python-version: '3.12'
           toxenv: 'py312'
+        - python-version: '3.13'
+          toxenv: 'py313'
     steps:
     - uses: actions/checkout@v4
     - name: Install build dependencies

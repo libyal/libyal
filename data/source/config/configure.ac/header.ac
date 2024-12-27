@@ -1,12 +1,12 @@
 AC_PREREQ([2.71])
 
 AC_INIT(
- [${library_name}],
- [${library_version}],
- [joachim.metz@gmail.com])
+  [${library_name}],
+  [${library_version}],
+  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
- [include/${library_name}.h.in])
+  [include/${library_name}.h.in])
 
 AM_INIT_AUTOMAKE([gnu 1.6 tar-ustar])
 AM_EXTRA_RECURSIVE_TARGETS([sources splint])

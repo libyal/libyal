@@ -894,7 +894,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     mingw_msys2_build_dependencies = [
         'autoconf', 'automake', 'gettext-devel', 'libtool', 'make',
-        'mingw-w64-x86_64-gcc']
+        'mingw-w64-x86_64-gcc', 'pkg-config']
 
     mingw_msys2_build_dependencies.extend(
         namespace.get('mingw_msys2_build_dependencies', None) or [])
@@ -1021,6 +1021,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     operations_file_name = os.path.join(
         'github_workflows', 'build_freebsd.yml.yaml')
     output_filename = os.path.join('.github', 'workflows', 'build_freebsd.yml')
+    self._GenerateSectionsFromOperationsFile(
+        operations_file_name, 'main', project_configuration, template_mappings,
+        output_filename)
+
+    operations_file_name = os.path.join(
+        'github_workflows', 'build_macos.yml.yaml')
+    output_filename = os.path.join('.github', 'workflows', 'build_macos.yml')
     self._GenerateSectionsFromOperationsFile(
         operations_file_name, 'main', project_configuration, template_mappings,
         output_filename)

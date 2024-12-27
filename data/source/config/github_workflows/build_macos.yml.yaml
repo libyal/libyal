@@ -1,0 +1,10 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: build_macos.yml/body.yml
+---
+identifier: main
+type: group
+operations:
+- generate_body
