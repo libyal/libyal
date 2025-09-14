@@ -7,7 +7,7 @@ long_description_content_type = text/plain
 author = Joachim Metz
 author_email = joachim.metz@gmail.com
 license = GNU Lesser General Public License v3 or later (LGPLv3+)
-license_files = COPYING COPYING.LESSER
+license_files = COPYING*
 classifiers =
   Development Status :: ${python_module_development_status}
   Programming Language :: Python

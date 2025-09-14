@@ -1,2 +1,2 @@
-- sh: if ( test `uname -s` = "Darwin" && test $${BUILD_ENVIRONMENT} = "python-tox" ) || test $${BUILD_ENVIRONMENT} = "xcode"; then brew update-reset && brew update -q; fi
+- sh: if ( test `uname -s` = "Darwin" && test $${BUILD_ENVIRONMENT} = "python-tox" ) || test $${BUILD_ENVIRONMENT} = "xcode"; then brew untap homebrew/homebrew-cask-versions && brew update -q; fi
 - sh: if ( test `uname -s` = "Darwin" && test $${BUILD_ENVIRONMENT} = "python-tox" ) || test $${BUILD_ENVIRONMENT} = "xcode"; then brew install -q ${brew_build_dependencies} || true; fi
