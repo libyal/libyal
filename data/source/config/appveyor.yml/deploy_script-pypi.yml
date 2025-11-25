@@ -1,4 +1,3 @@
 - ps: If ($$env:APPVEYOR_REPO_TAG -eq "true" -and $$isWindows -and $$env:BUILD_ENVIRONMENT -eq "python-tox") {
     Invoke-Expression "$${env:PYTHON} -m twine upload dist/*.whl --username __token__ --password $${env:PYPI_TOKEN} --skip-existing" }
 - sh: if test $${APPVEYOR_REPO_TAG} = "true" && test `uname -s` = "Darwin" && test $${BUILD_ENVIRONMENT} = "python-tox"; then twine upload dist/*.whl --username __token__ --password $${PYPI_TOKEN} --skip-existing; fi
-- sh: if test $${APPVEYOR_REPO_TAG} = "true" && test `uname -s` = "Linux" && test $${BUILD_ENVIRONMENT} = "python-tox"; then python3 -m twine upload dist/*.whl --username __token__ --password $${PYPI_TOKEN} --skip-existing; fi

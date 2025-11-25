@@ -1,27 +1,3 @@
-  - TARGET: windows-tox-py38-32bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python38\\python.exe"
-    PYTHON_VERSION: 3.8
-    TOXENV: py38
-  - TARGET: windows-tox-py38-64bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python38-x64\\python.exe"
-    PYTHON_VERSION: 3.8
-    TOXENV: py38
-  - TARGET: windows-tox-py39-32bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python39\\python.exe"
-    PYTHON_VERSION: 3.9
-    TOXENV: py39
-  - TARGET: windows-tox-py39-64bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python39-x64\\python.exe"
-    PYTHON_VERSION: 3.9
-    TOXENV: py39
   - TARGET: windows-tox-py310-32bit
     BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -70,12 +46,18 @@
     PYTHON: "C:\\Python313-x64\\python.exe"
     PYTHON_VERSION: 3.13
     TOXENV: py313
-  - TARGET: macos-tox-py39
+  - TARGET: windows-tox-py314-32bit
     BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    PYTHON_VERSION: 3.9
-    TOXENV: py39
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python314\\python.exe"
+    PYTHON_VERSION: 3.14
+    TOXENV: py314
+  - TARGET: windows-tox-py314-64bit
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python314-x64\\python.exe"
+    PYTHON_VERSION: 3.14
+    TOXENV: py314
   - TARGET: macos-tox-py310
     BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
@@ -100,9 +82,9 @@
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     PYTHON_VERSION: 3.13
     TOXENV: py313
-  - TARGET: linux-tox-py310
+  - TARGET: macos-tox-py314
     BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2204
-    PYTHON_VERSION: 3.10
-    TOXENV: py310
-    AUDITWHEEL_PLAT: manylinux_2_35_x86_64
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.14
+    TOXENV: py314
