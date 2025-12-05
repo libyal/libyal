@@ -18,8 +18,8 @@ import zipfile
 
 from setuptools import Extension
 from setuptools import setup
+from setuptools._distutils.ccompiler import new_compiler
 from setuptools.command.build_ext import build_ext
-from setuptools.ccompiler import new_compiler
 from setuptools.command.sdist import sdist
 
 
