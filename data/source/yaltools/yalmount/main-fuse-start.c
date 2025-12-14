@@ -3,8 +3,8 @@
 	{
 #if defined( HAVE_LIBFUSE3 )
 		// fuse_opt_add_arg: Assertion `!args->argv || args->allocated' failed.
-		${mount_tool_name}mount_fuse_arguments.argc = 0;
-		${mount_tool_name}mount_fuse_arguments.argv = NULL;
+		${mount_tool_name}_fuse_arguments.argc = 0;
+		${mount_tool_name}_fuse_arguments.argv = NULL;
 #endif
 		/* This argument is required but ignored
 		 */

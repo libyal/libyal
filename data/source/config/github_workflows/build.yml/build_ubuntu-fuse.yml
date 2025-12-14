@@ -1,5 +1,5 @@
   build_fuse_ubuntu:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
@@ -7,7 +7,7 @@
           compiler: 'gcc'
           configure_options: ''
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Install build dependencies
       run: |
         sudo apt-get -y install ${dpkg_build_dependencies} libfuse-dev
@@ -23,7 +23,7 @@
       run: |
         tests/runtests.sh
   build_fuse3_ubuntu:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
@@ -31,7 +31,7 @@
           compiler: 'gcc'
           configure_options: ''
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Install build dependencies
       run: |
         sudo apt-get -y install ${dpkg_build_dependencies} libfuse3-dev

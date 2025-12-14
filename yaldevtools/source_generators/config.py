@@ -736,9 +736,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     cygwin_build_dependencies.extend(
         namespace.get('cygwin_build_dependencies', None) or [])
 
-    if 'yacc' in library_build_dependencies:
+    if ('yacc' in library_build_dependencies or
+        'yacc' in tools_build_dependencies):
       cygwin_build_dependencies.append('bison')
-    if 'lex' in library_build_dependencies:
+    if 'lex' in library_build_dependencies or 'lex' in tools_build_dependencies:
       cygwin_build_dependencies.append('flex')
 
     if 'zlib' in library_build_dependencies:

@@ -6,7 +6,7 @@ on:
 permissions: read-all
 jobs:
   build_shared_ubuntu:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:

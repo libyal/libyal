@@ -1,3 +1,0 @@
-- cmd: if [%BUILD_ENVIRONMENT%]==[python-tox] (
-    "%PYTHON%" -m pip install -U tox twine )
-- sh: if test `uname -s` = "Darwin" && test $${BUILD_ENVIRONMENT} = "python-tox"; then brew install -q python@$${PYTHON_VERSION} tox twine-pypi || true; fi

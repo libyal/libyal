@@ -49,11 +49,6 @@ file: appveyor.yml/build_script-nuget.yml
 placeholders:
 - library_name
 ---
-identifier: generate_build_script_python
-type: template
-condition: "'python_bindings' in project_features"
-file: appveyor.yml/build_script-python.yml
----
 identifier: generate_build_script_start
 type: template
 file: appveyor.yml/build_script-start.yml
@@ -71,11 +66,6 @@ identifier: generate_deploy_script_nuget
 type: template
 condition: "'nuget' in project_features"
 file: appveyor.yml/deploy_script-nuget.yml
----
-identifier: generate_deploy_script_pypi
-type: template
-condition: "'python_bindings' in project_features"
-file: appveyor.yml/deploy_script-pypi.yml
 ---
 identifier: generate_deploy_script_start
 type: template
@@ -154,11 +144,6 @@ type: template
 condition: "'python_bindings' in project_features"
 file: appveyor.yml/environment-matrix-vs_with_python.yml
 ---
-identifier: generate_environment_matrix_wheel
-type: template
-condition: "'python_bindings' in project_features"
-file: appveyor.yml/environment-matrix-wheel.yml
----
 identifier: generate_environment_nuget
 type: template
 condition: "'nuget' in project_features"
@@ -202,11 +187,6 @@ type: template
 file: appveyor.yml/install-mingw-msys2.yml
 placeholders:
 - mingw_msys2_build_dependencies
----
-identifier: generate_install_python
-type: template
-condition: "'python_bindings' in project_features"
-file: appveyor.yml/install-python.yml
 ---
 identifier: generate_install_start
 type: template
