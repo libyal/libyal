@@ -825,6 +825,11 @@ class ProjectConfiguration(BaseConfiguration):
     self.tools_features = self._GetOptionalConfigValue(
         config_parser, 'tools', 'features', default_value=[])
 
+    if config_parser.has_section('info_tool'):
+        self.tools_features.append('info_tool')
+    if config_parser.has_section('mount_tool'):
+        self.tools_features.append('mount_tool')
+
     self.tools_names = self._GetOptionalConfigValue(
         config_parser, 'tools', 'names', default_value=[])
 

@@ -9,7 +9,6 @@ operations:
 - generate_artifacts_pypi
 - generate_deploy_script_start
 - generate_deploy_script_nuget
-- generate_deploy_script_pypi
 - generate_deploy_script_end
 ---
 identifier: generate_artifacts_nuget
@@ -149,13 +148,6 @@ type: template
 condition: "'nuget' in project_features"
 file: appveyor.yml/environment-nuget.yml
 ---
-identifier: generate_environment_pypi
-type: template
-condition: "'python_bindings' in project_features"
-file: appveyor.yml/environment-pypi.yml
-placeholders:
-- pypi_token
----
 identifier: generate_install_bzip2
 type: template
 condition: "'bzip2' in library_build_dependencies"
@@ -218,13 +210,11 @@ type: group
 operations:
 - generate_environment
 - generate_environment_nuget
-- generate_environment_pypi
 - generate_environment_matrix
 - generate_environment_matrix_vs_with_python
 - generate_environment_matrix_nuget
 - generate_environment_matrix_macos
 - generate_environment_matrix_macos_python
-- generate_environment_matrix_wheel
 - generate_environment_matrix_cygwin
 - generate_environment_matrix_cygwin_python
 - generate_environment_matrix_cygwin_tools
@@ -239,7 +229,6 @@ operations:
 - generate_install_bzip2
 - generate_install_dokan
 - generate_install_macos
-- generate_install_python
 - generate_install_cygwin
 - generate_install_mingw
 - generate_install_codecov
@@ -247,7 +236,6 @@ operations:
 - generate_build_script_vs_with_python
 - generate_build_script_nuget
 - generate_build_script_macos
-- generate_build_script_python
 - generate_build_script_end
 - generate_test_script
 - generate_after_test

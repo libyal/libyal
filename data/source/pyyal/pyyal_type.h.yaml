@@ -55,6 +55,7 @@ file: pyyal_type/typedef-start.h
 placeholders:
 - library_name
 - python_module_name
+- type_description
 - type_name
 ---
 identifier: generate_typedef_with_input

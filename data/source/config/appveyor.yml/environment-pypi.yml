@@ -1,2 +1,0 @@
-  PYPI_TOKEN:
-    secure: ${pypi_token}
