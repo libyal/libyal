@@ -124,6 +124,12 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
         sorted(makefile_am_file.libraries))
     template_mappings['shared_libs'] = ' '.join(shared_libs)
 
+    template_mappings['test_data_files'] = ' '.join(
+        project_configuration.test_data_files)
+    template_mappings['test_data_path'] = project_configuration.test_data_path
+    template_mappings['test_data_repository'] = (
+        project_configuration.test_data_repository)
+
     if self._experimental:
       self._GenerateRunTestsSh(
           project_configuration, template_mappings, output_writer)
@@ -136,7 +142,8 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
       output_filename = directory_entry
 
       if directory_entry in (
-          'syncbzip2.ps1', 'syncwinflexbison.ps1', 'synczlib.ps1'):
+          'syncbzip2.ps1', 'synctestdata.ps1', 'synctestdata.sh',
+          'syncwinflexbison.ps1', 'synczlib.ps1'):
         if not os.path.exists(output_filename):
           continue
 

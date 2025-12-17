@@ -136,15 +136,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     template_mappings['has_test_data_script'] = bool(
         os.path.isfile('synctestdata.sh'))
 
-    template_mappings['pypi_token'] = getattr(
-        project_configuration, 'pypi_token_appveyor', '')
-
     self._GenerateSectionsFromOperationsFile(
         'appveyor.yml.yaml', 'main', project_configuration, template_mappings,
         'appveyor.yml')
 
     del template_mappings['has_test_data_script']
-    del template_mappings['pypi_token']
 
   def _GenerateCodecovYML(self, project_configuration, template_mappings):
     """Generates the .codecov.yml configuration file.

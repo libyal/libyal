@@ -144,9 +144,14 @@ class ProjectConfiguration(BaseConfiguration):
     python_module_authors (str): authors of the Python module.
     python_module_name (str): name of the Python module, such as "pyyal".
     python_module_year_of_creation (str): year the Python module was created.
-    pypi_token_appveyor (str): secure PyPI API token for use on AppVeyor.
     rpm_build_dependencies (str): rpm build dependencies.
     supports_debug_output (bool): True if the project supports debug output.
+    test_data_files (list[str]): names of test data files within the git
+        repository to retrieve.
+    test_data_path (str): path to the test data within the git repository to
+        retrieve test data from.
+    test_data_repository (str): organization and name of the git repository to
+        retrieve test data from.
     tests_authors (str): authors of the test files.
     tests_example_filename1 (str): name of the first test example filename.
     tests_example_filename2 (str): name of the second test example filename.
@@ -154,6 +159,8 @@ class ProjectConfiguration(BaseConfiguration):
         the export tool.
     tests_export_tool_options (str): command line options used by the tests of
         the export tool.
+    tests_export_tool_profiles (list[str]): command line options profiles used
+        by the tests of the export tool.
     tests_info_tool_input_glob (str): input files glob used by the tests of
         the info tool.
     tests_info_tool_option_sets (list[str]): option sets used by the tests of
@@ -171,6 +178,8 @@ class ProjectConfiguration(BaseConfiguration):
         the verify tool.
     tests_verify_tool_options (str): command line options used by the tests of
         the verify tool.
+    tests_verify_tool_profiles (list[str]): command line options profiles used
+        by the tests of the verify tool.
     tools_authors (str): authors of the tools.
     tools_build_dependencies (str): tools build dependencies.
     tools_description (str): description of the tools.
@@ -260,6 +269,11 @@ class ProjectConfiguration(BaseConfiguration):
     self.mount_tool_source = None
     self.mount_tool_source_type = None
 
+    # Test data configuration.
+    self.test_data_files = None
+    self.test_data_path = None
+    self.test_data_repository = None
+
     # Tests configuration.
     self.tests_authors = None
     self.tests_option_sets = None
@@ -267,6 +281,7 @@ class ProjectConfiguration(BaseConfiguration):
     self.tests_input_glob = None
     self.tests_export_tool_option_sets = None
     self.tests_export_tool_options = None
+    self.tests_export_tool_profiles = None
     self.tests_info_tool_input_glob = None
     self.tests_info_tool_option_sets = None
     self.tests_info_tool_options = None
@@ -306,9 +321,6 @@ class ProjectConfiguration(BaseConfiguration):
 
     # RPM specific configuration.
     self.rpm_build_dependencies = None
-
-    # PyPI configuration.
-    self.pypi_token_appveyor = None
 
     # TODO: add attributes below to docstring.
 
@@ -762,6 +774,20 @@ class ProjectConfiguration(BaseConfiguration):
     self.rpm_build_dependencies = [
         name.split(' ')[0] for name in self.rpm_build_dependencies]
 
+  def _ReadTestDataConfiguration(self, config_parser):
+    """Reads the test data configuration.
+
+    Args:
+      config_parser (ConfigParser): configuration file parser.
+    """
+    self.test_data_path = self._GetOptionalConfigValue(
+        config_parser, 'test_data', 'path', default_value='test_data')
+    self.test_data_repository = self._GetOptionalConfigValue(
+        config_parser, 'test_data', 'repository',
+        default_value='log2timeline/dfvfs')
+    self.test_data_files = self._GetOptionalConfigValue(
+        config_parser, 'test_data', 'files', default_value=[])
+
   def _ReadTestsConfiguration(self, config_parser):
     """Reads the tests configuration.
 
@@ -781,6 +807,8 @@ class ProjectConfiguration(BaseConfiguration):
         config_parser, 'tests', 'export_tool_option_sets', default_value=[])
     self.tests_export_tool_options = self._GetOptionalConfigValue(
         config_parser, 'tests', 'export_tool_options', default_value='')
+    self.tests_export_tool_profiles = self._GetOptionalConfigValue(
+        config_parser, 'tests', 'export_tool_profiles', default_value=[])
 
     self.tests_info_tool_input_glob = self._GetOptionalConfigValue(
         config_parser, 'tests', 'info_tool_input_glob',
@@ -799,6 +827,8 @@ class ProjectConfiguration(BaseConfiguration):
         config_parser, 'tests', 'verify_tool_option_sets', default_value=[])
     self.tests_verify_tool_options = self._GetOptionalConfigValue(
         config_parser, 'tests', 'verify_tool_options', default_value='')
+    self.tests_verify_tool_profiles = self._GetOptionalConfigValue(
+        config_parser, 'tests', 'verify_tool_profiles', default_value=[])
 
     self.tests_example_filename1 = self._GetOptionalConfigValue(
         config_parser, 'tests', 'example_filename1')
@@ -1136,6 +1166,7 @@ class ProjectConfiguration(BaseConfiguration):
     self._ReadDotNetBindingsConfiguration(config_parser)
     self._ReadJavaBindingsConfiguration(config_parser)
     self._ReadToolsConfiguration(config_parser)
+    self._ReadTestDataConfiguration(config_parser)
     self._ReadTestsConfiguration(config_parser)
 
     self._ReadDevelopmentConfiguration(config_parser)
@@ -1150,9 +1181,6 @@ class ProjectConfiguration(BaseConfiguration):
 
     self._ReadDPKGConfiguration(config_parser)
     self._ReadRPMConfiguration(config_parser)
-
-    self.pypi_token_appveyor = self._GetOptionalConfigValue(
-        config_parser, 'pypi', 'appveyor_token', default_value='')
 
     self._ReadInfoToolConfiguration(config_parser)
     self._ReadMountToolConfiguration(config_parser)

@@ -6,7 +6,6 @@ condition: "'nuget' in project_features or 'python_bindings' in project_features
 operations:
 - generate_artifacts_start
 - generate_artifacts_nuget
-- generate_artifacts_pypi
 - generate_deploy_script_start
 - generate_deploy_script_nuget
 - generate_deploy_script_end
@@ -15,11 +14,6 @@ identifier: generate_artifacts_nuget
 type: template
 condition: "'nuget' in project_features"
 file: appveyor.yml/artifacts-nuget.yml
----
-identifier: generate_artifacts_pypi
-type: template
-condition: "'python_bindings' in project_features"
-file: appveyor.yml/artifacts-pypi.yml
 ---
 identifier: generate_artifacts_start
 type: template

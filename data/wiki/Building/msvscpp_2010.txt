@@ -30,15 +30,15 @@ Configuration Properties -> General -> Platform Toolset
 
 Into "Windows7.1SDK" or equivalent.
 
-### msvscpp-convert script
+### msvscpp_convert script
 
 If you've Python installed on your Visual Studio build machine you can try
-running [msvscpp-convert](https://github.com/libyal/vstools/wiki/msvscpp-convert-script)
+running [msvscpp_convert](https://github.com/libyal/vstools/wiki/msvscpp-convert-script)
 to convert the Visual Studio 2008 solution files to 2010 format and add the x64
 settings for you with the option `--extend-with-x64`.
 
 ```
-msvscpp-convert.py --extend-with-x64 --output-format 2010 msvscpp\${project_name}.sln
+msvscpp_convert.py --extend-with-x64 --output-format 2010 msvscpp\${project_name}.sln
 ```
 
 This will create a subdirectory named vs2010 which contains the Visual Studio
