@@ -862,9 +862,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     freebsd_build_dependencies.extend(
         namespace.get('freebsd_build_dependencies', None) or [])
 
-    if 'yacc' in library_build_dependencies:
+    if ('yacc' in library_build_dependencies or
+        'yacc' in tools_build_dependencies):
       freebsd_build_dependencies.append('byacc')
-    if 'lex' in library_build_dependencies:
+    if 'lex' in library_build_dependencies or 'lex' in tools_build_dependencies:
       freebsd_build_dependencies.append('flex')
 
     if ('crypto' in library_build_dependencies or
@@ -887,6 +888,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     """
     library_build_dependencies = namespace.get(
         'library_build_dependencies', None) or []
+    tools_build_dependencies = namespace.get(
+        'tools_build_dependencies', None) or []
     project_features = namespace.get('project_features', None) or []
 
     mingw_msys2_build_dependencies = [
@@ -896,9 +899,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
     mingw_msys2_build_dependencies.extend(
         namespace.get('mingw_msys2_build_dependencies', None) or [])
 
-    if 'yacc' in library_build_dependencies:
+    if ('yacc' in library_build_dependencies or
+        'yacc' in tools_build_dependencies):
       mingw_msys2_build_dependencies.append('msys/bison')
-    if 'lex' in library_build_dependencies:
+    if 'lex' in library_build_dependencies or 'lex' in tools_build_dependencies:
       mingw_msys2_build_dependencies.append('msys/flex')
 
     # TODO: add support for other dependencies.
