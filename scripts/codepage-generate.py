@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # pylint: disable=invalid-name
 """Script to generate libuna source files base on a codepage definition."""
 
@@ -13,7 +12,7 @@ import sys
 from yaldevtools import template_string
 
 
-class SourceGenerator(object):
+class SourceGenerator:
   """Generates libuna source files based on a codepage definition."""
 
   _CODEPAGE_MAPPINGS_REGEX = re.compile(
@@ -25,7 +24,7 @@ class SourceGenerator(object):
     Args:
       templates_path (str): templates path.
     """
-    super(SourceGenerator, self).__init__()
+    super().__init__()
     self._codepage_name = None
     self._codepage_mappings = {}
     self._codepage_values = {}

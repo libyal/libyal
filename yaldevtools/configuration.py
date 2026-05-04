@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The project configuration."""
 
 import configparser
@@ -8,7 +7,7 @@ import os
 from yaldevtools import errors
 
 
-class BaseConfiguration(object):
+class BaseConfiguration:
   """Shared functionality for configuration objects."""
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
@@ -53,7 +52,7 @@ class DTFabricConfiguration(BaseConfiguration):
 
   def __init__(self):
     """Initializes a dtFabric configuration."""
-    super(DTFabricConfiguration, self).__init__()
+    super().__init__()
     self.data_types = {}
 
   def ReadConfiguration(self, config_parser):
@@ -189,7 +188,7 @@ class ProjectConfiguration(BaseConfiguration):
 
   def __init__(self):
     """Initializes a project configuration."""
-    super(ProjectConfiguration, self).__init__()
+    super().__init__()
     self._configuration_file_path = None
     self._has_dpkg = None
     self._has_rpm = None

@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 """Script to convert github.com issues into CSV."""
 
 import argparse
@@ -15,7 +14,7 @@ from urllib import error as urllib_error
 from urllib.request import urlopen
 
 
-class Project(object):
+class Project:
   """Project definition.
 
   Attributes:
@@ -33,7 +32,7 @@ class Project(object):
     Args:
       name (str): name of the project.
     """
-    super(Project, self).__init__()
+    super().__init__()
     self.appveyor_identifier = None
     self.category = None
     self.description = None
@@ -42,12 +41,12 @@ class Project(object):
     self.name = name
 
 
-class ProjectsReader(object):
+class ProjectsReader:
   """Project definition reader."""
 
   def __init__(self):
     """Initializes a projects definition reader."""
-    super(ProjectsReader, self).__init__()
+    super().__init__()
     self._config_parser = configparser.ConfigParser(interpolation=None)
 
   def _GetConfigValue(self, section_name, value_name):
@@ -103,7 +102,7 @@ class ProjectsReader(object):
     return projects
 
 
-class GithubIssueHelper(object):
+class GithubIssueHelper:
   """Github issue helper."""
 
   _KEYS = [
@@ -120,7 +119,7 @@ class GithubIssueHelper(object):
     Args:
       organization (str): name of the organization on Github.
     """
-    super(GithubIssueHelper, self).__init__()
+    super().__init__()
     self._organization = organization
 
   def _DownloadPageContent(self, download_url):
@@ -340,7 +339,7 @@ class GithubIssueHelper(object):
     output_writer.Write('\n')
 
 
-class FileWriter(object):
+class FileWriter:
   """Output writer that writes to file."""
 
   def __init__(self, name):
@@ -349,7 +348,7 @@ class FileWriter(object):
     Args:
       name (str): name of the output.
     """
-    super(FileWriter, self).__init__()
+    super().__init__()
     self._file_object = None
     self._name = name
 
@@ -375,7 +374,7 @@ class FileWriter(object):
     self._file_object.write(data)
 
 
-class StdoutWriter(object):
+class StdoutWriter:
   """Output writer that writes to stdout."""
 
   def Open(self):

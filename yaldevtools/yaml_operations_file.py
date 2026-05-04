@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """YAML-based generator operations file."""
 
 import yaml
@@ -6,7 +5,7 @@ import yaml
 from yaldevtools import resources
 
 
-class YAMLGeneratorOperationsFile(object):
+class YAMLGeneratorOperationsFile:
   """YAML-based generator operations file.
 
   A YAML-based generator operations file contains one or more generator

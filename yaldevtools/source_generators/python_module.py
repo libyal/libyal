@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The source file generator for python module source files."""
 
 import collections

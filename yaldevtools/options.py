@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 """The test and tool options."""
 
 
-class Options(object):
+class Options:
   """Test and tool options."""

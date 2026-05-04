@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # pylint: disable=invalid-name
 """Script to generate libyal m4 files."""
 

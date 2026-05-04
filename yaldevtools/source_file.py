@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The source file classes."""
 
 import collections
@@ -7,7 +6,7 @@ import os
 from yaldevtools import source_code
 
 
-class DefinitionsIncludeHeaderFile(object):
+class DefinitionsIncludeHeaderFile:
   """Definitions include header file.
 
   Attributes:
@@ -20,7 +19,7 @@ class DefinitionsIncludeHeaderFile(object):
     Args:
       path (str): path of the include header file.
     """
-    super(DefinitionsIncludeHeaderFile, self).__init__()
+    super().__init__()
     self._path = path
 
     self.definitions = []
@@ -68,7 +67,7 @@ class DefinitionsIncludeHeaderFile(object):
               line[enum_prefix_length:])
 
 
-class LibraryHeaderFile(object):
+class LibraryHeaderFile:
   """Library header file.
 
   Attributes:
@@ -88,7 +87,7 @@ class LibraryHeaderFile(object):
     Args:
       path (str): path of the header file.
     """
-    super(LibraryHeaderFile, self).__init__()
+    super().__init__()
     self._library_name = None
     self.functions_per_name = collections.OrderedDict()
     self.has_read_write_lock = False
@@ -336,7 +335,7 @@ class LibraryHeaderFile(object):
           source_file_object.close()
 
 
-class LibraryIncludeHeaderFile(object):
+class LibraryIncludeHeaderFile:
   """Library include header file.
 
   Attributes:
@@ -359,7 +358,7 @@ class LibraryIncludeHeaderFile(object):
     Args:
       path (str): path library include header file.
     """
-    super(LibraryIncludeHeaderFile, self).__init__()
+    super().__init__()
     self._api_functions_group = {}
     self._api_functions_with_input_group = {}
     self._api_pseudo_types_group = {}
@@ -717,7 +716,7 @@ class LibraryIncludeHeaderFile(object):
           have_wide_character_type = False
 
 
-class LibraryMakefileAMFile(object):
+class LibraryMakefileAMFile:
   """Library Makefile.am file.
 
   Attributes:
@@ -732,7 +731,7 @@ class LibraryMakefileAMFile(object):
     Args:
       path (str): path of the Makefile.am file.
     """
-    super(LibraryMakefileAMFile, self).__init__()
+    super().__init__()
     self._library_name = None
     self._path = path
     self.cppflags = []
@@ -790,7 +789,7 @@ class LibraryMakefileAMFile(object):
           in_section = 'sources'
 
 
-class MainMakefileAMFile(object):
+class MainMakefileAMFile:
   """Main Makefile.am file.
 
   Attributes:
@@ -806,7 +805,7 @@ class MainMakefileAMFile(object):
     Args:
       path (str): path of the Makefile.am file.
     """
-    super(MainMakefileAMFile, self).__init__()
+    super().__init__()
     self._library_name = None
     self._path = path
     self.libraries = []
@@ -850,7 +849,7 @@ class MainMakefileAMFile(object):
           in_subdirs = True
 
 
-class TestSourceFile(object):
+class TestSourceFile:
   """Test source file.
 
   Attributes:
@@ -864,7 +863,7 @@ class TestSourceFile(object):
     Args:
       path (str): path of the source file.
     """
-    super(TestSourceFile, self).__init__()
+    super().__init__()
     self.functions = {}
     self.path = path
 
@@ -935,7 +934,7 @@ class TestSourceFile(object):
       self._ReadFileObject(project_configuration, source_file_object)
 
 
-class TypesIncludeHeaderFile(object):
+class TypesIncludeHeaderFile:
   """Types include header file.
 
   Attributes:
@@ -948,7 +947,7 @@ class TypesIncludeHeaderFile(object):
     Args:
       path (str): path of the include header file.
     """
-    super(TypesIncludeHeaderFile, self).__init__()
+    super().__init__()
     self._library_name = None
     self._path = path
     self.types = []

@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # pylint: disable=invalid-name
 """Script to automate generation of wiki pages of the libyal libraries."""
 
@@ -13,7 +12,7 @@ import sys
 from yaldevtools import configuration
 
 
-class WikiPageGenerator(object):
+class WikiPageGenerator:
   """Generates wiki pages."""
 
   def __init__(self, templates_path):
@@ -22,7 +21,7 @@ class WikiPageGenerator(object):
     Args:
       templates_path (str): path of the directory containing the template files.
     """
-    super(WikiPageGenerator, self).__init__()
+    super().__init__()
     self._templates_path = templates_path
 
   def _GenerateSection(
@@ -1295,7 +1294,7 @@ class TroubleshootingPageGenerator(WikiPageGenerator):
     return True
 
 
-class FileWriter(object):
+class FileWriter:
   """Class that defines a file output writer."""
 
   def __init__(self, name):
@@ -1304,7 +1303,7 @@ class FileWriter(object):
     Args:
       name (str): name of the output.
     """
-    super(FileWriter, self).__init__()
+    super().__init__()
     self._file_object = None
     self._name = name
 
@@ -1330,7 +1329,7 @@ class FileWriter(object):
     self._file_object.write(data)
 
 
-class StdoutWriter(object):
+class StdoutWriter:
   """Class that defines a stdout output writer."""
 
   def Open(self):

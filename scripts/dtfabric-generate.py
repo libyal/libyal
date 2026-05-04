@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # pylint: disable=invalid-name
 """Script to generate source based on dtFabric format definitions."""
 
@@ -22,7 +21,7 @@ from yaldevtools.source_generators import interface
 # TODO: put signature into constants: libyal_constants.[ch]
 
 
-class TemplateRuntimeStructureMember(object):
+class TemplateRuntimeStructureMember:
   """Runtime structure member.
 
   Attributes:
@@ -35,7 +34,7 @@ class TemplateRuntimeStructureMember(object):
 
   def __init__(self):
     """Initializes a runtime structure member."""
-    super(TemplateRuntimeStructureMember, self).__init__()
+    super().__init__()
     self.data_size = None
     self.data_type = None
     self.description = None
@@ -120,7 +119,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     Args:
       templates_path (str): path of the directory containing the template files.
     """
-    super(SourceGenerator, self).__init__(templates_path)
+    super().__init__(templates_path)
     self._definitions_registry = registry.DataTypeDefinitionsRegistry()
     self._generate_structure_member_contents_hint = True
     self._generate_structure_member_size_hint = False

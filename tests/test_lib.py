@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Shared test case."""
 
 import os

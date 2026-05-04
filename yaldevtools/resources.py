@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Generator resources."""
 
 import ast
 
 
-class GeneratorOperation(object):
+class GeneratorOperation:
   """Generator operation.
 
   Attributes:
@@ -29,7 +28,7 @@ class GeneratorOperation(object):
       identifier (Optional[str]): identifier of the generator operation.
       type (Optional[str]): operation type.
     """
-    super(GeneratorOperation, self).__init__()
+    super().__init__()
     self._condition_expression = None
     self.condition = None
     self.default = None

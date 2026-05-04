@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The source code classes."""
 
 import collections
@@ -6,7 +5,7 @@ import collections
 from yaldevtools import definitions
 
 
-class EnumDeclaration(object):
+class EnumDeclaration:
   """Enumeration type declaration.
 
   Attributes:
@@ -20,12 +19,12 @@ class EnumDeclaration(object):
     Args:
       name (str): name.
     """
-    super(EnumDeclaration, self).__init__()
+    super().__init__()
     self.constants = collections.OrderedDict()
     self.name = name
 
 
-class FunctionArgument(object):
+class FunctionArgument:
   """Function argument."""
 
   def __init__(self, argument_string):
@@ -34,7 +33,7 @@ class FunctionArgument(object):
     Args:
       argument_string (str): function argument.
     """
-    super(FunctionArgument, self).__init__()
+    super().__init__()
     self._strings = [argument_string]
 
   def AddArgumentString(self, argument_string):
@@ -64,7 +63,7 @@ class FunctionArgument(object):
     return argument_string
 
 
-class FunctionPrototype(object):
+class FunctionPrototype:
   """Function prototype.
 
   Attributes:
@@ -91,7 +90,7 @@ class FunctionPrototype(object):
       name (str): name.
       return_type (str): return type.
     """
-    super(FunctionPrototype, self).__init__()
+    super().__init__()
     self._parsed_value = False
     self._value_name = None
     self._value_type = None
@@ -198,7 +197,7 @@ class FunctionPrototype(object):
     return self._value_type
 
 
-class PythonTypeObjectFunctionPrototype(object):
+class PythonTypeObjectFunctionPrototype:
   """Python type object function prototype.
 
   Attributes:
@@ -220,7 +219,7 @@ class PythonTypeObjectFunctionPrototype(object):
       type_name (str): type name.
       type_function (str): type function.
     """
-    super(PythonTypeObjectFunctionPrototype, self).__init__()
+    super().__init__()
     self._name = None
     self._python_module_name = python_module_name
     self._type_function = type_function

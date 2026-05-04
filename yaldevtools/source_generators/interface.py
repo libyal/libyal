@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The source file generator interface."""
 
 import abc
@@ -73,7 +72,7 @@ class TemplateString(string.Template):
     return self.pattern.sub(convert_placeholder, self.template)
 
 
-class BaseSourceFileGenerator(object):
+class BaseSourceFileGenerator:
   """Source file generator."""
 
   _PLACEHOLDER_VALUE_CALLBACKS = {}
@@ -88,7 +87,7 @@ class BaseSourceFileGenerator(object):
     Args:
       templates_path (str): path of the directory containing the template files.
     """
-    super(BaseSourceFileGenerator, self).__init__()
+    super().__init__()
     self._templates_path = templates_path
 
   def _GenerateSection(
@@ -559,7 +558,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
       templates_path (str): path of the directory containing the template files.
       experimental (bool): True if experimental features should be enabled.
     """
-    super(SourceFileGenerator, self).__init__(templates_path)
+    super().__init__(templates_path)
     self._data_directory = data_directory
     self._definitions_include_header_file = None
     self._definitions_include_header_path = None

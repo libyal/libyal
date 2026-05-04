@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Template string generator."""
 
 import string
 
 
-class TemplateStringGenerator(object):
+class TemplateStringGenerator:
   """Template string generator."""
 
   def _ReadTemplateFile(self, path):

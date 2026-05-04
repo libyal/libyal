@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # pylint: disable=invalid-name
 """Script to generate documenation based on dtFabric format definitions."""
 
@@ -16,7 +15,7 @@ from dtfabric import registry
 from yaldevtools import template_string
 
 
-class AsciidocFormatDocumentGenerator(object):
+class AsciidocFormatDocumentGenerator:
   """Asciidoc format document generator."""
 
   _APPENDICES_TEMPLATE_FILE = 'appendices.asciidoc'
@@ -30,7 +29,7 @@ class AsciidocFormatDocumentGenerator(object):
     Args:
       templates_path (str): templates path.
     """
-    super(AsciidocFormatDocumentGenerator, self).__init__()
+    super().__init__()
     self._definitions_registry = registry.DataTypeDefinitionsRegistry()
     self._templates_path = templates_path
     self._template_string_generator = template_string.TemplateStringGenerator()

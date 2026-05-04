@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """The output writers."""
 
 
-class FileWriter(object):
+class FileWriter:
   """File output writer."""
 
   def __init__(self, output_directory):
@@ -11,7 +10,7 @@ class FileWriter(object):
     Args:
       output_directory (str): path of the output directory.
     """
-    super(FileWriter, self).__init__()
+    super().__init__()
     self._output_directory = output_directory
 
   def WriteFile(self, file_path, file_data, access_mode='w'):
@@ -26,7 +25,7 @@ class FileWriter(object):
       file_object.write(file_data)
 
 
-class StdoutWriter(object):
+class StdoutWriter:
   """Stdout output writer."""
 
   # pylint: disable=unused-argument

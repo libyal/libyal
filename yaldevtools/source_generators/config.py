@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The source file generator for configuration files."""
 
 import glob
@@ -8,7 +7,7 @@ import os
 from yaldevtools.source_generators import interface
 
 
-class Dependency(object):
+class Dependency:
   """Dependency.
 
   Attributes:
@@ -24,7 +23,7 @@ class Dependency(object):
           source.
       name (Optional[str]): name.
     """
-    super(Dependency, self).__init__()
+    super().__init__()
     self.is_local = is_local
     self.name = name
 

@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # pylint: disable=invalid-name
 """Libyal CLI source format helper."""
 
@@ -8,17 +7,17 @@ import sys
 
 # TODO: have the SourceFormatter use the GroupModifier to detect a group
 # of lines it applies to and then make the necessary changes.
-class GroupModifier(object):
+class GroupModifier:
   """Group of lines modifier."""
 
 
 # TODO: have the SourceFormatter use the LineModifier to detect a line
 # it applies to and then make the necessary changes.
-class LineModifier(object):
+class LineModifier:
   """Line modifier."""
 
 
-class Variable(object):
+class Variable:
   """C variable."""
 
   _TYPE_SORT_RANKING = [
@@ -66,7 +65,7 @@ class Variable(object):
     except ValueError:
       variable_type_sort_ranking = 0
 
-    super(Variable, self).__init__()
+    super().__init__()
     self.is_pointer = is_pointer
     self.name = name
     self.modifiers = modifiers
@@ -158,7 +157,7 @@ class Variable(object):
     return (self.name > variable.name) - (self.name < variable.name)
 
 
-class SourceFormatter(object):
+class SourceFormatter:
   """C source formatter."""
 
   def VerticalAlignEqualSigns(self, lines, alignment_offset):

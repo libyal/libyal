@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # pylint: disable=invalid-name
 """Script to format a source file."""
 
@@ -9,7 +8,7 @@ import sys
 from yaldevtools import source_formatter
 
 
-class SourceFileParser(object):
+class SourceFileParser:
   """Source file parser."""
 
   _STATE_NONE = 0
@@ -17,7 +16,7 @@ class SourceFileParser(object):
 
   def __init__(self):
     """Initializes a source file parser."""
-    super(SourceFileParser, self).__init__()
+    super().__init__()
     self._functions = []
 
   def ReadFile(self, path):

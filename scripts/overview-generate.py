@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # pylint: disable=invalid-name
 """Script to automate generation of an overview of the libyal libraries."""
 
@@ -14,7 +13,7 @@ import string
 import sys
 
 
-class Project(object):
+class Project:
   """Project definition.
 
   Attributes:
@@ -33,7 +32,7 @@ class Project(object):
     Args:
       name (str): name.
     """
-    super(Project, self).__init__()
+    super().__init__()
     self.appveyor_identifier = None
     self.category = None
     self.description = None
@@ -43,12 +42,12 @@ class Project(object):
     self.name = name
 
 
-class ProjectsReader(object):
+class ProjectsReader:
   """Project definition reader."""
 
   def __init__(self):
     """Initializes a projects definition reader."""
-    super(ProjectsReader, self).__init__()
+    super().__init__()
     self._config_parser = configparser.ConfigParser(interpolation=None)
 
   def _GetConfigValue(self, section_name, value_name):
@@ -106,7 +105,7 @@ class ProjectsReader(object):
     return projects
 
 
-class ConfigureAcFile(object):
+class ConfigureAcFile:
   """Configure.ac file.
 
   Attributes:
@@ -120,7 +119,7 @@ class ConfigureAcFile(object):
     Args:
       path (str): path of the configure.ac file.
     """
-    super(ConfigureAcFile, self).__init__()
+    super().__init__()
     self._path = path
 
     self.name = os.path.basename(path)
@@ -153,7 +152,7 @@ class ConfigureAcFile(object):
     return False
 
 
-class DefinitionsHeaderFile(object):
+class DefinitionsHeaderFile:
   """Definitions header file.
 
   Attributes:
@@ -167,7 +166,7 @@ class DefinitionsHeaderFile(object):
     Args:
       path (str): path of the definitions header file.
     """
-    super(DefinitionsHeaderFile, self).__init__()
+    super().__init__()
     self._path = path
 
     self.name = os.path.basename(path)
@@ -197,7 +196,7 @@ class DefinitionsHeaderFile(object):
     return False
 
 
-class M4ScriptFile(object):
+class M4ScriptFile:
   """M4 script file.
 
   Attributes:
@@ -211,7 +210,7 @@ class M4ScriptFile(object):
     Args:
       path (str): path of the m4 script file.
     """
-    super(M4ScriptFile, self).__init__()
+    super().__init__()
     self._path = path
 
     self.name = os.path.basename(path)
@@ -237,7 +236,7 @@ class M4ScriptFile(object):
     return False
 
 
-class ScriptFile(object):
+class ScriptFile:
   """Script or configuration file.
 
   Attributes:
@@ -251,7 +250,7 @@ class ScriptFile(object):
     Args:
       path (str): path of the script or configuration file.
     """
-    super(ScriptFile, self).__init__()
+    super().__init__()
     self._path = path
 
     self.name = os.path.basename(path)
@@ -277,7 +276,7 @@ class ScriptFile(object):
     return False
 
 
-class WikiPageGenerator(object):
+class WikiPageGenerator:
   """Generates wiki pages."""
 
   _CATEGORIES = {
@@ -332,7 +331,7 @@ class WikiPageGenerator(object):
       data_directory (str): path of the data directory.
       templates_path (str): path of the directory containing the template files.
     """
-    super(WikiPageGenerator, self).__init__()
+    super().__init__()
     self._data_directory = data_directory
     self._templates_path = templates_path
 
@@ -1063,7 +1062,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
             'table_entry.txt', template_mappings, output_writer)
 
 
-class FileWriter(object):
+class FileWriter:
   """File-based output writer."""
 
   def __init__(self, name):
@@ -1072,7 +1071,7 @@ class FileWriter(object):
     Args:
       name (str): path of the output file.
     """
-    super(FileWriter, self).__init__()
+    super().__init__()
     self._file_object = None
     self._name = name
 
@@ -1098,7 +1097,7 @@ class FileWriter(object):
     self._file_object.write(data)
 
 
-class StdoutWriter(object):
+class StdoutWriter:
   """Stdout-based output writer."""
 
   def Open(self):

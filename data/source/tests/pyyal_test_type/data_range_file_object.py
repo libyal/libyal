@@ -1,4 +1,4 @@
-class DataRangeFileObject(object):
+class DataRangeFileObject:
   """File-like object that maps an in-file data range."""
 
   def __init__(self, path, range_offset, range_size):
@@ -14,7 +14,7 @@ class DataRangeFileObject(object):
       stat_object = os.stat(path)
       range_size = stat_object.st_size
 
-    super(DataRangeFileObject, self).__init__()
+    super().__init__()
     self._current_offset = 0
     self._file_object = open(path, "rb")
     self._range_offset = range_offset

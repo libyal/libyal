@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for the source file generator for common source files."""
 
 import os

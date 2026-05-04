@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for the template string generator."""
 
 import unittest

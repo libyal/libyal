@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The source file generator for man page files."""
 
 import difflib

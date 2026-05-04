@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The source file generator for test source files."""
 
 import logging
