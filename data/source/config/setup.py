@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 #
 # Script to build and install Python-bindings.
 # Version: 20251125
@@ -163,12 +163,12 @@ class custom_sdist(sdist):
     dist_files.append(("sdist", "", sdist_package_file))
 
 
-class ProjectInformation:
+class ProjectInformation(object):
   """Project information."""
 
   def __init__(self):
     """Initializes project information."""
-    super().__init__()
+    super(ProjectInformation, self).__init__()
     self.include_directories = []
     self.library_name = None
     self.library_names = []
