@@ -726,7 +726,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         'tools_build_dependencies', None) or []
     project_features = namespace.get('project_features', None) or []
 
-    cygwin_build_dependencies = ['gettext-devel', 'wget']
+    cygwin_build_dependencies = ['gettext-devel']
 
     cygwin_build_dependencies.extend(
         namespace.get('cygwin_build_dependencies', None) or [])

@@ -1,4 +1,8 @@
 - ps: If ($$env:BUILD_ENVIRONMENT -eq "cygwin64") {
-    (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86_64.exe", "C:\\cygwin64\\setup-x86_64.exe") }
+    Invoke-WebRequest -Uri "https://cygwin.com/setup-x86_64.exe" -Outfile C:\cygwin64\setup-x86_64.exe }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com ${cygwin_build_dependencies} )
+- ps: If ($$env:BUILD_ENVIRONMENT -eq "cygwin64" -And -Not (Test-Path ..\config.guess)) {
+    Invoke-WebRequest -Uri "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD" -Outfile ..\config.guess }
+- ps: If ($$env:BUILD_ENVIRONMENT -eq "cygwin64" -And -Not (Test-Path ..\config.sub)) {
+    Invoke-WebRequest -Uri "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" -Outfile ..\config.sub }
