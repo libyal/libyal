@@ -1,0 +1,8 @@
+  coverage:
+    runs-on: $${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          compiler: 'gcc'
+          configure_options: '--enable-wide-character-type'

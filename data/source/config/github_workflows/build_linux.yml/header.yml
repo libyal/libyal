@@ -1,5 +1,5 @@
-# Build from source.
-name: build
+# Build from source on Linux.
+name: build_linux
 on: [push, pull_request]
 permissions: read-all
 jobs:

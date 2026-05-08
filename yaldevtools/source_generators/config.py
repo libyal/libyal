@@ -1012,8 +1012,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     self._GenerateGitignore(project_configuration, template_mappings)
 
-    operations_file_name = os.path.join('github_workflows', 'build.yml.yaml')
-    output_filename = os.path.join('.github', 'workflows', 'build.yml')
+    operations_file_name = os.path.join(
+        'github_workflows', 'build_linux.yml.yaml')
+    output_filename = os.path.join('.github', 'workflows', 'build_linux.yml')
     self._GenerateSectionsFromOperationsFile(
         operations_file_name, 'main', project_configuration, template_mappings,
         output_filename)
@@ -1032,12 +1033,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         operations_file_name, 'main', project_configuration, template_mappings,
         output_filename)
 
-    operations_file_name = os.path.join(
-        'github_workflows', 'build_shared.yml.yaml')
-    output_filename = os.path.join('.github', 'workflows', 'build_shared.yml')
-    self._GenerateSectionsFromOperationsFile(
-        operations_file_name, 'main', project_configuration, template_mappings,
-        output_filename)
+    if os.path.isdir('ossfuzz'):
+      operations_file_name = os.path.join(
+          'github_workflows', 'build_ossfuzz.yml.yaml')
+      output_filename = os.path.join(
+          '.github', 'workflows', 'build_ossfuzz.yml')
+      self._GenerateSectionsFromOperationsFile(
+          operations_file_name, 'main', project_configuration,
+          template_mappings, output_filename)
 
     if project_configuration.HasPythonModule():
       operations_file_name = os.path.join(
@@ -1047,14 +1050,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           operations_file_name, 'main', project_configuration,
           template_mappings, output_filename)
 
-    if os.path.isdir('ossfuzz'):
-      operations_file_name = os.path.join(
-          'github_workflows', 'build_ossfuzz.yml.yaml')
-      output_filename = os.path.join(
-          '.github', 'workflows', 'build_ossfuzz.yml')
-      self._GenerateSectionsFromOperationsFile(
-          operations_file_name, 'main', project_configuration,
-          template_mappings, output_filename)
+    operations_file_name = os.path.join(
+        'github_workflows', 'build_windows.yml.yaml')
+    output_filename = os.path.join('.github', 'workflows', 'build_windows.yml')
+    self._GenerateSectionsFromOperationsFile(
+        operations_file_name, 'main', project_configuration, template_mappings,
+        output_filename)
 
     self._GenerateAppVeyorYML(project_configuration, template_mappings)
 

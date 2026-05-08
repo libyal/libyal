@@ -1,17 +1,17 @@
-  build_ubuntu:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: $${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - architecture: 'x86'
+        - os: ubuntu-24.04
           compiler: 'clang'
           configure_options: ''
-        - architecture: 'x64'
+        - os: ubuntu-24.04-arm
           compiler: 'clang'
           configure_options: ''
-        - architecture: 'x86'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: ''
-        - architecture: 'x64'
+        - os: ubuntu-24.04-arm
           compiler: 'gcc'
           configure_options: ''
