@@ -168,10 +168,10 @@ file: configure.ac/config_files_rpm_spec.ac
 placeholders:
 - library_name
 ---
-identifier: generate_config_files_setup_cfg
+identifier: generate_config_files_pyproject_toml
 type: template
 condition: "'python_bindings' in project_features"
-file: configure.ac/config_files_setup_cfg.ac
+file: configure.ac/config_files_pyproject_toml.ac
 ---
 identifier: generate_config_files_start
 type: template
@@ -294,7 +294,7 @@ operations:
 - generate_config_files_headers
 - generate_config_files_dotnet_rc
 - generate_config_files_rpm_spec
-- generate_config_files_setup_cfg
+- generate_config_files_pyproject_toml
 - generate_config_files_end
 - generate_output
 - generate_notice

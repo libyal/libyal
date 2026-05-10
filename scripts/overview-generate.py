@@ -422,8 +422,8 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
           github_actions_status = (
               '[![build](https://github.com/libyal/{0:s}/actions/workflows/'
-              'build.yml/badge.svg)](https://github.com/libyal/{0:s}/actions/'
-              'workflows/build.yml)').format(project.name)
+              'build_linux.yml/badge.svg)](https://github.com/libyal/{0:s}/actions/'
+              'workflows/build_linux.yml)').format(project.name)
 
           if project.appveyor_identifier:
             appveyor_build_status = (

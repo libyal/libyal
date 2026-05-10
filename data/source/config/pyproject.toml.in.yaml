@@ -2,10 +2,11 @@
 ---
 identifier: generate_body
 type: template
-file: setup.cfg.in/body
+file: pyproject.toml.in/body
 placeholders:
 - library_name
 - python_module_development_status
+- python_module_name
 ---
 identifier: main
 type: group

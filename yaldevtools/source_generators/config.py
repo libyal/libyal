@@ -979,14 +979,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
       if not os.path.isfile(template_filename):
         continue
 
-      # TODO: skip operator definitons files based on header.
+      # TODO: skip operator definition files based on header.
       if directory_entry in (
           'acinclude.m4.yaml', 'appveyor.yml.yaml', 'codecov.yml.yaml',
           'configure.ac.yaml', 'gitignore.yaml', 'libyal.spec.in.yaml',
-          'setup.cfg.in.yaml', 'tox.ini.yaml'):
+          'pyproject.toml.in.yaml', 'tox.ini.yaml'):
         continue
 
-      if (directory_entry in ('pyproject.toml', 'setup.py') and
+      if (directory_entry == '_build.py' and
           not project_configuration.HasPythonModule()):
         continue
 
@@ -1070,8 +1070,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     if project_configuration.HasPythonModule():
       self._GenerateSectionsFromOperationsFile(
-          'setup.cfg.in.yaml', 'main', project_configuration,
-          template_mappings, 'setup.cfg.in')
+          'pyproject.toml.in.yaml', 'main', project_configuration,
+          template_mappings, 'pyproject.toml.in')
 
       self._GenerateSectionsFromOperationsFile(
           'tox.ini.yaml', 'main', project_configuration, template_mappings,

@@ -1,0 +1,11 @@
+    - name: Download test data
+      run: |
+        if (Test-Path .\synctestdata.ps1) { .\synctestdata.ps1 }
+    - name: Building from source
+      run: |
+        .\synclibs.ps1 -UseHead
+        .\autogen.ps1
+        .\build.ps1 -VisualStudioVersion 2022 -Configuration Release -Platform x64 -PythonPath $${{ env.pythonLocation }} -VSToolsOptions "--extend-with-x64 --no-python-dll"
+    - name: Run tests
+      run: |
+        .\runtests.ps1

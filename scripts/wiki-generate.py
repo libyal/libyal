@@ -668,10 +668,6 @@ class WikiPageGenerator:
     if project_configuration.HasPythonModule():
       macos_pkg_configure_options = ' --enable-python --with-pyprefix'
 
-    if project_configuration.HasPythonModule():
-      building_table_of_contents += (
-          '* [Using setup.py](Building#using-setuppy)\n')
-
     development_table_of_contents += (
         '* [C/C++ development](C-development)\n')
 
@@ -984,9 +980,6 @@ class BuildingPageGenerator(WikiPageGenerator):
       self._GenerateSection('rpm.txt', template_mappings, output_writer)
 
     self._GenerateSection('macos_pkg.txt', template_mappings, output_writer)
-
-    if project_configuration.HasPythonModule():
-      self._GenerateSection('setup_py.txt', template_mappings, output_writer)
 
   def HasContent(self, project_configuration):
     """Determines if the generator will generate content.

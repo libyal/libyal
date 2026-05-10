@@ -15,10 +15,3 @@ then
 	exit $${EXIT_FAILURE};
 fi
 
-PYTHON=`which python 2> /dev/null`;
-
-if test -f "setup.py" && ! run_setup_py_tests $${PYTHON};
-then
-	exit $${EXIT_FAILURE};
-fi
-

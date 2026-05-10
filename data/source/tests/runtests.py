@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Script to run Python test scripts.
 #
-# Version: 20231024
+# Version: 20260505
 
 import glob
 import os

@@ -22,7 +22,6 @@ jobs:
       run: |
         brew update -q
         brew install -q autoconf automake gettext gnu-sed libtool pkg-config || true
-        brew link --force gettext
         ln -s /usr/local/bin/glibtoolize /usr/local/bin/libtoolize
     - name: Download test data
       run: |

@@ -24,9 +24,6 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
 
     template_names = ['header.sh', 'functions.sh']
 
-    if project_configuration.HasPythonModule():
-      template_names.append('functions-python.sh')
-
     template_names.append('configure-start.sh')
 
     template_names.append('configure-debug_output.sh')
