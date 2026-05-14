@@ -1,0 +1,15 @@
+# Building a Python wheel
+The Python build module can be used to create a Python wheel.
+
+To create a wheel in the dist sub directory:
+
+```
+python -m build --outdir=dist --wheel
+```
+
+To install the wheel:
+
+```
+python -m pip install --find-links=dist --no-index ${project_name}-python
+```
+

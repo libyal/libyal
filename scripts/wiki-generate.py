@@ -12,6 +12,65 @@ import sys
 from yaldevtools import configuration
 
 
+class TemplateString(string.Template):
+  """Template string."""
+
+  idpattern = r'(?a:[_a-z][_a-z0-9.]*(|:[_a-z][_a-z0-9]*))'
+
+  def substitute(self, mapping=None):
+    """Substitutes placeholders in the template string.
+
+    Args:
+      mapping (dict[str, str]): values of placeholders.
+    """
+    def convert_placeholder(match):
+      """Converts a placeholder into a mapped value.
+
+      Args:
+        match (re.Match): expression match.
+
+      Returns:
+        str: mapped value.
+
+      Raises:
+        ValueError: if the pattern is not supported.
+      """
+      identifier = match.group('named') or match.group('braced')
+      if identifier is not None:
+        identifier, _, modifier = identifier.partition(':')
+
+        identifiers = identifier.split('.')
+        try:
+          value = mapping[identifiers[0]]
+        except KeyError:
+          raise ValueError(f'No mapping for placeholder: {identifiers[0]:s}')
+
+        for attribute_name in identifiers[1:]:
+          value = getattr(value, attribute_name, None)
+        value = str(value)
+
+        if modifier == 'camel_case':
+          value = ''.join([word.title() for word in value.split('_')])
+        elif modifier == 'lower_case':
+          value = value.lower()
+        elif modifier == 'upper_case':
+          value = value.upper()
+        elif modifier:
+          raise ValueError('Unrecognized modifier in pattern', self.pattern)
+
+        return value
+
+      if match.group('escaped') is not None:
+        return self.delimiter
+
+      if match.group('invalid') is not None:
+        self._invalid(match)
+
+      raise ValueError('Unrecognized named group in pattern', self.pattern)
+
+    return self.pattern.sub(convert_placeholder, self.template)
+
+
 class WikiPageGenerator:
   """Generates wiki pages."""
 
@@ -35,7 +94,7 @@ class WikiPageGenerator:
       output_writer (OutputWriter): output writer.
     """
     template_string = self._ReadTemplateFile(template_filename)
-    output_data = template_string.substitute(template_mappings)
+    output_data = template_string.substitute(mapping=template_mappings)
     output_writer.Write(output_data)
 
   def _GetCygwinBuildDependencies(self, project_configuration):
@@ -631,9 +690,12 @@ class WikiPageGenerator:
           '* [Using Debian package tools (DEB)]'
           '(Building#using-debian-package-tools-deb)\n')
 
-      dpkg_build_dependencies = self._GetDpkgBuildDependencies(
-          project_configuration)
-      dpkg_build_dependencies = ' '.join(dpkg_build_dependencies)
+      dpkg_build_dependencies = [
+          'autotools-dev', 'build-essential', 'debhelper', 'dh-autoreconf',
+          'dh-python', 'fakeroot', 'pkg-config']
+      dpkg_build_dependencies.extend(
+          self._GetDpkgBuildDependencies(project_configuration))
+      dpkg_build_dependencies = ' '.join(sorted(dpkg_build_dependencies))
 
       dpkg_filenames = self._GetDpkgFilenames(project_configuration)
       dpkg_filenames = '\n'.join(dpkg_filenames)
@@ -667,6 +729,10 @@ class WikiPageGenerator:
     macos_pkg_configure_options = ''
     if project_configuration.HasPythonModule():
       macos_pkg_configure_options = ' --enable-python --with-pyprefix'
+
+    if project_configuration.HasPythonModule():
+      building_table_of_contents += (
+          '* [Building a Python wheel](Building#building-a-python-wheel)\n')
 
     development_table_of_contents += (
         '* [C/C++ development](C-development)\n')
@@ -863,14 +929,18 @@ class WikiPageGenerator:
       filename (str): path of the file containing the template string.
 
     Returns:
-      string.Template: template string.
+      TemplateString: template string.
     """
     path = os.path.join(self._templates_path, filename)
 
-    with open(path, 'r', encoding='utf8') as file_object:
+    # Read with binary mode to make sure end of line characters are not
+    # converted.
+    with open(path, 'rb') as file_object:
       file_data = file_object.read()
 
-    return string.Template(file_data)
+    file_data = file_data.decode('utf8')
+
+    return TemplateString(file_data)
 
   @abc.abstractmethod
   def Generate(self, project_configuration, output_writer):
@@ -980,6 +1050,9 @@ class BuildingPageGenerator(WikiPageGenerator):
       self._GenerateSection('rpm.txt', template_mappings, output_writer)
 
     self._GenerateSection('macos_pkg.txt', template_mappings, output_writer)
+
+    if project_configuration.HasPythonModule():
+      self._GenerateSection('python_wheel.txt', template_mappings, output_writer)
 
   def HasContent(self, project_configuration):
     """Determines if the generator will generate content.

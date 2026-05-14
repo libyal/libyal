@@ -209,7 +209,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
     # Have zlib checked before libcrypto.
     if project_configuration.HasDependencyZlib():
-      dependency = Dependency(name='bzip2')
+      dependency = Dependency(name='zlib')
 
       if libcrypto_index < len(makefile_am_file.library_dependencies):
         library_dependencies.insert(libcrypto_index, dependency)

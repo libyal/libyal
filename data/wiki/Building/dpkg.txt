@@ -3,7 +3,7 @@
 To build ${project_name} using the Debian package tools make sure you have the following packages installed:
 
 ```
-sudo apt install autotools-dev build-essential debhelper dh-autoreconf dh-python fakeroot pkg-config ${dpkg_build_dependencies}
+sudo apt install ${dpkg_build_dependencies}
 ```
 
 If you downloaded the source using git make sure to run ./configure at least once to generate the dpkg packaging files.
