@@ -4,7 +4,6 @@ import abc
 import datetime
 import logging
 import os
-import re
 import string
 import time
 

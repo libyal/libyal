@@ -296,8 +296,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         #     else:
         #       template_filename = 'check_zlib_inflate.ac'
 
-        templates_path = os.path.join(self._templates_path, "configure.ac")
-
         # TODO: add support for Makefile in documents (libuna)
 
         # TODO: add support for build options configuration
@@ -544,7 +542,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             "configure.ac",
         )
-
         del template_mappings["library_dependencies"]
         del template_mappings["notice_message"]
         del template_mappings["spec_library_tests"]

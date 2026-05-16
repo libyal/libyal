@@ -190,14 +190,14 @@ class SourceFormatter:
 
             indentation = set(line[index:end_index])
             if indentation == set([" "]) or indentation == set([" ", "\t"]):
-                line = "{0:s}\t{1:s}".format(line[:index], line[end_index:])
+                line = "\t".join([line[:index], line[end_index:]])
                 line_length = len(line)
 
             index += 1
 
         while index < line_length:
             if line[index] == "\t":
-                line = "{0:s}        {1:s}".format(line[:index], line[index + 1 :])
+                line = "        ".join([line[:index], line[index + 1 :]])
                 line_length = len(line)
 
             index += 1
@@ -286,18 +286,16 @@ class SourceFormatter:
                     indentation_level += 1
 
                 # TODO: handle switch case with return.
-                elif in_switch_case and (
-                    stripped_line == "break;"
-                    or line == "{0:s}}}".format("\t" * (indentation_level - 1))
-                ):
-                    in_switch_case = False
-                    indentation_level -= 1
+                elif in_switch_case:
+                    indentation = "\t" * (indentation_level - 1)
+                    if stripped_line == "break;" or line == f"{indentation:s}}}":
+                        in_switch_case = False
+                        indentation_level -= 1
 
-                elif not in_switch_case and (
-                    stripped_line.startswith("case ") or stripped_line == "default:"
-                ):
-                    in_switch_case = True
-                    indentation_level += 1
+                else:
+                    if stripped_line.startswith("case ") or stripped_line == "default:":
+                        in_switch_case = True
+                        indentation_level += 1
 
             elif line == "{":
                 in_function = True
@@ -384,7 +382,7 @@ class SourceFormatter:
                 alignment_size = alignment_offset - len(formatted_prefix)
                 alignment = " " * alignment_size
 
-                line = "{0:s}{1:s}={2:s}".format(prefix, alignment, suffix)
+                line = f"{prefix:s}{alignment:s}={suffix:s}"
 
             aligned_lines.append(line)
 

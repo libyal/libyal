@@ -55,7 +55,6 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
                 project_configuration.library_name.upper()
             )
         )
-
         in_internal_types = False
 
         internal_types = []
@@ -86,7 +85,6 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         self._VerticalAlignTabs(output_filename)
 
     def Generate(self, project_configuration, output_writer):
@@ -121,20 +119,18 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
         notify_header_file = os.path.join(
             library_path, "{0:s}_notify.h".format(project_configuration.library_name)
         )
-
         if include_header_file.types:
             longest_type_name = max(include_header_file.types, key=len)
-            longest_library_debug_type_prefix = (
-                "typedef struct {0:s}_{1:s} {{}}"
-            ).format(project_configuration.library_name, longest_type_name)
+            # longest_library_debug_type_prefix = (
+            #     "typedef struct {0:s}_{1:s} {{}}"
+            # ).format(project_configuration.library_name, longest_type_name)
 
         library_debug_type_definitions = []
         type_definitions = []
         for type_name in include_header_file.types:
-            library_debug_type_prefix = "typedef struct {0:s}_{1:s} {{}}".format(
-                project_configuration.library_name, type_name
-            )
-
+            # library_debug_type_prefix = "typedef struct {0:s}_{1:s} {{}}".format(
+            #     project_configuration.library_name, type_name
+            # )
             library_debug_type_definition = (
                 "typedef struct {0:s}_{1:s} {{}}\t{0:s}_{1:s}_t;"
             ).format(project_configuration.library_name, type_name)
@@ -158,7 +154,6 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateTypesHeader(
             project_configuration, template_mappings, output_writer
         )
-
         for directory_entry in os.listdir(self._templates_path):
             if not directory_entry.startswith("libyal"):
                 continue
@@ -210,7 +205,6 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
             output_filename = os.path.join(
                 project_configuration.library_name, output_filename
             )
-
             if not directory_entry in (
                 "libyal.c",
                 "libyal_extern.h",

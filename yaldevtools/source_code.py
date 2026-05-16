@@ -57,9 +57,7 @@ class FunctionArgument:
             argument_string = self._strings[0]
 
         elif number_of_strings > 1:
-            argument_string = "{0:s}{1:s}".format(
-                self._strings[0], ", ".join(self._strings[1:])
-            )
+            argument_string = "".join([self._strings[0], ", ".join(self._strings[1:])])
 
         return argument_string
 
@@ -131,7 +129,7 @@ class FunctionPrototype:
         argument_strings = []
         for function_argument in self.arguments:
             argument_string = function_argument.CopyToString()
-            argument_string = '"{0:s}"'.format(argument_string)
+            argument_string = f'"{argument_string:s}"'
             argument_strings.append(argument_string)
 
         return " ".join(argument_strings)
@@ -238,8 +236,8 @@ class PythonTypeObjectFunctionPrototype:
     def name(self):
         """str: name."""
         if self._name is None:
-            self._name = "{0:s}_{1:s}_{2:s}".format(
-                self._python_module_name, self._type_name, self.type_function
+            self._name = "_".join(
+                [self._python_module_name, self._type_name, self.type_function]
             )
 
         return self._name
@@ -254,7 +252,8 @@ class PythonTypeObjectFunctionPrototype:
         if self._type_function.startswith(
             "copy_"
         ) and not self._type_function.startswith("copy_from_"):
-            return "get_{0:s}".format(self._type_function[5:])
+            type_name = self._type_function[5]
+            return f"get_{type_name:s}"
 
         if self._type_function.startswith(
             "get_utf8_"
@@ -401,8 +400,8 @@ class PythonTypeObjectFunctionPrototype:
             value_name = value_name.replace("_", " ")
 
         if type_function == "get_ascii_codepage":
-            description = ("The codepage used for ASCII strings in the {0:s}.").format(
-                self._type_name
+            description = (
+                f"The codepage used for ASCII strings in the {self._type_name:s}."
             )
 
         elif type_function == "get_data_as_boolean":
@@ -425,13 +424,13 @@ class PythonTypeObjectFunctionPrototype:
             if type_name:
                 type_name = type_name.replace("_", " ")
 
-            description = "Indicates the {0:s} is {1:s}.".format(type_name, value_name)
+            description = f"Indicates the {type_name:s} is {value_name:s}."
 
         elif self.value_description:
-            description = "The {0:s}.".format(self.value_description)
+            description = f"The {self.value_description:s}."
 
         elif value_name:
-            description = "The {0:s}.".format(value_name)
+            description = f"The {value_name:s}."
 
         return description
 
@@ -480,7 +479,7 @@ class PythonTypeObjectFunctionPrototype:
             and self.return_values
             and "None" in self.return_values
         ):
-            data_type_description = "{0:s} or None".format(data_type_description)
+            data_type_description = f"{data_type_description:s} or None"
 
         return data_type_description
 
@@ -503,13 +502,11 @@ class PythonTypeObjectFunctionPrototype:
             value_name = value_name.replace("_", " ")
 
         if type_function == "close":
-            description = ["Closes a {0:s}.".format(type_name)]
+            description = [f"Closes a {type_name:s}."]
 
         elif type_function == "get_ascii_codepage":
             description = [
-                (
-                    "Retrieves the codepage for ASCII strings used in " "the {0:s}."
-                ).format(type_name)
+                f"Retrieves the codepage for ASCII strings used in the {type_name:s}."
             ]
 
         elif type_function == "get_data_as_boolean":
@@ -528,31 +525,24 @@ class PythonTypeObjectFunctionPrototype:
             description = ["Retrieves the data as a string."]
 
         elif type_function == "get_string":
-            description = [
-                "Retrieves the {0:s} formatted as a string.".format(type_name)
-            ]
-
+            description = [f"Retrieves the {type_name:s} formatted as a string."]
         elif type_function == "open":
-            description = ["Opens a {0:s}.".format(type_name)]
+            description = [f"Opens a {type_name:s}."]
 
         elif type_function == "open_file_object":
-            description = [
-                ("Opens a {0:s} using a file-like object.").format(type_name)
-            ]
-
+            description = [f"Opens a {type_name:s} using a file-like object."]
         elif type_function == "read_buffer":
             if self.value_description:
-                description = [
-                    "Reads a buffer of {0:s}.".format(self.value_description)
-                ]
+                description = [f"Reads a buffer of {self.value_description:s}."]
             else:
                 description = ["Reads a buffer of data."]
 
         elif type_function == "read_buffer_at_offset":
             if self.value_description:
                 description = [
-                    "Reads a buffer of {0:s} at a specific offset.".format(
-                        self.value_description
+                    (
+                        f"Reads a buffer of {self.value_description:s} at a specific "
+                        f"offset."
                     )
                 ]
             else:
@@ -561,19 +551,17 @@ class PythonTypeObjectFunctionPrototype:
         elif type_function == "seek_offset":
             if self.value_description:
                 description = [
-                    "Seeks an offset within the {0:s}.".format(self.value_description)
+                    f"Seeks an offset within the {self.value_description:s}."
                 ]
             else:
                 description = ["Seeks an offset within the data."]
 
         elif type_function == "set_ascii_codepage":
             description = [
-                ("Sets the codepage for ASCII strings used in the " "{0:s}.").format(
-                    type_name
-                ),
+                f"Sets the codepage for ASCII strings used in the {type_name:s}.",
                 (
-                    "Expects the codepage to be a string containing a Python "
-                    "codec definition."
+                    "Expects the codepage to be a string containing a Python codec "
+                    "definition."
                 ),
             ]
 
@@ -581,22 +569,22 @@ class PythonTypeObjectFunctionPrototype:
             description = ["Sets the parent file."]
 
         elif type_function == "signal_abort":
-            description = [
-                "Signals the {0:s} to abort the current activity.".format(type_name)
-            ]
+            description = [f"Signals the {type_name:s} to abort the current activity."]
 
         elif self.function_type == definitions.FUNCTION_TYPE_GET_BY_INDEX:
             _, _, argument_suffix = self.arguments[0].rpartition("_")
             if self.value_description:
                 description = [
-                    "Retrieves the {0:s} specified by the {1:s}.".format(
-                        self.value_description, argument_suffix
+                    (
+                        f"Retrieves the {self.value_description:s} specified by the "
+                        f"{argument_suffix:s}."
                     )
                 ]
             else:
                 description = [
-                    "Retrieves the {0:s} specified by the {1:s}.".format(
-                        value_name, argument_suffix
+                    (
+                        f"Retrieves the {value_name:s} specified by the "
+                        f"{argument_suffix:s}."
                     )
                 ]
 
@@ -608,40 +596,38 @@ class PythonTypeObjectFunctionPrototype:
             _, _, type_function_suffix = type_function.partition("_by_")
             if self.value_description:
                 description = [
-                    "Retrieves the {0:s} specified by the {1:s}.".format(
-                        self.value_description, type_function_suffix
+                    (
+                        f"Retrieves the {self.value_description:s} specified by the "
+                        f"{type_function_suffix:s}."
                     )
                 ]
             else:
                 description = [
-                    "Retrieves the {0:s} specified by the {1:s}.".format(
-                        value_name, type_function_suffix
+                    (
+                        f"Retrieves the {value_name:s} specified by the "
+                        f"{type_function_suffix:s}."
                     )
                 ]
 
         elif self.function_type == definitions.FUNCTION_TYPE_COPY_FROM:
 
             # TODO: fix value name.
-            description = [
-                "Copies the {0:s} from the {1:s}.".format(type_name, value_name)
-            ]
+            description = [f"Copies the {type_name:s} from the {value_name:s}."]
 
         elif self.function_type in (
             definitions.FUNCTION_TYPE_COPY,
             definitions.FUNCTION_TYPE_GET,
         ):
             if self.value_description:
-                description = ["Retrieves the {0:s}.".format(self.value_description)]
+                description = [f"Retrieves the {self.value_description:s}."]
             else:
-                description = ["Retrieves the {0:s}.".format(value_name)]
+                description = [f"Retrieves the {value_name:s}."]
 
         elif self.function_type == definitions.FUNCTION_TYPE_IS:
-            description = [
-                "Determines if the {0:s} is {1:s}.".format(type_name, value_name)
-            ]
+            description = [f"Determines if the {type_name:s} is {value_name:s}."]
 
         elif self.function_type == definitions.FUNCTION_TYPE_SET:
-            description = ["Sets the {0:s}.".format(value_name)]
+            description = ["Sets the {value_name:s}."]
 
         return description
 

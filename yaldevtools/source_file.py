@@ -23,6 +23,7 @@ class DefinitionsIncludeHeaderFile:
         self._path = path
 
         self.definitions = []
+        self.enum_declarations = []
 
     def Read(self, project_configuration):
         """Reads the include header file.
@@ -320,7 +321,7 @@ class LibraryHeaderFile:
         header_file_path = self.path
         if not os.path.exists(header_file_path):
             # Fallback to .h.in file if available.
-            header_file_path = "{0:s}.in".format(self.path)
+            header_file_path = f"{self.path:s}.in"
 
         if not os.path.exists(header_file_path):
             raise IOError("Missing include header file: {0:s}".format(self.path))
@@ -328,7 +329,8 @@ class LibraryHeaderFile:
         source_file_path = "{0:s}.c".format(self.path[:-2])
         with open(header_file_path, "r", encoding="utf8") as header_file_object:
             if os.path.exists(source_file_path):
-                source_file_object = open(source_file_path, "r", encoding="utf8")
+                # pylint: disable=consider-using-with
+                source_file_object = open(source_file_path, encoding="utf8")
             else:
                 source_file_object = None
 
@@ -336,7 +338,6 @@ class LibraryHeaderFile:
                 self._ReadFileObject(
                     project_configuration, header_file_object, source_file_object
                 )
-
             finally:
                 if source_file_object:
                     source_file_object.close()
