@@ -2,4 +2,4 @@
 
 
 class ConfigurationError(Exception):
-  """Configuration error."""
+    """Configuration error."""

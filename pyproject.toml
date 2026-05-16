@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yaldevtools"
+version = "20260516"
+description = "libyal development tools"
+maintainers = [
+    { name = "Joachim Metz", email = "joachim.metz@gmail.com" },
+]
+license = "Apache-2.0"
+license-files = ["AUTHORS", "LICENSE"]
+readme = "README.md"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "PyYAML >= 3.10",
+]
+
+[project.urls]
+Documentation = "https://github.com/libyal/libyal/blob/main/README.md"
+Homepage = "https://github.com/libyal/libyal"
+Repository = "https://github.com/libyal/libyal"
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+include = "\\.pyi?$"
+force-exclude = """
+(
+    data/
+)
+"""
+
+[tool.docformatter]
+black = true
+non-cap = []
+non-strict = true
+
+[tool.setuptools]
+package-dir = {"yaldevtools" = "yaldevtools"}

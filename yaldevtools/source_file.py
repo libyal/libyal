@@ -7,966 +7,994 @@ from yaldevtools import source_code
 
 
 class DefinitionsIncludeHeaderFile:
-  """Definitions include header file.
+    """Definitions include header file.
 
-  Attributes:
-    enum_declarations (list[EnumDeclaration]): enumeration type declarations.
-  """
-
-  def __init__(self, path):
-    """Initializes a definitions include header file.
-
-    Args:
-      path (str): path of the include header file.
+    Attributes:
+      enum_declarations (list[EnumDeclaration]): enumeration type declarations.
     """
-    super().__init__()
-    self._path = path
 
-    self.definitions = []
+    def __init__(self, path):
+        """Initializes a definitions include header file.
 
-  def Read(self, project_configuration):
-    """Reads the include header file.
+        Args:
+          path (str): path of the include header file.
+        """
+        super().__init__()
+        self._path = path
 
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-    """
-    self.enum_declarations = []
+        self.definitions = []
 
-    enum_prefix = 'enum {0:s}'.format(
-        project_configuration.library_name.upper())
-    enum_prefix_length = len(enum_prefix)
+    def Read(self, project_configuration):
+        """Reads the include header file.
 
-    in_enum = False
-    enum_declaration = None
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+        """
+        self.enum_declarations = []
 
-    with open(self._path, 'r', encoding='utf8') as file_object:
-      for line in file_object.readlines():
-        line = line.strip()
+        enum_prefix = "enum {0:s}".format(project_configuration.library_name.upper())
+        enum_prefix_length = len(enum_prefix)
 
-        if in_enum:
-          if line.startswith('};'):
-            in_enum = False
+        in_enum = False
+        enum_declaration = None
 
-            self.enum_declarations.append(enum_declaration)
-            enum_declaration = None
+        with open(self._path, "r", encoding="utf8") as file_object:
+            for line in file_object.readlines():
+                line = line.strip()
 
-          elif not line.startswith('{'):
-            definition, _, value = line.partition('=')
+                if in_enum:
+                    if line.startswith("};"):
+                        in_enum = False
 
-            definition = definition.strip()
-            definition = definition.rstrip(',')
+                        self.enum_declarations.append(enum_declaration)
+                        enum_declaration = None
 
-            value = value.strip()
-            value = value.rstrip(',')
+                    elif not line.startswith("{"):
+                        definition, _, value = line.partition("=")
 
-            enum_declaration.constants[definition] = value
+                        definition = definition.strip()
+                        definition = definition.rstrip(",")
 
-        if line.startswith(enum_prefix):
-          in_enum = True
-          enum_declaration = source_code.EnumDeclaration(
-              line[enum_prefix_length:])
+                        value = value.strip()
+                        value = value.rstrip(",")
+
+                        enum_declaration.constants[definition] = value
+
+                if line.startswith(enum_prefix):
+                    in_enum = True
+                    enum_declaration = source_code.EnumDeclaration(
+                        line[enum_prefix_length:]
+                    )
 
 
 class LibraryHeaderFile:
-  """Library header file.
+    """Library header file.
 
-  Attributes:
-    functions_per_name (dict[str, list[FunctionPrototype]]): function
-        prototypes per name.
-    has_read_write_lock (bool): True if the header uses a thread read/write
-        lock.
-    have_internal_functions (bool): True if the header defines internal, non
-        extern, functions.
-    path (str): path of the header file.
-    types (list[str]): type names.
-  """
-
-  def __init__(self, path):
-    """Initializes a library header file.
-
-    Args:
+    Attributes:
+      functions_per_name (dict[str, list[FunctionPrototype]]): function
+          prototypes per name.
+      has_read_write_lock (bool): True if the header uses a thread read/write
+          lock.
+      have_internal_functions (bool): True if the header defines internal, non
+          extern, functions.
       path (str): path of the header file.
+      types (list[str]): type names.
     """
-    super().__init__()
-    self._library_name = None
-    self.functions_per_name = collections.OrderedDict()
-    self.has_read_write_lock = False
-    self.have_internal_functions = False
-    self.path = path
-    self.types = []
 
-  def _ReadFileObject(
-      self, project_configuration, header_file_object, source_file_object):
-    """Reads a header file-like object.
+    def __init__(self, path):
+        """Initializes a library header file.
 
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      header_file_object (file): header file-like object.
-      source_file_object (file): source file-like object or None if not
-          available.
-    """
-    self._library_name = project_configuration.library_name
+        Args:
+          path (str): path of the header file.
+        """
+        super().__init__()
+        self._library_name = None
+        self.functions_per_name = collections.OrderedDict()
+        self.has_read_write_lock = False
+        self.have_internal_functions = False
+        self.path = path
+        self.types = []
 
-    self.functions_per_name = collections.OrderedDict()
-    self.types = []
+    def _ReadFileObject(
+        self, project_configuration, header_file_object, source_file_object
+    ):
+        """Reads a header file-like object.
 
-    define_extern = '{0:s}_EXTERN'.format(self._library_name.upper())
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          header_file_object (file): header file-like object.
+          source_file_object (file): source file-like object or None if not
+              available.
+        """
+        self._library_name = project_configuration.library_name
 
-    define_have_debug_output = '#if defined( HAVE_DEBUG_OUTPUT )'
+        self.functions_per_name = collections.OrderedDict()
+        self.types = []
 
-    define_have_wide_character_type = (
-        '#if defined( HAVE_WIDE_CHARACTER_TYPE )')
+        define_extern = "{0:s}_EXTERN".format(self._library_name.upper())
 
-    function_argument = None
-    function_prototype = None
-    have_extern = False
-    have_debug_output = False
-    have_wide_character_type = False
-    in_function_prototype = False
+        define_have_debug_output = "#if defined( HAVE_DEBUG_OUTPUT )"
 
-    for line in header_file_object.readlines():
-      line = line.strip()
+        define_have_wide_character_type = "#if defined( HAVE_WIDE_CHARACTER_TYPE )"
 
-      if in_function_prototype:
-        # Check if we have a callback function argument.
-        if line.endswith('('):
-          argument_string = '{0:s} '.format(line)
-          function_argument = source_code.FunctionArgument(argument_string)
-
-        else:
-          if line.endswith(' );'):
-            argument_string = line[:-3]
-
-          else:
-            # Get the part of the line before the ','.
-            argument_string, _, _ = line.partition(',')
-
-          if not function_argument:
-            function_prototype.AddArgumentString(argument_string)
-
-          else:
-            function_argument.AddArgumentString(argument_string)
-
-        if function_argument and line.endswith(' ),'):
-          function_prototype.AddArgument(function_argument)
-          function_argument = None
-
-        elif line.endswith(' );'):
-          self.functions_per_name[function_prototype.name] = (
-              function_prototype)
-
-          function_prototype = None
-          in_function_prototype = False
-          have_extern = False
-
-      elif line.endswith('('):
-        function_line = line
-
-        # Get the part of the line before the library name.
-        data_type, _, _ = line.partition(self._library_name)
-
-        # Get the part of the line after the data type.
-        line = line[len(data_type):]
-        data_type = data_type.strip()
-
-        # Get the part of the remainder of the line before the '('.
-        name, _, _ = line.partition('(')
-
-        return_values = None
-        value_description = None
-        if source_file_object:
-          source_line = source_file_object.readline()
-
-          while source_line:
-            if source_line.startswith('/* Reads '):
-              value_description = source_line.strip()
-              value_description = value_description[9:]
-
-              if value_description.endswith(
-                  ' at the current offset into a buffer'):
-                value_description = value_description[:-36]
-
-              elif value_description.endswith(' at a specific offset'):
-                value_description = value_description[:-21]
-
-            elif source_line.startswith('/* Retrieves '):
-              value_description = source_line.strip()
-              value_description = value_description[13:]
-
-              if value_description.startswith('a '):
-                value_description = value_description[2:]
-              elif value_description.startswith('an '):
-                value_description = value_description[3:]
-              elif value_description.startswith('the '):
-                value_description = value_description[4:]
-
-              if value_description.startswith(
-                  '64-bit FILETIME value containing the '):
-                value_description = value_description[37:]
-              elif value_description.startswith('specific '):
-                value_description = value_description[9:]
-
-              if (value_description.startswith('UTF-8 ') or
-                  value_description.startswith('UTF-16 ')):
-                if value_description.startswith('UTF-8 '):
-                  value_description = value_description[6:]
-                elif value_description.startswith('UTF-16 '):
-                  value_description = value_description[7:]
-
-                if value_description.startswith('encoded '):
-                  value_description = value_description[8:]
-
-              if value_description.startswith('string value of '):
-                value_description = value_description[16:]
-
-              if value_description.startswith('a '):
-                value_description = value_description[2:]
-              elif value_description.startswith('an '):
-                value_description = value_description[3:]
-              elif value_description.startswith('the '):
-                value_description = value_description[4:]
-
-            elif source_line.startswith(
-                '/* Seeks a certain offset within the '):
-              value_description = source_line.strip()
-              value_description = value_description[37:]
-
-            elif source_line.startswith(' * Returns '):
-              return_values = set()
-              if ' -1 ' in source_line:
-                return_values.add('-1')
-              if ' 0 ' in source_line:
-                return_values.add('0')
-              if ' 1 ' in source_line:
-                return_values.add('1')
-              if ' NULL ' in source_line:
-                return_values.add('NULL')
-
-            elif function_line == source_line.strip():
-              break
-
-            source_line = source_file_object.readline()
-
-        function_prototype = source_code.FunctionPrototype(name, data_type)
-        function_prototype.have_extern = have_extern
-        function_prototype.have_debug_output = have_debug_output
-        function_prototype.have_wide_character_type = (
-            have_wide_character_type)
-        function_prototype.return_values = return_values
-        function_prototype.value_description = value_description
-
-        if not have_extern:
-          self.have_internal_functions = True
-
-        in_function_prototype = True
-
-      elif line.startswith(define_extern):
-        have_extern = True
-
-      elif line.startswith(define_have_debug_output):
-        have_debug_output = True
-
-      elif line.startswith(define_have_wide_character_type):
-        have_wide_character_type = True
-
-      elif line.startswith('#endif'):
+        function_argument = None
+        function_prototype = None
+        have_extern = False
         have_debug_output = False
         have_wide_character_type = False
+        in_function_prototype = False
 
-      elif line.startswith('typedef struct '):
-        type_name = line.split(' ')[2]
-        self.types.append(type_name)
+        for line in header_file_object.readlines():
+            line = line.strip()
 
-      elif line == 'libcthreads_read_write_lock_t *read_write_lock;':
-        self.has_read_write_lock = True
+            if in_function_prototype:
+                # Check if we have a callback function argument.
+                if line.endswith("("):
+                    argument_string = "{0:s} ".format(line)
+                    function_argument = source_code.FunctionArgument(argument_string)
 
-    self.types = sorted(self.types)
+                else:
+                    if line.endswith(" );"):
+                        argument_string = line[:-3]
 
-  def GetTypeFunction(self, type_name, type_function):
-    """Retrieves the function prototype of a specific type function.
+                    else:
+                        # Get the part of the line before the ','.
+                        argument_string, _, _ = line.partition(",")
 
-    Args:
-      type_name (str): type name.
-      type_function (str): type function.
+                    if not function_argument:
+                        function_prototype.AddArgumentString(argument_string)
 
-    Returns:
-      FunctionPrototype: function prototype of the type function or None
-          if no such function.
-    """
-    if type_function.startswith('internal_'):
-      function_name = '{0:s}_internal_{1:s}_{2:s}'.format(
-          self._library_name, type_name, type_function[9:])
-    else:
-      function_name = '{0:s}_{1:s}_{2:s}'.format(
-          self._library_name, type_name, type_function)
-    return self.functions_per_name.get(function_name, None)
+                    else:
+                        function_argument.AddArgumentString(argument_string)
 
-  def Read(self, project_configuration):
-    """Reads a header file.
+                if function_argument and line.endswith(" ),"):
+                    function_prototype.AddArgument(function_argument)
+                    function_argument = None
 
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
+                elif line.endswith(" );"):
+                    self.functions_per_name[function_prototype.name] = (
+                        function_prototype
+                    )
 
-    Raises:
-      IOError: if the include header file is missing.
-      OSError: if the include header file is missing.
-    """
-    header_file_path = self.path
-    if not os.path.exists(header_file_path):
-      # Fallback to .h.in file if available.
-      header_file_path = '{0:s}.in'.format(self.path)
+                    function_prototype = None
+                    in_function_prototype = False
+                    have_extern = False
 
-    if not os.path.exists(header_file_path):
-      raise IOError('Missing include header file: {0:s}'.format(self.path))
+            elif line.endswith("("):
+                function_line = line
 
-    source_file_path = '{0:s}.c'.format(self.path[:-2])
-    with open(header_file_path, 'r', encoding='utf8') as header_file_object:
-      if os.path.exists(source_file_path):
-        source_file_object = open(source_file_path, 'r', encoding='utf8')
-      else:
-        source_file_object = None
+                # Get the part of the line before the library name.
+                data_type, _, _ = line.partition(self._library_name)
 
-      try:
-        self._ReadFileObject(
-            project_configuration, header_file_object, source_file_object)
+                # Get the part of the line after the data type.
+                line = line[len(data_type) :]
+                data_type = data_type.strip()
 
-      finally:
-        if source_file_object:
-          source_file_object.close()
+                # Get the part of the remainder of the line before the '('.
+                name, _, _ = line.partition("(")
+
+                return_values = None
+                value_description = None
+                if source_file_object:
+                    source_line = source_file_object.readline()
+
+                    while source_line:
+                        if source_line.startswith("/* Reads "):
+                            value_description = source_line.strip()
+                            value_description = value_description[9:]
+
+                            if value_description.endswith(
+                                " at the current offset into a buffer"
+                            ):
+                                value_description = value_description[:-36]
+
+                            elif value_description.endswith(" at a specific offset"):
+                                value_description = value_description[:-21]
+
+                        elif source_line.startswith("/* Retrieves "):
+                            value_description = source_line.strip()
+                            value_description = value_description[13:]
+
+                            if value_description.startswith("a "):
+                                value_description = value_description[2:]
+                            elif value_description.startswith("an "):
+                                value_description = value_description[3:]
+                            elif value_description.startswith("the "):
+                                value_description = value_description[4:]
+
+                            if value_description.startswith(
+                                "64-bit FILETIME value containing the "
+                            ):
+                                value_description = value_description[37:]
+                            elif value_description.startswith("specific "):
+                                value_description = value_description[9:]
+
+                            if value_description.startswith(
+                                "UTF-8 "
+                            ) or value_description.startswith("UTF-16 "):
+                                if value_description.startswith("UTF-8 "):
+                                    value_description = value_description[6:]
+                                elif value_description.startswith("UTF-16 "):
+                                    value_description = value_description[7:]
+
+                                if value_description.startswith("encoded "):
+                                    value_description = value_description[8:]
+
+                            if value_description.startswith("string value of "):
+                                value_description = value_description[16:]
+
+                            if value_description.startswith("a "):
+                                value_description = value_description[2:]
+                            elif value_description.startswith("an "):
+                                value_description = value_description[3:]
+                            elif value_description.startswith("the "):
+                                value_description = value_description[4:]
+
+                        elif source_line.startswith(
+                            "/* Seeks a certain offset within the "
+                        ):
+                            value_description = source_line.strip()
+                            value_description = value_description[37:]
+
+                        elif source_line.startswith(" * Returns "):
+                            return_values = set()
+                            if " -1 " in source_line:
+                                return_values.add("-1")
+                            if " 0 " in source_line:
+                                return_values.add("0")
+                            if " 1 " in source_line:
+                                return_values.add("1")
+                            if " NULL " in source_line:
+                                return_values.add("NULL")
+
+                        elif function_line == source_line.strip():
+                            break
+
+                        source_line = source_file_object.readline()
+
+                function_prototype = source_code.FunctionPrototype(name, data_type)
+                function_prototype.have_extern = have_extern
+                function_prototype.have_debug_output = have_debug_output
+                function_prototype.have_wide_character_type = have_wide_character_type
+                function_prototype.return_values = return_values
+                function_prototype.value_description = value_description
+
+                if not have_extern:
+                    self.have_internal_functions = True
+
+                in_function_prototype = True
+
+            elif line.startswith(define_extern):
+                have_extern = True
+
+            elif line.startswith(define_have_debug_output):
+                have_debug_output = True
+
+            elif line.startswith(define_have_wide_character_type):
+                have_wide_character_type = True
+
+            elif line.startswith("#endif"):
+                have_debug_output = False
+                have_wide_character_type = False
+
+            elif line.startswith("typedef struct "):
+                type_name = line.split(" ")[2]
+                self.types.append(type_name)
+
+            elif line == "libcthreads_read_write_lock_t *read_write_lock;":
+                self.has_read_write_lock = True
+
+        self.types = sorted(self.types)
+
+    def GetTypeFunction(self, type_name, type_function):
+        """Retrieves the function prototype of a specific type function.
+
+        Args:
+          type_name (str): type name.
+          type_function (str): type function.
+
+        Returns:
+          FunctionPrototype: function prototype of the type function or None
+              if no such function.
+        """
+        if type_function.startswith("internal_"):
+            function_name = "{0:s}_internal_{1:s}_{2:s}".format(
+                self._library_name, type_name, type_function[9:]
+            )
+        else:
+            function_name = "{0:s}_{1:s}_{2:s}".format(
+                self._library_name, type_name, type_function
+            )
+        return self.functions_per_name.get(function_name, None)
+
+    def Read(self, project_configuration):
+        """Reads a header file.
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+
+        Raises:
+          IOError: if the include header file is missing.
+          OSError: if the include header file is missing.
+        """
+        header_file_path = self.path
+        if not os.path.exists(header_file_path):
+            # Fallback to .h.in file if available.
+            header_file_path = "{0:s}.in".format(self.path)
+
+        if not os.path.exists(header_file_path):
+            raise IOError("Missing include header file: {0:s}".format(self.path))
+
+        source_file_path = "{0:s}.c".format(self.path[:-2])
+        with open(header_file_path, "r", encoding="utf8") as header_file_object:
+            if os.path.exists(source_file_path):
+                source_file_object = open(source_file_path, "r", encoding="utf8")
+            else:
+                source_file_object = None
+
+            try:
+                self._ReadFileObject(
+                    project_configuration, header_file_object, source_file_object
+                )
+
+            finally:
+                if source_file_object:
+                    source_file_object.close()
 
 
 class LibraryIncludeHeaderFile:
-  """Library include header file.
+    """Library include header file.
 
-  Attributes:
-    functions_per_name (dict[str, list[FunctionPrototype]]): function
-        prototypes per name.
-    functions_per_section (dict[str, list[FunctionPrototype]]): function
-        prototypes per section.
-    have_bfio (bool): True if the include header supports libbfio.
-    have_wide_character_type (bool): True if the include header supports
-        the wide character type.
-    name (str): name.
-    section_names (list[str]): section names.
-  """
-
-  _SIGNATURE_TYPES = ('container', 'file', 'handle', 'store', 'volume')
-
-  def __init__(self, path):
-    """Initializes a library include header file.
-
-    Args:
-      path (str): path library include header file.
+    Attributes:
+      functions_per_name (dict[str, list[FunctionPrototype]]): function
+          prototypes per name.
+      functions_per_section (dict[str, list[FunctionPrototype]]): function
+          prototypes per section.
+      have_bfio (bool): True if the include header supports libbfio.
+      have_wide_character_type (bool): True if the include header supports
+          the wide character type.
+      name (str): name.
+      section_names (list[str]): section names.
     """
-    super().__init__()
-    self._api_functions_group = {}
-    self._api_functions_with_input_group = {}
-    self._api_pseudo_types_group = {}
-    self._api_types_group = {}
-    self._api_types_with_open_group = {}
-    self._check_signature_type = None
-    self._library_name = None
-    self._path = path
 
-    self.functions_per_name = collections.OrderedDict()
-    self.functions_per_section = {}
-    self.have_bfio = False
-    self.have_wide_character_type = False
-    self.name = os.path.basename(path)
-    self.section_names = []
+    _SIGNATURE_TYPES = ("container", "file", "handle", "store", "volume")
 
-  def _AnalyzeFunctionGroups(self):
-    """Analyzes the library include header file for function groups."""
-    self._api_functions_group = {}
-    self._api_functions_with_input_group = {}
-    self._api_types_group = {}
-    self._api_types_with_open_group = {}
+    def __init__(self, path):
+        """Initializes a library include header file.
 
-    for section_name, functions in self.functions_per_section.items():
-      if not functions:
-        continue
+        Args:
+          path (str): path library include header file.
+        """
+        super().__init__()
+        self._api_functions_group = {}
+        self._api_functions_with_input_group = {}
+        self._api_pseudo_types_group = {}
+        self._api_types_group = {}
+        self._api_types_with_open_group = {}
+        self._check_signature_type = None
+        self._library_name = None
+        self._path = path
 
-      group_name = section_name.replace(' ', '_')
-      group_name = group_name.replace('-', '_')
-      group_name = group_name.lower()
-      if '(' in group_name and ')' in group_name:
-        prefix, _, suffix = group_name.partition('(')
-        _, _, suffix = group_name.rpartition(')')
-        group_name = ''.join([prefix[:-1], suffix])
+        self.functions_per_name = collections.OrderedDict()
+        self.functions_per_section = {}
+        self.have_bfio = False
+        self.have_wide_character_type = False
+        self.name = os.path.basename(path)
+        self.section_names = []
 
-      group_name, _, _ = group_name.rpartition('_functions')
+    def _AnalyzeFunctionGroups(self):
+        """Analyzes the library include header file for function groups."""
+        self._api_functions_group = {}
+        self._api_functions_with_input_group = {}
+        self._api_types_group = {}
+        self._api_types_with_open_group = {}
 
-      function_name_prefix = '{0:s}_{1:s}_'.format(
-          self._library_name, group_name)
+        for section_name, functions in self.functions_per_section.items():
+            if not functions:
+                continue
 
-      found_match = False
-      for function_prototype in functions:
-        if function_prototype.name.startswith(function_name_prefix):
-          found_match = True
-          break
+            group_name = section_name.replace(" ", "_")
+            group_name = group_name.replace("-", "_")
+            group_name = group_name.lower()
+            if "(" in group_name and ")" in group_name:
+                prefix, _, suffix = group_name.partition("(")
+                _, _, suffix = group_name.rpartition(")")
+                group_name = "".join([prefix[:-1], suffix])
 
-      # Ignore the section header if it is just informative.
-      if not found_match:
-        if group_name == 'support':
-          signature_type = self.GetCheckSignatureType()
-          if signature_type:
-            self._api_functions_with_input_group[group_name] = section_name
-          else:
-            self._api_functions_group[group_name] = section_name
+            group_name, _, _ = group_name.rpartition("_functions")
 
-        else:
-          # TODO: improve pseudo type detection.
-          if group_name.endswith('_item'):
-            group_name = group_name[:-5]
+            function_name_prefix = "{0:s}_{1:s}_".format(self._library_name, group_name)
 
-          function_name_prefix = '{0:s}_{1:s}_'.format(
-              self._library_name, group_name)
+            found_match = False
+            for function_prototype in functions:
+                if function_prototype.name.startswith(function_name_prefix):
+                    found_match = True
+                    break
 
-          found_match = False
-          for function_prototype in functions:
-            if function_prototype.name.startswith(function_name_prefix):
-              found_match = True
-              break
+            # Ignore the section header if it is just informative.
+            if not found_match:
+                if group_name == "support":
+                    signature_type = self.GetCheckSignatureType()
+                    if signature_type:
+                        self._api_functions_with_input_group[group_name] = section_name
+                    else:
+                        self._api_functions_group[group_name] = section_name
 
-          if found_match:
-            self._api_pseudo_types_group[group_name] = section_name
+                else:
+                    # TODO: improve pseudo type detection.
+                    if group_name.endswith("_item"):
+                        group_name = group_name[:-5]
 
-      elif self._library_name != 'libcerror' and group_name == 'error':
-        self._api_functions_group[group_name] = section_name
+                    function_name_prefix = "{0:s}_{1:s}_".format(
+                        self._library_name, group_name
+                    )
 
-      elif (not self.HasTypeFunction(group_name, 'create') and
-            not self.HasTypeFunction(group_name, 'free')):
-        self._api_functions_group[group_name] = section_name
+                    found_match = False
+                    for function_prototype in functions:
+                        if function_prototype.name.startswith(function_name_prefix):
+                            found_match = True
+                            break
 
-      elif self.HasTypeFunction(group_name, 'open'):
-        self._api_types_with_open_group[group_name] = section_name
+                    if found_match:
+                        self._api_pseudo_types_group[group_name] = section_name
 
-      else:
-        self._api_types_group[group_name] = section_name
+            elif self._library_name != "libcerror" and group_name == "error":
+                self._api_functions_group[group_name] = section_name
 
-  def GetAPIFunctionTestGroups(self):
-    """Determines the API function test groups.
+            elif not self.HasTypeFunction(
+                group_name, "create"
+            ) and not self.HasTypeFunction(group_name, "free"):
+                self._api_functions_group[group_name] = section_name
 
-    Returns:
-      tuple: containing:
-
-        list[str]: names of API function groups without test data.
-        list[str]: names of API function groups with test data.
-    """
-    if (not self._api_functions_group and
-        not self._api_functions_with_input_group):
-      self._AnalyzeFunctionGroups()
-
-    return (
-        self._api_functions_group.keys(),
-        self._api_functions_with_input_group.keys())
-
-  def GetAPIPseudoTypeTestGroups(self):
-    """Determines the API pseudo type test groups.
-
-    Returns:
-      list[str]: names of API pseudo type groups without test data.
-    """
-    if not self._api_types_group and not self._api_types_with_open_group:
-      self._AnalyzeFunctionGroups()
-
-    return list(self._api_pseudo_types_group.keys())
-
-  def GetAPITypeTestGroups(self):
-    """Determines the API type test groups.
-
-    Returns:
-      tuple: containing:
-
-        list[str]: names of API type groups without test data.
-        list[str]: names of API type groups with test data.
-    """
-    if not self._api_types_group and not self._api_types_with_open_group:
-      self._AnalyzeFunctionGroups()
-
-    return (list(self._api_types_group.keys()),
-            list(self._api_types_with_open_group.keys()))
-
-  def GetCheckSignatureType(self):
-    """Determines the check signature function type.
-
-    Returns:
-      str: check signature function type of None if no check signature function
-          was found.
-    """
-    if not self._check_signature_type:
-      for signature_type in self._SIGNATURE_TYPES:
-        function_name = '{0:s}_check_{1:s}_signature'.format(
-            self._library_name, signature_type)
-
-        if function_name in self.functions_per_name:
-          self._check_signature_type = signature_type
-          break
-
-    return self._check_signature_type
-
-  def GetFunctionGroup(self, group_name):
-    """Retrieves a function group.
-
-    Args:
-      group_name (str): group name.
-
-    Returns:
-      list[FunctionPrototype]: function prototypes of the functions in
-          the group.
-    """
-    section_name = self._api_functions_group.get(group_name, None)
-    if not section_name:
-      section_name = self._api_functions_with_input_group.get(group_name, None)
-    if not section_name:
-      section_name = self._api_types_group.get(group_name, None)
-    if not section_name:
-      section_name = self._api_types_with_open_group.get(group_name, None)
-    if not section_name:
-      return []
-
-    return self.functions_per_section.get(section_name, [])
-
-  def HasErrorArgument(self, group_name):
-    """Determines if a function group has functions with an error argument.
-
-    Args:
-      group_name (str): group name.
-
-    Returns:
-      bool: True if there ar functions with an error argument defined,
-          False otherwise.
-    """
-    error_type = '{0:s}_error_t '.format(self._library_name)
-
-    functions = self.GetFunctionGroup(group_name)
-    for function_prototype in functions:
-      if not function_prototype.arguments:
-        continue
-
-      function_argument = function_prototype.arguments[-1]
-      function_argument_string = function_argument.CopyToString()
-      if function_argument_string.startswith(error_type):
-        return True
-
-    return False
-
-  def HasFunction(self, function_name):
-    """Determines if the include header defines a specific function.
-
-    Args:
-      function_name (str): function name.
-
-    Returns:
-      bool: True if function is defined, False otherwise.
-    """
-    function_name = '{0:s}_{1:s}'.format(self._library_name, function_name)
-    return function_name in self.functions_per_name
-
-  def HasTypeFunction(self, type_name, type_function):
-    """Determines if the include header defines a specific type function.
-
-    Args:
-      type_name (str): type name.
-      type_function (str): type function.
-
-    Returns:
-      bool: True if function is defined, False otherwise.
-    """
-    function_name = '{0:s}_{1:s}_{2:s}'.format(
-        self._library_name, type_name, type_function)
-    return function_name in self.functions_per_name
-
-  def Read(self, project_configuration):
-    """Reads the include header file.
-
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-    """
-    self._library_name = project_configuration.library_name
-
-    self.functions_per_name = collections.OrderedDict()
-    self.functions_per_section = {}
-    self.have_bfio = False
-    self.have_wide_character_type = False
-    self.section_names = []
-
-    define_deprecated = '{0:s}_DEPRECATED'.format(self._library_name.upper())
-
-    define_extern = '{0:s}_EXTERN'.format(self._library_name.upper())
-
-    define_have_bfio = '#if defined( {0:s}_HAVE_BFIO )'.format(
-        self._library_name.upper())
-
-    define_have_debug_output = '#if defined( HAVE_DEBUG_OUTPUT )'
-
-    define_have_wide_character_type = (
-        '#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )').format(
-            self._library_name.upper())
-
-    function_argument = None
-    function_prototype = None
-    have_bfio = False
-    have_extern = False
-    have_debug_output = False
-    have_wide_character_type = False
-    in_define_deprecated = False
-    in_section = False
-    section_name = None
-
-    with open(self._path, 'r', encoding='utf8') as file_object:
-      for line in file_object.readlines():
-        line = line.strip()
-
-        if have_extern:
-          if function_prototype:
-            # Check if we have a callback function argument.
-            if line.endswith('('):
-              argument_string = '{0:s} '.format(line)
-              function_argument = source_code.FunctionArgument(argument_string)
+            elif self.HasTypeFunction(group_name, "open"):
+                self._api_types_with_open_group[group_name] = section_name
 
             else:
-              if line.endswith(' );'):
-                argument_string = line[:-3]
+                self._api_types_group[group_name] = section_name
 
-              else:
-                # Get the part of the line before the ','.
-                argument_string, _, _ = line.partition(',')
+    def GetAPIFunctionTestGroups(self):
+        """Determines the API function test groups.
 
-              if not function_argument:
-                function_prototype.AddArgumentString(argument_string)
+        Returns:
+          tuple: containing:
 
-              else:
-                function_argument.AddArgumentString(argument_string)
+            list[str]: names of API function groups without test data.
+            list[str]: names of API function groups with test data.
+        """
+        if not self._api_functions_group and not self._api_functions_with_input_group:
+            self._AnalyzeFunctionGroups()
 
-            if function_argument and line.endswith(' ),'):
-              function_prototype.AddArgument(function_argument)
-              function_argument = None
+        return (
+            self._api_functions_group.keys(),
+            self._api_functions_with_input_group.keys(),
+        )
 
-            elif line.endswith(' );'):
-              if not in_define_deprecated:
-                # TODO: handle section_name is None
-                self.functions_per_name[function_prototype.name] = (
-                    function_prototype)
+    def GetAPIPseudoTypeTestGroups(self):
+        """Determines the API pseudo type test groups.
 
-                self.functions_per_section[section_name].append(
-                    function_prototype)
+        Returns:
+          list[str]: names of API pseudo type groups without test data.
+        """
+        if not self._api_types_group and not self._api_types_with_open_group:
+            self._AnalyzeFunctionGroups()
 
-              function_prototype = None
-              in_define_deprecated = False
-              have_extern = False
+        return list(self._api_pseudo_types_group.keys())
 
-          elif line.endswith(';'):
-            # The line contains a variable definition.
-            have_extern = False
+    def GetAPITypeTestGroups(self):
+        """Determines the API type test groups.
 
-          else:
-            # Get the part of the line before the library name.
-            data_type, _, _ = line.partition(self._library_name)
+        Returns:
+          tuple: containing:
 
-            # Get the part of the line after the data type.
-            line = line[len(data_type):]
-            data_type = data_type.strip()
+            list[str]: names of API type groups without test data.
+            list[str]: names of API type groups with test data.
+        """
+        if not self._api_types_group and not self._api_types_with_open_group:
+            self._AnalyzeFunctionGroups()
 
-            # Get the part of the remainder of the line before the '('.
-            name, _, _ = line.partition('(')
+        return (
+            list(self._api_types_group.keys()),
+            list(self._api_types_with_open_group.keys()),
+        )
 
-            function_prototype = source_code.FunctionPrototype(name, data_type)
-            function_prototype.have_bfio = have_bfio
-            function_prototype.have_extern = have_extern
-            function_prototype.have_debug_output = have_debug_output
-            function_prototype.have_wide_character_type = (
-                have_wide_character_type)
+    def GetCheckSignatureType(self):
+        """Determines the check signature function type.
 
-            if have_bfio:
-              self.have_bfio = True
-            if have_wide_character_type:
-              self.have_wide_character_type = True
+        Returns:
+          str: check signature function type of None if no check signature function
+              was found.
+        """
+        if not self._check_signature_type:
+            for signature_type in self._SIGNATURE_TYPES:
+                function_name = "{0:s}_check_{1:s}_signature".format(
+                    self._library_name, signature_type
+                )
 
-        elif in_section:
-          if line.startswith('* '):
-            section_name = line[2:]
-            self.section_names.append(section_name)
-            self.functions_per_section[section_name] = []
-            in_section = False
+                if function_name in self.functions_per_name:
+                    self._check_signature_type = signature_type
+                    break
 
-        elif line == (
-            '/* -------------------------------------------------------------'
-            '------------'):
-          in_section = True
+        return self._check_signature_type
 
-        elif line.startswith(define_deprecated):
-          in_define_deprecated = True
+    def GetFunctionGroup(self, group_name):
+        """Retrieves a function group.
 
-        elif line.startswith(define_have_bfio):
-          have_bfio = True
+        Args:
+          group_name (str): group name.
 
-        elif line.startswith(define_extern):
-          have_extern = True
+        Returns:
+          list[FunctionPrototype]: function prototypes of the functions in
+              the group.
+        """
+        section_name = self._api_functions_group.get(group_name, None)
+        if not section_name:
+            section_name = self._api_functions_with_input_group.get(group_name, None)
+        if not section_name:
+            section_name = self._api_types_group.get(group_name, None)
+        if not section_name:
+            section_name = self._api_types_with_open_group.get(group_name, None)
+        if not section_name:
+            return []
 
-        elif line.startswith(define_have_debug_output):
-          have_debug_output = True
+        return self.functions_per_section.get(section_name, [])
 
-        elif line.startswith(define_have_wide_character_type):
-          have_wide_character_type = True
+    def HasErrorArgument(self, group_name):
+        """Determines if a function group has functions with an error argument.
 
-        elif line.startswith('#endif'):
-          have_bfio = False
-          have_debug_output = False
-          have_wide_character_type = False
+        Args:
+          group_name (str): group name.
+
+        Returns:
+          bool: True if there ar functions with an error argument defined,
+              False otherwise.
+        """
+        error_type = "{0:s}_error_t ".format(self._library_name)
+
+        functions = self.GetFunctionGroup(group_name)
+        for function_prototype in functions:
+            if not function_prototype.arguments:
+                continue
+
+            function_argument = function_prototype.arguments[-1]
+            function_argument_string = function_argument.CopyToString()
+            if function_argument_string.startswith(error_type):
+                return True
+
+        return False
+
+    def HasFunction(self, function_name):
+        """Determines if the include header defines a specific function.
+
+        Args:
+          function_name (str): function name.
+
+        Returns:
+          bool: True if function is defined, False otherwise.
+        """
+        function_name = "{0:s}_{1:s}".format(self._library_name, function_name)
+        return function_name in self.functions_per_name
+
+    def HasTypeFunction(self, type_name, type_function):
+        """Determines if the include header defines a specific type function.
+
+        Args:
+          type_name (str): type name.
+          type_function (str): type function.
+
+        Returns:
+          bool: True if function is defined, False otherwise.
+        """
+        function_name = "{0:s}_{1:s}_{2:s}".format(
+            self._library_name, type_name, type_function
+        )
+        return function_name in self.functions_per_name
+
+    def Read(self, project_configuration):
+        """Reads the include header file.
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+        """
+        self._library_name = project_configuration.library_name
+
+        self.functions_per_name = collections.OrderedDict()
+        self.functions_per_section = {}
+        self.have_bfio = False
+        self.have_wide_character_type = False
+        self.section_names = []
+
+        define_deprecated = "{0:s}_DEPRECATED".format(self._library_name.upper())
+
+        define_extern = "{0:s}_EXTERN".format(self._library_name.upper())
+
+        define_have_bfio = "#if defined( {0:s}_HAVE_BFIO )".format(
+            self._library_name.upper()
+        )
+
+        define_have_debug_output = "#if defined( HAVE_DEBUG_OUTPUT )"
+
+        define_have_wide_character_type = (
+            "#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )"
+        ).format(self._library_name.upper())
+
+        function_argument = None
+        function_prototype = None
+        have_bfio = False
+        have_extern = False
+        have_debug_output = False
+        have_wide_character_type = False
+        in_define_deprecated = False
+        in_section = False
+        section_name = None
+
+        with open(self._path, "r", encoding="utf8") as file_object:
+            for line in file_object.readlines():
+                line = line.strip()
+
+                if have_extern:
+                    if function_prototype:
+                        # Check if we have a callback function argument.
+                        if line.endswith("("):
+                            argument_string = "{0:s} ".format(line)
+                            function_argument = source_code.FunctionArgument(
+                                argument_string
+                            )
+
+                        else:
+                            if line.endswith(" );"):
+                                argument_string = line[:-3]
+
+                            else:
+                                # Get the part of the line before the ','.
+                                argument_string, _, _ = line.partition(",")
+
+                            if not function_argument:
+                                function_prototype.AddArgumentString(argument_string)
+
+                            else:
+                                function_argument.AddArgumentString(argument_string)
+
+                        if function_argument and line.endswith(" ),"):
+                            function_prototype.AddArgument(function_argument)
+                            function_argument = None
+
+                        elif line.endswith(" );"):
+                            if not in_define_deprecated:
+                                # TODO: handle section_name is None
+                                self.functions_per_name[function_prototype.name] = (
+                                    function_prototype
+                                )
+
+                                self.functions_per_section[section_name].append(
+                                    function_prototype
+                                )
+
+                            function_prototype = None
+                            in_define_deprecated = False
+                            have_extern = False
+
+                    elif line.endswith(";"):
+                        # The line contains a variable definition.
+                        have_extern = False
+
+                    else:
+                        # Get the part of the line before the library name.
+                        data_type, _, _ = line.partition(self._library_name)
+
+                        # Get the part of the line after the data type.
+                        line = line[len(data_type) :]
+                        data_type = data_type.strip()
+
+                        # Get the part of the remainder of the line before the '('.
+                        name, _, _ = line.partition("(")
+
+                        function_prototype = source_code.FunctionPrototype(
+                            name, data_type
+                        )
+                        function_prototype.have_bfio = have_bfio
+                        function_prototype.have_extern = have_extern
+                        function_prototype.have_debug_output = have_debug_output
+                        function_prototype.have_wide_character_type = (
+                            have_wide_character_type
+                        )
+
+                        if have_bfio:
+                            self.have_bfio = True
+                        if have_wide_character_type:
+                            self.have_wide_character_type = True
+
+                elif in_section:
+                    if line.startswith("* "):
+                        section_name = line[2:]
+                        self.section_names.append(section_name)
+                        self.functions_per_section[section_name] = []
+                        in_section = False
+
+                elif line == (
+                    "/* -------------------------------------------------------------"
+                    "------------"
+                ):
+                    in_section = True
+
+                elif line.startswith(define_deprecated):
+                    in_define_deprecated = True
+
+                elif line.startswith(define_have_bfio):
+                    have_bfio = True
+
+                elif line.startswith(define_extern):
+                    have_extern = True
+
+                elif line.startswith(define_have_debug_output):
+                    have_debug_output = True
+
+                elif line.startswith(define_have_wide_character_type):
+                    have_wide_character_type = True
+
+                elif line.startswith("#endif"):
+                    have_bfio = False
+                    have_debug_output = False
+                    have_wide_character_type = False
 
 
 class LibraryMakefileAMFile:
-  """Library Makefile.am file.
+    """Library Makefile.am file.
 
-  Attributes:
-    cppflags (list[str]): C preprocess flags.
-    libraries (list[str]): library names.
-    sources (list[str]): source and header file paths.
-  """
-
-  def __init__(self, path):
-    """Initializes a library Makefile.am file.
-
-    Args:
-      path (str): path of the Makefile.am file.
+    Attributes:
+      cppflags (list[str]): C preprocess flags.
+      libraries (list[str]): library names.
+      sources (list[str]): source and header file paths.
     """
-    super().__init__()
-    self._library_name = None
-    self._path = path
-    self.cppflags = []
-    self.libraries = []
-    self.sources = []
 
-  def Read(self, project_configuration):
-    """Reads the Makefile.am file.
+    def __init__(self, path):
+        """Initializes a library Makefile.am file.
 
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-    """
-    self._library_name = project_configuration.library_name
+        Args:
+          path (str): path of the Makefile.am file.
+        """
+        super().__init__()
+        self._library_name = None
+        self._path = path
+        self.cppflags = []
+        self.libraries = []
+        self.sources = []
 
-    self.cppflags = []
-    self.libraries = []
-    self.sources = []
+    def Read(self, project_configuration):
+        """Reads the Makefile.am file.
 
-    library_sources = '{0:s}_la_SOURCES'.format(self._library_name)
-    library_libadd = '{0:s}_la_LIBADD'.format(self._library_name)
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+        """
+        self._library_name = project_configuration.library_name
 
-    in_section = None
+        self.cppflags = []
+        self.libraries = []
+        self.sources = []
 
-    with open(self._path, 'r', encoding='utf8') as file_object:
-      for line in file_object.readlines():
-        line = line.strip()
+        library_sources = "{0:s}_la_SOURCES".format(self._library_name)
+        library_libadd = "{0:s}_la_LIBADD".format(self._library_name)
 
-        if in_section:
-          if not line:
-            in_section = None
-            continue
+        in_section = None
 
-          if line.endswith('\\'):
-            line = line[:-1].strip()
+        with open(self._path, "r", encoding="utf8") as file_object:
+            for line in file_object.readlines():
+                line = line.strip()
 
-          if (in_section == 'cppflags' and line.startswith('@') and
-              line.endswith('_CPPFLAGS@')):
-            self.cppflags.append(line[1:-10].lower())
+                if in_section:
+                    if not line:
+                        in_section = None
+                        continue
 
-          elif (in_section == 'libadd' and line.startswith('@') and
-                line.endswith('_LIBADD@')):
-            self.libraries.append(line[1:-8].lower())
+                    if line.endswith("\\"):
+                        line = line[:-1].strip()
 
-          elif in_section == 'sources':
-            sources = line.split(' ')
-            self.sources.extend(sources)
+                    if (
+                        in_section == "cppflags"
+                        and line.startswith("@")
+                        and line.endswith("_CPPFLAGS@")
+                    ):
+                        self.cppflags.append(line[1:-10].lower())
 
-        elif line == 'AM_CPPFLAGS = \\':
-          in_section = 'cppflags'
+                    elif (
+                        in_section == "libadd"
+                        and line.startswith("@")
+                        and line.endswith("_LIBADD@")
+                    ):
+                        self.libraries.append(line[1:-8].lower())
 
-        elif line.startswith(library_libadd):
-          in_section = 'libadd'
+                    elif in_section == "sources":
+                        sources = line.split(" ")
+                        self.sources.extend(sources)
 
-        elif line.startswith(library_sources):
-          in_section = 'sources'
+                elif line == "AM_CPPFLAGS = \\":
+                    in_section = "cppflags"
+
+                elif line.startswith(library_libadd):
+                    in_section = "libadd"
+
+                elif line.startswith(library_sources):
+                    in_section = "sources"
 
 
 class MainMakefileAMFile:
-  """Main Makefile.am file.
+    """Main Makefile.am file.
 
-  Attributes:
-    libraries (list[str]): library names.
-    library_dependencies (list[str]): names of the dependencies of the main
-        library.
-    tools_dependencies (list[str]): names of the dependencies of the tools.
-  """
-
-  def __init__(self, path):
-    """Initializes a main Makefile.am file.
-
-    Args:
-      path (str): path of the Makefile.am file.
+    Attributes:
+      libraries (list[str]): library names.
+      library_dependencies (list[str]): names of the dependencies of the main
+          library.
+      tools_dependencies (list[str]): names of the dependencies of the tools.
     """
-    super().__init__()
-    self._library_name = None
-    self._path = path
-    self.libraries = []
-    self.library_dependencies = []
-    self.tools_dependencies = []
 
-  def Read(self, project_configuration):
-    """Reads the Makefile.am file.
+    def __init__(self, path):
+        """Initializes a main Makefile.am file.
 
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-    """
-    self._library_name = project_configuration.library_name
+        Args:
+          path (str): path of the Makefile.am file.
+        """
+        super().__init__()
+        self._library_name = None
+        self._path = path
+        self.libraries = []
+        self.library_dependencies = []
+        self.tools_dependencies = []
 
-    in_subdirs = False
-    in_library_dependencies = True
+    def Read(self, project_configuration):
+        """Reads the Makefile.am file.
 
-    with open(self._path, 'r', encoding='utf8') as file_object:
-      for line in file_object.readlines():
-        line = line.strip()
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+        """
+        self._library_name = project_configuration.library_name
 
-        if in_subdirs:
-          if line.endswith('\\'):
-            line = line[:-1].strip()
+        in_subdirs = False
+        in_library_dependencies = True
 
-          if not line:
-            in_subdirs = False
+        with open(self._path, "r", encoding="utf8") as file_object:
+            for line in file_object.readlines():
+                line = line.strip()
 
-          elif line.startswith('lib'):
-            if line == self._library_name:
-              in_library_dependencies = False
-            else:
-              self.libraries.append(line)
+                if in_subdirs:
+                    if line.endswith("\\"):
+                        line = line[:-1].strip()
 
-              if in_library_dependencies:
-                self.library_dependencies.append(line)
-              else:
-                self.tools_dependencies.append(line)
+                    if not line:
+                        in_subdirs = False
 
-        elif line.startswith('SUBDIRS'):
-          in_subdirs = True
+                    elif line.startswith("lib"):
+                        if line == self._library_name:
+                            in_library_dependencies = False
+                        else:
+                            self.libraries.append(line)
+
+                            if in_library_dependencies:
+                                self.library_dependencies.append(line)
+                            else:
+                                self.tools_dependencies.append(line)
+
+                elif line.startswith("SUBDIRS"):
+                    in_subdirs = True
 
 
 class TestSourceFile:
-  """Test source file.
+    """Test source file.
 
-  Attributes:
-    functions (dict[str, list[str]])): lines of the test functions per name.
-    path (str): path of the source file.
-  """
-
-  def __init__(self, path):
-    """Initializes a test source file.
-
-    Args:
+    Attributes:
+      functions (dict[str, list[str]])): lines of the test functions per name.
       path (str): path of the source file.
     """
-    super().__init__()
-    self.functions = {}
-    self.path = path
 
-  def _ReadFileObject(self, project_configuration, source_file_object):
-    """Reads a source file-like object.
+    def __init__(self, path):
+        """Initializes a test source file.
 
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-      source_file_object (file): source file-like object.
-    """
-    test_function_prefix = 'int {0:s}_test_'.format(
-        project_configuration.library_name_suffix)
+        Args:
+          path (str): path of the source file.
+        """
+        super().__init__()
+        self.functions = {}
+        self.path = path
 
-    in_comment = False
-    in_function = False
+    def _ReadFileObject(self, project_configuration, source_file_object):
+        """Reads a source file-like object.
 
-    lines_comment = []
-    lines_function = []
-    function_name = None
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          source_file_object (file): source file-like object.
+        """
+        test_function_prefix = "int {0:s}_test_".format(
+            project_configuration.library_name_suffix
+        )
 
-    for line in source_file_object.readlines():
-      line = line.rstrip()
+        in_comment = False
+        in_function = False
 
-      if in_comment:
-        lines_comment.append(line)
+        lines_comment = []
+        lines_function = []
+        function_name = None
 
-        if line == ' */':
-          in_comment = False
+        for line in source_file_object.readlines():
+            line = line.rstrip()
 
-      if in_function:
-        lines_function.append(line)
+            if in_comment:
+                lines_comment.append(line)
 
-        if line == '}':
-          function_lines = list(lines_comment)
-          function_lines.extend(lines_function)
-          function_lines.extend(['', ''])
+                if line == " */":
+                    in_comment = False
 
-          self.functions[function_name] = function_lines
+            if in_function:
+                lines_function.append(line)
 
-          in_function = False
+                if line == "}":
+                    function_lines = list(lines_comment)
+                    function_lines.extend(lines_function)
+                    function_lines.extend(["", ""])
 
-      elif line.startswith('/* '):
-        lines_comment = [line]
+                    self.functions[function_name] = function_lines
 
-        in_comment = True
+                    in_function = False
 
-      elif line.startswith(test_function_prefix) and line.endswith('('):
-        _, _, function_name = line[:-1].partition(' ')
+            elif line.startswith("/* "):
+                lines_comment = [line]
 
-        lines_function = [line]
+                in_comment = True
 
-        in_function = True
+            elif line.startswith(test_function_prefix) and line.endswith("("):
+                _, _, function_name = line[:-1].partition(" ")
 
-  def Read(self, project_configuration):
-    """Reads a source file.
+                lines_function = [line]
 
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
+                in_function = True
 
-    Raises:
-      IOError: if the test source file is missing.
-      OSError: if the test source file is missing.
-    """
-    if not os.path.exists(self.path):
-      raise IOError('Missing test source file: {0:s}'.format(self.path))
+    def Read(self, project_configuration):
+        """Reads a source file.
 
-    with open(self.path, 'r', encoding='utf8') as source_file_object:
-      self._ReadFileObject(project_configuration, source_file_object)
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+
+        Raises:
+          IOError: if the test source file is missing.
+          OSError: if the test source file is missing.
+        """
+        if not os.path.exists(self.path):
+            raise IOError("Missing test source file: {0:s}".format(self.path))
+
+        with open(self.path, "r", encoding="utf8") as source_file_object:
+            self._ReadFileObject(project_configuration, source_file_object)
 
 
 class TypesIncludeHeaderFile:
-  """Types include header file.
+    """Types include header file.
 
-  Attributes:
-    types (list[str]): type names.
-  """
-
-  def __init__(self, path):
-    """Initializes a types include header file.
-
-    Args:
-      path (str): path of the include header file.
+    Attributes:
+      types (list[str]): type names.
     """
-    super().__init__()
-    self._library_name = None
-    self._path = path
-    self.types = []
 
-  def Read(self, project_configuration):
-    """Reads the include header file.
+    def __init__(self, path):
+        """Initializes a types include header file.
 
-    Args:
-      project_configuration (ProjectConfiguration): project configuration.
-    """
-    self._library_name = project_configuration.library_name
+        Args:
+          path (str): path of the include header file.
+        """
+        super().__init__()
+        self._library_name = None
+        self._path = path
+        self.types = []
 
-    self.types = []
+    def Read(self, project_configuration):
+        """Reads the include header file.
 
-    typedef_prefix = 'typedef intptr_t {0:s}_'.format(self._library_name)
-    typedef_prefix_length = len(typedef_prefix)
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+        """
+        self._library_name = project_configuration.library_name
 
-    with open(self._path, 'r', encoding='utf8') as file_object:
-      for line in file_object.readlines():
-        line = line.strip()
-        if line.startswith(typedef_prefix) and line.endswith('_t;'):
-          self.types.append(line[typedef_prefix_length:-3])
+        self.types = []
+
+        typedef_prefix = "typedef intptr_t {0:s}_".format(self._library_name)
+        typedef_prefix_length = len(typedef_prefix)
+
+        with open(self._path, "r", encoding="utf8") as file_object:
+            for line in file_object.readlines():
+                line = line.strip()
+                if line.startswith(typedef_prefix) and line.endswith("_t;"):
+                    self.types.append(line[typedef_prefix_length:-3])

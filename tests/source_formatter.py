@@ -8,15 +8,15 @@ from tests import test_lib
 
 
 class SourceFormatterTest(test_lib.BaseTestCase):
-  """Libyal C source formatter tests."""
+    """Libyal C source formatter tests."""
 
-  # TODO: add tests for FormatLineIndentation
+    # TODO: add tests for FormatLineIndentation
 
-  def testFormatSource(self):
-    """Tests the FormatSource function."""
-    test_formatter = source_formatter.SourceFormatter()
+    def testFormatSource(self):
+        """Tests the FormatSource function."""
+        test_formatter = source_formatter.SourceFormatter()
 
-    expected_lines = """
+        expected_lines = """
 int myfunction(
      int *argument )
 {
@@ -34,7 +34,7 @@ int myfunction(
 }
 """
 
-    lines = """
+        lines = """
 int myfunction(
      int *argument )
 {
@@ -52,40 +52,31 @@ int myfunction(
 }
 """
 
-    lines = test_formatter.FormatSource(lines.split('\n'))
-    lines = '\n'.join(lines)
+        lines = test_formatter.FormatSource(lines.split("\n"))
+        lines = "\n".join(lines)
 
-    self.assertEqual(lines, expected_lines)
+        self.assertEqual(lines, expected_lines)
 
-  def testVerticalAlignEqualSigns(self):
-    """Tests the VerticalAlignEqualSigns function."""
-    test_formatter = source_formatter.SourceFormatter()
+    def testVerticalAlignEqualSigns(self):
+        """Tests the VerticalAlignEqualSigns function."""
+        test_formatter = source_formatter.SourceFormatter()
 
-    expected_lines = [
-        'int first  = NULL;',
-        'int second = NULL;',
-        '']
+        expected_lines = ["int first  = NULL;", "int second = NULL;", ""]
 
-    lines = [
-        'int first = NULL;',
-        'int second = NULL;',
-        '']
+        lines = ["int first = NULL;", "int second = NULL;", ""]
 
-    lines = test_formatter.VerticalAlignEqualSigns(lines, 11)
-    self.assertEqual(lines, expected_lines)
+        lines = test_formatter.VerticalAlignEqualSigns(lines, 11)
+        self.assertEqual(lines, expected_lines)
 
-  def testVerticalAlignEqualSignsDetermineOffset(self):
-    """Tests the VerticalAlignEqualSignsDetermineOffset function."""
-    test_formatter = source_formatter.SourceFormatter()
+    def testVerticalAlignEqualSignsDetermineOffset(self):
+        """Tests the VerticalAlignEqualSignsDetermineOffset function."""
+        test_formatter = source_formatter.SourceFormatter()
 
-    lines = [
-        'int first = NULL;',
-        'int second = NULL;',
-        '']
+        lines = ["int first = NULL;", "int second = NULL;", ""]
 
-    offset = test_formatter.VerticalAlignEqualSignsDetermineOffset(lines)
-    self.assertEqual(offset, 11)
+        offset = test_formatter.VerticalAlignEqualSignsDetermineOffset(lines)
+        self.assertEqual(offset, 11)
 
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    unittest.main()

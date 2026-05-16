@@ -8,13 +8,13 @@ from tests import test_lib
 
 
 class TemplateStringGeneratorTest(test_lib.BaseTestCase):
-  """Template string generator tests."""
+    """Template string generator tests."""
 
-  def testInitialize(self):
-    """Tests the __init__ function."""
-    generator = template_string.TemplateStringGenerator()
-    self.assertIsNotNone(generator)
+    def testInitialize(self):
+        """Tests the __init__ function."""
+        generator = template_string.TemplateStringGenerator()
+        self.assertIsNotNone(generator)
 
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    unittest.main()
