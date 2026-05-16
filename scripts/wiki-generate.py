@@ -369,9 +369,9 @@ class WikiPageGenerator:
 
     development_table_of_contents = ''
 
-    development_main_object_pre_open_python = ''
-    development_main_object_post_open_python = ''
-    development_main_object_post_open_file_object_python = ''
+    development_main_object_python_pre_open = ''
+    development_main_object_python_post_open = ''
+    development_main_object_python_post_open_file_object = ''
 
     tests_profiles = ''
 
@@ -745,27 +745,31 @@ class WikiPageGenerator:
     if development_item_path:
       development_item_path = development_item_path.replace('\\', '\\\\')
 
-    if project_configuration.development_main_object_pre_open_python:
-      development_main_object_pre_open_python = '{0:s}\n'.format(
-          project_configuration.development_main_object_pre_open_python)
+    if project_configuration.development_main_object_python_pre_open:
+      development_main_object_python_pre_open = '{0:s}\n'.format(
+          project_configuration.development_main_object_python_pre_open)
 
-    if project_configuration.development_main_object_post_open_python:
-      development_main_object_post_open_python = '{0:s}\n'.format('\n'.join(
-          project_configuration.development_main_object_post_open_python))
+    if project_configuration.development_main_object_python_post_open:
+      development_main_object_python_post_open = '{0:s}\n'.format('\n'.join(
+          project_configuration.development_main_object_python_post_open))
 
-    if project_configuration.development_main_object_post_open_file_object_python:
-      development_main_object_post_open_file_object_python = '{0:s}\n'.format('\n'.join(
-          project_configuration.development_main_object_post_open_file_object_python))
-    elif project_configuration.development_main_object_post_open_python:
-      development_main_object_post_open_file_object_python = '{0:s}\n'.format(
-          '\n'.join(project_configuration.development_main_object_post_open_python))
+    if project_configuration.development_main_object_python_post_open_file_object:
+      development_main_object_python_post_open_file_object = '{0:s}\n'.format('\n'.join(
+          project_configuration.development_main_object_python_post_open_file_object))
+    elif project_configuration.development_main_object_python_post_open:
+      development_main_object_python_post_open_file_object = '{0:s}\n'.format(
+          '\n'.join(project_configuration.development_main_object_python_post_open))
 
     if project_configuration.mount_tool_file_entry_example:
       mount_tool_file_entry_example = (
           project_configuration.mount_tool_file_entry_example)
+      mount_tool_file_entry_example_windows = (
+          mount_tool_file_entry_example.replace('\\x', '^x').replace('/', '\\'))
     else:
-      mount_tool_file_entry_example = '{0:s}1'.format(
-          project_configuration.project_name[3:])
+      mount_tool_file_entry_example = (
+          f'{project_configuration.project_name[3:]:s}1')
+      mount_tool_file_entry_example_windows = (
+          mount_tool_file_entry_example.upper())
 
     if project_configuration.mount_tool_additional_arguments:
       mount_tool_additional_arguments = (
@@ -798,7 +802,7 @@ class WikiPageGenerator:
         'python_bindings_name': python_bindings_name,
         'mount_tool_file_entry_example': mount_tool_file_entry_example,
         'mount_tool_file_entry_example_windows': (
-            mount_tool_file_entry_example.replace('\\x', '^x')),
+            mount_tool_file_entry_example_windows),
         'mount_tool_name': mount_tool_name,
         'tools_name': tools_name,
 
@@ -814,12 +818,12 @@ class WikiPageGenerator:
             project_configuration.development_main_object),
         'development_main_object_filename': (
             project_configuration.development_main_object_filename),
-        'development_main_object_pre_open_python': (
-            development_main_object_pre_open_python),
-        'development_main_object_post_open_python': (
-            development_main_object_post_open_python),
-        'development_main_object_post_open_file_object_python': (
-            development_main_object_post_open_file_object_python),
+        'development_main_object_python_pre_open': (
+            development_main_object_python_pre_open),
+        'development_main_object_python_post_open': (
+            development_main_object_python_post_open),
+        'development_main_object_python_post_open_file_object': (
+            development_main_object_python_post_open_file_object),
         'development_main_object_size': (
             project_configuration.development_main_object_size),
 
@@ -1227,8 +1231,8 @@ class MountingPageGenerator(WikiPageGenerator):
       self._GenerateSection(
           'mounting_missing_backend.txt', template_mappings, output_writer)
 
-      if project_configuration.mount_tool_source_type in (
-          'image', 'volume'):
+      if project_configuration.mount_tool_file_entry_type in (
+          'file', 'volume'):
         template_file = 'mounting_{0:s}_contents.txt'.format(
             project_configuration.mount_tool_source_type)
         self._GenerateSection(template_file, template_mappings, output_writer)

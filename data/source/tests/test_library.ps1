@@ -8,7 +8,7 @@ $$ExitIgnore = 77
 
 $$LibraryTests = "${library_tests}"
 $$LibraryTestsWithInput = "${library_tests_with_input}"
-$$OptionSets = "${tests_option_sets}"
+$$OptionSets = "${tests_option_sets_ps1}"
 
 $$InputGlob = "${tests_input_glob}"
 

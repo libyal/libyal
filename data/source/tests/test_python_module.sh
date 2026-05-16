@@ -10,7 +10,7 @@ EXIT_IGNORE=77;
 
 TEST_FUNCTIONS="${test_python_functions}";
 TEST_FUNCTIONS_WITH_INPUT="${test_python_functions_with_input}";
-OPTION_SETS=(${tests_option_sets});
+OPTION_SETS=(${tests_option_sets_sh});
 
 TEST_TOOL_DIRECTORY=".";
 INPUT_GLOB="${tests_input_glob}";

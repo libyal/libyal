@@ -12,7 +12,7 @@ import unittest
 
 test_profile = ".${python_module_name}"
 input_glob = "*"
-option_sets = [${runtest_py_tests_option_sets}]
+option_sets = [${runtest_py_tests_option_sets_py}]
 
 
 def ReadIgnoreList(test_profile):

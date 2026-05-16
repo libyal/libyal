@@ -7,9 +7,9 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-PROFILES=(${tests_info_tool_profiles});
+PROFILES=(${tests_info_tool_profiles_sh});
 OPTIONS_PER_PROFILE=(${tests_info_tool_options_per_profile});
-OPTION_SETS=(${tests_info_tool_option_sets});
+OPTION_SETS=(${tests_info_tool_option_sets_sh});
 
 INPUT_GLOB="${tests_info_tool_input_glob}";
 

@@ -115,10 +115,12 @@ class ProjectConfiguration(BaseConfiguration):
         modification date and time value provided by the file entry.
     mount_tool_file_entry_modification_time_value (str): name of the
         modification date and time value provided by the file entry.
-    mount_tool_file_entry_type (str): file entry type used by the mount tool.
+    mount_tool_file_entry_type (str): file entry type used by the mount tool,
+        such as "file", "file_entry" or "volume".
     mount_tool_file_entry_type_size_value (str): name of the size value
         provided by the file entry type.
-    mount_tool_file_system_type (str): file system type used by the mount tool.
+    mount_tool_file_system_type (str): file system type used by the mount tool,
+        such as "volume".
     mount_tool_mounted_description (str): description what is mounted by
         the mount tool.
     mount_tool_path_prefix (str): path prefix used by the mount tool.
@@ -329,9 +331,9 @@ class ProjectConfiguration(BaseConfiguration):
     self.development_item_path = None
     self.development_main_object = None
     self.development_main_object_filename = None
-    self.development_main_object_pre_open_python = None
-    self.development_main_object_post_open_python = None
-    self.development_main_object_post_open_file_object_python = None
+    self.development_main_object_python_pre_open = None
+    self.development_main_object_python_post_open = None
+    self.development_main_object_python_post_open_file_object = None
     self.development_main_object_size = None
     self.development_pytsk3 = False
 
@@ -388,18 +390,18 @@ class ProjectConfiguration(BaseConfiguration):
     self.development_main_object_size = self._GetOptionalConfigValue(
         config_parser, 'development', 'main_object_size')
 
-    self.development_main_object_pre_open_python = (
+    self.development_main_object_python_pre_open = (
         self._GetOptionalConfigValue(
-            config_parser, 'development', 'main_object_pre_open_python'))
+            config_parser, 'development', 'main_object_python_pre_open'))
 
-    self.development_main_object_post_open_python = (
+    self.development_main_object_python_post_open = (
         self._GetOptionalConfigValue(
-            config_parser, 'development', 'main_object_post_open_python'))
+            config_parser, 'development', 'main_object_python_post_open'))
 
-    self.development_main_object_post_open_file_object_python = (
+    self.development_main_object_python_post_open_file_object = (
         self._GetOptionalConfigValue(
             config_parser, 'development',
-            'main_object_post_open_file_object_python'))
+            'main_object_python_post_open_file_object'))
 
   def _ReadDPKGConfiguration(self, config_parser):
     """Reads the DPKG configuration.

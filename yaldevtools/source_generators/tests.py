@@ -2871,8 +2871,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['library_tests_with_input'] = ' '.join(
         library_tests_with_input)
 
-    template_mappings['runtest_py_tests_option_sets'] = ', '.join([
-        "\"{0:s}\"".format(test_option_set)
+    template_mappings['runtest_py_tests_option_sets_py'] = ', '.join([
+        '"{0:s}"'.format(test_option_set)
         for test_option_set in project_configuration.tests_option_sets])
 
     template_mappings['shared_libs'] = ' '.join(shared_libs)
@@ -2886,38 +2886,51 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
     template_mappings['test_python_functions_with_input'] = ' '.join(
         sorted(python_functions_with_input))
 
-    template_mappings['tests_option_sets'] = ' '.join([
-        "\"{0:s}\"".format(test_option_set)
+    template_mappings['tests_option_sets_ps1'] = ' '.join(
+        project_configuration.tests_option_sets)
+    template_mappings['tests_option_sets_sh'] = ' '.join([
+        '"{0:s}"'.format(test_option_set)
         for test_option_set in project_configuration.tests_option_sets])
 
     template_mappings['tests_input_glob'] = (
         project_configuration.tests_input_glob)
 
-    template_mappings['tests_export_tool_option_sets'] = ' '.join([
-        "\"{0:s}\"".format(test_option_set) for test_option_set in (
+    template_mappings['tests_export_tool_option_sets_ps1'] = ' '.join(
+        project_configuration.tests_export_tool_option_sets)
+    template_mappings['tests_export_tool_option_sets_sh'] = ' '.join([
+        '"{0:s}"'.format(test_option_set) for test_option_set in (
             project_configuration.tests_export_tool_option_sets)])
     template_mappings['tests_export_tool_options'] = (
         project_configuration.tests_export_tool_options)
-    template_mappings['tests_export_tool_profiles'] = " ".join([
+    template_mappings['tests_export_tool_profiles_ps1'] = ', '.join(
+        project_configuration.tests_export_tool_profiles)
+    template_mappings['tests_export_tool_profiles_sh'] = ' '.join([
         '"{0:s}"'.format(profile) for profile in (
             project_configuration.tests_export_tool_profiles)])
 
     template_mappings['tests_info_tool_input_glob'] = (
         project_configuration.tests_info_tool_input_glob)
-    template_mappings['tests_info_tool_option_sets'] = ' '.join([
-        "\"{0:s}\"".format(test_option_set) for test_option_set in (
+    template_mappings['tests_info_tool_option_sets_ps1'] = ' '.join(
+        project_configuration.tests_info_tool_option_sets)
+    template_mappings['tests_info_tool_option_sets_sh'] = ' '.join([
+        '"{0:s}"'.format(test_option_set) for test_option_set in (
             project_configuration.tests_info_tool_option_sets)])
     template_mappings['tests_info_tool_options'] = (
         project_configuration.tests_info_tool_options)
-    template_mappings['tests_info_tool_options_per_profile'] = " ".join([
+    template_mappings['tests_info_tool_options_per_profile_ps1'] = ', '.join([
         '"{0:s}"'.format(options) for options in (
             project_configuration.tests_info_tool_options_per_profile)])
-    template_mappings['tests_info_tool_profiles'] = " ".join([
+    template_mappings['tests_info_tool_profiles_ps1'] = ', '.join([
+        '"{0:s}"'.format(profile) for profile in (
+            project_configuration.tests_info_tool_profiles)])
+    template_mappings['tests_info_tool_profiles_sh'] = ' '.join([
         '"{0:s}"'.format(profile) for profile in (
             project_configuration.tests_info_tool_profiles)])
 
-    template_mappings['tests_verify_tool_option_sets'] = ' '.join([
-        "\"{0:s}\"".format(test_option_set) for test_option_set in (
+    template_mappings['tests_verify_tool_option_sets_ps1'] = ' '.join(
+        project_configuration.tests_verify_tool_option_sets)
+    template_mappings['tests_verify_tool_option_sets_sh'] = ' '.join([
+        '"{0:s}"'.format(test_option_set) for test_option_set in (
             project_configuration.tests_verify_tool_option_sets)])
     template_mappings['tests_verify_tool_options'] = (
         project_configuration.tests_verify_tool_options)

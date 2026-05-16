@@ -7,7 +7,7 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-PROFILES=(${tests_export_tool_profiles});
+PROFILES=(${tests_export_tool_profiles_sh});
 OPTIONS_PER_PROFILE=(${tests_export_tool_options_per_profile});
 OPTIONS=(${tests_export_tool_options});
 

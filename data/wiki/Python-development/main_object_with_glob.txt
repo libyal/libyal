@@ -2,9 +2,9 @@
 
 ```
 ${development_prefix}_${development_main_object} = ${python_bindings_name}.${development_main_object}()
-${development_main_object_pre_open_python}
+${development_main_object_python_pre_open}
 ${development_prefix}_${development_main_object}.open(["${development_main_object_filename}"])
-${development_main_object_post_open_python}
+${development_main_object_python_post_open}
 ${development_prefix}_${development_main_object}.close()
 ```
 
@@ -25,9 +25,9 @@ ${development_prefix}_${development_main_object}.open(filenames)
 file_object = open("${development_main_object_filename}", "rb")
 
 ${development_prefix}_${development_main_object} = ${python_bindings_name}.${development_main_object}()
-${development_main_object_pre_open_python}
+${development_main_object_python_pre_open}
 ${development_prefix}_${development_main_object}.open_file_objects([file_object])
-${development_main_object_post_open_file_object_python}
+${development_main_object_python_post_open_file_object}
 ${development_prefix}_${development_main_object}.close()
 ```
 
