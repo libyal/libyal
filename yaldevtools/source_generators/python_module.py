@@ -90,7 +90,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["definitions_description"] = definitions_name.replace(
             "_", " "
         )
-
         output_filename = os.path.join(
             project_configuration.python_module_name,
             f"{project_configuration.python_module_name:s}_{definitions_name:s}.h",
@@ -102,7 +101,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         del template_mappings["definitions_name"]
         del template_mappings["definitions_description"]
 
@@ -153,7 +151,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["definitions_description"] = definitions_name.replace(
             "_", " "
         )
-
         output_filename = os.path.join(
             project_configuration.python_module_name,
             f"{project_configuration.python_module_name:s}_{definitions_name:s}.c",
@@ -165,7 +162,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         del template_mappings["constant_names"]
         del template_mappings["definition_name"]
         del template_mappings["definitions_name"]
@@ -208,7 +204,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         del template_mappings["signature_type"]
 
         self._FormatHeaderFile(project_configuration, output_filename)
@@ -241,9 +236,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             signature_desription = project_configuration.project_data_format or "TODO"
 
             if signature_type.lower() not in signature_desription.lower():
-                signature_desription = "{0:s} {1:s}".format(
-                    signature_desription, signature_type
-                )
+                signature_desription = " ".join([signature_desription, signature_type])
 
         for type_name in sorted(python_module_types):
             self._SetTypeNameInTemplateMappings(template_mappings, type_name)
@@ -268,7 +261,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         del template_mappings["definition_types"]
 
         del template_mappings["python_module_types"]
@@ -290,6 +282,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           type_name (str): name of type.
           output_writer (OutputWriter): output writer.
         """
+        python_module_name = project_configuration.python_module_name
         sequence_type_name = self._GetSequenceName(type_name)
 
         template_mappings["sequence_type_description"] = sequence_type_name.replace(
@@ -298,11 +291,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["sequence_type_name"] = sequence_type_name
 
         output_filename = os.path.join(
-            project_configuration.python_module_name,
-            (
-                f"{project_configuration.python_module_name:s}_"
-                f"{sequence_type_name:s}.h"
-            ),
+            python_module_name,
+            f"{python_module_name:s}_{sequence_type_name:s}.h",
         )
         self._GenerateSectionsFromOperationsFile(
             "pyyal_sequence_type.h.yaml",
@@ -311,7 +301,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         del template_mappings["sequence_type_description"]
         del template_mappings["sequence_type_name"]
 
@@ -339,6 +328,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           output_writer (OutputWriter): output writer.
           type_is_object (Optional[bool]): True if the type is an object.
         """
+        python_module_name = project_configuration.python_module_name
         sequence_type_name = self._GetSequenceName(type_name)
 
         python_module_include_names = set(
@@ -349,23 +339,18 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 "python",
             ]
         )
-
         if type_is_object:
             python_module_include_names.add(type_name)
 
         python_module_includes = []
         for include_name in sorted(python_module_include_names):
             python_module_includes.append(
-                (
-                    f'#include "{project_configuration.python_module_name:s}_'
-                    f'{include_name:s}.h"'
-                )
+                f'#include "{python_module_name:s}_{include_name:s}.h"'
             )
 
         self._SetSequenceTypeNameInTemplateMappings(
             template_mappings, sequence_type_name
         )
-
         template_mappings["python_module_includes"] = "\n".join(python_module_includes)
 
         template_mappings["sequence_type_description"] = sequence_type_name.replace(
@@ -374,11 +359,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["sequence_type_name"] = sequence_type_name
 
         output_filename = os.path.join(
-            project_configuration.python_module_name,
-            (
-                f"{project_configuration.python_module_name:s}_"
-                f"{sequence_type_name:s}.c"
-            ),
+            python_module_name,
+            f"{python_module_name:s}_{sequence_type_name:s}.c",
         )
         self._GenerateSectionsFromOperationsFile(
             "pyyal_sequence_type.c.yaml",
@@ -387,7 +369,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         del template_mappings["sequence_type_description"]
         del template_mappings["sequence_type_name"]
 
@@ -466,7 +447,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         del template_mappings["python_function_prototypes"]
 
         template_names = []
@@ -484,42 +464,37 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         for type_function, python_function_prototype in iter(
             python_function_prototypes.items()
         ):
-
             if type_function in ("free", "initialize"):
                 continue
 
             value_name = python_function_prototype.value_name
 
-            template_filename = "{0:s}.h".format(type_function)
-            template_filename = os.path.join(templates_path, template_filename)
+            template_filename = os.path.join(templates_path, f"{type_function:s}.h")
             if not os.path.exists(template_filename):
                 template_filename = None
                 if python_function_prototype.function_type == (
                     definitions.FUNCTION_TYPE_GET
                 ):
-
                     if python_function_prototype.DataTypeIsDatetime():
                         template_filename = "get_datetime_value.h"
 
                 elif python_function_prototype.function_type == (
                     definitions.FUNCTION_TYPE_GET_BY_INDEX
                 ):
-
                     value_name_prefix = ""
                     if value_name.startswith("recovered_"):
                         value_name_prefix = "recovered_"
                         value_name = value_name[10:]
 
-                    template_filename = "get_{0:s}{1:s}_value_by_index.h".format(
-                        value_name_prefix, python_function_prototype.data_type
+                    data_type = python_function_prototype.data_type
+                    template_filename = (
+                        f"get_{value_name_prefix:s}{data_type:s}_value_by_index.h"
                     )
-
                     sequence_value_name = self._GetSequenceName(value_name)
                     self._SetSequenceValueNameInTemplateMappings(
                         template_mappings, sequence_value_name
@@ -536,10 +511,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
             if not template_filename or not os.path.exists(template_filename):
                 logging.warning(
-                    (
-                        "Unable to generate Python type object header for: {0:s}.{1:s} "
-                        "missing template: {2:s}"
-                    ).format(type_name, type_function, template_filename)
+                    f"Unable to generate Python type object header for: "
+                    f"{type_name:s}.{type_function:s} "
+                    f"missing template: {template_filename:s}"
                 )
                 continue
 
@@ -556,7 +530,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         # TODO: change to a generic line modifiers approach.
         self._CorrectDescriptionSpelling(type_name, output_filename)
 
@@ -586,13 +559,12 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           has_pseudo_sub_types (Optional[bool]): True if type has pseudo sub types.
           is_pseudo_type (Optional[bool]): True if type is a pseudo type.
         """
-        output_filename = "{0:s}_{1:s}.c".format(
-            project_configuration.python_module_name, type_name
+        output_filename = (
+            f"{project_configuration.python_module_name:s}_{type_name:s}.c"
         )
         output_filename = os.path.join(
             project_configuration.python_module_name, output_filename
         )
-
         lines = []
         if os.path.exists(output_filename):
             with open(output_filename, "r", encoding="utf8") as file_object:
@@ -626,7 +598,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 "unused",
             ]
         )
-
         if bfio_support:
             python_module_include_names.update(
                 set(["file_object_io_handle", "libbfio"])
@@ -681,7 +652,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     sequence_type_prefix, _, sequence_type_suffix = (
                         sequence_type_name.rpartition("_")
                     )
-
                     if sequence_type_suffix in ("entry", "index"):
                         sequence_type_name = sequence_type_prefix
 
@@ -694,9 +664,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             templates_path = os.path.join(self._templates_path, "pyyal_type")
 
         if is_pseudo_type:
+            library_name = project_configuration.library_name
             base_type_name = "item"
-            base_type_indicator = "{0:s}_{1:s}_TYPE_{2:s}".format(
-                project_configuration.library_name, base_type_name, type_name
+            base_type_indicator = (
+                f"{library_name:s}_{base_type_name:s}_TYPE_{type_name:s}"
             )
             base_type_indicator = base_type_indicator.upper()
 
@@ -711,9 +682,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
         python_module_includes = []
         for include_name in sorted(python_module_include_names):
-            include = '#include "{0:s}_{1:s}.h"'.format(
-                project_configuration.python_module_name, include_name
-            )
+            python_module_name = project_configuration.python_module_name
+            include = f'#include "{python_module_name:s}_{include_name:s}.h"'
             python_module_includes.append(include)
 
         template_mappings["python_module_includes"] = "\n".join(python_module_includes)
@@ -727,7 +697,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         if bfio_support:
             template_filename = os.path.join(templates_path, "have_bfio.c")
             self._GenerateSection(
@@ -742,7 +711,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             output_writer,
             output_filename,
         )
-
         self._GenerateTypeSourceFileTypeObjectGetSetDefinitions(
             project_configuration,
             template_mappings,
@@ -751,12 +719,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             output_writer,
             output_filename,
         )
-
         template_filename = os.path.join(templates_path, "type_object.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         if not is_pseudo_type:
             if has_pseudo_sub_types:
                 template_filename = os.path.join(
@@ -768,7 +734,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     output_filename,
                     access_mode="a",
                 )
-
             elif with_parent:
                 template_filename = os.path.join(templates_path, "new-with_parent.c")
                 self._GenerateSection(
@@ -789,7 +754,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
             )
-
             if open_support:
                 template_filename = "free_with_input.c"
             elif with_parent:
@@ -808,7 +772,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         for type_function, python_function_prototype in iter(
             python_function_prototypes.items()
         ):
-
             if type_function in ("free", "initialize"):
                 continue
 
@@ -824,8 +787,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     template_mappings, python_function_prototype.value_type
                 )
 
-            template_filename = "{0:s}.c".format(type_function)
-            template_filename = os.path.join(templates_path, template_filename)
+            template_filename = os.path.join(templates_path, f"{type_function:s}.c")
             if not os.path.exists(template_filename):
                 template_filename = None
 
@@ -837,28 +799,25 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     template_filename = "set_keys_with_mode.c"
 
                 elif type_function == "set_password":
-                    template_filename = "set_{0:s}_value.c".format("string")
+                    template_filename = f"set_string_value.c"
 
                 elif python_function_prototype.function_type == (
                     definitions.FUNCTION_TYPE_COPY
                 ):
-                    template_filename = "copy_{0:s}_value.c".format(
-                        python_function_prototype.data_type
-                    )
+                    data_type = python_function_prototype.data_type
+                    template_filename = f"copy_{data_type:s}_value.c"
 
                 elif python_function_prototype.function_type == (
                     definitions.FUNCTION_TYPE_COPY_FROM
                 ):
-                    template_filename = "copy_from_{0:s}_value.c".format(
-                        python_function_prototype.data_type
-                    )
+                    data_type = python_function_prototype.data_type
+                    template_filename = f"copy_from_{data_type:s}_value.c"
 
                 elif python_function_prototype.function_type == (
                     definitions.FUNCTION_TYPE_COPY_TO
                 ):
-                    template_filename = "copy_to_{0:s}_value.c".format(
-                        python_function_prototype.data_type
-                    )
+                    data_type = python_function_prototype.data_type
+                    template_filename = f"copy_to_{data_type:s}_value.c"
 
                 elif python_function_prototype.function_type in (
                     definitions.FUNCTION_TYPE_GET,
@@ -867,13 +826,12 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     definitions.FUNCTION_TYPE_GET_BY_NAME,
                     definitions.FUNCTION_TYPE_GET_BY_PATH,
                 ):
-
                     if value_name.startswith("recovered_"):
                         value_name_prefix = "recovered_"
                         value_name = value_name[10:]
 
                     elif value_name_prefix:
-                        value_name_prefix = "{0:s}_".format(value_name_prefix)
+                        value_name_prefix = f"{value_name_prefix:s}_"
 
                     else:
                         value_name_prefix = ""
@@ -884,10 +842,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                         if not python_function_prototype.arguments:
                             if value_name.startswith("number_of_recovered_"):
                                 value_name = value_name[20:]
+                                data_type = python_function_prototype.data_type
                                 template_filename = (
-                                    "get_number_of_recovered_{0:s}_value.c"
-                                ).format(python_function_prototype.data_type)
-
+                                    f"get_number_of_recovered_{data_type:s}_value.c"
+                                )
                             else:
                                 if (
                                     python_function_prototype.return_values
@@ -900,7 +858,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                                             python_function_prototype.data_type,
                                         )
                                     )
-
                                 elif has_pseudo_sub_types:
                                     template_filename = (
                                         "get_{0:s}{1:s}_value-with_type_object.c"
@@ -908,7 +865,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                                         value_name_prefix,
                                         python_function_prototype.data_type,
                                     )
-
                                 else:
                                     template_filename = "get_{0:s}{1:s}_value.c".format(
                                         value_name_prefix,
@@ -918,11 +874,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     elif python_function_prototype.function_type == (
                         definitions.FUNCTION_TYPE_GET_BY_INDEX
                     ):
-
                         template_filename = "get_{0:s}{1:s}_value_by_index.c".format(
                             value_name_prefix, python_function_prototype.data_type
                         )
-
                         if python_function_prototype.object_type:
                             sequence_type_name = self._GetSequenceName(
                                 python_function_prototype.object_type
@@ -941,7 +895,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                         definitions.FUNCTION_TYPE_GET_BY_NAME,
                         definitions.FUNCTION_TYPE_GET_BY_PATH,
                     ):
-
                         _, _, type_function_suffix = type_function.partition("_by_")
 
                         template_filename = "get_{0:s}{1:s}_value_by_{2:s}.c".format(
@@ -979,19 +932,16 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
             if not template_filename:
                 logging.warning(
-                    (
-                        "Unable to generate Python type object source code for: "
-                        "{0:s}.{1:s} missing template"
-                    ).format(type_name, type_function)
+                    f"Unable to generate Python type object source code for: "
+                    f"{type_name:s}.{type_function:s} missing template"
                 )
                 continue
 
             if not os.path.exists(template_filename):
                 logging.warning(
-                    (
-                        "Unable to generate Python type object source code for: "
-                        "{0:s}.{1:s} not such template file: {2:s}"
-                    ).format(type_name, type_function, template_filename)
+                    f"Unable to generate Python type object source code for: "
+                    f"{type_name:s}.{type_function:s} not such template file: "
+                    f"{template_filename:s}"
                 )
                 continue
 
@@ -1041,7 +991,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 search_string = ("PyObject *{0:s}_{1:s}_{2:s}(").format(
                     project_configuration.python_module_name, type_name, type_function
                 )
-
                 result = self._CopyFunctionToOutputFile(
                     lines, search_string, output_filename
                 )
@@ -1108,20 +1057,21 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             if type_function == "copy_from_byte_stream":
                 python_type_object_method = [
                     "",
-                    '\t{{ "{0:s}",'.format(type_function),
-                    "\t  (PyCFunction) {0:s},".format(python_function_prototype.name),
-                    "\t  {0:s},".format(arguments_flags),
-                    '\t  "{0:s}({1:s})\\n"'.format(type_function, arguments_string),
+                    f'\t{{ "{type_function:s}",',
+                    f"\t  (PyCFunction) {python_function_prototype.name:s},",
+                    f"\t  {arguments_flags:s},",
+                    f'\t  "{type_function:s}({arguments_string:s})\\n"',
                     '\t  "\\n"',
                 ]
             else:
                 python_type_object_method = [
                     "",
-                    '\t{{ "{0:s}",'.format(type_function),
-                    "\t  (PyCFunction) {0:s},".format(python_function_prototype.name),
-                    "\t  {0:s},".format(arguments_flags),
-                    '\t  "{0:s}({1:s}) -> {2:s}\\n"'.format(
-                        type_function, arguments_string, data_type
+                    f'\t{{ "{type_function:s}",',
+                    f"\t  (PyCFunction) {python_function_prototype.name:s},",
+                    f"\t  {arguments_flags:s},",
+                    (
+                        f'\t  "{type_function:s}({arguments_string:s}) -> '
+                        f'{data_type:s}\\n"'
                     ),
                     '\t  "\\n"',
                 ]
@@ -1134,9 +1084,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 line = line.replace(" xml ", " XML ")
 
                 if index < len(description) - 1:
-                    python_type_object_methods.append('\t  "{0:s}\\n"'.format(line))
+                    python_type_object_methods.append(f'\t  "{line:s}\\n"')
                 else:
-                    python_type_object_methods.append('\t  "{0:s}" }},'.format(line))
+                    python_type_object_methods.append(f'\t  "{line:s}" }},')
 
             if (
                 type_function == "get_offset"
@@ -1250,11 +1200,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         python_type_object_methods.extend(
             ["", "\t/* Sentinel */", "\t{ NULL, NULL, 0, NULL }"]
         )
-
         template_mappings["python_type_object_methods"] = "\n".join(
             python_type_object_methods
         )
-
         template_filename = os.path.join(templates_path, "type_object_methods.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
@@ -2089,7 +2037,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     project_configuration.python_module_name,
                     project_configuration.library_name,
                 )
-
             else:
                 output_filename = "{0:s}_{1:s}".format(
                     project_configuration.python_module_name, directory_entry[6:]
@@ -2111,7 +2058,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         library_include_header_file = self._GetLibraryIncludeHeaderFile(
             project_configuration
         )
-
         python_module_types = []
 
         if not library_include_header_file:
@@ -2125,7 +2071,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             api_types, api_types_with_input = (
                 library_include_header_file.GetAPITypeTestGroups()
             )
-
             api_pseudo_types = library_include_header_file.GetAPIPseudoTypeTestGroups()
 
             api_types.extend(api_types_with_input)
@@ -2144,7 +2089,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                         project_configuration, type_name, is_pseudo_type=is_pseudo_type
                     )
                 )
-
                 if not python_function_prototypes:
                     logging.warning(
                         (
@@ -2179,7 +2123,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     has_pseudo_sub_types=has_pseudo_sub_types,
                     is_pseudo_type=is_pseudo_type,
                 )
-
                 self._GenerateTypeHeaderFile(
                     project_configuration,
                     template_mappings,
@@ -2194,7 +2137,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 self._SetTypeNameInTemplateMappings(
                     template_mappings, sequence_type_name
                 )
-
                 self._GenerateSequenceTypeSourceFile(
                     project_configuration,
                     template_mappings,
@@ -2202,14 +2144,12 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     output_writer,
                     type_is_object=type_is_object,
                 )
-
                 self._GenerateSequenceTypeHeaderFile(
                     project_configuration,
                     template_mappings,
                     sequence_type_name,
                     output_writer,
                 )
-
                 module_type_name = self._GetSequenceName(sequence_type_name)
                 python_module_types.append(module_type_name)
 
@@ -2249,7 +2189,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     enum_declaration,
                     output_writer,
                 )
-
                 self._GenerateDefinitionsHeaderFile(
                     project_configuration,
                     template_mappings,
@@ -2257,7 +2196,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     enum_declaration,
                     output_writer,
                 )
-
                 definition_types.append(definitions_name)
 
         python_module_types.extend(definition_types)
@@ -2268,7 +2206,6 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             library_include_header_file,
             output_writer,
         )
-
         self._GenerateModuleSourceFile(
             project_configuration,
             template_mappings,

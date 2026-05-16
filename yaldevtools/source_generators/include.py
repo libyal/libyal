@@ -84,30 +84,25 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
         library_name = project_configuration.library_name
 
         pkginclude_headers = [
-            "\t{0:s}/definitions.h \\".format(library_name),
-            "\t{0:s}/extern.h \\".format(library_name),
-            "\t{0:s}/features.h \\".format(library_name),
-            "\t{0:s}/types.h".format(library_name),
+            f"\t{library_name:s}/definitions.h \\",
+            f"\t{library_name:s}/extern.h \\",
+            f"\t{library_name:s}/features.h \\",
+            f"\t{library_name:s}/types.h",
         ]
-
         # TODO: detect if header file exits.
         if library_name != "libcerror":
-            pkginclude_header = "\t{0:s}/error.h \\".format(library_name)
-            pkginclude_headers.append(pkginclude_header)
+            pkginclude_headers.append(f"\t{library_name:s}/error.h \\")
 
         if include_header_file.HasFunction("get_codepage"):
-            pkginclude_header = "\t{0:s}/codepage.h \\".format(library_name)
-            pkginclude_headers.append(pkginclude_header)
+            pkginclude_headers.append(f"\t{library_name:s}/codepage.h \\")
 
         # TODO: detect if header file exits.
         if library_name in ("libnk2", "libpff"):
-            pkginclude_header = "\t{0:s}/mapi.h \\".format(library_name)
-            pkginclude_headers.append(pkginclude_header)
+            pkginclude_headers.append(f"\t{library_name:s}/mapi.h \\")
 
         # TODO: detect if header file exits.
         if library_name == "libolecf":
-            pkginclude_header = "\t{0:s}/ole.h \\".format(library_name)
-            pkginclude_headers.append(pkginclude_header)
+            pkginclude_headers.append(f"\t{library_name:s}/ole.h \\")
 
         pkginclude_headers = sorted(pkginclude_headers)
 
@@ -137,14 +132,13 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
           output_writer (OutputWriter): output writer.
           output_filename (str): path of the output file.
         """
+        library_name = project_configuration.library_name
         templates_path = os.path.join(self._templates_path, "libyal", "types.h.in")
 
         type_definitions = []
         # TODO: deprecate project_configuration.library_public_types ?
         for type_name in sorted(project_configuration.library_public_types):
-            type_definition = "typedef intptr_t {0:s}_{1:s}_t;".format(
-                project_configuration.library_name, type_name
-            )
+            type_definition = f"typedef intptr_t {library_name:s}_{type_name:s}_t;"
             type_definitions.append(type_definition)
 
         template_mappings["library_type_definitions"] = "\n".join(type_definitions)
@@ -174,9 +168,8 @@ class IncludeSourceFileGenerator(interface.SourceFileGenerator):
 
         if not include_header_file:
             logging.warning(
-                "Missing: {0:s} skipping generation of include source files.".format(
-                    self._library_include_header_path
-                )
+                f"Missing: {self._library_include_header_path:s} skipping generation "
+                f"of include source files."
             )
             return
 
