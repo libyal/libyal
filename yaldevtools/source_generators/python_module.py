@@ -853,29 +853,30 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                                     in python_function_prototype.return_values
                                 ):
                                     template_filename = (
-                                        "get_{0:s}{1:s}_value-with_none.c".format(
-                                            value_name_prefix,
-                                            python_function_prototype.data_type,
-                                        )
+                                        f"{value_name_prefix:s}"
+                                        f"{python_function_prototype.data_type:s}"
+                                        f"_value-with_none.c"
                                     )
                                 elif has_pseudo_sub_types:
                                     template_filename = (
-                                        "get_{0:s}{1:s}_value-with_type_object.c"
-                                    ).format(
-                                        value_name_prefix,
-                                        python_function_prototype.data_type,
+                                        f"{value_name_prefix:s}"
+                                        f"{python_function_prototype.data_type:s}"
+                                        f"_value-with_type_object.c"
                                     )
                                 else:
-                                    template_filename = "get_{0:s}{1:s}_value.c".format(
-                                        value_name_prefix,
-                                        python_function_prototype.data_type,
+                                    template_filename = (
+                                        f"{value_name_prefix:s}"
+                                        f"{python_function_prototype.data_type:s}"
+                                        f"_value.c"
                                     )
 
                     elif python_function_prototype.function_type == (
                         definitions.FUNCTION_TYPE_GET_BY_INDEX
                     ):
-                        template_filename = "get_{0:s}{1:s}_value_by_index.c".format(
-                            value_name_prefix, python_function_prototype.data_type
+                        template_filename = (
+                            f"get_{value_name_prefix:s}"
+                            f"{python_function_prototype.data_type:s}"
+                            f"_value_by_index.c"
                         )
                         if python_function_prototype.object_type:
                             sequence_type_name = self._GetSequenceName(
@@ -897,10 +898,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     ):
                         _, _, type_function_suffix = type_function.partition("_by_")
 
-                        template_filename = "get_{0:s}{1:s}_value_by_{2:s}.c".format(
-                            value_name_prefix,
-                            python_function_prototype.data_type,
-                            type_function_suffix,
+                        template_filename = (
+                            f"{value_name_prefix:s}"
+                            f"{python_function_prototype.data_type:s}"
+                            f"_value_by_{type_function_suffix:s}.c"
                         )
 
                     if python_function_prototype.data_type == (
@@ -959,9 +960,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
             if generate_get_value_type_object:
                 search_string = (
-                    "PyTypeObject *{0:s}_{1:s}_get_{2:s}_type_object("
-                ).format(
-                    project_configuration.python_module_name, type_name, value_name
+                    f"PyTypeObject *{project_configuration.python_module_name:s}"
+                    f"_{type_name:s}_get_{value_name:s}_type_object("
                 )
 
                 result = self._CopyFunctionToOutputFile(
@@ -988,8 +988,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 "get_data_as_floating_point",
                 "get_data_as_integer",
             ):
-                search_string = ("PyObject *{0:s}_{1:s}_{2:s}(").format(
-                    project_configuration.python_module_name, type_name, type_function
+                search_string = (
+                    f"PyObject *"
+                    f"{project_configuration.python_module_name:s}"
+                    f"_{type_name:s}_{type_function:s}("
                 )
                 result = self._CopyFunctionToOutputFile(
                     lines, search_string, output_filename
@@ -1105,31 +1107,40 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     [
                         "",
                         '\t{ "read",',
-                        "\t  (PyCFunction) {0:s}_{1:s}_read_buffer,".format(
-                            project_configuration.python_module_name, type_name
+                        (
+                            f"\t  (PyCFunction) "
+                            f"{project_configuration.python_module_name:s}"
+                            f"_{type_name:s}"
+                            f"_read_buffer,"
                         ),
                         "\t  METH_VARARGS | METH_KEYWORDS,",
                         '\t  "read(size) -> Bytes\\n"',
                         '\t  "\\n"',
-                        '\t  "{0:s}." }},'.format(read_buffer_description[0][:-1]),
+                        f'\t  "{read_buffer_description[0][:-1]:s}." }},',
                         "",
                         '\t{ "seek",',
-                        "\t  (PyCFunction) {0:s}_{1:s}_seek_offset,".format(
-                            project_configuration.python_module_name, type_name
+                        (
+                            f"\t  (PyCFunction) "
+                            f"{project_configuration.python_module_name:s}"
+                            f"_{type_name:s}"
+                            f"_seek_offset,"
                         ),
                         "\t  METH_VARARGS | METH_KEYWORDS,",
                         '\t  "seek(offset, whence) -> None\\n"',
                         '\t  "\\n"',
-                        '\t  "{0:s}." }},'.format(seek_offset_description[0][:-1]),
+                        f'\t  "{seek_offset_description[0][:-1]:s}." }},',
                         "",
                         '\t{ "tell",',
-                        "\t  (PyCFunction) {0:s}_{1:s}_get_offset,".format(
-                            project_configuration.python_module_name, type_name
+                        (
+                            f"\t  (PyCFunction) "
+                            f"{project_configuration.python_module_name:s}"
+                            f"_{type_name:s}"
+                            f"_get_offset,"
                         ),
                         "\t  METH_NOARGS,",
                         '\t  "tell() -> Integer\\n"',
                         '\t  "\\n"',
-                        '\t  "{0:s}." }},'.format(description[0][:-1]),
+                        f'\t  "{description[0][:-1]:s}." }},',
                     ]
                 )
 
@@ -1140,14 +1151,14 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 python_type_object_methods.extend(
                     [
                         "",
-                        '\t{{ "{0:s}_as_integer",'.format(type_function),
-                        "\t  (PyCFunction) {0:s}_as_integer,".format(
-                            python_function_prototype.name
+                        f'\t{{ "{type_function:s}_as_integer",',
+                        (
+                            f"\t  (PyCFunction) "
+                            f"{python_function_prototype.name:s}"
+                            f"_as_integer,"
                         ),
                         "\t  METH_NOARGS,",
-                        '\t  "{0:s}_as_integer({1:s}) -> Integer or None\\n"'.format(
-                            type_function, arguments_string
-                        ),
+                        '\t  "{type_function:s}_as_integer({arguments_string:s}) -> Integer or None\\n"',
                         '\t  "\\n"',
                     ]
                 )
@@ -1156,38 +1167,39 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     definitions.DATA_TYPE_FAT_DATE_TIME
                 ):
                     description[0] = (
-                        "{0:s} as a 32-bit integer containing a FAT date time " "value."
-                    ).format(description[0][:-1])
+                        f"{description[0][:-1]:s} as a 32-bit integer containing "
+                        "a FAT date time value."
+                    )
 
                 elif python_function_prototype.data_type == (
                     definitions.DATA_TYPE_FILETIME
                 ):
                     description[0] = (
-                        "{0:s} as a 64-bit integer containing a FILETIME value."
-                    ).format(description[0][:-1])
+                        f"{description[0][:-1]:s} as a 64-bit integer containing "
+                        "a FILETIME value."
+                    )
 
                 elif python_function_prototype.data_type == (
                     definitions.DATA_TYPE_FLOATINGTIME
                 ):
                     description[0] = (
-                        "{0:s} as a 64-bit integer containing a floatingtime " "value."
-                    ).format(description[0][:-1])
+                        f"{description[0][:-1]:s} as a 64-bit integer containing "
+                        "a floatingtime value."
+                    )
 
                 elif python_function_prototype.data_type == (
                     definitions.DATA_TYPE_POSIX_TIME
                 ):
                     description[0] = (
-                        "{0:s} as a 32-bit integer containing a POSIX timestamp "
-                        "value."
-                    ).format(description[0][:-1])
+                        f"{description[0][:-1]:s} as a 32-bit integer containing "
+                        "a POSIX timestamp value."
+                    )
 
                 for index, line in enumerate(description):
                     if index < len(description) - 1:
-                        python_type_object_methods.append('\t  "{0:s}\\n"'.format(line))
+                        python_type_object_methods.append(f'\t  "{line:s}\\n"')
                     else:
-                        python_type_object_methods.append(
-                            '\t  "{0:s}" }},'.format(line)
-                        )
+                        python_type_object_methods.append(f'\t  "{line:s}" }},')
 
             elif (
                 python_function_prototype.arguments
@@ -1261,8 +1273,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             if type_function != "get_ascii_codepage":
                 setter_function = "0"
             else:
-                setter_function = ("{0:s}_{1:s}_set_ascii_codepage_setter").format(
-                    project_configuration.python_module_name, type_name
+                setter_function = (
+                    f"{project_configuration.python_module_name:s}"
+                    f"_{type_name:s}"
+                    f"_set_ascii_codepage_setter"
                 )
 
             description = python_function_prototype.GetAttributeDescription()
@@ -1276,10 +1290,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 python_type_object_get_set_definitions.extend(
                     [
                         "",
-                        '\t{{ "{0:s}",'.format(type_function[4:]),
-                        "\t  (getter) {0:s},".format(python_function_prototype.name),
-                        "\t  (setter) {0:s},".format(setter_function),
-                        '\t  "{0:s}",'.format(description),
+                        f'\t{{ "{type_function[4:]:s}",',
+                        f"\t  (getter) {python_function_prototype.name:s},",
+                        f"\t  (setter) {setter_function:s},",
+                        f'\t  "{description:s}",',
                         "\t  NULL },",
                     ]
                 )
@@ -1299,10 +1313,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 python_type_object_get_set_definitions.extend(
                     [
                         "",
-                        '\t{{ "{0:s}",'.format(sequence_type_function),
-                        "\t  (getter) {0:s},".format(sequence_type_getter),
-                        "\t  (setter) {0:s},".format(setter_function),
-                        '\t  "{0:s}.",'.format(sequence_type_description),
+                        f'\t{{ "{sequence_type_function:s}",',
+                        f"\t  (getter) {sequence_type_getter:s},",
+                        f"\t  (setter) {setter_function:s},",
+                        f'\t  "{sequence_type_description:s}.",',
                         "\t  NULL },",
                     ]
                 )
@@ -1317,10 +1331,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 python_type_object_get_set_definitions.extend(
                     [
                         "",
-                        '\t{{ "{0:s}",'.format(sequence_type_function),
-                        "\t  (getter) {0:s},".format(sequence_type_getter),
-                        "\t  (setter) {0:s},".format(setter_function),
-                        '\t  "{0:s}.",'.format(sequence_type_description),
+                        f'\t{{ "{sequence_type_function:s}",',
+                        f"\t  (getter) {sequence_type_getter:s},",
+                        f"\t  (setter) {setter_function:s},",
+                        f'\t  "{sequence_type_description:s}.",',
                         "\t  NULL },",
                     ]
                 )
@@ -1363,34 +1377,35 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         """
         if len(function_prototype.arguments) < 2:
             logging.warning(
-                "Unsupported function prototype: {0:s}".format(function_prototype.name)
+                f"Unsupported function prototype: " f"{function_prototype.name:s}"
             )
             return None
 
         if type_function in ("free", "initialize"):
-            self_argument = "{0:s}_{1:s}_t **{1:s}".format(
-                project_configuration.library_name, type_name
+            self_argument = (
+                f"{project_configuration.library_name:s}"
+                f"_{type_name:s}_t **{type_name:s}"
             )
 
         elif is_pseudo_type:
             base_type_name = "item"
-            self_argument = "{0:s}_{1:s}_t *{2:s}".format(
-                project_configuration.library_name, base_type_name, type_name
+            self_argument = (
+                f"{project_configuration.library_name:s}"
+                f"_{base_type_name:s}_t *{type_name:s}"
             )
 
         else:
-            self_argument = "{0:s}_{1:s}_t *{1:s}".format(
-                project_configuration.library_name, type_name
+            self_argument = (
+                f"{project_configuration.library_name:s}"
+                f"_{type_name:s}_t *{type_name:s}"
             )
 
         function_argument = function_prototype.arguments[0]
         function_argument_string = function_argument.CopyToString()
         if function_argument_string != self_argument:
             logging.warning(
-                (
-                    "Unsupported function prototype: {0:s} - unsupported self "
-                    "argument: {1:s}"
-                ).format(function_prototype.name, function_argument_string)
+                f"Unsupported function prototype: {function_prototype.name:s} - "
+                f"unsupported self argument: {function_argument_string:s}"
             )
             return None
 
@@ -1398,7 +1413,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         function_argument_string = function_argument.CopyToString()
         if function_argument_string != "libcerror_error_t **error":
             logging.warning(
-                "Unsupported function prototype: {0:s}".format(function_prototype.name)
+                f"Unsupported function prototype: {function_prototype.name:s}"
             )
             return None
 
@@ -1526,9 +1541,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
                     if value_argument_string != "const uint8_t *utf8_string":
                         logging.warning(
-                            "Unsupported function prototype: {0:s}".format(
-                                function_prototype.name
-                            )
+                            f"Unsupported function prototype: "
+                            f"{function_prototype.name:s}"
                         )
                         return None
 
@@ -1537,9 +1551,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
                     if function_argument_string != "size_t utf8_string_length":
                         logging.warning(
-                            "Unsupported function prototype: {0:s}".format(
-                                function_prototype.name
-                            )
+                            f"Unsupported function prototype: "
+                            f"{function_prototype.name:s}"
                         )
                         return None
 
@@ -1796,8 +1809,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         if not header_file:
             return None
 
-        function_name_prefix = "{0:s}_{1:s}_".format(
-            project_configuration.library_name, type_name
+        function_name_prefix = (
+            f"{project_configuration.library_name:s}" f"_{type_name:s}_"
         )
         function_name_prefix_length = len(function_name_prefix)
 
@@ -1809,9 +1822,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 continue
 
             if not function_name.startswith(function_name_prefix):
-                logging.warning(
-                    "Skipping unsupported API function: {0:s}".format(function_name)
-                )
+                logging.warning(f"Skipping unsupported API function: {function_name:s}")
                 continue
 
             type_function = function_name[function_name_prefix_length:]
@@ -1906,7 +1917,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 or not python_function_prototype.function_type
             ):
                 logging.warning(
-                    "Skipping unsupported type function: {0:s}".format(function_name)
+                    "Skipping unsupported type function: " f"{function_name:s}"
                 )
                 continue
 
@@ -1927,15 +1938,15 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           str: sequence type or value name.
         """
         if name == "key":
-            return "{0:s}s".format(name)
+            return f"{name:s}s"
 
         if name[-1] in ("s", "x", "z") or (name[-1] == "h" and name[-2] in ("c", "s")):
-            return "{0:s}es".format(name)
+            return f"{name:s}es"
 
         if name[-1] == "y":
-            return "{0:s}ies".format(name[:-1])
+            return f"{name[:-1]:s}ies"
 
-        return "{0:s}s".format(name)
+        return f"{name:s}s"
 
     def _GetSequenceType(self, python_function_prototype):
         """Determines if the function prototype implies a sequence type.
@@ -2033,13 +2044,14 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
             force_create = False
 
             if directory_entry == "pyyal_libyal.h":
-                output_filename = "{0:s}_{1:s}.h".format(
-                    project_configuration.python_module_name,
-                    project_configuration.library_name,
+                output_filename = (
+                    f"{project_configuration.python_module_name:s}"
+                    f"_{project_configuration.library_name:s}.h"
                 )
             else:
-                output_filename = "{0:s}_{1:s}".format(
-                    project_configuration.python_module_name, directory_entry[6:]
+                output_filename = (
+                    f"{project_configuration.python_module_name:s}"
+                    f"_{directory_entry[6:]}"
                 )
 
             output_filename = os.path.join(
@@ -2062,10 +2074,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
         if not library_include_header_file:
             logging.warning(
-                (
-                    "Missing: {0:s} skipping generation of Python type object "
-                    "source and header files."
-                ).format(self._library_include_header_path)
+                f"Missing: {self._library_include_header_path:s} skipping generation "
+                f"of Python type object source and header files."
             )
         else:
             api_types, api_types_with_input = (
@@ -2091,11 +2101,8 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 )
                 if not python_function_prototypes:
                     logging.warning(
-                        (
-                            "Missing function prototypes for type: {0:s} skipping "
-                            "generation of Python type object source and header "
-                            "files."
-                        ).format(type_name)
+                        f"Missing function prototypes for type: {type_name:s} skipping "
+                        f"generation of Python type object source and header files."
                     )
                     continue
 
@@ -2161,15 +2168,11 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
         if not definitions_include_header_file:
             logging.warning(
-                (
-                    "Missing: {0:s} skipping generation of Python definitions object "
-                    "source and header files."
-                ).format(self._definitions_include_header_path)
+                f"Missing: {self._definitions_include_header_path:s} skipping "
+                f"generation of Python definitions object source and header files."
             )
         else:
-            definitions_name_prefix = "{0:s}_".format(
-                project_configuration.library_name
-            )
+            definitions_name_prefix = f"{project_configuration.library_name:s}_"
             definitions_name_prefix_length = len(definitions_name_prefix)
 
             for enum_declaration in definitions_include_header_file.enum_declarations:

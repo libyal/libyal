@@ -391,7 +391,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                 options_usage.append(usage)
 
         options_without_arguments = "".join(options_without_arguments)
-        usage = f'[ -{options_without_arguments:s} ]'
+        usage = f"[ -{options_without_arguments:s} ]"
         options_usage.append(usage)
 
         if project_configuration.info_tool_source_type:
@@ -668,11 +668,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             template_name = "get_modification_time-mounted_timestamp.c"
 
         elif not project_configuration.mount_tool_file_system_type:
-            template_name = (
-                "get_modification_time-{file_entry_modification_time_type:s}_and_mounted_timestamp.c"
-            )
+            template_name = "get_modification_time-{file_entry_modification_time_type:s}_and_mounted_timestamp.c"
         else:
-            template_name = "get_modification_time-{file_entry_modification_time_type:s}.c"
+            template_name = (
+                "get_modification_time-{file_entry_modification_time_type:s}.c"
+            )
 
         template_names.append(template_name)
 
@@ -683,11 +683,11 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             template_name = "get_inode_change_time-mounted_timestamp.c"
 
         elif not project_configuration.mount_tool_file_system_type:
-            template_name = (
-                "get_inode_change_time-{file_entry_inode_change_time_type:s}_and_mounted_timestamp.c"
-            )
+            template_name = "get_inode_change_time-{file_entry_inode_change_time_type:s}_and_mounted_timestamp.c"
         else:
-            template_name = "get_inode_change_time-{file_entry_inode_change_time_type:s}.c"
+            template_name = (
+                "get_inode_change_time-{file_entry_inode_change_time_type:s}.c"
+            )
 
         template_names.append(template_name)
 
@@ -884,8 +884,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             file_system_type.replace("_", " ")
         )
         template_mappings["mount_tool_file_system_type_name"] = (
-            f"{project_configuration.library_name_suffix:s}_"
-            f"{file_system_type:s}"
+            f"{project_configuration.library_name_suffix:s}_" f"{file_system_type:s}"
         )
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
@@ -992,8 +991,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             file_system_type.replace("_", " ")
         )
         template_mappings["mount_tool_file_system_type_name"] = (
-            f"{project_configuration.library_name_suffix:s}_"
-            f"{file_system_type:s}"
+            f"{project_configuration.library_name_suffix:s}_" f"{file_system_type:s}"
         )
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
@@ -1471,8 +1469,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             "_", " "
         )
         template_mappings["mount_tool_base_type_name"] = (
-            f"{project_configuration.library_name_suffix:s}_"
-            f"{base_type:s}"
+            f"{project_configuration.library_name_suffix:s}_" f"{base_type:s}"
         )
         template_mappings["mount_tool_file_entry_type"] = mount_tool_file_entry_type
         template_mappings["mount_tool_file_entry_type_description"] = (
@@ -1491,8 +1488,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             file_system_type.replace("_", " ")
         )
         template_mappings["mount_tool_file_system_type_name"] = (
-            f"{project_configuration.library_name_suffix:s}_"
-            f"{file_system_type:s}"
+            f"{project_configuration.library_name_suffix:s}_" f"{file_system_type:s}"
         )
         template_mappings["mount_tool_source_type"] = (
             project_configuration.mount_tool_source_type
@@ -1969,7 +1965,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                 options_usage.append(usage)
 
         options_without_arguments = "".join(options_without_arguments)
-        usage = f'[ -{options_without_arguments:s} ]'
+        usage = f"[ -{options_without_arguments:s} ]"
         options_usage.append(usage)
 
         options_usage.extend(
