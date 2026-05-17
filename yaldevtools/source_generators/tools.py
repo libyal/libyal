@@ -668,10 +668,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             template_name = "get_modification_time-mounted_timestamp.c"
 
         elif not project_configuration.mount_tool_file_system_type:
-            template_name = "get_modification_time-{file_entry_modification_time_type:s}_and_mounted_timestamp.c"
+            template_name = (
+                f"get_modification_time-{file_entry_modification_time_type:s}_and_"
+                f"mounted_timestamp.c"
+            )
         else:
             template_name = (
-                "get_modification_time-{file_entry_modification_time_type:s}.c"
+                f"get_modification_time-{file_entry_modification_time_type:s}.c"
             )
 
         template_names.append(template_name)
@@ -683,10 +686,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             template_name = "get_inode_change_time-mounted_timestamp.c"
 
         elif not project_configuration.mount_tool_file_system_type:
-            template_name = "get_inode_change_time-{file_entry_inode_change_time_type:s}_and_mounted_timestamp.c"
+            template_name = (
+                f"get_inode_change_time-{file_entry_inode_change_time_type:s}_and_"
+                f"mounted_timestamp.c"
+            )
         else:
             template_name = (
-                "get_inode_change_time-{file_entry_inode_change_time_type:s}.c"
+                f"get_inode_change_time-{file_entry_inode_change_time_type:s}.c"
             )
 
         template_names.append(template_name)
@@ -2124,6 +2130,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             mount_tool_options.append(option)
 
         if project_configuration.HasMountToolsFeatureOffset():
+            mount_tool_source_type = project_configuration.mount_tool_source_type
             option = (
                 "o",
                 "offset",
@@ -2161,15 +2168,14 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                     "v",
                     "",
                     (
-                        "verbose output to stderr, while {mount_tool_name:s} will remain "
-                        "running in the foreground"
+                        "verbose output to stderr, while {mount_tool_name:s} will "
+                        "remain running in the foreground"
                     ),
                 ),
                 ("V", "", "print version"),
                 ("X", "extended_options", "extended options to pass to sub system"),
             ]
         )
-
         return mount_tool_options
 
     def Generate(self, project_configuration, output_writer):

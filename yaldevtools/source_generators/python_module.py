@@ -402,12 +402,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           has_pseudo_sub_types (Optional[bool]): True if type has pseudo sub types.
           is_pseudo_type (Optional[bool]): True if type is a pseudo type.
         """
-        open_support = "open" in python_function_prototypes
         without_initialize_and_with_free = (
             "initialize" not in python_function_prototypes
             and "free" in python_function_prototypes
         )
-
         # TODO: make check more generic based on the source itself.
         if (
             project_configuration.library_name == "libfwnt"
@@ -466,9 +464,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         ]
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
-        for type_function, python_function_prototype in iter(
-            python_function_prototypes.items()
-        ):
+        for (
+            type_function,
+            python_function_prototype,
+        ) in python_function_prototypes.items():
             if type_function in ("free", "initialize"):
                 continue
 
@@ -769,9 +768,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         generate_get_value_type_object = False
         value_type_objects = set([])
 
-        for type_function, python_function_prototype in iter(
-            python_function_prototypes.items()
-        ):
+        for (
+            type_function,
+            python_function_prototype,
+        ) in python_function_prototypes.items():
             if type_function in ("free", "initialize"):
                 continue
 
@@ -799,7 +799,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     template_filename = "set_keys_with_mode.c"
 
                 elif type_function == "set_password":
-                    template_filename = f"set_string_value.c"
+                    template_filename = "set_string_value.c"
 
                 elif python_function_prototype.function_type == (
                     definitions.FUNCTION_TYPE_COPY
@@ -1035,11 +1035,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         templates_path = os.path.join(self._templates_path, "pyyal_type")
 
         python_type_object_methods = []
-        python_type_object_get_set_definitions = []
-        for type_function, python_function_prototype in iter(
-            python_function_prototypes.items()
-        ):
-
+        for (
+            type_function,
+            python_function_prototype,
+        ) in python_function_prototypes.items():
             if type_function in ("free", "initialize"):
                 continue
 
@@ -1158,7 +1157,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                             f"_as_integer,"
                         ),
                         "\t  METH_NOARGS,",
-                        '\t  "{type_function:s}_as_integer({arguments_string:s}) -> Integer or None\\n"',
+                        (
+                            f'\t  "{type_function:s}_as_integer({arguments_string:s}) '
+                            f'-> Integer or None\\n"'
+                        ),
                         '\t  "\\n"',
                     ]
                 )
@@ -1245,10 +1247,10 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         templates_path = os.path.join(self._templates_path, "pyyal_type")
 
         python_type_object_get_set_definitions = []
-        for type_function, python_function_prototype in iter(
-            python_function_prototypes.items()
-        ):
-
+        for (
+            type_function,
+            python_function_prototype,
+        ) in python_function_prototypes.items():
             if python_function_prototype.function_type not in (
                 definitions.FUNCTION_TYPE_COPY,
                 definitions.FUNCTION_TYPE_COPY_TO,
@@ -1507,10 +1509,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                 value_type, _, _ = value_argument_string.partition(" ")
 
             else:
-                type_function_prefix, _, type_function_suffix = type_function.partition(
-                    "_by_"
-                )
-
+                _, _, type_function_suffix = type_function.partition("_by_")
                 value_argument_index = 1
 
                 function_argument = function_prototype.arguments[value_argument_index]
@@ -1817,7 +1816,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
         functions_per_name = header_file.functions_per_name
 
         python_function_prototypes = collections.OrderedDict()
-        for function_name, function_prototype in iter(functions_per_name.items()):
+        for function_name, function_prototype in functions_per_name.items():
             if not function_prototype.have_extern:
                 continue
 
@@ -1991,12 +1990,9 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
           dict[str, str]: string template mappings, where the key maps to the name
               of a template variable.
         """
-        template_mappings = super(
-            PythonModuleSourceFileGenerator, self
-        )._GetTemplateMappings(
+        template_mappings = super()._GetTemplateMappings(
             project_configuration, authors_separator=",\n *                          "
         )
-
         # TODO: have source formatter take care of the alignment.
         # Used to align source in pyyal/pyyal_file_object_io_handle.c
         alignment_padding = len(project_configuration.library_name) - 6
@@ -2106,10 +2102,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
                     )
                     continue
 
-                for type_function, python_function_prototype in iter(
-                    python_function_prototypes.items()
-                ):
-
+                for python_function_prototype in python_function_prototypes.values():
                     sequence_type_name, type_is_object = self._GetSequenceType(
                         python_function_prototype
                     )

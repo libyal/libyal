@@ -119,11 +119,11 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
         notify_header_file = os.path.join(
             library_path, "{0:s}_notify.h".format(project_configuration.library_name)
         )
-        if include_header_file.types:
-            longest_type_name = max(include_header_file.types, key=len)
-            # longest_library_debug_type_prefix = (
-            #     "typedef struct {0:s}_{1:s} {{}}"
-            # ).format(project_configuration.library_name, longest_type_name)
+        # if include_header_file.types:
+        #     longest_type_name = max(include_header_file.types, key=len)
+        #     longest_library_debug_type_prefix = (
+        #         "typedef struct {0:s}_{1:s} {{}}"
+        #     ).format(project_configuration.library_name, longest_type_name)
 
         library_debug_type_definitions = []
         type_definitions = []

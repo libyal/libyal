@@ -667,14 +667,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           template_mappings (dict[str, str]): template mappings, where the key
               maps to the name of a template variable.
         """
-        include_header_file = self._GetLibraryIncludeHeaderFile(project_configuration)
-
         makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
         local_libraries = [
             "/".join(["", name]) for name in sorted(makefile_am_file.libraries)
         ]
-
         tests_files = ["/tests/tmp*"]
 
         if (
@@ -705,7 +702,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             "/".join(["", project_configuration.tools_directory, name])
             for name in sorted(project_configuration.tools_names)
         ]
-
         template_mappings["local_libraries"] = "\n".join(sorted(local_libraries))
         template_mappings["tests_files"] = "\n".join(sorted(tests_files))
         template_mappings["tools_executables"] = "\n".join(tools_executables)
@@ -717,7 +713,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             ".gitignore",
         )
-
         del template_mappings["local_libraries"]
         del template_mappings["tests_files"]
         del template_mappings["tools_executables"]

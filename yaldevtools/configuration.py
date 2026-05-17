@@ -294,6 +294,7 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_info_tool_profiles = None
         self.tests_verify_tool_option_sets = None
         self.tests_verify_tool_options = None
+        self.tests_verify_tool_profiles = None
         self.tests_example_filename1 = None
         self.tests_example_filename2 = None
 

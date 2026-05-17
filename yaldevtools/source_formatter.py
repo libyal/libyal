@@ -270,7 +270,6 @@ class SourceFormatter:
                         block_of_declaration_lines = self.VerticalAlignEqualSigns(
                             block_of_declaration_lines, alignment_offset
                         )
-
                         formatted_lines.extend(block_of_declaration_lines)
                         block_of_declaration_lines = []
 
@@ -345,7 +344,6 @@ class SourceFormatter:
             declaration_lines = self.VerticalAlignEqualSigns(
                 declaration_lines, alignment_offset
             )
-
             formatted_lines.extend(declaration_lines)
             formatted_lines.append(line)
             declaration_lines = []
@@ -355,7 +353,6 @@ class SourceFormatter:
             declaration_lines = self.VerticalAlignEqualSigns(
                 declaration_lines, alignment_offset
             )
-
             formatted_lines.extend(declaration_lines)
             declaration_lines = []
 

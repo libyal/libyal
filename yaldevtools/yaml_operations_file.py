@@ -104,7 +104,7 @@ class YAMLGeneratorOperationsFile:
             )
 
         generator_operation = resources.GeneratorOperation(
-            identifier=operation_identifier, type=operation_type
+            identifier=operation_identifier, operation_type=operation_type
         )
         generator_operation.condition = yaml_generator_operation.get("condition", None)
         generator_operation.modifiers = yaml_generator_operation.get("modifiers", None)

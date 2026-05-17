@@ -106,10 +106,8 @@ class BaseSourceFileGenerator:
             output_data = template_string.substitute(mapping=template_mappings)
         except (KeyError, ValueError) as exception:
             logging.error(
-                (
-                    f"Unable to format template: {template_file_path:s} with error: "
-                    f"{exception!s}"
-                )
+                f"Unable to format template: {template_file_path:s} with error: "
+                f"{exception!s}"
             )
             return
 
@@ -240,7 +238,7 @@ class BaseSourceFileGenerator:
 
             try:
                 result = eval(expression, namespace)  # pylint: disable=eval-used
-            except Exception as exception:
+            except Exception as exception:  # pylint: disable=broad-exception-caught
                 logging.warning(
                     f"Unable to check condition for operation: "
                     f"{group_operation.identifier:s} in file: "
@@ -305,7 +303,7 @@ class BaseSourceFileGenerator:
 
         templates_path = os.path.dirname(operations_file_path)
 
-        namespace = dict()
+        namespace = {}
         if project_configuration:
             namespace.update(project_configuration.__dict__)
         namespace.update(template_configuration)
@@ -344,7 +342,7 @@ class BaseSourceFileGenerator:
 
             try:
                 result = eval(expression, namespace)  # pylint: disable=eval-used
-            except Exception as exception:
+            except Exception as exception:  # pylint: disable=broad-exception-caught
                 logging.warning(
                     f"Unable to check condition for operation: "
                     f"{selection_operation.identifier:s} in file: "
@@ -408,7 +406,7 @@ class BaseSourceFileGenerator:
 
             try:
                 result = eval(expression, namespace)  # pylint: disable=eval-used
-            except Exception as exception:
+            except Exception as exception:  # pylint: disable=broad-exception-caught
                 logging.warning(
                     f"Unable to check condition for operation: "
                     f"{sequence_operation.identifier:s} in file: "
@@ -438,10 +436,8 @@ class BaseSourceFileGenerator:
                 operation = operations.get(operation_name, None)
                 if not operation:
                     logging.warning(
-                        (
-                            f"Missing operation: {operation_name:s} in file: "
-                            f"{operations_file_name:s}"
-                        )
+                        f"Missing operation: {operation_name:s} in file: "
+                        f"{operations_file_name:s}"
                     )
                     return ""
 
@@ -452,7 +448,6 @@ class BaseSourceFileGenerator:
                     namespace,
                     templates_path,
                 )
-
                 output_data = "".join([output_data, operation_output_data])
 
         del namespace[sequence_operation.placeholder]
@@ -486,13 +481,11 @@ class BaseSourceFileGenerator:
 
             try:
                 result = eval(expression, namespace)  # pylint: disable=eval-used
-            except Exception as exception:
+            except Exception as exception:  # pylint: disable=broad-exception-caught
                 logging.warning(
-                    (
-                        f"Unable to check condition for operation: "
-                        f"{template_operation.identifier:s} in file: "
-                        f"{operations_file_name:s} with error: {exception!s}"
-                    )
+                    f"Unable to check condition for operation: "
+                    f"{template_operation.identifier:s} in file: "
+                    f"{operations_file_name:s} with error: {exception!s}"
                 )
                 result = False
 
@@ -511,11 +504,9 @@ class BaseSourceFileGenerator:
             value = self._GetPlaceholderValue(namespace, identifier)
             if value is None:
                 logging.warning(
-                    (
-                        f"Missing template placeholder: {identifier:s} defined in "
-                        f"operation: {template_operation.identifier:s} in file: "
-                        f"{operations_file_name:s}"
-                    )
+                    f"Missing template placeholder: {identifier:s} defined in "
+                    f"operation: {template_operation.identifier:s} in file: "
+                    f"{operations_file_name:s}"
                 )
 
             template_values[identifier] = value
@@ -524,10 +515,8 @@ class BaseSourceFileGenerator:
             output_data = template_string.substitute(mapping=template_values)
         except (KeyError, ValueError) as exception:
             logging.error(
-                (
-                    f"Unable to format template: {template_file_path:s} with error: "
-                    f"{exception!s}"
-                )
+                f"Unable to format template: {template_file_path:s} with error: "
+                f"{exception!s}"
             )
             return ""
 

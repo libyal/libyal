@@ -57,7 +57,7 @@ class YAMLGeneratorOperationsFileTest(test_lib.BaseTestCase):
 
         test_operations_file = yaml_operations_file.YAMLGeneratorOperationsFile()
 
-        with open(test_file_path, "r", encoding="utf-8") as file_object:
+        with open(test_file_path, encoding="utf-8") as file_object:
             operations = list(test_operations_file._ReadFromFileObject(file_object))
 
         self.assertEqual(len(operations), 5)

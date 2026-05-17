@@ -512,7 +512,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         if project_configuration.HasPythonModule():
             for python_module_type in python_module_types:
-                test_script = f"{project_configuration.python_module_name:s}_test_{python_module_type:s}.py"
+                test_script = (
+                    f"{project_configuration.python_module_name:s}_test_"
+                    f"{python_module_type:s}.py"
+                )
                 python_scripts.append(test_script)
 
             test_script = (
@@ -559,18 +562,18 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         check_programs = sorted(check_programs)
 
-        cppflags = list(makefile_am_file.cppflags)
+        am_cppflags = list(makefile_am_file.cppflags)
         if api_functions_with_input or api_types_with_open:
             # Add libcsystem before non libyal cppflags.
             index = 0
-            while index < len(cppflags):
-                cppflag = cppflags[index]
+            while index < len(am_cppflags):
+                cppflag = am_cppflags[index]
                 if not cppflag.startswith("lib") or cppflag == "libcrypto":
                     break
                 index += 1
 
         cppflags = []
-        for name in cppflags:
+        for name in am_cppflags:
             name_upper = name.upper()
             cppflags.append(f"@{name_upper:s}_CPPFLAGS@")
 
@@ -656,7 +659,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 header_file = self._GetTypeLibraryHeaderFile(
                     project_configuration, group_name
                 )
-
                 if project_configuration.library_name == "libcerror":
                     template_filename = "yal_test_type_no_error.am"
 
@@ -691,10 +693,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
             else:
                 logging.warning(
-                    (
-                        'Unable to generate tests Makefile.am entry for: "{0:s}" with '
-                        "error: missing template"
-                    ).format(group_name)
+                    f'Unable to generate tests Makefile.am entry for: "{group_name:s}" '
+                    f"with error: missing template"
                 )
                 continue
 
@@ -1519,7 +1519,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                     output_writer,
                     output_filename,
                 )
-
                 self._GenerateTypeTestDefineInternalStart(
                     template_mappings,
                     last_have_extern,
@@ -1527,14 +1526,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                     output_writer,
                     output_filename,
                 )
-
                 logging.info(
-                    (
-                        'Generating tests source code for type: "{0:s}" function: "{1:s}" '
-                        "with template: {2:s}"
-                    ).format(type_name, type_function, function_template)
+                    f'Generating tests source code for type: "{type_name:s}" function: '
+                    f'"{type_function:s}" with template: {function_template:s}'
                 )
-
                 self._GenerateSection(
                     template_filename,
                     template_mappings,
@@ -1553,21 +1548,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 access_mode="a",
             ):
                 logging.info(
-                    (
-                        'Used existing tests source code for type: "{0:s}" function: '
-                        '"{1:s}" due to missing template'
-                    ).format(type_name, type_function)
+                    f'Used existing tests source code for type: "{type_name:s}" '
+                    f'function: "{type_function:s}" due to missing template'
                 )
-
                 return function_name, test_function_name, last_have_extern
 
             logging.warning(
-                (
-                    'Unable to generate tests source code for type: "{0:s}" function: '
-                    '"{1:s}" with error: missing template'
-                ).format(type_name, type_function)
+                f'Unable to generate tests source code for type: "{type_name:s}" '
+                f'function: "{type_function:s}" with error: missing template'
             )
-
             body_template_name = "function-body.c"
             # TODO: improve generation of default function body.
             return function_name, None, last_have_extern
@@ -1686,10 +1675,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             test_data_size = len(test_data)
             if not test_data_size:
                 logging.warning(
-                    (
-                        'Unable to generate tests source code for type: "{0:s}" '
-                        'function: "{1:s}" with error: missing test data'
-                    ).format(type_name, type_function)
+                    f'Unable to generate tests source code for type: "{type_name:s}" '
+                    f'function: "{type_function:s}" with error: missing test data'
                 )
                 return function_name, None, last_have_extern
 
@@ -1783,7 +1770,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             output_writer,
             output_filename,
         )
-
         self._GenerateTypeTestDefineInternalStart(
             template_mappings,
             last_have_extern,
@@ -1791,18 +1777,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             output_writer,
             output_filename,
         )
-
+        names_string = ", ".join(template_names)
         logging.info(
-            (
-                'Generating tests source code for type: "{0:s}" function: "{1:s}" '
-                "with templates: {2:s}"
-            ).format(type_name, type_function, ", ".join(template_names))
+            f'Generating tests source code for type: "{type_name:s}" function: '
+            f'"{type_function:s}" with templates: {names_string:s}'
         )
-
         self._GenerateSections(
             template_filenames, template_mappings, output_filename, access_mode="a"
         )
-
         del template_mappings["function_name"]
         del template_mappings["function_variables"]
         del template_mappings["initialize_value_name"]
@@ -1897,27 +1879,20 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 access_mode="a",
             ):
                 logging.info(
-                    (
-                        'Used existing tests source code for type: "{0:s}" function: '
-                        '"{1:s}" due to missing template'
-                    ).format(type_name, type_function)
+                    f'Used existing tests source code for type: "{type_name:s}" '
+                    f'function: "{type_function:s}" due to missing template'
                 )
-
                 return function_name, test_function_name, have_extern
 
             logging.warning(
-                (
-                    'Unable to generate tests source code for type: "{0:s}" function: '
-                    '"{1:s}" with error: missing template'
-                ).format(type_name, type_function)
+                f'Unable to generate tests source code for type: "{type_name:s}" '
+                f'function: "{type_function:s}" with error: missing template'
             )
-
             return function_name, None, have_extern
 
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         return function_name, test_function_name, have_extern
 
     def _GenerateTypeTestDefineInternalEnd(
