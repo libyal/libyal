@@ -152,17 +152,14 @@ class GithubIssueHelper:
                     return url_object.read(), url_object.info()
 
                 logging.warning(
-                    "Unable to download URL: {0:s} with status code: {1:d}".format(
-                        download_url, url_object.code
-                    )
+                    f"Unable to download URL: {download_url:s} with status code: "
+                    f"{url_object.code:d}"
                 )
                 return None, None
 
         except urllib_error.URLError as exception:
             logging.warning(
-                "Unable to download URL: {0:s} with error: {1!s}".format(
-                    download_url, exception
-                )
+                f"Unable to download URL: {download_url:s} with error: {exception!s}"
             )
             return None, None
 
@@ -176,9 +173,9 @@ class GithubIssueHelper:
         self._WaitForRateLimit()
 
         download_url = (
-            "https://api.github.com/repos/{0:s}/{1:s}/issues?state=open"
-        ).format(self._organization, project_name)
-
+            f"https://api.github.com/repos/{self._organization:s}/{project_name:s}/"
+            f"issues?state=open"
+        )
         issues_data, response = self._DownloadPageContent(download_url)
         if not issues_data:
             return
@@ -197,7 +194,7 @@ class GithubIssueHelper:
 
         matches = self._LAST_PAGE_RE.findall(link_header)
         if len(matches) != 1 and len(matches[0]) != 2:
-            logging.error("Unsupported Link HTTP header: {0:s}".format(link_header))
+            logging.error(f"Unsupported Link HTTP header: {link_header:s}")
             return
 
         base_url = matches[0][0]
@@ -205,16 +202,16 @@ class GithubIssueHelper:
         try:
             last_page = int(matches[0][1], 10) + 1
         except ValueError:
-            logging.error("Unsupported Link HTTP header: {0:s}".format(link_header))
+            logging.error(f"Unsupported Link HTTP header: {link_header:s}")
             return
 
         for page_number in range(2, last_page):
             self._WaitForRateLimit()
 
-            download_url = "{0:s}{1:d}".format(base_url, page_number)
+            download_url = f"{base_url:s}{page_number:d}"
             issues_data, _ = self._DownloadPageContent(download_url)
             if not issues_data:
-                logging.error("Missing issues page content: {0:s}".format(download_url))
+                logging.error(f"Missing issues page content: {download_url:s}")
                 continue
 
             for issue_json in json.loads(issues_data):
@@ -257,9 +254,8 @@ class GithubIssueHelper:
 
             reset_timestamp -= current_timestamp
             logging.info(
-                (
-                    "Rate limiting calls to Github API - sleeping for {0:d} " "seconds."
-                ).format(reset_timestamp)
+                f"Rate limiting calls to Github API - sleeping for {reset_timestamp:d} "
+                f"seconds."
             )
             time.sleep(reset_timestamp)
 
@@ -269,11 +265,8 @@ class GithubIssueHelper:
         Args:
           output_writer (OutputWriter): an output writer.
         """
-        csv_line = "project:\t{0:s}\n".format(
-            "\t".join(["{0:s}:".format(key) for key in self._KEYS])
-        )
-
-        output_writer.Write(csv_line)
+        csv_keys = "\t".join([f"{key:s}:" for key in self._KEYS])
+        output_writer.Write("project:\t{csv_keys:s}\n")
 
     def _WriteIssue(self, project_name, issue_json, output_writer):
         """Writes an issue to CSV.
@@ -331,13 +324,13 @@ class GithubIssueHelper:
                     csv_value = ", ".join(
                         [label_json["name"] for label_json in labels_json]
                     )
-
             else:
-                csv_value = "{0!s}".format(issue_json[key])
+                csv_value = str(issue_json[key])
 
             csv_values.append(csv_value)
 
-        csv_line = "{0:s}\t{1:s}\n".format(project_name, "\t".join(csv_values))
+        csv_values = "\t".join(csv_values)
+        csv_line = f"{project_name:s}\t{csv_values:s}\n"
 
         output_writer.Write(csv_line)
 
@@ -467,7 +460,7 @@ def Main():
         return False
 
     if not os.path.exists(options.configuration_file):
-        print("No such configuration file: {0:s}.".format(options.configuration_file))
+        print(f"No such configuration file: {options.configuration_file:s}")
         print("")
         return False
 
@@ -479,9 +472,8 @@ def Main():
         projects = projects_reader.ReadFromFile(options.configuration_file)
         if not projects:
             print(
-                "Unable to read projects from configuration file: {0:s}.".format(
-                    options.configuration_file
-                )
+                f"Unable to read projects from configuration file: "
+                f"{options.configuration_file:s}"
             )
             print("")
             return False

@@ -33,13 +33,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             data_string = data[block_index : block_index + 16]
 
             hexadecimal_string = ", ".join(
-                ["0x{0:02x}".format(byte_value) for byte_value in data_string[0:16]]
+                [f"0x{byte_value:02x}" for byte_value in data_string[0:16]]
             )
 
             if len(data_string) < 16 or block_index + 16 == data_size:
-                hexadecimal_lines.append("\t{0:s}".format(hexadecimal_string))
+                hexadecimal_lines.append(f"\t{hexadecimal_string:s}")
             else:
-                hexadecimal_lines.append("\t{0:s},".format(hexadecimal_string))
+                hexadecimal_lines.append(f"\t{hexadecimal_string:s},")
 
         return "\n".join(hexadecimal_lines)
 
@@ -66,8 +66,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         templates_path = os.path.join(self._templates_path, "yal_test_support")
 
-        output_filename = "{0:s}_test_support.c".format(
-            project_configuration.library_name_suffix
+        output_filename = (
+            f"{project_configuration.library_name_suffix:s}_test_support.c"
         )
         output_filename = os.path.join("tests", output_filename)
 
@@ -97,7 +97,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             if not include_header_file.HasFunction(support_function):
                 continue
 
-            template_filename = "{0:s}.c".format(support_function)
+            template_filename = f"{support_function:s}.c"
             template_filename = os.path.join(templates_path, template_filename)
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
@@ -114,7 +114,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             for option, argument in test_options:
                 getopt_string = option
                 if argument:
-                    getopt_string = "{0:s}:".format(getopt_string)
+                    getopt_string = f"{getopt_string:s}:"
 
                 test_getopt_string.append(getopt_string)
 
@@ -122,10 +122,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                     test_options_variable_declarations.extend(
                         [
                             "\tlibcerror_error_t *error = NULL;",
-                            "\tsystem_character_t *option_{0:s} = NULL;".format(
-                                argument
-                            ),
-                            "\toff64_t {0:s}_offset = 0;".format(signature_type),
+                            f"\tsystem_character_t *option_{argument:s} = NULL;",
+                            f"\toff64_t {signature_type:s}_offset = 0;",
                             "\tsize_t string_length = 0;",
                             "\tint result = 0;",
                         ]
@@ -170,7 +168,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
                 else:
                     switch_case_unused.append(
-                        "\t\t\tcase (system_integer_t) '{0:s}':".format(option)
+                        f"\t\t\tcase (system_integer_t) '{option:s}':"
                     )
 
             if switch_case_unused:
@@ -286,8 +284,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           with_input (Optional[bool]): True if tests require input data.
           with_offset (Optional[bool]): True if tests require offset support.
         """
-        output_filename = "{0:s}_test_functions.h".format(
-            project_configuration.library_name_suffix
+        output_filename = (
+            f"{project_configuration.library_name_suffix:s}_test_functions.h"
         )
         output_filename = os.path.join("tests", output_filename)
         self._GenerateTestFunctionsHeader(
@@ -299,8 +297,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             with_offset=with_offset,
         )
 
-        output_filename = "{0:s}_test_functions.c".format(
-            project_configuration.library_name_suffix
+        output_filename = (
+            f"{project_configuration.library_name_suffix:s}_test_functions.c"
         )
         output_filename = os.path.join("tests", output_filename)
         self._GenerateTestFunctionsSource(
@@ -500,7 +498,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                     test_scripts.extend(["test_tools.ps1", "test_tools.sh"])
                     with_tools = True
 
-                test_script = "test_{0:s}.sh".format(tool_name)
+                test_script = f"test_{tool_name:s}.sh"
                 test_scripts.append(test_script)
 
                 if tool_name_suffix == "info":
@@ -514,13 +512,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         if project_configuration.HasPythonModule():
             for python_module_type in python_module_types:
-                test_script = "{0:s}_test_{1:s}.py".format(
-                    project_configuration.python_module_name, python_module_type
-                )
+                test_script = f"{project_configuration.python_module_name:s}_test_{python_module_type:s}.py"
                 python_scripts.append(test_script)
 
-            test_script = "{0:s}_test_support.py".format(
-                project_configuration.python_module_name
+            test_script = (
+                f"{project_configuration.python_module_name:s}_test_support.py"
             )
             python_scripts.append(test_script)
 
@@ -530,35 +526,34 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         check_scripts = sorted(check_scripts)
 
         if project_configuration.HasPythonModule():
-            test_script = "$(TESTS_{0:s})".format(
-                project_configuration.python_module_name.upper()
-            )
+            python_module_name_upper = project_configuration.python_module_name.upper()
+            test_script = f"$(TESTS_{python_module_name_upper:s})"
             test_scripts.append(test_script)
 
         check_programs = []
         for test in sorted(tests):
-            check_program = "{0:s}_test_{1:s}".format(
-                project_configuration.library_name_suffix, test
+            check_program = (
+                f"{project_configuration.library_name_suffix:s}_test_{test:s}"
             )
             check_programs.append(check_program)
 
         if with_tools:
             tests.add("tools_output")
-            check_program = "{0:s}_test_tools_output".format(
-                project_configuration.library_name_suffix
+            check_program = (
+                f"{project_configuration.library_name_suffix:s}_test_tools_output"
             )
             check_programs.append(check_program)
 
             tests.add("tools_signal")
-            check_program = "{0:s}_test_tools_signal".format(
-                project_configuration.library_name_suffix
+            check_program = (
+                f"{project_configuration.library_name_suffix:s}_test_tools_signal"
             )
             check_programs.append(check_program)
 
         if with_info_tool:
             tests.add("tools_info_handle")
-            check_program = "{0:s}_test_tools_info_handle".format(
-                project_configuration.library_name_suffix
+            check_program = (
+                f"{project_configuration.library_name_suffix:s}_test_tools_info_handle"
             )
             check_programs.append(check_program)
 
@@ -574,29 +569,30 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                     break
                 index += 1
 
-        cppflags = ["@{0:s}_CPPFLAGS@".format(name.upper()) for name in cppflags]
+        cppflags = []
+        for name in cppflags:
+            name_upper = name.upper()
+            cppflags.append(f"@{name_upper:s}_CPPFLAGS@")
 
-        cppflag = "@{0:s}_DLL_IMPORT@".format(
-            project_configuration.library_name.upper()
-        )
+        library_name_upper = project_configuration.library_name.upper()
+        cppflag = f"@{library_name_upper:s}_DLL_IMPORT@"
         cppflags.append(cppflag)
 
         template_mappings["cppflags"] = " \\\n".join(
-            ["\t{0:s}".format(name) for name in cppflags]
+            [f"\t{name:s}" for name in cppflags]
         )
         template_mappings["python_tests"] = " \\\n".join(
-            ["\t{0:s}".format(filename) for filename in python_test_scripts]
+            [f"\t{filename:s}" for filename in python_test_scripts]
         )
         template_mappings["tests"] = " \\\n".join(
-            ["\t{0:s}".format(filename) for filename in test_scripts]
+            [f"\t{filename:s}" for filename in test_scripts]
         )
         template_mappings["check_scripts"] = " \\\n".join(
-            ["\t{0:s}".format(filename) for filename in check_scripts]
+            [f"\t{filename:s}" for filename in check_scripts]
         )
         template_mappings["check_programs"] = " \\\n".join(
-            ["\t{0:s}".format(filename) for filename in check_programs]
+            [f"\t{filename:s}" for filename in check_programs]
         )
-
         template_names = []
 
         if with_tools:
@@ -741,8 +737,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         templates_path = os.path.join(self._templates_path, "pyyal_test_support")
 
-        output_filename = "{0:s}_test_support.py".format(
-            project_configuration.python_module_name
+        output_filename = (
+            f"{project_configuration.python_module_name:s}_test_support.py"
         )
         output_filename = os.path.join("tests", output_filename)
 
@@ -766,7 +762,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             if not include_header_file.HasFunction(support_function):
                 continue
 
-            template_filename = "{0:s}.py".format(support_function)
+            template_filename = f"{support_function:s}.py"
             template_filename = os.path.join(templates_path, template_filename)
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
@@ -883,8 +879,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         templates_path = os.path.join(self._templates_path, "pyyal_test_type")
 
-        output_filename = "{0:s}_test_{1:s}.py".format(
-            project_configuration.python_module_name, type_name
+        output_filename = (
+            f"{project_configuration.python_module_name:s}_test_{type_name:s}.py"
         )
         output_filename = os.path.join("tests", output_filename)
 
@@ -1185,7 +1181,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 function.
             bool: True if the function prototype was externally available.
         """
-        template_filename = "{0:s}.c".format(type_function)
+        template_filename = f"{type_function:s}.c"
 
         return self._GenerateTypeTestFromTemplate(
             project_configuration,
@@ -1247,7 +1243,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             project_configuration, type_name, type_function
         )
 
-        library_type_prefix = "{0:s}_".format(project_configuration.library_name)
+        library_type_prefix = f"{project_configuration.library_name:s}_"
 
         function_prototype = header_file.GetTypeFunction(type_name, type_function)
         if not function_prototype:
@@ -1277,21 +1273,17 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 access_mode="a",
             ):
                 logging.info(
-                    (
-                        'Used existing tests source code for type: "{0:s}" function: '
-                        '"{1:s}" due to unsuppored number of arguments'
-                    ).format(type_name, type_function)
+                    f'Unable to generate tests source code for type: "{type_name:s}" '
+                    f'function: "{type_function:s}" with error: unsupported number of '
+                    f"arguments"
                 )
-
                 return function_name, test_function_name, last_have_extern
 
             logging.warning(
-                (
-                    'Unable to generate tests source code for type: "{0:s}" function: '
-                    '"{1:s}" with error: unsupported number of arguments'
-                ).format(type_name, type_function)
+                f'Unable to generate tests source code for type: "{type_name:s}" '
+                f'function: "{type_function:s}" with error: unsupported number of '
+                f"arguments"
             )
-
             return function_name, None, last_have_extern
 
         if initialize_number_of_arguments == 3:
@@ -1334,8 +1326,8 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         io_handle_argument_string = io_handle_argument.CopyToString()
 
         with_io_handle = False
-        if io_handle_argument_string == "{0:s}_io_handle_t *io_handle".format(
-            project_configuration.library_name
+        if io_handle_argument_string == (
+            f"{project_configuration.library_name:s}_io_handle_t *io_handle"
         ):
             with_io_handle = True
 
@@ -1368,10 +1360,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 number_of_arguments == function_argument_index + 2
                 and type_function.endswith("_size")
             ):
-                function_template = "get_{0:s}_string_size".format(utf_type)
+                function_template = f"get_{utf_type:s}_string_size"
 
             elif number_of_arguments == function_argument_index + 3:
-                function_template = "get_{0:s}_string".format(utf_type)
+                function_template = f"get_{utf_type:s}_string"
 
         elif type_function.startswith("get_"):
             function_argument = function_prototype.arguments[function_argument_index]
@@ -1416,7 +1408,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             function_template = "refers_to_value"
 
         if function_template and with_index:
-            function_template = "{0:s}-with_index".format(function_template)
+            function_template = f"{function_template:s}-with_index"
 
         if type_function in (
             "copy_from_byte_stream",
@@ -1486,27 +1478,27 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         body_template_name = None
         if function_template:
             if clone_function:
-                body_template_name = "function-body-{0:s}-with_clone_function.c".format(
-                    function_template
+                body_template_name = (
+                    f"function-body-{function_template:s}-with_clone_function.c"
                 )
             elif free_function:
-                body_template_name = "function-body-{0:s}-with_free_function.c".format(
-                    function_template
+                body_template_name = (
+                    f"function-body-{function_template:s}-with_free_function.c"
                 )
             elif with_codepage:
-                body_template_name = "function-body-{0:s}-with_codepage.c".format(
-                    function_template
+                body_template_name = (
+                    f"function-body-{function_template:s}-with_codepage.c"
                 )
             elif with_io_handle:
-                body_template_name = "function-body-{0:s}-with_io_handle.c".format(
-                    function_template
+                body_template_name = (
+                    f"function-body-{function_template:s}-with_io_handle.c"
                 )
             elif with_is_set:
-                body_template_name = "function-body-{0:s}-with_is_set.c".format(
-                    function_template
+                body_template_name = (
+                    f"function-body-{function_template:s}-with_is_set.c"
                 )
             else:
-                body_template_name = "function-body-{0:s}.c".format(function_template)
+                body_template_name = f"function-body-{function_template:s}.c"
 
         body_template_filename = None
         if body_template_name:
@@ -1515,7 +1507,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if not body_template_filename or not os.path.exists(body_template_filename):
             template_filename = None
             if function_template:
-                template_filename = "{0:s}.c".format(function_template)
+                template_filename = f"{function_template:s}.c"
                 template_filename = os.path.join(templates_path, template_filename)
 
             # Generate the test function based on a single template.
@@ -1588,9 +1580,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         function_template, _, _ = function_template.partition("-")
 
         if function_template == "get_binary_data_value":
-            function_variables.extend(
-                ["{0:s} {1:s}[ 4096 ];".format(value_type, value_name), ""]
-            )
+            function_variables.extend([f"{value_type:s} {value_name:s}[ 4096 ];", ""])
 
         elif function_template == "get_guid_value":
             function_variables.extend(["uint8_t guid_data[ 16 ];", ""])
@@ -1605,20 +1595,16 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             else:
                 variable_name = value_name
 
-            function_variables.extend(
-                ["{0:s} {1:s}[ 512 ];".format(value_type, variable_name), ""]
-            )
+            function_variables.extend([f"{value_type:s} {variable_name:s}[ 512 ];", ""])
 
             if with_is_set and not with_index:
-                function_variables.append("int {0:s}_is_set = 0;".format(value_name))
+                function_variables.append(f"int {value_name:s}_is_set = 0;")
 
         elif function_template == "get_type_value":
-            function_variables.append(
-                "{0:s}_t *{1:s} = NULL;".format(value_type, value_name)
-            )
+            function_variables.append(f"{value_type:s}_t *{value_name:s} = NULL;")
 
             if with_is_set and not with_index:
-                function_variables.append("int {0:s}_is_set = 0;".format(value_name))
+                function_variables.append(f"int {value_name:s}_is_set = 0;")
 
         elif function_template == "get_uuid_value":
             function_variables.extend(["uint8_t uuid_data[ 16 ];", ""])
@@ -1633,12 +1619,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             else:
                 variable_name = value_name
 
-            function_variables.append(
-                "{0:s} {1:s} = 0;".format(value_type, variable_name)
-            )
+            function_variables.append(f"{value_type:s} {variable_name:s} = 0;")
 
             if with_is_set and not with_index:
-                function_variables.append("int {0:s}_is_set = 0;".format(value_name))
+                function_variables.append(f"int {value_name:s}_is_set = 0;")
 
         elif function_template == "read_file_io_handle":
             function_variables.append("libbfio_handle_t *file_io_handle = NULL;")
@@ -1674,7 +1658,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             "get_type_value",
             "get_value",
         ):
-            function_template = "get_{0:s}".format(function_value_name or value_name)
+            function_template = f"get_{function_value_name or value_name:s}"
 
         elif function_template in ("has_value", "is_value", "refers_to_value"):
             function_template = type_function
@@ -1713,7 +1697,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         for variable in function_variables:
             # Do not indent empty lines of function_variables.
             if variable:
-                variable = "\t{0:s}".format(variable)
+                variable = f"\t{variable:s}"
 
             function_variable_strings.append(variable)
 
@@ -1733,7 +1717,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 template_name = "function-initialize.c"
 
             if function_template == "clone":
-                template_name = "{0:s}-clone.c".format(template_name[:-2])
+                template_name = f"{template_name[:-2]:s}-clone.c"
 
             template_names.append(template_name)
 
@@ -2083,7 +2067,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         Returns:
           bool: True if the function prototype was externally available.
         """
-        library_type_prefix = "{0:s}_".format(project_configuration.library_name)
+        library_type_prefix = f"{project_configuration.library_name:s}_"
 
         function_prototype = header_file.GetTypeFunction(type_name, type_function)
         if not function_prototype:
@@ -2093,10 +2077,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_filename = None
 
         if number_of_arguments == 2:
-            template_filename = "{0:s}.c".format(type_function)
+            template_filename = f"{type_function:s}.c"
 
         elif number_of_arguments == 3:
-            template_filename = "{0:s}-with_value.c".format(type_function)
+            template_filename = f"{type_function:s}-with_value.c"
 
             function_argument = function_prototype.arguments[1]
 
@@ -2245,7 +2229,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         test_options_function_arguments = ["const system_character_t *source"]
         for _, argument in test_options:
             if argument != "offset":
-                function_argument = "const system_character_t *{0:s}".format(argument)
+                function_argument = f"const system_character_t *{argument:s}"
                 test_options_function_arguments.append(function_argument)
 
         test_options_function_variables = ["int result = 0;"]
@@ -2255,18 +2239,18 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_names = []
 
         if has_glob:
-            template_names.append("{0:s}-start-with_glob.c".format(test_name))
+            template_names.append(f"{test_name:s}-start-with_glob.c")
         else:
-            template_names.append("{0:s}-start.c".format(test_name))
+            template_names.append(f"{test_name:s}-start.c")
 
         for _, argument in test_options:
             if argument != "offset":
-                template_names.append("{0:s}-set_{1:s}.c".format(test_name, argument))
+                template_names.append(f"{test_name:s}-set_{argument:s}.c")
 
         if has_glob:
-            template_names.append("{0:s}-end-with_glob.c".format(test_name))
+            template_names.append(f"{test_name:s}-end-with_glob.c")
         else:
-            template_names.append("{0:s}-end.c".format(test_name))
+            template_names.append(f"{test_name:s}-end.c")
 
         template_filenames = [
             os.path.join(templates_path, template_name)
@@ -2274,12 +2258,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         ]
 
         test_options_function_arguments = [
-            "     {0:s}".format(function_argument)
+            f"     {function_argument:s}"
             for function_argument in test_options_function_arguments
         ]
 
         test_options_function_variables = [
-            "\t{0:s}".format(function_variable)
+            f"\t{function_variable:s}"
             for function_variable in test_options_function_variables
         ]
 
@@ -2348,9 +2332,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 test_source_file.Read(project_configuration)
             except IOError:
                 logging.warning(
-                    "Unable to read test source file: {0:s}".format(
-                        test_source_file.path
-                    )
+                    f"Unable to read test source file: {test_source_file.path:s}"
                 )
                 return False, False
 
@@ -2459,9 +2441,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
             for _, argument in test_options:
                 if argument != "offset":
-                    function_argument = "const system_character_t *{0:s}".format(
-                        argument
-                    )
+                    function_argument = f"const system_character_t *{argument:s}"
                     test_options_function_arguments.append(function_argument)
 
             test_options_function_variables = ["int result = 0;"]
@@ -2487,9 +2467,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             )
         ):
             template_names.append(
-                "start_{0:s}_{1:s}.c".format(
-                    project_configuration.library_name_suffix, type_name
-                )
+                f"start_{project_configuration.library_name_suffix:s}_{type_name:s}.c"
             )
 
         if with_input:
@@ -2508,7 +2486,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
             for _, argument in test_options:
                 if argument != "offset":
-                    template_names.append("open_source-set_{0:s}.c".format(argument))
+                    template_names.append(f"open_source-set_{argument:s}.c")
 
             template_names.append("open_source-body.c")
 
@@ -2521,12 +2499,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             template_names.extend(["open_source-end.c", "close_source.c"])
 
             test_options_function_arguments = [
-                "     {0:s}".format(function_argument)
+                f"     {function_argument:s}"
                 for function_argument in test_options_function_arguments
             ]
 
             test_options_function_variables = [
-                "\t{0:s}".format(function_variable)
+                f"\t{function_variable:s}"
                 for function_variable in test_options_function_variables
             ]
 
@@ -2563,7 +2541,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
                 test_data_suffix, _, test_data_index = test_data_suffix.rpartition(".")
                 if test_data_suffix:
-                    test_data_suffix = "_{0:s}".format(test_data_suffix)
+                    test_data_suffix = f"_{test_data_suffix:s}"
 
                 test_data_file = os.path.join(test_data_directory, directory_entry)
                 with open(test_data_file, "rb") as file_object:
@@ -2744,9 +2722,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         template_mappings["type_size_name"] = type_size_name
 
-        function_name_prefix = "{0:s}_{1:s}_".format(
-            project_configuration.library_name, type_name
-        )
+        function_name_prefix = f"{project_configuration.library_name:s}_{type_name:s}_"
         function_name_prefix_length = len(function_name_prefix)
 
         internal_function_name_prefix = "{0:s}_internal_{1:s}_".format(
@@ -2865,17 +2841,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             for option, argument in test_options:
                 getopt_string = option
                 if argument:
-                    getopt_string = "{0:s}:".format(getopt_string)
+                    getopt_string = f"{getopt_string:s}:"
 
                 test_getopt_string.append(getopt_string)
 
                 if argument == "offset":
                     test_options_variable_declarations.extend(
                         [
-                            "\tsystem_character_t *option_{0:s} = NULL;".format(
-                                argument
-                            ),
-                            "\toff64_t {0:s}_offset = 0;".format(type_name),
+                            f"\tsystem_character_t *option_{argument:s} = NULL;",
+                            f"\toff64_t {type_name:s}_offset = 0;",
                         ]
                     )
 
@@ -3027,9 +3001,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 open_source_arguments = ["\t\t          file_io_handle"]
             for _, argument in test_options:
                 if argument != "offset":
-                    open_source_arguments.append(
-                        "\t\t          option_{0:s}".format(argument)
-                    )
+                    open_source_arguments.append(f"\t\t          option_{argument:s}")
 
             template_mappings["test_options_open_source_arguments"] = ",\n".join(
                 open_source_arguments
@@ -3218,20 +3190,16 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
             if not test_function_name:
                 tests_to_run_mappings.append(
-                    "{0:s}/* TODO: add tests for {1:s} */".format(
-                        indentation, function_name
-                    )
+                    f"{indentation:s}/* TODO: add tests for {function_name:s} */"
                 )
 
             else:
                 if with_args:
                     test_to_run_mappings = [
-                        "{0:s}{1:s}_TEST_RUN_WITH_ARGS(".format(
-                            indentation, library_name_suffix
-                        ),
-                        '{0:s} "{1:s}",'.format(indentation, function_name),
-                        "{0:s} {1:s},".format(indentation, test_function_name),
-                        "{0:s} {1:s} );".format(indentation, type_name),
+                        f"{indentation:s}{library_name_suffix:s}_TEST_RUN_WITH_ARGS(",
+                        f'{indentation:s} "{function_name:s}",',
+                        f"{indentation:s} {test_function_name:s},",
+                        f"{indentation:s} {type_name:s} );",
                     ]
 
                 elif with_input:
@@ -3239,11 +3207,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                         "_open_close"
                     ):
                         test_to_run_mappings = [
-                            "{0:s}{1:s}_TEST_RUN(".format(
-                                indentation, library_name_suffix
-                            ),
-                            '{0:s} "{1:s}",'.format(indentation, function_name),
-                            "{0:s} {1:s} );".format(indentation, test_function_name),
+                            f"{indentation:s}{library_name_suffix:s}_TEST_RUN(",
+                            f'{indentation:s} "{function_name:s}",',
+                            f"{indentation:s} {test_function_name:s} );",
                         ]
 
                     else:
@@ -3251,9 +3217,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                             "{0:s}{1:s}_TEST_RUN_WITH_ARGS(".format(
                                 indentation, library_name_suffix
                             ),
-                            '{0:s} "{1:s}",'.format(indentation, function_name),
-                            "{0:s} {1:s},".format(indentation, test_function_name),
-                            "{0:s} source".format(indentation),
+                            f'{indentation:s} "{function_name:s}",',
+                            f"{indentation:s} {test_function_name:s},",
+                            f"{indentation:s} source",
                         ]
 
                         for _, argument in test_options:
@@ -3262,18 +3228,16 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                                     test_to_run_mappings[-1]
                                 )
                                 test_to_run_mappings.append(
-                                    "{0:s} option_{1:s}".format(indentation, argument)
+                                    f"{indentation:s} option_{argument:s}"
                                 )
 
-                        test_to_run_mappings[-1] = "{0:s} );".format(
-                            test_to_run_mappings[-1]
-                        )
+                        test_to_run_mappings[-1] = f"{test_to_run_mappings[-1]:s} );"
 
                 else:
                     test_to_run_mappings = [
-                        "{0:s}{1:s}_TEST_RUN(".format(indentation, library_name_suffix),
-                        '{0:s} "{1:s}",'.format(indentation, function_name),
-                        "{0:s} {1:s} );".format(indentation, test_function_name),
+                        f"{indentation:s}{library_name_suffix:s}_TEST_RUN(",
+                        f'{indentation:s} "{function_name:s}",',
+                        f"{indentation:s} {test_function_name:s} );",
                     ]
 
                 tests_to_run_mappings.extend(test_to_run_mappings)
@@ -3362,9 +3326,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             value_name, _, _ = free_function.rpartition("_free_function")
             self._SetValueNameInTemplateMappings(template_mappings, value_name)
 
-            template_filename = "{0:s}_with_free_function.c".format(type_function)
+            template_filename = f"{type_function:s}_with_free_function.c"
         else:
-            template_filename = "{0:s}.c".format(type_function)
+            template_filename = f"{type_function:s}.c"
 
         template_filename = os.path.join(templates_path, template_filename)
         self._GenerateSection(
@@ -3394,9 +3358,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         Returns:
           str: function name.
         """
-        return "{0:s}_{1:s}_{2:s}".format(
-            project_configuration.library_name, type_name, type_function
-        )
+        return f"{project_configuration.library_name:s}_{type_name:s}_{type_function:s}"
 
     def _GetLibraryTypes(self, project_configuration, makefile_am_file):
         """Determines the types defined in the library sources.
@@ -3417,10 +3379,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             project_configuration.library_name,
         )
 
-        type_name_prefix = "{0:s}_".format(project_configuration.library_name)
+        type_name_prefix = f"{project_configuration.library_name:s}_"
         type_name_prefix_length = len(type_name_prefix)
 
-        include_file_prefix = "{0:s}_lib".format(project_configuration.library_name)
+        include_file_prefix = f"{project_configuration.library_name:s}_lib"
 
         types = []
         functions = []
@@ -3535,7 +3497,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         template_mappings["runtest_py_tests_option_sets_py"] = ", ".join(
             [
-                '"{0:s}"'.format(test_option_set)
+                f'"{test_option_set:s}"'
                 for test_option_set in project_configuration.tests_option_sets
             ]
         )
@@ -3556,7 +3518,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         )
         template_mappings["tests_option_sets_sh"] = " ".join(
             [
-                '"{0:s}"'.format(test_option_set)
+                f'"{test_option_set:s}"'
                 for test_option_set in project_configuration.tests_option_sets
             ]
         )
@@ -3568,7 +3530,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         )
         template_mappings["tests_export_tool_option_sets_sh"] = " ".join(
             [
-                '"{0:s}"'.format(test_option_set)
+                f'"{test_option_set:s}"'
                 for test_option_set in (
                     project_configuration.tests_export_tool_option_sets
                 )
@@ -3582,7 +3544,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         )
         template_mappings["tests_export_tool_profiles_sh"] = " ".join(
             [
-                '"{0:s}"'.format(profile)
+                f'"{profile:s}"'
                 for profile in (project_configuration.tests_export_tool_profiles)
             ]
         )
@@ -3595,7 +3557,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         )
         template_mappings["tests_info_tool_option_sets_sh"] = " ".join(
             [
-                '"{0:s}"'.format(test_option_set)
+                f'"{test_option_set:s}"'
                 for test_option_set in (
                     project_configuration.tests_info_tool_option_sets
                 )
@@ -3606,7 +3568,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         )
         template_mappings["tests_info_tool_options_per_profile_ps1"] = ", ".join(
             [
-                '"{0:s}"'.format(options)
+                f'"{options:s}"'
                 for options in (
                     project_configuration.tests_info_tool_options_per_profile
                 )
@@ -3614,13 +3576,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         )
         template_mappings["tests_info_tool_profiles_ps1"] = ", ".join(
             [
-                '"{0:s}"'.format(profile)
+                f'"{profile:s}"'
                 for profile in (project_configuration.tests_info_tool_profiles)
             ]
         )
         template_mappings["tests_info_tool_profiles_sh"] = " ".join(
             [
-                '"{0:s}"'.format(profile)
+                f'"{profile:s}"'
                 for profile in (project_configuration.tests_info_tool_profiles)
             ]
         )
@@ -3630,7 +3592,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         )
         template_mappings["tests_verify_tool_option_sets_sh"] = " ".join(
             [
-                '"{0:s}"'.format(test_option_set)
+                f'"{test_option_set:s}"'
                 for test_option_set in (
                     project_configuration.tests_verify_tool_option_sets
                 )
@@ -3809,7 +3771,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
                     else:
                         sorted_lines = " \\\n".join(
-                            ["\t{0:s}".format(filename) for filename in sorted(sources)]
+                            [f"\t{filename:s}" for filename in sorted(sources)]
                         )
 
                         file_object.writelines(sorted_lines)
@@ -3830,7 +3792,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         Returns:
           bytes: contents of test data file.
         """
-        test_data_filename = "{0:s}.{1:d}".format(type_name, sequence_number)
+        test_data_filename = f"{type_name:s}.{sequence_number:d}"
         test_data_file = os.path.join("tests", "data", test_data_filename)
 
         if not os.path.exists(test_data_file):
@@ -3906,22 +3868,21 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
             internal_types.append(type_name)
 
-        logging.info(
-            "Found public functions: {0:s}".format(", ".join(public_functions))
-        )
-        logging.info("Found public types: {0:s}".format(", ".join(public_types)))
-        logging.info(
-            "Found public pseudo types: {0:s}".format(", ".join(api_pseudo_types))
-        )
-        logging.info(
-            "Found internal functions: {0:s}".format(", ".join(internal_functions))
-        )
-        logging.info("Found internal types: {0:s}".format(", ".join(internal_types)))
+        function_names = ", ".join(public_functions)
+        logging.info(f"Found public functions: {function_names:s}")
+        type_names = ", ".join(public_types)
+        logging.info(f"Found public types: {type_names:s}")
+        type_names = ", ".join(api_pseudo_types)
+        logging.info(f"Found public pseudo types: {type_names:s}")
+        function_names = ", ".join(internal_functions)
+        logging.info(f"Found internal functions: {function_names:s}")
+        type_names = ", ".join(internal_types)
+        logging.info(f"Found internal types: {type_names:s}")
 
         # TODO: handle non-template files differently.
         # TODO: yal_test_open_close.c handle file, handle, volume
 
-        library_header = "yal_test_{0:s}.h".format(project_configuration.library_name)
+        library_header = f"yal_test_{project_configuration.library_name:s}.h"
 
         test_python_functions = []
         for function_name in self._PYTHON_FUNCTION_NAMES:
@@ -4082,9 +4043,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             )
             if not result:
                 api_types.remove(type_name)
-                logging.warning(
-                    "Unable to generate tests for API type: {0:s}".format(type_name)
-                )
+                logging.warning(f"Unable to generate tests for API type: {type_name:s}")
 
             if project_configuration.HasPythonModule():
                 python_module_types.append(type_name)
@@ -4112,9 +4071,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             )
             if not result:
                 api_types_with_open.remove(type_name)
-                logging.warning(
-                    "Unable to generate tests for API type: {0:s}".format(type_name)
-                )
+                logging.warning(f"Unable to generate tests for API type: {type_name:s}")
 
             if project_configuration.HasPythonModule():
                 python_module_types.append(type_name)
@@ -4149,9 +4106,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             if not result:
                 api_pseudo_types.remove(type_name)
                 logging.warning(
-                    "Unable to generate tests for API pseudo type: {0:s}".format(
-                        type_name
-                    )
+                    f"Unable to generate tests for API pseudo type: {type_name:s}"
                 )
 
             if project_configuration.HasPythonModule():
@@ -4181,9 +4136,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             if not result:
                 internal_types.remove(type_name)
                 logging.warning(
-                    "Unable to generate tests for internal type: {0:s}".format(
-                        type_name
-                    )
+                    f"Unable to generate tests for internal type: {type_name:s}"
                 )
             if with_bfio:
                 internal_types.remove(type_name)

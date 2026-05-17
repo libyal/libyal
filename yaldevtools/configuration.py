@@ -356,7 +356,7 @@ class ProjectConfiguration(BaseConfiguration):
         self.cygwin_dll_dependencies = self._GetOptionalConfigValue(
             config_parser, "cygwin", "dll_dependencies", default_value=[]
         )
-        cygwin_dll_filename = "cyg{0:s}-0.dll".format(self.library_name_suffix)
+        cygwin_dll_filename = f"cyg{self.library_name_suffix:s}-0.dll"
         self.cygwin_dll_filename = self._GetOptionalConfigValue(
             config_parser, "cygwin", "dll_filename", default_value=cygwin_dll_filename
         )
@@ -427,7 +427,7 @@ class ProjectConfiguration(BaseConfiguration):
         Args:
           config_parser (ConfigParser): configuration file parser.
         """
-        self.dotnet_bindings_name = "{0:s}.net".format(self.library_name_suffix)
+        self.dotnet_bindings_name = f"{self.library_name_suffix:s}.net"
 
     def _ReadFreeBSDConfiguration(self, config_parser):
         """Reads the FreeBSD configuration.
@@ -485,9 +485,7 @@ class ProjectConfiguration(BaseConfiguration):
             "volume",
         ):
             raise errors.ConfigurationError(
-                "unsupported info tool source type: {0:s}".format(
-                    self.info_tool_source_type
-                )
+                f"unsupported info tool source type: {self.info_tool_source_type:s}"
             )
 
     def _ReadJavaBindingsConfiguration(self, unused_config_parser):
@@ -496,7 +494,7 @@ class ProjectConfiguration(BaseConfiguration):
         Args:
           config_parser (ConfigParser): configuration file parser.
         """
-        self.java_bindings_name = "j{0:s}".format(self.library_name_suffix)
+        self.java_bindings_name = f"j{self.library_name_suffix:s}"
 
     def _ReadLibraryConfiguration(self, config_parser):
         """Reads the library configuration.
@@ -506,8 +504,8 @@ class ProjectConfiguration(BaseConfiguration):
         """
         library_description = ""
         if self.project_data_format:
-            library_description = "Library to access the {0:s} format".format(
-                self.project_data_format
+            library_description = (
+                f"Library to access the {self.project_data_format:s} format"
             )
         self.library_description = self._GetOptionalConfigValue(
             config_parser, "library", "description", default_value=library_description
@@ -540,7 +538,7 @@ class ProjectConfiguration(BaseConfiguration):
         self.mingw_dll_dependencies = self._GetOptionalConfigValue(
             config_parser, "mingw", "dll_dependencies", default_value=[]
         )
-        mingw_dll_filename = "lib{0:s}-1.dll".format(self.library_name_suffix)
+        mingw_dll_filename = f"lib{self.library_name_suffix:s}-1.dll"
         self.mingw_dll_filename = self._GetOptionalConfigValue(
             config_parser, "mingw", "dll_filename", default_value=mingw_dll_filename
         )
@@ -600,9 +598,8 @@ class ProjectConfiguration(BaseConfiguration):
             not in ("fat_timestamp", "filetime", "hfs_time", "nano_posix_time")
         ):
             raise errors.ConfigurationError(
-                "unsupported mount tool file entry access time type: {0:s}".format(
-                    self.mount_tool_file_entry_access_time_type
-                )
+                f"unsupported mount tool file entry access time type: "
+                f"{self.mount_tool_file_entry_access_time_type:s}"
             )
 
         self.mount_tool_file_entry_access_time_value = self._GetOptionalConfigValue(
@@ -620,9 +617,8 @@ class ProjectConfiguration(BaseConfiguration):
             not in ("fat_timestamp", "filetime", "hfs_time", "nano_posix_time")
         ):
             raise errors.ConfigurationError(
-                "unsupported mount tool file entry creation time type: {0:s}".format(
-                    self.mount_tool_file_entry_creation_time_type
-                )
+                f"unsupported mount tool file entry creation time type: "
+                f"{self.mount_tool_file_entry_creation_time_type:s}"
             )
 
         self.mount_tool_file_entry_creation_time_value = self._GetOptionalConfigValue(
@@ -645,9 +641,8 @@ class ProjectConfiguration(BaseConfiguration):
             not in ("fat_timestamp", "filetime", "hfs_time", "nano_posix_time")
         ):
             raise errors.ConfigurationError(
-                (
-                    "unsupported mount tool file entry inode change time type: " "{0:s}"
-                ).format(self.mount_tool_file_entry_inode_change_time_type)
+                f"unsupported mount tool file entry inode change time type: "
+                f"{self.mount_tool_file_entry_inode_change_time_type:s}"
             )
 
         self.mount_tool_file_entry_inode_change_time_value = (
@@ -669,9 +664,8 @@ class ProjectConfiguration(BaseConfiguration):
             not in ("fat_timestamp", "filetime", "hfs_time", "nano_posix_time")
         ):
             raise errors.ConfigurationError(
-                (
-                    "unsupported mount tool file entry modification time type: " "{0:s}"
-                ).format(self.mount_tool_file_entry_modification_time_type)
+                f"unsupported mount tool file entry modification time type: "
+                f"{self.mount_tool_file_entry_modification_time_type:s}"
             )
 
         self.mount_tool_file_entry_modification_time_value = (
@@ -726,9 +720,7 @@ class ProjectConfiguration(BaseConfiguration):
             "volume",
         ):
             raise errors.ConfigurationError(
-                "unsupported mount tool source type: {0:s}".format(
-                    self.mount_tool_source_type
-                )
+                f"unsupported mount tool source type: {self.mount_tool_source_type:s}"
             )
 
     def _ReadProjectConfiguration(self, config_parser):
@@ -749,9 +741,8 @@ class ProjectConfiguration(BaseConfiguration):
         project_description = ""
         if self.project_data_format:
             project_description = (
-                "{0:s} is a library to access the {1:s} format.".format(
-                    self.project_name, self.project_data_format
-                )
+                f"{self.project_name:s} is a library to access the "
+                f"{self.project_data_format:s} format."
             )
 
         self.project_description = self._GetOptionalConfigValue(
@@ -764,8 +755,8 @@ class ProjectConfiguration(BaseConfiguration):
         self.project_documentation_url = self._GetOptionalConfigValue(
             config_parser, "project", "documentation_url"
         )
-        project_downloads_url = "https://github.com/libyal/{0:s}/releases".format(
-            self.project_name
+        project_downloads_url = (
+            f"https://github.com/libyal/{self.project_name:s}/releases"
         )
         self.project_downloads_url = self._GetOptionalConfigValue(
             config_parser,
@@ -773,9 +764,7 @@ class ProjectConfiguration(BaseConfiguration):
             "downloads_url",
             default_value=project_downloads_url,
         )
-        project_git_url = "https://github.com/libyal/{0:s}.git".format(
-            self.project_name
-        )
+        project_git_url = f"https://github.com/libyal/{self.project_name:s}.git"
         self.project_git_url = self._GetOptionalConfigValue(
             config_parser, "project", "git_url", default_value=project_git_url
         )
@@ -787,9 +776,7 @@ class ProjectConfiguration(BaseConfiguration):
             self.project_year_of_creation = int(self.project_year_of_creation, 10)
         except ValueError:
             raise errors.ConfigurationError(
-                "Invalid project year of creation: {0!s}".format(
-                    self.project_year_of_creation
-                )
+                f"Invalid project year of creation: {self.project_year_of_creation!s}"
             )
 
         self.project_features = self._GetOptionalConfigValue(
@@ -814,7 +801,7 @@ class ProjectConfiguration(BaseConfiguration):
             "authors",
             default_value=self.project_authors,
         )
-        self.python_module_name = "py{0:s}".format(self.library_name_suffix)
+        self.python_module_name = f"py{self.library_name_suffix:s}"
         self.python_module_year_of_creation = self._GetOptionalConfigValue(
             config_parser, "python_module", "year_of_creation"
         )
@@ -827,9 +814,8 @@ class ProjectConfiguration(BaseConfiguration):
                 )
             except ValueError:
                 raise errors.ConfigurationError(
-                    "Invalid Python module year of creation: {0!s}".format(
-                        self.python_module_year_of_creation
-                    )
+                    f"Invalid Python module year of creation: "
+                    f"{self.python_module_year_of_creation!s}"
                 )
 
     def _ReadRPMConfiguration(self, config_parser):
@@ -938,7 +924,7 @@ class ProjectConfiguration(BaseConfiguration):
         self.tools_description = self._GetOptionalConfigValue(
             config_parser, "tools", "description", default_value=""
         )
-        tools_directory = "{0:s}tools".format(self.library_name_suffix)
+        tools_directory = f"{self.library_name_suffix:s}tools"
         self.tools_directory = self._GetOptionalConfigValue(
             config_parser, "tools", "directory", default_value=tools_directory
         )
@@ -1226,7 +1212,7 @@ class ProjectConfiguration(BaseConfiguration):
           bool: True if the rpm spec file exits.
         """
         if self._has_rpm is None:
-            spec_filename = "{0:s}.spec.in".format(self.project_name)
+            spec_filename = f"{self.project_name:s}.spec.in"
             path = os.path.join(self._configuration_file_path, spec_filename)
             self._has_rpm = os.path.exists(path)
 
