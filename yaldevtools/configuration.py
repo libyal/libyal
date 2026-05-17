@@ -81,6 +81,7 @@ class ProjectConfiguration(BaseConfiguration):
       gcc_build_dependencies (list[str]): GCC build dependencies.
       gcc_static_build_dependencies (list[str]): GCC build dependencies for
           building static binaries.
+      info_tool_features (list[str]): features of the info tool.
       info_tool_source_description (str): description of the input source.
       info_tool_source_type (str): input source type, such as container, file,
           image or volume.
@@ -246,6 +247,7 @@ class ProjectConfiguration(BaseConfiguration):
         self.tools_names = []
 
         # Info tool configuration.
+        self.info_tool_features = []
         self.info_tool_source_description = None
         self.info_tool_source_type = None
 
@@ -354,12 +356,10 @@ class ProjectConfiguration(BaseConfiguration):
         self.cygwin_dll_dependencies = self._GetOptionalConfigValue(
             config_parser, "cygwin", "dll_dependencies", default_value=[]
         )
-
         cygwin_dll_filename = "cyg{0:s}-0.dll".format(self.library_name_suffix)
         self.cygwin_dll_filename = self._GetOptionalConfigValue(
             config_parser, "cygwin", "dll_filename", default_value=cygwin_dll_filename
         )
-
         # Remove trailing comments.
         self.cygwin_build_dependencies = [
             name.split(" ")[0] for name in self.cygwin_build_dependencies
@@ -377,38 +377,30 @@ class ProjectConfiguration(BaseConfiguration):
         development_features = self._GetOptionalConfigValue(
             config_parser, "development", "features", default_value=[]
         )
-
         self.development_glob = "glob" in development_features
         self.development_pytsk3 = "pytsk3" in development_features
 
         self.development_item_object = self._GetOptionalConfigValue(
             config_parser, "development", "item_object"
         )
-
         self.development_item_path = self._GetOptionalConfigValue(
             config_parser, "development", "item_path"
         )
-
         self.development_main_object = self._GetConfigValue(
             config_parser, "development", "main_object"
         )
-
         self.development_main_object_filename = self._GetConfigValue(
             config_parser, "development", "main_object_filename"
         )
-
         self.development_main_object_size = self._GetOptionalConfigValue(
             config_parser, "development", "main_object_size"
         )
-
         self.development_main_object_python_pre_open = self._GetOptionalConfigValue(
             config_parser, "development", "main_object_python_pre_open"
         )
-
         self.development_main_object_python_post_open = self._GetOptionalConfigValue(
             config_parser, "development", "main_object_python_post_open"
         )
-
         self.development_main_object_python_post_open_file_object = (
             self._GetOptionalConfigValue(
                 config_parser, "development", "main_object_python_post_open_file_object"
@@ -424,7 +416,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.dpkg_build_dependencies = self._GetOptionalConfigValue(
             config_parser, "dpkg", "build_dependencies", default_value=[]
         )
-
         # Remove trailing comments.
         self.dpkg_build_dependencies = [
             name.split(" ")[0] for name in self.dpkg_build_dependencies
@@ -447,7 +438,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.freebsd_build_dependencies = self._GetOptionalConfigValue(
             config_parser, "freebsd", "build_dependencies", default_value=[]
         )
-
         # Remove trailing comments.
         self.freebsd_build_dependencies = [
             name.split(" ")[0] for name in self.freebsd_build_dependencies
@@ -465,7 +455,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.gcc_static_build_dependencies = self._GetOptionalConfigValue(
             config_parser, "gcc", "static_build_dependencies", default_value=[]
         )
-
         # Remove trailing comments.
         self.gcc_build_dependencies = [
             name.split(" ")[0] for name in self.gcc_build_dependencies
@@ -486,11 +475,9 @@ class ProjectConfiguration(BaseConfiguration):
         self.info_tool_source_description = self._GetOptionalConfigValue(
             config_parser, "info_tool", "source_description"
         )
-
         self.info_tool_source_type = self._GetOptionalConfigValue(
             config_parser, "info_tool", "source_type"
         )
-
         if self.info_tool_source_type and self.info_tool_source_type not in (
             "container",
             "file",
@@ -525,21 +512,17 @@ class ProjectConfiguration(BaseConfiguration):
         self.library_description = self._GetOptionalConfigValue(
             config_parser, "library", "description", default_value=library_description
         )
-
         self.library_build_dependencies = self._GetOptionalConfigValue(
             config_parser, "library", "build_dependencies", default_value=[]
         )
-
         self.library_features = self._GetOptionalConfigValue(
             config_parser, "library", "features", default_value=[]
         )
-
         self.library_name = self.project_name
         self.library_name_suffix = self.library_name[3:]
         self.library_public_types = self._GetOptionalConfigValue(
             config_parser, "library", "public_types", default_value=[]
         )
-
         # Remove trailing comments.
         self.library_build_dependencies = [
             name.split(" ")[0] for name in self.library_build_dependencies
@@ -557,12 +540,10 @@ class ProjectConfiguration(BaseConfiguration):
         self.mingw_dll_dependencies = self._GetOptionalConfigValue(
             config_parser, "mingw", "dll_dependencies", default_value=[]
         )
-
         mingw_dll_filename = "lib{0:s}-1.dll".format(self.library_name_suffix)
         self.mingw_dll_filename = self._GetOptionalConfigValue(
             config_parser, "mingw", "dll_filename", default_value=mingw_dll_filename
         )
-
         # Remove trailing comments.
         self.mingw_build_dependencies = [
             name.split(" ")[0] for name in self.mingw_build_dependencies
@@ -577,7 +558,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.mingw_msys2_build_dependencies = self._GetOptionalConfigValue(
             config_parser, "mingw_msys2", "build_dependencies", default_value=[]
         )
-
         # Remove trailing comments.
         self.mingw_msys2_build_dependencies = [
             name.split(" ")[0] for name in self.mingw_msys2_build_dependencies
@@ -596,7 +576,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.mount_tool_features = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "features", default_value=[]
         )
-
         if (
             "offset" in self.mount_tool_features
             and "parent" in self.mount_tool_features
@@ -609,15 +588,12 @@ class ProjectConfiguration(BaseConfiguration):
         self.mount_tool_additional_arguments = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "additional_arguments"
         )
-
         self.mount_tool_base_type = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "base_type"
         )
-
         self.mount_tool_file_entry_access_time_type = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "file_entry_access_time_type"
         )
-
         if (
             self.mount_tool_file_entry_access_time_type
             and self.mount_tool_file_entry_access_time_type
@@ -635,11 +611,9 @@ class ProjectConfiguration(BaseConfiguration):
             "file_entry_access_time_value",
             default_value="access_time",
         )
-
         self.mount_tool_file_entry_creation_time_type = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "file_entry_creation_time_type"
         )
-
         if (
             self.mount_tool_file_entry_creation_time_type
             and self.mount_tool_file_entry_creation_time_type
@@ -657,17 +631,14 @@ class ProjectConfiguration(BaseConfiguration):
             "file_entry_creation_time_value",
             default_value="creation_time",
         )
-
         self.mount_tool_file_entry_example = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "file_entry_example"
         )
-
         self.mount_tool_file_entry_inode_change_time_type = (
             self._GetOptionalConfigValue(
                 config_parser, "mount_tool", "file_entry_inode_change_time_type"
             )
         )
-
         if (
             self.mount_tool_file_entry_inode_change_time_type
             and self.mount_tool_file_entry_inode_change_time_type
@@ -687,13 +658,11 @@ class ProjectConfiguration(BaseConfiguration):
                 default_value="inode_change_time",
             )
         )
-
         self.mount_tool_file_entry_modification_time_type = (
             self._GetOptionalConfigValue(
                 config_parser, "mount_tool", "file_entry_modification_time_type"
             )
         )
-
         if (
             self.mount_tool_file_entry_modification_time_type
             and self.mount_tool_file_entry_modification_time_type
@@ -713,33 +682,27 @@ class ProjectConfiguration(BaseConfiguration):
                 default_value="modification_time",
             )
         )
-
         self.mount_tool_file_entry_type = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "file_entry_type"
         )
-
         self.mount_tool_file_entry_type_size_value = self._GetOptionalConfigValue(
             config_parser,
             "mount_tool",
             "file_entry_type_size_value",
             default_value="size",
         )
-
         self.mount_tool_file_system_type = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "file_system_type"
         )
-
         self.mount_tool_mounted_description = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "mounted_description"
         )
-
         self.mount_tool_path_prefix = self._GetOptionalConfigValue(
             config_parser,
             "mount_tool",
             "path_prefix",
             default_value=self.library_name_suffix,
         )
-
         self.mount_tool_source = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "source"
         )
@@ -752,11 +715,9 @@ class ProjectConfiguration(BaseConfiguration):
         self.mount_tool_source_description_long = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "source_description_long"
         )
-
         self.mount_tool_source_type = self._GetOptionalConfigValue(
             config_parser, "mount_tool", "source_type"
         )
-
         if self.mount_tool_source_type and self.mount_tool_source_type not in (
             "container",
             "descriptor file",
@@ -785,7 +746,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.project_data_format = self._GetOptionalConfigValue(
             config_parser, "project", "data_format", default_value=""
         )
-
         project_description = ""
         if self.project_data_format:
             project_description = (
@@ -793,19 +753,17 @@ class ProjectConfiguration(BaseConfiguration):
                     self.project_name, self.project_data_format
                 )
             )
+
         self.project_description = self._GetOptionalConfigValue(
             config_parser, "project", "description", default_value=project_description
         )
-
         project_authors = ["Joachim Metz <joachim.metz@gmail.com>"]
         self.project_authors = self._GetOptionalConfigValue(
             config_parser, "project", "authors", default_value=project_authors
         )
-
         self.project_documentation_url = self._GetOptionalConfigValue(
             config_parser, "project", "documentation_url"
         )
-
         project_downloads_url = "https://github.com/libyal/{0:s}/releases".format(
             self.project_name
         )
@@ -815,19 +773,16 @@ class ProjectConfiguration(BaseConfiguration):
             "downloads_url",
             default_value=project_downloads_url,
         )
-
         project_git_url = "https://github.com/libyal/{0:s}.git".format(
             self.project_name
         )
         self.project_git_url = self._GetOptionalConfigValue(
             config_parser, "project", "git_url", default_value=project_git_url
         )
-
         self.project_status = self._GetConfigValue(config_parser, "project", "status")
         self.project_year_of_creation = self._GetConfigValue(
             config_parser, "project", "year_of_creation"
         )
-
         try:
             self.project_year_of_creation = int(self.project_year_of_creation, 10)
         except ValueError:
@@ -840,7 +795,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.project_features = self._GetOptionalConfigValue(
             config_parser, "project", "features", default_value=[]
         )
-
         self.supports_debug_output = "debug_output" in self.project_features
         self.deploy_to_nuget = "nuget" in self.project_features
 
@@ -864,7 +818,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.python_module_year_of_creation = self._GetOptionalConfigValue(
             config_parser, "python_module", "year_of_creation"
         )
-
         if not self.python_module_year_of_creation:
             self.python_module_year_of_creation = self.project_year_of_creation
         else:
@@ -888,7 +841,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.rpm_build_dependencies = self._GetOptionalConfigValue(
             config_parser, "rpm", "build_dependencies", default_value=[]
         )
-
         # Remove trailing comments.
         self.rpm_build_dependencies = [
             name.split(" ")[0] for name in self.rpm_build_dependencies
@@ -928,7 +880,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_input_glob = self._GetOptionalConfigValue(
             config_parser, "tests", "input_glob", default_value="*"
         )
-
         self.tests_export_tool_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "export_tool_option_sets", default_value=[]
         )
@@ -938,7 +889,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_export_tool_profiles = self._GetOptionalConfigValue(
             config_parser, "tests", "export_tool_profiles", default_value=[]
         )
-
         self.tests_info_tool_input_glob = self._GetOptionalConfigValue(
             config_parser,
             "tests",
@@ -957,7 +907,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_info_tool_profiles = self._GetOptionalConfigValue(
             config_parser, "tests", "info_tool_profiles", default_value=[]
         )
-
         self.tests_verify_tool_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "verify_tool_option_sets", default_value=[]
         )
@@ -967,7 +916,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_verify_tool_profiles = self._GetOptionalConfigValue(
             config_parser, "tests", "verify_tool_profiles", default_value=[]
         )
-
         self.tests_example_filename1 = self._GetOptionalConfigValue(
             config_parser, "tests", "example_filename1"
         )
@@ -990,16 +938,13 @@ class ProjectConfiguration(BaseConfiguration):
         self.tools_description = self._GetOptionalConfigValue(
             config_parser, "tools", "description", default_value=""
         )
-
         tools_directory = "{0:s}tools".format(self.library_name_suffix)
         self.tools_directory = self._GetOptionalConfigValue(
             config_parser, "tools", "directory", default_value=tools_directory
         )
-
         self.tools_features = self._GetOptionalConfigValue(
             config_parser, "tools", "features", default_value=[]
         )
-
         if config_parser.has_section("info_tool"):
             self.tools_features.append("info_tool")
         if config_parser.has_section("mount_tool"):
@@ -1008,7 +953,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.tools_names = self._GetOptionalConfigValue(
             config_parser, "tools", "names", default_value=[]
         )
-
         # Remove trailing comments.
         self.tools_build_dependencies = [
             name.split(" ")[0] for name in self.tools_build_dependencies
@@ -1039,7 +983,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.msvscpp_dll_dependencies = self._GetOptionalConfigValue(
             config_parser, "msvscpp", "dll_dependencies", default_value=[]
         )
-
         # Remove trailing comments.
         self.msvscpp_build_dependencies = [
             name.split(" ")[0] for name in self.msvscpp_build_dependencies
@@ -1135,6 +1078,14 @@ class ProjectConfiguration(BaseConfiguration):
         """
         return "dotnet_bindings" in self.project_features
 
+    def HasInfoToolsFeatureCodepage(self):
+        """Determines if the info tool has a codepage feature.
+
+        Returns:
+          bool: True if the info tool has a codepage feature.
+        """
+        return "codepage" in self.info_tool_features
+
     def HasJavaBindings(self):
         """Determines if the project provides Java bindings.
 
@@ -1155,7 +1106,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a codepage feature.
 
         Returns:
-          bool: True if the mount tools has a codepage feature.
+          bool: True if the mount tool has a codepage feature.
         """
         return "codepage" in self.mount_tool_features
 
@@ -1163,7 +1114,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has an encrypted root plist feature.
 
         Returns:
-          bool: True if the mount tools has an encrypted root plist feature.
+          bool: True if the mount tool has an encrypted root plist feature.
         """
         return "encrypted_root_plist" in self.mount_tool_features
 
@@ -1171,7 +1122,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has an extended attributes feature.
 
         Returns:
-          bool: True if the mount tools has an extended attributes feature.
+          bool: True if the mount tool has an extended attributes feature.
         """
         return "extended_attributes" in self.mount_tool_features
 
@@ -1179,7 +1130,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a glob feature.
 
         Returns:
-          bool: True if the mount tools has a glob feature.
+          bool: True if the mount tool has a glob feature.
         """
         return "glob" in self.mount_tool_features
 
@@ -1187,7 +1138,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a keys feature.
 
         Returns:
-          bool: True if the mount tools has a keys feature.
+          bool: True if the mount tool has a keys feature.
         """
         return "keys" in self.mount_tool_features
 
@@ -1195,7 +1146,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a multi source feature.
 
         Returns:
-          bool: True if the mount tools has a multi source feature.
+          bool: True if the mount tool has a multi source feature.
         """
         return "multi_source" in self.mount_tool_features
 
@@ -1203,7 +1154,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has an offset feature.
 
         Returns:
-          bool: True if the mount tools has an offset feature.
+          bool: True if the mount tool has an offset feature.
         """
         return "offset" in self.mount_tool_features
 
@@ -1211,7 +1162,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a parent feature.
 
         Returns:
-          bool: True if the mount tools has a parent feature.
+          bool: True if the mount tool has a parent feature.
         """
         return "parent" in self.mount_tool_features
 
@@ -1219,7 +1170,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a password feature.
 
         Returns:
-          bool: True if the mount tools has a password feature.
+          bool: True if the mount tool has a password feature.
         """
         return "password" in self.mount_tool_features
 
@@ -1227,7 +1178,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a recovery password feature.
 
         Returns:
-          bool: True if the mount tools has a recovery password feature.
+          bool: True if the mount tool has a recovery password feature.
         """
         return "recovery_password" in self.mount_tool_features
 
@@ -1235,7 +1186,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a startup key feature.
 
         Returns:
-          bool: True if the mount tools has a startup key feature.
+          bool: True if the mount tool has a startup key feature.
         """
         return "startup_key" in self.mount_tool_features
 
@@ -1243,7 +1194,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a symbolic link feature.
 
         Returns:
-          bool: True if the mount tools has a symbolic link feature.
+          bool: True if the mount tool has a symbolic link feature.
         """
         return "symbolic_link" in self.mount_tool_features
 
@@ -1251,7 +1202,7 @@ class ProjectConfiguration(BaseConfiguration):
         """Determines if the mount tool has a feature to unlock encrypted source.
 
         Returns:
-          bool: True if the mount tools has a feature to unlock encrypted source.
+          bool: True if the mount tool has a feature to unlock encrypted source.
         """
         return (
             self.HasMountToolsFeatureKeys()

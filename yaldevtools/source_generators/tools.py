@@ -23,7 +23,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         for option, argument, _ in tool_options:
             getopt_string = option
             if argument:
-                getopt_string = "{0:s}:".format(getopt_string)
+                getopt_string = f"{getopt_string:s}:"
 
             getopt_string_segments.append(getopt_string)
 
@@ -52,41 +52,37 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             if argument:
                 getopt_switch.extend(
                     [
-                        "\t\t\tcase (system_integer_t) '{0:s}':".format(option),
-                        "\t\t\t\toption_{0:s} = optarg;".format(argument),
+                        f"\t\t\tcase (system_integer_t) '{option:s}':",
+                        f"\t\t\t\toption_{argument:s} = optarg;",
                         "",
                         "\t\t\t\tbreak;",
                     ]
                 )
-
             elif option == "h":
                 getopt_switch.extend(
                     [
-                        "\t\t\tcase (system_integer_t) '{0:s}':".format(option),
+                        f"\t\t\tcase (system_integer_t) '{option:s}':",
                         "\t\t\t\tusage_fprint(",
                         "\t\t\t\t stdout );",
                         "",
                         "\t\t\t\treturn( EXIT_SUCCESS );",
                     ]
                 )
-
             elif option == "v":
                 getopt_switch.extend(
                     [
-                        "\t\t\tcase (system_integer_t) '{0:s}':".format(option),
+                        f"\t\t\tcase (system_integer_t) '{option:s}':",
                         "\t\t\t\tverbose = 1;",
                         "",
                         "\t\t\t\tbreak;",
                     ]
                 )
-
             elif option == "V":
+                tools_directory = project_configuration.tools_directory
                 getopt_switch.extend(
                     [
-                        "\t\t\tcase (system_integer_t) '{0:s}':".format(option),
-                        "\t\t\t\t{0:s}_output_copyright_fprint(".format(
-                            project_configuration.tools_directory
-                        ),
+                        f"\t\t\tcase (system_integer_t) '{option:s}':",
+                        f"\t\t\t\t{tools_directory:s}_output_copyright_fprint(",
                         "\t\t\t\t stdout );",
                         "",
                         "\t\t\t\treturn( EXIT_SUCCESS );",
@@ -116,11 +112,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         template_mappings["info_tool_source_type"] = (
             project_configuration.info_tool_source_type
         )
-
         for template_name in ("struct.h", "initialize.h", "free.h", "signal_abort.h"):
             template_filename = os.path.join(templates_path, template_name)
             self._GenerateSection(
@@ -132,7 +126,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         for template_name in ("open.h", "close.h"):
             template_filename = os.path.join(templates_path, template_name)
             self._GenerateSection(
@@ -167,11 +160,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         template_mappings["info_tool_source_type"] = (
             project_configuration.info_tool_source_type
         )
-
         for template_name in ("initialize.c", "free.c", "signal_abort.c"):
             template_filename = os.path.join(templates_path, template_name)
             self._GenerateSection(
@@ -183,7 +174,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         for template_name in ("open.c", "close.c"):
             template_filename = os.path.join(templates_path, template_name)
             self._GenerateSection(
@@ -203,13 +193,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
               maps to the name of a template variable.
           output_writer (OutputWriter): output writer.
         """
-        info_tool_name = "{0:s}info".format(project_configuration.library_name_suffix)
+        info_tool_name = f"{project_configuration.library_name_suffix:s}info"
 
-        info_tool_filename = "{0:s}.c".format(info_tool_name)
+        info_tool_filename = f"{info_tool_name:s}.c"
         info_tool_filename = os.path.join(
             project_configuration.tools_directory, info_tool_filename
         )
-
         if os.path.exists(info_tool_filename):
             output_filename = os.path.join(
                 project_configuration.tools_directory, "info_handle.h"
@@ -217,14 +206,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             self._GenerateInfoHandleHeaderFile(
                 project_configuration, template_mappings, output_writer, output_filename
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "info_handle.c"
             )
             self._GenerateInfoHandleSourceFile(
                 project_configuration, template_mappings, output_writer, output_filename
             )
-
             self._GenerateInfoToolSourceFile(
                 project_configuration,
                 template_mappings,
@@ -256,7 +243,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         info_tool_options = self._GetInfoToolOptions(
             project_configuration, info_tool_name
         )
-
         template_mappings["info_tool_name"] = info_tool_name
         template_mappings["info_tool_source_description"] = (
             project_configuration.info_tool_source_description
@@ -264,7 +250,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["info_tool_source_type"] = (
             project_configuration.info_tool_source_type
         )
-
         template_filename = os.path.join(templates_path, "header.c")
         self._GenerateSection(template_filename, template_mappings, output_filename)
 
@@ -272,7 +257,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         self._GenerateInfoToolSourceUsageFunction(
             project_configuration,
             template_mappings,
@@ -281,12 +265,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             output_writer,
             output_filename,
         )
-
         template_filename = os.path.join(templates_path, "signal_handler.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         self._GenerateInfoToolSourceMainFunction(
             project_configuration,
             template_mappings,
@@ -295,7 +277,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             output_writer,
             output_filename,
         )
-
         del template_mappings["info_tool_name"]
         del template_mappings["info_tool_source_description"]
         del template_mappings["info_tool_source_type"]
@@ -332,18 +313,15 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         getopt_switch = self._GenerateGetoptSwitch(
             project_configuration, info_tool_options
         )
-
         template_mappings["info_tool_getopt_string"] = getopt_string
         template_mappings["info_tool_options_switch"] = getopt_switch
         template_mappings["info_tool_options_variable_declarations"] = (
             variable_declarations
         )
-
         template_filename = os.path.join(templates_path, "main-start.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         del template_mappings["info_tool_getopt_string"]
         del template_mappings["info_tool_options_switch"]
         del template_mappings["info_tool_options_variable_declarations"]
@@ -353,7 +331,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         template_filename = os.path.join(templates_path, "main-end.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
@@ -392,33 +369,35 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             description_lines = text_wrapper.wrap(description)
 
             description_line = description_lines.pop(0)
-            details = '\tfprintf( stream, "\\t-{0:s}:{1:s}{2:s}\\n"'.format(
-                option, alignment_padding, description_line
+            details = (
+                f'\tfprintf( stream, "\\t-{{{option:s}}}:{alignment_padding:s}'
+                f'{description_line:s}\\n"'
             )
-
             # TODO: determine indentation size
             for description_line in description_lines:
                 options_details.append(details)
-                details = '\t                 "\\t   {0:s}{1:s}\\n"'.format(
-                    alignment_padding, description_line
+                details = (
+                    f'\t                 "\\t   {{   {alignment_padding:s}'
+                    f'{description_line:s}\\n"'
                 )
 
-            details = "{0:s} );".format(details)
+            details = f"{details:s} );"
             options_details.append(details)
 
             if not argument:
                 options_without_arguments.append(option)
             else:
-                usage = "[ -{0:s} {1:s} ]".format(option, argument)
+                usage = f"[ -{option:s} {argument:s} ]"
                 options_usage.append(usage)
 
-        usage = "[ -{0:s} ]".format("".join(options_without_arguments))
+        options_without_arguments = "".join(options_without_arguments)
+        usage = f'[ -{options_without_arguments:s} ]'
         options_usage.append(usage)
 
         if project_configuration.info_tool_source_type:
             options_usage.append(project_configuration.info_tool_source_type)
 
-        usage = "Usage: {0:s} ".format(info_tool_name)
+        usage = f"Usage: {info_tool_name:s} "
         usage_length = len(usage)
         alignment_padding = " " * usage_length
         options_usage = " ".join(options_usage)
@@ -430,15 +409,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         info_tool_usage = []
         usage_line = usage_lines.pop(0)
-        usage = '\tfprintf( stream, "{0:s}{1:s}\\n"'.format(usage, usage_line)
+        usage = f'\tfprintf( stream, "{usage:s}{usage_line:s}\\n"'
 
         for usage_line in usage_lines:
             info_tool_usage.append(usage)
-            usage = '\t                 "{0:s}{1:s}\\n"'.format(
-                alignment_padding, usage_line
-            )
+            usage = f'\t                 "{alignment_padding:s}{usage_line:s}\\n"'
 
-        usage = '{0:s}\\n" );'.format(usage[:-1])
+        usage = f'{usage[:-1]}\\n" );'
         info_tool_usage.append(usage)
 
         template_mappings["info_tool_options"] = "\n".join(options_details)
@@ -448,7 +425,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         del template_mappings["info_tool_options"]
         del template_mappings["info_tool_usage"]
 
@@ -470,8 +446,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             if argument:
                 alignment_padding = " " * (largest_argument_length - len(argument))
                 variable_declaration = (
-                    "\tsystem_character_t *option_{0:s}{1:s} = NULL;"
-                ).format(argument, alignment_padding)
+                    f"\tsystem_character_t *option_{argument:s}{alignment_padding:s} "
+                    f"= NULL;"
+                )
                 variable_declarations.append(variable_declaration)
 
         return "\n".join(sorted(variable_declarations))
@@ -502,12 +479,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             "Umount.h",
             "footer.h",
         ]
-
         template_filenames = [
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         self._SortIncludeHeaders(project_configuration, output_filename)
@@ -539,7 +514,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             "CloseFile.c",
             "ReadFile.c",
         ]
-
         # TODO: set option via configuration
         if project_configuration.library_name in ("libfsext", "libfsfat", "libfsxfs"):
             template_names.append("FindFiles-without_parent.c")
@@ -549,12 +523,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_names.extend(
             ["GetFileInformation.c", "GetVolumeInformation.c", "Umount.c", "footer.c"]
         )
-
         template_filenames = [
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         template_mappings["mount_tool_name"] = mount_tool_name
 
         self._GenerateSections(template_filenames, template_mappings, output_filename)
@@ -594,7 +566,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                 "get_name.h",
             ]
         )
-
         # TODO: set option via configuration
         if project_configuration.library_name in ("libfsapfs", "libfsext"):
             template_names.append("get_symbolic_link_target.h")
@@ -607,24 +578,21 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                 "footer.h",
             ]
         )
-
         template_filenames = [
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         mount_tool_file_entry_type = (
             project_configuration.mount_tool_file_entry_type or ""
         )
-
         template_mappings["mount_tool_file_entry_type"] = mount_tool_file_entry_type
         template_mappings["mount_tool_file_entry_type_description"] = (
             mount_tool_file_entry_type.replace("_", " ")
         )
-        template_mappings["mount_tool_file_entry_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, mount_tool_file_entry_type
+        template_mappings["mount_tool_file_entry_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{mount_tool_file_entry_type:s}"
         )
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         del template_mappings["mount_tool_file_entry_type"]
@@ -668,14 +636,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             template_name = "get_creation_time-mounted_timestamp.c"
 
         elif not project_configuration.mount_tool_file_system_type:
-            template_name = "get_creation_time-{0:s}_and_mounted_timestamp.c".format(
-                file_entry_creation_time_type
+            template_name = (
+                f"get_creation_time-{file_entry_creation_time_type:s}_and_mounted_"
+                f"timestamp.c"
             )
-
         else:
-            template_name = "get_creation_time-{0:s}.c".format(
-                file_entry_creation_time_type
-            )
+            template_name = f"get_creation_time-{file_entry_creation_time_type:s}.c"
 
         template_names.append(template_name)
 
@@ -686,14 +652,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             template_name = "get_access_time-mounted_timestamp.c"
 
         elif not project_configuration.mount_tool_file_system_type:
-            template_name = "get_access_time-{0:s}_and_mounted_timestamp.c".format(
-                file_entry_access_time_type
+            template_name = (
+                f"get_access_time-{file_entry_access_time_type:s}_and_mounted_"
+                f"timestamp.c"
             )
-
         else:
-            template_name = "get_access_time-{0:s}.c".format(
-                file_entry_access_time_type
-            )
+            template_name = f"get_access_time-{file_entry_access_time_type:s}.c"
 
         template_names.append(template_name)
 
@@ -705,15 +669,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         elif not project_configuration.mount_tool_file_system_type:
             template_name = (
-                "get_modification_time-{0:s}_and_mounted_timestamp.c".format(
-                    file_entry_modification_time_type
-                )
+                "get_modification_time-{file_entry_modification_time_type:s}_and_mounted_timestamp.c"
             )
-
         else:
-            template_name = "get_modification_time-{0:s}.c".format(
-                file_entry_modification_time_type
-            )
+            template_name = "get_modification_time-{file_entry_modification_time_type:s}.c"
 
         template_names.append(template_name)
 
@@ -725,15 +684,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         elif not project_configuration.mount_tool_file_system_type:
             template_name = (
-                "get_inode_change_time-{0:s}_and_mounted_timestamp.c".format(
-                    file_entry_inode_change_time_type
-                )
+                "get_inode_change_time-{file_entry_inode_change_time_type:s}_and_mounted_timestamp.c"
             )
-
         else:
-            template_name = "get_inode_change_time-{0:s}.c".format(
-                file_entry_inode_change_time_type
-            )
+            template_name = "get_inode_change_time-{file_entry_inode_change_time_type:s}.c"
 
         template_names.append(template_name)
 
@@ -764,7 +718,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         file_entry_access_time_value = (
             project_configuration.mount_tool_file_entry_access_time_value
         )
@@ -784,7 +737,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["mount_tool_file_entry_creation_time_value_description"] = (
             file_entry_creation_time_value.replace("_", " ")
         )
-
         file_entry_inode_change_time_value = (
             project_configuration.mount_tool_file_entry_inode_change_time_value
         )
@@ -808,26 +760,23 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         mount_tool_file_entry_type = (
             project_configuration.mount_tool_file_entry_type or ""
         )
-
         template_mappings["mount_tool_file_entry_type"] = mount_tool_file_entry_type
         template_mappings["mount_tool_file_entry_type_description"] = (
             mount_tool_file_entry_type.replace("_", " ")
         )
-        template_mappings["mount_tool_file_entry_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, mount_tool_file_entry_type
+        template_mappings["mount_tool_file_entry_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{mount_tool_file_entry_type:s}"
         )
-
         mount_tool_file_entry_type_size_value = (
             project_configuration.mount_tool_file_entry_type_size_value or ""
         )
-
         template_mappings["mount_tool_file_entry_type_size_value"] = (
             mount_tool_file_entry_type_size_value
         )
         template_mappings["mount_tool_file_entry_type_size_value_description"] = (
             mount_tool_file_entry_type_size_value.replace("_", " ")
         )
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         del template_mappings["mount_tool_file_entry_access_time_value"]
@@ -878,7 +827,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_names.extend(
             ["includes-end.h", "struct-start.h", "struct-mounted_timestamp.h"]
         )
-
         if not project_configuration.mount_tool_file_system_type:
             template_names.extend(
                 ["struct-path_prefix.h", "struct-file_entry_type_array.h"]
@@ -889,7 +837,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_names.extend(
             ["struct-end.h", "initialize.h", "free.h", "signal_abort.h"]
         )
-
         if not project_configuration.mount_tool_file_system_type:
             template_names.append("set_path_prefix.h")
         else:
@@ -917,19 +864,17 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         mount_tool_file_entry_type = (
             project_configuration.mount_tool_file_entry_type or ""
         )
-
         template_mappings["mount_tool_file_entry_type"] = mount_tool_file_entry_type
         template_mappings["mount_tool_file_entry_type_description"] = (
             mount_tool_file_entry_type.replace("_", " ")
         )
-        template_mappings["mount_tool_file_entry_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, mount_tool_file_entry_type
+        template_mappings["mount_tool_file_entry_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{mount_tool_file_entry_type:s}"
         )
-
         file_system_type = project_configuration.mount_tool_file_system_type
         if not file_system_type:
             file_system_type = mount_tool_file_entry_type
@@ -938,10 +883,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["mount_tool_file_system_type_description"] = (
             file_system_type.replace("_", " ")
         )
-        template_mappings["mount_tool_file_system_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, file_system_type
+        template_mappings["mount_tool_file_system_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{file_system_type:s}"
         )
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         del template_mappings["mount_tool_file_entry_type"]
@@ -1027,19 +972,17 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         mount_tool_file_entry_type = (
             project_configuration.mount_tool_file_entry_type or ""
         )
-
         template_mappings["mount_tool_file_entry_type"] = mount_tool_file_entry_type
         template_mappings["mount_tool_file_entry_type_description"] = (
             mount_tool_file_entry_type.replace("_", " ")
         )
-        template_mappings["mount_tool_file_entry_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, mount_tool_file_entry_type
+        template_mappings["mount_tool_file_entry_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{mount_tool_file_entry_type:s}"
         )
-
         file_system_type = project_configuration.mount_tool_file_system_type
         if not file_system_type:
             file_system_type = mount_tool_file_entry_type
@@ -1048,10 +991,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["mount_tool_file_system_type_description"] = (
             file_system_type.replace("_", " ")
         )
-        template_mappings["mount_tool_file_system_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, file_system_type
+        template_mappings["mount_tool_file_system_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{file_system_type:s}"
         )
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         del template_mappings["mount_tool_file_entry_type"]
@@ -1096,7 +1039,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_names.extend(
             ["set_stat_info.c", "filldir.c", "open.c", "read.c", "release.c"]
         )
-
         if project_configuration.HasMountToolsFeatureExtendedAttributes():
             template_names.extend(["getxattr.c", "listxattr.c"])
 
@@ -1111,14 +1053,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         mount_tool_file_entry_type = (
             project_configuration.mount_tool_file_entry_type or ""
         )
-
         template_mappings["mount_tool_file_entry_type"] = mount_tool_file_entry_type
-        template_mappings["mount_tool_file_entry_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, mount_tool_file_entry_type
+        template_mappings["mount_tool_file_entry_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{mount_tool_file_entry_type:s}"
         )
         template_mappings["mount_tool_name"] = mount_tool_name
 
@@ -1258,19 +1199,17 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         mount_tool_file_entry_type = (
             project_configuration.mount_tool_file_entry_type or ""
         )
-
         template_mappings["mount_tool_file_entry_type"] = mount_tool_file_entry_type
-        template_mappings["mount_tool_file_entry_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, mount_tool_file_entry_type
+        template_mappings["mount_tool_file_entry_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{mount_tool_file_entry_type:s}"
         )
         template_mappings["mount_tool_source_type"] = (
             project_configuration.mount_tool_source_type
         )
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         del template_mappings["mount_tool_file_entry_type"]
@@ -1509,7 +1448,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                 "get_file_entry_by_path-file_entry_initialize.c",
             ]
         )
-
         if not project_configuration.mount_tool_file_system_type:
             template_names.append("get_file_entry_by_path-end.c")
         else:
@@ -1519,11 +1457,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         mount_tool_file_entry_type = (
             project_configuration.mount_tool_file_entry_type or ""
         )
-
         base_type = project_configuration.mount_tool_base_type
         if not base_type:
             base_type = project_configuration.mount_tool_file_system_type
@@ -1534,18 +1470,18 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["mount_tool_base_type_description"] = base_type.replace(
             "_", " "
         )
-        template_mappings["mount_tool_base_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, base_type
+        template_mappings["mount_tool_base_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{base_type:s}"
         )
-
         template_mappings["mount_tool_file_entry_type"] = mount_tool_file_entry_type
         template_mappings["mount_tool_file_entry_type_description"] = (
             mount_tool_file_entry_type.replace("_", " ")
         )
-        template_mappings["mount_tool_file_entry_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, mount_tool_file_entry_type
+        template_mappings["mount_tool_file_entry_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{mount_tool_file_entry_type:s}"
         )
-
         file_system_type = project_configuration.mount_tool_file_system_type
         if not file_system_type:
             file_system_type = mount_tool_file_entry_type
@@ -1554,17 +1490,16 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["mount_tool_file_system_type_description"] = (
             file_system_type.replace("_", " ")
         )
-        template_mappings["mount_tool_file_system_type_name"] = "{0:s}_{1:s}".format(
-            project_configuration.library_name_suffix, file_system_type
+        template_mappings["mount_tool_file_system_type_name"] = (
+            f"{project_configuration.library_name_suffix:s}_"
+            f"{file_system_type:s}"
         )
-
         template_mappings["mount_tool_source_type"] = (
             project_configuration.mount_tool_source_type
         )
         template_mappings["mount_tool_source_type_description"] = (
             project_configuration.mount_tool_source_type.replace("_", " ")
         )
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         del template_mappings["mount_tool_base_type"]
@@ -1585,7 +1520,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._CorrectDescriptionSpelling(
             project_configuration.mount_tool_file_entry_type, output_filename
         )
-
         if file_system_type:
             self._CorrectDescriptionSpelling(file_system_type, output_filename)
 
@@ -1642,13 +1576,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
               maps to the name of a template variable.
           output_writer (OutputWriter): output writer.
         """
-        mount_tool_name = "{0:s}mount".format(project_configuration.library_name_suffix)
+        mount_tool_name = f"{project_configuration.library_name_suffix:s}mount"
 
-        mount_tool_filename = "{0:s}.c".format(mount_tool_name)
+        mount_tool_filename = f"{mount_tool_name:s}.c"
         mount_tool_filename = os.path.join(
             project_configuration.tools_directory, mount_tool_filename
         )
-
         if os.path.exists(mount_tool_filename):
             if project_configuration.mount_tool_file_system_type:
                 output_filename = os.path.join(
@@ -1660,7 +1593,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                     output_writer,
                     output_filename,
                 )
-
                 output_filename = os.path.join(
                     project_configuration.tools_directory, "mount_path_string.c"
                 )
@@ -1677,49 +1609,42 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             self._GenerateMountFileEntryHeaderFile(
                 project_configuration, template_mappings, output_writer, output_filename
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "mount_file_entry.c"
             )
             self._GenerateMountFileEntrySourceFile(
                 project_configuration, template_mappings, output_writer, output_filename
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "mount_file_system.h"
             )
             self._GenerateMountFileSystemHeaderFile(
                 project_configuration, template_mappings, output_writer, output_filename
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "mount_file_system.c"
             )
             self._GenerateMountFileSystemSourceFile(
                 project_configuration, template_mappings, output_writer, output_filename
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "mount_handle.h"
             )
             self._GenerateMountHandleHeaderFile(
                 project_configuration, template_mappings, output_writer, output_filename
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "mount_handle.c"
             )
             self._GenerateMountHandleSourceFile(
                 project_configuration, template_mappings, output_writer, output_filename
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "mount_dokan.h"
             )
             self._GenerateMountDokanHeaderFile(
                 project_configuration, template_mappings, output_writer, output_filename
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "mount_dokan.c"
             )
@@ -1730,7 +1655,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                 output_writer,
                 output_filename,
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "mount_fuse.h"
             )
@@ -1741,7 +1665,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                 template_mappings,
                 output_filename,
             )
-
             output_filename = os.path.join(
                 project_configuration.tools_directory, "mount_fuse.c"
             )
@@ -1801,11 +1724,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         mount_tool_options = self._GetMountToolOptions(
             project_configuration, mount_tool_name
         )
-
         template_mappings["mount_tool_name"] = mount_tool_name
         template_mappings["mount_tool_path_prefix"] = (
             project_configuration.mount_tool_path_prefix
@@ -1819,7 +1740,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["mount_tool_source_type"] = (
             project_configuration.mount_tool_source_type
         )
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         self._GenerateMountToolSourceUsageFunction(
@@ -1830,12 +1750,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             output_writer,
             output_filename,
         )
-
         template_filename = os.path.join(templates_path, "signal_handler.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         self._GenerateMountToolSourceMainFunction(
             project_configuration,
             template_mappings,
@@ -1844,7 +1762,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             output_writer,
             output_filename,
         )
-
         del template_mappings["mount_tool_name"]
         del template_mappings["mount_tool_path_prefix"]
         del template_mappings["mount_tool_source_description"]
@@ -1885,7 +1802,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         getopt_switch = self._GenerateGetoptSwitch(
             project_configuration, mount_tool_options
         )
-
         template_names = ["main-start.c"]
 
         # TODO: set option via configuration
@@ -1981,18 +1897,15 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         template_mappings["data_format"] = project_configuration.project_data_format
         template_mappings["mount_tool_getopt_string"] = getopt_string
         template_mappings["mount_tool_options_switch"] = getopt_switch
         template_mappings["mount_tool_options_variable_declarations"] = (
             variable_declarations
         )
-
         self._GenerateSections(
             template_filenames, template_mappings, output_filename, access_mode="a"
         )
-
         del template_mappings["data_format"]
         del template_mappings["mount_tool_getopt_string"]
         del template_mappings["mount_tool_options_switch"]
@@ -2035,37 +1948,37 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             description_lines = text_wrapper.wrap(description)
 
             description_line = description_lines.pop(0)
-            details = '\tfprintf( stream, "\\t-{0:s}:{1:s}{2:s}\\n"'.format(
-                option, alignment_padding, description_line
+            details = (
+                f'\tfprintf( stream, "\\t-{{option:s}}:{alignment_padding:s}'
+                f'{description_line:s}\\n"'
             )
-
             for description_line in description_lines:
                 options_details.append(details)
-                details = '\t                 "\\t   {0:s}{1:s}\\n"'.format(
-                    alignment_padding, description_line
+                details = (
+                    f'\t                 "\\t   {{   {alignment_padding:s}'
+                    f'{description_line:s}\\n"'
                 )
 
-            details = "{0:s} );".format(details)
+            details = f"{details} );"
             options_details.append(details)
 
             if not argument:
                 options_without_arguments.append(option)
             else:
-                usage = "[ -{0:s} {1:s} ]".format(option, argument)
+                usage = f"[ -{option:s} {argument:s} ]"
                 options_usage.append(usage)
 
-        usage = "[ -{0:s} ]".format("".join(options_without_arguments))
+        options_without_arguments = "".join(options_without_arguments)
+        usage = f'[ -{options_without_arguments:s} ]'
         options_usage.append(usage)
 
         options_usage.extend(
             [project_configuration.mount_tool_source_type, "mount_point"]
         )
-
         mount_tool_source_alignment = " " * (
             len("mount_point") - len(project_configuration.mount_tool_source_type)
         )
-
-        usage = "Usage: {0:s} ".format(mount_tool_name)
+        usage = f"Usage: {mount_tool_name:s} "
         usage_length = len(usage)
         alignment_padding = " " * usage_length
         options_usage = " ".join(options_usage)
@@ -2077,15 +1990,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         mount_tool_usage = []
         usage_line = usage_lines.pop(0)
-        usage = '\tfprintf( stream, "{0:s}{1:s}\\n"'.format(usage, usage_line)
+        usage = f'\tfprintf( stream, "{usage:s}{usage_line:s}\\n"'
 
         for usage_line in usage_lines:
             mount_tool_usage.append(usage)
-            usage = '\t                 "{0:s}{1:s}\\n"'.format(
-                alignment_padding, usage_line
-            )
+            usage = f'\t                 "{alignment_padding:s}{usage_line:s}\\n"'
 
-        usage = '{0:s}\\n" );'.format(usage[:-1])
+        usage = f'{usage[:-1]}\\n" );'
         mount_tool_usage.append(usage)
 
         template_mappings["mount_tool_options"] = "\n".join(options_details)
@@ -2113,9 +2024,8 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         # TODO: sort options with lower case before upper case.
         info_tool_options = []
 
-        # TODO: add condition
-        info_tool_options.append(
-            (
+        if project_configuration.HasInfoToolsFeatureCodepage():
+            option = (
                 "c",
                 "codepage",
                 (
@@ -2126,7 +2036,8 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                     "windows-1257 or windows-1258 "
                 ),
             )
-        )
+            info_tool_options.append(option)
+
         info_tool_options.extend(
             [
                 ("h", "", "shows this help"),
@@ -2220,9 +2131,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             option = (
                 "o",
                 "offset",
-                "specify the {0:s} offset in bytes".format(
-                    project_configuration.mount_tool_source_type
-                ),
+                f"specify the {{{mount_tool_source_type:s}}} offset in bytes",
             )
             mount_tool_options.append(option)
 
@@ -2256,9 +2165,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                     "v",
                     "",
                     (
-                        "verbose output to stderr, while {0:s} will remain "
+                        "verbose output to stderr, while {mount_tool_name:s} will remain "
                         "running in the foreground"
-                    ).format(mount_tool_name),
+                    ),
                 ),
                 ("V", "", "print version"),
                 ("X", "extended_options", "extended options to pass to sub system"),
@@ -2279,8 +2188,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             project_configuration.library_name,
             project_configuration.tools_directory,
         )
-
-        library_header = "yaltools_{0:s}.h".format(project_configuration.library_name)
+        library_header = f"yaltools_{{{project_configuration.library_name:s}}}.h"
 
         if not os.path.exists(tools_path):
             return
@@ -2288,7 +2196,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings = self._GetTemplateMappings(
             project_configuration, authors_separator=",\n *                          "
         )
-
         # TODO: add support for ouput.[ch]
 
         for directory_entry in os.listdir(self._templates_path):
@@ -2301,20 +2208,19 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                 continue
 
             if directory_entry == "yaltools_libyal.h":
-                output_filename = "{0:s}tools_{1:s}.h".format(
-                    project_configuration.library_name_suffix,
-                    project_configuration.library_name,
+                output_filename = (
+                    f"{project_configuration.library_name_suffix:s}tools_"
+                    f"{project_configuration.library_name:s}.h"
                 )
-
             else:
-                output_filename = "{0:s}_{1:s}".format(
-                    project_configuration.tools_directory, directory_entry[9:]
+                output_filename = (
+                    f"{project_configuration.tools_directory:s}_"
+                    f"{directory_entry[9:]:s}"
                 )
 
             output_filename = os.path.join(
                 project_configuration.tools_directory, output_filename
             )
-
             if not os.path.exists(output_filename):
                 continue
 

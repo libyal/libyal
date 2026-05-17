@@ -1,10 +1,21 @@
 # yaldevtools generator specification.
 ---
-identifier: generate_body
+identifier: generate_footer
 type: template
-file: build_wheel.yml/body.yml
+file: build_wheel.yml/footer.yml
+---
+identifier: generate_header
+type: template
+file: build_wheel.yml/header.yml
+---
+identifier: generate_winflexbison
+type: template
+condition: "'lex' in library_build_dependencies or 'yacc' in library_build_dependencies or 'lex' in tools_build_dependencies or 'yacc' in tools_build_dependencies"
+file: build_wheel.yml/winflexbison.yml
 ---
 identifier: main
 type: group
 operations:
-- generate_body
+- generate_header
+- generate_winflexbison
+- generate_footer
