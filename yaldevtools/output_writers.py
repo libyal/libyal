@@ -38,7 +38,7 @@ class StdoutWriter:
           access_mode (Optional[str]): output file access mode.
         """
         print("-" * 80)
-        print("{0: ^80}".format(file_path))
+        print(f"{file_path: ^80}")
         print("-" * 80)
         print("")
         print(file_data, end="")

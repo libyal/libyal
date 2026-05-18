@@ -41,19 +41,19 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
         templates_path = os.path.join(self._templates_path, "libyal_types.h")
 
         library_path = self._GetLibraryPath(project_configuration)
-        output_filename = "{0:s}_types.h".format(project_configuration.library_name)
-        output_filename = os.path.join(library_path, output_filename)
+        output_filename = os.path.join(
+            library_path, f"{project_configuration.library_name:s}_types.h"
+        )
 
         if project_configuration.library_name in ("libcerror", "libcthreads"):
             return
 
-        internal_types_start_line = "#endif /* defined( HAVE_LOCAL_{0:s} ) */".format(
-            project_configuration.library_name.upper()
+        library_name_upper = project_configuration.library_name.upper()
+        internal_types_start_line = (
+            "#endif /* defined( HAVE_LOCAL_{library_name_upper:s} ) */"
         )
         internal_types_end_line = (
-            "#endif /* !defined( _{0:s}_INTERNAL_TYPES_H ) */".format(
-                project_configuration.library_name.upper()
-            )
+            "#endif /* !defined( _{library_name_upper:s}_INTERNAL_TYPES_H ) */"
         )
         in_internal_types = False
 
@@ -102,42 +102,45 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
 
         if not include_header_file:
             logging.warning(
-                "Missing: {0:s} skipping generation of library source files.".format(
-                    self._types_include_header_path
-                )
+                f"Missing: {self._types_include_header_path:s} skipping generation of "
+                f"library source files."
             )
             return
 
         library_path = self._GetLibraryPath(project_configuration)
 
         codepage_header_file = os.path.join(
-            library_path, "{0:s}_codepage.h".format(project_configuration.library_name)
+            library_path, f"{project_configuration.library_name:s}_codepage.h"
         )
         error_header_file = os.path.join(
-            library_path, "{0:s}_error.h".format(project_configuration.library_name)
+            library_path, f"{project_configuration.library_name:s}_error.h"
         )
         notify_header_file = os.path.join(
-            library_path, "{0:s}_notify.h".format(project_configuration.library_name)
+            library_path, f"{project_configuration.library_name:s}_notify.h"
         )
         # if include_header_file.types:
         #     longest_type_name = max(include_header_file.types, key=len)
         #     longest_library_debug_type_prefix = (
-        #         "typedef struct {0:s}_{1:s} {{}}"
-        #     ).format(project_configuration.library_name, longest_type_name)
+        #         f"typedef struct {project_configuration.library_name:s}_"
+        #         f"{longest_type_name:s} {{}}"
+        #     )
 
         library_debug_type_definitions = []
         type_definitions = []
         for type_name in include_header_file.types:
-            # library_debug_type_prefix = "typedef struct {0:s}_{1:s} {{}}".format(
-            #     project_configuration.library_name, type_name
+            # library_debug_type_prefix = (
+            #     f"typedef struct {project_configuration.library_name:s}_"
+            #     f"{type_name:s} {{}}"
             # )
             library_debug_type_definition = (
-                "typedef struct {0:s}_{1:s} {{}}\t{0:s}_{1:s}_t;"
-            ).format(project_configuration.library_name, type_name)
+                f"typedef struct {project_configuration.library_name:s}_{type_name:s} "
+                f"{{}}\t{project_configuration.library_name:s}_{type_name:s}_t;"
+            )
             library_debug_type_definitions.append(library_debug_type_definition)
 
-            type_definition = "typedef intptr_t {0:s}_{1:s}_t;".format(
-                project_configuration.library_name, type_name
+            type_definition = (
+                f"typedef intptr_t {project_configuration.library_name:s}_"
+                f"{type_name:s}_t;"
             )
             type_definitions.append(type_definition)
 
@@ -158,9 +161,7 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
             if not directory_entry.startswith("libyal"):
                 continue
 
-            if directory_entry.endswith(
-                "_{0:s}.h".format(project_configuration.library_name)
-            ):
+            if directory_entry.endswith(f"_{project_configuration.library_name:s}.h"):
                 continue
 
             if directory_entry == "libyal_codepage.h" and (
@@ -199,8 +200,8 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
             if not os.path.isfile(template_filename):
                 continue
 
-            output_filename = "{0:s}{1:s}".format(
-                project_configuration.library_name, directory_entry[6:]
+            output_filename = "".join(
+                [project_configuration.library_name, directory_entry[6:]]
             )
             output_filename = os.path.join(
                 project_configuration.library_name, output_filename

@@ -848,7 +848,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
             # TODO: handle types in non-matching header files.
             try:
                 header_file.Read(project_configuration)
-            except IOError:
+            except OSError:
                 logging.warning(
                     f"Unable to read library header file: {header_file.path:s}"
                 )

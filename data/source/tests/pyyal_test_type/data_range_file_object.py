@@ -72,8 +72,8 @@ class DataRangeFileObject:
 
     if self._current_offset < 0:
       raise IOError(
-          "Invalid current offset: {0:d} value less than zero.".format(
-              self._current_offset))
+          f"Invalid current offset: {self._current_offset:d} value less than "
+          f"zero.")
 
     if (self._range_size is not None and
         self._current_offset >= self._range_size):
@@ -106,8 +106,8 @@ class DataRangeFileObject:
     """
     if self._current_offset < 0:
       raise IOError(
-          "Invalid current offset: {0:d} value less than zero.".format(
-              self._current_offset))
+          f"Invalid current offset: {self._current_offset:d} value less than "
+          f"zero.")
 
     if whence == os.SEEK_CUR:
       offset += self._current_offset

@@ -87,12 +87,12 @@ def Main():
         return False
 
     if not os.path.exists(options.configuration_file):
-        print("No such configuration file: {0:s}.".format(options.configuration_file))
+        print(f"No such configuration file: {options.configuration_file:s}")
         print("")
         return False
 
     if options.output_directory and not os.path.exists(options.output_directory):
-        print("No such output directory: {0:s}.".format(options.output_directory))
+        print(f"No such output directory: {options.output_directory:s}")
         print("")
         return False
 

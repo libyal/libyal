@@ -41,11 +41,9 @@ class AsciidocFormatDocumentGenerator:
         template_filename = os.path.join(
             self._templates_path, self._APPENDICES_TEMPLATE_FILE
         )
-
         output_data = self._template_string_generator.Generate(
             template_filename, template_mappings
         )
-
         print(output_data)
 
         # TODO: generate references
@@ -60,7 +58,6 @@ class AsciidocFormatDocumentGenerator:
         output_data = self._template_string_generator.Generate(
             template_filename, template_mappings
         )
-
         print(output_data)
 
         self._GenerateOverview()
@@ -102,11 +99,9 @@ class AsciidocFormatDocumentGenerator:
         template_filename = os.path.join(
             self._templates_path, self._OVERVIEW_TEMPLATE_FILE
         )
-
         output_data = self._template_string_generator.Generate(
             template_filename, template_mappings
         )
-
         print(output_data)
 
         # TODO: generate characteristics table
@@ -120,9 +115,8 @@ class AsciidocFormatDocumentGenerator:
 
         if format_definition.description:
             template_mappings["abstract"] = (
-                "This document contains information about the {0:s}".format(
-                    format_definition.description
-                )
+                f"This document contains information about the "
+                f"{format_definition.description:s}"
             )
 
         summary = format_definition.metadata.get("summary", None)
@@ -141,20 +135,18 @@ class AsciidocFormatDocumentGenerator:
         if year:
             date = datetime.date.today()
             if year != date.year:
-                copyright_years = "{0:d}-{1:d}".format(year, date.year)
+                copyright_years = f"{year:d}-{date.year:d}"
             else:
-                copyright_years = "{0:d}".format(year)
+                copyright_years = f"{year:d}"
 
             template_mappings["copyright"] = copyright_years
 
         template_filename = os.path.join(
             self._templates_path, self._PREFACE_TEMPLATE_FILE
         )
-
         output_data = self._template_string_generator.Generate(
             template_filename, template_mappings
         )
-
         print(output_data)
 
     def Generate(self):
@@ -182,7 +174,6 @@ def Main():
     argument_parser = argparse.ArgumentParser(
         description=("Generates documentation based on dtFabric format definitions.")
     )
-
     argument_parser.add_argument(
         "--templates-path",
         "--templates_path",
@@ -192,7 +183,6 @@ def Main():
         default=None,
         help=("Path to the template files."),
     )
-
     argument_parser.add_argument(
         "source",
         nargs="?",
@@ -201,7 +191,6 @@ def Main():
         default=None,
         help="name of the file containing the dtFabric format definitions.",
     )
-
     options = argument_parser.parse_args()
 
     if not options.source:
@@ -212,7 +201,7 @@ def Main():
         return False
 
     if not os.path.isfile(options.source):
-        print("No such file: {0:s}".format(options.source))
+        print(f"No such file: {options.source:s}")
         print("")
         return False
 
@@ -229,7 +218,7 @@ def Main():
     try:
         source_generator.ReadDefinitions(options.source)
     except errors.FormatError as exception:
-        print("Unable to read definitions with error: {0!s}".format(exception))
+        print(f"Unable to read definitions with error: {exception!s}")
         return False
 
     source_generator.Generate()

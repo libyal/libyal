@@ -71,12 +71,10 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
         template_mappings["coverage_configure_options"] = " ".join(
             coverage_configure_options
         )
-
         template_filenames = [
             os.path.join(templates_path, template_name)
             for template_name in template_names
         ]
-
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
         del template_mappings["asan_configure_options"]
@@ -95,13 +93,10 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
         """
         makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
-        mount_tool_name = "{0:s}mount".format(project_configuration.library_name_suffix)
-
-        mount_tool_filename = "{0:s}.c".format(mount_tool_name)
         mount_tool_filename = os.path.join(
-            project_configuration.tools_directory, mount_tool_filename
+            project_configuration.tools_directory,
+            f"{project_configuration.library_name_suffix:s}mount.c",
         )
-
         shared_libs = list(makefile_am_file.libraries)
         if "bzip2" in shared_libs:
             shared_libs.remove("bzip2")
@@ -127,7 +122,6 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
         template_mappings["test_data_repository"] = (
             project_configuration.test_data_repository
         )
-
         if self._experimental:
             self._GenerateRunTestsSh(
                 project_configuration, template_mappings, output_writer

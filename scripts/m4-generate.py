@@ -19,7 +19,6 @@ def Main():
     argument_parser = argparse.ArgumentParser(
         description=("Generates a m4 file for a libyal library.")
     )
-
     argument_parser.add_argument(
         "configuration_file",
         action="store",
@@ -27,7 +26,6 @@ def Main():
         default="source.conf",
         help="The source generation configuration file.",
     )
-
     argument_parser.add_argument(
         "-o",
         "--output",
@@ -37,7 +35,6 @@ def Main():
         default=None,
         help="path of the output files to write to.",
     )
-
     argument_parser.add_argument(
         "-p",
         "--projects",
@@ -47,7 +44,6 @@ def Main():
         default=None,
         help="path of the projects.",
     )
-
     options = argument_parser.parse_args()
 
     if not options.configuration_file:
@@ -58,12 +54,12 @@ def Main():
         return False
 
     if not os.path.exists(options.configuration_file):
-        print("No such configuration file: {0:s}.".format(options.configuration_file))
+        print(f"No such configuration file: {options.configuration_file:s}")
         print("")
         return False
 
     if options.output_directory and not os.path.exists(options.output_directory):
-        print("No such output directory: {0:s}.".format(options.output_directory))
+        print(f"No such output directory: {options.output_directory:s}")
         print("")
         return False
 

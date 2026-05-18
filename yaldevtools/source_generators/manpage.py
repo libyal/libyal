@@ -31,13 +31,13 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
           output_writer (OutputWriter): output writer.
           output_filename (str): path of the output file.
         """
-        backup_filename = "{0:s}.{1:d}".format(output_filename, os.getpid())
+        pid = os.getpid()
+        backup_filename = f"{output_filename:s}.{pid:d}"
         shutil.copyfile(output_filename, backup_filename)
 
         template_mappings["date"] = time.strftime("%B %d, %Y", time.gmtime()).replace(
             " 0", "  "
         )
-
         template_filename = os.path.join(self._templates_path, "header.txt")
         self._GenerateSection(template_filename, template_mappings, output_filename)
 
@@ -46,7 +46,6 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
             functions_per_section = include_header_file.functions_per_section.get(
                 section_name, []
             )
-
             if not functions_per_section:
                 continue
 
@@ -60,7 +59,6 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
                 output_filename,
                 access_mode="a",
             )
-
             bfio_functions = []
             debug_output_functions = []
             functions = []
@@ -139,7 +137,6 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
                     output_filename,
                     access_mode="a",
                 )
-
                 for function_prototype in bfio_functions:
                     function_arguments_string = function_prototype.CopyToManpageString()
                     function_template_mappings = {
@@ -163,7 +160,6 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         if have_wide_character_type_functions:
             template_filename = os.path.join(self._templates_path, "notes.txt")
             self._GenerateSection(
@@ -180,7 +176,6 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         with open(backup_filename, "r", encoding="utf8") as backup_file:
             backup_lines = backup_file.readlines()
 
@@ -214,16 +209,16 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
 
         if not include_header_file:
             logging.warning(
-                "Missing: {0:s} skipping generation of library man page.".format(
-                    self._library_include_header_path
-                )
+                f"Missing: {self._library_include_header_path:s} skipping generation "
+                f"of library man page."
             )
             return
 
         template_mappings = self._GetTemplateMappings(project_configuration)
 
-        output_filename = "{0:s}.3".format(project_configuration.library_name)
-        output_filename = os.path.join("manuals", output_filename)
+        output_filename = os.path.join(
+            "manuals", f"{project_configuration.library_name:s}.3"
+        )
 
         self._GenerateLibraryManPage(
             project_configuration,

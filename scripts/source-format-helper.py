@@ -186,7 +186,7 @@ class SourceFormatter:
                 alignment_size = alignment_offset - len(formatted_prefix)
                 alignment = " " * alignment_size
 
-                line = "{0:s}{1:s}={2:s}".format(prefix, alignment, suffix)
+                line = f"{prefix:s}{alignment:s}={suffix:s}"
 
             aligned_lines.append(line)
 
@@ -263,7 +263,6 @@ class SourceFormatter:
             declaration_lines = self.VerticalAlignEqualSigns(
                 declaration_lines, alignment_offset
             )
-
             formatted_lines.extend(declaration_lines)
             formatted_lines.append(line)
             declaration_lines = []
@@ -273,7 +272,6 @@ class SourceFormatter:
             declaration_lines = self.VerticalAlignEqualSigns(
                 declaration_lines, alignment_offset
             )
-
             formatted_lines.extend(declaration_lines)
             declaration_lines = []
 

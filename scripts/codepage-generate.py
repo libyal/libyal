@@ -49,7 +49,6 @@ class SourceGenerator:
         output_data = self._template_string_generator.Generate(
             template_filename, template_mappings
         )
-
         with open(output_filename, access_mode, encoding="utf8") as file_object:
             file_object.write(output_data)
 
@@ -58,9 +57,8 @@ class SourceGenerator:
         templates_path = os.path.join(self._templates_path, "libuna_codepage.c")
 
         output_filename = os.path.join(
-            "libuna", "libuna_codepage_{0:s}.c".format(self._codepage_name)
+            "libuna", f"libuna_codepage_{self._codepage_name:s}.c"
         )
-
         template_mappings = self._GetTemplateMappings()
 
         template_filename = os.path.join(templates_path, "header.c")
@@ -72,7 +70,6 @@ class SourceGenerator:
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         number_of_table_values = 0
         first_codepage_value = None
         last_codepage_value = None
@@ -90,19 +87,21 @@ class SourceGenerator:
                     unicode_value = self._codepage_values.get(
                         last_codepage_value, 0xFFFD
                     )
-                    table_values.append("0x{0:04x}".format(unicode_value))
+                    table_values.append(f"0x{unicode_value:04x}")
                     number_of_table_values += 1
 
                     if last_codepage_value % 8 == 7:
-                        lines.append("\t{0:s},".format(", ".join(table_values)))
+                        values_string = ", ".join(table_values)
+                        lines.append(f"\t{values_string:s},")
                         table_values = []
 
             unicode_value = self._codepage_values[codepage_value]
-            table_values.append("0x{0:04x}".format(unicode_value))
+            table_values.append(f"0x{unicode_value:04x}")
             number_of_table_values += 1
 
             if codepage_value % 8 == 7:
-                lines.append("\t{0:s},".format(", ".join(table_values)))
+                values_string = ", ".join(table_values)
+                lines.append(f"\t{values_string:s},")
                 table_values = []
 
             if first_codepage_value is None:
@@ -113,20 +112,23 @@ class SourceGenerator:
             while len(table_values) < 8:
                 last_codepage_value += 1
                 unicode_value = self._codepage_values.get(last_codepage_value, 0xFFFD)
-                table_values.append("0x{0:04x}".format(unicode_value))
+                table_values.append(f"0x{unicode_value:04x}")
                 number_of_table_values += 1
 
-            lines.append("\t{0:s}".format(", ".join(table_values)))
+            values_string = ", ".join(table_values)
+            lines.append(f"\t{values_string:s}")
             table_values = []
         else:
             lines[-1] = lines[-1][:-1]
 
+        line = (
+            f"const uint16_t libuna_codepage_{self._codepage_name:s}_byte_stream_to_"
+            f"unicode_base_0x{first_codepage_value:02x}[ {number_of_table_values:d} ] "
+            f"= {{"
+        )
         lines.insert(
             0,
-            (
-                "const uint16_t libuna_codepage_{0:s}_byte_stream_to_unicode_base_"
-                "0x{1:02x}[ {2:d} ] = {{"
-            ).format(self._codepage_name, first_codepage_value, number_of_table_values),
+            line,
         )
         lines.append("};")
 
@@ -137,17 +139,14 @@ class SourceGenerator:
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         del template_mappings["codepage_to_unicode_table"]
 
         template_filename = os.path.join(
             templates_path, "unicode_to_codepage_tables-start.c"
         )
-
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         first_unicode_value = None
         last_unicode_value = None
 
@@ -184,19 +183,21 @@ class SourceGenerator:
                 while last_unicode_value < unicode_value - 1:
                     last_unicode_value += 1
                     codepage_value = self._unicode_values.get(last_unicode_value, 0x1A)
-                    table_values.append("0x{0:02x}".format(codepage_value))
+                    table_values.append(f"0x{codepage_value:02x}")
                     number_of_table_values += 1
 
                     if last_unicode_value % 8 == 7:
-                        lines.append("\t{0:s},".format(", ".join(table_values)))
+                        values_string = ", ".join(table_values)
+                        lines.append(f"\t{values_string:s},")
                         table_values = []
 
                 codepage_value = self._unicode_values[unicode_value]
-                table_values.append("0x{0:02x}".format(codepage_value))
+                table_values.append(f"0x{codepage_value:02x}")
                 number_of_table_values += 1
 
                 if unicode_value % 8 == 7:
-                    lines.append("\t{0:s},".format(", ".join(table_values)))
+                    values_string = ", ".join(table_values)
+                    lines.append(f"\t{values_string:s},")
                     table_values = []
 
                 last_unicode_value = unicode_value
@@ -205,28 +206,25 @@ class SourceGenerator:
                 while len(table_values) < 8:
                     last_unicode_value += 1
                     codepage_value = self._unicode_values.get(last_unicode_value, 0x1A)
-                    table_values.append("0x{0:02x}".format(codepage_value))
+                    table_values.append(f"0x{codepage_value:02x}")
                     number_of_table_values += 1
 
-                lines.append("\t{0:s}".format(", ".join(table_values)))
+                values_string = ", ".join(table_values)
+                lines.append(f"\t{values_string:s}")
                 table_values = []
             else:
                 lines[-1] = lines[-1][:-1]
 
-            template_mappings["entries_base_offset"] = "0x{0:04x}".format(
-                base_unicode_value
-            )
+            template_mappings["entries_base_offset"] = f"0x{base_unicode_value:04x}"
             template_mappings["number_of_entries"] = number_of_table_values
             template_mappings["table_entries"] = "\n".join(lines)
 
             template_filename = os.path.join(
                 templates_path, "unicode_to_codepage_table.c"
             )
-
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
             )
-
             del template_mappings["entries_base_offset"]
             del template_mappings["number_of_entries"]
             del template_mappings["table_entries"]
@@ -234,29 +232,24 @@ class SourceGenerator:
         template_filename = os.path.join(
             templates_path, "copy_from_byte_stream-start.c"
         )
-
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         template_filename = os.path.join(templates_path, "copy_from_byte_stream-body.c")
 
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         template_filename = os.path.join(templates_path, "copy_from_byte_stream-end.c")
 
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         template_filename = os.path.join(templates_path, "copy_to_byte_stream-start.c")
 
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         unmapped_values = {}
         for base_unicode_value, unicode_values in sorted(
             unicode_mappings_groups.items()
@@ -271,33 +264,28 @@ class SourceGenerator:
         template_filename = os.path.join(
             templates_path, "copy_to_byte_stream-body-direct.c"
         )
-
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         for base_unicode_value, unicode_values in sorted(
             unicode_mappings_groups.items()
         ):
             if len(unicode_values) > 8:
-                template_mappings["first_unicode_value"] = "0x{0:04x}".format(
-                    unicode_values[0] & ~(0x0007)
+                first_unicode_value = unicode_values[0] & ~(0x0007)
+                template_mappings["first_unicode_value"] = (
+                    f"0x{first_unicode_value:04x}"
                 )
-                template_mappings["last_unicode_value"] = "0x{0:04x}".format(
-                    (unicode_values[-1] & ~(0x0007)) + 8
-                )
-
+                last_unicode_value = (unicode_values[-1] & ~(0x0007)) + 8
+                template_mappings["last_unicode_value"] = f"0x{last_unicode_value:04x}"
                 template_filename = os.path.join(
                     templates_path, "copy_to_byte_stream-body-mapped.c"
                 )
-
                 self._GenerateSection(
                     template_filename,
                     template_mappings,
                     output_filename,
                     access_mode="a",
                 )
-
                 del template_mappings["first_unicode_value"]
                 del template_mappings["last_unicode_value"]
 
@@ -305,33 +293,28 @@ class SourceGenerator:
             template_filename = os.path.join(
                 templates_path, "copy_to_byte_stream-body-switch-start.c"
             )
-
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
             )
-
             for unicode_value, codepage_value in sorted(unmapped_values.items()):
-                template_mappings["codepage_value"] = "0x{0:02x}".format(codepage_value)
-                template_mappings["unicode_value"] = "0x{0:04x}".format(unicode_value)
+                template_mappings["codepage_value"] = f"0x{codepage_value:02x}"
+                template_mappings["unicode_value"] = f"0x{unicode_value:04x}"
 
                 template_filename = os.path.join(
                     templates_path, "copy_to_byte_stream-body-switch-entry.c"
                 )
-
                 self._GenerateSection(
                     template_filename,
                     template_mappings,
                     output_filename,
                     access_mode="a",
                 )
-
                 del template_mappings["codepage_value"]
                 del template_mappings["unicode_value"]
 
             template_filename = os.path.join(
                 templates_path, "copy_to_byte_stream-body-switch-end.c"
             )
-
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
             )
@@ -345,9 +328,8 @@ class SourceGenerator:
     def _GenerateSourceHeaderFile(self):
         """Generates a source header file."""
         output_filename = os.path.join(
-            "libuna", "libuna_codepage_{0:s}.h".format(self._codepage_name)
+            "libuna", f"libuna_codepage_{self._codepage_name:s}.h"
         )
-
         template_mappings = self._GetTemplateMappings()
 
         template_filename = os.path.join(self._templates_path, "libuna_codepage.h")
@@ -357,9 +339,8 @@ class SourceGenerator:
     def _GenerateTestHeaderFile(self):
         """Generates a test header file."""
         output_filename = os.path.join(
-            "tests", "una_test_codepage_{0:s}.h".format(self._codepage_name)
+            "tests", f"una_test_codepage_{self._codepage_name:s}.h"
         )
-
         number_of_test_mappings = 0
         test_mappings = []
         last_codepage_value = -1
@@ -479,7 +460,6 @@ def Main():
     argument_parser = argparse.ArgumentParser(
         description=("Generates libuna source files base on a codepage definition.")
     )
-
     argument_parser.add_argument(
         "definitions_file",
         action="store",
@@ -487,7 +467,6 @@ def Main():
         default="windows-1252.txt",
         help="Path to the codepage definition file.",
     )
-
     argument_parser.add_argument(
         "-o",
         "--output",
@@ -497,7 +476,6 @@ def Main():
         default=None,
         help="Path of the output files to write to.",
     )
-
     argument_parser.add_argument(
         "--templates-path",
         "--templates_path",
@@ -507,7 +485,6 @@ def Main():
         default=None,
         help=("Path to the template files."),
     )
-
     options = argument_parser.parse_args()
 
     if not options.definitions_file:
@@ -518,14 +495,12 @@ def Main():
         return False
 
     if not os.path.exists(options.definitions_file):
-        print(
-            "No such codepage definition file: {0:s}.".format(options.definitions_file)
-        )
+        print(f"No such codepage definition file: {options.definitions_file:s}")
         print("")
         return False
 
     if options.output_directory and not os.path.exists(options.output_directory):
-        print("No such output directory: {0:s}.".format(options.output_directory))
+        print(f"No such output directory: {options.output_directory:s}")
         print("")
         return False
 

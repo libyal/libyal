@@ -33,13 +33,14 @@ class DefinitionsIncludeHeaderFile:
         """
         self.enum_declarations = []
 
-        enum_prefix = "enum {0:s}".format(project_configuration.library_name.upper())
+        library_name_upper = project_configuration.library_name.upper()
+        enum_prefix = f"enum {library_name_upper:s}"
         enum_prefix_length = len(enum_prefix)
 
         in_enum = False
         enum_declaration = None
 
-        with open(self._path, "r", encoding="utf8") as file_object:
+        with open(self._path, encoding="utf8") as file_object:
             for line in file_object.readlines():
                 line = line.strip()
 
@@ -112,7 +113,8 @@ class LibraryHeaderFile:
         self.functions_per_name = collections.OrderedDict()
         self.types = []
 
-        define_extern = "{0:s}_EXTERN".format(self._library_name.upper())
+        library_name_upper = self._library_name.upper()
+        define_extern = f"{library_name_upper:s}_EXTERN"
 
         define_have_debug_output = "#if defined( HAVE_DEBUG_OUTPUT )"
 
@@ -131,8 +133,7 @@ class LibraryHeaderFile:
             if in_function_prototype:
                 # Check if we have a callback function argument.
                 if line.endswith("("):
-                    argument_string = "{0:s} ".format(line)
-                    function_argument = source_code.FunctionArgument(argument_string)
+                    function_argument = source_code.FunctionArgument(f"{line:s} ")
 
                 else:
                     if line.endswith(" );"):
@@ -156,7 +157,6 @@ class LibraryHeaderFile:
                     self.functions_per_name[function_prototype.name] = (
                         function_prototype
                     )
-
                     function_prototype = None
                     in_function_prototype = False
                     have_extern = False
@@ -299,13 +299,11 @@ class LibraryHeaderFile:
               if no such function.
         """
         if type_function.startswith("internal_"):
-            function_name = "{0:s}_internal_{1:s}_{2:s}".format(
-                self._library_name, type_name, type_function[9:]
+            function_name = (
+                f"{self._library_name:s}_internal_{type_name:s}_{type_function[9:]:s}"
             )
         else:
-            function_name = "{0:s}_{1:s}_{2:s}".format(
-                self._library_name, type_name, type_function
-            )
+            function_name = f"{self._library_name:s}_{type_name:s}_{type_function:s}"
         return self.functions_per_name.get(function_name, None)
 
     def Read(self, project_configuration):
@@ -315,7 +313,6 @@ class LibraryHeaderFile:
           project_configuration (ProjectConfiguration): project configuration.
 
         Raises:
-          IOError: if the include header file is missing.
           OSError: if the include header file is missing.
         """
         header_file_path = self.path
@@ -324,10 +321,10 @@ class LibraryHeaderFile:
             header_file_path = f"{self.path:s}.in"
 
         if not os.path.exists(header_file_path):
-            raise IOError("Missing include header file: {0:s}".format(self.path))
+            raise OSError(f"Missing include header file: {self.path:s}")
 
-        source_file_path = "{0:s}.c".format(self.path[:-2])
-        with open(header_file_path, "r", encoding="utf8") as header_file_object:
+        source_file_path = f"{self.path[:-2]:s}.c"
+        with open(header_file_path, encoding="utf8") as header_file_object:
             if os.path.exists(source_file_path):
                 # pylint: disable=consider-using-with
                 source_file_object = open(source_file_path, encoding="utf8")
@@ -404,7 +401,7 @@ class LibraryIncludeHeaderFile:
 
             group_name, _, _ = group_name.rpartition("_functions")
 
-            function_name_prefix = "{0:s}_{1:s}_".format(self._library_name, group_name)
+            function_name_prefix = f"{self._library_name:s}_{group_name:s}_"
 
             found_match = False
             for function_prototype in functions:
@@ -426,10 +423,7 @@ class LibraryIncludeHeaderFile:
                     if group_name.endswith("_item"):
                         group_name = group_name[:-5]
 
-                    function_name_prefix = "{0:s}_{1:s}_".format(
-                        self._library_name, group_name
-                    )
-
+                    function_name_prefix = f"{self._library_name:s}_{group_name:s}_"
                     found_match = False
                     for function_prototype in functions:
                         if function_prototype.name.startswith(function_name_prefix):
@@ -507,10 +501,9 @@ class LibraryIncludeHeaderFile:
         """
         if not self._check_signature_type:
             for signature_type in self._SIGNATURE_TYPES:
-                function_name = "{0:s}_check_{1:s}_signature".format(
-                    self._library_name, signature_type
+                function_name = (
+                    f"{self._library_name:s}_check_{signature_type:s}_signature"
                 )
-
                 if function_name in self.functions_per_name:
                     self._check_signature_type = signature_type
                     break
@@ -549,7 +542,7 @@ class LibraryIncludeHeaderFile:
           bool: True if there ar functions with an error argument defined,
               False otherwise.
         """
-        error_type = "{0:s}_error_t ".format(self._library_name)
+        error_type = f"{self._library_name:s}_error_t "
 
         functions = self.GetFunctionGroup(group_name)
         for function_prototype in functions:
@@ -572,7 +565,7 @@ class LibraryIncludeHeaderFile:
         Returns:
           bool: True if function is defined, False otherwise.
         """
-        function_name = "{0:s}_{1:s}".format(self._library_name, function_name)
+        function_name = f"{self._library_name:s}_{function_name:s}"
         return function_name in self.functions_per_name
 
     def HasTypeFunction(self, type_name, type_function):
@@ -585,9 +578,7 @@ class LibraryIncludeHeaderFile:
         Returns:
           bool: True if function is defined, False otherwise.
         """
-        function_name = "{0:s}_{1:s}_{2:s}".format(
-            self._library_name, type_name, type_function
-        )
+        function_name = f"{self._library_name:s}_{type_name:s}_{type_function:s}"
         return function_name in self.functions_per_name
 
     def Read(self, project_configuration):
@@ -604,20 +595,17 @@ class LibraryIncludeHeaderFile:
         self.have_wide_character_type = False
         self.section_names = []
 
-        define_deprecated = "{0:s}_DEPRECATED".format(self._library_name.upper())
+        library_name_upper = self._library_name.upper()
+        define_deprecated = f"{library_name_upper:s}_DEPRECATED"
 
-        define_extern = "{0:s}_EXTERN".format(self._library_name.upper())
+        define_extern = f"{library_name_upper:s}_EXTERN"
 
-        define_have_bfio = "#if defined( {0:s}_HAVE_BFIO )".format(
-            self._library_name.upper()
-        )
-
+        define_have_bfio = f"#if defined( {library_name_upper:s}_HAVE_BFIO )"
         define_have_debug_output = "#if defined( HAVE_DEBUG_OUTPUT )"
 
         define_have_wide_character_type = (
-            "#if defined( {0:s}_HAVE_WIDE_CHARACTER_TYPE )"
-        ).format(self._library_name.upper())
-
+            f"#if defined( {library_name_upper:s}_HAVE_WIDE_CHARACTER_TYPE )"
+        )
         function_argument = None
         function_prototype = None
         have_bfio = False
@@ -628,7 +616,7 @@ class LibraryIncludeHeaderFile:
         in_section = False
         section_name = None
 
-        with open(self._path, "r", encoding="utf8") as file_object:
+        with open(self._path, encoding="utf8") as file_object:
             for line in file_object.readlines():
                 line = line.strip()
 
@@ -636,11 +624,9 @@ class LibraryIncludeHeaderFile:
                     if function_prototype:
                         # Check if we have a callback function argument.
                         if line.endswith("("):
-                            argument_string = "{0:s} ".format(line)
                             function_argument = source_code.FunctionArgument(
-                                argument_string
+                                f"{line:s} "
                             )
-
                         else:
                             if line.endswith(" );"):
                                 argument_string = line[:-3]
@@ -665,7 +651,6 @@ class LibraryIncludeHeaderFile:
                                 self.functions_per_name[function_prototype.name] = (
                                     function_prototype
                                 )
-
                                 self.functions_per_section[section_name].append(
                                     function_prototype
                                 )
@@ -698,7 +683,6 @@ class LibraryIncludeHeaderFile:
                         function_prototype.have_wide_character_type = (
                             have_wide_character_type
                         )
-
                         if have_bfio:
                             self.have_bfio = True
                         if have_wide_character_type:
@@ -772,12 +756,12 @@ class LibraryMakefileAMFile:
         self.libraries = []
         self.sources = []
 
-        library_sources = "{0:s}_la_SOURCES".format(self._library_name)
-        library_libadd = "{0:s}_la_LIBADD".format(self._library_name)
+        library_sources = f"{self._library_name:s}_la_SOURCES"
+        library_libadd = f"{self._library_name:s}_la_LIBADD"
 
         in_section = None
 
-        with open(self._path, "r", encoding="utf8") as file_object:
+        with open(self._path, encoding="utf8") as file_object:
             for line in file_object.readlines():
                 line = line.strip()
 
@@ -902,10 +886,7 @@ class TestSourceFile:
           project_configuration (ProjectConfiguration): project configuration.
           source_file_object (file): source file-like object.
         """
-        test_function_prefix = "int {0:s}_test_".format(
-            project_configuration.library_name_suffix
-        )
-
+        test_function_prefix = "int {project_configuration.library_name_suffix:s}_test_"
         in_comment = False
         in_function = False
 
@@ -953,13 +934,12 @@ class TestSourceFile:
           project_configuration (ProjectConfiguration): project configuration.
 
         Raises:
-          IOError: if the test source file is missing.
           OSError: if the test source file is missing.
         """
         if not os.path.exists(self.path):
-            raise IOError("Missing test source file: {0:s}".format(self.path))
+            raise OSError(f"Missing test source file: {self.path:s}")
 
-        with open(self.path, "r", encoding="utf8") as source_file_object:
+        with open(self.path, encoding="utf8") as source_file_object:
             self._ReadFileObject(project_configuration, source_file_object)
 
 
@@ -991,10 +971,10 @@ class TypesIncludeHeaderFile:
 
         self.types = []
 
-        typedef_prefix = "typedef intptr_t {0:s}_".format(self._library_name)
+        typedef_prefix = f"typedef intptr_t {self._library_name:s}_"
         typedef_prefix_length = len(typedef_prefix)
 
-        with open(self._path, "r", encoding="utf8") as file_object:
+        with open(self._path, encoding="utf8") as file_object:
             for line in file_object.readlines():
                 line = line.strip()
                 if line.startswith(typedef_prefix) and line.endswith("_t;"):
