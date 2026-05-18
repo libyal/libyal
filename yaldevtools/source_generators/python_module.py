@@ -1980,6 +1980,7 @@ class PythonModuleSourceFileGenerator(interface.SourceFileGenerator):
 
         return None, None
 
+    # pylint: disable=arguments-differ
     def _GetTemplateMappings(self, project_configuration):
         """Retrieves the template mappings.
 

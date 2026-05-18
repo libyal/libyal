@@ -41,19 +41,19 @@ class LibrarySourceFileGenerator(interface.SourceFileGenerator):
         templates_path = os.path.join(self._templates_path, "libyal_types.h")
 
         library_path = self._GetLibraryPath(project_configuration)
+        library_name_upper = project_configuration.library_name.upper()
+
         output_filename = os.path.join(
             library_path, f"{project_configuration.library_name:s}_types.h"
         )
-
         if project_configuration.library_name in ("libcerror", "libcthreads"):
             return
 
-        library_name_upper = project_configuration.library_name.upper()
         internal_types_start_line = (
-            "#endif /* defined( HAVE_LOCAL_{library_name_upper:s} ) */"
+            f"#endif /* defined( HAVE_LOCAL_{library_name_upper:s} ) */"
         )
         internal_types_end_line = (
-            "#endif /* !defined( _{library_name_upper:s}_INTERNAL_TYPES_H ) */"
+            f"#endif /* !defined( _{library_name_upper:s}_INTERNAL_TYPES_H ) */"
         )
         in_internal_types = False
 

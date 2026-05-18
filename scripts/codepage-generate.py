@@ -349,21 +349,22 @@ class SourceGenerator:
                 byte_stream = ["0x00"]
             else:
                 byte_stream = []
-                byte_value = codepage_value
-                while byte_value > 0:
-                    byte_stream_value = "0x{0:02x}".format(byte_value & 0xFF)
-                    byte_value >>= 8
+                value = codepage_value
+                while value > 0:
+                    byte_value = value & 0xFF
+                    value >>= 8
 
-                    byte_stream.insert(0, byte_stream_value)
+                    byte_stream.insert(0, f"0x{byte_value:02x}")
 
             # Add an empty line between non-consecutive values.
             if codepage_value > last_codepage_value + 1:
                 test_mappings.append("")
 
+            bytes_string = ", ".join(byte_stream)
+            number_of_bytes = len(byte_stream)
             test_mappings.append(
-                "\t{{ {{ {0:s} }}, {1:d}, 0x{2:04x}, 0 }},".format(
-                    ", ".join(byte_stream), len(byte_stream), unicode_value
-                )
+                f"\t{{ {{ {bytes_string:s} }}, {number_of_bytes:d}, "
+                f"0x{unicode_value:04x}, 0 }},"
             )
             number_of_test_mappings += 1
 
@@ -397,12 +398,12 @@ class SourceGenerator:
         template_mappings = {}
 
         date = datetime.date.today()
-        template_mappings["copyright"] = "2008-{0:d}".format(date.year)
+        template_mappings["copyright"] = f"2008-{date.year:d}"
 
         codepage_description = self._codepage_name.replace("_", " ")
         codepage_description = codepage_description.title()
         if codepage_description.startswith("Mac "):
-            codepage_description = "Mac{0:s}".format(codepage_description[4:])
+            codepage_description = f"Mac{codepage_description[4:]:s}"
 
         template_mappings["codepage_description"] = codepage_description
         template_mappings["codepage_name"] = self._codepage_name

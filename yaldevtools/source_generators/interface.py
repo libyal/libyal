@@ -17,14 +17,15 @@ class TemplateString(string.Template):
 
     idpattern = r"(?a:[_a-z][_a-z0-9.]*(|:[_a-z][_a-z0-9]*))"
 
-    def substitute(self, mapping=None):
+    # pylint: disable=arguments-differ
+    def substitute(self, mapping=None, **kwargs):
         """Substitutes placeholders in the template string.
 
         Args:
           mapping (dict[str, str]): values of placeholders.
         """
 
-        def convert_placeholder(match):
+        def ConvertPlaceholder(match):
             """Converts a placeholder into a mapped value.
 
             Args:
@@ -69,7 +70,7 @@ class TemplateString(string.Template):
 
             raise ValueError("Unrecognized named group in pattern", self.pattern)
 
-        return self.pattern.sub(convert_placeholder, self.template)
+        return self.pattern.sub(ConvertPlaceholder, self.template)
 
 
 class BaseSourceFileGenerator:

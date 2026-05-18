@@ -57,56 +57,47 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
     _CHARACTER_DATA_TYPES = {
         1: "char",
     }
-
     _CHARACTER_FORMAT_INDICATORS = {
         1: "%c",
     }
-
     _FLOATING_POINT_DATA_TYPES = {
         4: "float",
         8: "double",
     }
-
     _FLOATING_POINT_FORMAT_INDICATORS = {
         4: "%f",
         8: "%f",
     }
-
     _HEXADECIMAL_FORMAT_INDICATORS = {
         1: '0x%02" PRIx8 "',
         2: '0x%04" PRIx16 "',
         4: '0x%08" PRIx32 "',
         8: '0x%08" PRIx64 "',
     }
-
     _SIGNED_INTEGER_DATA_TYPES = {
         1: "int8_t",
         2: "int16_t",
         4: "int32_t",
         8: "int64_t",
     }
-
     _SIGNED_INTEGER_FORMAT_INDICATORS = {
         1: '%" PRIi8 "',
         2: '%" PRIi16 "',
         4: '%" PRIi32 "',
         8: '%" PRIi64 "',
     }
-
     _UNSIGNED_INTEGER_DATA_TYPES = {
         1: "uint8_t",
         2: "uint16_t",
         4: "uint32_t",
         8: "uint64_t",
     }
-
     _UNSIGNED_INTEGER_FORMAT_INDICATORS = {
         1: '%" PRIu8 "',
         2: '%" PRIu16 "',
         4: '%" PRIu32 "',
         8: '%" PRIu64 "',
     }
-
     _NON_PRINTABLE_CHARACTERS = list(range(0, 0x20)) + list(range(0x7F, 0xA0))
     _ESCAPE_CHARACTERS = str.maketrans(
         {value: f"\\x{value:02x}" for value in _NON_PRINTABLE_CHARACTERS}
@@ -143,7 +134,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             hexadecimal_string = ", ".join(
                 [f"0x{byte_value:02x}" for byte_value in data_string[0:16]]
             )
-
             if len(data_string) < 16 or block_index + 16 == data_size:
                 hexadecimal_lines.append(f"\t{hexadecimal_string:s}")
             else:
@@ -167,7 +157,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             library_name=f"lib{self._prefix:s}",
             structure_name=data_type_definition.name,
         )
-
         if not self._prefix:
             output_filename = "runtime_structure.h"
         else:
@@ -182,21 +171,17 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         structure_description_title = "".join(
             [structure_description[0].upper(), structure_description[1:]]
         )
-
         structure_members = self._GetTemplateRuntimeStructureMembers(
             data_type_definition, members_configuration
         )
-
         template_mappings["structure_description_title"] = structure_description_title
         template_mappings["structure_members"] = structure_members
         template_mappings["structure_options"] = members_configuration.get(
             "__options__", {}
         )
-
         self._GenerateSectionsFromOperationsFile(
             "runtime_structure.h.yaml", "main", None, template_mappings, output_filename
         )
-
         del template_mappings["structure_description_title"]
         del template_mappings["structure_members"]
         del template_mappings["structure_options"]
@@ -221,7 +206,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             member_data_type_definition = getattr(
                 member_definition, "member_data_type_definition", member_definition
             )
-
             type_indicator = member_data_type_definition.TYPE_INDICATOR
             if type_indicator == definitions.TYPE_INDICATOR_STRING:
                 has_string_member = True
@@ -237,7 +221,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             library_name=f"lib{self._prefix:s}",
             structure_name=data_type_definition.name,
         )
-
         template_directory = os.path.join(self._templates_path, "runtime_structure.c")
 
         if not self._prefix:
@@ -254,7 +237,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         structure_description_title = "".join(
             [structure_description[0].upper(), structure_description[1:]]
         )
-
         # TODO: refactor move into sub method - start
 
         check_signature_structure_members = []
@@ -268,7 +250,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             member_data_type_definition = getattr(
                 member_definition, "member_data_type_definition", member_definition
             )
-
             supported_values = getattr(member_definition, "values", None)
             if not supported_values:
                 continue
@@ -276,7 +257,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             member_value_type = self._GetRuntimeStructureMemberValueType(
                 member_data_type_definition
             )
-
             member_value = None
             member_value_size = None
 
@@ -317,7 +297,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         template_mappings["check_signature_structure_members"] = (
             check_signature_structure_members
         )
-
         template_mappings["has_datetime_member"] = has_datetime_member
         template_mappings["has_string_member"] = has_string_member
         template_mappings["has_uuid_member"] = has_uuid_member
@@ -326,7 +305,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         template_mappings["initialize_memory_allocate_indentation"] = " " * (
             len(data_type_definition.name) + 4
         )
-
         template_mappings["read_data_debug_variables"] = (
             self._GetRuntimeStructureSourceFunctionReadDataDebugVariables(
                 data_type_definition, members_configuration
@@ -337,17 +315,14 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
                 data_type_definition, members_configuration
             )
         )
-
         template_mappings["structure_description"] = structure_description
         template_mappings["structure_description_title"] = structure_description_title
         template_mappings["structure_options"] = members_configuration.get(
             "__options__", {}
         )
-
         self._GenerateSectionsFromOperationsFile(
             "runtime_structure.c.yaml", "main", None, template_mappings, output_filename
         )
-
         del template_mappings["check_signature_structure_members"]
 
         del template_mappings["has_datetime_member"]
@@ -376,7 +351,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             member_data_type_definition = getattr(
                 member_definition, "member_data_type_definition", member_definition
             )
-
             member_configuration = members_configuration.get(structure_member.name, {})
 
             member_byte_order = None
@@ -386,7 +360,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             member_value_type = self._GetRuntimeStructureMemberValueType(
                 member_data_type_definition
             )
-
             if member_value_type == "filetime":
                 # TODO: get byte order from member_data_type_definition.
                 member_byte_order = "little_endian"
@@ -461,7 +434,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
                             output_filename,
                             access_mode="a",
                         )
-
                         template_filename = "read_data-unsupported.c"
                         data_offset_is_set = True
 
@@ -477,14 +449,12 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
             )
-
             del template_mappings["structure_member"]
 
         template_filename = os.path.join(template_directory, "read_data-debug_start.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         # TODO: refactor move to operations file
 
         # TODO: add support for debug output of trailing units, such as "X bytes"
@@ -515,11 +485,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             member_data_type_definition = getattr(
                 member_definition, "member_data_type_definition", member_definition
             )
-
             member_value_type = self._GetRuntimeStructureMemberValueType(
                 member_data_type_definition
             )
-
             member_configuration = members_configuration.get(structure_member.name, {})
 
             member_byte_order = None
@@ -599,12 +567,8 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
                     member_data_arguments = []
                     for byte_index in range(len(supported_values[0])):
                         argument = (
-                            "\t\t ( ({0:s}_{1:s}_t *) data )->{2:s}[ {3:d} ]".format(
-                                self._prefix,
-                                data_type_definition_name,
-                                structure_member.name,
-                                byte_index,
-                            )
+                            f"\t\t ( ({self._prefix:s}_{data_type_definition_name:s}_t "
+                            f"*) data )->{structure_member.name:s}[ {byte_index:d} ]"
                         )
                         member_data_arguments.append(argument)
 
@@ -654,7 +618,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
             )
-
             del template_mappings["structure_member"]
             del template_mappings["tab_alignment"]
 
@@ -662,12 +625,10 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         template_filename = os.path.join(template_directory, "read_data-end.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         if "file_io_handle" in structure_options:
             template_mappings["structure_description"] = structure_description
 
@@ -677,7 +638,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
             )
-
             del template_mappings["structure_description"]
 
         self._SortIncludeHeaders(output_filename)
@@ -711,7 +671,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             library_name=f"lib{self._prefix:s}",
             structure_name=data_type_definition.name,
         )
-
         template_mappings["test_data"] = self._FormatTestData(test_data)
         template_mappings["test_data_size"] = len(test_data)
 
@@ -724,7 +683,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         del template_mappings["test_data"]
         del template_mappings["test_data_size"]
 
@@ -742,11 +700,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         template_mappings = self._GetTemplateMappings(
             structure_name=data_type_definition.name
         )
-
         structure_members = self._GetStoredStructureHeaderMembers(
             data_type_definition, members_configuration
         )
-
         template_mappings["structure_members"] = structure_members
 
         template_filename = os.path.join(
@@ -755,7 +711,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         del template_mappings["structure_members"]
 
     def _GenerateStoredStructureHeaderFile(
@@ -773,7 +728,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         template_mappings = self._GetTemplateMappings(
             structure_name=data_type_definition.name
         )
-
         if not self._prefix:
             output_filename = "stored_structure.h"
         else:
@@ -788,7 +742,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         structure_description = "".join(
             [structure_description[0].upper(), structure_description[1:]]
         )
-
         format_definition = self._GetFormatDefinitions()
         if format_definition.description:
             structure_description = (
@@ -818,7 +771,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-
         self._SortIncludeHeaders(output_filename)
 
     def _GetFormatDefinitions(self):
@@ -888,7 +840,6 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         data_type_definition = getattr(
             data_type_definition, "member_data_type_definition", data_type_definition
         )
-
         format_indicator = None
         if debug_format == self._DEBUG_FORMAT_HEXADECIMAL:
             format_indicator = self._HEXADECIMAL_FORMAT_INDICATORS.get(
@@ -991,14 +942,12 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             member_data_type_definition = getattr(
                 member_definition, "member_data_type_definition", member_definition
             )
-
             type_indicator = member_data_type_definition.TYPE_INDICATOR
             if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
                 data_bit_size = data_type_size * 8
                 debug_variables.add(
                     f"\tuint{data_bit_size:d}_t value_{data_bit_size:d}bit = 0;"
                 )
-
             elif type_indicator == definitions.TYPE_INDICATOR_PADDING:
                 debug_variables.add(f"\tconst uint8_t *{member_name:s} = NULL;")
                 debug_variables.add(f"\tsize_t {member_name:s}_size = 0;")
@@ -1025,30 +974,24 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             member_usage = members_configuration.get(member_name, {}).get(
                 "usage", self._USAGE_DEBUG
             )
-
             member_data_type_definition = getattr(
                 member_definition, "member_data_type_definition", member_definition
             )
-
             type_indicator = member_data_type_definition.TYPE_INDICATOR
             if type_indicator == definitions.TYPE_INDICATOR_INTEGER:
                 if member_usage == self._USAGE_IN_FUNCTION:
                     data_type_size = member_definition.GetByteSize()
-                    variable = "\tuint{0:d}_t {1:s} = 0;".format(
-                        data_type_size * 8, member_name
-                    )
-                    variables.add(variable)
+                    bit_size = data_type_size * 8
+                    variables.add(f"\tuint{bit_size:d}_t {member_name:s} = 0;")
 
             # TODO: add support for padding type?
 
             elif type_indicator == definitions.TYPE_INDICATOR_STREAM:
                 if member_usage in (self._USAGE_IN_FUNCTION, self._USAGE_IN_STRUCT):
-                    variable = "\tsize_t data_offset = 0;"
-                    variables.add(variable)
+                    variables.add("\tsize_t data_offset = 0;")
 
                 if member_usage == self._USAGE_IN_FUNCTION:
-                    variable = "\tconst uint8_t *{0:s} = NULL;".format(member_name)
-                    variables.add(variable)
+                    variables.add(f"\tconst uint8_t *{member_name:s} = NULL;")
 
             elif type_indicator == definitions.TYPE_INDICATOR_STRING:
                 elements_terminator = getattr(
@@ -1056,14 +999,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
                 )
                 if elements_terminator is not None:
                     if member_usage in (self._USAGE_IN_FUNCTION, self._USAGE_IN_STRUCT):
-                        variable = "\tsize_t data_offset = 0;"
-                        variables.add(variable)
-
-                        variable = "\tconst uint8_t *{0:s} = NULL;".format(member_name)
-                        variables.add(variable)
-
-                        variable = "\tsize_t {0:s}_size = 0;".format(member_name)
-                        variables.add(variable)
+                        variables.add("\tsize_t data_offset = 0;")
+                        variables.add(f"\tconst uint8_t *{member_name:s} = NULL;")
+                        variables.add(f"\tsize_t {member_name:s}_size = 0;")
 
         variables = list(sorted(variables))
         variables.append("")
@@ -1100,13 +1038,13 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
                 description = member_name.replace("_", " ")
 
             if description[0] == "(":
-                line = "\t/* ({0:s}{1:s}".format(
-                    description[1].upper(), description[2:]
-                )
+                first_character = description[1].upper()
+                remainder = description[2:]
             else:
-                line = "\t/* {0:s}{1:s}".format(description[0].upper(), description[1:])
+                first_character = description[0].upper()
+                remainder = description[1:]
 
-            lines.append(line)
+            lines.append(f"\t/* {first_character:s}{remainder:s}")
 
             if self._generate_structure_member_size_hint:
                 if not data_type_size:
@@ -1114,7 +1052,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
                 elif data_type_size == 1:
                     line = "\t * Consists of 1 byte"
                 else:
-                    line = "\t * Consists of {0:d} bytes".format(data_type_size)
+                    line = f"\t * Consists of {data_type_size:d} bytes"
 
                 lines.append(line)
 
@@ -1128,9 +1066,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
             if not data_type_size:
                 line = "\t/* TODO: unknown size */"
             elif data_type_size == 1:
-                line = "\tuint8_t {0:s};".format(member_name)
+                line = f"\tuint8_t {member_name:s};"
             else:
-                line = "\tuint8_t {0:s}[ {1:d} ];".format(member_name, data_type_size)
+                line = f"\tuint8_t {member_name:s}[ {data_type_size:d} ];"
 
             lines.append(line)
 
@@ -1177,9 +1115,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         year = format_definition.metadata.get("year", date.year)
         if year:
             if year != date.year:
-                copyright_years = "{0:d}-{1:d}".format(year, date.year)
+                copyright_years = f"{year:d}-{date.year:d}"
             else:
-                copyright_years = "{0:d}".format(year)
+                copyright_years = f"{year:d}"
 
             template_mappings["copyright"] = copyright_years
 
@@ -1224,22 +1162,22 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
                 description = member_name.replace("_", " ")
 
             # TODO: remove leading "The", kept for testing purposed for now.
-            # description = '{0:s}{1:s}'.format(
-            #     description[0].upper(), description[1:])
-            description = "The {0:s}{1:s}".format(
-                description[0].lower(), description[1:]
-            )
+            # first_character = description[0].upper()
+            # remainder = description[1:]
+            # description = f"{first_character:s}{remainder:s}'
+
+            first_character = description[0].lower()
+            remainder = description[1:]
+            description = f"The {first_character:s}{remainder:s}"
 
             member_data_type_definition = getattr(
                 member_definition, "member_data_type_definition", member_definition
             )
-
             type_indicator = member_data_type_definition.TYPE_INDICATOR
 
             member_value_type = self._GetRuntimeStructureMemberValueType(
                 member_data_type_definition
             )
-
             if member_value_type in ("stream_fixed_size", "string_fixed_size"):
                 member_data_size = member_data_type_definition.GetByteSize() + 1
             else:
@@ -1268,8 +1206,9 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         Returns:
           bytes: contents of test data file.
         """
-        test_data_filename = "{0:s}.{1:d}".format(type_name, sequence_number)
-        test_data_file = os.path.join("tests", "data", test_data_filename)
+        test_data_file = os.path.join(
+            "tests", "data", f"{type_name:s}.{sequence_number:d}"
+        )
 
         test_data = b""
         if os.path.exists(test_data_file):
@@ -1287,7 +1226,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         with open(output_filename, "r", encoding="utf8") as file_object:
             lines = file_object.readlines()
 
-        library_include_header_start = '#include "lib{0:s}_'.format(self._prefix)
+        library_include_header_start = f'#include "lib{self._prefix:s}_'
 
         include_headers = []
         in_include_headers = False
@@ -1379,12 +1318,11 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
                         for assigment_statement in assigment_statements:
                             prefix, _, suffix = assigment_statement.rpartition("=")
                             prefix = prefix.rstrip()
-                            alignment_length = alignment_offset - len(prefix)
 
-                            assigment_statement_line = "{0:s}{1:s}={2:s}".format(
-                                prefix, " " * alignment_length, suffix
-                            )
-                            file_object.write(assigment_statement_line)
+                            alignment_length = alignment_offset - len(prefix)
+                            alignment = " " * alignment_length
+
+                            file_object.write(f"{prefix:s}{alignment:s}={suffix:s}")
 
                     in_assigment_statements_block = False
                     assigment_statements = []
@@ -1409,7 +1347,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         for name, members_configuration in dtfabric_configuration.data_types.items():
             definition = self._definitions_registry.GetDefinitionByName(name)
             if not definition:
-                logging.error("Missing data type: {0:s}".format(name))
+                logging.error(f"Missing data type: {name:s}")
                 result = False
                 continue
 
@@ -1417,7 +1355,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
                 definitions.TYPE_INDICATOR_STRUCTURE,
                 definitions.TYPE_INDICATOR_STRUCTURE_FAMILY,
             ):
-                logging.error("Unsupported data type: {0:s}".format(name))
+                logging.error(f"Unsupported data type: {name:s}")
                 result = False
                 continue
 
@@ -1426,14 +1364,14 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
             #   Skip structures that are part of a type family.
             #   if definition.family_definition:
-            #     logging.info('Skipping data type: {0:s}'.format(name))
+            #     logging.info(f"Skipping data type: {name:s}")
             #     continue
 
             #   byte_size = definition.GetByteSize()
             #   if byte_size is None:
             #     continue
 
-            logging.info("Generating data type: {0:s}".format(name))
+            logging.info(f"Generating data type: {name:s}")
 
             self._GenerateRuntimeStructureHeaderFile(definition, members_configuration)
             self._GenerateRuntimeStructureSourceFile(definition, members_configuration)
@@ -1463,7 +1401,6 @@ def Main():
     argument_parser = argparse.ArgumentParser(
         description="Generates source based on dtFabric format definitions."
     )
-
     argument_parser.add_argument(
         "--definitions-file",
         "--definitions_file",
@@ -1473,7 +1410,6 @@ def Main():
         default="dtfabric.yaml",
         help=("Path to the dtFabric definitions file."),
     )
-
     argument_parser.add_argument(
         "--templates-path",
         "--templates_path",
@@ -1483,7 +1419,6 @@ def Main():
         default=None,
         help=("Path to the template files."),
     )
-
     argument_parser.add_argument(
         "configuration_file",
         action="store",
@@ -1491,7 +1426,6 @@ def Main():
         default="libyal.ini",
         help="path of the configuration file.",
     )
-
     options = argument_parser.parse_args()
 
     if not options.configuration_file:
@@ -1502,7 +1436,7 @@ def Main():
         return False
 
     if not os.path.isfile(options.configuration_file):
-        print("No such configuration file: {0:s}.".format(options.configuration_file))
+        print(f"No such configuration file: {options.configuration_file:s}")
         print("")
         return False
 
@@ -1523,10 +1457,8 @@ def Main():
         source_generator.ReadDefinitions(options.definitions_file)
     except errors.FormatError as exception:
         print(
-            (
-                "Unable to read data format definitions from file: {0:s} with error: "
-                "{1!s}"
-            ).format(options.definitions_file, exception)
+            f"Unable to read data format definitions from file: "
+            f"{options.definitions_file:s} with error: {exception!s}"
         )
         return False
 

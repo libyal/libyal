@@ -407,6 +407,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 template_filename, template_mappings, output_filename, access_mode="a"
             )
 
+    # pylint: disable=too-many-arguments
     def _GenerateMakefileAM(
         self,
         project_configuration,
@@ -1131,6 +1132,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         del template_mappings["type_name"]
 
+    # pylint: disable=too-many-arguments
     def _GenerateTypeTest(
         self,
         project_configuration,
@@ -1185,6 +1187,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             with_input=with_input,
         )
 
+    # pylint: disable=too-many-arguments
     def _GenerateTypeTestFunction(
         self,
         project_configuration,
@@ -1322,7 +1325,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             function_argument_index = 1
 
         file_offset_argument = function_prototype.arguments[-2]
-        file_offset_argument_string = codepage_argument.CopyToString()
+        file_offset_argument_string = file_offset_argument.CopyToString()
 
         with_file_offset = False
         if file_offset_argument_string.startswith(
@@ -1772,6 +1775,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         return function_name, test_function_name, have_extern
 
+    # pylint: disable=too-many-arguments
     def _GenerateTypeTestFromTemplate(
         self,
         project_configuration,
@@ -1984,6 +1988,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 template_filename, template_mappings, output_filename, access_mode="a"
             )
 
+    # pylint: disable=too-many-arguments
     def _GenerateTypeTestInitializeFunction(
         self,
         project_configuration,
@@ -2069,6 +2074,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         return have_extern
 
+    # pylint: disable=too-many-arguments
     def _GenerateTypeTestOpenFunction(
         self,
         project_configuration,
@@ -2413,9 +2419,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 "thread_pool",
             )
         ):
-            template_names.append(
-                f"start_{library_name_suffix:s}_{type_name:s}.c"
-            )
+            template_names.append(f"start_{library_name_suffix:s}_{type_name:s}.c")
 
         if with_input:
             template_names.append("start_with_input.c")
@@ -2730,6 +2734,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         return True, with_read_file_io_handle_function
 
+    # pylint: disable=too-many-arguments
     def _GenerateTypeTestsMainFunction(
         self,
         project_configuration,
@@ -2998,6 +3003,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             template_filename, template_mappings, output_filename, access_mode="a"
         )
 
+    # pylint: disable=too-many-arguments
     def _GenerateTypeTestsMainTestsToRun(
         self,
         project_configuration,
@@ -3187,6 +3193,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             template_mappings, have_extern, True, output_writer, output_filename
         )
 
+    # pylint: disable=too-many-arguments
     def _GenerateTypeTestWithFreeFunction(
         self,
         project_configuration,
@@ -3350,6 +3357,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         return types, functions
 
+    # pylint: disable=arguments-differ
     def _GetTemplateMappings(
         self,
         project_configuration,

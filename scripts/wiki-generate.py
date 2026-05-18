@@ -226,29 +226,17 @@ class WikiPageGenerator:
         Returns:
           list[str]: dpkg filenames.
         """
-        filenames = []
+        project_name = project_configuration.project_name
 
-        dpkg_library_filename = "{0:s}_<version>-1_<arch>.deb".format(
-            project_configuration.project_name
-        )
-        filenames.append(dpkg_library_filename)
-
-        dpkg_development_filename = "{0:s}-dev_<version>-1_<arch>.deb".format(
-            project_configuration.project_name
-        )
-        filenames.append(dpkg_development_filename)
-
+        filenames = [
+            f"{project_name:s}_<version>-1_<arch>.deb",
+            f"{project_name:s}-dev_<version>-1_<arch>.deb",
+        ]
         if project_configuration.HasPythonModule():
-            dpkg_python3_filename = "{0:s}-python3_<version>-1_<arch>.deb".format(
-                project_configuration.project_name
-            )
-            filenames.append(dpkg_python3_filename)
+            filenames.append(f"{project_name:s}-python3_<version>-1_<arch>.deb")
 
         if project_configuration.HasTools():
-            dpkg_tools_filename = "{0:s}-tools_<version>-1_<arch>.deb".format(
-                project_configuration.project_name
-            )
-            filenames.append(dpkg_tools_filename)
+            filenames.append(f"{project_name:s}-tools_<version>-1_<arch>.deb")
 
         return filenames
 
@@ -365,34 +353,23 @@ class WikiPageGenerator:
         Returns:
           list[str]: rpm filenames.
         """
-        filenames = []
+        project_name = project_configuration.project_name
 
-        rpm_library_filename = (
-            "~/rpmbuild/RPMS/<arch>/{0:s}-<version>-1.<arch>.rpm"
-        ).format(project_configuration.project_name)
-        filenames.append(rpm_library_filename)
-
-        rpm_development_filename = (
-            "~/rpmbuild/RPMS/<arch>/{0:s}-devel-<version>-1.<arch>.rpm"
-        ).format(project_configuration.project_name)
-        filenames.append(rpm_development_filename)
-
+        filenames = [
+            f"~/rpmbuild/RPMS/<arch>/{project_name:s}-<version>-1.<arch>.rpm",
+            f"~/rpmbuild/RPMS/<arch>/{project_name:s}-devel-<version>-1.<arch>.rpm",
+        ]
         if project_configuration.HasPythonModule():
-            rpm_python3_filename = (
-                "~/rpmbuild/RPMS/<arch>/{0:s}-python3-<version>-1.<arch>.rpm"
-            ).format(project_configuration.project_name)
-            filenames.append(rpm_python3_filename)
+            filenames.append(
+                f"~/rpmbuild/RPMS/<arch>/{project_name:s}-python3-<version>-1.<arch>.rpm"
+            )
 
         if project_configuration.HasTools():
-            rpm_tools_filename = (
-                "~/rpmbuild/RPMS/<arch>/{0:s}-tools-<version>-1.<arch>.rpm"
-            ).format(project_configuration.project_name)
-            filenames.append(rpm_tools_filename)
+            filenames.append(
+                f"~/rpmbuild/RPMS/<arch>/{project_name:s}-tools-<version>-1.<arch>.rpm"
+            )
 
-        rpm_source_filename = "~/rpmbuild/SRPMS/{0:s}-<version>-1.src.rpm".format(
-            project_configuration.project_name
-        )
-        filenames.append(rpm_source_filename)
+        filenames.append(f"~/rpmbuild/SRPMS/{project_name:s}-<version>-1.src.rpm")
 
         return filenames
 
@@ -439,34 +416,33 @@ class WikiPageGenerator:
         mount_tool_source_description_long = ""
         mount_tool_file_entry_example = ""
 
-        development_prefix = project_configuration.project_name[3:]
-        python_bindings_name = "py{0:s}".format(project_configuration.project_name[3:])
-        mount_tool_name = "{0:s}mount".format(project_configuration.project_name[3:])
-        tools_name = "{0:s}tools".format(project_configuration.project_name[3:])
+        project_name = project_configuration.project_name
+        project_name_suffix = project_name[3:]
+        python_bindings_name = f"py{project_name_suffix:s}"
+        mount_tool_name = f"{project_name_suffix:s}mount"
+        tools_name = f"{project_name_suffix:s}tools"
 
         if project_configuration.project_status:
-            project_status += "-{0:s}".format(project_configuration.project_status)
+            project_status += f"-{project_configuration.project_status:s}"
 
         if project_configuration.project_documentation_url:
-            documentation = "* [Documentation]({0:s})\n".format(
-                project_configuration.project_documentation_url
-            )
+            documentation = f"* [Documentation]({project_configuration.project_documentation_url:s})\n"
 
         if project_configuration.library_build_dependencies:
             for dependency in project_configuration.library_build_dependencies:
-                build_dependencies += "* {0:s}\n".format(dependency)
+                build_dependencies += f"* {dependency:s}\n"
 
         if project_configuration.HasTests() and project_configuration.tests_profiles:
             for profile in project_configuration.tests_profiles:
-                tests_profiles += "* {0:s}\n".format(profile)
+                tests_profiles += f"* {profile:s}\n"
 
         if project_configuration.troubleshooting_example:
             troubleshooting_example = project_configuration.troubleshooting_example
 
         building_table_of_contents += (
-            "The {0:s} source code can be build with different compilers:\n" "\n"
-        ).format(project_configuration.project_name)
-
+            f"The {project_name:s} source code can be build with different "
+            f"compilers:\n\n"
+        )
         # Git support.
         git_apt_dependencies = [
             "git",
@@ -476,7 +452,6 @@ class WikiPageGenerator:
             "libtool",
             "pkg-config",
         ]
-
         if (
             "lex" in project_configuration.library_build_dependencies
             or "lex" in project_configuration.tools_build_dependencies
@@ -499,7 +474,6 @@ class WikiPageGenerator:
             "libtool",
             "pkg-config",
         ]
-
         if (
             "lex" in project_configuration.library_build_dependencies
             or "lex" in project_configuration.tools_build_dependencies
@@ -523,7 +497,6 @@ class WikiPageGenerator:
             "libtoolize",
             "pkg-config",
         ]
-
         if (
             "lex" in project_configuration.library_build_dependencies
             or "lex" in project_configuration.tools_build_dependencies
@@ -537,9 +510,8 @@ class WikiPageGenerator:
             git_build_dependencies.append("byacc")
 
         git_build_dependencies = "\n".join(
-            ["* {0:s}".format(dependency) for dependency in git_build_dependencies]
+            [f"* {dependency:s}" for dependency in git_build_dependencies]
         )
-
         git_macports_dependencies = [
             "git",
             "autoconf",
@@ -548,7 +520,6 @@ class WikiPageGenerator:
             "libtool",
             "pkgconfig",
         ]
-
         if (
             "lex" in project_configuration.library_build_dependencies
             or "lex" in project_configuration.tools_build_dependencies
@@ -586,7 +557,6 @@ class WikiPageGenerator:
             "* [Using GNU Compiler Collection (GCC)]"
             "(Building#using-gnu-compiler-collection-gcc)\n"
         )
-
         gcc_build_dependencies = []
         gcc_static_build_dependencies = []
 
@@ -645,26 +615,20 @@ class WikiPageGenerator:
         gcc_static_build_dependencies.extend(
             project_configuration.gcc_build_dependencies
         )
-
         gcc_build_dependencies = "\n".join(
-            ["* {0:s}".format(dependency) for dependency in gcc_build_dependencies]
+            [f"* {dependency:s}" for dependency in gcc_build_dependencies]
         )
-
         if gcc_build_dependencies:
             gcc_build_dependencies = (
-                "\n"
-                "Also make sure to have the following dependencies including "
-                "source headers installed:\n"
-                "{0:s}\n"
-            ).format(gcc_build_dependencies)
+                f"\n"
+                f"Also make sure to have the following dependencies including source "
+                f"headers installed:\n"
+                f"{gcc_build_dependencies:s}\n"
+            )
 
         gcc_static_build_dependencies = "\n".join(
-            [
-                "* {0:s}".format(dependency)
-                for dependency in gcc_static_build_dependencies
-            ]
+            [f"* {dependency:s}" for dependency in gcc_static_build_dependencies]
         )
-
         # Cygwin support.
         building_table_of_contents += "  * [Using Cygwin](Building#cygwin)\n"
 
@@ -672,21 +636,19 @@ class WikiPageGenerator:
             project_configuration
         )
         cygwin_build_dependencies = "\n".join(
-            ["* {0:s}".format(dependency) for dependency in cygwin_build_dependencies]
+            [f"* {dependency:s}" for dependency in cygwin_build_dependencies]
         )
-
         cygwin_dll_dependencies = self._GetCygwinDLLDependencies(project_configuration)
         cygwin_dll_dependencies = "\n".join(
-            ["* {0:s}".format(dependency) for dependency in cygwin_dll_dependencies]
+            [f"* {dependency:s}" for dependency in cygwin_dll_dependencies]
         )
-
         if project_configuration.HasTools():
             cygwin_executables += "And the following executables:\n" "```\n"
 
             # TODO: use tools_features to generate tools_names
             for name in project_configuration.tools_names:
-                cygwin_executables += "{0:s}/.libs/{1:s}.exe\n".format(
-                    project_configuration.tools_directory, name
+                cygwin_executables += (
+                    f"{project_configuration.tools_directory:s}/.libs/{name:s}.exe\n"
                 )
 
             cygwin_executables += "```\n"
@@ -694,40 +656,37 @@ class WikiPageGenerator:
         # Fuse support.
         if "fuse" in project_configuration.tools_build_dependencies:
             gcc_mount_tool += (
-                "\n"
-                "If you want to be able to use {0:s}, make sure that:\n"
-                "\n"
-                "* on a Linux system you have libfuse-dev (Debian-based) or "
-                "fuse-devel (RedHat-based) installed.\n"
-                "* on a macOS system, you have OSXFuse "
-                "(http://osxfuse.github.com/) installed.\n"
-            ).format(mount_tool_name)
+                f"\n"
+                f"If you want to be able to use {mount_tool_name:s}, make sure that:\n"
+                f"\n"
+                f"* on a Linux system you have libfuse-dev (Debian-based) or "
+                f"fuse-devel (RedHat-based) installed.\n"
+                f"* on a macOS system, you have OSXFuse (http://osxfuse.github.com/) "
+                f"installed.\n"
+            )
 
         # MinGW support.
         building_table_of_contents += (
             "* [Using Minimalist GNU for Windows (MinGW)]"
             "(Building#using-minimalist-gnu-for-windows-mingw)\n"
         )
-
         mingw_build_dependencies = self._GetMinGWBuildDependencies(
             project_configuration
         )
         mingw_build_dependencies = "\n".join(
-            ["* {0:s}".format(dependency) for dependency in mingw_build_dependencies]
+            [f"* {dependency:s}" for dependency in mingw_build_dependencies]
         )
-
         mingw_dll_dependencies = self._GetMinGWDLLDependencies(project_configuration)
         mingw_dll_dependencies = "\n".join(
-            ["* {0:s}".format(dependency) for dependency in mingw_dll_dependencies]
+            [f"* {dependency:s}" for dependency in mingw_dll_dependencies]
         )
-
         if project_configuration.HasTools():
             mingw_executables += "And the following executables:\n" "```\n"
 
             # TODO: use tools_features to generate tools_names
             for name in project_configuration.tools_names:
-                mingw_executables += "{0:s}/.libs/{1:s}.exe\n".format(
-                    project_configuration.tools_directory, name
+                mingw_executables += (
+                    f"{project_configuration.tools_directory:s}/.libs/{name:s}.exe\n"
                 )
 
             mingw_executables += "```\n" "\n"
@@ -737,63 +696,57 @@ class WikiPageGenerator:
             "* [Using Microsoft Visual Studio]"
             "(Building#using-microsoft-visual-studio)\n"
         )
-
         msvscpp_build_dependencies = self._GetVisualStudioBuildDependencies(
             project_configuration
         )
         msvscpp_build_dependencies = "\n".join(
-            ["* {0:s}".format(dependency) for dependency in msvscpp_build_dependencies]
+            [f"* {dependency:s}" for dependency in msvscpp_build_dependencies]
         )
-
         if msvscpp_build_dependencies:
             msvscpp_build_dependencies = (
-                "\n"
-                "To compile {0:s} using Microsoft Visual Studio you'll "
-                "need:\n"
-                "\n"
-                "{1:s}\n"
-            ).format(project_configuration.project_name, msvscpp_build_dependencies)
+                f"\n"
+                f"To compile {project_name:s} using Microsoft Visual Studio you'll "
+                f"need:\n"
+                f"\n"
+                f"{msvscpp_build_dependencies:s}\n"
+            )
 
         msvscpp_dll_dependencies = self._GetVisualStudioDLLDependencies(
             project_configuration
         )
         msvscpp_dll_dependencies = "\n".join(
-            ["* {0:s}".format(dependency) for dependency in msvscpp_dll_dependencies]
+            [f"* {dependency:s}" for dependency in msvscpp_dll_dependencies]
         )
-
         if msvscpp_dll_dependencies:
             msvscpp_dll_dependencies = (
-                "{0:s}.dll is dependent on:\n"
-                "{1:s}\n"
-                "\n"
-                "These DLLs can be found in the same directory as "
-                "{0:s}.dll.\n"
-            ).format(project_configuration.project_name, msvscpp_dll_dependencies)
+                f"{project_name:s}.dll is dependent on:\n"
+                f"{msvscpp_dll_dependencies:s}\n"
+                f"\n"
+                f"These DLLs can be found in the same directory as "
+                f"{project_name:s}.dll.\n"
+            )
 
         msvscpp_build_git = (
-            "\n"
-            "Note that if you want to build {0:s} from source checked out of "
-            "git with Visual Studio make sure the autotools are able to make "
-            "a distribution package of {0:s} before trying to build it.\n"
-            "You can create distribution package by running: "
-            '"make dist".\n'
-        ).format(project_configuration.project_name)
-
+            f"\n"
+            f"Note that if you want to build {project_name:s} from source checked out "
+            f"of git with Visual Studio make sure the autotools are able to make a "
+            f"distribution package of {0:s} before trying to build it.\n"
+            f'You can create distribution package by running: "make dist".\n'
+        )
         if project_configuration.HasDependencyDokan():
             msvscpp_mount_tool += (
-                "\n"
-                "If you want to be able to use {0:s} you'll need Dokan library "
-                "see the corresponding section below.\n"
-                "Otherwise ignore or remove the dokan_dll and {0:s} Visual Studio "
-                "project files.\n"
-            ).format(mount_tool_name)
+                f"\n"
+                f"If you want to be able to use {mount_tool_name:s} you'll need Dokan "
+                f"library see the corresponding section below.\n"
+                f"Otherwise ignore or remove the dokan_dll and {mount_tool_name:s} "
+                f"Visual Studio project files.\n"
+            )
 
         building_table_of_contents += "\n"
 
         building_table_of_contents += (
             "Or directly packaged with different package managers:\n\n"
         )
-
         # Dpkg support.
         dpkg_build_dependencies = ""
         dpkg_filenames = ""
@@ -802,7 +755,6 @@ class WikiPageGenerator:
                 "* [Using Debian package tools (DEB)]"
                 "(Building#using-debian-package-tools-deb)\n"
             )
-
             dpkg_build_dependencies = [
                 "autotools-dev",
                 "build-essential",
@@ -829,7 +781,6 @@ class WikiPageGenerator:
                 "* [Using RedHat package tools (RPM)]"
                 "(Building#using-redhat-package-tools-rpm)\n"
             )
-
             rpm_build_dependencies = self._GetRpmBuildDependencies(
                 project_configuration
             )
@@ -837,10 +788,8 @@ class WikiPageGenerator:
 
             if project_configuration.project_status != "stable":
                 rpm_rename_source_package += (
-                    "mv {0:s}-{1:s}-<version>.tar.gz {0:s}-<version>.tar.gz\n".format(
-                        project_configuration.project_name,
-                        project_configuration.project_status,
-                    )
+                    f"mv {project_name:s}-{project_configuration.project_status:s}-"
+                    f"<version>.tar.gz {0:s}-<version>.tar.gz\n"
                 )
 
             rpm_filenames = self._GetRpmFilenames(project_configuration)
@@ -850,7 +799,6 @@ class WikiPageGenerator:
         building_table_of_contents += (
             "* [Using macOS pkgbuild](Building#using-macos-pkgbuild)\n"
         )
-
         macos_pkg_configure_options = ""
         if project_configuration.HasPythonModule():
             macos_pkg_configure_options = " --enable-python --with-pyprefix"
@@ -872,28 +820,30 @@ class WikiPageGenerator:
             development_item_path = development_item_path.replace("\\", "\\\\")
 
         if project_configuration.development_main_object_python_pre_open:
-            development_main_object_python_pre_open = "{0:s}\n".format(
+            python_pre_open_string = (
                 project_configuration.development_main_object_python_pre_open
             )
+            development_main_object_python_pre_open = f"{python_pre_open_string:s}\n"
 
         if project_configuration.development_main_object_python_post_open:
-            development_main_object_python_post_open = "{0:s}\n".format(
-                "\n".join(
-                    project_configuration.development_main_object_python_post_open
-                )
+            python_post_open_string = "\n".join(
+                project_configuration.development_main_object_python_post_open
             )
+            development_main_object_python_post_open = f"{python_post_open_string:s}\n"
 
         if project_configuration.development_main_object_python_post_open_file_object:
-            development_main_object_python_post_open_file_object = "{0:s}\n".format(
-                "\n".join(
-                    project_configuration.development_main_object_python_post_open_file_object
-                )
+            python_post_open_file_object_string = "\n".join(
+                project_configuration.development_main_object_python_post_open_file_object
+            )
+            development_main_object_python_post_open_file_object = (
+                f"{python_post_open_file_object_string:s}\n"
             )
         elif project_configuration.development_main_object_python_post_open:
-            development_main_object_python_post_open_file_object = "{0:s}\n".format(
-                "\n".join(
-                    project_configuration.development_main_object_python_post_open
-                )
+            python_post_open_string = "\n".join(
+                project_configuration.development_main_object_python_post_open
+            )
+            development_main_object_python_post_open_file_object = (
+                f"{python_post_open_string:s}\n"
             )
 
         if project_configuration.mount_tool_file_entry_example:
@@ -904,9 +854,7 @@ class WikiPageGenerator:
                 mount_tool_file_entry_example.replace("\\x", "^x").replace("/", "\\")
             )
         else:
-            mount_tool_file_entry_example = (
-                f"{project_configuration.project_name[3:]:s}1"
-            )
+            mount_tool_file_entry_example = f"{project_name[3:]:s}1"
             mount_tool_file_entry_example_windows = (
                 mount_tool_file_entry_example.upper()
             )
@@ -932,8 +880,8 @@ class WikiPageGenerator:
 
         template_mappings = {
             "building_table_of_contents": building_table_of_contents,
-            "project_name": project_configuration.project_name,
-            "project_name_suffix": project_configuration.project_name[3:],
+            "project_name": project_name,
+            "project_name_suffix": project_name_suffix,
             "project_status": project_status,
             "project_description": project_configuration.project_description,
             "project_git_url": project_configuration.project_git_url,
@@ -948,7 +896,7 @@ class WikiPageGenerator:
             "tools_name": tools_name,
             "documentation": documentation,
             "development_table_of_contents": development_table_of_contents,
-            "development_prefix": development_prefix,
+            "development_prefix": project_name_suffix,
             "development_item_object": (project_configuration.development_item_object),
             "development_item_path": development_item_path,
             "development_main_object": (project_configuration.development_main_object),
@@ -1358,8 +1306,8 @@ class MountingPageGenerator(WikiPageGenerator):
                 "image",
                 "volume",
             ):
-                template_file = "mounting_{0:s}.txt".format(
-                    project_configuration.mount_tool_source_type
+                template_file = (
+                    f"mounting_{project_configuration.mount_tool_source_type:s}.txt"
                 )
                 self._GenerateSection(template_file, template_mappings, output_writer)
 
@@ -1368,8 +1316,9 @@ class MountingPageGenerator(WikiPageGenerator):
             )
 
             if project_configuration.mount_tool_file_entry_type in ("file", "volume"):
-                template_file = "mounting_{0:s}_contents.txt".format(
-                    project_configuration.mount_tool_source_type
+                template_file = (
+                    f"mounting_{project_configuration.mount_tool_source_type:s}_"
+                    f"contents.txt"
                 )
                 self._GenerateSection(template_file, template_mappings, output_writer)
 
@@ -1381,15 +1330,15 @@ class MountingPageGenerator(WikiPageGenerator):
             self._GenerateSection(
                 "mounting_root_access.txt", template_mappings, output_writer
             )
-
             if project_configuration.HasDependencyDokan():
                 if project_configuration.mount_tool_source_type in (
                     "file",
                     "image",
                     "volume",
                 ):
-                    template_file = "mounting_{0:s}_windows.txt".format(
-                        project_configuration.mount_tool_source_type
+                    template_file = (
+                        f"mounting_{project_configuration.mount_tool_source_type:s}_"
+                        f"windows.txt"
                     )
                     self._GenerateSection(
                         template_file, template_mappings, output_writer
@@ -1611,12 +1560,12 @@ def Main():
         return False
 
     if not os.path.exists(options.configuration_file):
-        print("No such configuration file: {0:s}.".format(options.configuration_file))
+        print(f"No such configuration file: {options.configuration_file:s}")
         print("")
         return False
 
     if options.output_directory and not os.path.exists(options.output_directory):
-        print("No such output directory: {0:s}.".format(options.output_directory))
+        print(f"No such output directory: {options.output_directory:s}")
         print("")
         return False
 
@@ -1676,8 +1625,7 @@ def Main():
             continue
 
         if options.output_directory:
-            filename = "{0:s}.md".format(page_name)
-            output_file = os.path.join(options.output_directory, filename)
+            output_file = os.path.join(options.output_directory, f"{page_name:s}.md")
             output_writer = FileWriter(output_file)
         else:
             output_writer = StdoutWriter()

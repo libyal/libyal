@@ -88,7 +88,6 @@ class ProjectsReader:
             project.appveyor_identifier = self._GetConfigValue(
                 project_name, "appveyor_identifier"
             )
-
             project.category = self._GetConfigValue(project_name, "category")
 
             project.description = self._GetConfigValue(project_name, "description")
@@ -98,7 +97,6 @@ class ProjectsReader:
             project.documentation_only = self._GetConfigValue(
                 project_name, "documentation_only"
             )
-
             project.group = self._GetConfigValue(project_name, "group")
 
             projects.append(project)
@@ -180,9 +178,10 @@ class DefinitionsHeaderFile:
           bool: True if the version was read from the file.
         """
         library_name, _, _ = self.name.partition("_")
-        version_line = "#define {0:s}_VERSION".format(library_name.upper())
+        library_name_upper = library_name.upper()
+        version_line = f"#define {library_name_upper:s}_VERSION"
 
-        with open(self._path, "r", encoding="utf8") as file_object:
+        with open(self._path, encoding="utf8") as file_object:
             for line in file_object.readlines():
                 line = line.strip()
                 if line.startswith(version_line):
@@ -223,7 +222,7 @@ class M4ScriptFile:
         Returns:
           bool: True if the version was read from the file.
         """
-        with open(self._path, "r", encoding="utf8") as file_object:
+        with open(self._path, encoding="utf8") as file_object:
             for line in file_object.readlines():
                 line = line.strip()
                 if line.startswith("dnl Version: "):
@@ -263,7 +262,7 @@ class ScriptFile:
         Returns:
           bool: True if the version was read from the file.
         """
-        with open(self._path, "r", encoding="utf8") as file_object:
+        with open(self._path, encoding="utf8") as file_object:
             for line in file_object.readlines():
                 line = line.strip()
                 if line.startswith("# Version: "):
@@ -317,7 +316,6 @@ class WikiPageGenerator:
         "knowledge_base": ("Knowledge base projects", ""),
         "legacy": ("Legacy projects", "Projects that will be discontinued"),
     }
-
     _ORDER_OF_LIBRARY_CATEGORIES = (
         "cross_platform",
         "data_format",
@@ -329,7 +327,6 @@ class WikiPageGenerator:
         "utility",
         "legacy",
     )
-
     _ORDER_OF_OTHER_CATEGORIES = ("other", "knowledge_base")
 
     def __init__(self, data_directory, templates_path):
@@ -367,7 +364,7 @@ class WikiPageGenerator:
         """
         path = os.path.join(self._templates_path, filename)
 
-        with open(path, "r", encoding="utf8") as file_object:
+        with open(path, encoding="utf8") as file_object:
             file_data = file_object.read()
 
         return string.Template(file_data)
@@ -412,7 +409,6 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
             self._GenerateSection(
                 "category_library.txt", template_mappings, output_writer
             )
-
             projects = projects_per_category[category]
             for project in projects_per_category[category]:
                 appveyor_build_status = ""
@@ -421,31 +417,30 @@ class OverviewWikiPageGenerator(WikiPageGenerator):
 
                 if project.documentation_only:
                     project_description = (
-                        "{0:s} (**at the moment [documentation]"
-                        "(https://github.com/libyal/{1:s}/blob/main/documentation) "
-                        "only**)"
-                    ).format(project.description, project.name)
-
+                        f"{project.description:s} (**at the moment [documentation]"
+                        "(https://github.com/libyal/{project.name:s}/blob/main/"
+                        f"documentation) only**)"
+                    )
                 else:
                     project_description = project.description
 
                     github_actions_status = (
-                        "[![build](https://github.com/libyal/{0:s}/actions/workflows/"
-                        "build_linux.yml/badge.svg)](https://github.com/libyal/{0:s}/actions/"
-                        "workflows/build_linux.yml)"
-                    ).format(project.name)
-
+                        f"[![build](https://github.com/libyal/{project.name:s}/actions/"
+                        f"workflows/build_linux.yml/badge.svg)](https://github.com/"
+                        f"libyal/{project.name:s}/actions/workflows/build_linux.yml)"
+                    )
                     if project.appveyor_identifier:
                         appveyor_build_status = (
-                            "[![Build status]"
-                            "(https://ci.appveyor.com/api/projects/status/{0:s}?svg=true)]"
-                            "(https://ci.appveyor.com/project/libyal/{1:s})"
-                        ).format(project.appveyor_identifier, project.name)
+                            f"[![Build status](https://ci.appveyor.com/api/projects/"
+                            f"status/{project.appveyor_identifier:s}?svg=true)]"
+                            f"(https://ci.appveyor.com/project/libyal/{project.name:s})"
+                        )
 
                     codecov_status = (
-                        "[![codecov](https://codecov.io/gh/libyal/{0:s}/branch/main/"
-                        "graph/badge.svg)](https://codecov.io/gh/libyal/{0:s})"
-                    ).format(project.name)
+                        f"[![codecov](https://codecov.io/gh/libyal/{project.name:s}/"
+                        f"branch/main/graph/badge.svg)](https://codecov.io/gh/libyal/"
+                        f"{project.name:s})"
+                    )
 
                 template_mappings = {
                     "appveyor_build_status": appveyor_build_status,
@@ -541,7 +536,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
             configuration_file = ScriptFile(path)
 
             version = None
-            logging.info("Reading: {0:s}".format(path))
+            logging.info(f"Reading: {path:s}")
             if configuration_file.ReadVersion():
                 version = configuration_file.version
             if not version:
@@ -562,7 +557,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                 configuration_file = ScriptFile(configuration_path)
 
                 version = None
-                logging.info("Reading: {0:s}".format(configuration_path))
+                logging.info(f"Reading: {configuration_path:s}")
                 if configuration_file.ReadVersion():
                     version = configuration_file.version
                 if not version:
@@ -607,7 +602,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
             configure_ac_file = ConfigureAcFile(configure_ac_path)
 
             version = None
-            logging.info("Reading: {0:s}".format(configure_ac_path))
+            logging.info(f"Reading: {configure_ac_path:s}")
             if configure_ac_file.ReadVersion():
                 version = configure_ac_file.version
             if not version:
@@ -623,7 +618,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                     continue
 
                 definitions_header_path = os.path.join(
-                    project_path, library, "{0:s}_definitions.h".format(library)
+                    project_path, library, f"{library:s}_definitions.h"
                 )
                 if not os.path.exists(definitions_header_path):
                     continue
@@ -631,7 +626,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                 definitions_header_file = DefinitionsHeaderFile(definitions_header_path)
 
                 version = None
-                logging.info("Reading: {0:s}".format(definitions_header_path))
+                logging.info(f"Reading: {definitions_header_path:s}")
                 if definitions_header_file.ReadVersion():
                     version = definitions_header_file.version
                 if not version:
@@ -667,7 +662,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
             m4_script_file = M4ScriptFile(path)
 
             version = None
-            logging.info("Reading: {0:s}".format(path))
+            logging.info(f"Reading: {path:s}")
             if m4_script_file.ReadVersion():
                 version = m4_script_file.version
             if not version:
@@ -686,7 +681,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                 m4_script_file = M4ScriptFile(m4_script_path)
 
                 version = None
-                logging.info("Reading: {0:s}".format(m4_script_path))
+                logging.info(f"Reading: {m4_script_path:s}")
                 if m4_script_file.ReadVersion():
                     version = m4_script_file.version
                 if not version:
@@ -722,7 +717,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
             py_script_file = ScriptFile(path)
 
             version = None
-            logging.info("Reading: {0:s}".format(path))
+            logging.info(f"Reading: {path:s}")
             if py_script_file.ReadVersion():
                 version = py_script_file.version
             if not version:
@@ -741,7 +736,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                 py_script_file = ScriptFile(py_script_path)
 
                 version = None
-                logging.info("Reading: {0:s}".format(py_script_path))
+                logging.info(f"Reading: {py_script_path:s}")
                 if py_script_file.ReadVersion():
                     version = py_script_file.version
                 if not version:
@@ -777,7 +772,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
             script_file = ScriptFile(path)
 
             version = None
-            logging.info("Reading: {0:s}".format(path))
+            logging.info(f"Reading: {path:s}")
             if script_file.ReadVersion():
                 version = script_file.version
             if not version:
@@ -796,7 +791,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                 script_file = ScriptFile(script_path)
 
                 version = None
-                logging.info("Reading: {0:s}".format(script_path))
+                logging.info(f"Reading: {script_path:s}")
                 if script_file.ReadVersion():
                     version = script_file.version
                 if not version:
@@ -829,9 +824,8 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         # TODO: determine if Python glob supports "*.{ps1,sh}".
         versions_per_script = {}
         for extension in ("ps1", "sh"):
-            extension_glob = "*.{0:s}".format(extension)
             script_glob = os.path.join(
-                self._data_directory, "source", "tests", extension_glob
+                self._data_directory, "source", "tests", f"*.{extension:s}"
             )
             for path in glob.glob(script_glob):
                 if path.endswith("test_yalinfo.ps1"):
@@ -840,7 +834,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                 script_file = ScriptFile(path)
 
                 version = None
-                logging.info("Reading: {0:s}".format(path))
+                logging.info(f"Reading: {path:s}")
                 if script_file.ReadVersion():
                     version = script_file.version
                 if not version:
@@ -871,7 +865,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                 script_file = ScriptFile(script_path)
 
                 version = None
-                logging.info("Reading: {0:s}".format(script_path))
+                logging.info(f"Reading: {script_path:s}")
                 if script_file.ReadVersion():
                     version = script_file.version
                 if not version:
@@ -912,23 +906,19 @@ class StatusWikiPageGenerator(WikiPageGenerator):
         for configuration in sorted(versions_per_configuration):
             configuration_reference = configuration.lower().replace(".", "")
             table_of_contents.append(
-                "  * [{0:s}](Status#{1:s})".format(
-                    configuration, configuration_reference
-                )
+                f"  * [{configuration:s}](Status#{configuration_reference:s})"
             )
 
         table_of_contents.append("* [Scripts](Status#scripts)")
         for script in sorted(versions_per_script):
             script_reference = script.lower().replace(".", "")
-            table_of_contents.append(
-                "  * [{0:s}](Status#{1:s})".format(script, script_reference)
-            )
+            table_of_contents.append(f"  * [{script:s}](Status#{script_reference:s})")
 
         table_of_contents.append("* [M4 scripts](Status#m4-scripts)")
         for m4_script in sorted(versions_per_m4_script):
             m4_script_reference = m4_script.lower().replace(".", "")
             table_of_contents.append(
-                "  * [{0:s}](Status#{1:s})".format(m4_script, m4_script_reference)
+                f"  * [{m4_script:s}](Status#{m4_script_reference:s})"
             )
 
         # TODO: add version check for common.
@@ -937,20 +927,15 @@ class StatusWikiPageGenerator(WikiPageGenerator):
             category_title = self._CATEGORIES[category][0]
             catergory_reference = category_title.lower().replace(" ", "-")
             table_of_contents.append(
-                "* [{0:s}](Status#{1:s})".format(category_title, catergory_reference)
+                f"* [{category_title:s}](Status#{catergory_reference:s})"
             )
-
             for project in projects_per_category[category]:
-                table_of_contents.append(
-                    "  * [{0:s}](Status#{0:s})".format(project.name)
-                )
+                table_of_contents.append(f"  * [{project.name:s}](Status#{0:s})")
 
         table_of_contents.append("* [Test scripts](Status#test-scripts)")
         for script in sorted(versions_per_test_script):
             script_reference = script.lower().replace(".", "")
-            table_of_contents.append(
-                "  * [{0:s}](Status#{1:s})".format(script, script_reference)
-            )
+            table_of_contents.append(f"  * [{script:s}](Status#{script_reference:s})")
 
         table_of_contents.append("")
         output_data = "\n".join(table_of_contents)
@@ -1187,12 +1172,12 @@ def Main():
         return False
 
     if not os.path.exists(options.configuration_file):
-        print("No such configuration file: {0:s}.".format(options.configuration_file))
+        print(f"No such configuration file: {options.configuration_file:s}")
         print("")
         return False
 
     if options.output_directory and not os.path.exists(options.output_directory):
-        print("No such output directory: {0:s}.".format(options.output_directory))
+        print(f"No such output directory: {options.output_directory:s}")
         print("")
         return False
 
@@ -1207,9 +1192,8 @@ def Main():
     projects = projects_reader.ReadFromFile(options.configuration_file)
     if not projects:
         print(
-            "Unable to read projects from configuration file: {0:s}.".format(
-                options.configuration_file
-            )
+            f"Unable to read projects from configuration file: "
+            f"{options.configuration_file:s}"
         )
         print("")
         return False
@@ -1225,8 +1209,7 @@ def Main():
         wiki_page = page_generator_class(data_directory, templates_path)
 
         if options.output_directory:
-            filename = "{0:s}.md".format(page_name)
-            output_file = os.path.join(options.output_directory, filename)
+            output_file = os.path.join(options.output_directory, f"{page_name:s}.md")
             output_writer = FileWriter(output_file)
         else:
             output_writer = StdoutWriter()

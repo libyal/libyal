@@ -266,7 +266,7 @@ class SourceFormatter:
                         continue
 
                     if block_of_declaration_lines:
-                        block_of_declaration_lines.sort(key=lambda line: Variable(line))
+                        block_of_declaration_lines.sort(key=Variable)
                         block_of_declaration_lines = self.VerticalAlignEqualSigns(
                             block_of_declaration_lines, alignment_offset
                         )
@@ -340,7 +340,7 @@ class SourceFormatter:
                 declaration_lines.append(line)
                 continue
 
-            declaration_lines.sort(key=lambda line: Variable(line))
+            declaration_lines.sort(key=Variable)
             declaration_lines = self.VerticalAlignEqualSigns(
                 declaration_lines, alignment_offset
             )
@@ -349,7 +349,7 @@ class SourceFormatter:
             declaration_lines = []
 
         if declaration_lines:
-            declaration_lines.sort(key=lambda line: Variable(line))
+            declaration_lines.sort(key=Variable)
             declaration_lines = self.VerticalAlignEqualSigns(
                 declaration_lines, alignment_offset
             )
