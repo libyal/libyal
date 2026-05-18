@@ -1609,14 +1609,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         )
         if function_template == "clone":
             function_variables.append(
-                f"{library_name:s}_{type_name:s}_t *destination_{1:s} = NULL;"
+                f"{library_name:s}_{type_name:s}_t *destination_{type_name:s} = NULL;"
             )
             function_variables.append(
-                f"{library_name:s}_{type_name:s}_t *source_{1:s} = NULL;"
+                f"{library_name:s}_{type_name:s}_t *source_{type_name:s} = NULL;"
             )
         elif not with_input:
             function_variables.append(
-                f"{library_name:s}_{type_name:s}_t *{1:s} = NULL;"
+                f"{library_name:s}_{type_name:s}_t *{type_name:s} = NULL;"
             )
 
         if function_template in (
@@ -3147,7 +3147,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
                     else:
                         test_to_run_mappings = [
-                            f"{argument:s}{library_name_suffix:s}_TEST_RUN_WITH_ARGS(",
+                            f"{indentation:s}{library_name_suffix:s}_TEST_RUN_WITH_ARGS(",
                             f'{indentation:s} "{function_name:s}",',
                             f"{indentation:s} {test_function_name:s},",
                             f"{indentation:s} source",
