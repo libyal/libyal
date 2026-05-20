@@ -1,8 +1,36 @@
 # Build Python wheels from source using cibuildwheel.
 name: build_wheels
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+  release:
+    types: [published]
+  # Allow trigger via API
+  workflow_dispatch:
 permissions: read-all
 jobs:
+  build_sdist:
+    name: Build sdist
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install autoconf automake autopoint build-essential git libtool pkg-config python3-build
+    - name: Prepare build
+      run: |
+        ./synclibs.sh
+        ./autogen.sh
+        ./configure
+        make sources >/dev/null
+    - name: Build sdist
+      run: |
+        python -m build --sdist
+    - uses: actions/upload-artifact@v7
+      with:
+        name: cibw-sdist
+        path: dist/*.tar.gz
   build_wheels_linux:
     name: Build wheels on $${{ matrix.os }}
     runs-on: $${{ matrix.os }}

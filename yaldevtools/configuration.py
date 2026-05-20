@@ -71,20 +71,20 @@ class ProjectConfiguration(BaseConfiguration):
     """Project configuration.
 
     Attributes:
+      appveyor_allow_failures (list[str]): AppVeyor test targets that are allowed to fail.
       cygwin_build_dependencies (str): Cygwin build dependencies.
-      deploy_to_nuget (bool): True if the project should be deployed to NuGet on
-          release.
+      deploy_to_nuget (bool): True if the project should be deployed to NuGet on release.
       dpkg_build_dependencies (str): dpkg build dependencies.
       dotnet_bindings_name (str): name of the .Net bindings.
       dtfabric_configuration (DTFabricConfiguration): dtFabric configuration.
       freebsd_build_dependencies (str): FreeBSD build dependencies.
       gcc_build_dependencies (list[str]): GCC build dependencies.
-      gcc_static_build_dependencies (list[str]): GCC build dependencies for
-          building static binaries.
+      gcc_static_build_dependencies (list[str]): GCC build dependencies for building
+          static binaries.
       info_tool_features (list[str]): features of the info tool.
       info_tool_source_description (str): description of the input source.
-      info_tool_source_type (str): input source type, such as container, file,
-          image or volume.
+      info_tool_source_type (str): input source type, such as container, file, image or
+          volume.
       java_bindings_name (str): name of the Java bindings.
       library_build_dependencies (str): library build dependencies.
       library_description (str): description of the library.
@@ -344,6 +344,23 @@ class ProjectConfiguration(BaseConfiguration):
 
         # Troubleshooting configuration.
         self.troubleshooting_example = None
+
+        # AppVeyor specific configuration.
+        self.appveyor_allow_failures = None
+
+    def _ReadAppVeyorConfiguration(self, config_parser):
+        """Reads the AppVeyor configuration.
+
+        Args:
+          config_parser (ConfigParser): configuration file parser.
+        """
+        self.appveyor_allow_failures = self._GetOptionalConfigValue(
+            config_parser, "appveyor", "allow_failures", default_value=[]
+        )
+        # Remove trailing comments.
+        self.appveyor_allow_failures = [
+            name.split(" ")[0] for name in self.appveyor_allow_failures
+        ]
 
     def _ReadCygwinConfiguration(self, config_parser):
         """Reads the Cygwin configuration.
@@ -1277,3 +1294,5 @@ class ProjectConfiguration(BaseConfiguration):
 
         self._ReadInfoToolConfiguration(config_parser)
         self._ReadMountToolConfiguration(config_parser)
+
+        self._ReadAppVeyorConfiguration(config_parser)

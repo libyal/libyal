@@ -1,5 +1,7 @@
 # Build from source on Linux.
 name: build_linux
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
 permissions: read-all
 jobs:

@@ -74,8 +74,10 @@ file: appveyor.yml/environment-matrix.yml
 ---
 identifier: generate_environment_matrix_allow_failures
 type: template
-condition: "'python_bindings' in project_features"
+condition: "appveyor_allow_failures != []"
 file: appveyor.yml/matrix-allow_failures.yml
+placeholders:
+- allow_failures
 ---
 identifier: generate_environment_matrix_cygwin
 type: template

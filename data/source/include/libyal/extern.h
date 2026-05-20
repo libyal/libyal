@@ -31,14 +31,17 @@
  */
 #if defined( ${library_name:upper_case}_DLL_EXPORT )
 #define ${library_name:upper_case}_EXTERN __declspec(dllexport)
+#define ${library_name:upper_case}_EXTERN_VARIABLE extern __declspec(dllexport)
 
 #elif defined( ${library_name:upper_case}_DLL_IMPORT )
-#define ${library_name:upper_case}_EXTERN extern __declspec(dllimport)
+#define ${library_name:upper_case}_EXTERN __declspec(dllimport)
+#define ${library_name:upper_case}_EXTERN_VARIABLE extern __declspec(dllimport)
 
 #else
 #define ${library_name:upper_case}_EXTERN extern
+#define ${library_name:upper_case}_EXTERN_VARIABLE extern
 
-#endif
+#endif /* defined( ${library_name:upper_case}_DLL_EXPORT ) */
 
 #endif /* !defined( _${library_name:upper_case}_EXTERN_H ) */
 

@@ -75,7 +75,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 m4_macro_definition = (
                     f"AC_DEFUN([AX_{library_name_upper:s}_CHECK_LOCAL],"
                 )
-
                 macro_start_line_number = None
                 for line_number, line in enumerate(input_lines):
                     if line.startswith(m4_macro_definition):
@@ -112,7 +111,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 template_mappings,
                 "acinclude.m4",
             )
-
             del template_mappings["library_name"]
 
         template_mappings["library_name"] = library_name
@@ -126,7 +124,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, "acinclude.m4", access_mode="a"
         )
-
         del template_mappings["library_name"]
 
     def _GenerateAppVeyorYML(self, project_configuration, template_mappings):
@@ -140,10 +137,16 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         # if project_configuration.HasDependencyCrypto():
         # TODO: add environment-cygwin64-openssl.yml
 
+        allow_failures = [
+            f"  - TARGET: {target:s}"
+            for target in project_configuration.appveyor_allow_failures]
+
+        template_mappings["allow_failures"] = "\n".join(allow_failures)
+        template_mappings["appveyor_allow_failures"] = (
+            project_configuration.appveyor_allow_failures)
         template_mappings["has_test_data_script"] = bool(
             os.path.isfile("synctestdata.sh")
         )
-
         self._GenerateSectionsFromOperationsFile(
             "appveyor.yml.yaml",
             "main",
@@ -151,8 +154,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             "appveyor.yml",
         )
-
         del template_mappings["has_test_data_script"]
+        del template_mappings["appveyor_allow_failures"]
+        del template_mappings["allow_failures"]
 
     def _GenerateCodecovYML(self, project_configuration, template_mappings):
         """Generates the .codecov.yml configuration file.
