@@ -1,17 +1,8 @@
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+#if defined( HAVE_CTHREADS_TEST_FUNCTION_HOOK )
 
 static int (*cthreads_test_real_pthread_thread_create)(pthread_t *, const pthread_attr_t *, void *(*)(void *), void *) = NULL;
-static int (*cthreads_test_real_pthread_thread_join)(pthread_t, void **)                                               = NULL;
-
 int cthreads_test_pthread_thread_create_attempts_before_fail                                                           = -1;
-int cthreads_test_pthread_thread_join_attempts_before_fail                                                             = -1;
-
 int cthreads_test_real_pthread_thread_create_function_return_value                                                     = EBUSY;
-int cthreads_test_real_pthread_thread_join_function_return_value                                                       = EBUSY;
-
-#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
-
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
 
 /* Custom pthread_thread_create for testing error cases
  * Returns 0 if successful or an error value otherwise
@@ -29,6 +20,11 @@ int pthread_thread_create(
 		cthreads_test_real_pthread_thread_create = dlsym(
 		                                            RTLD_NEXT,
 		                                            "pthread_thread_create" );
+
+		if( cthreads_test_real_pthread_thread_create == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_thread_create_attempts_before_fail == 0 )
 	{
@@ -49,6 +45,10 @@ int pthread_thread_create(
 	return( result );
 }
 
+static int (*cthreads_test_real_pthread_thread_join)(pthread_t, void **) = NULL;
+int cthreads_test_pthread_thread_join_attempts_before_fail               = -1;
+int cthreads_test_real_pthread_thread_join_function_return_value         = EBUSY;
+
 /* Custom pthread_thread_join for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -63,6 +63,11 @@ int pthread_thread_join(
 		cthreads_test_real_pthread_thread_join = dlsym(
 		                                          RTLD_NEXT,
 		                                          "pthread_thread_join" );
+
+		if( cthreads_test_real_pthread_thread_join == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_thread_join_attempts_before_fail == 0 )
 	{
@@ -87,7 +92,7 @@ int pthread_thread_join(
 	return( result );
 }
 
-#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
+#endif /* defined( HAVE_CTHREADS_TEST_FUNCTION_HOOK ) */
 
 /* The thread callback function
  * Returns 1 if successful or -1 on error

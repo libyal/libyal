@@ -1,6 +1,6 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20241013
+dnl Version: 20260527
 
 dnl Function to test if a certain feature was disabled
 AC_DEFUN([AX_COMMON_ARG_DISABLE],
@@ -48,6 +48,30 @@ AC_DEFUN([AX_COMMON_ARG_WITH],
       [whether to use $3],
       [ac_cv_with_$2],
       [ac_cv_with_$2=$4])dnl
+  ])
+
+dnl Function to detect whether a specific compiler flag can be used
+dnl Note that function only supports compiler flags without a =
+AC_DEFUN([AX_COMMON_CHECK_COMPILER_FLAG],
+  [AC_REQUIRE([AC_PROG_CC])
+
+  m4_define([variable_name], [ac_cv_with[]m4_translit([$1], [- ], [__])])
+
+  AC_MSG_CHECKING([whether $CC supports $1])
+
+  SAVE_CFLAGS="$CFLAGS"
+
+  dnl Force -Werror so Clang/GCC fail on unsupported options
+  CFLAGS="$CFLAGS -Werror $1"
+
+  AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([[]], [[]])],
+    [AC_MSG_RESULT([yes])
+     eval variable_name="yes"],
+    [AC_MSG_RESULT([no])
+     eval variable_name="no"])
+
+  CFLAGS="$SAVE_CFLAGS"
   ])
 
 dnl Function to detect whether shared library support should be disabled
@@ -164,24 +188,24 @@ AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_JD],
     [AC_LANG_PROGRAM(
       [[#include <stdio.h>]],
       [[printf( "%jd" ); ]] )],
-    [ac_cv_cv_have_printf_jd=no],
-    [ac_cv_cv_have_printf_jd=yes])
+    [ac_cv_have_printf_jd=no],
+    [ac_cv_have_printf_jd=yes])
 
   dnl Second try to see if compilation and linkage with a parameter succeeds
   AS_IF(
-    [test "x$ac_cv_cv_have_printf_jd" = xyes],
+    [test "x$ac_cv_have_printf_jd" = xyes],
     [AC_LINK_IFELSE(
       [AC_LANG_PROGRAM(
         [[#include <sys/types.h>
 #include <stdio.h>]],
         [[printf( "%jd", (off_t) 10 ); ]] )],
-      [ac_cv_cv_have_printf_jd=yes],
-      [ac_cv_cv_have_printf_jd=no])
+      [ac_cv_have_printf_jd=yes],
+      [ac_cv_have_printf_jd=no])
     ])
 
   dnl Third try to see if the program runs correctly
   AS_IF(
-    [test "x$ac_cv_cv_have_printf_jd" = xyes],
+    [test "x$ac_cv_have_printf_jd" = xyes],
     [AC_RUN_IFELSE(
       [AC_LANG_PROGRAM(
         [[#include <sys/types.h>
@@ -189,16 +213,16 @@ AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_JD],
         [[char string[ 3 ];
 if( snprintf( string, 3, "%jd", (off_t) 10 ) < 0 ) return( 1 );
 if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
-      [ac_cv_cv_have_printf_jd=yes],
-      [ac_cv_cv_have_printf_jd=no],
-      [ac_cv_cv_have_printf_jd=undetermined])
+      [ac_cv_have_printf_jd=yes],
+      [ac_cv_have_printf_jd=no],
+      [ac_cv_have_printf_jd=undetermined])
     ])
 
   AC_LANG_POP(C)
   CFLAGS="$SAVE_CFLAGS"
 
   AS_IF(
-    [test "x$ac_cv_cv_have_printf_jd" = xyes],
+    [test "x$ac_cv_have_printf_jd" = xyes],
     [AC_MSG_RESULT(
       [yes])
     AC_DEFINE(
@@ -206,7 +230,7 @@ if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
       [1],
       [Define to 1 whether printf supports the conversion specifier "%jd".]) ],
     [AC_MSG_RESULT(
-      [$ac_cv_cv_have_printf_jd])
+      [$ac_cv_have_printf_jd])
     ])
   ])
 
@@ -224,24 +248,24 @@ AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_ZD],
     [AC_LANG_PROGRAM(
       [[#include <stdio.h>]],
       [[printf( "%zd" ); ]] )],
-    [ac_cv_cv_have_printf_zd=no],
-    [ac_cv_cv_have_printf_zd=yes])
+    [ac_cv_have_printf_zd=no],
+    [ac_cv_have_printf_zd=yes])
 
   dnl Second try to see if compilation and linkage with a parameter succeeds
   AS_IF(
-    [test "x$ac_cv_cv_have_printf_zd" = xyes],
+    [test "x$ac_cv_have_printf_zd" = xyes],
     [AC_LINK_IFELSE(
       [AC_LANG_PROGRAM(
         [[#include <sys/types.h>
 #include <stdio.h>]],
         [[printf( "%zd", (size_t) 10 ); ]] )],
-      [ac_cv_cv_have_printf_zd=yes],
-      [ac_cv_cv_have_printf_zd=no])
+      [ac_cv_have_printf_zd=yes],
+      [ac_cv_have_printf_zd=no])
     ])
 
   dnl Third try to see if the program runs correctly
   AS_IF(
-    [test "x$ac_cv_cv_have_printf_zd" = xyes],
+    [test "x$ac_cv_have_printf_zd" = xyes],
     [AC_RUN_IFELSE(
       [AC_LANG_PROGRAM(
         [[#include <sys/types.h>
@@ -249,16 +273,16 @@ AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_ZD],
         [[char string[ 3 ];
 if( snprintf( string, 3, "%zd", (size_t) 10 ) < 0 ) return( 1 );
 if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
-      [ac_cv_cv_have_printf_zd=yes],
-      [ac_cv_cv_have_printf_zd=no],
-      [ac_cv_cv_have_printf_zd=undetermined])
+      [ac_cv_have_printf_zd=yes],
+      [ac_cv_have_printf_zd=no],
+      [ac_cv_have_printf_zd=undetermined])
     ])
 
   AC_LANG_POP(C)
   CFLAGS="$SAVE_CFLAGS"
 
   AS_IF(
-    [test "x$ac_cv_cv_have_printf_zd" = xyes],
+    [test "x$ac_cv_have_printf_zd" = xyes],
     [AC_MSG_RESULT(
       [yes])
     AC_DEFINE(
@@ -266,7 +290,7 @@ if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
       [1],
       [Define to 1 whether printf supports the conversion specifier "%zd".]) ],
     [AC_MSG_RESULT(
-      [$ac_cv_cv_have_printf_zd])
+      [$ac_cv_have_printf_zd])
     ])
   ])
 
@@ -288,7 +312,7 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
   AS_IF(
     [test "x$ac_cv_enable_winapi" = xno],
     [AC_CHECK_HEADERS([libintl.h])
-    ])
+  ])
 
   dnl Headers included in common/types.h
   AC_CHECK_HEADERS([limits.h])

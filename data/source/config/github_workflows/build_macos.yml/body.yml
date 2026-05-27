@@ -29,8 +29,6 @@ jobs:
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
     - name: Building from source
-      env:
-        CC: $${{ matrix.compiler }}
       run: |
         tests/build.sh $${{ matrix.configure_options }}
     - name: Run tests

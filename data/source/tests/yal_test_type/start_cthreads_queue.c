@@ -1,20 +1,7 @@
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+#if defined( HAVE_CTHREADS_TEST_FUNCTION_HOOK )
 
-static int (*cthreads_test_real_pthread_mutex_lock)(pthread_mutex_t *)   = NULL;
-static int (*cthreads_test_real_pthread_mutex_unlock)(pthread_mutex_t *) = NULL;
-
-int cthreads_test_pthread_mutex_lock_attempts_before_fail                = -1;
-int cthreads_test_pthread_mutex_unlock_attempts_before_fail              = -1;
-
-#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
-
-libcthreads_queue_t *cthreads_test_queue = NULL;
-int cthreads_test_expected_queued_value  = 0;
-int cthreads_test_queued_value           = 0;
-int cthreads_test_number_of_iterations   = 497;
-int cthreads_test_number_of_values       = 32;
-
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+static int (*cthreads_test_real_pthread_mutex_lock)(pthread_mutex_t *) = NULL;
+int cthreads_test_pthread_mutex_lock_attempts_before_fail              = -1;
 
 /* Custom pthread_mutex_lock for testing error cases
  * Returns 0 if successful or an error value otherwise
@@ -29,6 +16,11 @@ int pthread_mutex_lock(
 		cthreads_test_real_pthread_mutex_lock = dlsym(
 		                                         RTLD_NEXT,
 		                                         "pthread_mutex_lock" );
+
+		if( cthreads_test_real_pthread_mutex_lock == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_mutex_lock_attempts_before_fail == 0 )
 	{
@@ -46,6 +38,9 @@ int pthread_mutex_lock(
 	return( result );
 }
 
+static int (*cthreads_test_real_pthread_mutex_unlock)(pthread_mutex_t *) = NULL;
+int cthreads_test_pthread_mutex_unlock_attempts_before_fail              = -1;
+
 /* Custom pthread_mutex_unlock for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -59,6 +54,11 @@ int pthread_mutex_unlock(
 		cthreads_test_real_pthread_mutex_unlock = dlsym(
 		                                           RTLD_NEXT,
 		                                           "pthread_mutex_unlock" );
+
+		if( cthreads_test_real_pthread_mutex_unlock == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_mutex_unlock_attempts_before_fail == 0 )
 	{
@@ -76,7 +76,13 @@ int pthread_mutex_unlock(
 	return( result );
 }
 
-#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
+#endif /* defined( HAVE_CTHREADS_TEST_FUNCTION_HOOK ) */
+
+libcthreads_queue_t *cthreads_test_queue = NULL;
+int cthreads_test_expected_queued_value  = 0;
+int cthreads_test_queued_value           = 0;
+int cthreads_test_number_of_iterations   = 497;
+int cthreads_test_number_of_values       = 32;
 
 /* Test element compare function
  * Returns LIBCTHREADS_COMPARE_LESS, LIBCTHREADS_COMPARE_EQUAL, LIBCTHREADS_COMPARE_GREATER if successful or -1 on error

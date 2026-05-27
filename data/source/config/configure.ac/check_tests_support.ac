@@ -1,2 +1,5 @@
+dnl Check if code coverage support should be enabled
+AX_TESTS_CHECK_ENABLE_CODE_COVERAGE
+
 dnl Check if tests required headers and functions are available
 AX_TESTS_CHECK_LOCAL

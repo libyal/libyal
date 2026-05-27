@@ -1,29 +1,8 @@
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+#if defined( HAVE_CTHREADS_TEST_FUNCTION_HOOK )
 
 static int (*cthreads_test_real_pthread_rwlock_init)(pthread_rwlock_t *, const pthread_rwlockattr_t *) = NULL;
-static int (*cthreads_test_real_pthread_rwlock_destroy)(pthread_rwlock_t *)                            = NULL;
-static int (*cthreads_test_real_pthread_rwlock_rdlock)(pthread_rwlock_t *)                             = NULL;
-static int (*cthreads_test_real_pthread_rwlock_wrlock)(pthread_rwlock_t *)                             = NULL;
-static int (*cthreads_test_real_pthread_rwlock_unlock)(pthread_rwlock_t *)                             = NULL;
-
 int cthreads_test_pthread_rwlock_init_attempts_before_fail                                             = -1;
-int cthreads_test_pthread_rwlock_destroy_attempts_before_fail                                          = -1;
-int cthreads_test_pthread_rwlock_rdlock_attempts_before_fail                                           = -1;
-int cthreads_test_pthread_rwlock_wrlock_attempts_before_fail                                           = -1;
-int cthreads_test_pthread_rwlock_unlock_attempts_before_fail                                           = -1;
-
 int cthreads_test_real_pthread_rwlock_init_function_return_value                                       = EBUSY;
-int cthreads_test_real_pthread_rwlock_destroy_function_return_value                                    = EBUSY;
-int cthreads_test_real_pthread_rwlock_rdlock_function_return_value                                     = EBUSY;
-int cthreads_test_real_pthread_rwlock_wrlock_function_return_value                                     = EBUSY;
-int cthreads_test_real_pthread_rwlock_unlock_function_return_value                                     = EBUSY;
-
-#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
-
-libcthreads_read_write_lock_t *cthreads_test_read_write_lock = NULL;
-int cthreads_test_locked_value                               = 0;
-
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
 
 /* Custom pthread_rwlock_init for testing error cases
  * Returns 0 if successful or an error value otherwise
@@ -39,6 +18,11 @@ int pthread_rwlock_init(
 		cthreads_test_real_pthread_rwlock_init = dlsym(
 		                                          RTLD_NEXT,
 		                                          "pthread_rwlock_init" );
+
+		if( cthreads_test_real_pthread_rwlock_init == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_rwlock_init_attempts_before_fail == 0 )
 	{
@@ -57,6 +41,10 @@ int pthread_rwlock_init(
 	return( result );
 }
 
+static int (*cthreads_test_real_pthread_rwlock_destroy)(pthread_rwlock_t *) = NULL;
+int cthreads_test_pthread_rwlock_destroy_attempts_before_fail               = -1;
+int cthreads_test_real_pthread_rwlock_destroy_function_return_value         = EBUSY;
+
 /* Custom pthread_rwlock_destroy for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -70,6 +58,11 @@ int pthread_rwlock_destroy(
 		cthreads_test_real_pthread_rwlock_destroy = dlsym(
 		                                             RTLD_NEXT,
 		                                             "pthread_rwlock_destroy" );
+
+		if( cthreads_test_real_pthread_rwlock_destroy == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_rwlock_destroy_attempts_before_fail == 0 )
 	{
@@ -87,6 +80,10 @@ int pthread_rwlock_destroy(
 	return( result );
 }
 
+static int (*cthreads_test_real_pthread_rwlock_rdlock)(pthread_rwlock_t *) = NULL;
+int cthreads_test_pthread_rwlock_rdlock_attempts_before_fail               = -1;
+int cthreads_test_real_pthread_rwlock_rdlock_function_return_value         = EBUSY;
+
 /* Custom pthread_rwlock_rdlock for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -100,6 +97,11 @@ int pthread_rwlock_rdlock(
 		cthreads_test_real_pthread_rwlock_rdlock = dlsym(
 		                                            RTLD_NEXT,
 		                                            "pthread_rwlock_rdlock" );
+
+		if( cthreads_test_real_pthread_rwlock_rdlock == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_rwlock_rdlock_attempts_before_fail == 0 )
 	{
@@ -116,6 +118,10 @@ int pthread_rwlock_rdlock(
 
 	return( result );
 }
+
+static int (*cthreads_test_real_pthread_rwlock_wrlock)(pthread_rwlock_t *) = NULL;
+int cthreads_test_pthread_rwlock_wrlock_attempts_before_fail               = -1;
+int cthreads_test_real_pthread_rwlock_wrlock_function_return_value         = EBUSY;
 
 /* Custom pthread_rwlock_wrlock for testing error cases
  * Returns 0 if successful or an error value otherwise
@@ -147,6 +153,12 @@ int pthread_rwlock_wrlock(
 	return( result );
 }
 
+#if defined( HAVE_PTHREAD_RWLOCK_UNLOCK_HOOK )
+
+static int (*cthreads_test_real_pthread_rwlock_unlock)(pthread_rwlock_t *) = NULL;
+int cthreads_test_pthread_rwlock_unlock_attempts_before_fail               = -1;
+int cthreads_test_real_pthread_rwlock_unlock_function_return_value         = EBUSY;
+
 /* Custom pthread_rwlock_unlock for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -160,6 +172,11 @@ int pthread_rwlock_unlock(
 		cthreads_test_real_pthread_rwlock_unlock = dlsym(
 		                                            RTLD_NEXT,
 		                                            "pthread_rwlock_unlock" );
+
+		if( cthreads_test_real_pthread_rwlock_unlock == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_rwlock_unlock_attempts_before_fail == 0 )
 	{
@@ -181,8 +198,12 @@ int pthread_rwlock_unlock(
 
 	return( result );
 }
+#endif /* defined( HAVE_PTHREAD_RWLOCK_UNLOCK_HOOK ) */
 
-#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
+#endif /* defined( HAVE_CTHREADS_TEST_FUNCTION_HOOK ) */
+
+libcthreads_read_write_lock_t *cthreads_test_read_write_lock = NULL;
+int cthreads_test_locked_value                               = 0;
 
 /* The cthreads_test_read_write_lock_grab_for_read thread1 callback function
  * Returns 1 if successful or -1 on error

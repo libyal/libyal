@@ -1,23 +1,8 @@
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+#if defined( HAVE_CTHREADS_TEST_FUNCTION_HOOK )
 
 static int (*cthreads_test_real_pthread_cond_init)(pthread_cond_t *, const pthread_condattr_t *) = NULL;
-static int (*cthreads_test_real_pthread_cond_destroy)(pthread_cond_t *)                          = NULL;
-static int (*cthreads_test_real_pthread_cond_broadcast)(pthread_cond_t *)                        = NULL;
-static int (*cthreads_test_real_pthread_cond_signal)(pthread_cond_t *)                           = NULL;
-static int (*cthreads_test_real_pthread_cond_wait)(pthread_cond_t *, pthread_mutex_t *)          = NULL;
-
 int cthreads_test_pthread_cond_init_attempts_before_fail                                         = -1;
-int cthreads_test_pthread_cond_destroy_attempts_before_fail                                      = -1;
-int cthreads_test_pthread_cond_broadcast_attempts_before_fail                                    = -1;
-int cthreads_test_pthread_cond_signal_attempts_before_fail                                       = -1;
-int cthreads_test_pthread_cond_wait_attempts_before_fail                                         = -1;
-
 int cthreads_test_real_pthread_cond_init_function_return_value                                   = EBUSY;
-int cthreads_test_real_pthread_cond_destroy_function_return_value                                = EBUSY;
-
-#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
-
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
 
 /* Custom pthread_cond_init for testing error cases
  * Returns 0 if successful or an error value otherwise
@@ -33,6 +18,11 @@ int pthread_cond_init(
 		cthreads_test_real_pthread_cond_init = dlsym(
 		                                        RTLD_NEXT,
 		                                        "pthread_cond_init" );
+
+		if( cthreads_test_real_pthread_cond_init == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_cond_init_attempts_before_fail == 0 )
 	{
@@ -51,6 +41,10 @@ int pthread_cond_init(
 	return( result );
 }
 
+static int (*cthreads_test_real_pthread_cond_destroy)(pthread_cond_t *) = NULL;
+int cthreads_test_pthread_cond_destroy_attempts_before_fail             = -1;
+int cthreads_test_real_pthread_cond_destroy_function_return_value       = EBUSY;
+
 /* Custom pthread_cond_destroy for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -64,6 +58,11 @@ int pthread_cond_destroy(
 		cthreads_test_real_pthread_cond_destroy = dlsym(
 		                                           RTLD_NEXT,
 		                                           "pthread_cond_destroy" );
+
+		if( cthreads_test_real_pthread_cond_destroy == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_cond_destroy_attempts_before_fail == 0 )
 	{
@@ -81,6 +80,9 @@ int pthread_cond_destroy(
 	return( result );
 }
 
+static int (*cthreads_test_real_pthread_cond_broadcast)(pthread_cond_t *) = NULL;
+int cthreads_test_pthread_cond_broadcast_attempts_before_fail             = -1;
+
 /* Custom pthread_cond_broadcast for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -94,6 +96,11 @@ int pthread_cond_broadcast(
 		cthreads_test_real_pthread_cond_broadcast = dlsym(
 		                                             RTLD_NEXT,
 		                                             "pthread_cond_broadcast" );
+
+		if( cthreads_test_real_pthread_cond_broadcast == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_cond_broadcast_attempts_before_fail == 0 )
 	{
@@ -111,6 +118,9 @@ int pthread_cond_broadcast(
 	return( result );
 }
 
+static int (*cthreads_test_real_pthread_cond_signal)(pthread_cond_t *) = NULL;
+int cthreads_test_pthread_cond_signal_attempts_before_fail             = -1;
+
 /* Custom pthread_cond_signal for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -124,6 +134,11 @@ int pthread_cond_signal(
 		cthreads_test_real_pthread_cond_signal = dlsym(
 		                                          RTLD_NEXT,
 		                                          "pthread_cond_signal" );
+
+		if( cthreads_test_real_pthread_cond_signal == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_cond_signal_attempts_before_fail == 0 )
 	{
@@ -141,6 +156,9 @@ int pthread_cond_signal(
 	return( result );
 }
 
+static int (*cthreads_test_real_pthread_cond_wait)(pthread_cond_t *, pthread_mutex_t *) = NULL;
+int cthreads_test_pthread_cond_wait_attempts_before_fail                                = -1;
+
 /* Custom pthread_cond_wait for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -155,6 +173,11 @@ int pthread_cond_wait(
 		cthreads_test_real_pthread_cond_wait = dlsym(
 		                                        RTLD_NEXT,
 		                                        "pthread_cond_wait" );
+
+		if( cthreads_test_real_pthread_cond_wait == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( cthreads_test_pthread_cond_wait_attempts_before_fail == 0 )
 	{
@@ -173,5 +196,5 @@ int pthread_cond_wait(
 	return( result );
 }
 
-#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
+#endif /* defined( HAVE_CTHREADS_TEST_FUNCTION_HOOK ) */
 
