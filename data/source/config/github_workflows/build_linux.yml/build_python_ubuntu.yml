@@ -17,7 +17,7 @@
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
-    - name: Building from source
+    - name: Build from source
       env:
         CC: $${{ matrix.compiler }}
       run: |
@@ -42,7 +42,7 @@
         sudo add-apt-repository universe &&
         sudo apt update &&
         sudo apt -y install ${dpkg_build_dependencies} python3 python3-build python3-dev
-    - name: Building from source
+    - name: Build from source
       env:
         CC: $${{ matrix.compiler }}
       run: |

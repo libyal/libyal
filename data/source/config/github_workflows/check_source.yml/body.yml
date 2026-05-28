@@ -23,7 +23,7 @@ jobs:
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
-    - name: Building from source
+    - name: Build from source
       env:
         CC: $${{ matrix.compiler }}
       run: |
@@ -48,7 +48,7 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt -y install autoconf automake autopoint build-essential clang clang-tools git jq libtool pkg-config
-    - name: Building from source
+    - name: Build from source
       env:
         CC: $${{ matrix.compiler }}
       run: |
@@ -111,7 +111,7 @@ jobs:
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
-    - name: Building from source
+    - name: Build from source
       env:
         CC: $${{ matrix.compiler }}
       run: |

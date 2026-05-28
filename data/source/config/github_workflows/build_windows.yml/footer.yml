@@ -1,7 +1,7 @@
     - name: Download test data
       run: |
         if (Test-Path .\synctestdata.ps1) { .\synctestdata.ps1 }
-    - name: Building from source
+    - name: Build from source
       run: |
         .\synclibs.ps1 -UseHead
         .\autogen.ps1

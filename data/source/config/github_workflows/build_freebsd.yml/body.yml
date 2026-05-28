@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - name: Building from source
+    - name: Build from source
       id: build_freebsd
       uses: vmactions/freebsd-vm@v1
       with:

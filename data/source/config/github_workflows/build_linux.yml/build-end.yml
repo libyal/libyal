@@ -6,7 +6,7 @@
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
-    - name: Building from source
+    - name: Build from source
       env:
         CC: $${{ matrix.compiler }}
       run: |
@@ -30,7 +30,7 @@
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
-    - name: Building from source
+    - name: Build from source
       env:
         CC: $${{ matrix.compiler }}
       run: |

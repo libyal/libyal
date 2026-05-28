@@ -28,7 +28,7 @@ jobs:
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
-    - name: Building from source
+    - name: Build from source
       run: |
         tests/build.sh $${{ matrix.configure_options }}
     - name: Run tests

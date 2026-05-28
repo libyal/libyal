@@ -9,7 +9,7 @@
     - name: Prepare shared libraries
       run: |
         tests/syncsharedlibs.sh --use-head
-    - name: Building from source
+    - name: Build from source
       env:
         CC: $${{ matrix.compiler }}
       run: |
