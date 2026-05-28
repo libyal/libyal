@@ -1,0 +1,29 @@
+# yaldevtools generator specification.
+---
+identifier: generate_coverage_cygwin
+type: template
+file: coverage.yml/coverage_cygwin.yml
+---
+identifier: generate_coverage_linux_header
+type: template
+condition: "'wide_character_type' in library_features"
+fallback: coverage.yml/coverage_linux_header.yml
+file: coverage.yml/coverage_linux_header-wide_character_type.yml
+---
+identifier: generate_coverage_linux_footer
+type: template
+file: coverage.yml/coverage_linux_footer.yml
+placeholders:
+- dpkg_build_dependencies
+---
+identifier: generate_header
+type: template
+file: coverage.yml/header.yml
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_coverage_cygwin
+- generate_coverage_linux_header
+- generate_coverage_linux_footer

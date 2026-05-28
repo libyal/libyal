@@ -1,33 +1,43 @@
 # yaldevtools generator specification.
 ---
-identifier: generate_footer
+identifier: generate_build_cygwin
 type: template
-file: build_windows.yml/footer.yml
+file: build_windows.yml/build_cygwin.yml
+---
+identifier: generate_build_footer
+type: template
+file: build_windows.yml/build_footer.yml
+---
+identifier: generate_build_header
+type: template
+file: build_windows.yml/build_header.yml
+---
+identifier: generate_build_install_bzip2
+type: template
+condition: "'bzip2' in library_build_dependencies"
+file: build_windows.yml/build_install-bzip2.yml
+---
+identifier: generate_build_install_winflexbison
+type: template
+condition: "'lex' in library_build_dependencies or 'yacc' in library_build_dependencies or 'lex' in tools_build_dependencies or 'yacc' in tools_build_dependencies"
+file: build_windows.yml/build_install-winflexbison.yml
+---
+identifier: generate_build_install_zlib
+type: template
+condition: "'zlib' in library_build_dependencies"
+file: build_windows.yml/build_install-zlib.yml
 ---
 identifier: generate_header
 type: template
 file: build_windows.yml/header.yml
 ---
-identifier: generate_install_bzip2
-type: template
-condition: "'bzip2' in library_build_dependencies"
-file: build_windows.yml/install-bzip2.yml
----
-identifier: generate_install_winflexbison
-type: template
-condition: "'lex' in library_build_dependencies or 'yacc' in library_build_dependencies or 'lex' in tools_build_dependencies or 'yacc' in tools_build_dependencies"
-file: build_windows.yml/install-winflexbison.yml
----
-identifier: generate_install_zlib
-type: template
-condition: "'zlib' in library_build_dependencies"
-file: build_windows.yml/install-zlib.yml
----
 identifier: main
 type: group
 operations:
 - generate_header
-- generate_install_winflexbison
-- generate_install_zlib
-- generate_install_bzip2
-- generate_footer
+- generate_build_header
+- generate_build_install_winflexbison
+- generate_build_install_zlib
+- generate_build_install_bzip2
+- generate_build_footer
+- generate_build_cygwin

@@ -22,5 +22,6 @@
     - name: Upload coverage report to Codecov
       uses: codecov/codecov-action@v6
       with:
-        name: $${{ matrix.os }}-gcc-no-optimization
+        name: $${{ matrix.codecov_name }}
         token: $${{ secrets.CODECOV_TOKEN }}
+        verbose: true

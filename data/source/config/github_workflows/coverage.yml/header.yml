@@ -1,0 +1,7 @@
+# Generate code coverage report and upload to Codecov.
+name: coverage
+on:
+  pull_request:
+  push:
+permissions: read-all
+jobs:

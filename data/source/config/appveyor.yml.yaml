@@ -79,27 +79,6 @@ file: appveyor.yml/matrix-allow_failures.yml
 placeholders:
 - allow_failures
 ---
-identifier: generate_environment_matrix_cygwin
-type: template
-file: appveyor.yml/environment-matrix-cygwin64.yml
----
-identifier: generate_environment_matrix_cygwin_python
-type: template
-condition: "'python_bindings' in project_features"
-file: appveyor.yml/environment-matrix-cygwin64-python.yml
----
-identifier: generate_environment_matrix_cygwin_tools
-type: group
-condition: "'tools' in project_features"
-operations:
-- generate_environment_matrix_cygwin_tools_static_executables
----
-identifier: generate_environment_matrix_cygwin_tools_static_executables
-type: template
-condition: "'mount_tool' in tools_features"
-fallback: appveyor.yml/environment-matrix-cygwin64-static-executables.yml
-file: appveyor.yml/environment-matrix-cygwin64-static-executables-fuse.yml
----
 identifier: generate_environment_matrix_macos
 type: template
 file: appveyor.yml/environment-matrix-macos.yml
@@ -153,12 +132,6 @@ identifier: generate_install_codecov
 type: template
 file: appveyor.yml/install-codecov.yml
 ---
-identifier: generate_install_cygwin
-type: template
-file: appveyor.yml/install-cygwin.yml
-placeholders:
-- cygwin_build_dependencies
----
 identifier: generate_install_dokan
 type: template
 condition: "'mount_tool' in tools_features"
@@ -211,9 +184,6 @@ operations:
 - generate_environment_matrix_nuget
 - generate_environment_matrix_macos
 - generate_environment_matrix_macos_python
-- generate_environment_matrix_cygwin
-- generate_environment_matrix_cygwin_python
-- generate_environment_matrix_cygwin_tools
 - generate_environment_matrix_mingw
 - generate_environment_matrix_mingw_python
 - generate_environment_matrix_mingw_tools
@@ -225,7 +195,6 @@ operations:
 - generate_install_bzip2
 - generate_install_dokan
 - generate_install_macos
-- generate_install_cygwin
 - generate_install_mingw
 - generate_install_codecov
 - generate_build_script_start

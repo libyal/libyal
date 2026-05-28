@@ -1,6 +1,6 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20260528
+dnl Version: 20260529
 
 dnl Function to test if a certain feature was disabled
 AC_DEFUN([AX_COMMON_ARG_DISABLE],
@@ -79,7 +79,7 @@ AC_DEFUN([AX_COMMON_CHECK_DISABLE_SHARED_LIBS],
   [AX_COMMON_ARG_DISABLE(
     [shared-libs],
     [shared_libs],
-    [disable shared library support])
+    [shared library support])
   ])
 
 dnl Function to detect whether debug output should be enabled
@@ -151,7 +151,7 @@ AC_DEFUN([AX_COMMON_CHECK_ENABLE_WINAPI],
   [AX_COMMON_ARG_ENABLE(
     [winapi],
     [winapi],
-    [enable WINAPI support for cross-compilation],
+    [WINAPI support for cross-compilation],
     [auto-detect])
 
   AS_IF(

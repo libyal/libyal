@@ -1,0 +1,52 @@
+  coverage_cygwin:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+        - configure_options: '--enable-code-coverage --enable-winapi=yes'
+          codecov_name: 'cygwin64-gcc-no-optimization'
+    steps:
+    - name: Configure git 
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v6
+    - name: Install Cygwin and build dependencies
+      uses: cygwin/cygwin-install-action@v6
+      with:
+        packages: autoconf, automake, curl, gettext-devel, git, libtool, make, mingw-w64-x86_64-gcc, pkg-config
+        platform: x86_64
+        add-to-path: true
+    - name: Build from source
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: $${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+        CONFIGURE_OPTIONS: $${{ matrix.configure_options }}
+        LD: ld
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+        tests/build.sh $${CONFIGURE_OPTIONS}
+    - name: Run tests
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: $${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+      run: |
+        tests/runtests.sh
+    - name: Generate coverage data
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: $${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+      run: |
+        for DIRECTORY in `find . -maxdepth 1 -type d`; do \
+          (cd $${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
+        done
+    # Cannot use codecov/codecov-action@v6 given it tries to use cygwin sh and fails.
+    - name: Upload coverage report to Codecov
+      shell: pwsh
+      env:
+        CODECOV_TOKEN: $${{ secrets.CODECOV_TOKEN }}
+      run: |
+        Invoke-WebRequest -Uri "https://cli.codecov.io/latest/windows/codecov.exe" -OutFile "codecov.exe"
+        Unblock-File -Path "./codecov.exe"
+        ./codecov.exe --verbose upload-coverage --git-service github --gcov-executable gcov --name "$${{ matrix.codecov_name }}"

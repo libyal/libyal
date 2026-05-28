@@ -1,19 +1,13 @@
 #!/usr/bin/env bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20231119
+# Version: 20260528
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
 #
-# When CHECK_WITH_GDB is set to a non-empty value the test executable
-# is run with gdb, otherwise it is run without.
-#
 # When CHECK_WITH_STDERR is set to a non-empty value the test executable
 # is run with error output to stderr.
-#
-# When CHECK_WITH_VALGRIND is set to a non-empty value the test executable
-# is run with valgrind, otherwise it is run without.
 #
 # PYTHON is used to determine the Python interpreter.
 
@@ -42,10 +36,6 @@ assert_availability_binary()
 
 # Checks the availability of binaries and exits if not available.
 #
-# Globals:
-#   CHECK_WITH_GDB
-#   CHECK_WITH_VALGRIND
-#
 assert_availability_binaries()
 {
 	assert_availability_binary cat;
@@ -60,15 +50,6 @@ assert_availability_binaries()
 	assert_availability_binary uname;
 	assert_availability_binary wc;
 	assert_availability_binary zcat;
-
-	if test -n "${CHECK_WITH_GDB}";
-	then
-		assert_availability_binary gdb;
-
-	elif test -n "${CHECK_WITH_VALGRIND}";
-	then
-		assert_availability_binary valgrind;
-	fi
 }
 
 # Checks if the test set is in the ignore list.
@@ -406,9 +387,7 @@ read_test_data_option_file()
 #
 # Globals:
 #   CHECK_WITH_ASAN
-#   CHECK_WITH_GDB
 #   CHECK_WITH_STDERR
-#   CHECK_WITH_VALGRIND
 #
 # Arguments:
 #   a string containing the test description
@@ -523,128 +502,6 @@ run_test_with_arguments()
 			fi
 		fi
 
-	elif test -n "${CHECK_WITH_GDB}";
-	then
-		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
-		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
-
-		if test "${PLATFORM}" = "Darwin";
-		then
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			else
-				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			fi
-
-		elif test "${PLATFORM}" = "CYGWIN_NT";
-		then
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			else
-				PATH="${LIBRARY_PATH}:${PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			fi
-
-		else
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			else
-				LD_LIBRARY_PATH="${LIBRARY_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			fi
-		fi
-
-	elif test -n "${CHECK_WITH_VALGRIND}";
-	then
-		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
-		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
-
-		local VALGRIND_LOG="valgrind.log-$$";
-		local VALGRIND_OPTIONS=("--tool=memcheck" "--leak-check=full" "--show-leak-kinds=definite,indirect,possible" "--track-origins=yes" "--log-file=${VALGRIND_LOG}");
-
-		if test "${PLATFORM}" = "Darwin";
-		then
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			else
-				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			fi
-
-		elif test "${PLATFORM}" = "CYGWIN_NT";
-		then
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			else
-				PATH="${LIBRARY_PATH}:${PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			fi
-
-		else
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			else
-				LD_LIBRARY_PATH="${LIBRARY_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			fi
-		fi
-		if test ${RESULT} -eq ${EXIT_SUCCESS};
-		then
-			grep "All heap blocks were freed -- no leaks are possible" ${VALGRIND_LOG} > /dev/null 2>&1;
-
-			if test $? -ne ${EXIT_SUCCESS};
-			then
-				# Ignore "still reachable"
-				# Also see: http://valgrind.org/docs/manual/faq.html#faq.deflost
-
-				grep "definitely lost: 0 bytes in 0 blocks" ${VALGRIND_LOG} > /dev/null 2>&1;
-				RESULT_DIRECTLY_LOST=$?;
-
-				grep "indirectly lost: 0 bytes in 0 blocks" ${VALGRIND_LOG} > /dev/null 2>&1;
-				RESULT_INDIRECTLY_LOST=$?;
-
-				grep "possibly lost: 0 bytes in 0 blocks" ${VALGRIND_LOG} > /dev/null 2>&1;
-				RESULT_POSSIBLY_LOST=$?;
-
-				grep "suppressed: 0 bytes in 0 blocks" ${VALGRIND_LOG} > /dev/null 2>&1;
-				RESULT_SUPPRESSED=$?;
-
-				if test ${RESULT_DIRECTLY_LOST} -ne ${EXIT_SUCCESS} || test ${RESULT_INDIRECTLY_LOST} -ne ${EXIT_SUCCESS} || test ${RESULT_POSSIBLY_LOST} -ne ${EXIT_SUCCESS} || test ${RESULT_SUPPRESSED} -ne ${EXIT_SUCCESS};
-				then
-					echo "Memory leakage detected.";
-					cat ${VALGRIND_LOG};
-
-					RESULT=${EXIT_FAILURE};
-				fi
-			fi
-			# Detect valgrind warnings.
-			local NUMBER_OF_LINES=`wc -l ${VALGRIND_LOG} | awk '{ print $1 }'`;
-
-			if test ${NUMBER_OF_LINES} -ne 15 && test ${NUMBER_OF_LINES} -ne 22;
-			then
-				echo "Unsupported number of lines: ${NUMBER_OF_LINES}";
-				cat ${VALGRIND_LOG};
-
-				RESULT=${EXIT_FAILURE};
-			fi
-		fi
-		rm -f ${VALGRIND_LOG};
-
 	elif test ${IS_PYTHON_SCRIPT} -eq 0;
 	then
 		if ! test -f "${TEST_EXECUTABLE}";
@@ -726,9 +583,7 @@ run_test_with_arguments()
 #
 # Globals:
 #   CHECK_WITH_ASAN
-#   CHECK_WITH_GDB
 #   CHECK_WITH_STDERR
-#   CHECK_WITH_VALGRIND
 #
 # Arguments:
 #   a string containing the path of the test executable
@@ -843,128 +698,6 @@ run_test_with_input_and_arguments()
 				RESULT=$?;
 			fi
 		fi
-
-	elif test -n "${CHECK_WITH_GDB}";
-	then
-		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
-		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
-
-		if test "${PLATFORM}" = "Darwin";
-		then
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			else
-				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			fi
-
-		elif test "${PLATFORM}" = "CYGWIN_NT";
-		then
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			else
-				PATH="${LIBRARY_PATH}:${PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			fi
-
-		else
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			else
-				LD_LIBRARY_PATH="${LIBRARY_PATH}" gdb -ex "set non-stop on" -ex "run" -ex "quit" --args "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			fi
-		fi
-
-	elif test -n "${CHECK_WITH_VALGRIND}";
-	then
-		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
-		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
-
-		local VALGRIND_LOG="valgrind.log-$$";
-		local VALGRIND_OPTIONS=("--tool=memcheck" "--leak-check=full" "--show-leak-kinds=definite,indirect,possible" "--track-origins=yes" "--log-file=${VALGRIND_LOG}");
-
-		if test "${PLATFORM}" = "Darwin";
-		then
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			else
-				DYLD_LIBRARY_PATH="${LIBRARY_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			fi
-
-		elif test "${PLATFORM}" = "CYGWIN_NT";
-		then
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			else
-				PATH="${LIBRARY_PATH}:${PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			fi
-
-		else
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			else
-				LD_LIBRARY_PATH="${LIBRARY_PATH}" valgrind ${VALGRIND_OPTIONS[@]} "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			fi
-		fi
-		if test ${RESULT} -eq ${EXIT_SUCCESS};
-		then
-			grep "All heap blocks were freed -- no leaks are possible" ${VALGRIND_LOG} > /dev/null 2>&1;
-
-			if test $? -ne ${EXIT_SUCCESS};
-			then
-				# Ignore "still reachable"
-				# Also see: http://valgrind.org/docs/manual/faq.html#faq.deflost
-
-				grep "definitely lost: 0 bytes in 0 blocks" ${VALGRIND_LOG} > /dev/null 2>&1;
-				RESULT_DIRECTLY_LOST=$?;
-
-				grep "indirectly lost: 0 bytes in 0 blocks" ${VALGRIND_LOG} > /dev/null 2>&1;
-				RESULT_INDIRECTLY_LOST=$?;
-
-				grep "possibly lost: 0 bytes in 0 blocks" ${VALGRIND_LOG} > /dev/null 2>&1;
-				RESULT_POSSIBLY_LOST=$?;
-
-				grep "suppressed: 0 bytes in 0 blocks" ${VALGRIND_LOG} > /dev/null 2>&1;
-				RESULT_SUPPRESSED=$?;
-
-				if test ${RESULT_DIRECTLY_LOST} -ne ${EXIT_SUCCESS} || test ${RESULT_INDIRECTLY_LOST} -ne ${EXIT_SUCCESS} || test ${RESULT_POSSIBLY_LOST} -ne ${EXIT_SUCCESS} || test ${RESULT_SUPPRESSED} -ne ${EXIT_SUCCESS};
-				then
-					echo "Memory leakage detected.";
-					cat ${VALGRIND_LOG};
-
-					RESULT=${EXIT_FAILURE};
-				fi
-			fi
-			# Detect valgrind warnings.
-			local NUMBER_OF_LINES=`wc -l ${VALGRIND_LOG} | awk '{ print $1 }'`;
-
-			if test ${NUMBER_OF_LINES} -ne 15 && test ${NUMBER_OF_LINES} -ne 22;
-			then
-				echo "Unsupported number of lines: ${NUMBER_OF_LINES}";
-				cat ${VALGRIND_LOG};
-
-				RESULT=${EXIT_FAILURE};
-			fi
-		fi
-		rm -f ${VALGRIND_LOG};
 
 	elif test ${IS_PYTHON_SCRIPT} -eq 0;
 	then

@@ -1,8 +1,0 @@
-  - TARGET: cygwin64-gcc
-    BUILD_ENVIRONMENT: cygwin64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: ""
-  - TARGET: cygwin64-gcc-no-optimization
-    BUILD_ENVIRONMENT: cygwin64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-code-coverage"

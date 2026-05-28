@@ -49,18 +49,6 @@ type: template
 condition: "'pthread' in library_features"
 file: build_linux.yml/build-no_pthread.yml
 ---
-identifier: generate_coverage
-type: template
-condition: "'wide_character_type' in library_features"
-fallback: build_linux.yml/coverage.yml
-file: build_linux.yml/coverage-wide_character_type.yml
----
-identifier: generate_footer
-type: template
-file: build_linux.yml/footer.yml
-placeholders:
-- dpkg_build_dependencies
----
 identifier: generate_header
 type: template
 file: build_linux.yml/header.yml
@@ -101,5 +89,3 @@ operations:
 - generate_build_with_fuse
 - generate_build_python_module
 - generate_shared
-- generate_coverage
-- generate_footer

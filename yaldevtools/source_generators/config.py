@@ -1167,6 +1167,16 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             output_filename,
         )
 
+        operations_file_name = os.path.join("github_workflows", "coverage.yml.yaml")
+        output_filename = os.path.join(".github", "workflows", "coverage.yml")
+        self._GenerateSectionsFromOperationsFile(
+            operations_file_name,
+            "main",
+            project_configuration,
+            template_mappings,
+            output_filename,
+        )
+
         operations_file_name = os.path.join("github_workflows", "build_linux.yml.yaml")
         output_filename = os.path.join(".github", "workflows", "build_linux.yml")
         self._GenerateSectionsFromOperationsFile(
