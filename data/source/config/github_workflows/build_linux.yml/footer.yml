@@ -10,7 +10,7 @@
       env:
         CC: $${{ matrix.compiler }}
       run: |
-        tests/build.sh $${{ matrix.configure_options }} --enable-code-coverage
+        tests/build.sh $${{ matrix.configure_options }}
     - name: Run tests
       run: |
         make check CHECK_WITH_STDERR=1 SKIP_TOOLS_END_TO_END_TESTS=1

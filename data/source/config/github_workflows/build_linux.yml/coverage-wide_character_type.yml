@@ -5,4 +5,4 @@
         include:
         - os: ubuntu-24.04
           compiler: 'gcc'
-          configure_options: '--enable-wide-character-type'
+          configure_options: 'CPPFLAGS=-DHAVE_MEMORY_TESTS=1 --enable-code-coverage --enable-wide-character-type'

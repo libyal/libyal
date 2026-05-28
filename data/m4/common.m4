@@ -1,6 +1,6 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20260527
+dnl Version: 20260528
 
 dnl Function to test if a certain feature was disabled
 AC_DEFUN([AX_COMMON_ARG_DISABLE],
@@ -59,7 +59,7 @@ AC_DEFUN([AX_COMMON_CHECK_COMPILER_FLAG],
 
   AC_MSG_CHECKING([whether $CC supports $1])
 
-  SAVE_CFLAGS="$CFLAGS"
+  BACKUP_CFLAGS="$CFLAGS"
 
   dnl Force -Werror so Clang/GCC fail on unsupported options
   CFLAGS="$CFLAGS -Werror $1"
@@ -71,7 +71,7 @@ AC_DEFUN([AX_COMMON_CHECK_COMPILER_FLAG],
     [AC_MSG_RESULT([no])
      eval variable_name="no"])
 
-  CFLAGS="$SAVE_CFLAGS"
+  CFLAGS="$BACKUP_CFLAGS"
   ])
 
 dnl Function to detect whether shared library support should be disabled
@@ -179,7 +179,7 @@ AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_JD],
   [AC_MSG_CHECKING(
     [whether printf supports the conversion specifier "%jd"])
 
-  SAVE_CFLAGS="$CFLAGS"
+  BACKUP_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS -Wall -Werror"
   AC_LANG_PUSH(C)
 
@@ -219,7 +219,7 @@ if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
     ])
 
   AC_LANG_POP(C)
-  CFLAGS="$SAVE_CFLAGS"
+  CFLAGS="$BACKUP_CFLAGS"
 
   AS_IF(
     [test "x$ac_cv_have_printf_jd" = xyes],
@@ -239,7 +239,7 @@ AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_ZD],
   [AC_MSG_CHECKING(
     [whether printf supports the conversion specifier "%zd"])
 
-  SAVE_CFLAGS="$CFLAGS"
+  BACKUP_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS -Wall -Werror"
   AC_LANG_PUSH(C)
 
@@ -279,7 +279,7 @@ if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
     ])
 
   AC_LANG_POP(C)
-  CFLAGS="$SAVE_CFLAGS"
+  CFLAGS="$BACKUP_CFLAGS"
 
   AS_IF(
     [test "x$ac_cv_have_printf_zd" = xyes],

@@ -1155,6 +1155,18 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         self._GenerateGitignore(project_configuration, template_mappings)
 
+        operations_file_name = os.path.join(
+            "github_workflows", "check_source.yml.yaml"
+        )
+        output_filename = os.path.join(".github", "workflows", "check_source.yml")
+        self._GenerateSectionsFromOperationsFile(
+            operations_file_name,
+            "main",
+            project_configuration,
+            template_mappings,
+            output_filename,
+        )
+
         operations_file_name = os.path.join("github_workflows", "build_linux.yml.yaml")
         output_filename = os.path.join(".github", "workflows", "build_linux.yml")
         self._GenerateSectionsFromOperationsFile(

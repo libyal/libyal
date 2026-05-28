@@ -1,3 +1,9 @@
+dnl Check if asan support should be enabled
+AX_TESTS_CHECK_ENABLE_ASAN
+
+dnl Check if ubsan support should be enabled
+AX_TESTS_CHECK_ENABLE_UBSAN
+
 dnl Check if code coverage support should be enabled
 AX_TESTS_CHECK_ENABLE_CODE_COVERAGE
 

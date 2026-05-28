@@ -3471,6 +3471,22 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["tests_export_tool_options"] = (
             project_configuration.tests_export_tool_options
         )
+        template_mappings["tests_export_tool_options_per_profile_ps1"] = ", ".join(
+            [
+                f'"{options:s}"'
+                for options in (
+                    project_configuration.tests_export_tool_options_per_profile
+                )
+            ]
+        )
+        template_mappings["tests_export_tool_options_per_profile_sh"] = " ".join(
+            [
+                f'"{options:s}"'
+                for options in (
+                    project_configuration.tests_export_tool_options_per_profile
+                )
+            ]
+        )
         template_mappings["tests_export_tool_profiles_ps1"] = ", ".join(
             project_configuration.tests_export_tool_profiles
         )
@@ -3506,6 +3522,14 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 )
             ]
         )
+        template_mappings["tests_info_tool_options_per_profile_sh"] = " ".join(
+            [
+                f'"{options:s}"'
+                for options in (
+                    project_configuration.tests_info_tool_options_per_profile
+                )
+            ]
+        )
         template_mappings["tests_info_tool_profiles_ps1"] = ", ".join(
             [
                 f'"{profile:s}"'
@@ -3533,7 +3557,22 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["tests_verify_tool_options"] = (
             project_configuration.tests_verify_tool_options
         )
-
+        template_mappings["tests_verify_tool_options_per_profile_ps1"] = ", ".join(
+            [
+                f'"{options:s}"'
+                for options in (
+                    project_configuration.tests_verify_tool_options_per_profile
+                )
+            ]
+        )
+        template_mappings["tests_verify_tool_options_per_profile_sh"] = " ".join(
+            [
+                f'"{options:s}"'
+                for options in (
+                    project_configuration.tests_verify_tool_options_per_profile
+                )
+            ]
+        )
         template_mappings["alignment_padding"] = " " * len(
             project_configuration.library_name_suffix
         )
