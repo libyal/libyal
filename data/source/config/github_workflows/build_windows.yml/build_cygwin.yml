@@ -6,7 +6,7 @@
         - configure_options: '--enable-winapi=no'
         - configure_options: '--enable-winapi=yes'
     steps:
-    - name: Configure git 
+    - name: Configure git
       run: git config --global core.autocrlf false
     - uses: actions/checkout@v6
     - name: Install Cygwin and build dependencies
@@ -31,6 +31,4 @@
       env:
         CHERE_INVOKING: 1
       run: |
-        PLATFORM=`uname -s | sed 's/-.*$$//'`
-        echo "Platform: $${PLATFORM}"
         tests/runtests.sh

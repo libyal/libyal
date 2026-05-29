@@ -19,18 +19,6 @@ identifier: generate_artifacts_start
 type: template
 file: appveyor.yml/artifacts-start.yml
 ---
-identifier: generate_after_test
-type: template
-file: appveyor.yml/after_test.yml
-placeholders:
-- library_name
----
-identifier: generate_build_script_end
-type: template
-file: appveyor.yml/build_script-end.yml
-placeholders:
-- library_name
----
 identifier: generate_build_script_macos
 type: template
 file: appveyor.yml/build_script-macos.yml
@@ -89,25 +77,6 @@ condition: "'python_bindings' in project_features"
 fallback: appveyor.yml/environment-matrix-macos-pkgbuild.yml
 file: appveyor.yml/environment-matrix-macos-python.yml
 ---
-identifier: generate_environment_matrix_mingw
-type: template
-file: appveyor.yml/environment-matrix-mingw-w64.yml
----
-identifier: generate_environment_matrix_mingw_python
-type: template
-condition: "'python_bindings' in project_features"
-file: appveyor.yml/environment-matrix-mingw-w64-python.yml
----
-identifier: generate_environment_matrix_mingw_tools
-type: group
-condition: "'tools' in project_features"
-operations:
-- generate_environment_matrix_mingw_tools_static_executables
----
-identifier: generate_environment_matrix_mingw_tools_static_executables
-type: template
-file: appveyor.yml/environment-matrix-mingw-w64-static-executables.yml
----
 identifier: generate_environment_matrix_nuget
 type: template
 condition: "'nuget' in project_features"
@@ -128,10 +97,6 @@ type: template
 condition: "'bzip2' in library_build_dependencies"
 file: appveyor.yml/install-bzip2.yml
 ---
-identifier: generate_install_codecov
-type: template
-file: appveyor.yml/install-codecov.yml
----
 identifier: generate_install_dokan
 type: template
 condition: "'mount_tool' in tools_features"
@@ -142,12 +107,6 @@ type: template
 file: appveyor.yml/install-macos.yml
 placeholders:
 - brew_build_dependencies
----
-identifier: generate_install_mingw
-type: template
-file: appveyor.yml/install-mingw-msys2.yml
-placeholders:
-- mingw_msys2_build_dependencies
 ---
 identifier: generate_install_start
 type: template
@@ -184,9 +143,6 @@ operations:
 - generate_environment_matrix_nuget
 - generate_environment_matrix_macos
 - generate_environment_matrix_macos_python
-- generate_environment_matrix_mingw
-- generate_environment_matrix_mingw_python
-- generate_environment_matrix_mingw_tools
 - generate_environment_matrix_allow_failures
 - generate_install_start
 - generate_install_testdata
@@ -195,13 +151,9 @@ operations:
 - generate_install_bzip2
 - generate_install_dokan
 - generate_install_macos
-- generate_install_mingw
-- generate_install_codecov
 - generate_build_script_start
 - generate_build_script_vs_with_python
 - generate_build_script_nuget
 - generate_build_script_macos
-- generate_build_script_end
 - generate_test_script
-- generate_after_test
 - generate_artifacts_and_deploy_script

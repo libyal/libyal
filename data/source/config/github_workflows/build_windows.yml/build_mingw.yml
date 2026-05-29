@@ -1,0 +1,25 @@
+  build_mingw:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+        - configure_options: ''
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up MSYS2 with MinGW-w64
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: autoconf automake gettext gettext-devel libtool make mingw-w64-x86_64-gcc pkg-config
+    - name: Build from source
+      shell: msys2 {0}
+      env:
+        CONFIGURE_OPTIONS: $${{ matrix.configure_options }}
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+        tests/build.sh $${CONFIGURE_OPTIONS}
+    - name: Run tests
+      shell: msys2 {0}
+      run: |
+        tests/runtests.sh

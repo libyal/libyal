@@ -16,6 +16,10 @@ file: coverage.yml/coverage_linux_footer.yml
 placeholders:
 - dpkg_build_dependencies
 ---
+identifier: generate_coverage_mingw
+type: template
+file: coverage.yml/coverage_mingw.yml
+---
 identifier: generate_header
 type: template
 file: coverage.yml/header.yml
@@ -27,3 +31,4 @@ operations:
 - generate_coverage_cygwin
 - generate_coverage_linux_header
 - generate_coverage_linux_footer
+- generate_coverage_mingw

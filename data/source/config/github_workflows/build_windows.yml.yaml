@@ -27,6 +27,10 @@ type: template
 condition: "'zlib' in library_build_dependencies"
 file: build_windows.yml/build_install-zlib.yml
 ---
+identifier: generate_build_mingw
+type: template
+file: build_windows.yml/build_mingw.yml
+---
 identifier: generate_header
 type: template
 file: build_windows.yml/header.yml
@@ -41,3 +45,4 @@ operations:
 - generate_build_install_bzip2
 - generate_build_footer
 - generate_build_cygwin
+- generate_build_mingw
