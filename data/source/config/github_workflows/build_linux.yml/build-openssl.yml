@@ -3,7 +3,7 @@
           configure_options: '--with-openssl=no'
         - os: ubuntu-24.04
           compiler: 'gcc'
-          configure_options: '--enable-openssl-evp-cipher=yes --enable-openssl-evp-md=yes'
+          configure_options: '--disable-openssl-evp-cipher --disable-openssl-evp-md'
         - os: ubuntu-24.04
           compiler: 'gcc'
-          configure_options: '--enable-openssl-evp-cipher=no --enable-openssl-evp-md=no'
+          configure_options: '--enable-openssl-evp-cipher --enable-openssl-evp-md'

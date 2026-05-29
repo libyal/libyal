@@ -139,11 +139,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         allow_failures = [
             f"  - TARGET: {target:s}"
-            for target in project_configuration.appveyor_allow_failures]
+            for target in project_configuration.appveyor_allow_failures
+        ]
 
         template_mappings["allow_failures"] = "\n".join(allow_failures)
         template_mappings["appveyor_allow_failures"] = (
-            project_configuration.appveyor_allow_failures)
+            project_configuration.appveyor_allow_failures
+        )
         template_mappings["has_test_data_script"] = bool(
             os.path.isfile("synctestdata.sh")
         )
@@ -1105,7 +1107,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         template_mappings = self._GetTemplateMappings(
             project_configuration, authors_separator=",\n *                          "
         )
-
         template_mappings["authors"] = "Joachim Metz <joachim.metz@gmail.com>"
 
         template_mappings["pc_libs_private"] = " ".join(pc_libs_private)
@@ -1155,10 +1156,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         self._GenerateGitignore(project_configuration, template_mappings)
 
-        operations_file_name = os.path.join(
-            "github_workflows", "check_source.yml.yaml"
-        )
+        operations_file_name = os.path.join("github_workflows", "check_source.yml.yaml")
         output_filename = os.path.join(".github", "workflows", "check_source.yml")
+
         self._GenerateSectionsFromOperationsFile(
             operations_file_name,
             "main",
@@ -1166,7 +1166,17 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
+        configure_options = ["--enable-code-coverage", "--enable-winapi"]
 
+        if include_header_file and include_header_file.have_wide_character_type:
+            configure_options.append("--enable-wide-character-type")
+
+        template_mappings["coverage_cygwin_configure_options"] = " ".join(
+            sorted(configure_options)
+        )
+        template_mappings["coverage_mingw_configure_options"] = " ".join(
+            sorted(configure_options)
+        )
         operations_file_name = os.path.join("github_workflows", "coverage.yml.yaml")
         output_filename = os.path.join(".github", "workflows", "coverage.yml")
         self._GenerateSectionsFromOperationsFile(
@@ -1176,6 +1186,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
+        del template_mappings["coverage_mingw_configure_options"]
+        del template_mappings["coverage_cygwin_configure_options"]
 
         operations_file_name = os.path.join("github_workflows", "build_linux.yml.yaml")
         output_filename = os.path.join(".github", "workflows", "build_linux.yml")
@@ -1186,11 +1198,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         operations_file_name = os.path.join(
             "github_workflows", "build_freebsd.yml.yaml"
         )
         output_filename = os.path.join(".github", "workflows", "build_freebsd.yml")
+
         self._GenerateSectionsFromOperationsFile(
             operations_file_name,
             "main",
@@ -1198,9 +1210,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         operations_file_name = os.path.join("github_workflows", "build_macos.yml.yaml")
         output_filename = os.path.join(".github", "workflows", "build_macos.yml")
+
         self._GenerateSectionsFromOperationsFile(
             operations_file_name,
             "main",
@@ -1208,7 +1220,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         if os.path.isdir("ossfuzz"):
             operations_file_name = os.path.join(
                 "github_workflows", "build_ossfuzz.yml.yaml"
@@ -1246,7 +1257,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-
         self._GenerateAppVeyorYML(project_configuration, template_mappings)
 
         self._GenerateConfigureAC(project_configuration, template_mappings)
@@ -1256,7 +1266,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         self._GenerateDpkg(
             project_configuration, template_mappings, output_writer, "dpkg"
         )
-
         self._GenerateRpmSpec(project_configuration, template_mappings)
 
         if project_configuration.HasPythonModule():
@@ -1267,7 +1276,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 template_mappings,
                 "pyproject.toml.in",
             )
-
             self._GenerateSectionsFromOperationsFile(
                 "tox.ini.yaml",
                 "main",

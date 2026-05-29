@@ -10,7 +10,7 @@ fi
 
 # Test "./configure && make && make check" with OpenSSL non-EVP implementation.
 
-run_configure_make_check "--enable-openssl-evp-cipher=no --enable-openssl-evp-md=no";
+run_configure_make_check "--disable-openssl-evp-cipher --disable-openssl-evp-md";
 RESULT=$$?;
 
 if test $${RESULT} -ne $${EXIT_SUCCESS};
@@ -20,7 +20,7 @@ fi
 
 # Test "./configure && make && make check" with OpenSSL EVP implementation.
 
-run_configure_make_check "--enable-openssl-evp-cipher=yes --enable-openssl-evp-md=yes";
+run_configure_make_check "--enable-openssl-evp-cipher --enable-openssl-evp-md";
 RESULT=$$?;
 
 if test $${RESULT} -ne $${EXIT_SUCCESS};

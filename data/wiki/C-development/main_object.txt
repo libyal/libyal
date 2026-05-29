@@ -63,9 +63,9 @@ ${project_name} provides both narrow and wide character string functions for fil
 The wide character equivalent of the open function is ${project_name}_${development_main_object}_open_wide.
 By default ${project_name} will only enable wide character string support on Windows since other operating systems have build-in support for UTF-8 narrow character strings.
 
-To compile with wide character support add --enable-wide-character-type=yes to configure, e.g.:
+To compile with wide character support add --enable-wide-character-type to configure, e.g.:
 ```
-./configure --enable-wide-character-type=yes
+./configure --enable-wide-character-type
 ```
 
 Or on Windows define WINAPI and either ``` _UNICODE ``` or ``` UNICODE ```

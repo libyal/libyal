@@ -3,7 +3,7 @@
     strategy:
       matrix:
         include:
-        - configure_options: '--enable-code-coverage --enable-winapi=yes'
+        - configure_options: '${coverage_mingw_configure_options}'
           codecov_name: 'mingw-w64-gcc-no-optimization'
     steps:
     - uses: actions/checkout@v6
@@ -12,7 +12,7 @@
       with:
         msystem: MINGW64
         update: true
-        install: autoconf automake gettext gettext-devel libtool make mingw-w64-x86_64-gcc pkg-config
+        install: autoconf automake gettext gettext-devel git libtool make mingw-w64-x86_64-gcc pkg-config
     - name: Build from source
       shell: msys2 {0}
       env:

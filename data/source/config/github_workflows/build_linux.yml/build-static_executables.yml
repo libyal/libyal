@@ -1,3 +1,3 @@
         - os: ubuntu-24.04
           compiler: 'gcc'
-          configure_options: '--enable-static-executables=yes --enable-multi-threading-support=no'
+          configure_options: '--disable-multi-threading-support --enable-static-executables'

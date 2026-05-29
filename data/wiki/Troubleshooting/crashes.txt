@@ -6,7 +6,7 @@ If you want to report one of these please include the back trace.
 ### GNU Compiler Collection (GCC)
 Compile ${project_name} with debug symbols:
 ```
-CPPCFLAGS=-g ./configure --enable-shared=no
+CPPCFLAGS=-g ./configure --disable-shared
 make
 ```
 

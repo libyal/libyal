@@ -1,6 +1,6 @@
 ## Static library
-To make a static library add --enable-shared=no to configure, .e.g:
+To make a static library add --disable-shared to configure, .e.g:
 ```
-./configure --enable-shared=no
+./configure --disable-shared
 ```
 

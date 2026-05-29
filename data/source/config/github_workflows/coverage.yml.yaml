@@ -3,6 +3,8 @@
 identifier: generate_coverage_cygwin
 type: template
 file: coverage.yml/coverage_cygwin.yml
+placeholders:
+- coverage_cygwin_configure_options
 ---
 identifier: generate_coverage_linux_header
 type: template
@@ -19,6 +21,8 @@ placeholders:
 identifier: generate_coverage_mingw
 type: template
 file: coverage.yml/coverage_mingw.yml
+placeholders:
+- coverage_mingw_configure_options
 ---
 identifier: generate_header
 type: template

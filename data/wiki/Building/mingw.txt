@@ -5,16 +5,16 @@ ${mingw_build_dependencies}
 
 To build use:
 ```
-mingw32-configure --prefix=/opt/local/i386-mingw32 --enable-winapi=yes
+mingw32-configure --prefix=/opt/local/i386-mingw32 --enable-winapi
 mingw32-make
 ```
 
-It is recommended that you use WINAPI support but it is possible to compile ${project_name} without it (--enable-winapi=no).
+It is recommended that you use WINAPI support but it is possible to compile ${project_name} without it (--disable-winapi).
 The default behavior is that configure will try to auto-detect MinGW and enable WINAPI support.
 
 If mingw32-configure and mingw32-make are not available you can build it with:
 ```
-./configure --host=i386-mingw32 --prefix=/opt/local/i386-mingw32 --enable-winapi=yes
+./configure --host=i386-mingw32 --prefix=/opt/local/i386-mingw32 --enable-winapi
 make
 ```
 
@@ -31,7 +31,7 @@ MINGWFLAGS="-mwin32 -mconsole -march=i586 "
 CFLAGS="$$MINGWFLAGS"
 CXXFLAGS="$$MINGWFLAGS"
 
-CC=$$CC CXX=$$CXX AR=$$AR OBJDUMP=$$OBJDUMP RANLIB=$$RANLIB STRIP=$$STRIP ./configure --host=i586-mingw32msvc --prefix=/opt/local/i386-mingw32 --enable-winapi=yes
+CC=$$CC CXX=$$CXX AR=$$AR OBJDUMP=$$OBJDUMP RANLIB=$$RANLIB STRIP=$$STRIP ./configure --host=i586-mingw32msvc --prefix=/opt/local/i386-mingw32 --enable-winapi
 CC=$$CC CXX=$$CXX AR=$$AR OBJDUMP=$$OBJDUMP RANLIB=$$RANLIB STRIP=$$STRIP CFLAGS="$$CFLAGS" CXXFLAGS="$$CXXFLAGS" make
 ```
 
@@ -42,7 +42,7 @@ If you get compiler errors like:
 
 That means WINVER is not set or set to a version predating Windows XP (0x0501) and you'll have to set WINVER manually like:
 ```
-CFLAGS=-DWINVER=0x0501 ./configure --host=i386-mingw32 --enable-winapi=yes
+CFLAGS=-DWINVER=0x0501 ./configure --host=i386-mingw32 --enable-winapi
 ```
 
 You should end up with the following DLL:

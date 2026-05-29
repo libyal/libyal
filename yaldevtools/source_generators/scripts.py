@@ -52,7 +52,7 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
             template_names.append("tests-python.sh")
 
         asan_configure_options = []
-        coverage_configure_options = ["--enable-shared=no"]
+        coverage_configure_options = ["--disable-shared"]
 
         if project_configuration.HasDependencyCrypto():
             asan_configure_options.append("--with-openssl=no")

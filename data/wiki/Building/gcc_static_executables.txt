@@ -4,14 +4,14 @@ Some distributions provide separate packages for static versions of libraries. M
 * glibc
 ${gcc_static_build_dependencies}
 
-To make static executables add --enable-static-executables=yes to configure, .e.g:
+To make static executables add --enable-static-executables to configure, .e.g:
 ```
-./configure --enable-static-executables=yes
+./configure --enable-static-executables
 ```
 
 Check if the executables can be run.
 
-Disable multi-thread support with `--enable-multi-threading-support=no` if you get an error similar to:
+Disable multi-thread support with `--disable-multi-threading-support` if you get an error similar to:
 ```
 libcthreads_read_write_lock_grab_for_write: unable to lock read/write lock for write with error: Deadlock condition detected.
 ```

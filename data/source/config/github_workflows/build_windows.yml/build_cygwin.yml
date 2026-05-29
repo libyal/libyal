@@ -3,8 +3,8 @@
     strategy:
       matrix:
         include:
-        - configure_options: '--enable-winapi=no'
-        - configure_options: '--enable-winapi=yes'
+        - configure_options: '--disable-winapi'
+        - configure_options: '--enable-winapi'
     steps:
     - name: Configure git
       run: git config --global core.autocrlf false

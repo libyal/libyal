@@ -3,7 +3,7 @@
     strategy:
       matrix:
         include:
-        - configure_options: '--enable-code-coverage --enable-winapi=yes'
+        - configure_options: '${coverage_cygwin_configure_options}'
           codecov_name: 'cygwin64-gcc-no-optimization'
     steps:
     - name: Configure git 
