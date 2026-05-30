@@ -1,10 +1,3 @@
-  build_cygwin:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        include:
-        - configure_options: '--disable-winapi'
-        - configure_options: '--enable-winapi'
     steps:
     - name: Configure git
       run: git config --global core.autocrlf false
@@ -12,7 +5,7 @@
     - name: Install Cygwin and build dependencies
       uses: cygwin/cygwin-install-action@v6
       with:
-        packages: autoconf, automake, gettext-devel, git, libtool, make, mingw-w64-x86_64-gcc, pkg-config
+        packages: ${cygwin_build_dependencies}
         platform: x86_64
         add-to-path: true
     - name: Build from source

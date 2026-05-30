@@ -1,9 +1,0 @@
-  coverage_linux:
-    runs-on: $${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-        - os: ubuntu-24.04
-          compiler: 'gcc'
-          configure_options: 'CPPFLAGS=-DHAVE_MEMORY_TESTS=1 --enable-code-coverage --enable-wide-character-type'
-          codecov_name: 'ubuntu-24.04-gcc-no-optimization'

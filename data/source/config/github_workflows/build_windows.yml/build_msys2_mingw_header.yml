@@ -1,0 +1,5 @@
+  build_msys2_mingw:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:

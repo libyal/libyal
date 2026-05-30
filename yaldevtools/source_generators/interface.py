@@ -357,7 +357,6 @@ class BaseSourceFileGenerator:
         selection_input = self._GetPlaceholderValue(
             namespace, selection_operation.input
         )
-
         operation_name = selection_operation.options.get(
             selection_input, selection_operation.default
         )

@@ -36,7 +36,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         "cygwin_build_dependencies": "_GetCygwinBuildDependencies",
         "dpkg_build_dependencies": "_GetDpkgBuildDependencies",
         "freebsd_build_dependencies": "_GetFreeBSDBuildDependencies",
-        "mingw_msys2_build_dependencies": "_GetMinGWMSYS2BuildDependencies",
+        "msys2_mingw_build_dependencies": "_GetMSYS2MinGWBuildDependencies",
         "python_module_development_status": "_GetPythonModuleDevelopmentStatus",
     }
 
@@ -141,7 +141,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             f"  - TARGET: {target:s}"
             for target in project_configuration.appveyor_allow_failures
         ]
-
         template_mappings["allow_failures"] = "\n".join(allow_failures)
         template_mappings["appveyor_allow_failures"] = (
             project_configuration.appveyor_allow_failures
@@ -182,7 +181,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             ".codecov.yml",
         )
-
         del template_mappings["ignore_paths"]
 
     def _GenerateConfigureAC(self, project_configuration, template_mappings):
@@ -203,7 +201,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             Dependency(is_local=True, name=name)
             for name in makefile_am_file.library_dependencies
         ]
-
         libcrypto_index = len(makefile_am_file.library_dependencies)
         if "libcaes" in makefile_am_file.library_dependencies:
             libcaes_index = makefile_am_file.library_dependencies.index("libcaes")
@@ -605,7 +602,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         dpkg_build_dependencies = self._GetDpkgBuildDependenciesDpkgControl(
             project_configuration
         )
-
         template_mappings["dpkg_build_dependencies"] = ", ".join(
             dpkg_build_dependencies
         )
@@ -617,7 +613,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 project_configuration.library_description[1:],
             ]
         )
-
         template_filename = os.path.join(templates_path, "control")
         output_filename = os.path.join(output_directory, "control")
         self._GenerateSection(template_filename, template_mappings, output_filename)
@@ -832,12 +827,21 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         tools_build_dependencies = namespace.get("tools_build_dependencies", None) or []
         project_features = namespace.get("project_features", None) or []
 
-        cygwin_build_dependencies = ["gettext-devel"]
-
+        # TODO: have mingw build mingw-w64-x86_64-gcc
+        cygwin_build_dependencies = [
+            "autoconf",
+            "automake",
+            "binutils",
+            "gcc-core",
+            "gettext-devel",
+            "git",
+            "libtool",
+            "make",
+            "pkg-config",
+        ]
         cygwin_build_dependencies.extend(
             namespace.get("cygwin_build_dependencies", None) or []
         )
-
         if "yacc" in library_build_dependencies or "yacc" in tools_build_dependencies:
             cygwin_build_dependencies.append("bison")
         if "lex" in library_build_dependencies or "lex" in tools_build_dependencies:
@@ -859,7 +863,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             cygwin_build_dependencies.append("libssl-devel")
 
         if "python_bindings" in project_features:
-            cygwin_build_dependencies.append("python3-devel")
+            cygwin_build_dependencies.extend(["python312", "python312-devel"])
 
         if "uuid" in library_build_dependencies or "uuid" in tools_build_dependencies:
             cygwin_build_dependencies.append("libuuid-devel")
@@ -867,7 +871,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         if "fuse" in tools_build_dependencies:
             cygwin_build_dependencies.append("cygfuse")
 
-        return " ".join([f"-P {name:s}" for name in sorted(cygwin_build_dependencies)])
+        return ", ".join(sorted(cygwin_build_dependencies))
 
     def _GetDpkgBuildDependencies(self, namespace):
         """Retrieves the dpkg build dependencies.
@@ -892,11 +896,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             "libtool",
             "pkg-config",
         ]
-
         dpkg_build_dependencies.extend(
             namespace.get("dpkg_build_dependencies", None) or []
         )
-
         if "yacc" in library_build_dependencies:
             dpkg_build_dependencies.append("byacc")
         if "lex" in library_build_dependencies:
@@ -982,11 +984,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             "libtool",
             "pkgconf",
         ]
-
         freebsd_build_dependencies.extend(
             namespace.get("freebsd_build_dependencies", None) or []
         )
-
         if "yacc" in library_build_dependencies or "yacc" in tools_build_dependencies:
             freebsd_build_dependencies.append("byacc")
         if "lex" in library_build_dependencies or "lex" in tools_build_dependencies:
@@ -1003,7 +1003,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         return " ".join(sorted(freebsd_build_dependencies))
 
-    def _GetMinGWMSYS2BuildDependencies(self, namespace):
+    def _GetMSYS2MinGWBuildDependencies(self, namespace):
         """Retrieves the MinGW-MSYS2 build dependencies.
 
         Args:
@@ -1018,33 +1018,33 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         tools_build_dependencies = namespace.get("tools_build_dependencies", None) or []
         project_features = namespace.get("project_features", None) or []
 
-        mingw_msys2_build_dependencies = [
+        msys2_mingw_build_dependencies = [
             "autoconf",
             "automake",
+            "gettext",
             "gettext-devel",
+            "git",
             "libtool",
             "make",
             "mingw-w64-x86_64-gcc",
             "pkg-config",
         ]
-
-        mingw_msys2_build_dependencies.extend(
-            namespace.get("mingw_msys2_build_dependencies", None) or []
+        msys2_mingw_build_dependencies.extend(
+            namespace.get("msys2_mingw_build_dependencies", None) or []
         )
-
         if "yacc" in library_build_dependencies or "yacc" in tools_build_dependencies:
-            mingw_msys2_build_dependencies.append("msys/bison")
+            msys2_mingw_build_dependencies.append("msys/bison")
         if "lex" in library_build_dependencies or "lex" in tools_build_dependencies:
-            mingw_msys2_build_dependencies.append("msys/flex")
+            msys2_mingw_build_dependencies.append("msys/flex")
 
         # TODO: add support for other dependencies.
         if "zlib" in library_build_dependencies:
-            mingw_msys2_build_dependencies.append("msys/zlib-devel")
+            msys2_mingw_build_dependencies.append("msys/zlib-devel")
 
         if "python_bindings" in project_features:
-            mingw_msys2_build_dependencies.append("mingw-w64-x86_64-python3")
+            msys2_mingw_build_dependencies.append("mingw-w64-x86_64-python3")
 
-        return " ".join(sorted(mingw_msys2_build_dependencies))
+        return " ".join(sorted(msys2_mingw_build_dependencies))
 
     def _GetPythonModuleDevelopmentStatus(self, namespace):
         """Retrieves the Python module development status.
@@ -1166,15 +1166,26 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-        configure_options = ["--enable-code-coverage", "--enable-winapi"]
+        configure_options = ["--enable-code-coverage"]
 
         if include_header_file and include_header_file.have_wide_character_type:
             configure_options.append("--enable-wide-character-type")
 
+        if project_configuration.HasDependencyCrypto():
+            configure_options.append("--with-openssl=no")
+
+        linux_configure_options = configure_options.copy()
+        linux_configure_options.append("CPPFLAGS=-DHAVE_MEMORY_TESTS=1")
+
+        configure_options.append("--enable-winapi")
+
         template_mappings["coverage_cygwin_configure_options"] = " ".join(
             sorted(configure_options)
         )
-        template_mappings["coverage_mingw_configure_options"] = " ".join(
+        template_mappings["coverage_linux_configure_options"] = " ".join(
+            sorted(linux_configure_options)
+        )
+        template_mappings["coverage_msys2_mingw_configure_options"] = " ".join(
             sorted(configure_options)
         )
         operations_file_name = os.path.join("github_workflows", "coverage.yml.yaml")
@@ -1186,7 +1197,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
-        del template_mappings["coverage_mingw_configure_options"]
+        del template_mappings["coverage_msys2_mingw_configure_options"]
+        del template_mappings["coverage_linux_configure_options"]
         del template_mappings["coverage_cygwin_configure_options"]
 
         operations_file_name = os.path.join("github_workflows", "build_linux.yml.yaml")
@@ -1246,6 +1258,20 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 output_filename,
             )
 
+        build_matrix = ["windows-11-arm", "windows-2022"]
+        build_cygwin_matrix = [""]
+        build_msys2_mingw_matrix = ["--disable-winapi", "--enable-winapi"]
+
+        if project_configuration.HasPythonModule():
+            build_cygwin_matrix.append("--enable-python")
+            build_msys2_mingw_matrix.append(
+                "--disable-nls --disable-shared-libs --enable-python"
+            )
+
+        template_mappings["build_matrix"] = build_matrix
+        template_mappings["build_cygwin_matrix"] = build_cygwin_matrix
+        template_mappings["build_msys2_mingw_matrix"] = build_msys2_mingw_matrix
+
         operations_file_name = os.path.join(
             "github_workflows", "build_windows.yml.yaml"
         )
@@ -1257,6 +1283,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             output_filename,
         )
+        del template_mappings["build_msys2_mingw_matrix"]
+        del template_mappings["build_cygwin_matrix"]
+        del template_mappings["build_matrix"]
+
         self._GenerateAppVeyorYML(project_configuration, template_mappings)
 
         self._GenerateConfigureAC(project_configuration, template_mappings)

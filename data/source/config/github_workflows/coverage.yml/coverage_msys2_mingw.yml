@@ -1,9 +1,9 @@
-  coverage_mingw:
+  coverage_msys2_mingw:
     runs-on: windows-latest
     strategy:
       matrix:
         include:
-        - configure_options: '${coverage_mingw_configure_options}'
+        - configure_options: '${coverage_msys2_mingw_configure_options}'
           codecov_name: 'mingw-w64-gcc-no-optimization'
     steps:
     - uses: actions/checkout@v6
@@ -12,7 +12,7 @@
       with:
         msystem: MINGW64
         update: true
-        install: autoconf automake gettext gettext-devel git libtool make mingw-w64-x86_64-gcc pkg-config
+        install: ${msys2_mingw_build_dependencies}
     - name: Build from source
       shell: msys2 {0}
       env:

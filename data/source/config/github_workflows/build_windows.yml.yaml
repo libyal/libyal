@@ -1,8 +1,28 @@
 # yaldevtools generator specification.
 ---
-identifier: generate_build_cygwin
+identifier: generate_build_cygwin_footer
 type: template
-file: build_windows.yml/build_cygwin.yml
+file: build_windows.yml/build_cygwin_footer.yml
+placeholders:
+- cygwin_build_dependencies
+---
+identifier: generate_build_cygwin_header
+type: template
+file: build_windows.yml/build_cygwin_header.yml
+---
+identifier: generate_build_cygwin_matrix
+type: sequence
+condition: "build_cygwin_matrix != []"
+input: build_cygwin_matrix
+placeholder: build_cygwin_matrix_entry
+operations:
+- generate_build_cygwin_matrix_entry
+---
+identifier: generate_build_cygwin_matrix_entry
+type: template
+file: build_windows.yml/build_cygwin_matrix_entry.yml
+placeholders:
+- build_cygwin_matrix_entry
 ---
 identifier: generate_build_footer
 type: template
@@ -27,9 +47,47 @@ type: template
 condition: "'zlib' in library_build_dependencies"
 file: build_windows.yml/build_install-zlib.yml
 ---
-identifier: generate_build_mingw
+identifier: generate_build_matrix
+type: sequence
+condition: "build_matrix != []"
+input: build_matrix
+placeholder: build_matrix_entry
+operations:
+- generate_build_matrix_entry
+---
+identifier: generate_build_matrix_entry
 type: template
-file: build_windows.yml/build_mingw.yml
+file: build_windows.yml/build_matrix_entry.yml
+placeholders:
+- build_matrix_entry
+---
+identifier: generate_build_msys2_mingw_footer
+type: template
+file: build_windows.yml/build_msys2_mingw_footer.yml
+placeholders:
+- msys2_mingw_build_dependencies
+---
+identifier: generate_build_msys2_mingw_header
+type: template
+file: build_windows.yml/build_msys2_mingw_header.yml
+---
+identifier: generate_build_msys2_mingw_matrix
+type: sequence
+condition: "build_msys2_mingw_matrix != []"
+input: build_msys2_mingw_matrix
+placeholder: build_msys2_mingw_matrix_entry
+operations:
+- generate_build_msys2_mingw_matrix_entry
+---
+identifier: generate_build_msys2_mingw_matrix_entry
+type: template
+file: build_windows.yml/build_msys2_mingw_matrix_entry.yml
+placeholders:
+- build_msys2_mingw_matrix_entry
+---
+identifier: generate_build_steps
+type: template
+file: build_windows.yml/build_steps.yml
 ---
 identifier: generate_header
 type: template
@@ -40,9 +98,15 @@ type: group
 operations:
 - generate_header
 - generate_build_header
+- generate_build_matrix
+- generate_build_steps
 - generate_build_install_winflexbison
 - generate_build_install_zlib
 - generate_build_install_bzip2
 - generate_build_footer
-- generate_build_cygwin
-- generate_build_mingw
+- generate_build_cygwin_header
+- generate_build_cygwin_matrix
+- generate_build_cygwin_footer
+- generate_build_msys2_mingw_header
+- generate_build_msys2_mingw_matrix
+- generate_build_msys2_mingw_footer

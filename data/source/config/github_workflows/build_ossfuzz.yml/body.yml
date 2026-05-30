@@ -8,7 +8,7 @@ jobs:
   build_ossfuzz:
     runs-on: $${{ matrix.os }}
     strategy:
-      matrix: [
+      matrix:
         os: ["ubuntu-24.04"]
     steps:
     - name: Install build dependencies

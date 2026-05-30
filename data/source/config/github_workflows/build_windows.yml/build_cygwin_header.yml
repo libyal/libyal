@@ -1,5 +1,5 @@
-  build:
-    runs-on: $${{ matrix.os }}
+  build_cygwin:
+    runs-on: windows-latest
     strategy:
       matrix:
         include:

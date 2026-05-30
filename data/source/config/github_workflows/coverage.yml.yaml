@@ -4,25 +4,22 @@ identifier: generate_coverage_cygwin
 type: template
 file: coverage.yml/coverage_cygwin.yml
 placeholders:
+- cygwin_build_dependencies
 - coverage_cygwin_configure_options
 ---
-identifier: generate_coverage_linux_header
+identifier: generate_coverage_linux
 type: template
-condition: "'wide_character_type' in library_features"
-fallback: coverage.yml/coverage_linux_header.yml
-file: coverage.yml/coverage_linux_header-wide_character_type.yml
----
-identifier: generate_coverage_linux_footer
-type: template
-file: coverage.yml/coverage_linux_footer.yml
+file: coverage.yml/coverage_linux.yml
 placeholders:
+- coverage_linux_configure_options
 - dpkg_build_dependencies
 ---
-identifier: generate_coverage_mingw
+identifier: generate_coverage_msys2_mingw
 type: template
-file: coverage.yml/coverage_mingw.yml
+file: coverage.yml/coverage_msys2_mingw.yml
 placeholders:
-- coverage_mingw_configure_options
+- msys2_mingw_build_dependencies
+- coverage_msys2_mingw_configure_options
 ---
 identifier: generate_header
 type: template
@@ -33,6 +30,5 @@ type: group
 operations:
 - generate_header
 - generate_coverage_cygwin
-- generate_coverage_linux_header
-- generate_coverage_linux_footer
-- generate_coverage_mingw
+- generate_coverage_linux
+- generate_coverage_msys2_mingw

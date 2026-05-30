@@ -1,0 +1,1 @@
+        - configure_options: '${build_msys2_mingw_matrix_entry}'
