@@ -1,6 +1,32 @@
 dnl Functions for testing
 dnl
-dnl Version: 20260529
+dnl Version: 20260530
+
+dnl Function to detect whether the file system is case-insensitive
+AC_DEFUN([AX_TEST_CHECK_FILE_SYSTEM_IS_CASE_INSENSITIVE],
+  [AC_MSG_CHECKING([whether the file system is case-insensitive])
+
+  as_tmp_case_file="conftest.case.tst"
+  touch "$as_tmp_case_file" 2>/dev/null
+
+  AS_IF(
+    [test -f CONFTEST.CASE.TST],
+    [ac_cv_file_system_case_insentive=yes],
+    [ac_cv_file_system_case_insentive=no])
+
+  rm -f "$as_tmp_case_file" CONFTEST.CASE.TST 2>/dev/null
+
+  AC_MSG_RESULT(
+    [$ac_cv_file_system_case_insentive])
+
+  AS_IF(
+    [test "x$ac_cv_file_system_case_insentive" = xyes],
+    [AC_DEFINE(
+      [HAVE_CASE_INSENSITIVE_FILE_SYSTEM],
+      [1],
+      [Define to 1 whether file system is case-insensitive.])
+    ])
+  ])
 
 dnl Function to check whether libasan is functional
 AC_DEFUN([AX_TESTS_CHECK_LIBASAN],
@@ -156,6 +182,8 @@ AC_DEFUN([AX_TESTS_CHECK_LOCAL],
   AC_CHECK_LIB(
     dl,
     dlsym)
+
+  AX_TEST_CHECK_FILE_SYSTEM_IS_CASE_INSENSITIVE
 
   AS_IF(
     [test "x$lt_cv_prog_gnu_ld" = xyes && test "x$ac_cv_lib_dl_dlsym" = xyes],

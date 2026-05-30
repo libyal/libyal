@@ -1,6 +1,6 @@
 dnl Checks for libcdirectory required headers and functions
 dnl
-dnl Version: 20260529
+dnl Version: 20260530
 
 dnl Function to detect if libcdirectory is available
 dnl ac_libcdirectory_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -112,7 +112,7 @@ AC_DEFUN([AX_LIBCDIRECTORY_CHECK_LIB],
     ])
   ])
 
-dnl Function to detect whether a readdir_r is deprecated
+dnl Function to detect whether readdir_r is deprecated
 AC_DEFUN([AX_LIBCDIRECTORY_CHECK_DEPRECATED_READDIR_R],
   [AC_REQUIRE([AC_PROG_CC])
 

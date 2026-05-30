@@ -1262,7 +1262,14 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         build_matrix = ["windows-11-arm", "windows-2022"]
         build_cygwin_matrix = [""]
-        build_msys2_mingw_matrix = ["--disable-winapi", "--enable-winapi"]
+
+        if include_header_file and include_header_file.have_wide_character_type:
+            build_msys2_mingw_matrix = [
+                "--disable-winapi --enable-wide-character-type",
+                "--enable-winapi --enable-wide-character-type",
+            ]
+        else:
+            build_msys2_mingw_matrix = ["--disable-winapi", "--enable-winapi"]
 
         if project_configuration.HasPythonModule():
             build_cygwin_matrix.append("--enable-python")

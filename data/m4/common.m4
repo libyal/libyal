@@ -1,6 +1,6 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20260529
+dnl Version: 20260530
 
 dnl Function to test if a certain feature was disabled
 AC_DEFUN([AX_COMMON_ARG_DISABLE],
@@ -324,7 +324,7 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
   AC_CHECK_HEADERS([wchar.h wctype.h])
 
   dnl File stream functions used in common/file_stream.h
-  AC_CHECK_FUNCS([fclose feof fgets fopen fread fseeko fseeko64 fwrite vfprintf])
+  AC_CHECK_FUNCS([fclose feof fgets fgetws fopen fread fseeko fseeko64 fwrite vfprintf])
 
   AS_IF(
     [test "x$ac_cv_func_fclose" != xyes],
@@ -384,9 +384,7 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
 
   AS_IF(
     [test "x$ac_cv_enable_wide_character_type" != xno],
-    [AC_CHECK_FUNCS([fgetws])
-
-    AS_IF(
+    [AS_IF(
       [test "x$ac_cv_func_fgetws" != xyes],
       [AC_MSG_FAILURE(
         [Missing function: fgetws],
@@ -522,11 +520,11 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
     ])
 
   dnl Wide character string functions used in common/wide_string.h
+  AC_CHECK_FUNCS([swprintf towlower wcscasecmp wcschr wcslen wcsncasecmp wcsncmp wcsncpy wcsnicmp wcsrchr wcsstr wmemchr wmemcmp wmemcpy wmemrchr])
+
   AS_IF(
     [test "x$ac_cv_enable_wide_character_type" != xno],
-    [AC_CHECK_FUNCS([swprintf towlower wcscasecmp wcschr wcslen wcsncasecmp wcsncmp wcsncpy wcsnicmp wcsrchr wcsstr wmemchr wmemcmp wmemcpy wmemrchr])
-
-    AS_IF(
+    [AS_IF(
       [test "x$ac_cv_func_swprintf" != xyes],
       [AC_MSG_FAILURE(
         [Missing function: swprintf],
