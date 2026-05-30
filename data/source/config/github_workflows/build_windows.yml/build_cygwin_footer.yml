@@ -8,6 +8,13 @@
         packages: ${cygwin_build_dependencies}
         platform: x86_64
         add-to-path: true
+    - name: Download test data
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: $${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
     - name: Build from source
       shell: bash --login -e -o pipefail -o igncr {0}
       working-directory: $${{ github.workspace }}
@@ -16,8 +23,10 @@
         CONFIGURE_OPTIONS: $${{ matrix.configure_options }}
         LD: ld
       run: |
-        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
-        tests/build.sh $${CONFIGURE_OPTIONS}
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure $${CONFIGURE_OPTIONS}
+        make > /dev/null
     - name: Run tests
       shell: bash --login -e -o pipefail -o igncr {0}
       working-directory: $${{ github.workspace }}

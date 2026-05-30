@@ -6,13 +6,19 @@
         msystem: MINGW64
         update: true
         install: ${msys2_mingw_build_dependencies}
+    - name: Download test data
+      shell: msys2 {0}
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
     - name: Build from source
       shell: msys2 {0}
       env:
         CONFIGURE_OPTIONS: $${{ matrix.configure_options }}
       run: |
-        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
-        tests/build.sh $${CONFIGURE_OPTIONS}
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure $${CONFIGURE_OPTIONS}
+        make > /dev/null
     - name: Run tests
       shell: msys2 {0}
       run: |

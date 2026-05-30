@@ -975,10 +975,12 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         )
         tools_build_dependencies = namespace.get("tools_build_dependencies", None) or []
 
+        # Note that the test scripts require bash.
         freebsd_build_dependencies = [
             "autoconf",
             "automake",
             "bash",
+            "curl",
             "gettext",
             "git",
             "libtool",

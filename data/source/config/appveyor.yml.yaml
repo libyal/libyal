@@ -19,10 +19,6 @@ identifier: generate_artifacts_start
 type: template
 file: appveyor.yml/artifacts-start.yml
 ---
-identifier: generate_build_script_macos
-type: template
-file: appveyor.yml/build_script-macos.yml
----
 identifier: generate_build_script_nuget
 type: template
 condition: "'nuget' in project_features"
@@ -67,16 +63,6 @@ file: appveyor.yml/matrix-allow_failures.yml
 placeholders:
 - allow_failures
 ---
-identifier: generate_environment_matrix_macos
-type: template
-file: appveyor.yml/environment-matrix-macos.yml
----
-identifier: generate_environment_matrix_macos_python
-type: template
-condition: "'python_bindings' in project_features"
-fallback: appveyor.yml/environment-matrix-macos-pkgbuild.yml
-file: appveyor.yml/environment-matrix-macos-python.yml
----
 identifier: generate_environment_matrix_nuget
 type: template
 condition: "'nuget' in project_features"
@@ -101,12 +87,6 @@ identifier: generate_install_dokan
 type: template
 condition: "'mount_tool' in tools_features"
 file: appveyor.yml/install-dokan.yml
----
-identifier: generate_install_macos
-type: template
-file: appveyor.yml/install-macos.yml
-placeholders:
-- brew_build_dependencies
 ---
 identifier: generate_install_start
 type: template
@@ -141,8 +121,6 @@ operations:
 - generate_environment_matrix
 - generate_environment_matrix_vs_with_python
 - generate_environment_matrix_nuget
-- generate_environment_matrix_macos
-- generate_environment_matrix_macos_python
 - generate_environment_matrix_allow_failures
 - generate_install_start
 - generate_install_testdata
@@ -150,10 +128,8 @@ operations:
 - generate_install_zlib
 - generate_install_bzip2
 - generate_install_dokan
-- generate_install_macos
 - generate_build_script_start
 - generate_build_script_vs_with_python
 - generate_build_script_nuget
-- generate_build_script_macos
 - generate_test_script
 - generate_artifacts_and_deploy_script

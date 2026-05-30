@@ -21,7 +21,10 @@
       env:
         CC: $${{ matrix.compiler }}
       run: |
-        tests/build.sh $${{ matrix.configure_options }}
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${{ matrix.configure_options }}
+        make > /dev/null
     - name: Run tests
       env:
         PYTHON_VERSION: $${{ matrix.python_version }}
@@ -46,7 +49,10 @@
       env:
         CC: $${{ matrix.compiler }}
       run: |
-        tests/build.sh $${{ matrix.configure_options }}
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${{ matrix.configure_options }}
+        make > /dev/null
     - name: Build Python module
       run: |
         python -m build

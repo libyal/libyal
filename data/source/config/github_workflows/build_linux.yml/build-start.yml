@@ -6,11 +6,11 @@
         - os: ubuntu-24.04
           compiler: 'clang'
           configure_options: ''
-        - os: ubuntu-24.04-arm
-          compiler: 'clang'
-          configure_options: ''
         - os: ubuntu-24.04
           compiler: 'gcc'
+          configure_options: ''
+        - os: ubuntu-24.04-arm
+          compiler: 'clang'
           configure_options: ''
         - os: ubuntu-24.04-arm
           compiler: 'gcc'

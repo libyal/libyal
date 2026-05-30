@@ -10,7 +10,10 @@
       env:
         CC: $${{ matrix.compiler }}
       run: |
-        tests/build.sh $${{ matrix.configure_options }}
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure $${{ matrix.configure_options }}
+        make > /dev/null
     - name: Run tests
       run: |
         tests/runtests.sh
@@ -34,7 +37,10 @@
       env:
         CC: $${{ matrix.compiler }}
       run: |
-        tests/build.sh $${{ matrix.configure_options }}
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure $${{ matrix.configure_options }}
+        make > /dev/null
     - name: Run tests
       run: |
         make distcheck

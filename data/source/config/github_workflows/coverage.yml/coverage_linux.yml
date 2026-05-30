@@ -19,7 +19,10 @@
       env:
         CC: $${{ matrix.compiler }}
       run: |
-        tests/build.sh $${{ matrix.configure_options }}
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure $${{ matrix.configure_options }}
+        make > /dev/null
     - name: Run tests
       run: |
         make check CHECK_WITH_STDERR=1 SKIP_TOOLS_END_TO_END_TESTS=1
