@@ -9,7 +9,7 @@ placeholders:
 identifier: generate_build_python_module
 type: template
 condition: "'python_bindings' in project_features"
-file: build_linux.yml/build_python_ubuntu.yml
+file: build_linux.yml/build_python.yml
 placeholders:
 - dpkg_build_dependencies
 ---

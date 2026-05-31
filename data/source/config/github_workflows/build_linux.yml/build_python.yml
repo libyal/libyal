@@ -1,4 +1,4 @@
-  build_python_ubuntu:
+  build_python:
     runs-on: $${{ matrix.os }}
     strategy:
       matrix:
@@ -23,14 +23,14 @@
       run: |
         ./synclibs.sh --use-head
         ./autogen.sh
-        ./configure ${{ matrix.configure_options }}
+        ./configure $${{ matrix.configure_options }}
         make > /dev/null
     - name: Run tests
       env:
         PYTHON_VERSION: $${{ matrix.python_version }}
       run: |
         tests/runtests.sh
-  build_pyproject_ubuntu:
+  build_pyproject:
     runs-on: $${{ matrix.os }}
     strategy:
       matrix:
@@ -51,7 +51,7 @@
       run: |
         ./synclibs.sh --use-head
         ./autogen.sh
-        ./configure ${{ matrix.configure_options }}
+        ./configure $${{ matrix.configure_options }}
         make > /dev/null
     - name: Build Python module
       run: |

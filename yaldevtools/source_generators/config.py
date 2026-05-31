@@ -832,6 +832,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             "autoconf",
             "automake",
             "binutils",
+            "curl",
             "gcc-core",
             "gettext-devel",
             "git",
@@ -1023,6 +1024,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         msys2_mingw_build_dependencies = [
             "autoconf",
             "automake",
+            "curl",
             "gettext",
             "gettext-devel",
             "git",

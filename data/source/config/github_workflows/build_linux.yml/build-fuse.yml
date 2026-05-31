@@ -1,4 +1,4 @@
-  build_fuse_ubuntu:
+  build_fuse:
     runs-on: $${{ matrix.os }}
     strategy:
       matrix:
@@ -25,7 +25,7 @@
     - name: Run tests
       run: |
         tests/runtests.sh
-  build_fuse3_ubuntu:
+  build_fuse3:
     runs-on: $${{ matrix.os }}
     strategy:
       matrix:

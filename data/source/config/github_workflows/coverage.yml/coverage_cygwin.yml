@@ -12,7 +12,7 @@
     - name: Install Cygwin and build dependencies
       uses: cygwin/cygwin-install-action@v6
       with:
-        packages: autoconf, automake, curl, gettext-devel, git, libtool, make, mingw-w64-x86_64-gcc, pkg-config
+        packages: ${cygwin_build_dependencies}
         platform: x86_64
         add-to-path: true
     - name: Download test data
