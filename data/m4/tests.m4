@@ -1,6 +1,6 @@
 dnl Functions for testing
 dnl
-dnl Version: 20260530
+dnl Version: 20260531
 
 dnl Function to detect whether the file system is case-insensitive
 AC_DEFUN([AX_TEST_CHECK_FILE_SYSTEM_IS_CASE_INSENSITIVE],
@@ -192,6 +192,10 @@ AC_DEFUN([AX_TESTS_CHECK_LOCAL],
       [1],
       [Define to 1 if dlsym function is available in GNU dl.])
     ])
+
+  AC_SUBST(
+    [TESTS_USE_WINAPI],
+    [$ac_cv_enable_winapi])
   ])
 
 dnl Function to detect if OSS-Fuzz build environment is available

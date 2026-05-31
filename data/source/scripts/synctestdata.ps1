@@ -1,11 +1,11 @@
 # Script that synchronizes the local test data
 #
-# Version: 20251217
+# Version: 20260531
 
 $$Repository = "${test_data_repository}"
 $$TestDataPath = "${test_data_path}"
 $$TestSet = "public"
-$$TestInputDirectory = "tests/input"
+$$TestInputDirectory = "tests\input"
 $$TestFiles = "${test_data_files}"
 
 If (-Not (Test-Path $${TestInputDirectory}))

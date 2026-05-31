@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Export tool testing script
 #
-# Version: 20240413
+# Version: 20260531
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -167,7 +167,7 @@ do
 
 					IFS=" " read -a OPTIONS <<< $$(read_test_data_option_file "$${TEST_SET_DIRECTORY}" "$${INPUT_FILE}" "$${OPTION_SET}");
 
-					run_test_on_input_file "$${TEST_SET_DIRECTORY}" "${library_name_suffix}export" "with_stdout_reference" "$${OPTION_SETS}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}" "$${PROFILE_OPTIONS[@]}" "$${OPTIONS[@]}";
+					run_test_on_input_file "$${TEST_SET_DIRECTORY}" "${library_name_suffix}export" "with_stdout_reference" "$${OPTION_SET}" "$${TEST_EXECUTABLE}" "$${INPUT_FILE}" "$${PROFILE_OPTIONS[@]}" "$${OPTIONS[@]}";
 					RESULT=$$?;
 
 					if test $${RESULT} -ne $${EXIT_SUCCESS};

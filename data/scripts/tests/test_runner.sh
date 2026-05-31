@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20260528
-#
-# When CHECK_WITH_ASAN is set to a non-empty value the test executable
-# is run with asan, otherwise it is run without.
+# Version: 20260531
 #
 # When CHECK_WITH_STDERR is set to a non-empty value the test executable
 # is run with error output to stderr.
@@ -386,7 +383,6 @@ read_test_data_option_file()
 # Runs the test with optional arguments.
 #
 # Globals:
-#   CHECK_WITH_ASAN
 #   CHECK_WITH_STDERR
 #
 # Arguments:
@@ -435,74 +431,7 @@ run_test_with_arguments()
 	fi
 	local RESULT=0;
 
-	if test -n "${CHECK_WITH_ASAN}";
-	then
-		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
-		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
-
-		local LSAN_SUPPRESSIONS="lsan.suppressions";
-
-		if ! test -f ${LSAN_SUPPRESSIONS};
-		then
-			LSAN_SUPPRESSIONS="../lsan.suppressions";
-		fi
-		if test "${PLATFORM}" = "Darwin";
-		then
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			else
-				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			fi
-		else
-			local CONFIG_LOG="../config.log";
-
-			if ! test -f ${CONFIG_LOG};
-			then
-				CONFIG_LOG="../../config.log";
-			fi
-			local CC=`cat ${CONFIG_LOG} | grep -e "^CC=" | sed "s/CC='\\(.*\\)'/\1/"`;
-			local LIBASAN="";
-
-			if test -z ${CC} || test ${CC} != "clang";
-			then
-				local LDCONFIG=`which ldconfig 2> /dev/null`;
-
-				if test -z ${LDCONFIG} || ! test -x ${LDCONFIG};
-				then
-					LDCONFIG="/sbin/ldconfig";
-				fi
-				if test -z ${LDCONFIG} || ! test -x ${LDCONFIG};
-				then
-					echo "Missing binary: ldconfig";
-					echo "";
-
-					exit ${EXIT_FAILURE};
-				fi
-				LIBASAN=`${LDCONFIG} -p | grep libasan | sed 's/^.* => //' | sort | tail -n 1`;
-
-				if ! test -f ${LIBASAN};
-				then
-					echo "Missing library: ${BINARY}";
-					echo "";
-
-					exit ${EXIT_FAILURE};
-				fi
-			fi
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			else
-				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]};
-				RESULT=$?;
-			fi
-		fi
-
-	elif test ${IS_PYTHON_SCRIPT} -eq 0;
+	if test ${IS_PYTHON_SCRIPT} -eq 0;
 	then
 		if ! test -f "${TEST_EXECUTABLE}";
 		then
@@ -582,7 +511,6 @@ run_test_with_arguments()
 # Runs the test with an input file and optional arguments.
 #
 # Globals:
-#   CHECK_WITH_ASAN
 #   CHECK_WITH_STDERR
 #
 # Arguments:
@@ -631,75 +559,12 @@ run_test_with_input_and_arguments()
 	fi
 	local RESULT=0;
 
-	if test -n "${CHECK_WITH_ASAN}";
+	# TODO: add support for "${MSYSTEM}" = "UCRT64"
+	if test ${TESTS_USE_WINAPI} = "yes" || test "${MSYSTEM}" = "MINGW32" || test "${MSYSTEM}" = "MINGW64";
 	then
-		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
-		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
-		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
-
-		local LSAN_SUPPRESSIONS="lsan.suppressions";
-
-		if ! test -f ${LSAN_SUPPRESSIONS};
-		then
-			LSAN_SUPPRESSIONS="../lsan.suppressions";
-		fi
-		if test "${PLATFORM}" = "Darwin";
-		then
-			# TODO DYLD_INSERT_LIBRARIES=/Library/Developer/CommandLineTools/usr/lib/clang/8.1.0/lib/darwin/libclang_rt.asan_osx_dynamic.dylib
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			else
-				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" DYLD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			fi
-		else
-			local CONFIG_LOG="../config.log";
-
-			if ! test -f ${CONFIG_LOG};
-			then
-				CONFIG_LOG="../../config.log";
-			fi
-			local CC=`cat ${CONFIG_LOG} | grep -e "^CC=" | sed "s/CC='\\(.*\\)'/\1/"`;
-			local LIBASAN="";
-
-			if test -z ${CC} || test ${CC} != "clang";
-			then
-				local LDCONFIG=`which ldconfig 2> /dev/null`;
-
-				if test -z ${LDCONFIG} || ! test -x ${LDCONFIG};
-				then
-					LDCONFIG="/sbin/ldconfig";
-				fi
-				if test -z ${LDCONFIG} || ! test -x ${LDCONFIG};
-				then
-					echo "Missing binary: ldconfig";
-					echo "";
-
-					exit ${EXIT_FAILURE};
-				fi
-				LIBASAN=`${LDCONFIG} -p | grep libasan | sed 's/^.* => //' | sort | tail -n 1`;
-
-				if ! test -f ${LIBASAN};
-				then
-					echo "Missing library: ${BINARY}";
-					echo "";
-
-					exit ${EXIT_FAILURE};
-				fi
-			fi
-			if test ${IS_PYTHON_SCRIPT} -eq 0;
-			then
-				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			else
-				LSAN_OPTIONS=suppressions="${LSAN_SUPPRESSIONS}" LD_PRELOAD="${LIBASAN}" LD_LIBRARY_PATH="${LIBRARY_PATH}" "${TEST_EXECUTABLE}" ${ARGUMENTS[@]} "${INPUT_FILE}";
-				RESULT=$?;
-			fi
-		fi
-
-	elif test ${IS_PYTHON_SCRIPT} -eq 0;
+		INPUT_FILE=`cygpath -w "${INPUT_FILE}"`;
+	fi
+	if test ${IS_PYTHON_SCRIPT} -eq 0;
 	then
 		if ! test -f "${TEST_EXECUTABLE}";
 		then
@@ -752,7 +617,6 @@ run_test_with_input_and_arguments()
 
 			return ${EXIT_FAILURE};
 		fi
-
 		if test -n "${CHECK_WITH_STDERR}";
 		then
 			${TEST_EXECUTABLE} ${ARGUMENTS[@]} "${INPUT_FILE}";

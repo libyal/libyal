@@ -484,7 +484,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             # TODO: use tools_features to generate tools_names
             if tool_name in project_configuration.tools_names:
                 if not with_tools:
-                    test_scripts.extend(["test_tools.ps1", "test_tools.sh"])
+                    test_scripts.append("test_tools.sh")
                     with_tools = True
 
                 test_script = f"test_{tool_name:s}.sh"
@@ -590,7 +590,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if with_tools:
             template_names.append("automake_options.am")
 
-        template_names.append("cppflags.am")
+        template_names.extend(["cppflags.am", "test_environment.am"])
 
         if project_configuration.HasPythonModule():
             template_names.append("python.am")
