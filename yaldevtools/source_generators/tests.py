@@ -590,7 +590,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if with_tools:
             template_names.append("automake_options.am")
 
-        template_names.extend(["cppflags.am", "test_environment.am"])
+        template_names.extend(["flags.am", "test_environment.am"])
 
         if project_configuration.HasPythonModule():
             template_names.append("python.am")

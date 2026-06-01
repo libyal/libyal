@@ -57,7 +57,7 @@ int mount_fuse_open(
 
 		goto on_error;
 	}
-	if( ( file_info->flags & 0x03 ) != O_RDONLY )
+	if( ( file_info->flags & O_ACCMODE ) != O_RDONLY )
 	{
 		libcerror_error_set(
 		 &error,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Verify tool testing script
 #
-# Version: 20240413
+# Version: 20260601
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -59,12 +59,6 @@ then
 
 	exit $${EXIT_IGNORE};
 fi
-
-TEST_PROFILE_DIRECTORY=$$(get_test_profile_directory "input" "${library_name_suffix}verify");
-
-IGNORE_LIST=$$(read_ignore_list "$${TEST_PROFILE_DIRECTORY}");
-
-RESULT=$${EXIT_SUCCESS};
 
 for PROFILE_INDEX in $${!PROFILES[*]};
 do

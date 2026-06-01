@@ -1,5 +1,5 @@
 int mount_fuse_set_stat_info(
-     struct stat *stat_info,
+     mount_fuse_stat_t *stat_info,
      size64_t size,
      uint16_t file_mode,
      int64_t access_time,

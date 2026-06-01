@@ -370,7 +370,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
             description_line = description_lines.pop(0)
             details = (
-                f'\tfprintf( stream, "\\t-{{{option:s}}}:{alignment_padding:s}'
+                f'\tfprintf( stream, "\\t-{option:s}:{alignment_padding:s}'
                 f'{description_line:s}\\n"'
             )
             # TODO: determine indentation size
@@ -1951,7 +1951,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
             description_line = description_lines.pop(0)
             details = (
-                f'\tfprintf( stream, "\\t-{{option:s}}:{alignment_padding:s}'
+                f'\tfprintf( stream, "\\t-{option:s}:{alignment_padding:s}'
                 f'{description_line:s}\\n"'
             )
             for description_line in description_lines:

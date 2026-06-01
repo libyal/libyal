@@ -24,6 +24,19 @@
 
 #include <common.h>
 
+#if !defined( __CYGWIN__ ) && !defined( _WIN32 ) && defined( __has_attribute )
+#if __has_attribute( visibility )
+#define ${library_name:upper_case}_INTERNAL	__attribute__((visibility("hidden"))) extern
+
+#else
+#define ${library_name:upper_case}_INTERNAL	extern
+
+#endif /* __has_attribute( visibility ) */
+#else
+#define ${library_name:upper_case}_INTERNAL	extern
+
+#endif /* !defined( __CYGWIN__ ) && !defined( _WIN32 ) && defined( __has_attribute ) */
+
 /* Define HAVE_LOCAL_${library_name:upper_case} for local use of ${library_name}
  */
 #if !defined( HAVE_LOCAL_${library_name:upper_case} )
@@ -32,7 +45,7 @@
 
 #else
 #define ${library_name:upper_case}_EXTERN		/* extern */
-#define ${library_name:upper_case}_EXTERN_VARIABLE	extern
+#define ${library_name:upper_case}_EXTERN_VARIABLE	${library_name:upper_case}_INTERNAL
 
 #endif /* !defined( HAVE_LOCAL_${library_name:upper_case} ) */
 

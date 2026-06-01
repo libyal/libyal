@@ -4,12 +4,12 @@
 #if defined( HAVE_LIBFUSE3 )
 int mount_fuse_getattr(
      const char *path,
-     struct stat *stat_info,
+     mount_fuse_stat_t *stat_info,
      struct fuse_file_info *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #else
 int mount_fuse_getattr(
      const char *path,
-     struct stat *stat_info )
+     mount_fuse_stat_t *stat_info )
 #endif
 {
 	libcerror_error_t *error       = NULL;
@@ -64,7 +64,7 @@ int mount_fuse_getattr(
 	if( memory_set(
 	     stat_info,
 	     0,
-	     sizeof( struct stat ) ) == NULL )
+	     sizeof( mount_fuse_stat_t ) ) == NULL )
 	{
 		libcerror_error_set(
 		 &error,

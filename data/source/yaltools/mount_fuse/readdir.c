@@ -18,7 +18,7 @@ int mount_fuse_readdir(
      struct fuse_file_info *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #endif
 {
-	struct stat *stat_info                = NULL;
+	mount_fuse_stat_t *stat_info          = NULL;
 	libcerror_error_t *error              = NULL;
 	mount_file_entry_t *parent_file_entry = NULL;
 	mount_file_entry_t *sub_file_entry    = NULL;
@@ -84,7 +84,7 @@ int mount_fuse_readdir(
 		goto on_error;
 	}
 	stat_info = memory_allocate_structure(
-	             struct stat );
+	             mount_fuse_stat_t );
 
 	if( stat_info == NULL )
 	{
