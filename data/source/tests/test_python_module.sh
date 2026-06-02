@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests Python module functions and types.
 #
-# Version: 20260530
+# Version: 20260601
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -149,7 +149,9 @@ if test "$${PLATFORM}" = "MINGW32_NT" || test "$${PLATFORM}" = "MINGW64_NT" || t
 then
 	# Copy the library DLL to the Python module directory so Python can load it
 	# given LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR.
-	cp ../$${LIBRARY_NAME}/.libs/$${LIBRARY_NAME}*.dll ../$${PYTHON_MODULE}/.libs
+	cp ../$${LIBRARY_NAME}/.libs/$${LIBRARY_NAME}*.dll ../$${PYTHON_MODULE}/.libs;
+	# Also make sure the Python module directory is in PATH.
+	export PATH="../$${PYTHON_MODULE}/.libs:$${PATH}";
 fi
 
 RESULT=$${EXIT_IGNORE};

@@ -129,6 +129,9 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
 
         for directory_entry in os.listdir(self._templates_path):
             template_filename = os.path.join(self._templates_path, directory_entry)
+            if template_filename.endswith(".swp"):
+                continue
+
             if not os.path.isfile(template_filename):
                 continue
 

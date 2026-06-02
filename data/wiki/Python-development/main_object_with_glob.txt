@@ -10,8 +10,8 @@ ${development_prefix}_${development_main_object}.close()
 
 The explicit call to ${development_prefix}_${development_main_object}.close() is not required.
 
-${development_prefix}_${development_main_object}.open() requires a list of all 
-the necessary filenames. You can use the ${python_bindings_name}.glob() to 
+${development_prefix}_${development_main_object}.open() requires a list of all
+the necessary filenames. You can use the ${python_bindings_name}.glob() to
 obtain a list of available filenames from "${development_main_object_filename}", e.g.
 ```
 filenames = ${python_bindings_name}.glob("${development_main_object_filename}")
@@ -33,6 +33,6 @@ ${development_prefix}_${development_main_object}.close()
 
 The explicit call to ${development_prefix}_${development_main_object}.close() is not required.
 
-${development_prefix}_${development_main_object}.open_file_objects() requires a 
+${development_prefix}_${development_main_object}.open_file_objects() requires a
 list of all the necessary file objects.
 

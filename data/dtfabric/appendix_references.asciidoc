@@ -5,9 +5,9 @@
 
 [cols="1,5",options="header"]
 |===
-| Title: | 
-| Author(s): | 
-| Date: | 
-| URL: | 
+| Title: |
+| Author(s): |
+| Date: |
+| URL: |
 |===
 

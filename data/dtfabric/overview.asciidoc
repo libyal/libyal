@@ -5,7 +5,7 @@ ${summary}
 |===
 | Characteristics | Description
 | Byte order | ${byte_order}
-| Date and time values | 
-| Character strings | 
+| Date and time values |
+| Character strings |
 |===
 

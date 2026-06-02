@@ -126,7 +126,7 @@ EOT
 		# Determine the object files for tlib and prefix them with a "+".
 		TLIB_OBJECTS=`echo ${SOURCE_FILES} | tr ' ' '\n'| sed 's/^/+/;s/\.c$/.obj/' | tr '\n' ' '`;
 
-		# Determine the library dependencies. 
+		# Determine the library dependencies.
 		if test ${DIRECTORY} = "${PREFIX}tools" || test ${DIRECTORY} = "tests";
 		then
 			LIBADD=`sed "/^AM_CPPFLAGS =/,/^${BUILD_TARGET}_LDADD =/ { d }; /^$/,$ { d }" ${DIRECTORY}/Makefile.am | sed 's/^\s*//;s/[ ]*\\\\//' | tr '\n' ' '`;
@@ -237,7 +237,7 @@ LDFLAGS  = -V4.0 -c -x -Gn
 DEFS     = -DNDEBUG -DWIN32 -DUNICODE -DZLIB_DLL
 INCLUDES = -I.;\$(BCCDIR)\\Include;
 
-LIBADD   = 
+LIBADD   =
 
 .SUFFIXES: .c
 

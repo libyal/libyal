@@ -13,5 +13,5 @@ Some examples of common run-time errors:
 The procedure entry point DecodePointer could not be located in the dynamic link library KERNEL32.DLL
 ```
 
-You are likely trying to run an executable created by Visual Studio 2010 or later on a version of Windows that is no longer supported. 
+You are likely trying to run an executable created by Visual Studio 2010 or later on a version of Windows that is no longer supported.
 
