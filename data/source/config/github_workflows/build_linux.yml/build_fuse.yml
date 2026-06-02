@@ -10,6 +10,7 @@
     - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
+        sudo apt -y update
         sudo apt -y install ${dpkg_build_dependencies} libfuse-dev
     - name: Download test data
       run: |
@@ -24,7 +25,7 @@
         make > /dev/null
     - name: Run tests
       run: |
-        tests/runtests.sh
+        tests/runtests.sh CHECK_WITH_STDERR=1
   build_fuse3:
     runs-on: $${{ matrix.os }}
     strategy:
@@ -37,6 +38,7 @@
     - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
+        sudo apt -y update
         sudo apt -y install ${dpkg_build_dependencies} libfuse3-dev
     - name: Download test data
       run: |
@@ -51,4 +53,4 @@
         make > /dev/null
     - name: Run tests
       run: |
-        tests/runtests.sh
+        tests/runtests.sh CHECK_WITH_STDERR=1

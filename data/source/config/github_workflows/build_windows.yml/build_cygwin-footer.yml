@@ -33,4 +33,4 @@
       env:
         CHERE_INVOKING: 1
       run: |
-        tests/runtests.sh
+        tests/runtests.sh CHECK_WITH_STDERR=1

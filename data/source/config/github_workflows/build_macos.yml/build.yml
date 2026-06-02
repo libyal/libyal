@@ -45,4 +45,4 @@ jobs:
         make > /dev/null
     - name: Run tests
       run: |
-        tests/runtests.sh
+        tests/runtests.sh CHECK_WITH_STDERR=1

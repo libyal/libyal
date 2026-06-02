@@ -6,6 +6,12 @@ file: build_linux.yml/build-end.yml
 placeholders:
 - dpkg_build_dependencies
 ---
+identifier: generate_build_mingw
+type: template
+file: build_linux.yml/build_mingw.yml
+placeholders:
+- dpkg_build_dependencies
+---
 identifier: generate_build_python_module
 type: template
 condition: "'python_bindings' in project_features"
@@ -20,7 +26,7 @@ file: build_linux.yml/build-start.yml
 identifier: generate_build_with_fuse
 type: template
 condition: "'fuse' in tools_build_dependencies"
-file: build_linux.yml/build-fuse.yml
+file: build_linux.yml/build_fuse.yml
 placeholders:
 - dpkg_build_dependencies
 ---
@@ -62,18 +68,18 @@ operations:
 ---
 identifier: generate_shared_footer
 type: template
-file: build_linux.yml/shared-footer.yml
+file: build_linux.yml/build_shared-footer.yml
 placeholders:
 - dpkg_build_dependencies
 ---
 identifier: generate_shared_header
 type: template
-file: build_linux.yml/shared-header.yml
+file: build_linux.yml/build_shared-header.yml
 ---
 identifier: generate_shared_matrix_wide_character
 type: template
 condition: "'wide_character_type' in library_features"
-file: build_linux.yml/shared-matrix_wide_character.yml
+file: build_linux.yml/build_shared-matrix_wide_character.yml
 ---
 identifier: main
 type: group
@@ -87,5 +93,6 @@ operations:
 - generate_build_with_static_executables
 - generate_build_end
 - generate_build_with_fuse
+- generate_build_mingw
 - generate_build_python_module
 - generate_shared

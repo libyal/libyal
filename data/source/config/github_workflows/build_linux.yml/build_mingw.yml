@@ -1,0 +1,31 @@
+  build_mingw:
+    runs-on: $${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          configure_options: '--enable-mingw-binmode --host=x86_64-w64-mingw32'
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install build dependencies
+      run: |
+        sudo apt -y update
+        sudo apt -y install ${dpkg_build_dependencies} mingw-w64 wine wine-binfmt
+        sudo mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc 2>/dev/null || true
+        sudo sh -c "echo ':DOSWin:M::MZ::/usr/bin/wine:' > /proc/sys/fs/binfmt_misc/register"
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure $${{ matrix.configure_options }}
+        make > /dev/null
+    - name: Run tests
+      env:
+        WINE_DRIVER: "null"
+        WINEDEBUG: "-all,err-winediag,err-systray"
+        WINEDLLOVERRIDES: "explorer.exe=d"
+      run: |
+        tests/runtests.sh CHECK_WITH_STDERR=1

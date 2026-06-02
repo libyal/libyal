@@ -11,6 +11,7 @@
     - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
+        sudo apt -y update
         sudo apt -y install curl ${dpkg_build_dependencies}
     - name: Download test data
       run: |

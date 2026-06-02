@@ -29,7 +29,7 @@
     - name: Run tests
       shell: msys2 {0}
       run: |
-        tests/runtests.sh
+        tests/runtests.sh CHECK_WITH_STDERR=1
     - name: Generate coverage data
       shell: msys2 {0}
       run: |
