@@ -87,7 +87,7 @@ placeholders:
 ---
 identifier: generate_build_steps
 type: template
-file: build_windows.yml/build_steps.yml
+file: build_windows.yml/build-steps.yml
 ---
 identifier: generate_header
 type: template

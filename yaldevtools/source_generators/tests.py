@@ -3468,9 +3468,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 )
             ]
         )
-        template_mappings["tests_export_tool_options"] = (
-            project_configuration.tests_export_tool_options
-        )
         template_mappings["tests_export_tool_options_per_profile_ps1"] = ", ".join(
             [
                 f'"{options:s}"'
@@ -3511,9 +3508,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 )
             ]
         )
-        template_mappings["tests_info_tool_options"] = (
-            project_configuration.tests_info_tool_options
-        )
         template_mappings["tests_info_tool_options_per_profile_ps1"] = ", ".join(
             [
                 f'"{options:s}"'
@@ -3553,9 +3547,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                     project_configuration.tests_verify_tool_option_sets
                 )
             ]
-        )
-        template_mappings["tests_verify_tool_options"] = (
-            project_configuration.tests_verify_tool_options
         )
         template_mappings["tests_verify_tool_options_per_profile_ps1"] = ", ".join(
             [

@@ -161,8 +161,6 @@ class ProjectConfiguration(BaseConfiguration):
       tests_example_filename2 (str): name of the second test example filename.
       tests_export_tool_option_sets (list[str]): option sets used by the tests of
           the export tool.
-      tests_export_tool_options (str): command line options used by the tests of
-          the export tool.
       tests_export_tool_options_per_profile (list[str]): command line options per
           profile used by the tests of the export tool.
       tests_export_tool_profiles (list[str]): command line options profiles used
@@ -170,8 +168,6 @@ class ProjectConfiguration(BaseConfiguration):
       tests_info_tool_input_glob (str): input files glob used by the tests of
           the info tool.
       tests_info_tool_option_sets (list[str]): option sets used by the tests of
-          the info tool.
-      tests_info_tool_options (str): command line options used by the tests of
           the info tool.
       tests_info_tool_options_per_profile (list[str]): command line options per
           profile used by the tests of the info tool.
@@ -181,8 +177,6 @@ class ProjectConfiguration(BaseConfiguration):
       tests_option_sets (list[str]): option sets used by the tests.
       tests_profiles (list[str]): names of the test profiles.
       tests_verify_tool_option_sets (list[str]): option sets used by the tests of
-          the verify tool.
-      tests_verify_tool_options (str): command line options used by the tests of
           the verify tool.
       tests_verify_tool_options_per_profile (list[str]): command line options per
           profile used by the tests of the verify tool.
@@ -289,16 +283,13 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_profiles = None
         self.tests_input_glob = None
         self.tests_export_tool_option_sets = None
-        self.tests_export_tool_options = None
         self.tests_export_tool_options_per_profile = None
         self.tests_export_tool_profiles = None
         self.tests_info_tool_input_glob = None
         self.tests_info_tool_option_sets = None
-        self.tests_info_tool_options = None
         self.tests_info_tool_options_per_profile = None
         self.tests_info_tool_profiles = None
         self.tests_verify_tool_option_sets = None
-        self.tests_verify_tool_options = None
         self.tests_verify_tool_options_per_profile = None
         self.tests_verify_tool_profiles = None
         self.tests_example_filename1 = None
@@ -893,9 +884,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_export_tool_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "export_tool_option_sets", default_value=[]
         )
-        self.tests_export_tool_options = self._GetOptionalConfigValue(
-            config_parser, "tests", "export_tool_options", default_value=""
-        )
         self.tests_export_tool_options_per_profile = self._GetOptionalConfigValue(
             config_parser, "tests", "export_tool_options_per_profile", default_value=[]
         )
@@ -911,9 +899,6 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_info_tool_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "info_tool_option_sets", default_value=[]
         )
-        self.tests_info_tool_options = self._GetOptionalConfigValue(
-            config_parser, "tests", "info_tool_options", default_value=""
-        )
         self.tests_info_tool_options_per_profile = self._GetOptionalConfigValue(
             config_parser, "tests", "info_tool_options_per_profile", default_value=[]
         )
@@ -922,9 +907,6 @@ class ProjectConfiguration(BaseConfiguration):
         )
         self.tests_verify_tool_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "verify_tool_option_sets", default_value=[]
-        )
-        self.tests_verify_tool_options = self._GetOptionalConfigValue(
-            config_parser, "tests", "verify_tool_options", default_value=""
         )
         self.tests_verify_tool_options_per_profile = self._GetOptionalConfigValue(
             config_parser, "tests", "verify_tool_options_per_profile", default_value=[]

@@ -9,7 +9,7 @@ EXIT_IGNORE=77;
 
 PROFILES=(${tests_verify_tool_profiles_sh});
 OPTIONS_PER_PROFILE=(${tests_verify_tool_options_per_profile_sh});
-OPTIONS=(${tests_verify_tool_options});
+OPTION_SETS=(${tests_verify_tool_option_sets_sh});
 
 INPUT_GLOB="${tests_input_glob}";
 

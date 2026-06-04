@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Export tool testing script
 #
-# Version: 20260601
+# Version: 20260602
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -9,7 +9,7 @@ EXIT_IGNORE=77;
 
 PROFILES=(${tests_export_tool_profiles_sh});
 OPTIONS_PER_PROFILE=(${tests_export_tool_options_per_profile_sh});
-OPTIONS=(${tests_export_tool_options});
+OPTION_SETS=(${tests_export_tool_option_sets_sh});
 
 INPUT_GLOB="${tests_input_glob}";
 
