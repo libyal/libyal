@@ -1000,7 +1000,10 @@ class ProjectConfiguration(BaseConfiguration):
         Returns:
           bool: True if the project depends on bzip2.
         """
-        return "bzip2" in self.library_build_dependencies
+        return (
+            "bzip2" in self.library_build_dependencies
+            or "bzip2" in self.tools_build_dependencies
+        )
 
     def HasDependencyCrypto(self):
         """Determines if the project depends on libcrypto.
@@ -1008,7 +1011,10 @@ class ProjectConfiguration(BaseConfiguration):
         Returns:
           bool: True if the project depends on libcrypto.
         """
-        return "crypto" in self.library_build_dependencies
+        return (
+            "crypto" in self.library_build_dependencies
+            or "crypto" in self.tools_build_dependencies
+        )
 
     def HasDependencyDokan(self):
         """Determines if the project depends on Dokan.
@@ -1054,7 +1060,10 @@ class ProjectConfiguration(BaseConfiguration):
         Returns:
           bool: True if the project depends on zlib.
         """
-        return "zlib" in self.library_build_dependencies
+        return (
+            "zlib" in self.library_build_dependencies
+            or "zlib" in self.tools_build_dependencies
+        )
 
     def HasDpkg(self):
         """Determines if the project provides dpkg configuration files.

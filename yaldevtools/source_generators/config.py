@@ -134,9 +134,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           template_mappings (dict[str, str]): template mappings, where the key
               maps to the name of a template variable.
         """
-        # if project_configuration.HasDependencyCrypto():
-        # TODO: add environment-cygwin64-openssl.yml
-
         allow_failures = [
             f"  - TARGET: {target:s}"
             for target in project_configuration.appveyor_allow_failures
@@ -210,7 +207,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             libhmac_index = makefile_am_file.library_dependencies.index("libhmac")
             libcrypto_index = min(libcrypto_index, libhmac_index)
 
-        if project_configuration.HasDependencyCrypto():
+        if "crypto" in project_configuration.library_build_dependencies:
             if libcrypto_index == len(makefile_am_file.library_dependencies):
                 dependency = Dependency(name="libcrypto")
                 library_dependencies.append(dependency)
@@ -729,9 +726,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         makefile_am_file = self._GetMainMakefileAM(project_configuration)
 
         library_dependencies = list(makefile_am_file.library_dependencies)
-        if project_configuration.HasDependencyCrypto():
+        if "crypto" in project_configuration.library_build_dependencies:
             library_dependencies.append("libcrypto")
-        if project_configuration.HasDependencyZlib():
+        if "zlib" in project_configuration.library_build_dependencies:
             library_dependencies.append("zlib")
 
         tools_dependencies = []
@@ -1037,9 +1034,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             namespace.get("msys2_mingw_build_dependencies", None) or []
         )
         if "yacc" in library_build_dependencies or "yacc" in tools_build_dependencies:
-            msys2_mingw_build_dependencies.append("mingw-w64-x86_64-bison")
+            msys2_mingw_build_dependencies.append("msys/bison")
         if "lex" in library_build_dependencies or "lex" in tools_build_dependencies:
-            msys2_mingw_build_dependencies.append("mingw-w64-x86_64-flex")
+            msys2_mingw_build_dependencies.append("msys/flex")
 
         # TODO: add support for other dependencies.
         if "zlib" in library_build_dependencies:

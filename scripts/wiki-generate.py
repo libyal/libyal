@@ -118,23 +118,13 @@ class WikiPageGenerator:
             "make",
             "pkg-config",
         ]
-
-        if (
-            "lex" in project_configuration.library_build_dependencies
-            or "lex" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyLex():
             dependencies.append("flex")
 
-        if (
-            "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyYacc():
             dependencies.append("byacc")
 
-        if (
-            "zlib" in project_configuration.library_build_dependencies
-            or "zlib" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyZlib():
             dependencies.append(
                 "zlib-devel (for DEFLATE compression support) (optional but "
                 "recommended, can be disabled by --with-zlib=no)"
@@ -143,10 +133,7 @@ class WikiPageGenerator:
         if project_configuration.HasDependencyBzip2():
             dependencies.append("libbz2-devel (required for bzip2 compression support)")
 
-        if (
-            "crypto" in project_configuration.library_build_dependencies
-            or "crypto" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyCrypto():
             dependencies.append(
                 "libssl-devel (optional but recommended, can be disabled by "
                 "--with-openssl=no)"
@@ -182,31 +169,19 @@ class WikiPageGenerator:
         """
         dependencies = list(project_configuration.dpkg_build_dependencies)
 
-        if (
-            "lex" in project_configuration.library_build_dependencies
-            or "lex" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyLex():
             dependencies.append("flex")
 
-        if (
-            "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyYacc():
             dependencies.append("bison")
 
-        if (
-            "zlib" in project_configuration.library_build_dependencies
-            or "zlib" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyZlib():
             dependencies.append("zlib1g-dev")
 
         if project_configuration.HasDependencyBzip2():
             dependencies.append("bzip2-dev")
 
-        if (
-            "crypto" in project_configuration.library_build_dependencies
-            or "crypto" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyCrypto():
             dependencies.append("libssl-dev")
 
         if "fuse" in project_configuration.tools_build_dependencies:
@@ -251,22 +226,13 @@ class WikiPageGenerator:
         """
         dependencies = []
 
-        if (
-            "lex" in project_configuration.library_build_dependencies
-            or "lex" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyLex():
             dependencies.append("flex")
 
-        if (
-            "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyYacc():
             dependencies.append("byacc")
 
-        if (
-            "zlib" in project_configuration.library_build_dependencies
-            or "zlib" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyZlib():
             dependencies.append(
                 "MinGW build of zlib library and source headers (for DEFLATE "
                 "compression support) (optional but recommended, can be disabled "
@@ -309,31 +275,19 @@ class WikiPageGenerator:
         """
         dependencies = list(project_configuration.rpm_build_dependencies)
 
-        if (
-            "lex" in project_configuration.library_build_dependencies
-            or "lex" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyLex():
             dependencies.append("flex")
 
-        if (
-            "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyYacc():
             dependencies.append("byacc")
 
-        if (
-            "zlib" in project_configuration.library_build_dependencies
-            or "zlib" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyZlib():
             dependencies.append("zlib-devel")
 
         if project_configuration.HasDependencyBzip2():
             dependencies.append("bzip2-devel")
 
-        if (
-            "crypto" in project_configuration.library_build_dependencies
-            or "crypto" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyCrypto():
             dependencies.append("openssl-devel")
 
         if "fuse" in project_configuration.tools_build_dependencies:
@@ -452,16 +406,10 @@ class WikiPageGenerator:
             "libtool",
             "pkg-config",
         ]
-        if (
-            "lex" in project_configuration.library_build_dependencies
-            or "lex" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyLex():
             git_apt_dependencies.append("flex")
 
-        if (
-            "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyYacc():
             git_apt_dependencies.append("bison")
 
         git_apt_dependencies = " ".join(git_apt_dependencies)
@@ -474,16 +422,10 @@ class WikiPageGenerator:
             "libtool",
             "pkg-config",
         ]
-        if (
-            "lex" in project_configuration.library_build_dependencies
-            or "lex" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyLex():
             git_dnf_dependencies.append("flex")
 
-        if (
-            "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyYacc():
             git_dnf_dependencies.append("byacc")
 
         git_dnf_dependencies = " ".join(git_dnf_dependencies)
@@ -497,16 +439,10 @@ class WikiPageGenerator:
             "libtoolize",
             "pkg-config",
         ]
-        if (
-            "lex" in project_configuration.library_build_dependencies
-            or "lex" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyLex():
             git_build_dependencies.append("flex")
 
-        if (
-            "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyYacc():
             git_build_dependencies.append("byacc")
 
         git_build_dependencies = "\n".join(
@@ -520,16 +456,10 @@ class WikiPageGenerator:
             "libtool",
             "pkgconfig",
         ]
-        if (
-            "lex" in project_configuration.library_build_dependencies
-            or "lex" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyLex():
             git_macports_dependencies.append("flex")
 
-        if (
-            "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyYacc():
             git_macports_dependencies.append("byacc")
 
         git_macports_dependencies = " ".join(git_macports_dependencies)
@@ -537,17 +467,12 @@ class WikiPageGenerator:
         git_msvscpp_dependencies = [".\\synclibs.ps1"]
 
         if (
-            "lex" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-            or "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
+            project_configuration.HasDependencyLex()
+            or project_configuration.HasDependencyYacc()
         ):
             git_msvscpp_dependencies.append(".\\syncwinflexbison.ps1")
 
-        if (
-            "zlib" in project_configuration.library_build_dependencies
-            or "zlib" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyZlib():
             git_msvscpp_dependencies.append(".\\synczlib.ps1")
 
         git_msvscpp_dependencies = "\n".join(git_msvscpp_dependencies)
@@ -560,22 +485,13 @@ class WikiPageGenerator:
         gcc_build_dependencies = []
         gcc_static_build_dependencies = []
 
-        if (
-            "lex" in project_configuration.library_build_dependencies
-            or "lex" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyLex():
             gcc_build_dependencies.append("flex")
 
-        if (
-            "yacc" in project_configuration.library_build_dependencies
-            or "yacc" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyYacc():
             gcc_build_dependencies.append("byacc")
 
-        if (
-            "zlib" in project_configuration.library_build_dependencies
-            or "zlib" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyZlib():
             gcc_build_dependencies.append(
                 "zlib (for DEFLATE compression support) (optional but recommended, "
                 "can be disabled by --with-zlib=no)"
@@ -593,10 +509,7 @@ class WikiPageGenerator:
                 "bzip2 (required for bzip2 compression support)"
             )
 
-        if (
-            "crypto" in project_configuration.library_build_dependencies
-            or "crypto" in project_configuration.tools_build_dependencies
-        ):
+        if project_configuration.HasDependencyCrypto():
             gcc_build_dependencies.append(
                 "libcrypto (part of OpenSSL) (optional but recommended, can be "
                 "disabled by --with-openssl=no)"
@@ -1400,7 +1313,6 @@ class TestingPageGenerator(WikiPageGenerator):
                 self._GenerateSection(
                     "tests_profiles.txt", template_mappings, output_writer
                 )
-
                 if (
                     project_configuration.tests_example_filename1
                     and project_configuration.tests_example_filename2
@@ -1410,10 +1322,6 @@ class TestingPageGenerator(WikiPageGenerator):
                     )
 
             # TODO: add section about ASAN
-
-            self._GenerateSection(
-                "tests_valgrind.txt", template_mappings, output_writer
-            )
 
     def HasContent(self, project_configuration):
         """Determines if the generator will generate content.

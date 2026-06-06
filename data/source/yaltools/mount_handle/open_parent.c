@@ -9,7 +9,7 @@ int mount_handle_open_parent(
 	uint8_t guid[ 16 ];
 
 	${library_name}_${mount_tool_file_system_type}_t *parent_${mount_tool_file_system_type_name} = NULL;
-	system_character_t *parent_basename_end                                                      = NULL;
+	const system_character_t *parent_basename_end                                                = NULL;
 	system_character_t *parent_filename                                                          = NULL;
 	system_character_t *parent_path                                                              = NULL;
 	static char *function                                                                        = "mount_handle_open_parent";
@@ -228,7 +228,7 @@ int mount_handle_open_parent(
 		 function,
 		 parent_path );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( ${library_name}_${mount_tool_file_system_type}_set_parent_file(
 	     ${mount_tool_file_system_type_name},

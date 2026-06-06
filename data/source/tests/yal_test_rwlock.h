@@ -24,27 +24,39 @@
 
 #include <common.h>
 
+#include "${library_name_suffix}_test_extern.h"
 #include "${library_name_suffix}_test_lib${library_name_suffix}.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-#if defined( ${library_name:upper_case}_HAVE_MULTI_THREAD_SUPPORT ) && defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
-#define HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK		1
+#if defined( ${library_name:upper_case}_HAVE_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+#define HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK_HOOK	1
+#endif
 #endif
 
-#if defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK )
+#if defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK_HOOK )
 
-extern int ${library_name_suffix}_test_pthread_rwlock_init_attempts_before_fail;
+${library_name_suffix:upper_case}_TEST_INTERNAL \
+int ${library_name_suffix}_test_pthread_rwlock_init_attempts_before_fail;
 
-extern int ${library_name_suffix}_test_pthread_rwlock_destroy_attempts_before_fail;
+${library_name_suffix:upper_case}_TEST_INTERNAL \
+int ${library_name_suffix}_test_pthread_rwlock_destroy_attempts_before_fail;
 
-extern int ${library_name_suffix}_test_pthread_rwlock_rdlock_attempts_before_fail;
+${library_name_suffix:upper_case}_TEST_INTERNAL \
+int ${library_name_suffix}_test_pthread_rwlock_rdlock_attempts_before_fail;
 
-extern int ${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fail;
+${library_name_suffix:upper_case}_TEST_INTERNAL \
+int ${library_name_suffix}_test_pthread_rwlock_wrlock_attempts_before_fail;
 
-extern int ${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail;
+#if defined( HAVE_PTHREAD_RWLOCK_UNLOCK_HOOK )
+
+${library_name_suffix:upper_case}_TEST_INTERNAL \
+int ${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail;
+
+#endif /* defined( HAVE_PTHREAD_RWLOCK_UNLOCK_HOOK ) */
 
 #endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK ) */
 

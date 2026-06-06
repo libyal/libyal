@@ -45,4 +45,4 @@
         make > /dev/null
     - name: Run tests
       run: |
-        make distcheck
+        make distcheck VERBOSE=1
