@@ -404,6 +404,7 @@ class WikiPageGenerator:
             "automake",
             "autopoint",
             "libtool",
+            "make",
             "pkg-config",
         ]
         if project_configuration.HasDependencyLex():
@@ -420,6 +421,7 @@ class WikiPageGenerator:
             "automake",
             "gettext-devel",
             "libtool",
+            "make",
             "pkg-config",
         ]
         if project_configuration.HasDependencyLex():
@@ -437,6 +439,7 @@ class WikiPageGenerator:
             "automake",
             "autopoint or gettextize",
             "libtoolize",
+            "make",
             "pkg-config",
         ]
         if project_configuration.HasDependencyLex():
@@ -454,6 +457,7 @@ class WikiPageGenerator:
             "automake",
             "gettext",
             "libtool",
+            "make",
             "pkgconfig",
         ]
         if project_configuration.HasDependencyLex():

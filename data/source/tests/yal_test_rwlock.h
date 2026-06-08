@@ -58,7 +58,7 @@ int ${library_name_suffix}_test_pthread_rwlock_unlock_attempts_before_fail;
 
 #endif /* defined( HAVE_PTHREAD_RWLOCK_UNLOCK_HOOK ) */
 
-#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK ) */
+#endif /* defined( HAVE_${library_name_suffix:upper_case}_TEST_RWLOCK_HOOK ) */
 
 #if defined( __cplusplus )
 }

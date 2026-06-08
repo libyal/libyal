@@ -21,7 +21,7 @@
       run: |
         ./synclibs.sh --use-head
         ./autogen.sh
-        ./configure ${{ matrix.configure_options }}
+        ./configure $${{ matrix.configure_options }}
         make > /dev/null
     - name: Run tests
       run: |
@@ -49,7 +49,7 @@
       run: |
         ./synclibs.sh --use-head
         ./autogen.sh
-        ./configure ${{ matrix.configure_options }}
+        ./configure $${{ matrix.configure_options }}
         make > /dev/null
     - name: Run tests
       run: |

@@ -64,55 +64,42 @@ AC_DEFUN([AX_LIBUUID_CHECK_LIB],
 
     AS_IF(
       [test "x$ac_cv_libuuid" = xcheck],
-      [AS_IF(
-        [test "x$ac_cv_enable_winapi" = xyes],
-        [dnl Check for headers
-        AC_CHECK_HEADERS(
-	  [rpcdce.h],
-	  [],
-	  [],
-          [#if defined( HAVE_WINDOWS_H )
-#include <windows.h>
-#endif])
+      [dnl Check for headers
+      AC_CHECK_HEADERS([uuid/uuid.h])
 
-	AX_LIBRPCRT4_CHECK_UUID_CREATE
+      AS_IF(
+        [test "x$ac_cv_header_uuid_uuid_h" = xno],
+        [ac_cv_libuuid=no],
+        [AC_CHECK_FUNC(
+          [uuid_generate],
+          [ac_cv_libuuid=native
 
-        AS_IF(
-          [test "x$ac_cv_have_rpcrt4_uuid_create" = xno],
-	  [ac_cv_libuuid=no],
-          [ac_cv_libuuid=librpcrt4
+          ac_cv_libuuid_LIBADD=""],
+          [ac_cv_libuuid=libuuid
 
-          ac_cv_libuuid_LIBADD="-lrpcrt4"])
-	],
-        [dnl Check for headers
-        AC_CHECK_HEADERS([uuid/uuid.h])
-
-        AS_IF(
-          [test "x$ac_cv_header_uuid_uuid_h" = xno],
-          [ac_cv_libuuid=no],
-          [AC_CHECK_FUNC(
+          AC_CHECK_LIB(
+            [uuid],
             [uuid_generate],
-            [ac_cv_libuuid=native
+            [],
+            [ac_cv_libuuid=no])
 
-            ac_cv_libuuid_LIBADD=""],
-            [ac_cv_libuuid=libuuid
+          AS_IF(
+             [test "x$ac_cv_lib_uuid_uuid_generate" = xno],
+             [AC_MSG_FAILURE(
+               [Missing function: uuid_generate in library: uuid.],
+               [1])
+             ])
 
-            AC_CHECK_LIB(
-              [uuid],
-              [uuid_generate],
-              [],
-              [ac_cv_libuuid=no])
-            AS_IF(
-               [test "x$ac_cv_lib_uuid_uuid_generate" = xno],
-               [AC_MSG_FAILURE(
-                 [Missing function: zlibVersion in library: zlib.],
-                 [1])
-               ])
-
-            ac_cv_libuuid_LIBADD="-luuid"
-            ])
-          ])
+          ac_cv_libuuid_LIBADD="-luuid";
+	  ])
         ])
+      ])
+
+    AS_IF(
+      [test "x$ac_cv_libuuid" != xyes && test "x$ac_cv_with_libuuid" != x && test "x$ac_cv_with_libuuid" != xauto-detect && test "x$ac_cv_with_libuuid" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported uuid in directory: $ac_cv_with_libuuid],
+        [1])
       ])
     ])
 
@@ -195,8 +182,28 @@ AC_DEFUN([AX_LIBUUID_CHECK_ENABLE],
     [auto-detect],
     [DIR])
 
-  dnl Check for a shared library version
-  AX_LIBUUID_CHECK_LIB
+  AS_IF(
+    [test "x$ac_cv_enable_winapi" = xno],
+    [dnl Check for a shared library version
+    AX_LIBUUID_CHECK_LIB],
+    [dnl Check for headers
+    AC_CHECK_HEADERS(
+      [rpcdce.h],
+      [],
+      [],
+      [[#if defined( HAVE_WINDOWS_H )
+        #include <windows.h>
+        #endif
+      ]])
+    AX_LIBRPCRT4_CHECK_UUID_CREATE
+
+    AS_IF(
+      [test "x$ac_cv_have_rpcrt4_uuid_create" = xno],
+        [ac_cv_libuuid=no],
+        [ac_cv_libuuid=librpcrt4
+
+        ac_cv_libuuid_LIBADD="-lrpcrt4"])
+    ])
 
   AS_IF(
     [test "x$ac_cv_libuuid_CPPFLAGS" != "x"],

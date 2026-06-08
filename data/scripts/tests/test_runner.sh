@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20260606
+# Version: 20260607
 #
 # When CHECK_WITH_STDERR is set to a non-empty value the test executable
 # is run with error output to stderr.
@@ -562,7 +562,7 @@ run_test_with_input_and_arguments()
 	OSTYPE_LOWER=`echo "$OSTYPE" | tr '[A-Z]' '[a-z]'`;
 	case "${OSTYPE_LOWER}" in
 		cygwin*|msys*)
-			if test ${TESTS_USE_WINAPI} = "yes" || test "${MSYSTEM}" = "MINGW32" || test "${MSYSTEM}" = "MINGW64";
+			if test "${TESTS_USE_WINAPI}" = "yes" || test "${MSYSTEM}" = "MINGW32" || test "${MSYSTEM}" = "MINGW64";
 			then
 				INPUT_FILE=`cygpath -w "${INPUT_FILE}"`;
 			fi
@@ -581,14 +581,14 @@ run_test_with_input_and_arguments()
 
 				exit ${EXIT_IGNORE};
 			fi
-			if test ${TESTS_USE_WINAPI} = "yes" || ${OBJDUMP} -f "${TEST_EXECUTABLE}" 2>&1 | grep -q "pei-";
+			if test "${TESTS_USE_WINAPI}" = "yes" || ${OBJDUMP} -f "${TEST_EXECUTABLE}" 2>&1 | grep -q "pei-";
 			then
 				INPUT_FILE=`winepath -w "${INPUT_FILE}" 2>/dev/null`;
 			fi
 			;;
 
 		*)
-			if test ${TESTS_USE_WINAPI} = "yes";
+			if test "${TESTS_USE_WINAPI}" = "yes";
 			then
 				echo "WINAPI not supported on ${OSTYPE}";
 

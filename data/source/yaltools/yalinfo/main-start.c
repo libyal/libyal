@@ -14,6 +14,11 @@ ${info_tool_options_variable_declarations}
 	int result                     = 0;
 	int verbose                    = 0;
 
+#if defined( __MINGW32__ ) && defined( HAVE_MINGW_BINMODE )
+	_setmode( _fileno( stdout ), _O_BINARY );
+	_setmode( _fileno( stderr ), _O_BINARY );
+#endif
+
 	libcnotify_stream_set(
 	 stderr,
 	 NULL );

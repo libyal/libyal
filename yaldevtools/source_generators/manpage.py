@@ -207,23 +207,16 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
 
         include_header_file = self._GetLibraryIncludeHeaderFile(project_configuration)
 
-        if not include_header_file:
-            logging.warning(
-                f"Missing: {self._library_include_header_path:s} skipping generation "
-                f"of library man page."
+        if include_header_file:
+            template_mappings = self._GetTemplateMappings(project_configuration)
+
+            output_filename = os.path.join(
+                "manuals", f"{project_configuration.library_name:s}.3"
             )
-            return
-
-        template_mappings = self._GetTemplateMappings(project_configuration)
-
-        output_filename = os.path.join(
-            "manuals", f"{project_configuration.library_name:s}.3"
-        )
-
-        self._GenerateLibraryManPage(
-            project_configuration,
-            template_mappings,
-            include_header_file,
-            output_writer,
-            output_filename,
-        )
+            self._GenerateLibraryManPage(
+                project_configuration,
+                template_mappings,
+                include_header_file,
+                output_writer,
+                output_filename,
+            )

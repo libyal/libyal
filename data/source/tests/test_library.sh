@@ -92,7 +92,7 @@ run_test_with_input()
 		else
 			for FILENAME in $${TEST_SET_INPUT_DIRECTORY}/$${INPUT_GLOB};
 			do
-				if test -e "${FILENAME}";
+				if test -e "$${FILENAME}";
 				then
 					INPUT_FILES+=("$${FILENAME}")
 				fi

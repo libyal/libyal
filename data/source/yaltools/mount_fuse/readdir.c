@@ -5,7 +5,7 @@
 int mount_fuse_readdir(
      const char *path,
      void *buffer,
-     fuse_fill_dir_t filler,
+     mount_fuse_fill_dir_t filler,
      off_t offset ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
      struct fuse_file_info *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
      enum fuse_readdir_flags flags ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
@@ -13,7 +13,7 @@ int mount_fuse_readdir(
 int mount_fuse_readdir(
      const char *path,
      void *buffer,
-     fuse_fill_dir_t filler,
+     mount_fuse_fill_dir_t filler,
      off_t offset ${tools_name:upper_case}_ATTRIBUTE_UNUSED,
      struct fuse_file_info *file_info ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
 #endif

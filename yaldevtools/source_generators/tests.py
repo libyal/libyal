@@ -61,7 +61,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           test_options (list[tuple[str, str]]): test options.
           output_writer (OutputWriter): output writer.
         """
-        signature_type = include_header_file.GetCheckSignatureType()
+        if include_header_file:
+            signature_type = include_header_file.GetCheckSignatureType()
+        else:
+            signature_type = None
 
         templates_path = os.path.join(self._templates_path, "yal_test_support")
 
@@ -92,7 +95,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             "get_codepage",
             "set_codepage",
         ):
-            if not include_header_file.HasFunction(support_function):
+            if not include_header_file or not include_header_file.HasFunction(
+                support_function
+            ):
                 continue
 
             template_filename = f"{support_function:s}.c"
@@ -551,7 +556,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         check_programs = sorted(check_programs)
 
-        am_cppflags = list(makefile_am_file.cppflags)
+        if makefile_am_file:
+            am_cppflags = list(makefile_am_file.cppflags)
+        else:
+            am_cppflags = []
+
         if api_functions_with_input or api_types_with_open:
             # Add libcsystem before non libyal cppflags.
             index = 0
@@ -3406,7 +3415,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         )
         library_tests_with_input = sorted(library_tests_with_input)
 
-        shared_libs = list(makefile_am_file.libraries)
+        if makefile_am_file:
+            shared_libs = list(makefile_am_file.libraries)
+        else:
+            shared_libs = []
+
         if "bzip2" in shared_libs:
             shared_libs.remove("bzip2")
         if "libcrypto" in shared_libs:
@@ -3426,14 +3439,12 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["library_tests_with_input"] = " ".join(
             library_tests_with_input
         )
-
         template_mappings["runtest_py_tests_option_sets_py"] = ", ".join(
             [
                 f'"{test_option_set:s}"'
                 for test_option_set in project_configuration.tests_option_sets
             ]
         )
-
         template_mappings["shared_libs"] = " ".join(shared_libs)
 
         # TODO: determine tools tests
@@ -3444,7 +3455,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["test_python_functions_with_input"] = " ".join(
             sorted(python_functions_with_input)
         )
-
         template_mappings["tests_option_sets_ps1"] = " ".join(
             project_configuration.tests_option_sets
         )
@@ -3454,7 +3464,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 for test_option_set in project_configuration.tests_option_sets
             ]
         )
-
         template_mappings["tests_input_glob"] = project_configuration.tests_input_glob
 
         template_mappings["tests_export_tool_option_sets_ps1"] = " ".join(
@@ -3493,7 +3502,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 for profile in (project_configuration.tests_export_tool_profiles)
             ]
         )
-
         template_mappings["tests_info_tool_input_glob"] = (
             project_configuration.tests_info_tool_input_glob
         )
@@ -3536,7 +3544,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 for profile in (project_configuration.tests_info_tool_profiles)
             ]
         )
-
         template_mappings["tests_verify_tool_option_sets_ps1"] = " ".join(
             project_configuration.tests_verify_tool_option_sets
         )
@@ -3567,7 +3574,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["alignment_padding"] = " " * len(
             project_configuration.library_name_suffix
         )
-
         return template_mappings
 
     def _GetTestFunctionName(self, project_configuration, type_name, type_function):
@@ -3787,32 +3793,30 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         include_header_file = self._GetLibraryIncludeHeaderFile(project_configuration)
 
-        if not include_header_file:
-            logging.warning(
-                f"Missing: {self._library_include_header_path:s} skipping generation "
-                f"of include source files."
+        if include_header_file:
+            api_functions, api_functions_with_input = (
+                include_header_file.GetAPIFunctionTestGroups()
             )
-            return
+            api_types, api_types_with_open = include_header_file.GetAPITypeTestGroups()
+
+            api_pseudo_types = include_header_file.GetAPIPseudoTypeTestGroups()
+        else:
+            api_functions = []
+            api_functions_with_input = []
+            api_types = []
+            api_types_with_open = []
+            api_pseudo_types = []
 
         makefile_am_file = self._GetLibraryMakefileAM(project_configuration)
 
-        if not makefile_am_file:
-            logging.warning(
-                f"Missing: {self._library_makefile_am_path:s} skipping generation of "
-                f"include source files."
+        if makefile_am_file:
+            types, internal_functions = self._GetLibraryTypes(
+                project_configuration, makefile_am_file
             )
-            return
+        else:
+            types = []
+            internal_functions = []
 
-        api_functions, api_functions_with_input = (
-            include_header_file.GetAPIFunctionTestGroups()
-        )
-        api_types, api_types_with_open = include_header_file.GetAPITypeTestGroups()
-
-        api_pseudo_types = include_header_file.GetAPIPseudoTypeTestGroups()
-
-        types, internal_functions = self._GetLibraryTypes(
-            project_configuration, makefile_am_file
-        )
         public_functions = set(api_functions).union(set(api_functions_with_input))
         public_types = set(api_types).union(set(api_types_with_open))
 
@@ -3946,7 +3950,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         with_offset = False
 
-        signature_type = include_header_file.GetCheckSignatureType()
+        if include_header_file:
+            signature_type = include_header_file.GetCheckSignatureType()
+        else:
+            signature_type = None
 
         test_options = self._GetTestOptions(project_configuration, signature_type)
         if "offset" in [argument for _, argument in test_options]:

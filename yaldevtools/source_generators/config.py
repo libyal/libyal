@@ -560,6 +560,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           output_writer (OutputWriter): output writer.
           output_directory (str): path of the output directory.
         """
+        os.makedirs("dpkg", exist_ok=True)
+
         # TODO: add support for projects without Python bindings.
         # TODO: fix lintian issues.
 
@@ -1080,28 +1082,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         include_header_file = self._GetLibraryIncludeHeaderFile(project_configuration)
 
-        if not include_header_file:
-            logging.warning(
-                (
-                    f"Missing: {self._library_include_header_path:s} skipping "
-                    f"generation of configuration files."
-                )
-            )
-            return
-
         makefile_am_file = self._GetLibraryMakefileAM(project_configuration)
 
-        if not makefile_am_file:
-            logging.warning(
-                (
-                    f"Missing: {self._library_makefile_am_path:s} skipping generation "
-                    f"of configuration files."
-                )
-            )
-            return
+        if makefile_am_file:
+            libraries = sorted(makefile_am_file.libraries)
+        else:
+            libraries = []
 
         pc_libs_private = []
-        for library in sorted(makefile_am_file.libraries):
+        for library in libraries:
             if library != "libdl":
                 pc_libs_private.append(f"@ax_{library:s}_pc_libs_private@")
 
@@ -1143,7 +1132,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                     logging.warning(f"Skipping: {output_filename:s}")
                     continue
 
-            elif directory_entry == "libyal.pc.in":
+            elif directory_entry == "libyal.pc.in" and include_header_file:
                 output_filename = f"{project_configuration.library_name:s}.pc.in"
 
             else:
@@ -1178,6 +1167,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         linux_configure_options = configure_options.copy()
         linux_configure_options.append("CPPFLAGS=-DHAVE_MEMORY_TESTS=1")
 
+        # For now run the Linux coverage tests with zlib for libewf write tests.
+        if project_configuration.HasDependencyZlib():
+            configure_options.append("--with-zlib=no")
+
         configure_options.append("--enable-winapi")
 
         template_mappings["coverage_cygwin_configure_options"] = " ".join(
@@ -1191,6 +1184,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         )
         operations_file_name = os.path.join("github_workflows", "coverage.yml.yaml")
         output_filename = os.path.join(".github", "workflows", "coverage.yml")
+
         self._GenerateSectionsFromOperationsFile(
             operations_file_name,
             "main",
@@ -1204,6 +1198,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         operations_file_name = os.path.join("github_workflows", "build_linux.yml.yaml")
         output_filename = os.path.join(".github", "workflows", "build_linux.yml")
+
         self._GenerateSectionsFromOperationsFile(
             operations_file_name,
             "main",
@@ -1238,6 +1233,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 "github_workflows", "build_ossfuzz.yml.yaml"
             )
             output_filename = os.path.join(".github", "workflows", "build_ossfuzz.yml")
+
             self._GenerateSectionsFromOperationsFile(
                 operations_file_name,
                 "main",
@@ -1251,6 +1247,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 "github_workflows", "build_wheel.yml.yaml"
             )
             output_filename = os.path.join(".github", "workflows", "build_wheel.yml")
+
             self._GenerateSectionsFromOperationsFile(
                 operations_file_name,
                 "main",
@@ -1284,6 +1281,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             "github_workflows", "build_windows.yml.yaml"
         )
         output_filename = os.path.join(".github", "workflows", "build_windows.yml")
+
         self._GenerateSectionsFromOperationsFile(
             operations_file_name,
             "main",
@@ -1301,10 +1299,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         self._GenerateACIncludeM4(project_configuration, template_mappings)
 
-        self._GenerateDpkg(
-            project_configuration, template_mappings, output_writer, "dpkg"
-        )
-        self._GenerateRpmSpec(project_configuration, template_mappings)
+        if include_header_file:
+            self._GenerateDpkg(
+                project_configuration, template_mappings, output_writer, "dpkg"
+            )
+            self._GenerateRpmSpec(project_configuration, template_mappings)
 
         if project_configuration.HasPythonModule():
             self._GenerateSectionsFromOperationsFile(
