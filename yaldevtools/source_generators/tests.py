@@ -3571,6 +3571,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 )
             ]
         )
+        template_mappings["tests_verify_tool_profiles_ps1"] = ", ".join(
+            project_configuration.tests_verify_tool_profiles
+        )
+        template_mappings["tests_verify_tool_profiles_sh"] = " ".join(
+            [
+                f'"{profile:s}"'
+                for profile in (project_configuration.tests_verify_tool_profiles)
+            ]
+        )
         template_mappings["alignment_padding"] = " " * len(
             project_configuration.library_name_suffix
         )
