@@ -317,7 +317,10 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         options = self._GenerateOptions(info_tool_options)
 
         source_type = project_configuration.info_tool_source_type
-        options.append(f'\t\t{{ 0, "source", "the source {source_type:s}" }},')
+        if source_type:
+          options.append(f'\t\t{{ 0, "source", "the source {source_type:s}" }},')
+        else:
+          options.append(f'\t\t{{ 0, "source", "the source file" }},')
 
         variable_declarations = self._GenerateMainFunctionVariableDeclarations(
             project_configuration, info_tool_options
