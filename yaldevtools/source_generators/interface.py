@@ -650,7 +650,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         if not name or name[0] not in ("a", "e", "i", "o", ""):
             return
 
-        with open(output_filename, "r", encoding="utf8") as file_object:
+        with open(output_filename, encoding="utf8") as file_object:
             lines = file_object.readlines()
 
         name = name.replace("_", " ")
@@ -1021,7 +1021,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
           project_configuration (ProjectConfiguration): project configuration.
           output_filename (str): path of the output file.
         """
-        with open(output_filename, "r", encoding="utf8") as file_object:
+        with open(output_filename, encoding="utf8") as file_object:
             lines = file_object.readlines()
 
         library_include_header_start = (
@@ -1067,7 +1067,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         Args:
           output_filename (str): path of the output file.
         """
-        with open(output_filename, "r", encoding="utf8") as file_object:
+        with open(output_filename, encoding="utf8") as file_object:
             lines = file_object.readlines()
 
         formatter = source_formatter.SourceFormatter()
@@ -1105,7 +1105,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         Args:
           output_filename (str): path of the output file.
         """
-        with open(output_filename, "r", encoding="utf8") as file_object:
+        with open(output_filename, encoding="utf8") as file_object:
             lines = file_object.readlines()
 
         assigment_statements = []
@@ -1155,7 +1155,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         Args:
           output_filename (str): path of the output file.
         """
-        with open(output_filename, "r", encoding="utf8") as file_object:
+        with open(output_filename, encoding="utf8") as file_object:
             lines = file_object.readlines()
 
         alignment_number_of_spaces = 0
@@ -1202,7 +1202,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         Args:
           output_filename (str): path of the output file.
         """
-        with open(output_filename, "r", encoding="utf8") as file_object:
+        with open(output_filename, encoding="utf8") as file_object:
             lines = file_object.readlines()
 
         alignment_offset = 0

@@ -5,8 +5,7 @@
 	{
 		fprintf(
 		 stderr,
-		 "Unable to open: %" PRIs_SYSTEM ".\n",
-		 source );
+		 "Unable to open source ${info_tool_source_type}.\n" );
 
 		goto on_error;
 	}

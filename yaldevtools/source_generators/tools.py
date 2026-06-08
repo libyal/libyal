@@ -1,33 +1,38 @@
 """The source file generator for tool source files."""
 
 import os
-import textwrap
 
 from yaldevtools.source_generators import interface
 
 
-class ToolSourceFileGenerator(interface.SourceFileGenerator):
-    """Tool source file generator."""
+class ToolOption:
+    """Tool option.
 
-    def _GenerateGetoptString(self, tool_options):
-        """Generates a getopt string.
+    Attributes:
+      guard (str): guard.
+      help_text (str): help text.
+      identifier (str): identifier.
+      name (str): name.
+    """
+
+    def __init__(self, identifier, name, help_text, guard=None):
+        """Initializes a tool option.
 
         Args:
-          tool_options (list[tuple[str, str, st]])): tool options.
-
-        Returns:
-          str: getopt string.
+          identifier (str): identifier.
+          name (str): name.
+          help_text (str): help text.
+          guard (Optional[str]): condition under which the option should be active.
         """
-        getopt_string_segments = []
+        super().__init__()
+        self.guard = guard
+        self.help_text = help_text
+        self.identifier = identifier
+        self.name = name
 
-        for option, argument, _ in tool_options:
-            getopt_string = option
-            if argument:
-                getopt_string = f"{getopt_string:s}:"
 
-            getopt_string_segments.append(getopt_string)
-
-        return "".join(getopt_string_segments)
+class ToolSourceFileGenerator(interface.SourceFileGenerator):
+    """Tool source file generator."""
 
     def _GenerateGetoptSwitch(self, project_configuration, tool_options):
         """Generates a getopt switch.
@@ -40,54 +45,60 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
           str: getopt switch.
         """
         largest_argument_length = 0
-        for _, argument, _ in tool_options:
-            largest_argument_length = max(largest_argument_length, len(argument))
+        for option in tool_options:
+            largest_argument_length = max(largest_argument_length, len(option.name))
+
+        tools_name = project_configuration.tools_directory
 
         # TODO: move getopt_switch into templates.
         getopt_switch = []
-        for option, argument, _ in tool_options:
+        for option in tool_options:
             if getopt_switch:
                 getopt_switch.append("")
 
-            if argument:
-                getopt_switch.extend(
-                    [
-                        f"\t\t\tcase (system_integer_t) '{option:s}':",
-                        f"\t\t\t\toption_{argument:s} = optarg;",
-                        "",
-                        "\t\t\t\tbreak;",
-                    ]
-                )
-            elif option == "h":
-                getopt_switch.extend(
-                    [
-                        f"\t\t\tcase (system_integer_t) '{option:s}':",
-                        "\t\t\t\tusage_fprint(",
-                        "\t\t\t\t stdout );",
-                        "",
-                        "\t\t\t\treturn( EXIT_SUCCESS );",
-                    ]
-                )
-            elif option == "v":
-                getopt_switch.extend(
-                    [
-                        f"\t\t\tcase (system_integer_t) '{option:s}':",
-                        "\t\t\t\tverbose = 1;",
-                        "",
-                        "\t\t\t\tbreak;",
-                    ]
-                )
-            elif option == "V":
-                tools_directory = project_configuration.tools_directory
-                getopt_switch.extend(
-                    [
-                        f"\t\t\tcase (system_integer_t) '{option:s}':",
-                        f"\t\t\t\t{tools_directory:s}_output_copyright_fprint(",
-                        "\t\t\t\t stdout );",
-                        "",
-                        "\t\t\t\treturn( EXIT_SUCCESS );",
-                    ]
-                )
+            if option.name:
+                getop_switch_entry = []
+                if option.guard:
+                    getop_switch_entry.append(f"#if {option.guard:s}")
+
+                getop_switch_entry.extend([
+                    f"\t\t\tcase (system_integer_t) '{option.identifier:s}':",
+                    f"\t\t\t\toption_{option.name:s} = optarg;",
+                    "",
+                    "\t\t\t\tbreak;",
+                ])
+                if option.guard:
+                    getop_switch_entry.append(f"#endif")
+
+            elif option.identifier == "h":
+                getop_switch_entry = [
+                    f"\t\t\tcase (system_integer_t) '{option.identifier:s}':",
+                    f"\t\t\t\t{tools_name:s}_getopt_usage_fprint(",
+                    "\t\t\t\t stdout,",
+                    "\t\t\t\t program,",
+                    "\t\t\t\t description,",
+                    "\t\t\t\t options,",
+                    "\t\t\t\t number_of_options );",
+                    "",
+                    "\t\t\t\treturn( EXIT_SUCCESS );",
+                ]
+            elif option.identifier == "v":
+                getop_switch_entry = [
+                    f"\t\t\tcase (system_integer_t) '{option.identifier:s}':",
+                    "\t\t\t\tverbose = 1;",
+                    "",
+                    "\t\t\t\tbreak;",
+                ]
+            elif option.identifier == "V":
+                getop_switch_entry = [
+                    f"\t\t\tcase (system_integer_t) '{option.identifier:s}':",
+                    f"\t\t\t\t{tools_name:s}_output_copyright_fprint(",
+                    "\t\t\t\t stdout );",
+                    "",
+                    "\t\t\t\treturn( EXIT_SUCCESS );",
+                ]
+
+            getopt_switch.extend(getop_switch_entry)
 
         return "\n".join(getopt_switch)
 
@@ -257,13 +268,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-        self._GenerateInfoToolSourceUsageFunction(
-            project_configuration,
-            template_mappings,
-            info_tool_name,
-            info_tool_options,
-            output_writer,
-            output_filename,
+        template_filename = os.path.join(templates_path, "globals.c")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
         )
         template_filename = os.path.join(templates_path, "signal_handler.c")
         self._GenerateSection(
@@ -283,6 +290,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         self._SortIncludeHeaders(project_configuration, output_filename)
         self._SortVariableDeclarations(output_filename)
+        self._VerticalAlignAssignmentStatements(output_filename)
 
     def _GenerateInfoToolSourceMainFunction(
         self,
@@ -306,152 +314,79 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         """
         templates_path = os.path.join(self._templates_path, "yalinfo")
 
+        options = self._GenerateOptions(info_tool_options)
+
+        source_type = project_configuration.info_tool_source_type
+        options.append(f'\t\t{{ 0, "source", "the source {source_type:s}" }},')
+
         variable_declarations = self._GenerateMainFunctionVariableDeclarations(
-            info_tool_options
-        )
-        getopt_string = self._GenerateGetoptString(info_tool_options)
-        getopt_switch = self._GenerateGetoptSwitch(
             project_configuration, info_tool_options
         )
-        template_mappings["info_tool_getopt_string"] = getopt_string
-        template_mappings["info_tool_options_switch"] = getopt_switch
-        template_mappings["info_tool_options_variable_declarations"] = (
-            variable_declarations
+        if project_configuration.HasInfoToolsFeatureCodepage():
+            variable_declarations.append("\tint result = 0;")
+
+        getopt_switch = self._GenerateGetoptSwitch(
+            project_configuration, info_tool_options
         )
         template_filename = os.path.join(templates_path, "main-start.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-        del template_mappings["info_tool_getopt_string"]
-        del template_mappings["info_tool_options_switch"]
-        del template_mappings["info_tool_options_variable_declarations"]
+        template_mappings["info_tool_options"] = "\n".join(options)
 
-        # TODO: add condition
-        template_filename = os.path.join(templates_path, "main-option_codepage.c")
+        template_filename = os.path.join(templates_path, "main-options.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
+        del template_mappings["info_tool_options"]
+
+        template_mappings["info_tool_options_switch"] = getopt_switch
+        template_mappings["info_tool_options_variable_declarations"] = "\n".join(
+            sorted(variable_declarations)
+        )
+        template_filename = os.path.join(templates_path, "main-variables.c")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        del template_mappings["info_tool_options_switch"]
+        del template_mappings["info_tool_options_variable_declarations"]
+
+        if project_configuration.HasInfoToolsFeatureCodepage():
+            template_filename = os.path.join(templates_path, "main-option_codepage.c")
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+
         template_filename = os.path.join(templates_path, "main-end.c")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
 
-    def _GenerateInfoToolSourceUsageFunction(
-        self,
-        project_configuration,
-        template_mappings,
-        info_tool_name,
-        info_tool_options,
-        output_writer,
-        output_filename,
+    def _GenerateMainFunctionVariableDeclarations(
+        self, project_configuration, tool_options
     ):
-        """Generates an info tool source usage function.
-
-        Args:
-          project_configuration (ProjectConfiguration): project configuration.
-          template_mappings (dict[str, str]): template mappings, where the key
-              maps to the name of a template variable.
-          info_tool_name (str): name of the info tool.
-          info_tool_options (list[tuple[str, str, st]])): info tool options.
-          output_writer (OutputWriter): output writer.
-          output_filename (str): path of the output file.
-        """
-        templates_path = os.path.join(self._templates_path, "yalinfo")
-
-        alignment_padding = "          "
-        width = 80 - len(alignment_padding)
-        text_wrapper = textwrap.TextWrapper(width=width)
-
-        options_details = []
-        options_usage = []
-        options_without_arguments = []
-        for option, argument, description in info_tool_options:
-            description_lines = text_wrapper.wrap(description)
-
-            description_line = description_lines.pop(0)
-            details = (
-                f'\tfprintf( stream, "\\t-{option:s}:{alignment_padding:s}'
-                f'{description_line:s}\\n"'
-            )
-            # TODO: determine indentation size
-            for description_line in description_lines:
-                options_details.append(details)
-                details = (
-                    f'\t                 "\\t   {{   {alignment_padding:s}'
-                    f'{description_line:s}\\n"'
-                )
-
-            details = f"{details:s} );"
-            options_details.append(details)
-
-            if not argument:
-                options_without_arguments.append(option)
-            else:
-                usage = f"[ -{option:s} {argument:s} ]"
-                options_usage.append(usage)
-
-        options_without_arguments = "".join(options_without_arguments)
-        usage = f"[ -{options_without_arguments:s} ]"
-        options_usage.append(usage)
-
-        if project_configuration.info_tool_source_type:
-            options_usage.append(project_configuration.info_tool_source_type)
-
-        usage = f"Usage: {info_tool_name:s} "
-        usage_length = len(usage)
-        alignment_padding = " " * usage_length
-        options_usage = " ".join(options_usage)
-
-        width = 80 - usage_length
-        text_wrapper = textwrap.TextWrapper(width=width)
-
-        usage_lines = text_wrapper.wrap(options_usage)
-
-        info_tool_usage = []
-        usage_line = usage_lines.pop(0)
-        usage = f'\tfprintf( stream, "{usage:s}{usage_line:s}\\n"'
-
-        for usage_line in usage_lines:
-            info_tool_usage.append(usage)
-            usage = f'\t                 "{alignment_padding:s}{usage_line:s}\\n"'
-
-        usage = f'{usage[:-1]}\\n" );'
-        info_tool_usage.append(usage)
-
-        template_mappings["info_tool_options"] = "\n".join(options_details)
-        template_mappings["info_tool_usage"] = "\n".join(info_tool_usage)
-
-        template_filename = os.path.join(templates_path, "usage.c")
-        self._GenerateSection(
-            template_filename, template_mappings, output_filename, access_mode="a"
-        )
-        del template_mappings["info_tool_options"]
-        del template_mappings["info_tool_usage"]
-
-    def _GenerateMainFunctionVariableDeclarations(self, tool_options):
         """Generates the variable declarations of the main function.
 
         Args:
+          project_configuration (ProjectConfiguration): project configuration.
           tool_options (list[tuple[str, str, st]])): tool options.
 
         Returns:
-          str: variable declarations.
+          list[str]: variable declarations.
         """
-        largest_argument_length = 0
-        for _, argument, _ in tool_options:
-            largest_argument_length = max(largest_argument_length, len(argument))
+        # Make sure there is at least 1 variable in the list to prevent the template
+        # generating an empty line.
+        library_name = project_configuration.library_name
+        variable_declarations = [f"\t{library_name:s}_error_t *error = NULL;"]
 
-        variable_declarations = []
-        for _, argument, _ in tool_options:
-            if argument:
-                alignment_padding = " " * (largest_argument_length - len(argument))
-                variable_declaration = (
-                    f"\tsystem_character_t *option_{argument:s}{alignment_padding:s} "
-                    f"= NULL;"
+        for option in tool_options:
+            # Any options with a guard should be handled in the templates.
+            if option.name and not option.guard:
+                variable_declarations.append(
+                    f"\tsystem_character_t *option_{option.name:s} = NULL;"
                 )
-                variable_declarations.append(variable_declaration)
 
-        return "\n".join(sorted(variable_declarations))
+        return variable_declarations
 
     def _GenerateMountDokanHeaderFile(
         self, project_configuration, template_mappings, output_writer, output_filename
@@ -1744,13 +1679,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         )
         self._GenerateSections(template_filenames, template_mappings, output_filename)
 
-        self._GenerateMountToolSourceUsageFunction(
-            project_configuration,
-            template_mappings,
-            mount_tool_name,
-            mount_tool_options,
-            output_writer,
-            output_filename,
+        template_filename = os.path.join(templates_path, "globals.c")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
         )
         template_filename = os.path.join(templates_path, "signal_handler.c")
         self._GenerateSection(
@@ -1772,6 +1703,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         self._SortIncludeHeaders(project_configuration, output_filename)
         self._SortVariableDeclarations(output_filename)
+        self._VerticalAlignAssignmentStatements(output_filename)
 
     def _GenerateMountToolSourceMainFunction(
         self,
@@ -1797,14 +1729,28 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         file_system_type = project_configuration.mount_tool_file_system_type
 
-        variable_declarations = self._GenerateMainFunctionVariableDeclarations(
-            mount_tool_options
+        options = self._GenerateOptions(mount_tool_options)
+
+        source_type = project_configuration.mount_tool_source_type
+        description = project_configuration.mount_tool_source_description_long
+        options.append(f'\t\t{{ 0, "{source_type:s}", "{description:s}" }},')
+
+        options.append(
+            f'\t\t{{ 0, "mount_point", "the directory to serve as mount point" }},'
         )
-        getopt_string = self._GenerateGetoptString(mount_tool_options)
+        variable_declarations = self._GenerateMainFunctionVariableDeclarations(
+            project_configuration, mount_tool_options
+        )
+        if not file_system_type:
+            variable_declarations.extend([
+                "\tconst system_character_t *path_prefix = NULL;",
+                "\tsize_t path_prefix_size = 0;",
+            ])
+
         getopt_switch = self._GenerateGetoptSwitch(
             project_configuration, mount_tool_options
         )
-        template_names = ["main-start.c"]
+        template_names = ["main-start.c", "main-options.c"]
 
         # TODO: set option via configuration
         if project_configuration.library_name == "libewf":
@@ -1814,9 +1760,6 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             template_names.append("main-variables-multi_source.c")
         else:
             template_names.append("main-variables.c")
-
-        if not file_system_type:
-            template_names.append("main-variables-path_prefix.c")
 
         if project_configuration.HasMountToolsFeatureGlob():
             template_names.append("main-variables-glob.c")
@@ -1900,16 +1843,16 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             for template_name in template_names
         ]
         template_mappings["data_format"] = project_configuration.project_data_format
-        template_mappings["mount_tool_getopt_string"] = getopt_string
+        template_mappings["mount_tool_options"] = "\n".join(options)
         template_mappings["mount_tool_options_switch"] = getopt_switch
-        template_mappings["mount_tool_options_variable_declarations"] = (
-            variable_declarations
+        template_mappings["mount_tool_options_variable_declarations"] = "\n".join(
+            sorted(variable_declarations)
         )
         self._GenerateSections(
             template_filenames, template_mappings, output_filename, access_mode="a"
         )
         del template_mappings["data_format"]
-        del template_mappings["mount_tool_getopt_string"]
+        del template_mappings["mount_tool_options"]
         del template_mappings["mount_tool_options_switch"]
         del template_mappings["mount_tool_options_variable_declarations"]
 
@@ -1917,101 +1860,33 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         self._SortVariableDeclarations(output_filename)
         self._VerticalAlignFunctionArguments(output_filename)
 
-    def _GenerateMountToolSourceUsageFunction(
-        self,
-        project_configuration,
-        template_mappings,
-        mount_tool_name,
-        mount_tool_options,
-        output_writer,
-        output_filename,
-    ):
-        """Generates a mount tool source usage function.
+    def _GenerateOptions(self, tool_options):
+        """Generates options.
 
         Args:
-          project_configuration (ProjectConfiguration): project configuration.
-          template_mappings (dict[str, str]): template mappings, where the key
-              maps to the name of a template variable.
-          mount_tool_name (str): name of the mount tool.
-          mount_tool_options (list[tuple[str, str, st]])): mount tool options.
-          output_writer (OutputWriter): output writer.
-          output_filename (str): path of the output file.
+          tool_options (list[tuple[str, str, st]])): tool options.
+
+        Returns:
+          list[str]: options.
         """
-        templates_path = os.path.join(self._templates_path, "yalmount")
+        options = []
+        for option in tool_options:
+            if option.guard:
+                options.append(f"#if {option.guard:s}")
 
-        alignment_padding = "          "
-        width = 80 - len(alignment_padding)
-        text_wrapper = textwrap.TextWrapper(width=width)
-
-        options_details = []
-        options_usage = []
-        options_without_arguments = []
-        for option, argument, description in mount_tool_options:
-            description_lines = text_wrapper.wrap(description)
-
-            description_line = description_lines.pop(0)
-            details = (
-                f'\tfprintf( stream, "\\t-{option:s}:{alignment_padding:s}'
-                f'{description_line:s}\\n"'
-            )
-            for description_line in description_lines:
-                options_details.append(details)
-                details = (
-                    f'\t                 "\\t   {{   {alignment_padding:s}'
-                    f'{description_line:s}\\n"'
-                )
-
-            details = f"{details} );"
-            options_details.append(details)
-
-            if not argument:
-                options_without_arguments.append(option)
+            if option.name:
+                argument_string = f'"{option.name:s}"'
             else:
-                usage = f"[ -{option:s} {argument:s} ]"
-                options_usage.append(usage)
+                argument_string = "NULL"
 
-        options_without_arguments = "".join(options_without_arguments)
-        usage = f"[ -{options_without_arguments:s} ]"
-        options_usage.append(usage)
+            options.append(
+                f"\t\t{{ '{option.identifier:s}', {argument_string:s}, "
+                f'"{option.help_text:s}" }},'
+            )
+            if option.guard:
+                options.append("#endif")
 
-        options_usage.extend(
-            [project_configuration.mount_tool_source_type, "mount_point"]
-        )
-        mount_tool_source_alignment = " " * (
-            len("mount_point") - len(project_configuration.mount_tool_source_type)
-        )
-        usage = f"Usage: {mount_tool_name:s} "
-        usage_length = len(usage)
-        alignment_padding = " " * usage_length
-        options_usage = " ".join(options_usage)
-
-        width = 80 - usage_length
-        text_wrapper = textwrap.TextWrapper(width=width)
-
-        usage_lines = text_wrapper.wrap(options_usage)
-
-        mount_tool_usage = []
-        usage_line = usage_lines.pop(0)
-        usage = f'\tfprintf( stream, "{usage:s}{usage_line:s}\\n"'
-
-        for usage_line in usage_lines:
-            mount_tool_usage.append(usage)
-            usage = f'\t                 "{alignment_padding:s}{usage_line:s}\\n"'
-
-        usage = f'{usage[:-1]}\\n" );'
-        mount_tool_usage.append(usage)
-
-        template_mappings["mount_tool_options"] = "\n".join(options_details)
-        template_mappings["mount_tool_source_alignment"] = mount_tool_source_alignment
-        template_mappings["mount_tool_usage"] = "\n".join(mount_tool_usage)
-
-        template_filename = os.path.join(templates_path, "usage.c")
-        self._GenerateSection(
-            template_filename, template_mappings, output_filename, access_mode="a"
-        )
-        del template_mappings["mount_tool_options"]
-        del template_mappings["mount_tool_source_alignment"]
-        del template_mappings["mount_tool_usage"]
+        return options
 
     def _GetInfoToolOptions(self, project_configuration, info_tool_name):
         """Retrieves the info tool options.
@@ -2021,13 +1896,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
           info_tool_name (str): name of the info tool.
 
         Returns:
-          list[tuple[str, str, str]]: info tool options.
+          list[ToolOption]: info tool options.
         """
         # TODO: sort options with lower case before upper case.
         info_tool_options = []
 
         if project_configuration.HasInfoToolsFeatureCodepage():
-            option = (
+            option = ToolOption(
                 "c",
                 "codepage",
                 (
@@ -2042,9 +1917,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         info_tool_options.extend(
             [
-                ("h", "", "shows this help"),
-                ("v", "", "verbose output to stderr"),
-                ("V", "", "print version"),
+                ToolOption("h", "", "shows this help"),
+                ToolOption("v", "", "verbose output to stderr"),
+                ToolOption("V", "", "print version"),
             ]
         )
         return info_tool_options
@@ -2057,13 +1932,13 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
           mount_tool_name (str): name of the mount tool.
 
         Returns:
-          list[tuple[str, str, str]]: mount tool options.
+          list[ToolOption]: mount tool options.
         """
         # TODO: sort options with lower case before upper case.
         mount_tool_options = []
 
         if project_configuration.HasMountToolsFeatureCodepage():
-            option = (
+            option = ToolOption(
                 "c",
                 "codepage",
                 (
@@ -2076,7 +1951,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             mount_tool_options.append(option)
 
         if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
-            option = (
+            option = ToolOption(
                 "e",
                 "plist_path",
                 ("specify the path of the EncryptedRoot.plist.wipekey file"),
@@ -2085,7 +1960,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         # TODO: set option via configuration
         if project_configuration.library_name == "libfsapfs":
-            option = (
+            option = ToolOption(
                 "f",
                 "file_system_index",
                 ('specify a specific file system or \\"all\\"'),
@@ -2094,7 +1969,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         # TODO: set option via configuration
         if project_configuration.library_name == "libewf":
-            option = (
+            option = ToolOption(
                 "f",
                 "format",
                 (
@@ -2104,12 +1979,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             )
             mount_tool_options.append(option)
 
-        mount_tool_options.append(("h", "", "shows this help"))
+        mount_tool_options.append(ToolOption("h", "", "shows this help"))
 
         if project_configuration.HasMountToolsFeatureKeys():
             # TODO: set keys option description via configuration
             if project_configuration.library_name == "libbde":
-                option = (
+                option = ToolOption(
                     "k",
                     "keys",
                     (
@@ -2119,19 +1994,19 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                     ),
                 )
             elif project_configuration.library_name == "libfvde":
-                option = (
+                option = ToolOption(
                     "k",
                     "keys",
                     ("specify the volume master key formatted in base16"),
                 )
             elif project_configuration.library_name in ("libluksde", "libqcow"):
-                option = ("k", "keys", "specify the key formatted in base16")
+                option = ToolOption("k", "keys", "specify the key formatted in base16")
 
             mount_tool_options.append(option)
 
         if project_configuration.HasMountToolsFeatureOffset():
             mount_tool_source_type = project_configuration.mount_tool_source_type
-            option = (
+            option = ToolOption(
                 "o",
                 "offset",
                 f"specify the {{{mount_tool_source_type:s}}} offset in bytes",
@@ -2139,12 +2014,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             mount_tool_options.append(option)
 
         if project_configuration.HasMountToolsFeaturePassword():
-            option = ("p", "password", "specify the password/passphrase")
+            option = ToolOption("p", "password", "specify the password/passphrase")
 
             mount_tool_options.append(option)
 
         if project_configuration.HasMountToolsFeatureRecoveryPassword():
-            option = (
+            option = ToolOption(
                 "r",
                 "recovery_password",
                 "specify the recovery password/passphrase",
@@ -2152,7 +2027,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             mount_tool_options.append(option)
 
         if project_configuration.HasMountToolsFeatureStartupKey():
-            option = (
+            option = ToolOption(
                 "s",
                 "startup_key_path",
                 (
@@ -2164,16 +2039,24 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         mount_tool_options.extend(
             [
-                (
+                ToolOption(
                     "v",
                     "",
                     (
-                        "verbose output to stderr, while {mount_tool_name:s} will "
-                        "remain running in the foreground"
+                        f"verbose output to stderr, while {mount_tool_name:s} will "
+                        f"remain running in the foreground"
                     ),
                 ),
-                ("V", "", "print version"),
-                ("X", "extended_options", "extended options to pass to sub system"),
+                ToolOption("V", "", "print version"),
+                ToolOption(
+                    "X",
+                    "extended_options",
+                    "extended options to pass to sub system",
+                    guard=(
+                        "defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || "
+                        "defined( HAVE_LIBOSXFUSE )"
+                    ),
+                ),
             ]
         )
         return mount_tool_options
