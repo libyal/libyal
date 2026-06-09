@@ -1223,7 +1223,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         Args:
           output_filename (str): path of the output file.
         """
-        with open(output_filename, "r", encoding="utf8") as file_object:
+        with open(output_filename, encoding="utf8") as file_object:
             lines = file_object.readlines()
 
         library_include_header_start = f'#include "lib{self._prefix:s}_'
@@ -1251,7 +1251,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         Args:
           output_filename (str): path of the output file.
         """
-        with open(output_filename, "r", encoding="utf8") as file_object:
+        with open(output_filename, encoding="utf8") as file_object:
             lines = file_object.readlines()
 
         formatter = source_formatter.SourceFormatter()
@@ -1289,7 +1289,7 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
         Args:
           output_filename (str): path of the output file.
         """
-        with open(output_filename, "r", encoding="utf8") as file_object:
+        with open(output_filename, encoding="utf8") as file_object:
             lines = file_object.readlines()
 
         assigment_statements = []
@@ -1393,10 +1393,10 @@ class SourceGenerator(interface.BaseSourceFileGenerator):
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description="Generates source based on dtFabric format definitions."
@@ -1433,12 +1433,12 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     if not os.path.isfile(options.configuration_file):
         print(f"No such configuration file: {options.configuration_file:s}")
         print("")
-        return False
+        return 1
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -1460,13 +1460,13 @@ def Main():
             f"Unable to read data format definitions from file: "
             f"{options.definitions_file:s} with error: {exception!s}"
         )
-        return False
+        return 1
 
-    return source_generator.Generate(project_configuration)
+    if not source_generator.Generate(project_configuration):
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

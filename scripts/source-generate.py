@@ -22,15 +22,14 @@ from yaldevtools.source_generators import tools
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description=("Generates source files of the libyal libraries.")
     )
-
     argument_parser.add_argument(
         "-e",
         "--experimental",
@@ -39,7 +38,6 @@ def Main():
         default=False,
         help="enable experimental functionality.",
     )
-
     argument_parser.add_argument(
         "-g",
         "--generators",
@@ -48,7 +46,6 @@ def Main():
         default="all",
         help="names of the generators to run.",
     )
-
     argument_parser.add_argument(
         "-o",
         "--output",
@@ -58,7 +55,6 @@ def Main():
         default=None,
         help="path of the output files to write to.",
     )
-
     argument_parser.add_argument(
         "-p",
         "--projects",
@@ -68,7 +64,6 @@ def Main():
         default=None,
         help="path of the projects.",
     )
-
     argument_parser.add_argument(
         "configuration_file",
         action="store",
@@ -76,7 +71,6 @@ def Main():
         default="libyal.ini",
         help="path of the configuration file.",
     )
-
     options = argument_parser.parse_args()
 
     if not options.configuration_file:
@@ -84,17 +78,17 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     if not os.path.exists(options.configuration_file):
         print(f"No such configuration file: {options.configuration_file:s}")
         print("")
-        return False
+        return 1
 
     if options.output_directory and not os.path.exists(options.output_directory):
         print(f"No such output directory: {options.output_directory:s}")
         print("")
-        return False
+        return 1
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -131,7 +125,6 @@ def Main():
         ("tests", tests.TestSourceFileGenerator),
         ("yaltools", tools.ToolSourceFileGenerator),
     ]
-
     sources_directory = os.path.join(data_directory, "source")
     for source_category, source_generator_class in SOURCE_GENERATORS:
         if generators and source_category not in generators:
@@ -144,7 +137,6 @@ def Main():
             template_directory,
             experimental=options.experimental,
         )
-
         if options.output_directory:
             output_writer = output_writers.FileWriter(options.output_directory)
         else:
@@ -159,7 +151,6 @@ def Main():
     SOURCE_GENERATORS = [
         ("libyal.3", manpage.LibraryManPageGenerator),
     ]
-
     manuals_directory = os.path.join(libyal_directory, "data", "source", "manuals")
     for source_category, source_generator_class in SOURCE_GENERATORS:
         if generators and source_category not in generators:
@@ -172,7 +163,6 @@ def Main():
             template_directory,
             experimental=options.experimental,
         )
-
         if options.output_directory:
             output_writer = output_writers.FileWriter(options.output_directory)
         else:
@@ -180,11 +170,8 @@ def Main():
 
         source_generator_object.Generate(project_configuration, output_writer)
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

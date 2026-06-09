@@ -28,7 +28,7 @@ class SourceFileParser:
         state = self._STATE_NONE
         group = []
 
-        with open(path, "r", encoding="utf8") as file_object:
+        with open(path, encoding="utf8") as file_object:
             for line in file_object.readlines():
                 stripped_line = line.strip()
 
@@ -48,15 +48,14 @@ class SourceFileParser:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description=("Formats source files of the libyal libraries.")
     )
-
     argument_parser.add_argument(
         "source_file",
         action="store",
@@ -64,7 +63,6 @@ def Main():
         default="libyal.ini",
         help="path of the source file.",
     )
-
     options = argument_parser.parse_args()
 
     if not options.source_file:
@@ -72,16 +70,14 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     # TODO: remove trailing whitespace
 
     # parser = SourceFileParser()
     # parser.ReadFile(options.source_file)
 
-    # return
-
-    with open(options.source_file, "r", encoding="utf8") as file_object:
+    with open(options.source_file, encoding="utf8") as file_object:
         file_content = file_object.read()
 
     lines = file_content.split("\n")
@@ -93,11 +89,8 @@ def Main():
     with open(options.source_file, "w", encoding="utf8") as file_object:
         file_object.write(formatted_file_content)
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

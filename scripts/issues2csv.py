@@ -411,17 +411,16 @@ class StdoutWriter:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description=(
             "Generates an overview of open Github issues of the libyal libraries."
         )
     )
-
     argument_parser.add_argument(
         "configuration_file",
         action="store",
@@ -429,7 +428,6 @@ def Main():
         default="projects.ini",
         help=("The overview generation configuration file."),
     )
-
     argument_parser.add_argument(
         "-o",
         "--output",
@@ -439,7 +437,6 @@ def Main():
         default=None,
         help=("path of the output file to write to."),
     )
-
     argument_parser.add_argument(
         "-p",
         "--projects",
@@ -449,7 +446,6 @@ def Main():
         default=None,
         help="comma separated list of specific project names to query.",
     )
-
     options = argument_parser.parse_args()
 
     if not options.configuration_file:
@@ -457,12 +453,12 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     if not os.path.exists(options.configuration_file):
         print(f"No such configuration file: {options.configuration_file:s}")
         print("")
-        return False
+        return 1
 
     projects_reader = ProjectsReader()
 
@@ -476,7 +472,7 @@ def Main():
                 f"{options.configuration_file:s}"
             )
             print("")
-            return False
+            return 1
 
         project_names = [project.name for project in projects]
 
@@ -490,16 +486,13 @@ def Main():
     if not output_writer.Open():
         print("Unable to open output writer.")
         print("")
-        return False
+        return 1
 
     issue_helper = GithubIssueHelper("libyal")
     issue_helper.ListIssues(project_names, output_writer)
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

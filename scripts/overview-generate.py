@@ -130,7 +130,7 @@ class ConfigureAcFile:
         Returns:
           bool: True if the version was read from the file.
         """
-        with open(self._path, "r", encoding="utf8") as file_object:
+        with open(self._path, encoding="utf8") as file_object:
             line_count = 0
             for line in file_object.readlines():
                 line = line.strip()
@@ -1135,15 +1135,14 @@ class StdoutWriter:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description=("Generates an overview of the libyal libraries.")
     )
-
     argument_parser.add_argument(
         "configuration_file",
         action="store",
@@ -1151,7 +1150,6 @@ def Main():
         default="projects.ini",
         help=("The overview generation configuration file."),
     )
-
     argument_parser.add_argument(
         "-o",
         "--output",
@@ -1161,7 +1159,6 @@ def Main():
         default=None,
         help="path of the output files to write to.",
     )
-
     options = argument_parser.parse_args()
 
     if not options.configuration_file:
@@ -1169,17 +1166,17 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     if not os.path.exists(options.configuration_file):
         print(f"No such configuration file: {options.configuration_file:s}")
         print("")
-        return False
+        return 1
 
     if options.output_directory and not os.path.exists(options.output_directory):
         print(f"No such output directory: {options.output_directory:s}")
         print("")
-        return False
+        return 1
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -1196,13 +1193,12 @@ def Main():
             f"{options.configuration_file:s}"
         )
         print("")
-        return False
+        return 1
 
     wiki_pages = [
         ("Overview", OverviewWikiPageGenerator),
         ("Status", StatusWikiPageGenerator),
     ]
-
     for page_name, page_generator_class in wiki_pages:
         data_directory = os.path.join(libyal_directory, "data")
         templates_path = os.path.join(data_directory, "wiki", page_name)
@@ -1217,7 +1213,7 @@ def Main():
         if not output_writer.Open():
             print("Unable to open output writer.")
             print("")
-            return False
+            return 1
 
         wiki_page.Generate(projects, output_writer)
 
@@ -1225,11 +1221,8 @@ def Main():
 
     # TODO: add support for Unicode templates.
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

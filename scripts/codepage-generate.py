@@ -431,7 +431,7 @@ class SourceGenerator:
         self._codepage_values = {}
         self._unicode_values = {}
 
-        with open(definitions_file, "r", encoding="utf-8") as file_object:
+        with open(definitions_file, encoding="utf-8") as file_object:
             for line in file_object.readlines():
                 match_groups = self._CODEPAGE_MAPPINGS_REGEX.match(line)
                 if match_groups:
@@ -453,10 +453,10 @@ class SourceGenerator:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description=("Generates libuna source files base on a codepage definition.")
@@ -493,17 +493,17 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     if not os.path.exists(options.definitions_file):
         print(f"No such codepage definition file: {options.definitions_file:s}")
         print("")
-        return False
+        return 1
 
     if options.output_directory and not os.path.exists(options.output_directory):
         print(f"No such output directory: {options.output_directory:s}")
         print("")
-        return False
+        return 1
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -515,11 +515,11 @@ def Main():
 
     source_generator = SourceGenerator(templates_path)
     source_generator.ReadDefinitions(options.definitions_file)
-    return source_generator.Generate()
+    if not source_generator.Generate():
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

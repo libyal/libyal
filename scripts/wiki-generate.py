@@ -1435,15 +1435,14 @@ class StdoutWriter:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description=("Generates wiki pages of the libyal libraries.")
     )
-
     argument_parser.add_argument(
         "configuration_file",
         action="store",
@@ -1451,7 +1450,6 @@ def Main():
         default="project-wiki.ini",
         help=("The wiki generation configuration file."),
     )
-
     argument_parser.add_argument(
         "-o",
         "--output",
@@ -1461,7 +1459,6 @@ def Main():
         default=None,
         help="path of the output files to write to.",
     )
-
     options = argument_parser.parse_args()
 
     if not options.configuration_file:
@@ -1469,17 +1466,17 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     if not os.path.exists(options.configuration_file):
         print(f"No such configuration file: {options.configuration_file:s}")
         print("")
-        return False
+        return 1
 
     if options.output_directory and not os.path.exists(options.output_directory):
         print(f"No such output directory: {options.output_directory:s}")
         print("")
-        return False
+        return 1
 
     project_configuration = configuration.ProjectConfiguration()
     project_configuration.ReadFromFile(options.configuration_file)
@@ -1492,7 +1489,7 @@ def Main():
 
     project_description = []
     if os.path.exists(readme_file):
-        with open(readme_file, "r", encoding="utf8") as file_object:
+        with open(readme_file, encoding="utf8") as file_object:
             for line in file_object.readlines():
                 if line.startswith("For more information see:"):
                     project_description.pop()
@@ -1528,7 +1525,6 @@ def Main():
         ("Testing", TestingPageGenerator),
         ("Troubleshooting", TroubleshootingPageGenerator),
     ]
-
     for page_name, page_generator_class in wiki_pages:
         templates_path = os.path.join(libyal_directory, "data", "wiki", page_name)
         wiki_page = page_generator_class(templates_path)
@@ -1545,7 +1541,7 @@ def Main():
         if not output_writer.Open():
             print("Unable to open output writer.")
             print("")
-            return False
+            return 1
 
         wiki_page.Generate(project_configuration, output_writer)
 
@@ -1553,11 +1549,8 @@ def Main():
 
     # TODO: add support for Unicode templates.
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

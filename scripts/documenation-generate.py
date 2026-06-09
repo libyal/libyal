@@ -166,10 +166,10 @@ class AsciidocFormatDocumentGenerator:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description=("Generates documentation based on dtFabric format definitions.")
@@ -198,12 +198,12 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     if not os.path.isfile(options.source):
         print(f"No such file: {options.source:s}")
         print("")
-        return False
+        return 1
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -219,15 +219,12 @@ def Main():
         source_generator.ReadDefinitions(options.source)
     except errors.FormatError as exception:
         print(f"Unable to read definitions with error: {exception!s}")
-        return False
+        return 1
 
     source_generator.Generate()
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())
