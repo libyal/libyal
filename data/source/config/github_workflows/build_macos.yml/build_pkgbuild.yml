@@ -23,7 +23,7 @@
         ./synclibs.sh --use-head
         ./autogen.sh
         ./configure $${{ matrix.configure_options }}
-        make > /dev/null
+        make -j4 > /dev/null
     - name: Build pkg
       run: |
         tests/pkgbuild.sh

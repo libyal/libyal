@@ -611,7 +611,10 @@ class SourceFileGenerator(BaseSourceFileGenerator):
     """Source file generator."""
 
     def __init__(
-        self, projects_directory, data_directory, templates_path, experimental=False
+        self,
+        projects_directory,
+        data_directory,
+        templates_path,
     ):
         """Initializes a source file generator.
 
@@ -619,13 +622,11 @@ class SourceFileGenerator(BaseSourceFileGenerator):
           projects_directory (str): path of the projects directory.
           data_directory (str): path of the data directory.
           templates_path (str): path of the directory containing the template files.
-          experimental (bool): True if experimental features should be enabled.
         """
         super().__init__(templates_path)
         self._data_directory = data_directory
         self._definitions_include_header_file = None
         self._definitions_include_header_path = None
-        self._experimental = experimental
         self._has_tests = None
         self._library_include_header_file = None
         self._library_include_header_path = None

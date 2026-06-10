@@ -40,7 +40,7 @@
       env:
         CHERE_INVOKING: 1
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh VERBOSE=1
     - name: Generate coverage data
       shell: bash --login -e -o pipefail -o igncr {0}
       working-directory: $${{ github.workspace }}

@@ -31,14 +31,6 @@ def Main():
         description=("Generates source files of the libyal libraries.")
     )
     argument_parser.add_argument(
-        "-e",
-        "--experimental",
-        dest="experimental",
-        action="store_true",
-        default=False,
-        help="enable experimental functionality.",
-    )
-    argument_parser.add_argument(
         "-g",
         "--generators",
         dest="generators",
@@ -135,7 +127,6 @@ def Main():
             projects_directory,
             data_directory,
             template_directory,
-            experimental=options.experimental,
         )
         if options.output_directory:
             output_writer = output_writers.FileWriter(options.output_directory)
@@ -161,7 +152,6 @@ def Main():
             projects_directory,
             data_directory,
             template_directory,
-            experimental=options.experimental,
         )
         if options.output_directory:
             output_writer = output_writers.FileWriter(options.output_directory)

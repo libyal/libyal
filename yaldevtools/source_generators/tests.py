@@ -453,19 +453,23 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           python_module_types (list[str]): names of Python module types to test.
           output_writer (OutputWriter): output writer.
         """
-        tests = set(api_functions)
-        tests = tests.union(set(api_functions_with_input))
-        tests = tests.union(set(api_types))
-        tests = tests.union(set(api_types_with_open))
-        tests = tests.union(set(api_pseudo_types))
-        tests = tests.union(set(internal_functions))
-        tests = tests.union(set(internal_types))
-        tests = tests.union(set(internal_types_with_bfio))
+        test_binaries = set(api_functions)
+        test_binaries = test_binaries.union(set(api_functions_with_input))
+        test_binaries = test_binaries.union(set(api_types))
+        test_binaries = test_binaries.union(set(api_types_with_open))
+        test_binaries = test_binaries.union(set(api_pseudo_types))
+        test_binaries = test_binaries.union(set(internal_functions))
+        test_binaries = test_binaries.union(set(internal_types))
+        test_binaries = test_binaries.union(set(internal_types_with_bfio))
 
         templates_path = os.path.join(self._templates_path, "Makefile.am")
         output_filename = os.path.join("tests", "Makefile.am")
 
-        test_scripts = []
+        # Note that $(check_SCRIPTS) needs to be escaped, and $(check_AUTOTESTS:=.sh)
+        # not.
+        tests = ["\\$(check_SCRIPTS)"]
+        check_autotests = []
+
         if (
             api_functions
             or api_functions_with_input
@@ -473,12 +477,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             or api_types_with_open
             or api_pseudo_types
         ):
-            test_script = "test_library.sh"
-            test_scripts.append(test_script)
+            check_autotests.append("test_library")
 
-            # TODO: improve test script https://github.com/libyal/libyal/issues/78
-            # test_script = 'test_manpage.sh'
-            # test_scripts.append(test_script)
+            # TODO: see if https://github.com/libyal/libyal/issues/78 is still an issue
+            check_autotests.append("test_manpages")
 
         with_tools = False
         with_info_tool = False
@@ -489,18 +491,15 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             # TODO: use tools_features to generate tools_names
             if tool_name in project_configuration.tools_names:
                 if not with_tools:
-                    test_scripts.append("test_tools.sh")
+                    check_autotests.append("test_tools")
                     with_tools = True
 
-                test_script = f"test_{tool_name:s}.sh"
-                test_scripts.append(test_script)
+                check_autotests.append(f"test_{tool_name:s}")
 
                 if tool_name_suffix == "info":
                     with_info_tool = True
 
-        check_scripts = ["test_manpage.sh", "test_runner.sh"]
-        check_scripts.extend(test_scripts)
-
+        check_scripts_python = []
         python_scripts = []
         python_test_scripts = ["test_python_module.sh"]
 
@@ -517,38 +516,35 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             )
             python_scripts.append(test_script)
 
-            check_scripts.extend(python_scripts)
-            check_scripts.extend(python_test_scripts)
-
-        check_scripts = sorted(check_scripts)
+            check_scripts_python.extend(python_scripts)
+            check_scripts_python.extend(python_test_scripts)
 
         if project_configuration.HasPythonModule():
             python_module_name_upper = project_configuration.python_module_name.upper()
-            test_script = f"$(TESTS_{python_module_name_upper:s})"
-            test_scripts.append(test_script)
+            tests.append(f"$(TESTS_{python_module_name_upper:s})")
 
         check_programs = []
-        for test in sorted(tests):
+        for test in sorted(test_binaries):
             check_program = (
                 f"{project_configuration.library_name_suffix:s}_test_{test:s}"
             )
             check_programs.append(check_program)
 
         if with_tools:
-            tests.add("tools_output")
+            test_binaries.add("tools_output")
             check_program = (
                 f"{project_configuration.library_name_suffix:s}_test_tools_output"
             )
             check_programs.append(check_program)
 
-            tests.add("tools_signal")
+            test_binaries.add("tools_signal")
             check_program = (
                 f"{project_configuration.library_name_suffix:s}_test_tools_signal"
             )
             check_programs.append(check_program)
 
         if with_info_tool:
-            tests.add("tools_info_handle")
+            test_binaries.add("tools_info_handle")
             check_program = (
                 f"{project_configuration.library_name_suffix:s}_test_tools_info_handle"
             )
@@ -582,24 +578,24 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["cppflags"] = " \\\n".join(
             [f"\t{name:s}" for name in cppflags]
         )
+        template_mappings["check_autotests"] = " \\\n".join(
+            [f"\t{filename:s}" for filename in check_autotests]
+        )
+        template_mappings["check_programs"] = " \\\n".join(
+            [f"\t{filename:s}" for filename in check_programs]
+        )
         template_mappings["python_tests"] = " \\\n".join(
             [f"\t{filename:s}" for filename in python_test_scripts]
         )
         template_mappings["tests"] = " \\\n".join(
-            [f"\t{filename:s}" for filename in test_scripts]
-        )
-        template_mappings["check_scripts"] = " \\\n".join(
-            [f"\t{filename:s}" for filename in check_scripts]
-        )
-        template_mappings["check_programs"] = " \\\n".join(
-            [f"\t{filename:s}" for filename in check_programs]
+            [f"\t{filename:s}" for filename in tests]
         )
         template_names = []
 
         if with_tools:
             template_names.append("automake_options.am")
 
-        template_names.extend(["flags.am", "test_environment.am"])
+        template_names.append("flags.am")
 
         if project_configuration.HasPythonModule():
             template_names.append("python.am")
@@ -615,7 +611,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         # TODO: add support for read_file_io_handle tests
         # TODO: add support for rwlock tests
-        for group_name in sorted(tests):
+        for group_name in sorted(test_binaries):
             if group_name in api_functions or group_name in internal_functions:
                 has_error_argument = include_header_file.HasErrorArgument(group_name)
                 if (
@@ -3921,11 +3917,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             else:
                 output_filename = directory_entry
 
-            if directory_entry in (
-                "test_library.ps1",
-                "test_library.sh",
-                "test_manpage.sh",
-            ):
+            if directory_entry in ("test_library.ps1",):
                 force_create = bool(public_functions) or bool(public_types)
 
             elif directory_entry in ("test_yalinfo.ps1", "test_yalinfo.sh"):

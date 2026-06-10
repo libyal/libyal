@@ -219,7 +219,7 @@ void ${tools_name}_getopt_wrapped_fprint(
 
 	while( line_offset < text_length )
 	{
-		while( ( next_word_offset - line_offset ) < maximum_line_length )
+		while( ( next_word_offset - line_offset ) < (size_t) maximum_line_length )
 		{
 			while( next_word_offset < text_length )
 			{

@@ -26,7 +26,7 @@
         make > /dev/null
     - name: Run tests
       run: |
-        make check CHECK_WITH_STDERR=1 SKIP_TOOLS_END_TO_END_TESTS=1
+        make check SKIP_TOOLS_END_TO_END_TESTS=1 VERBOSE=1
     - name: Generate coverage data
       run: |
         for DIRECTORY in `find . -maxdepth 1 -type d`; do \

@@ -1,6 +1,6 @@
 .Dd ${date}
-.Dt ${library_name} 3
-.Os ${library_name}
+.Dt ${library_name:upper_case} 3
+.Os
 .Sh NAME
 .Nm ${library_name}.h
 .Nd ${library_description}

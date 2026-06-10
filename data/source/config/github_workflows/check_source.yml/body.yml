@@ -33,7 +33,7 @@ jobs:
         make > /dev/null
     - name: Run tests
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh VERBOSE=1
   scan_build:
     name: Check source with scan-build
     runs-on: $${{ matrix.os }}
@@ -124,4 +124,4 @@ jobs:
         make > /dev/null
     - name: Run tests
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh VERBOSE=1

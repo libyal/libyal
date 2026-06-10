@@ -672,8 +672,18 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         local_libraries = [
             "/".join(["", name]) for name in sorted(makefile_am_file.libraries)
         ]
-        tests_files = ["/tests/tmp*"]
-
+        tests_files = [
+            "/tests/*.dir",
+            "/tests/*.exe",
+            "/tests/*.log",
+            "/tests/*.tmp",
+            "/tests/atconfig",
+            "/tests/atlocal",
+            "/tests/package.m4",
+            "/tests/test_library",
+            "/tests/test_manpages",
+            "/tests/tmp*",
+        ]
         if (
             project_configuration.library_name != "libcnotify"
             and "libcnotify" in makefile_am_file.library_dependencies
@@ -682,6 +692,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
         if os.path.exists(os.path.join("tests", "input")):
             tests_files.append("/tests/input")
+
+        # TODO: add /tests/test_python_module
+        # TODO: add /tests/test_tools
 
         source_glob = os.path.join(
             "tests", f"{project_configuration.library_name_suffix:s}_test_*.c"
@@ -975,11 +988,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         )
         tools_build_dependencies = namespace.get("tools_build_dependencies", None) or []
 
-        # Note that the test scripts require bash.
         freebsd_build_dependencies = [
             "autoconf",
             "automake",
-            "bash",
             "curl",
             "gettext",
             "git",

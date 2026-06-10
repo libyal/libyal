@@ -26,11 +26,11 @@
         ./synclibs.sh --use-head
         ./autogen.sh
         ./configure $${CONFIGURE_OPTIONS}
-        make > /dev/null
+        make -j4 > /dev/null
     - name: Run tests
       shell: bash --login -e -o pipefail -o igncr {0}
       working-directory: $${{ github.workspace }}
       env:
         CHERE_INVOKING: 1
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh -j4 VERBOSE=1

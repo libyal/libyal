@@ -21,11 +21,11 @@
         ./synclibs.sh --use-head
         ./autogen.sh
         ./configure $${{ matrix.configure_options }}
-        make > /dev/null
+        make -j4 > /dev/null
     - name: Run tests
       env:
         WINE_DRIVER: "null"
         WINEDEBUG: "-all,err-winediag,err-systray"
         WINEDLLOVERRIDES: "explorer.exe=d"
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh VERBOSE=1

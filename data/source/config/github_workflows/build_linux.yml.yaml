@@ -93,7 +93,6 @@ operations:
 - generate_build_with_static_executables
 - generate_build_end
 - generate_build_with_fuse
-# Disabled for now
 # - generate_build_mingw
 - generate_build_python_module
 - generate_shared

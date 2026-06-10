@@ -61,12 +61,14 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
                 if option.guard:
                     getop_switch_entry.append(f"#if {option.guard:s}")
 
-                getop_switch_entry.extend([
-                    f"\t\t\tcase (system_integer_t) '{option.identifier:s}':",
-                    f"\t\t\t\toption_{option.name:s} = optarg;",
-                    "",
-                    "\t\t\t\tbreak;",
-                ])
+                getop_switch_entry.extend(
+                    [
+                        f"\t\t\tcase (system_integer_t) '{option.identifier:s}':",
+                        f"\t\t\t\toption_{option.name:s} = optarg;",
+                        "",
+                        "\t\t\t\tbreak;",
+                    ]
+                )
                 if option.guard:
                     getop_switch_entry.append(f"#endif")
 
@@ -318,9 +320,9 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         source_type = project_configuration.info_tool_source_type
         if source_type:
-          options.append(f'\t\t{{ 0, "source", "the source {source_type:s}" }},')
+            options.append(f'\t\t{{ 0, "source", "the source {source_type:s}" }},')
         else:
-          options.append(f'\t\t{{ 0, "source", "the source file" }},')
+            options.append(f'\t\t{{ 0, "source", "the source file" }},')
 
         variable_declarations = self._GenerateMainFunctionVariableDeclarations(
             project_configuration, info_tool_options
@@ -1745,10 +1747,12 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
             project_configuration, mount_tool_options
         )
         if not file_system_type:
-            variable_declarations.extend([
-                "\tconst system_character_t *path_prefix = NULL;",
-                "\tsize_t path_prefix_size = 0;",
-            ])
+            variable_declarations.extend(
+                [
+                    "\tconst system_character_t *path_prefix = NULL;",
+                    "\tsize_t path_prefix_size = 0;",
+                ]
+            )
 
         getopt_switch = self._GenerateGetoptSwitch(
             project_configuration, mount_tool_options
