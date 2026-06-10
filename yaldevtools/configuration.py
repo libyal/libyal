@@ -91,7 +91,9 @@ class ProjectConfiguration(BaseConfiguration):
       library_features (list[str]): features of the library.
       library_name (str): name of the library.
       library_name_suffix (str): suffix of the name of the library.
-      library_public_types (str): types publicly exported by the library.
+      library_public_types (list[str]): types publicly exported by the library.
+      library_tests (list[str]): library test names.
+      library_tests_with_input (list[str]): library test with input names.
       mingw_build_dependencies (list[str]): MinGW build dependencies.
       mingw_dll_dependencies (list[str]): MinGW DLL dependencies.
       mingw_dll_filename (str): name of the MinGW DLL file.
@@ -224,6 +226,8 @@ class ProjectConfiguration(BaseConfiguration):
         self.library_name_suffix = None
         # TODO: determine public types based on include header.
         self.library_public_types = None
+        self.library_tests = None
+        self.library_tests_with_input = None
 
         # Python module configuration.
         self.python_module_authors = None
@@ -535,6 +539,12 @@ class ProjectConfiguration(BaseConfiguration):
         self.library_name_suffix = self.library_name[3:]
         self.library_public_types = self._GetOptionalConfigValue(
             config_parser, "library", "public_types", default_value=[]
+        )
+        self.library_tests = self._GetOptionalConfigValue(
+            config_parser, "library", "tests", default_value=[]
+        )
+        self.library_tests_with_input = self._GetOptionalConfigValue(
+            config_parser, "library", "tests_with_input", default_value=[]
         )
         # Remove trailing comments.
         self.library_build_dependencies = [

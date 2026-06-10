@@ -1,4 +1,6 @@
     steps:
+    - name: Configure git
+      run: git config --global core.autocrlf false
     - uses: actions/checkout@v6
     - name: Set up MSYS2 with MinGW-w64
       uses: msys2/setup-msys2@v2

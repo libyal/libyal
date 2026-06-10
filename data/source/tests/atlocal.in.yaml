@@ -1,0 +1,10 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: atlocal.in/body.in
+---
+identifier: main
+type: group
+operations:
+- generate_body

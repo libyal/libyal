@@ -36,6 +36,11 @@ class FunctionArgument:
         super().__init__()
         self._strings = [argument_string]
 
+    @property
+    def string_parts(self):
+        """list[str]: string parts."""
+        return self._strings
+
     def AddArgumentString(self, argument_string):
         """Adds an argument string to the function argument.
 
@@ -52,14 +57,13 @@ class FunctionArgument:
         """
         number_of_strings = len(self._strings)
 
-        argument_string = ""
         if number_of_strings == 1:
-            argument_string = self._strings[0]
+            return self._strings[0]
 
-        elif number_of_strings > 1:
-            argument_string = "".join([self._strings[0], ", ".join(self._strings[1:])])
+        if number_of_strings > 1:
+            return "".join([self._strings[0], ", ".join(self._strings[1:])])
 
-        return argument_string
+        return ""
 
 
 class FunctionPrototype:
@@ -124,15 +128,61 @@ class FunctionPrototype:
         """Copies the function prototype to a string to be used in manpage.
 
         Returns:
-          str: function prototype to be used in manpage.
+          list[str]: function prototype to be used in manpage.
         """
-        argument_strings = []
-        for function_argument in self.arguments:
-            argument_string = function_argument.CopyToString()
-            argument_string = f'"{argument_string:s}"'
-            argument_strings.append(argument_string)
+        string_parts = [".nf\n", f".Ft {self.return_type:s}\n", f".Fo {self.name:s}"]
+        line_length = len(string_parts[-1])
 
-        return " ".join(argument_strings)
+        last_argument_index = len(self.arguments) - 1
+        for argument_index, function_argument in enumerate(self.arguments):
+            last_part_index = len(function_argument.string_parts) - 1
+            for part_index, argument_string_part in enumerate(
+                function_argument.string_parts
+            ):
+                argument_string_part = argument_string_part.strip()
+
+                if argument_string_part == "...":
+                    string_parts.append("\n.Va ...")
+                    line_length = 0
+                    continue
+
+                if part_index == 0:
+                    string_parts.append("\n.Fa")
+                    line_length = 5
+
+                argument_string_part_length = len(argument_string_part)
+
+                if argument_index == last_argument_index and part_index == last_part_index:
+                    maximum_length = 80
+                else:
+                    maximum_length = 78
+
+                additional_length = 2 + argument_string_part_length
+                if part_index == 0:
+                  additional_length += 1
+
+                if line_length + additional_length > maximum_length:
+                    string_parts.append(f" \\\n")
+                    line_length = 0
+                else:
+                    string_parts.append(" ")
+                    line_length += 1
+
+                if part_index == 0:
+                    string_parts.append('"')
+                    line_length += 1
+
+                string_parts.append(argument_string_part)
+                line_length += argument_string_part_length
+
+                if part_index == last_part_index:
+                    string_parts.append('"')
+                elif part_index > 0:
+                    string_parts.append(',')
+                line_length += 1
+
+        string_parts.extend(['\n.Fc', '\n.fi'])
+        return "".join(string_parts)
 
     def CopyToString(self):
         """Copies the function prototype to a string.

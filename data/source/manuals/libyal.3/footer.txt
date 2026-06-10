@@ -1,5 +1,5 @@
 .Sh SEE ALSO
-the ${library_name}.h include file
+.In ${library_name}.h
 .Sh AUTHORS
 .An ${authors}
 .Sh BUGS

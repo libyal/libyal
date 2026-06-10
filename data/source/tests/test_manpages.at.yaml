@@ -1,0 +1,12 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: test_manpages.at/body.at
+placeholders:
+- manpages_tests
+---
+identifier: main
+type: group
+operations:
+- generate_body

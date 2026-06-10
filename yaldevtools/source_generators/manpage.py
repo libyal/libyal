@@ -13,39 +13,6 @@ from yaldevtools.source_generators import interface
 class LibraryManPageGenerator(interface.SourceFileGenerator):
     """Library man page file (libyal.3) generator."""
 
-    _TOKEN_RE = re.compile(r'"(?:[^"\\])*"|[^\s"]+')
-
-    def _WrapFunctionLine(self, text, maximum_length=80):
-        """Wraps a function line.
-
-        Args:
-          line (str): line to wrap.
-          maximum_length (int): maximum line length.
-
-        Returns:
-          str: wrapped line.
-        """
-        tokens = self._TOKEN_RE.findall(text)
-        if not tokens:
-            return text
-
-        lines = []
-        current_line = f".Fn {tokens[0]:s}"
-
-        for token in tokens[1:]:
-            line = f"{current_line:s} {token:s}"
-            line_length = len(line)
-
-            if line_length <= maximum_length:
-              current_line = line
-
-            else:
-                lines.append(f"{current_line:s} \\")
-                current_line = token
-
-        lines.append(current_line)
-        return "\n".join(lines)[4:]
-
     def _GenerateLibraryManPage(
         self,
         project_configuration,
@@ -111,13 +78,8 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
             template_filename = os.path.join(self._templates_path, "function.txt")
 
             for function_prototype in functions:
-                function_arguments_string = function_prototype.CopyToManpageString()
-                function = self._WrapFunctionLine(
-                    f"{function_prototype.name:s} {function_arguments_string:s}"
-                )
                 function_template_mappings = {
-                    "function": function,
-                    "function_return_type": function_prototype.return_type,
+                    "function": function_prototype.CopyToManpageString()
                 }
                 self._GenerateSection(
                     template_filename,
@@ -149,13 +111,8 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
 
                 template_filename = os.path.join(self._templates_path, "function.txt")
                 for function_prototype in wide_character_type_functions:
-                    function_arguments_string = function_prototype.CopyToManpageString()
-                    function = self._WrapFunctionLine(
-                        f"{function_prototype.name:s} {function_arguments_string:s}"
-                    )
                     function_template_mappings = {
-                        "function": function,
-                        "function_return_type": function_prototype.return_type,
+                        "function": function_prototype.CopyToManpageString()
                     }
                     self._GenerateSection(
                         template_filename,
@@ -175,17 +132,10 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
                     output_filename,
                     access_mode="a",
                 )
-                template_filename = os.path.join(
-                    self._templates_path, "function.txt"
-                )
+                template_filename = os.path.join(self._templates_path, "function.txt")
                 for function_prototype in bfio_functions:
-                    function_arguments_string = function_prototype.CopyToManpageString()
-                    function = self._WrapFunctionLine(
-                        f"{function_prototype.name:s} {function_arguments_string:s}"
-                    )
                     function_template_mappings = {
-                        "function": function,
-                        "function_return_type": function_prototype.return_type,
+                        "function": function_prototype.CopyToManpageString()
                     }
                     self._GenerateSection(
                         template_filename,

@@ -3399,17 +3399,23 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
           dict[str, str]: string template mappings, where the key maps to the name
               of a template variable.
         """
-        library_tests = set(api_functions)
-        library_tests = library_tests.union(set(api_types))
-        library_tests = library_tests.union(set(internal_functions))
-        library_tests = library_tests.union(set(internal_types))
-        library_tests = sorted(library_tests)
+        library_tests = project_configuration.library_tests
+        if not library_tests:
+            library_tests = set(api_functions)
+            library_tests = library_tests.union(set(api_types))
+            library_tests = library_tests.union(set(internal_functions))
+            library_tests = library_tests.union(set(internal_types))
+            library_tests = sorted(library_tests)
 
-        library_tests_with_input = set(api_types_with_open)
-        library_tests_with_input = library_tests_with_input.union(
-            set(api_functions_with_input)
-        )
-        library_tests_with_input = sorted(library_tests_with_input)
+        library_tests_with_input = project_configuration.library_tests_with_input
+        if not library_tests_with_input:
+            library_tests_with_input = set(api_types_with_open)
+            library_tests_with_input = library_tests_with_input.union(
+                set(api_functions_with_input)
+            )
+            library_tests_with_input = sorted(library_tests_with_input)
+
+        manpages_tests = [f"{project_configuration.library_name:s}.3"]
 
         if makefile_am_file:
             shared_libs = list(makefile_am_file.libraries)
@@ -3435,6 +3441,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["library_tests_with_input"] = " ".join(
             library_tests_with_input
         )
+        template_mappings["manpages_tests"] = " ".join(manpages_tests)
         template_mappings["runtest_py_tests_option_sets_py"] = ", ".join(
             [
                 f'"{test_option_set:s}"'
@@ -3883,6 +3890,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             test_python_functions_with_input,
         )
         for directory_entry in os.listdir(self._templates_path):
+            if directory_entry in (
+                "atlocal.in.yaml",
+                "test_library.at.yaml",
+                "test_manpages.at.yaml",
+            ):
+                continue
+
             # Ignore yal_test_library.h in favor of yal_test_libyal.h
             if directory_entry == library_header:
                 continue
@@ -3917,7 +3931,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             else:
                 output_filename = directory_entry
 
-            if directory_entry in ("test_library.ps1",):
+            if directory_entry == "test_library.ps1":
                 force_create = bool(public_functions) or bool(public_types)
 
             elif directory_entry in ("test_yalinfo.ps1", "test_yalinfo.sh"):
@@ -3944,6 +3958,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             if output_filename.endswith(".c"):
                 self._SortIncludeHeaders(project_configuration, output_filename)
 
+            # TODO: only copy generate_test_inputs.sh if tests with input
             elif output_filename.endswith(".sh"):
                 # Set x-bit for a shell script (.sh).
                 stat_info = os.stat(output_filename)
@@ -4112,6 +4127,18 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             with_input=with_input,
             with_offset=with_offset,
         )
+        for filename in ("atlocal.in", "test_library.at", "test_manpages.at"):
+            operations_file_name = os.path.join(f"{filename:s}.yaml")
+            output_filename = os.path.join("tests", filename)
+
+            self._GenerateSectionsFromOperationsFile(
+                operations_file_name,
+                "main",
+                project_configuration,
+                template_mappings,
+                output_filename,
+             )
+
         self._GenerateMakefileAM(
             project_configuration,
             template_mappings,

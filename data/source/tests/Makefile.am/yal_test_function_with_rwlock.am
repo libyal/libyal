@@ -1,4 +1,5 @@
 ${library_name_suffix}_test_${type_name}_SOURCES = \
+	${library_name_suffix}_test_extern.h \
 	${library_name_suffix}_test_${type_name}.c \
 	${library_name_suffix}_test_libcerror.h \
 	${library_name_suffix}_test_${library_name}.h \

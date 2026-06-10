@@ -1,2 +1,1 @@
-.Ft ${function_return_type}
-.Fn ${function}
+${function}
