@@ -152,14 +152,17 @@ class FunctionPrototype:
 
                 argument_string_part_length = len(argument_string_part)
 
-                if argument_index == last_argument_index and part_index == last_part_index:
+                if (
+                    argument_index == last_argument_index
+                    and part_index == last_part_index
+                ):
                     maximum_length = 80
                 else:
                     maximum_length = 78
 
                 additional_length = 2 + argument_string_part_length
                 if part_index == 0:
-                  additional_length += 1
+                    additional_length += 1
 
                 if line_length + additional_length > maximum_length:
                     string_parts.append(f" \\\n")
@@ -178,10 +181,10 @@ class FunctionPrototype:
                 if part_index == last_part_index:
                     string_parts.append('"')
                 elif part_index > 0:
-                    string_parts.append(',')
+                    string_parts.append(",")
                 line_length += 1
 
-        string_parts.extend(['\n.Fc', '\n.fi'])
+        string_parts.extend(["\n.Fc", "\n.fi"])
         return "".join(string_parts)
 
     def CopyToString(self):

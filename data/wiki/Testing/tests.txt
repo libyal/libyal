@@ -1,10 +1,34 @@
 # Automated tests
-The ${project_name} package comes with automated tests, which are stored in the sub directory: tests.
+
+The ${project_name} package comes with automated tests, which are stored in the
+sub directory: tests.
 
 To run the automated tests:
+
 ```
 make check
 ```
 
-The automated tests are currently only intended to run on a system that can run a bash shell.
+To run the automated tests on MSYS2 make sure to turn off LF to CRLF conversion.
+This will break the autotest scripts.
+
+```
+git config --global core.autocrlf false
+```
+
+The following arguments can be used with `make check`:
+
+* `SKIP_LIBRARY_TESTS=1` to skip all the library tests;
+* `SKIP_PYTHON_TESTS=1` to skip all the Python module tests;
+* `SKIP_TOOLS_TESTS=1` to skip all the tools tests;
+* `SKIP_TOOLS_END_TO_END_TESTS=1` to skip the tools end-to-end tests;
+* `VERBOSE=1` for verbose output.
+
+## Windows
+
+To run the automated tests on Windows:
+
+```
+.\runtests.ps1
+```
 

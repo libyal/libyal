@@ -1,5 +1,4 @@
 m4_include([package.m4])
-m4_include([test_macros.at])
 
 dnl Lints a manpage
 m4_define([LINT_MANPAGE],

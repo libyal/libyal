@@ -1,0 +1,3 @@
+test_inputs_${test_profile}.at: generate_test_inputs.sh
+	$$(SHELL) $$(srcdir)/generate_test_inputs.sh $$(PACKAGE_NAME) ${test_profile}
+

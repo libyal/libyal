@@ -7,5 +7,6 @@ ${library_name_suffix}_test_tools_output_SOURCES = \
 
 ${library_name_suffix}_test_tools_output_LDADD = \
 	../${library_name}/${library_name}.la \
-	@LIBCERROR_LIBADD@
+	@LIBCERROR_LIBADD@ \
+	@LIBINTL@
 

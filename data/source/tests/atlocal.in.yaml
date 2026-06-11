@@ -1,10 +1,25 @@
 # yaldevtools generator specification.
 ---
-identifier: generate_body
+identifier: generate_header
 type: template
-file: atlocal.in/body.in
+file: atlocal.in/header.in
+---
+identifier: generate_python_module
+type: template
+condition: "'python_bindings' in project_features"
+file: atlocal.in/python_module.in
+placeholders:
+- library_name
+- python_module_name
+---
+identifier: generate_tools
+type: template
+condition: "'tools' in project_features"
+file: atlocal.in/tools.in
 ---
 identifier: main
 type: group
 operations:
-- generate_body
+- generate_header
+- generate_python_module
+- generate_tools

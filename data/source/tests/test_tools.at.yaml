@@ -1,0 +1,41 @@
+# yaldevtools generator specification.
+---
+identifier: generate_helper_functions
+type: template
+file: test_tools.at/helper_functions.at
+---
+identifier: generate_helper_functions_info_tool
+type: template
+# TODO: add condition
+file: test_tools.at/helper_functions_info_tool.at
+---
+identifier: generate_includes
+type: template
+file: test_tools.at/includes.at
+---
+identifier: generate_include_test_inputs
+type: template
+# TODO: add condition
+file: test_tools.at/include_test_inputs.at
+placeholders:
+- info_tool_name
+---
+identifier: generate_run_tests
+type: template
+file: test_tools.at/run_tests.at
+placeholders:
+- tools_tests_autotest
+---
+identifier: generate_run_tests_info_tool
+type: template
+# TODO: add condition
+file: test_tools.at/run_tests_info_tool.at
+---
+identifier: main
+type: group
+operations:
+- generate_includes
+- generate_helper_functions
+- generate_helper_functions_info_tool
+- generate_run_tests
+- generate_run_tests_info_tool

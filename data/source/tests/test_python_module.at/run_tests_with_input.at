@@ -1,0 +1,4 @@
+
+RUN_TEST_SCRIPTS_WITH_INPUT(
+  [${python_module_tests_with_input}],
+  test_inputs_${python_module_name})

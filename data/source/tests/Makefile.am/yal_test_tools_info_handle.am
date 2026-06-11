@@ -7,6 +7,7 @@ ${library_name_suffix}_test_tools_info_handle_SOURCES = \
 	${library_name_suffix}_test_unused.h
 
 ${library_name_suffix}_test_tools_info_handle_LDADD = \
+	@LIBCLOCALE_LIBADD@ \
 	../${library_name}/${library_name}.la \
 	@LIBCERROR_LIBADD@
 

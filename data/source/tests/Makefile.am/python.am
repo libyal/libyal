@@ -1,5 +1,2 @@
-if HAVE_PYTHON_TESTS
-TESTS_${python_module_name:upper_case} = \
-${python_tests}
-endif
+check_PYTHONdir = $$(abs_top_builddir)
 

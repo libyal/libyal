@@ -24,7 +24,7 @@ m4_define([SETUP_HELPER_FUNCTIONS],
       BINARY="$$abs_builddir/$$[]1.exe"
     else
       echo "Missing binary: $$[]1"
-      exit 1
+      exit 127
     fi
     shift
 
@@ -44,7 +44,7 @@ m4_define([SETUP_HELPER_FUNCTIONS],
           if ! test -x $${CYGPATH}; then
             echo "Missing cygpath"
 
-            exit $${EXIT_IGNORE}
+            exit 77
           fi
           TEST_FILE=`$${CYGPATH} -w "$${TEST_FILE}"`
         fi
@@ -55,17 +55,17 @@ m4_define([SETUP_HELPER_FUNCTIONS],
           if test -n "$${WSL_DISTRO_NAME}" || grep -i "microsoft" /proc/version >/dev/null &>2; then
             echo "WSL currently not supported"
 
-            exit $${EXIT_IGNORE}
+            exit 77
           fi
           if ! test -x $${OBJDUMP}; then
             echo "Missing objdump"
 
-            exit $${EXIT_IGNORE}
+            exit 77
           fi
           if ! test -x $${WINEPATH}; then
             echo "Missing winepath"
 
-            exit $${EXIT_IGNORE}
+            exit 77
           fi
           if $${OBJDUMP} -f "$${TEST_EXECUTABLE}" 2>&1 | grep "pei-" >/dev/null 2>&1; then
             TEST_FILE=`$${WINEPATH} -w "$${TEST_FILE}" 2>/dev/null`
@@ -77,7 +77,7 @@ m4_define([SETUP_HELPER_FUNCTIONS],
         if test "$${USE_WINAPI}" = "yes"; then
           echo "WINAPI not supported on $${OSTYPE}"
 
-          exit $${EXIT_IGNORE}
+          exit 77
         fi
         ;;
     esac

@@ -1,0 +1,2 @@
+
+include_test_inputs([${library_name}])

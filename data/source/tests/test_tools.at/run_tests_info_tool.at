@@ -1,0 +1,3 @@
+
+RUN_TEST_EXEINFO(
+  test_inputs_exeinfo)

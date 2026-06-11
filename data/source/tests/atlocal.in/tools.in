@@ -1,0 +1,7 @@
+
+# Settings used in test_tools.at
+GZIP_COMMAND="@GZIP_COMMAND@"
+SED="@SED@"
+ZCAT="@ZCAT@"
+
+export DIFF GZIP_COMMAND ZCAT

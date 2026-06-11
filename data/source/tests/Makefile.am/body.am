@@ -1,8 +1,2 @@
 BUILT_SOURCES = package.m4
 
-check_AUTOTESTS = \
-${check_autotests}
-
-check_PROGRAMS = \
-${check_programs}
-

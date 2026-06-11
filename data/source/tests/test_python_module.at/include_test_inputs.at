@@ -1,0 +1,3 @@
+m4_include([test_macros.at])
+
+include_test_inputs([${python_module_name}])

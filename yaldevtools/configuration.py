@@ -149,6 +149,8 @@ class ProjectConfiguration(BaseConfiguration):
       project_year_of_creation (str): year the project was created.
       python_module_authors (str): authors of the Python module.
       python_module_name (str): name of the Python module, such as "pyyal".
+      python_module_tests (list[str]): Python module test names.
+      python_module_tests_with_input (list[str]): Python module test with input names.
       python_module_year_of_creation (str): year the Python module was created.
       rpm_build_dependencies (str): rpm build dependencies.
       supports_debug_output (bool): True if the project supports debug output.
@@ -189,6 +191,8 @@ class ProjectConfiguration(BaseConfiguration):
       tools_description (str): description of the tools.
       tools_directory (str): name of the directory that contains the tools.
       tools_names (str): names of the individual tools.
+      tools_tests (list[str]): tools test names.
+      tools_tests_with_input (list[str]): tools test with input names.
     """
 
     def __init__(self):
@@ -232,6 +236,8 @@ class ProjectConfiguration(BaseConfiguration):
         # Python module configuration.
         self.python_module_authors = None
         self.python_module_name = None
+        self.python_module_tests = None
+        self.python_module_tests_with_input = None
         self.python_module_year_of_creation = None
 
         # .Net bindings configuration.
@@ -247,6 +253,8 @@ class ProjectConfiguration(BaseConfiguration):
         self.tools_directory = None
         self.tools_features = []
         self.tools_names = []
+        self.tools_tests = None
+        self.tools_tests_with_input = None
 
         # Info tool configuration.
         self.info_tool_features = []
@@ -827,6 +835,12 @@ class ProjectConfiguration(BaseConfiguration):
             default_value=self.project_authors,
         )
         self.python_module_name = f"py{self.library_name_suffix:s}"
+        self.python_module_tests = self._GetOptionalConfigValue(
+            config_parser, "python_module", "tests", default_value=[]
+        )
+        self.python_module_tests_with_input = self._GetOptionalConfigValue(
+            config_parser, "python_module", "tests_with_input", default_value=[]
+        )
         self.python_module_year_of_creation = self._GetOptionalConfigValue(
             config_parser, "python_module", "year_of_creation"
         )
@@ -955,11 +969,21 @@ class ProjectConfiguration(BaseConfiguration):
         )
         if config_parser.has_section("info_tool"):
             self.tools_features.append("info_tool")
+        if config_parser.has_section("export_tool"):
+            self.tools_features.append("export_tool")
         if config_parser.has_section("mount_tool"):
             self.tools_features.append("mount_tool")
+        if config_parser.has_section("verify_tool"):
+            self.tools_features.append("verify_tool")
 
         self.tools_names = self._GetOptionalConfigValue(
             config_parser, "tools", "names", default_value=[]
+        )
+        self.tools_tests = self._GetOptionalConfigValue(
+            config_parser, "tools", "tests", default_value=[]
+        )
+        self.tools_tests_with_input = self._GetOptionalConfigValue(
+            config_parser, "tools", "tests_with_input", default_value=[]
         )
         # Remove trailing comments.
         self.tools_build_dependencies = [
@@ -1094,6 +1118,22 @@ class ProjectConfiguration(BaseConfiguration):
           bool: True if the project provides .Net bindings.
         """
         return "dotnet_bindings" in self.project_features
+
+    def HasExportTool(self):
+        """Determines if the project provides an export tool.
+
+        Returns:
+          bool: True if the project provides an export tool.
+        """
+        return "export_tool" in self.tools_features
+
+    def HasInfoTool(self):
+        """Determines if the project provides an info tool.
+
+        Returns:
+          bool: True if the project provides an info tool.
+        """
+        return "info_tool" in self.tools_features
 
     def HasInfoToolsFeatureCodepage(self):
         """Determines if the info tool has a codepage feature.
@@ -1268,6 +1308,14 @@ class ProjectConfiguration(BaseConfiguration):
           bool: True if the project provides tools.
         """
         return "tools" in self.project_features
+
+    def HasVerifyTool(self):
+        """Determines if the project provides a verify tool.
+
+        Returns:
+          bool: True if the project provides a verify tool.
+        """
+        return "verify_tool" in self.tools_features
 
     def ReadFromFile(self, filename):
         """Reads the configuration from file.

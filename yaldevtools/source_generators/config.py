@@ -690,11 +690,17 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         ):
             tests_files.append("/tests/notify_stream.log")
 
-        if os.path.exists(os.path.join("tests", "input")):
-            tests_files.append("/tests/input")
+        if (
+            project_configuration.library_tests_with_input
+            or project_configuration.python_module_tests_with_input
+            or project_configuration.HasInfoTool()
+        ):
+            tests_files.extend(["/tests/input", "/tests/test_inputs_*.at"])
 
-        # TODO: add /tests/test_python_module
-        # TODO: add /tests/test_tools
+        if project_configuration.HasPythonModule():
+            tests_files.append("/tests/test_python_module")
+        if project_configuration.HasTools():
+            tests_files.append("/tests/test_tools")
 
         source_glob = os.path.join(
             "tests", f"{project_configuration.library_name_suffix:s}_test_*.c"
@@ -783,7 +789,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             template_mappings,
             f"{project_configuration.library_name:s}.spec.in",
         )
-
         del template_mappings["library_name"]
         del template_mappings["spec_build_requires"]
         del template_mappings["spec_requires"]

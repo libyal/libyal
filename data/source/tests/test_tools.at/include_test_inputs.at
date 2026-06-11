@@ -1,0 +1,2 @@
+
+include_test_inputs([${info_tool_name}])

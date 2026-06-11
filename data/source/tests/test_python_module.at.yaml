@@ -1,0 +1,45 @@
+# yaldevtools generator specification.
+---
+identifier: generate_helper_functions
+type: template
+file: test_python_module.at/helper_functions.at
+---
+identifier: generate_helper_functions_with_input
+type: template
+condition: "python_module_tests_with_input != ''"
+file: test_python_module.at/helper_functions_with_input.at
+---
+identifier: generate_includes
+type: template
+file: test_python_module.at/includes.at
+---
+identifier: generate_include_test_inputs
+type: template
+condition: "python_module_tests_with_input != ''"
+file: test_python_module.at/include_test_inputs.at
+placeholders:
+- python_module_name
+---
+identifier: generate_run_tests
+type: template
+file: test_python_module.at/run_tests.at
+placeholders:
+- python_module_tests
+---
+identifier: generate_run_tests_with_input
+type: template
+condition: "python_module_tests_with_input != ''"
+file: test_python_module.at/run_tests_with_input.at
+placeholders:
+- python_module_name
+- python_module_tests_with_input
+---
+identifier: main
+type: group
+operations:
+- generate_includes
+- generate_include_test_inputs
+- generate_helper_functions
+- generate_helper_functions_with_input
+- generate_run_tests
+- generate_run_tests_with_input

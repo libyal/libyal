@@ -1,0 +1,5 @@
+
+RUN_TEST_BINARIES_WITH_INPUT(
+  [SKIP_LIBRARY_TESTS],
+  [${library_tests_with_input}],
+  test_inputs_${library_name})

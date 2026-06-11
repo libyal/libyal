@@ -1,15 +1,19 @@
 ## Test profiles
+
 There are also multiple test profiles:
 ${tests_profiles}
 
-These test profiles are used by one or more tests.
-By default the tests run all the test sets, if applicable.
-Each test profile can define which test sets to ignore in the ignore-file, e.g. for the ${project_name} test profile:
+These test profiles are used by one or more tests. By default the tests run all
+the test sets, if applicable. Each test profile can define which test sets to
+ignore in the ignore-file, e.g.  for the ${project_name} test profile:
+
 ```
 tests/input/.${project_name}/ignore
 ```
 
-Every line of the ignore-file specifies (the sub directory name of) the test set that should be ignored, e.g. for the basic test set:
+Every line of the ignore-file specifies (the sub directory name of) the test set
+that should be ignored, e.g. for the basic test set:
+
 ```
 basic
 ```

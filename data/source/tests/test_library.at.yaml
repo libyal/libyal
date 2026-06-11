@@ -1,12 +1,34 @@
 # yaldevtools generator specification.
 ---
-identifier: generate_body
+identifier: generate_includes
 type: template
-file: test_library.at/body.at
+file: test_library.at/includes.at
+---
+identifier: generate_include_test_inputs
+type: template
+condition: "library_tests_with_input != ''"
+file: test_library.at/include_test_inputs.at
+placeholders:
+- library_name
+---
+identifier: generate_run_tests
+type: template
+file: test_library.at/run_tests.at
 placeholders:
 - library_tests
+---
+identifier: generate_run_tests_with_input
+type: template
+condition: "library_tests_with_input != ''"
+file: test_library.at/run_tests_with_input.at
+placeholders:
+- library_name
+- library_tests_with_input
 ---
 identifier: main
 type: group
 operations:
-- generate_body
+- generate_includes
+- generate_include_test_inputs
+- generate_run_tests
+- generate_run_tests_with_input
