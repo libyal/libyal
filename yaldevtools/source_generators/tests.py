@@ -484,11 +484,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         with_tools = False
         with_info_tool = False
+        # TODO: use tools_features to generate tools_names
         for tool_name_suffix in ("export", "info", "verify"):
             tool_name = "".join(
                 [project_configuration.library_name_suffix, tool_name_suffix]
             )
-            # TODO: use tools_features to generate tools_names
             if tool_name in project_configuration.tools_names:
                 if tool_name_suffix == "info":
                     with_info_tool = True
@@ -3548,6 +3548,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         template_mappings = super()._GetTemplateMappings(project_configuration)
 
+        template_mappings["library_name_suffix"] = project_configuration.library_name_suffix
         template_mappings["library_tests"] = " ".join(library_tests)
         template_mappings["library_tests_with_input"] = " ".join(
             library_tests_with_input
@@ -3566,26 +3567,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             ]
         )
         template_mappings["shared_libs"] = " ".join(shared_libs)
-
-        template_mappings["tools_tests"] = " ".join(sorted(tools_tests))
-        template_mappings["tools_tests_with_input"] = " ".join(sorted(tools_tests_with_input))
-        template_mappings["tools_tests_autotest"] = " ".join(
-            [f"tools_{name:s}" for name in sorted(tools_tests)]
-        )
-        template_mappings["tools_tests_with_input_autotest"] = " ".join(
-            [f"tools_{name:s}" for name in sorted(tools_tests_with_input)]
-        )
-
-        template_mappings["tests_option_sets_ps1"] = " ".join(
-            project_configuration.tests_option_sets
-        )
-        template_mappings["tests_option_sets_sh"] = " ".join(
-            [
-                f'"{test_option_set:s}"'
-                for test_option_set in project_configuration.tests_option_sets
-            ]
-        )
-        template_mappings["tests_input_glob"] = project_configuration.tests_input_glob
 
         template_mappings["tests_export_tool_option_sets_ps1"] = " ".join(
             project_configuration.tests_export_tool_option_sets
@@ -3665,6 +3646,17 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 for profile in (project_configuration.tests_info_tool_profiles)
             ]
         )
+        template_mappings["tests_input_glob"] = project_configuration.tests_input_glob
+
+        template_mappings["tests_option_sets_ps1"] = " ".join(
+            project_configuration.tests_option_sets
+        )
+        template_mappings["tests_option_sets_sh"] = " ".join(
+            [
+                f'"{test_option_set:s}"'
+                for test_option_set in project_configuration.tests_option_sets
+            ]
+        )
         template_mappings["tests_verify_tool_option_sets_ps1"] = " ".join(
             project_configuration.tests_verify_tool_option_sets
         )
@@ -3701,6 +3693,16 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 for profile in (project_configuration.tests_verify_tool_profiles)
             ]
         )
+        template_mappings["tools_names"] = project_configuration.tools_names
+        template_mappings["tools_tests"] = " ".join(sorted(tools_tests))
+        template_mappings["tools_tests_with_input"] = " ".join(sorted(tools_tests_with_input))
+        template_mappings["tools_tests_autotest"] = " ".join(
+            [f"tools_{name:s}" for name in sorted(tools_tests)]
+        )
+        template_mappings["tools_tests_with_input_autotest"] = " ".join(
+            [f"tools_{name:s}" for name in sorted(tools_tests_with_input)]
+        )
+
         template_mappings["alignment_padding"] = " " * len(
             project_configuration.library_name_suffix
         )
@@ -4037,7 +4039,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             if directory_entry == "test_library.ps1":
                 force_create = bool(public_functions) or bool(public_types)
 
-            elif directory_entry in ("test_yalinfo.ps1", "test_yalinfo.sh"):
+            elif directory_entry == "test_yalinfo.ps1":
                 force_create = "info_tool" in project_configuration.tools_features
 
             elif directory_entry == "yal_test_error.c":

@@ -280,6 +280,7 @@ AC_DEFUN([AX_TESTS_CHECK_LOCAL],
 
   dnl Note cannot use GZIP given it has a special purpose within gzip
   AC_PATH_PROG(GZIP_COMMAND, [gzip])
+  AC_PATH_PROGS([MD5SUM], [md5sum md5])
   AC_PATH_PROG(ZCAT, [zcat])
 
   AC_SUBST(

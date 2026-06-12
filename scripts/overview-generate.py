@@ -841,11 +841,7 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                     version = "missing"
 
                 # TODO: handle yal and pyyal place holders.
-                if script_file.name in (
-                    "test_pyyal_set_ascii_codepage.sh",
-                    "test_yalexport.sh",
-                    "test_yalinfo.sh",
-                ):
+                if script_file.name == "test_pyyal_set_ascii_codepage.sh":
                     continue
 
                 versions_per_script[script_file.name] = {version: []}

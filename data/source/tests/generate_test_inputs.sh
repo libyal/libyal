@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to generate test_inputs.at
 #
-# Version: 20260612
+# Version: 20260613
 
 ignore_list_add() {
     if ! ignore_list_contains "$$1"; then
@@ -235,7 +235,6 @@ if test -d "$${INPUT}"; then
 
                 if test -n "$${OPTIONS}"; then
                     TEST_INPUT="[$${OPTION_SET}], [$${OPTIONS}], [$${TEST_FILE}]"
-                    echo "Adding $${TEST_INPUT}"
                     test_inputs_push "$${TEST_INPUT}"
 
                     TEST_WITH_OPTIONS=1
@@ -244,7 +243,6 @@ if test -d "$${INPUT}"; then
 
             if test $${TEST_WITH_OPTIONS} -eq 0; then
                 TEST_INPUT="[], [], [$${TEST_FILE}]"
-                echo "Adding $${TEST_INPUT}"
                 test_inputs_push "$${TEST_INPUT}"
             fi
         done

@@ -3,11 +3,8 @@
 identifier: generate_helper_functions
 type: template
 file: test_tools.at/helper_functions.at
----
-identifier: generate_helper_functions_info_tool
-type: template
-# TODO: add condition
-file: test_tools.at/helper_functions_info_tool.at
+placeholders:
+- library_name_suffix
 ---
 identifier: generate_includes
 type: template
@@ -15,10 +12,16 @@ file: test_tools.at/includes.at
 ---
 identifier: generate_include_test_inputs
 type: template
-# TODO: add condition
 file: test_tools.at/include_test_inputs.at
 placeholders:
-- info_tool_name
+- tool_name
+---
+identifier: generate_include_test_inputs_tools
+type: sequence
+input: tools_names
+placeholder: tool_name
+operations:
+- generate_include_test_inputs
 ---
 identifier: generate_run_tests
 type: template
@@ -26,16 +29,24 @@ file: test_tools.at/run_tests.at
 placeholders:
 - tools_tests_autotest
 ---
-identifier: generate_run_tests_info_tool
+identifier: generate_run_tests_tool
 type: template
-# TODO: add condition
-file: test_tools.at/run_tests_info_tool.at
+file: test_tools.at/run_tests_tool.at
+placeholders:
+- tool_name
+---
+identifier: generate_run_tests_tools
+type: sequence
+input: tools_names
+placeholder: tool_name
+operations:
+- generate_run_tests_tool
 ---
 identifier: main
 type: group
 operations:
 - generate_includes
+- generate_include_test_inputs_tools
 - generate_helper_functions
-- generate_helper_functions_info_tool
 - generate_run_tests
-- generate_run_tests_info_tool
+- generate_run_tests_tools

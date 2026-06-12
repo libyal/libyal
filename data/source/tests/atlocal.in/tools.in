@@ -1,7 +1,8 @@
 
 # Settings used in test_tools.at
 GZIP_COMMAND="@GZIP_COMMAND@"
+MD5SUM="@MD5SUM@"
 SED="@SED@"
 ZCAT="@ZCAT@"
 
-export DIFF GZIP_COMMAND ZCAT
+export GZIP_COMMAND MD5SUM SED ZCAT

@@ -1,2 +1,1 @@
-
-include_test_inputs([${info_tool_name}])
+include_test_inputs([${tool_name}])

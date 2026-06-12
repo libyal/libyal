@@ -1,3 +1,0 @@
-
-RUN_TEST_${library_name_suffix:upper_case}INFO(
-  test_inputs_${library_name_suffix}info)
