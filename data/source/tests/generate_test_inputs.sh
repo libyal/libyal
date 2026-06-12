@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to generate test_inputs.at
 #
-# Version: 20260610
+# Version: 20260612
 
 ignore_list_add() {
     if ! ignore_list_contains "$$1"; then
@@ -164,17 +164,11 @@ read_project_ini() {
                     if test "$${CURRENT_SECTION}" = "tests"; then
                         case "$${LINE}" in
                             input_glob:*)
-                                INPUT_GLOB="$${LINE#*:}"
-                                INPUT_GLOB="$${INPUT_GLOB//\"/}"
-                                INPUT_GLOB="$${INPUT_GLOB// /}"
+				INPUT_GLOB=`printf '%s' "$${LINE#*:}" | tr -d '" '`
                                 ;;
 
                             option_sets:*)
-                                OPTION_SETS="$${LINE#*:}"
-                                OPTION_SETS="$${OPTION_SETS//\[/}"
-                                OPTION_SETS="$${OPTION_SETS//\]/}"
-                                OPTION_SETS="$${OPTION_SETS//\"/}"
-                                OPTION_SETS="$${OPTION_SETS// /}"
+				OPTION_SETS=`printf '%s' "$${LINE#*:}" | tr -d '[]" '`
                                 ;;
                         esac
                     fi

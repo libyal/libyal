@@ -708,8 +708,16 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if check_python_scripts:
             extra_dist.append("$(check_PYTHON_SCRIPTS)")
 
-        # TODO: add support for clean_files.append("notify_stream.log")
-        # TODO: add support for clean_files.append("TestFile")
+        # if (
+        #     project_configuration.library_name != "libcnotify"
+        #     and "libcnotify" in makefile_am_file.library_dependencies
+        # ):
+        #     clean_files.append("notify_stream.log")
+
+        if project_configuration.library_name in (
+            "libcdirectory", "libcfile",
+        ):
+            clean_files.append("TestFile")
 
         if (
             project_configuration.library_tests_with_input
@@ -745,10 +753,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             ("test_library", autotest_files),
         ]
         autotest_files = ["package.m4", "test_manpages.at"]
-        if project_configuration.library_tests_with_input:
-            autotest_files.append(
-                f"test_inputs_{project_configuration.library_name}.at"
-            )
         autotest_rules.append(("test_manpages", autotest_files))
 
         if project_configuration.HasPythonModule():
@@ -762,7 +766,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if project_configuration.HasTools():
             autotest_files = ["package.m4", "test_macros.at", "test_tools.at"]
             if project_configuration.HasInfoTool():
-                autotest_files.append(f"{project_configuration.library_name_suffix:s}info.at")
+                autotest_files.append(
+                    f"test_inputs_{project_configuration.library_name_suffix:s}info.at"
+                )
             autotest_rules.append(("test_tools", autotest_files))
 
         for autotest_name, autotest_files in autotest_rules:

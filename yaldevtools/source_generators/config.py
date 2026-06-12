@@ -691,6 +691,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             tests_files.append("/tests/notify_stream.log")
 
         if (
+            project_configuration.library_name == "libcdirectory"
+        ):
+            tests_files.append("/tests/TestFile")
+
+        if (
             project_configuration.library_tests_with_input
             or project_configuration.python_module_tests_with_input
             or project_configuration.HasInfoTool()

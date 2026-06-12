@@ -1,15 +1,15 @@
 
 AT_TEST_HELPER_FN(
-  [run_exetools_binary],
+  [run_${library_name_suffix}tools_binary],
   [path arguments],
-  [Resolves and runs the exetools binary],
-  [if test -x "$$abs_top_builddir/exetools/$$[]1"; then
-    BINARY="$$abs_top_builddir/exetools/$$[]1"
-  elif test -x "$$abs_top_builddir/exetools/$$[]1.exe"; then
+  [Resolves and runs the ${library_name_suffix}tools binary],
+  [if test -x "$$abs_top_builddir/${library_name_suffix}tools/$$[]1"; then
+    BINARY="$$abs_top_builddir/${library_name_suffix}tools/$$[]1"
+  elif test -x "$$abs_top_builddir/${library_name_suffix}tools/$$[]1.exe"; then
     # Prevent wine debug messages failing the test.
-    WINEDEBUG=-all
+    export WINEDEBUG=-all
 
-    BINARY="$$abs_top_builddir/exetools/$$[]1.exe"
+    BINARY="$$abs_top_builddir/${library_name_suffix}tools/$$[]1.exe"
   else
     echo "Missing binary: $$[]1"
     exit 127

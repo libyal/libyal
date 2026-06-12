@@ -19,7 +19,7 @@ m4_define([SETUP_HELPER_FUNCTIONS],
       BINARY="$$abs_builddir/$$[]1"
     elif test -x "$$abs_builddir/$$[]1.exe"; then
       # Prevent wine debug messages failing the test.
-      WINEDEBUG=-all
+      export WINEDEBUG=-all
 
       BINARY="$$abs_builddir/$$[]1.exe"
     else
@@ -40,7 +40,7 @@ m4_define([SETUP_HELPER_FUNCTIONS],
     OSTYPE_LOWER=`echo "$$OSTYPE" | tr '[A-Z]' '[a-z]'`
     case "$${OSTYPE_LOWER}" in
       cygwin*|msys*)
-        if test "$${USE_WINAPI}" = "yes" || test "$${MSYSTEM}" = "MINGW32" || test "$${MSYSTEM}" = "MINGW64"; then
+        if test "$${USE_MINGW}" = "yes" || test "$${USE_WINAPI}" = "yes"; then
           if ! test -x $${CYGPATH}; then
             echo "Missing cygpath"
 
@@ -51,14 +51,9 @@ m4_define([SETUP_HELPER_FUNCTIONS],
         ;;
 
       linux-gnu*)
-        if test "$${USE_WINAPI}" = "yes"; then
+        if test "$${USE_MINGW}" = "yes" || test "$${USE_WINAPI}" = "yes"; then
           if test -n "$${WSL_DISTRO_NAME}" || grep -i "microsoft" /proc/version >/dev/null &>2; then
-            echo "WSL currently not supported"
-
-            exit 77
-          fi
-          if ! test -x $${OBJDUMP}; then
-            echo "Missing objdump"
+            echo "Tests with WSL not supported"
 
             exit 77
           fi
@@ -67,15 +62,18 @@ m4_define([SETUP_HELPER_FUNCTIONS],
 
             exit 77
           fi
-          if $${OBJDUMP} -f "$${TEST_EXECUTABLE}" 2>&1 | grep "pei-" >/dev/null 2>&1; then
-            TEST_FILE=`$${WINEPATH} -w "$${TEST_FILE}" 2>/dev/null`
-          fi
+          TEST_FILE=`$${WINEPATH} -w "$${TEST_FILE}" 2>/dev/null`
         fi
         ;;
 
       *)
+        if test "$${USE_MINGW}" = "yes"; then
+          echo "Tests with MinGW not supported on $${OSTYPE}"
+
+          exit 77
+        fi
         if test "$${USE_WINAPI}" = "yes"; then
-          echo "WINAPI not supported on $${OSTYPE}"
+          echo "Tests with WINAPI not supported on $${OSTYPE}"
 
           exit 77
         fi

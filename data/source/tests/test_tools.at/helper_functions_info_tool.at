@@ -1,12 +1,12 @@
 
-dnl Runs exeinfo with input.
+dnl Runs ${library_name_suffix}info with input.
 dnl Arguments:
 dnl   test_input
-m4_define([RUN_TEST_EXEINFO_WITH_INPUT],
+m4_define([RUN_TEST_${library_name_suffix:upper_case}INFO_WITH_INPUT],
   [m4_define([sanitized_test_input],
     [m4_translit([$$1], [[],[],[]"'`\], [______])])
 
-  AT_SETUP(exeinfo with input: 'sanitized_test_input')
+  AT_SETUP(${library_name_suffix}info with input: 'sanitized_test_input')
 
   AT_SKIP_IF(
     [test -n "$${SKIP_TOOLS_TESTS}" || test -n "$${SKIP_TOOLS_END_TO_END_TESTS}"])
@@ -23,14 +23,14 @@ m4_define([RUN_TEST_EXEINFO_WITH_INPUT],
     TEST_SET=`basename "$${TEST_SET}"`
     OUTPUT_FILE="$${FILENAME}.log"
 
-    ath_fn_run_exetools_binary exeinfo "$${TEST_FILE}" > "$${OUTPUT_FILE}"
+    ath_fn_run_${library_name_suffix}tools_binary ${library_name_suffix}info "$${TEST_FILE}" > "$${OUTPUT_FILE}"
     STATUS=$$?
 
     if test $${STATUS} -eq 0; then
       # Strip header with version.
       $${SED} -i'~' '1,2d' "$${OUTPUT_FILE}"
 
-      EXPECTED_RESULTS="$$abs_srcdir/input/.exeinfo/$${TEST_SET}/$${FILENAME}.gz"
+      EXPECTED_RESULTS="$$abs_srcdir/input/.${library_name_suffix}info/$${TEST_SET}/$${FILENAME}.gz"
       if test -f "$${EXPECTED_RESULTS}"; then
         # zcat on Mac OS requires the input from stdin.
         $${ZCAT} < "$${EXPECTED_RESULTS}" | diff "$${OUTPUT_FILE}" -;
@@ -45,16 +45,16 @@ m4_define([RUN_TEST_EXEINFO_WITH_INPUT],
 
   AT_CLEANUP])
 
-dnl Runs exeinfo with options and input.
+dnl Runs ${library_name_suffix}info with options and input.
 dnl Arguments:
 dnl   option_set
 dnl   test_options
 dnl   test_input
-m4_define([RUN_TEST_EXEINFO_WITH_OPTIONS_AND_INPUT],
+m4_define([RUN_TEST_${library_name_suffix:upper_case}INFO_WITH_OPTIONS_AND_INPUT],
   [m4_define([sanitized_test_input],
     [m4_translit([$$3], [[],[],[]"'`\], [______])])
 
-  AT_SETUP(exeinfo with options: '$$2' and input: 'sanitized_test_input')
+  AT_SETUP(${library_name_suffix}info with options: '$$2' and input: 'sanitized_test_input')
 
   AT_SKIP_IF(
     [test -n "$${SKIP_TOOLS_TESTS}" || test -n "$${SKIP_TOOLS_END_TO_END_TESTS}"])
@@ -72,14 +72,14 @@ m4_define([RUN_TEST_EXEINFO_WITH_OPTIONS_AND_INPUT],
     OPTION_SET="$$1"
     OUTPUT_FILE="$${OUTPUT_FILE}-$${OPTION_SET}.log"
 
-    ath_fn_run_exetools_binary exeinfo "$${TEST_FILE}" > "$${OUTPUT_FILE}"
+    ath_fn_run_${library_name_suffix}tools_binary ${library_name_suffix}info "$${TEST_FILE}" > "$${OUTPUT_FILE}"
     STATUS=$$?
 
     if test $${STATUS} -eq 0; then
       # Strip header with version.
       $${SED} -i'~' '1,2d' "$${OUTPUT_FILE}"
 
-      EXPECTED_RESULTS="$$abs_srcdir/input/.exeinfo/$${TEST_SET}/$${FILENAME}.gz"
+      EXPECTED_RESULTS="$$abs_srcdir/input/.${library_name_suffix}info/$${TEST_SET}/$${FILENAME}.gz"
       if test -f "$${EXPECTED_RESULTS}"; then
         # zcat on Mac OS requires the input from stdin.
         $${ZCAT} < "$${EXPECTED_RESULTS}" | diff "$${OUTPUT_FILE}" -;
@@ -93,10 +93,10 @@ m4_define([RUN_TEST_EXEINFO_WITH_OPTIONS_AND_INPUT],
 
   AT_CLEANUP])
 
-dnl Runs exeinfo tests.
+dnl Runs ${library_name_suffix}info tests.
 dnl Arguments:
 dnl   test_inputs
-m4_define([RUN_TEST_EXEINFO],
+m4_define([RUN_TEST_${library_name_suffix:upper_case}INFO],
   [m4_foreach_w(
     [test_input],
     [$$1],
@@ -106,8 +106,8 @@ m4_define([RUN_TEST_EXEINFO],
 
     m4_ifblank(
       test_options,
-      [RUN_TEST_EXEINFO_WITH_INPUT([test_file])],
-      [RUN_TEST_EXEINFO_WITH_OPTIONS_AND_INPUT(
+      [RUN_TEST_${library_name_suffix:upper_case}INFO_WITH_INPUT([test_file])],
+      [RUN_TEST_${library_name_suffix:upper_case}INFO_WITH_OPTIONS_AND_INPUT(
         [option_set],
        	[test_options],
        	[test_file])]

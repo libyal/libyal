@@ -1,6 +1,6 @@
 dnl Functions for testing
 dnl
-dnl Version: 20260611
+dnl Version: 20260612
 
 dnl Function to check if pthread_rwlock_unlock can be hooked for testing
 AC_DEFUN([AX_TESTS_CHECK_CAN_HOOK_PTHREAD_RWLOCK_UNLOCK],
@@ -285,6 +285,21 @@ AC_DEFUN([AX_TESTS_CHECK_LOCAL],
   AC_SUBST(
     [TESTS_MANPAGE_LINTER],
     [$ac_cv_have_manpage_linter])
+
+  ac_tests_target_string="$target"
+
+  AS_IF(
+    [test "x$ac_tests_target_string" = x],
+    [ac_tests_target_string="$host"])
+
+  AS_CASE(
+    [$ac_tests_target_string],
+    [*mingw*],[ac_cv_tests_use_mingw=yes],
+    [*],[ac_cv_tests_use_mingw=no])
+
+  AC_SUBST(
+    [TESTS_USE_MINGW],
+    [$ac_cv_tests_use_mingw])
   AC_SUBST(
     [TESTS_USE_WINAPI],
     [$ac_cv_enable_winapi])
