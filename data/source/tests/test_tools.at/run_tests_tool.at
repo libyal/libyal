@@ -1,4 +1,5 @@
 
 RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_STDOUT(
   [${tool_name}],
+  [${tool_name}],
   test_inputs_${tool_name})

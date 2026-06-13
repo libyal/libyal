@@ -1,23 +1,69 @@
 ## Test profiles
 
-There are also multiple test profiles:
+The tests use different test profiles:
 ${tests_profiles}
 
 These test profiles are used by one or more tests. By default the tests run all
-the test sets, if applicable. Each test profile can define which test sets to
-ignore in the ignore-file, e.g.  for the ${project_name} test profile:
+the test sets, if applicable. Each test profile can define:
+
+* which test sets to ignore in the ignore-file;
+* which options to apply in the options-file;
+* which files to include of a specific test set in the test-set-files-file.
+
+### Ignore-file
+
+The ignore-file is a file named "ignore". The ignore-file of the ${project_name}
+test profile would be:
 
 ```
 tests/input/.${project_name}/ignore
 ```
 
 Every line of the ignore-file specifies (the sub directory name of) the test set
-that should be ignored, e.g. for the basic test set:
+that should be ignored, e.g. for the "basic" test set:
 
 ```
 basic
 ```
 
-Some of the tests store data in the test profile to be used for comparison in successive test runs.
-At the moment this data needs to be cleaned out manual if it causes the test to fail due to legitimate changes.
+Some of the tests store data in the test profile to be used for comparison in
+successive test runs. At the moment this data needs to be cleaned out manual if
+it causes the test to fail due to legitimate changes.
+
+### Options-file
+
+The options-file is a file named "options". The options-file of the
+${project_name} test profile would be:
+
+```
+tests/input/.${project_name}/options
+```
+
+The options-file consists on one line containing the options to apply.
+
+### Test-set-files-file
+
+The test-set-files-file is a file named "files" in the sub directory with the
+name of the test set. The test-set-files-file of the "basic" test set in the
+${project_name} test profile would be:
+
+```
+tests/input/.${project_name}/basic/files
+```
+
+Every line of the files-file specifies the filename in the test set to include
+in the test. Files not defined in the files-file are ignored by the test.
+
+E.g. if the "basic" test set sub directory contains the files:
+
+```
+${tests_example_filename1}
+${tests_example_filename2}
+```
+
+and only the first file needs to be tested, the files-file can then be defined as:
+
+```
+${tests_example_filename1}
+```
 

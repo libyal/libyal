@@ -647,7 +647,7 @@ class WikiPageGenerator:
             f"\n"
             f"Note that if you want to build {project_name:s} from source checked out "
             f"of git with Visual Studio make sure the autotools are able to make a "
-            f"distribution package of {0:s} before trying to build it.\n"
+            f"distribution package of {project_name:s} before trying to build it.\n"
             f'You can create distribution package by running: "make dist".\n'
         )
         if project_configuration.HasDependencyDokan():
@@ -706,7 +706,7 @@ class WikiPageGenerator:
             if project_configuration.project_status != "stable":
                 rpm_rename_source_package += (
                     f"mv {project_name:s}-{project_configuration.project_status:s}-"
-                    f"<version>.tar.gz {0:s}-<version>.tar.gz\n"
+                    f"<version>.tar.gz {project_name:s}-<version>.tar.gz\n"
                 )
 
             rpm_filenames = self._GetRpmFilenames(project_configuration)
@@ -795,6 +795,12 @@ class WikiPageGenerator:
         else:
             shared_object_version = "1"
 
+        tests_example_filename1 = (
+            project_configuration.tests_example_filename1 or "example1"
+        )
+        tests_example_filename2 = (
+            project_configuration.tests_example_filename2 or "example2"
+        )
         template_mappings = {
             "building_table_of_contents": building_table_of_contents,
             "project_name": project_name,
@@ -833,8 +839,8 @@ class WikiPageGenerator:
                 project_configuration.development_main_object_size
             ),
             "tests_profiles": tests_profiles,
-            "tests_example_filename1": (project_configuration.tests_example_filename1),
-            "tests_example_filename2": (project_configuration.tests_example_filename2),
+            "tests_example_filename1": tests_example_filename1,
+            "tests_example_filename2": tests_example_filename2,
             "troubleshooting_example": troubleshooting_example,
             "cygwin_build_dependencies": cygwin_build_dependencies,
             "cygwin_dll_dependencies": cygwin_dll_dependencies,
@@ -1306,26 +1312,12 @@ class TestingPageGenerator(WikiPageGenerator):
             self._GenerateSection("tests.txt", template_mappings, output_writer)
 
             if project_configuration.tests_profiles:
-                if (
-                    project_configuration.tests_example_filename1
-                    and project_configuration.tests_example_filename2
-                ):
-                    self._GenerateSection(
-                        "tests_files.txt", template_mappings, output_writer
-                    )
-
                 self._GenerateSection(
                     "tests_profiles.txt", template_mappings, output_writer
                 )
-                if (
-                    project_configuration.tests_example_filename1
-                    and project_configuration.tests_example_filename2
-                ):
-                    self._GenerateSection(
-                        "tests_profiles_files.txt", template_mappings, output_writer
-                    )
-
-            # TODO: add section about ASAN
+                self._GenerateSection(
+                    "tests_files.txt", template_mappings, output_writer
+                )
 
     def HasContent(self, project_configuration):
         """Determines if the generator will generate content.

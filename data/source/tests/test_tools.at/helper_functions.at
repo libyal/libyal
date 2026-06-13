@@ -1,4 +1,28 @@
 
+
+AT_TEST_HELPER_FN(
+  [compare_with_reference],
+  [test_profile test_set test_file test_output],
+  [Compares test results against a reference],
+  [TEST_PROFILE="$$1"
+  TEST_SET="$$2"
+  TEST_FILE="$$3"
+  TEST_RESULTS="$$4"
+  STATUS=0
+
+  EXPECTED_RESULTS="$$abs_srcdir/input/.$${TEST_PROFILE}/$${TEST_SET}/$${TEST_FILE}.gz"
+  if test -f "$${EXPECTED_RESULTS}"; then
+    # zcat on Mac OS requires the input from stdin.
+    $${ZCAT} < "$${EXPECTED_RESULTS}" | diff "$${TEST_RESULTS}" -;
+    STATUS=$$?
+  else
+    $${GZIP_COMMAND} "$${TEST_RESULTS}"
+    mkdir -p "$$abs_srcdir/input/.$${TEST_PROFILE}/$${TEST_SET}"
+    mv "$${TEST_RESULTS}.gz" "$${EXPECTED_RESULTS}"
+  fi
+  return $${STATUS}
+  ])
+
 AT_TEST_HELPER_FN(
   [run_${library_name_suffix}tools_binary],
   [path arguments],
@@ -21,9 +45,11 @@ AT_TEST_HELPER_FN(
 
 AT_TEST_HELPER_FN(
   [run_${library_name_suffix}tools_binary_and_compare_files],
-  [tool_name arguments test_file],
+  [tool_name test_profile options_set arguments test_file],
   [Runs a ${library_name_suffix}tools binary and compares files against a reference],
   [${library_name_suffix:upper_case}TOOL="$$[]1"
+  shift
+  TEST_PROFILE="$$[]1"
   shift
   OPTION_SET="$$[]1"
   shift
@@ -37,34 +63,30 @@ AT_TEST_HELPER_FN(
   if test "$${OPTION_SET}" = "."; then
     OUTPUT_FILE="$${FILENAME}.log"
   else
-    OUTPUT_FILE="$${OUTPUT_FILE}-$${OPTION_SET}.log"
+    OUTPUT_FILE="$${FILENAME}-$${OPTION_SET}.log"
   fi
+  OUTPUT_DIRECTORY="$${FILENAME}.export"
+
   ath_fn_run_${library_name_suffix}tools_binary "$${${library_name_suffix:upper_case}TOOL}" "$$[]@" > /dev/null
   STATUS=$$?
 
   if test $${STATUS} -eq 0; then
     # md5sum prefixes the output of a filename that contains an escape character with "\"
-    find "$${FILENAME}.export" -type f -exec $${MD5SUM} {} \; | sed 's/^\\//' | LC_ALL=C sort -k2,2 -k1,1 > "$${OUTPUT_FILE}"
+    find "$${OUTPUT_DIRECTORY}" -type f -exec $${MD5SUM} {} \; | sed 's/^\\//' | LC_ALL=C sort -k2,2 -k1,1 > "$${OUTPUT_FILE}"
 
-    EXPECTED_RESULTS="$$abs_srcdir/input/.$${${library_name_suffix:upper_case}TOOL}/$${TEST_SET}/$${FILENAME}.gz"
-    if test -f "$${EXPECTED_RESULTS}"; then
-      # zcat on Mac OS requires the input from stdin.
-      $${ZCAT} < "$${EXPECTED_RESULTS}" | diff "$${OUTPUT_FILE}" -;
-      STATUS=$$?
-    else
-      $${GZIP_COMMAND} "$${OUTPUT_FILE}"
-      mkdir -p "$${EXPECTED_RESULTS}"
-      mv "$${OUTPUT_FILE}.gz" "$${EXPECTED_RESULTS}"
-    fi
+    ath_fn_compare_with_reference "$${TEST_PROFILE}" "$${TEST_SET}" "$${FILENAME}" "$${OUTPUT_FILE}"
+    STATUS=$$?
   fi
   exit $$STATUS
   ])
 
 AT_TEST_HELPER_FN(
   [run_${library_name_suffix}tools_binary_and_compare_stdout],
-  [tool_name arguments test_file],
+  [tool_name test_profile options_set arguments test_file],
   [Runs a ${library_name_suffix}tools binary and compares stdout against a reference],
   [${library_name_suffix:upper_case}TOOL="$$[]1"
+  shift
+  TEST_PROFILE="$$[]1"
   shift
   OPTION_SET="$$[]1"
   shift
@@ -78,7 +100,7 @@ AT_TEST_HELPER_FN(
   if test "$${OPTION_SET}" = "."; then
     OUTPUT_FILE="$${FILENAME}.log"
   else
-    OUTPUT_FILE="$${OUTPUT_FILE}-$${OPTION_SET}.log"
+    OUTPUT_FILE="$${FILENAME}-$${OPTION_SET}.log"
   fi
   ath_fn_run_${library_name_suffix}tools_binary "$${${library_name_suffix:upper_case}TOOL}" "$$[]@" > "$${OUTPUT_FILE}"
   STATUS=$$?
@@ -87,16 +109,8 @@ AT_TEST_HELPER_FN(
     # Strip header with version.
     $${SED} -i'~' '1,2d' "$${OUTPUT_FILE}"
 
-    EXPECTED_RESULTS="$$abs_srcdir/input/.$${${library_name_suffix:upper_case}TOOL}/$${TEST_SET}/$${FILENAME}.gz"
-    if test -f "$${EXPECTED_RESULTS}"; then
-      # zcat on Mac OS requires the input from stdin.
-      $${ZCAT} < "$${EXPECTED_RESULTS}" | diff "$${OUTPUT_FILE}" -;
-      STATUS=$$?
-    else
-      $${GZIP_COMMAND} "$${OUTPUT_FILE}"
-      mkdir -p "$${EXPECTED_RESULTS}"
-      mv "$${OUTPUT_FILE}.gz" "$${EXPECTED_RESULTS}"
-    fi
+    ath_fn_compare_with_reference "$${TEST_PROFILE}" "$${TEST_SET}" "$${FILENAME}" "$${OUTPUT_FILE}"
+    STATUS=$$?
   fi
   exit $$STATUS
   ])
@@ -104,11 +118,12 @@ AT_TEST_HELPER_FN(
 dnl Runs a ${library_name_suffix}tool and compares files against a reference
 dnl Arguments:
 dnl   tool_name
+dnl   test_profile
 dnl   test_inputs
 m4_define([RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_FILES],
   [m4_foreach_w(
     [test_input],
-    [$$2],
+    [$$3],
     [m4_define([option_set], m4_normalize(get_test_result_value([test_input], 1)))
     m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
     m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
@@ -130,7 +145,7 @@ m4_define([RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_FILES],
 
       TEST_FILE=`ath_fn_resolve_test_file "$$abs_srcdir/input/test_file"`
 
-      AT_CHECK(ath_fn_run_${library_name_suffix}tools_binary_and_compare_files $$1 "." "$${TEST_FILE}")
+      AT_CHECK(ath_fn_run_${library_name_suffix}tools_binary_and_compare_files $$1 $$2 "." "$${TEST_FILE}")
 
       AT_CLEANUP],
       [AT_SETUP($$1 with options: 'test_options' and input: 'sanitized_test_file')
@@ -144,7 +159,7 @@ m4_define([RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_FILES],
 
       TEST_FILE=`ath_fn_resolve_test_file "$$abs_srcdir/input/test_file"`
 
-      AT_CHECK(ath_fn_run_${library_name_suffix}tools_binary_and_compare_files $$1 option_set test_options "$${TEST_FILE}")
+      AT_CHECK(ath_fn_run_${library_name_suffix}tools_binary_and_compare_files $$1 $$2 "option_set" test_options "$${TEST_FILE}")
 
       AT_CLEANUP])]
     )]
@@ -154,11 +169,12 @@ m4_define([RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_FILES],
 dnl Runs a ${library_name_suffix}tool and compares stdout against a reference
 dnl Arguments:
 dnl   tool_name
+dnl   test_profile
 dnl   test_inputs
 m4_define([RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_STDOUT],
   [m4_foreach_w(
     [test_input],
-    [$$2],
+    [$$3],
     [m4_define([option_set], m4_normalize(get_test_result_value([test_input], 1)))
     m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
     m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
@@ -179,7 +195,7 @@ m4_define([RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_STDOUT],
 
       TEST_FILE=`ath_fn_resolve_test_file "$$abs_srcdir/input/test_file"`
 
-      AT_CHECK(ath_fn_run_${library_name_suffix}tools_binary_and_compare_stdout $$1 "." "$${TEST_FILE}")
+      AT_CHECK(ath_fn_run_${library_name_suffix}tools_binary_and_compare_stdout $$1 $$2 "." "$${TEST_FILE}")
 
       AT_CLEANUP],
       [AT_SETUP($$1 with options: 'test_options' and input: 'sanitized_test_file')
@@ -193,7 +209,7 @@ m4_define([RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_STDOUT],
 
       TEST_FILE=`ath_fn_resolve_test_file "$$abs_srcdir/input/test_file"`
 
-      AT_CHECK(ath_fn_run_${library_name_suffix}tools_binary_and_compare_stdout $$1 option_set test_options "$${TEST_FILE}")
+      AT_CHECK(ath_fn_run_${library_name_suffix}tools_binary_and_compare_stdout $$1 $$2 "option_set" test_options "$${TEST_FILE}")
 
       AT_CLEANUP])]
     )]
