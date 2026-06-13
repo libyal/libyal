@@ -7,7 +7,8 @@ $$ExitFailure = 1
 $$ExitIgnore = 77
 
 $$Profiles = @(${tests_info_tool_profiles_ps1})
-$$OptionsPerProfile = @(${tests_info_tool_options_per_profile_ps1})
+# TODO: determine options per profile based on the options-file
+# $$OptionsPerProfile = @(${tests_info_tool_options_per_profile_ps1})
 $$OptionSets = "${tests_info_tool_option_sets_ps1}"
 
 $$InputGlob = "${tests_info_tool_input_glob}"

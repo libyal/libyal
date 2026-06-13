@@ -1,11 +1,20 @@
 /* Retrieves the value data of an extended attribute
  * Returns 0 if successful or a negative errno value otherwise
  */
+#if defined( __APPLE__ )
+int mount_fuse_getxattr(
+     const char *path,
+     const char *name,
+     char *value,
+     size_t size,
+     uint32_t position ${tools_name:upper_case}_ATTRIBUTE_UNUSED )
+#else
 int mount_fuse_getxattr(
      const char *path,
      const char *name,
      char *value,
      size_t size )
+#endif
 {
 	libcerror_error_t *error                                 = NULL;
 	${library_name}_extended_attribute_t *extended_attribute = NULL;
@@ -15,6 +24,10 @@ int mount_fuse_getxattr(
 	size_t name_length                                       = 0;
 	ssize_t read_count                                       = 0;
 	int result                                               = 0;
+
+#if defined( __APPLE__ )
+	${tools_name:upper_case}_UNREFERENCED_PARAMETER( position )
+#endif
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )

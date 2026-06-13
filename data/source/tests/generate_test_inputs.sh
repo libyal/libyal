@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to generate test_inputs.at
 #
-# Version: 20260614
+# Version: 20260615
 
 ignore_list_add() {
     if ! ignore_list_contains "$$1"; then
@@ -92,7 +92,7 @@ glob_test_files() {
     for LINE in "$$1"/$${INPUT_GLOB}; do
         if test -e "$${LINE}"; then
             test_files_push "$${LINE}"
-	fi
+        fi
     done
 }
 
@@ -134,10 +134,10 @@ option_sets_pop() {
     if test -z "$${OPTION_SETS}" || test "$${OPTION_SETS}" = "|"; then
         OPTION_SET=""
     else
-        OPTION_SET="$${OPTION_SETS%%,*}"
+        OPTION_SET="$${OPTION_SETS%%|*}"
 
         case "$${OPTION_SETS}" in
-            *\|*) OPTION_SETS="$${OPTION_SETS#*,}" ;;
+            *\|*) OPTION_SETS="$${OPTION_SETS#*|}" ;;
             *)    OPTION_SETS="" ;;
         esac
     fi
@@ -164,11 +164,11 @@ read_project_ini() {
                     if test "$${CURRENT_SECTION}" = "tests"; then
                         case "$${LINE}" in
                             input_glob:*)
-				INPUT_GLOB=`printf '%s' "$${LINE#*:}" | tr -d '" '`
+                                INPUT_GLOB=`printf '%s' "$${LINE#*:}" | tr -d '" '`
                                 ;;
 
                             option_sets:*)
-				OPTION_SETS=`printf '%s' "$${LINE#*:}" | tr -d '[]" '`
+                                OPTION_SETS=`printf '%s' "$${LINE#*:}" | tr -d '[]" ' | tr ',' '|'`
                                 ;;
                         esac
                     fi
@@ -191,6 +191,8 @@ TEST_FILES=""
 TEST_INPUTS=""
 
 read_project_ini "$${PACKAGE_NAME}"
+
+BACKUP_OPTION_SETS="$${OPTION_SETS}"
 
 if test -d "$${INPUT}"; then
     read_ignore_list "$${INPUT}/.$${TEST_PROFILE}"
@@ -232,12 +234,21 @@ if test -d "$${INPUT}"; then
             # Escape [ and ] as @<:@ and @:>@
             TEST_FILE=`echo "$${TEST_FILE}" | sed 's/\[/@<:@/g;s/\]/@:>@/g'`
 
+            OPTIONS_PER_PROFILE=""
+            OPTIONS_FILE="$${INPUT}/.$${TEST_PROFILE}/options"
+            if test -f "$${OPTIONS_FILE}"; then
+                OPTIONS_PER_PROFILE=`head -n 1 "$${OPTIONS_FILE}" | sed 's/[\r\n]*$$//'`
+            fi
             TEST_WITH_OPTIONS=0
 
+            OPTION_SETS="$${BACKUP_OPTION_SETS}"
             while option_sets_pop; test -n "$${OPTION_SET}"; do
                 read_options "$${INPUT}/.$${TEST_PROFILE}/$${TEST_SET}" "$${TEST_FILENAME}" "$${OPTION_SET}"
 
                 if test -n "$${OPTIONS}"; then
+                    if test -n "$${OPTIONS_PER_PROFILE}"; then
+                        OPTIONS="$${OPTIONS_PER_PROFILE} $${OPTIONS}"
+                    fi
                     TEST_INPUT="[$${OPTION_SET}], [$${OPTIONS}], [$${TEST_FILE}]"
                     test_inputs_push "$${TEST_INPUT}"
 
@@ -246,7 +257,7 @@ if test -d "$${INPUT}"; then
             done
 
             if test $${TEST_WITH_OPTIONS} -eq 0; then
-                TEST_INPUT="[], [], [$${TEST_FILE}]"
+                TEST_INPUT="[], [$${OPTIONS_PER_PROFILE}], [$${TEST_FILE}]"
                 test_inputs_push "$${TEST_INPUT}"
             fi
         done

@@ -1,5 +1,4 @@
 
-
 AT_TEST_HELPER_FN(
   [compare_with_reference],
   [test_profile test_set test_file test_output],
