@@ -1,4 +1,4 @@
 
-RUN_TEST_${tool_name:upper_case}_AND_COMPARE_STDOUT(
+RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_STDOUT(
   [${tool_name}],
   test_inputs_${tool_name})

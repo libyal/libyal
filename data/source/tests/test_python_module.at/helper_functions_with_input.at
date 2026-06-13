@@ -13,7 +13,7 @@ m4_define([RUN_TEST_SCRIPTS_WITH_INPUT],
       [test_input],
       [$$2],
       [m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
-      m4_define([test_file], m4_normalize(get_test_result_value([test_input], 3)))
+      m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
 
       m4_define(
         [test_script],

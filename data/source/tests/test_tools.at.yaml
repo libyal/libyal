@@ -33,6 +33,7 @@ identifier: generate_run_tests_tool
 type: template
 file: test_tools.at/run_tests_tool.at
 placeholders:
+- library_name_suffix
 - tool_name
 ---
 identifier: generate_run_tests_tools
