@@ -8,7 +8,23 @@ the test sets, if applicable. Each test profile can define:
 
 * which test sets to ignore in the ignore-file;
 * which options to apply in the options-file;
-* which files to include of a specific test set in the test-set-files-file.
+* which files to include of a specific test set in the glob-file or
+  test-set-files-file.
+
+### Glob-file
+
+The glob-file is a file named "glob". The glob-file of the ${project_name} test
+profile would be:
+
+```
+tests/input/.${project_name}/glob
+```
+
+The glob-file consists on one line containing the glob to apply, e.g.
+
+```
+*.txt
+```
 
 ### Ignore-file
 
@@ -66,4 +82,6 @@ and only the first file needs to be tested, the files-file can then be defined a
 ```
 ${tests_example_filename1}
 ```
+
+Note that the test-set-files-file overrules the glob-file.
 

@@ -1,2 +1,3 @@
-${autotest_name}: ${autotest_files}
+${autotest_name}: \
+${autotest_files}
 

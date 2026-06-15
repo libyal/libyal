@@ -1,17 +1,18 @@
 # Info tool testing script
 #
-# Version: 20260608
+# Version: 20260614
 
 $$ExitSuccess = 0
 $$ExitFailure = 1
 $$ExitIgnore = 77
 
 $$Profiles = @(${tests_info_tool_profiles_ps1})
-# TODO: determine options per profile based on the options-file
+# TODO: determine the options per profile based on the options-file
 # $$OptionsPerProfile = @(${tests_info_tool_options_per_profile_ps1})
 $$OptionSets = "${tests_info_tool_option_sets_ps1}"
 
-$$InputGlob = "${tests_info_tool_input_glob}"
+# TODO: determine the input glob based on the test-set-glob-file
+# $$InputGlob = "${tests_info_tool_input_glob}"
 
 $$VSDirectories = @(
 	"msvscpp",
@@ -162,7 +163,7 @@ For ($$ProfileIndex = 0; $$ProfileIndex -le ($$Profiles.length - 1); $$ProfileIn
 					$$InputOptions = $$InputOptions -replace "^offset=","-o"
 					$$InputOptions = $$InputOptions -replace "^password=","-p"
 					$$InputOptions = $$InputOptions -replace "^recovery_password=","-r"
-					$$InputOptions = $$InputOptions -replace "^startup_key=","-s"
+					$$InputOptions = $$InputOptions -replace "^startup_key=","-sinput\$${TestSetName}\"
 					$$InputOptions = $$InputOptions -replace "^virtual_address=","-v"
 
 					$$TestLog = "$${InputFileName}-$${OptionSet}.log"

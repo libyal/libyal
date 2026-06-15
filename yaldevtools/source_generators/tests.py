@@ -773,8 +773,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
         for autotest_name, autotest_files in autotest_rules:
             template_mappings["autotest_name"] = autotest_name
-            template_mappings["autotest_files"] = " ".join(sorted(autotest_files))
-
+            template_mappings["autotest_files"] = " \\\n".join(
+                [f"\t{name:s}" for name in sorted(autotest_files)]
+            )
             template_filename = os.path.join(templates_path, "autotest_rule.am")
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
@@ -3603,9 +3604,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 f'"{profile:s}"'
                 for profile in (project_configuration.tests_export_tool_profiles)
             ]
-        )
-        template_mappings["tests_info_tool_input_glob"] = (
-            project_configuration.tests_info_tool_input_glob
         )
         template_mappings["tests_info_tool_option_sets_ps1"] = " ".join(
             project_configuration.tests_info_tool_option_sets
