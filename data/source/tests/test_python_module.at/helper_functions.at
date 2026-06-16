@@ -52,6 +52,5 @@ m4_define([RUN_TEST_SCRIPTS],
       [ignore],
       [ignore])
 
-    AT_CLEANUP]
-  )]
-)
+    AT_CLEANUP])
+  ])

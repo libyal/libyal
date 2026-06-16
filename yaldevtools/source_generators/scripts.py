@@ -49,27 +49,29 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
         )
         for directory_entry in os.listdir(self._templates_path):
             template_filename = os.path.join(self._templates_path, directory_entry)
-            if template_filename.endswith(".swp"):
-                continue
-
             if not os.path.isfile(template_filename):
                 continue
 
-            output_filename = directory_entry
+            if template_filename.endswith(".swp"):
+                continue
+
+            if template_filename.endswith(".yaml"):
+                continue
 
             if directory_entry in (
                 "syncbzip2.ps1",
                 "synctestdata.ps1",
-                "synctestdata.sh",
                 "syncwinflexbison.ps1",
                 "synczlib.ps1",
             ):
-                if not os.path.exists(output_filename):
+                if not os.path.exists(directory_entry):
                     continue
 
             if directory_entry in ("builddokan.ps1", "syncdokan.ps1"):
                 if not os.path.exists(mount_tool_filename):
                     continue
+
+            output_filename = directory_entry
 
             self._GenerateSection(template_filename, template_mappings, output_filename)
 
@@ -77,3 +79,12 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
                 # Set the x-bit for a shell script (.sh).
                 stat_info = os.stat(output_filename)
                 os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
+
+        if os.path.exists("synctestdata.sh"):
+            self._GenerateSectionsFromOperationsFile(
+                "synctestdata.sh.yaml",
+                "main",
+                project_configuration,
+                template_mappings,
+                "synctestdata.sh",
+            )

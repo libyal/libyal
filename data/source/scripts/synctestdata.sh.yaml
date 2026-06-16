@@ -1,0 +1,19 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: synctestdata.sh/body.sh
+placeholders:
+- test_data_files
+- test_data_repository
+- test_data_path
+---
+identifier: generate_header
+type: template
+file: synctestdata.sh/header.sh
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_body

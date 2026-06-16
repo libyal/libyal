@@ -21,7 +21,7 @@ PyObject *${python_module_name}_glob(
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	wchar_t **filenames_wide         = NULL;
-	const wchar_t *filename_wide     = NULL;
+	wchar_t *filename_wide           = NULL;
 #else
 	PyObject *utf8_string_object     = NULL;
 #endif

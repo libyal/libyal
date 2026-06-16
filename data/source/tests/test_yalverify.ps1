@@ -7,7 +7,6 @@ $$ExitFailure = 1
 $$ExitIgnore = 77
 
 $$Profiles = @(${tests_verify_tool_profiles_ps1})
-$$OptionsPerProfile = @(${tests_verify_tool_options_per_profile_ps1})
 $$OptionSets = "${tests_verify_tool_option_sets_ps1}"
 
 $$InputGlob = "${tests_input_glob}"
