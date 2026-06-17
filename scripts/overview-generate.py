@@ -828,9 +828,6 @@ class StatusWikiPageGenerator(WikiPageGenerator):
                 self._data_directory, "source", "tests", f"*.{extension:s}"
             )
             for path in glob.glob(script_glob):
-                if path.endswith("test_yalinfo.ps1"):
-                    continue
-
                 script_file = ScriptFile(path)
 
                 version = None

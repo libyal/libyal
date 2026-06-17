@@ -3938,13 +3938,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         library_header = f"yal_test_{project_configuration.library_name:s}.h"
 
         for directory_entry in os.listdir(self._templates_path):
-            if directory_entry in (
-                "atlocal.in.yaml",
-                "test_library.at.yaml",
-                "test_manpages.at.yaml",
-                "test_python_module.at.yaml",
-                "test_tools.at.yaml",
-            ):
+            if directory_entry.endswith(".yaml"):
                 continue
 
             # Ignore yal_test_library.h in favor of yal_test_libyal.h
@@ -3983,9 +3977,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
 
             if directory_entry == "test_library.ps1":
                 force_create = bool(public_functions) or bool(public_types)
-
-            elif directory_entry == "test_yalinfo.ps1":
-                force_create = "info_tool" in project_configuration.tools_features
 
             elif directory_entry == "yal_test_error.c":
                 force_create = "error" in api_functions
@@ -4177,15 +4168,22 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             with_input=with_input,
             with_offset=with_offset,
         )
-        autotest_filenames = ["atlocal.in", "test_library.at", "test_manpages.at"]
+        self._GenerateSectionsFromOperationsFile(
+            "atlocal.in.yaml",
+            "main",
+            project_configuration,
+            template_mappings,
+            "atlocal.in",
+        )
+        test_suites = ["library", "manpages"]
         if project_configuration.HasPythonModule():
-            autotest_filenames.append("test_python_module.at")
+            test_suites.append("python_module")
         if project_configuration.HasTools():
-            autotest_filenames.append("test_tools.at")
+            test_suites.append("tools")
 
-        for filename in autotest_filenames:
-            operations_file_name = os.path.join(f"{filename:s}.yaml")
-            output_filename = os.path.join("tests", filename)
+        for test_suite in test_suites:
+            operations_file_name = os.path.join(f"test_{test_suite:s}.at.yaml")
+            output_filename = os.path.join("tests", f"test_{test_suite:s}.at")
 
             self._GenerateSectionsFromOperationsFile(
                 operations_file_name,
@@ -4194,6 +4192,18 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 template_mappings,
                 output_filename,
             )
+            # TODO: add support for python_module
+            if test_suite in ("library", "tools"):
+                operations_file_name = os.path.join(f"test_{test_suite:s}.ps1.yaml")
+                output_filename = os.path.join("tests", f"test_{test_suite:s}.ps1")
+
+                self._GenerateSectionsFromOperationsFile(
+                    operations_file_name,
+                    "main",
+                    project_configuration,
+                    template_mappings,
+                    output_filename,
+                )
 
         self._GenerateMakefileAM(
             project_configuration,

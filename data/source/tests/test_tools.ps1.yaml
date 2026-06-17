@@ -1,0 +1,46 @@
+# yaldevtools generator specification.
+---
+identifier: generate_footer
+type: template
+file: test_tools.ps1/footer.ps1
+---
+identifier: generate_header
+type: template
+file: test_tools.ps1/header.ps1
+placeholders:
+- tools_tests
+- tests_option_sets_ps1
+---
+identifier: generate_helper_functions
+type: template
+condition: "tools_test_profiles != []"
+file: test_tools.ps1/helper_functions.ps1
+---
+identifier: generate_init_tests
+type: template
+file: test_tools.ps1/init_tests.ps1
+---
+identifier: generate_run_tests
+type: template
+condition: "tools_tests != ''"
+file: test_tools.ps1/run_tests.ps1
+placeholders:
+- library_name_suffix
+---
+identifier: generate_run_tests_info_tool
+type: template
+condition: "tests_info_tool_profiles_ps1 != ''"
+file: test_tools.ps1/run_tests_info_tool.ps1
+placeholders:
+- library_name_suffix
+- tests_info_tool_profiles_ps1
+---
+identifier: main
+type: group
+operations:
+- generate_header
+- generate_helper_functions
+- generate_init_tests
+- generate_run_tests
+- generate_run_tests_info_tool
+- generate_footer

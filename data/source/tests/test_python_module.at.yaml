@@ -20,6 +20,10 @@ file: test_python_module.at/include_test_inputs.at
 placeholders:
 - python_module_name
 ---
+identifier: generate_init_tests
+type: template
+file: test_python_module.at/init_tests.at
+---
 identifier: generate_run_tests
 type: template
 condition: "python_module_tests != ''"
@@ -42,5 +46,6 @@ operations:
 - generate_include_test_inputs
 - generate_helper_functions
 - generate_helper_functions_with_input
+- generate_init_tests
 - generate_run_tests
 - generate_run_tests_with_input

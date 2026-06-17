@@ -1,0 +1,16 @@
+# yaldevtools generator specification.
+---
+identifier: generate_body
+type: template
+file: test_library.ps1/body.ps1
+placeholders:
+- library_name
+- library_name_suffix
+- library_tests
+- library_tests_with_input
+- tests_option_sets_ps1
+---
+identifier: main
+type: group
+operations:
+- generate_body

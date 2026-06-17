@@ -2,6 +2,7 @@
 ---
 identifier: generate_helper_functions
 type: template
+condition: "tools_test_profiles != []"
 file: test_tools.at/helper_functions.at
 placeholders:
 - library_name_suffix
@@ -29,6 +30,10 @@ input: tools_test_profiles
 placeholder: test_profile
 operations:
 - generate_include_test_inputs
+---
+identifier: generate_init_tests
+type: template
+file: test_tools.at/init_tests.at
 ---
 identifier: generate_run_tests
 type: template
@@ -87,6 +92,7 @@ operations:
 - generate_includes
 - generate_include_test_inputs_tools
 - generate_helper_functions
+- generate_init_tests
 - generate_run_tests
 - generate_run_tests_info_tool
 - generate_run_tests_verify_tool
