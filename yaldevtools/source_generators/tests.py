@@ -3501,6 +3501,10 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if "zlib" in shared_libs:
             shared_libs.remove("zlib")
 
+        tools_test_profiles = list(project_configuration.tests_export_tool_profiles)
+        tools_test_profiles.extend(project_configuration.tests_info_tool_profiles)
+        tools_test_profiles.extend(project_configuration.tests_verify_tool_profiles)
+
         template_mappings = super()._GetTemplateMappings(project_configuration)
 
         template_mappings["library_name_suffix"] = (
@@ -3532,41 +3536,23 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["tests_export_tool_option_sets_ps1"] = " ".join(
             project_configuration.tests_export_tool_option_sets
         )
-        template_mappings["tests_export_tool_option_sets_sh"] = " ".join(
-            [
-                f'"{test_option_set:s}"'
-                for test_option_set in (
-                    project_configuration.tests_export_tool_option_sets
-                )
-            ]
+        template_mappings["tests_export_tool_output"] = (
+            project_configuration.tests_export_tool_output
+        )
+        template_mappings["tests_export_tool_profiles"] = (
+            project_configuration.tests_export_tool_profiles
         )
         template_mappings["tests_export_tool_profiles_ps1"] = ", ".join(
             project_configuration.tests_export_tool_profiles
         )
-        template_mappings["tests_export_tool_profiles_sh"] = " ".join(
-            [
-                f'"{profile:s}"'
-                for profile in (project_configuration.tests_export_tool_profiles)
-            ]
-        )
+
         template_mappings["tests_info_tool_option_sets_ps1"] = " ".join(
             project_configuration.tests_info_tool_option_sets
         )
-        template_mappings["tests_info_tool_option_sets_sh"] = " ".join(
-            [
-                f'"{test_option_set:s}"'
-                for test_option_set in (
-                    project_configuration.tests_info_tool_option_sets
-                )
-            ]
+        template_mappings["tests_info_tool_profiles"] = (
+            project_configuration.tests_info_tool_profiles
         )
         template_mappings["tests_info_tool_profiles_ps1"] = ", ".join(
-            [
-                f'"{profile:s}"'
-                for profile in (project_configuration.tests_info_tool_profiles)
-            ]
-        )
-        template_mappings["tests_info_tool_profiles_sh"] = " ".join(
             [
                 f'"{profile:s}"'
                 for profile in (project_configuration.tests_info_tool_profiles)
@@ -3577,33 +3563,17 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["tests_option_sets_ps1"] = " ".join(
             project_configuration.tests_option_sets
         )
-        template_mappings["tests_option_sets_sh"] = " ".join(
-            [
-                f'"{test_option_set:s}"'
-                for test_option_set in project_configuration.tests_option_sets
-            ]
-        )
         template_mappings["tests_verify_tool_option_sets_ps1"] = " ".join(
             project_configuration.tests_verify_tool_option_sets
         )
-        template_mappings["tests_verify_tool_option_sets_sh"] = " ".join(
-            [
-                f'"{test_option_set:s}"'
-                for test_option_set in (
-                    project_configuration.tests_verify_tool_option_sets
-                )
-            ]
+        template_mappings["tests_verify_tool_profiles"] = (
+            project_configuration.tests_verify_tool_profiles
         )
         template_mappings["tests_verify_tool_profiles_ps1"] = ", ".join(
             project_configuration.tests_verify_tool_profiles
         )
-        template_mappings["tests_verify_tool_profiles_sh"] = " ".join(
-            [
-                f'"{profile:s}"'
-                for profile in (project_configuration.tests_verify_tool_profiles)
-            ]
-        )
         template_mappings["tools_names"] = project_configuration.tools_names
+
         template_mappings["tools_tests"] = " ".join(
             sorted(project_configuration.tools_tests)
         )
@@ -3619,6 +3589,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 for name in sorted(project_configuration.tools_tests_with_input)
             ]
         )
+        template_mappings["tools_test_profiles"] = sorted(tools_test_profiles)
 
         template_mappings["alignment_padding"] = " " * len(
             project_configuration.library_name_suffix
@@ -3940,7 +3911,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if library_tests_with_input_difference:
             logging.info(
                 f"Found additional library tests with input: "
-                f"{library_tests_difference_with_input!s}"
+                f"{library_tests_with_input_difference!s}"
             )
 
         python_module_tests_difference = set(python_module_tests).difference(
@@ -3958,7 +3929,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if python_module_tests_with_input_difference:
             logging.info(
                 f"Found additional Python module tests with input: "
-                f"{python_module_tests_difference_with_input!s}"
+                f"{python_module_tests_with_input_difference!s}"
             )
 
         # TODO: handle non-template files differently.

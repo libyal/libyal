@@ -1,1 +1,1 @@
-include_test_inputs([${tool_name}])
+include_test_inputs([${test_profile}])

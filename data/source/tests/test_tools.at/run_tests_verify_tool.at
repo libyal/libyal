@@ -1,0 +1,5 @@
+
+RUN_TEST_${library_name_suffix:upper_case}VERIFY_AND_COMPARE_STDOUT(
+  [${test_profile}],
+  [],
+  test_inputs_${test_profile})

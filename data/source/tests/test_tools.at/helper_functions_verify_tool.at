@@ -1,0 +1,45 @@
+
+dnl Runs ${library_name_suffix}verify and compares stdout against a reference
+dnl Arguments:
+dnl   test_profile
+dnl   test_options
+dnl   test_inputs
+m4_define([RUN_TEST_${library_name_suffix:upper_case}VERIFY_AND_COMPARE_STDOUT],
+  [m4_foreach_w(
+    [test_input],
+    [$3],
+    [m4_define([option_set], m4_normalize(get_test_input_value([test_input], 1)))
+    m4_define([test_options], m4_normalize(get_test_input_value([test_input], 2)))
+    m4_define([test_file], [_strip(get_test_input_value([test_input], 3))])
+
+    m4_ifblank(option_set, m4_define([option_set], [.]))
+
+    m4_define([sanitized_test_file],
+      [m4_translit([test_file], [[],[],[]"'`\], [______])])
+
+    m4_define([${library_name_suffix}verify_options], m4_normalize($2 test_options))
+
+    m4_ifblank(
+      test_options,
+      [m4_define(
+        [test_description],
+        [${library_name_suffix}verify with input: 'sanitized_test_file'])],
+      [m4_define(
+        [test_description],
+        [${library_name_suffix}verify with options: ']test_options[' and input: 'sanitized_test_file'])])
+
+    AT_SETUP(test_description)
+
+    AT_SKIP_IF(
+      [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
+
+    AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
+    AT_SKIP_IF([test -z "${SED}"])
+    AT_SKIP_IF([test -z "${ZCAT}"])
+
+    TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
+
+    AT_CHECK(ath_fn_run_${library_name_suffix}tools_binary_and_compare_stdout ${library_name_suffix}verify $1 "option_set" ${library_name_suffix}verify_options -q "${TEST_FILE}")
+
+    AT_CLEANUP])
+  ])

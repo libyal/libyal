@@ -59,7 +59,7 @@ For ($$ProfileIndex = 0; $$ProfileIndex -le ($$Profiles.length - 1); $$ProfileIn
 				$$OutputFile = "$${TestFileName}.log"
 			}
 			Invoke-Expression "..\$${TestExecutable} $${OptionsPerProfile} $${Options} $${TestFile} > $${OutputFile}"
-			$$Result = $$LastExitCode
+			$$Result = $$global:LastExitCode
 
 			If ($${Result} -eq $${ExitSuccess})
 			{

@@ -22,6 +22,7 @@ placeholders:
 ---
 identifier: generate_run_tests
 type: template
+condition: "python_module_tests != ''"
 file: test_python_module.at/run_tests.at
 placeholders:
 - python_module_tests

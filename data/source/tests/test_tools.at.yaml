@@ -6,6 +6,13 @@ file: test_tools.at/helper_functions.at
 placeholders:
 - library_name_suffix
 ---
+identifier: generate_helper_functions_verify_tool
+type: template
+condition: "tests_verify_tools_profiles != []"
+file: test_tools.at/helper_functions_verify_tool.at
+placeholders:
+- library_name_suffix
+---
 identifier: generate_includes
 type: template
 file: test_tools.at/includes.at
@@ -14,34 +21,65 @@ identifier: generate_include_test_inputs
 type: template
 file: test_tools.at/include_test_inputs.at
 placeholders:
-- tool_name
+- test_profile
 ---
 identifier: generate_include_test_inputs_tools
 type: sequence
-input: tools_names
-placeholder: tool_name
+input: tools_test_profiles
+placeholder: test_profile
 operations:
 - generate_include_test_inputs
 ---
 identifier: generate_run_tests
 type: template
+condition: "tools_tests_autotest != ''"
 file: test_tools.at/run_tests.at
 placeholders:
 - tools_tests_autotest
 ---
-identifier: generate_run_tests_tool
+identifier: generate_run_tests_export_tool
+type: sequence
+input: tests_export_tool_profiles
+placeholder: test_profile
+operations:
+- generate_run_tests_export_tool_with_profile
+---
+identifier: generate_run_tests_export_tool_with_profile
 type: template
-file: test_tools.at/run_tests_tool.at
+condition: "tests_export_tool_output == 'files'"
+file: test_tools.at/run_tests_export_tool_files.at
+fallback: test_tools.at/run_tests_export_tool.at
 placeholders:
 - library_name_suffix
-- tool_name
+- test_profile
 ---
-identifier: generate_run_tests_tools
+identifier: generate_run_tests_info_tool
 type: sequence
-input: tools_names
-placeholder: tool_name
+input: tests_info_tool_profiles
+placeholder: test_profile
 operations:
-- generate_run_tests_tool
+- generate_run_tests_info_tool_with_profile
+---
+identifier: generate_run_tests_info_tool_with_profile
+type: template
+file: test_tools.at/run_tests_info_tool.at
+placeholders:
+- library_name_suffix
+- test_profile
+---
+identifier: generate_run_tests_verify_tool
+type: sequence
+input: tests_verify_tool_profiles
+placeholder: test_profile
+operations:
+- generate_run_tests_verify_tool_with_profile
+---
+identifier: generate_run_tests_verify_tool_with_profile
+type: template
+file: test_tools.at/run_tests_verify_tool.at
+placeholders:
+- library_name_suffix
+- test_profile
 ---
 identifier: main
 type: group
@@ -50,4 +88,6 @@ operations:
 - generate_include_test_inputs_tools
 - generate_helper_functions
 - generate_run_tests
-- generate_run_tests_tools
+- generate_run_tests_info_tool
+- generate_run_tests_verify_tool
+- generate_run_tests_export_tool

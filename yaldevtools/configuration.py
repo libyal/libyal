@@ -165,6 +165,8 @@ class ProjectConfiguration(BaseConfiguration):
       tests_example_filename2 (str): name of the second test example filename.
       tests_export_tool_option_sets (list[str]): option sets used by the tests of
           the export tool.
+      tests_export_tool_output (str): output of the export tool, such as "files" or
+          "stdout". The default is "stdout".
       tests_export_tool_profiles (list[str]): command line options profiles used
           by the tests of the export tool.
       tests_info_tool_option_sets (list[str]): option sets used by the tests of
@@ -290,6 +292,7 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_profiles = None
         self.tests_input_glob = None
         self.tests_export_tool_option_sets = None
+        self.tests_export_tool_output = None
         self.tests_export_tool_profiles = None
         self.tests_info_tool_option_sets = None
         self.tests_info_tool_profiles = None
@@ -901,6 +904,9 @@ class ProjectConfiguration(BaseConfiguration):
         )
         self.tests_export_tool_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "export_tool_option_sets", default_value=[]
+        )
+        self.tests_export_tool_output = self._GetOptionalConfigValue(
+            config_parser, "tests", "export_tool_output", default_value="stdout"
         )
         self.tests_export_tool_profiles = self._GetOptionalConfigValue(
             config_parser, "tests", "export_tool_profiles", default_value=[]
