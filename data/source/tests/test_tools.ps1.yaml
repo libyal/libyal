@@ -33,6 +33,7 @@ condition: "tests_info_tool_profiles_ps1 != ''"
 file: test_tools.ps1/run_tests_info_tool.ps1
 placeholders:
 - library_name_suffix
+- tests_info_tool_options
 - tests_info_tool_profiles_ps1
 ---
 identifier: main

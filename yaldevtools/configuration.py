@@ -169,6 +169,8 @@ class ProjectConfiguration(BaseConfiguration):
           "stdout". The default is "stdout".
       tests_export_tool_profiles (list[str]): command line options profiles used
           by the tests of the export tool.
+      info_tool_options (str): options necessary for the tests of the info tool, such
+          as "-q" or "-u".
       tests_info_tool_option_sets (list[str]): option sets used by the tests of
           the info tool.
       tests_info_tool_profiles (list[str]): command line options profiles used by
@@ -294,6 +296,7 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_export_tool_option_sets = None
         self.tests_export_tool_output = None
         self.tests_export_tool_profiles = None
+        self.tests_info_tool_options = None
         self.tests_info_tool_option_sets = None
         self.tests_info_tool_profiles = None
         self.tests_verify_tool_option_sets = None
@@ -910,6 +913,9 @@ class ProjectConfiguration(BaseConfiguration):
         )
         self.tests_export_tool_profiles = self._GetOptionalConfigValue(
             config_parser, "tests", "export_tool_profiles", default_value=[]
+        )
+        self.tests_info_tool_options = self._GetOptionalConfigValue(
+            config_parser, "tests", "info_tool_options",
         )
         self.tests_info_tool_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "info_tool_option_sets", default_value=[]

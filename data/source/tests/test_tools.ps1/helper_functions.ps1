@@ -24,8 +24,17 @@ Function CompareWithReference
 
 Function RunToolsBinaryAndCompareStdout
 {
-	param( [string]$$TestExecutablesDirectory, [string]$$ToolName, [string]$$TestProfile, [string[]]$$TestInput )
+	param( [string]$$TestExecutablesDirectory, [string]$$ToolName, [string]$$TestProfile, [string]$$TestOptions, [string[]]$$TestInput )
 
+	$$TestExecutable = "$${TestExecutablesDirectory}\$${ToolName}.exe"
+
+	If (-Not (Test-Path -Path $${TestExecutable} -PathType Leaf))
+	{
+		$$TestDescription = "Missing binary: $${ToolName}"
+		WriteTestResult $${TestDescription} $${ExitCommandNotFound}
+
+		Return $${ExitCommandNotFound}
+	}
 	$$OptionSet = $$TestInput[0]
 	$$Options = $$TestInput[1]
 	$$TestFile = $$TestInput[2]
@@ -50,7 +59,7 @@ Function RunToolsBinaryAndCompareStdout
 
 	Try
 	{
-		Invoke-Expression "..\$${TestExecutablesDirectory}\$${ToolName}.exe $${Options} $${TestFile} > $${OutputFile}"
+		Invoke-Expression "..\$${TestExecutable} $${Options} $${TestFile} > $${OutputFile}"
 		$$Result = $$global:LastExitCode
 
 		If ($${Result} -eq $${ExitSuccess})
@@ -68,7 +77,6 @@ Function RunToolsBinaryAndCompareStdout
 		Remove-Item $${TmpDir} -Force -Recurse
 	}
 	$$TestDescription = "$${ToolName} with input: '$${TestSet}\$${TestFileName}"
-
 	WriteTestResult $${TestDescription} $${Result}
 
 	Return $${Result}

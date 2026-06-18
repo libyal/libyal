@@ -584,12 +584,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if project_configuration.HasTools():
             template_names.append("automake_options.am")
 
-        template_names.append("flags.am")
-
-        if project_configuration.HasPythonModule():
-            template_names.append("python.am")
-
-        template_names.extend(["body.am", "autotests.am"])
+        template_names.extend(["flags.am", "body.am", "autotests.am"])
 
         if project_configuration.HasPythonModule():
             template_names.append("autotests-python.am")
@@ -706,7 +701,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             "test_macros.at",
         ]
         if check_python_scripts:
-            extra_dist.append("$(check_PYTHON_SCRIPTS)")
+            extra_dist.append("$(check_SCRIPTS)")
 
         # if (
         #     project_configuration.library_name != "libcnotify"
@@ -3546,6 +3541,9 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             project_configuration.tests_export_tool_profiles
         )
 
+        template_mappings["tests_info_tool_options"] = (
+            project_configuration.tests_info_tool_options or ""
+        )
         template_mappings["tests_info_tool_option_sets_ps1"] = " ".join(
             project_configuration.tests_info_tool_option_sets
         )

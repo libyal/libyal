@@ -71,6 +71,7 @@ file: test_tools.at/run_tests_info_tool.at
 placeholders:
 - library_name_suffix
 - test_profile
+- tests_info_tool_options
 ---
 identifier: generate_run_tests_verify_tool
 type: sequence

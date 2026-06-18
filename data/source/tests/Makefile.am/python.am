@@ -1,2 +1,0 @@
-check_PYTHONdir = $$(abs_top_builddir)
-

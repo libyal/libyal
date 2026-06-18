@@ -2,6 +2,6 @@ if HAVE_PYTHON_TESTS
 check_AUTOTESTS += test_python_module
 endif
 
-check_PYTHON_SCRIPTS = \
+check_SCRIPTS = \
 ${check_python_scripts}
 

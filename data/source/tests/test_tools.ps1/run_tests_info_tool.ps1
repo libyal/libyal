@@ -9,7 +9,7 @@ For ($$ProfileIndex = 0; $$ProfileIndex -le ($$Profiles.length - 1); $$ProfileIn
 
 	ForEach ($$TestInput in $${TestInputs})
 	{
-		$$Result = RunToolsBinaryAndCompareStdout $${TestExecutablesDirectory} "${library_name_suffix}info" $${TestProfile} $${TestInput}
+		$$Result = RunToolsBinaryAndCompareStdout $${TestExecutablesDirectory} "${library_name_suffix}info" $${TestProfile} "${tests_info_tool_options}" $${TestInput}
 
 		If (($${Result} -ne $${ExitSuccess}) -And ($${Result} -ne $${ExitIgnore}))
 		{

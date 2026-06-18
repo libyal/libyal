@@ -5,6 +5,7 @@
 $$ExitSuccess = 0
 $$ExitFailure = 1
 $$ExitIgnore = 77
+$$ExitCommandNotFound = 127
 
 $$VSDirectories = @(
 	"msvscpp",
@@ -230,14 +231,14 @@ Function RunTestBinary
 {
 	param( [string]$$TestExecutablesDirectory, [string]$$TestName )
 
-	$$TestDescription = "$${TestName}"
 	$$TestExecutable = "$${TestExecutablesDirectory}\$${TestName}.exe"
 
 	If (-Not (Test-Path -Path $${TestExecutable} -PathType Leaf))
 	{
-		WriteTestResult $${TestDescription} $${ExitIgnore}
+		$$TestDescription = "Missing binary: $${TestName}"
+		WriteTestResult $${TestDescription} $${ExitCommandNotFound}
 
-		Return $${ExitIgnore}
+		Return $${ExitCommandNotFound}
 	}
 	$$Output = Invoke-Expression $${TestExecutable}
 	$$Result = $$global:LastExitCode
@@ -246,6 +247,7 @@ Function RunTestBinary
 	{
 		Write-Host $${Output} -foreground Red
 	}
+	$$TestDescription = "$${TestName}"
 	WriteTestResult $${TestDescription} $${Result}
 
 	Return $${Result}
@@ -261,14 +263,14 @@ Function RunTestBinaryWithInput
 
 	$$TestFileName = ($${TestFile} -split '\\')[-2..-1] -join '\'
 
-	$$TestDescription = "$${TestName} with input: '$${TestFileName}"
 	$$TestExecutable = "$${TestExecutablesDirectory}\$${TestName}.exe"
 
 	If (-Not (Test-Path -Path $${TestExecutable} -PathType Leaf))
 	{
-		WriteTestResult $${TestDescription} $${ExitIgnore}
+		$$TestDescription = "Missing binary: $${TestName}"
+		WriteTestResult $${TestDescription} $${ExitCommandNotFound}
 
-		Return $${ExitIgnore}
+		Return $${ExitCommandNotFound}
 	}
 	$$Output = Invoke-Expression "$${TestExecutable} $${Options} $${TestFile}"
 	$$Result = $$global:LastExitCode
@@ -277,6 +279,7 @@ Function RunTestBinaryWithInput
 	{
 		Write-Host $${Output} -foreground Red
 	}
+	$$TestDescription = "$${TestName} with input: '$${TestFileName}"
 	WriteTestResult $${TestDescription} $${Result}
 
 	Return $${Result}

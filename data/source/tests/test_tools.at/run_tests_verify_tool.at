@@ -1,5 +1,6 @@
 
-RUN_TEST_${library_name_suffix:upper_case}VERIFY_AND_COMPARE_STDOUT(
+RUN_TEST_${library_name_suffix:upper_case}TOOL_AND_COMPARE_STDOUT(
+  [${library_name_suffix}verify],
   [${test_profile}],
-  [],
+  [-q],
   test_inputs_${test_profile})
