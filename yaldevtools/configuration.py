@@ -915,7 +915,9 @@ class ProjectConfiguration(BaseConfiguration):
             config_parser, "tests", "export_tool_profiles", default_value=[]
         )
         self.tests_info_tool_options = self._GetOptionalConfigValue(
-            config_parser, "tests", "info_tool_options",
+            config_parser,
+            "tests",
+            "info_tool_options",
         )
         self.tests_info_tool_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "info_tool_option_sets", default_value=[]

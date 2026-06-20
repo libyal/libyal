@@ -1737,7 +1737,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         options = self._GenerateOptions(mount_tool_options)
 
         source_type = project_configuration.mount_tool_source_type
-        description = project_configuration.mount_tool_source_description_long
+        description = project_configuration.mount_tool_source_description_long or ""
         options.append(f'\t\t{{ 0, "{source_type:s}", "{description:s}" }},')
 
         options.append(

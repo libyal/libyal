@@ -185,7 +185,7 @@ class WikiPageGenerator:
             dependencies.append("libssl-dev")
 
         if "fuse" in project_configuration.tools_build_dependencies:
-            dependencies.append("libfuse-dev")
+            dependencies.append("libfuse3-dev")
 
         if project_configuration.HasPythonModule():
             dependencies.extend(["python3-dev", "python3-setuptools"])
@@ -291,7 +291,7 @@ class WikiPageGenerator:
             dependencies.append("openssl-devel")
 
         if "fuse" in project_configuration.tools_build_dependencies:
-            dependencies.append("fuse-devel")
+            dependencies.append("fuse3-devel")
 
         if project_configuration.HasPythonModule():
             dependencies.append("python3-devel")
@@ -576,8 +576,8 @@ class WikiPageGenerator:
                 f"\n"
                 f"If you want to be able to use {mount_tool_name:s}, make sure that:\n"
                 f"\n"
-                f"* on a Linux system you have libfuse-dev (Debian-based) or "
-                f"fuse-devel (RedHat-based) installed.\n"
+                f"* on a Linux system you have libfuse3-dev (Debian-based) or "
+                f"fuse3-devel (RedHat-based) installed.\n"
                 f"* on a macOS system, you have OSXFuse (http://osxfuse.github.com/) "
                 f"installed.\n"
             )

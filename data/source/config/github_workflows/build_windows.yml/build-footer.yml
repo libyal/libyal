@@ -5,7 +5,7 @@
       run: |
         .\synclibs.ps1 -UseHead
         .\autogen.ps1
-        .\build.ps1 -VisualStudioVersion 2022 -Configuration Release -Platform x64 -PythonPath $${{ env.pythonLocation }} -VSToolsOptions "--extend-with-x64 --no-python-dll"
+        .\build.ps1 -VisualStudioVersion $${{ matrix.visual_studio_version }} -Configuration Release -Platform x64 -PythonPath $${{ env.pythonLocation }} -VSToolsOptions "--extend-with-x64 --no-python-dll"
     - name: Run tests
       run: |
         .\runtests.ps1

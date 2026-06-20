@@ -3,3 +3,17 @@
     strategy:
       matrix:
         include:
+        - os: windows-11-arm
+          visual_studio_version: 2022
+        - os: windows-2022
+          visual_studio_version: 2022
+        - os: windows-2025
+          visual_studio_version: 2026
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+    - name: Install build dependencies
+      run: |
+        git clone https://github.com/libyal/vstools.git ..\vstools

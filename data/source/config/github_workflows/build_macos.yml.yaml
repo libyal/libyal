@@ -9,10 +9,6 @@ type: template
 condition: "'fuse' in tools_build_dependencies"
 file: build_macos.yml/build_macfuse.yml
 ---
-identifier: generate_build_pkgbuild
-type: template
-file: build_macos.yml/build_pkgbuild.yml
----
 identifier: generate_build_python_module
 type: template
 condition: "'python_bindings' in project_features"
@@ -24,4 +20,3 @@ operations:
 - generate_build
 - generate_build_macfuse
 - generate_build_python_module
-- generate_build_pkgbuild

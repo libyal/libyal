@@ -13,7 +13,11 @@ override_dh_auto_configure:
 
 .PHONY: override_dh_install
 override_dh_install:
-	dh_install --fail-missing -X.la
+	dh_install -X.la
+
+.PHONY: override_dh_missing
+override_dh_missing:
+	dh_missing -X.la --fail-missing
 
 .PHONY: override_dh_strip
 override_dh_strip:

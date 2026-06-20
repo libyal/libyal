@@ -35,9 +35,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         "brew_build_dependencies": "_GetBrewBuildDependencies",
         "cygwin_build_dependencies": "_GetCygwinBuildDependencies",
         "dpkg_build_dependencies": "_GetDpkgBuildDependencies",
+        "dpkg_package_dependencies": "_GetDpkgPackageDependencies",
         "freebsd_build_dependencies": "_GetFreeBSDBuildDependencies",
         "msys2_mingw_build_dependencies": "_GetMSYS2MinGWBuildDependencies",
         "python_module_development_status": "_GetPythonModuleDevelopmentStatus",
+        "rpm_package_dependencies": "_GetRpmPackageDependencies",
     }
 
     def _GenerateACIncludeM4(self, project_configuration, template_mappings):
@@ -239,7 +241,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 Dependency(is_local=True, name=name)
                 for name in makefile_am_file.tools_dependencies
             ]
-
             if "uuid" in project_configuration.tools_build_dependencies:
                 dependency = Dependency(name="libuuid")
                 tools_dependencies.append(dependency)
@@ -820,7 +821,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             "libtool",
             "pkg-config",
         ]
-
         if (
             "crypto" in library_build_dependencies
             or "crypto" in tools_build_dependencies
@@ -901,7 +901,20 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
           namespace (dict[str, object])): expression namespace.
 
         Returns:
-          list[str]: dpkg build dependencies in alphabetical order.
+          str: dpkg build dependencies.
+        """
+        dpkg_build_dependencies = self._GetDpkgBuildDependenciesAsList(namespace)
+
+        return " ".join(sorted(dpkg_build_dependencies))
+
+    def _GetDpkgBuildDependenciesAsList(self, namespace):
+        """Retrieves the dpkg build dependencies.
+
+        Args:
+          namespace (dict[str, object])): expression namespace.
+
+        Returns:
+          list[str]: dpkg build dependencies.
         """
         library_build_dependencies = (
             namespace.get("library_build_dependencies", None) or []
@@ -940,7 +953,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         if "sgutils" in library_build_dependencies:
             dpkg_build_dependencies.append("libsgutils2-dev")
 
-        return " ".join(sorted(dpkg_build_dependencies))
+        return dpkg_build_dependencies
 
     def _GetDpkgBuildDependenciesDpkgControl(self, project_configuration):
         """Retrieves the dpkg build dependencies for the dpkg/control file.
@@ -951,12 +964,16 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         Returns:
           list[str]: dpkg build dependencies.
         """
-        dpkg_build_dependencies = ["debhelper (>= 9)", "dh-autoreconf"]
+        dpkg_build_dependencies = ["debhelper (>= 13)", "dh-autoreconf"]
 
         if project_configuration.HasPythonModule():
             dpkg_build_dependencies.append("dh-python")
 
-        dpkg_build_dependencies.append("pkg-config")
+        if "fuse" in project_configuration.tools_build_dependencies:
+            dpkg_build_dependencies.append("libfuse3-dev")
+
+        if "sgutils" in project_configuration.library_build_dependencies:
+            dpkg_build_dependencies.append("libsgutils2-dev")
 
         if project_configuration.HasDependencyZlib():
             dpkg_build_dependencies.append("zlib1g-dev")
@@ -966,14 +983,10 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         ):
             dpkg_build_dependencies.append("libssl-dev")
 
+        dpkg_build_dependencies.append("pkg-config")
+
         if project_configuration.HasPythonModule():
             dpkg_build_dependencies.extend(["python3-dev", "python3-setuptools"])
-
-        if "fuse" in project_configuration.tools_build_dependencies:
-            dpkg_build_dependencies.append("libfuse-dev")
-
-        if "sgutils" in project_configuration.library_build_dependencies:
-            dpkg_build_dependencies.append("libsgutils2-dev")
 
         if project_configuration.dpkg_build_dependencies:
             dpkg_build_dependencies.extend(
@@ -981,6 +994,26 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             )
 
         return dpkg_build_dependencies
+
+    def _GetDpkgPackageDependencies(self, namespace):
+        """Retrieves the dpkg packaging dependencies.
+
+        Args:
+          namespace (dict[str, object])): expression namespace.
+
+        Returns:
+          str: dpkg packaging dependencies.
+        """
+        project_features = namespace.get("project_features", None) or []
+
+        dpkg_package_dependencies = self._GetDpkgBuildDependenciesAsList(namespace)
+        dpkg_package_dependencies.extend(
+            ["autotools-dev", "debhelper", "dh-autoreconf", "dh-python", "fakeroot"]
+        )
+        if "python_bindings" in project_features:
+            dpkg_package_dependencies.extend(["python3-dev", "python3-setuptools"])
+
+        return " ".join(sorted(dpkg_package_dependencies))
 
     def _GetFreeBSDBuildDependencies(self, namespace):
         """Retrieves the FreeBSD build dependencies.
@@ -1089,6 +1122,53 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             return "4 - Beta"
 
         return "5 - Production/Stable"
+
+    def _GetRpmPackageDependencies(self, namespace):
+        """Retrieves the rpm packaging dependencies.
+
+        Args:
+          namespace (dict[str, object])): expression namespace.
+
+        Returns:
+          list[str]: rpm packaging dependencies.
+        """
+        library_build_dependencies = (
+            namespace.get("library_build_dependencies", None) or []
+        )
+        tools_build_dependencies = namespace.get("tools_build_dependencies", None) or []
+        project_features = namespace.get("project_features", None) or []
+
+        rpm_package_dependencies = [
+            "autoconf",
+            "automake",
+            "gettext-devel",
+            "git",
+            "libtool",
+            "make",
+            "pkg-config",
+            "rpm-build",
+        ]
+        if "yacc" in library_build_dependencies:
+            rpm_package_dependencies.append("byacc")
+        if "lex" in library_build_dependencies:
+            rpm_package_dependencies.append("flex")
+
+        if "zlib" in library_build_dependencies:
+            rpm_package_dependencies.append("zlib-devel")
+
+        if (
+            "crypto" in library_build_dependencies
+            or "crypto" in tools_build_dependencies
+        ):
+            rpm_package_dependencies.append("openssl-devel")
+
+        if "python_bindings" in project_features:
+            rpm_package_dependencies.extend(["python3-devel", "python3-setuptools"])
+
+        if "fuse" in tools_build_dependencies:
+            rpm_package_dependencies.append("fuse3-devel")
+
+        return " ".join(sorted(rpm_package_dependencies))
 
     def Generate(self, project_configuration, output_writer):
         """Generates configuration files.
@@ -1215,58 +1295,24 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         del template_mappings["coverage_linux_configure_options"]
         del template_mappings["coverage_cygwin_configure_options"]
 
-        operations_file_name = os.path.join("github_workflows", "build_linux.yml.yaml")
-        output_filename = os.path.join(".github", "workflows", "build_linux.yml")
-
-        self._GenerateSectionsFromOperationsFile(
-            operations_file_name,
-            "main",
-            project_configuration,
-            template_mappings,
-            output_filename,
-        )
-        operations_file_name = os.path.join(
-            "github_workflows", "build_freebsd.yml.yaml"
-        )
-        output_filename = os.path.join(".github", "workflows", "build_freebsd.yml")
-
-        self._GenerateSectionsFromOperationsFile(
-            operations_file_name,
-            "main",
-            project_configuration,
-            template_mappings,
-            output_filename,
-        )
-        operations_file_name = os.path.join("github_workflows", "build_macos.yml.yaml")
-        output_filename = os.path.join(".github", "workflows", "build_macos.yml")
-
-        self._GenerateSectionsFromOperationsFile(
-            operations_file_name,
-            "main",
-            project_configuration,
-            template_mappings,
-            output_filename,
-        )
+        github_actions = [
+            "build_freebsd",
+            "build_linux",
+            "build_macos",
+            "build_package",
+        ]
         if os.path.isdir("ossfuzz"):
-            operations_file_name = os.path.join(
-                "github_workflows", "build_ossfuzz.yml.yaml"
-            )
-            output_filename = os.path.join(".github", "workflows", "build_ossfuzz.yml")
-
-            self._GenerateSectionsFromOperationsFile(
-                operations_file_name,
-                "main",
-                project_configuration,
-                template_mappings,
-                output_filename,
-            )
-
+            github_actions.append("build_ossfuzz")
         if project_configuration.HasPythonModule():
-            operations_file_name = os.path.join(
-                "github_workflows", "build_wheel.yml.yaml"
-            )
-            output_filename = os.path.join(".github", "workflows", "build_wheel.yml")
+            github_actions.append("build_wheel")
 
+        for github_action in github_actions:
+            operations_file_name = os.path.join(
+                "github_workflows", f"{github_action:s}.yml.yaml"
+            )
+            output_filename = os.path.join(
+                ".github", "workflows", f"{github_action:s}.yml"
+            )
             self._GenerateSectionsFromOperationsFile(
                 operations_file_name,
                 "main",
@@ -1275,7 +1321,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 output_filename,
             )
 
-        build_matrix = ["windows-11-arm", "windows-2022"]
         build_cygwin_matrix = [""]
 
         if include_header_file and include_header_file.have_wide_character_type:
@@ -1292,7 +1337,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 "--disable-nls --disable-shared-libs --enable-python"
             )
 
-        template_mappings["build_matrix"] = build_matrix
         template_mappings["build_cygwin_matrix"] = build_cygwin_matrix
         template_mappings["build_msys2_mingw_matrix"] = build_msys2_mingw_matrix
 
@@ -1310,7 +1354,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         )
         del template_mappings["build_msys2_mingw_matrix"]
         del template_mappings["build_cygwin_matrix"]
-        del template_mappings["build_matrix"]
 
         self._GenerateAppVeyorYML(project_configuration, template_mappings)
 

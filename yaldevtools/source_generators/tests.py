@@ -759,8 +759,11 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         if project_configuration.HasPythonModule():
             autotest_files = ["package.m4", "test_python_module.at"]
             if project_configuration.python_module_tests_with_input:
-                autotest_files.append(
-                    f"test_inputs_{project_configuration.python_module_name}.at"
+                autotest_files.extend(
+                    [
+                        f"test_inputs_{project_configuration.python_module_name}.at",
+                        "test_macros.at",
+                    ]
                 )
             autotest_rules.append(("test_python_module", autotest_files))
 
@@ -4171,7 +4174,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             "main",
             project_configuration,
             template_mappings,
-            "atlocal.in",
+            os.path.join("tests", "atlocal.in"),
         )
         test_suites = ["library", "manpages"]
         if project_configuration.HasPythonModule():

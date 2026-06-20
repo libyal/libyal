@@ -24,6 +24,11 @@ identifier: generate_init_tests
 type: template
 file: test_python_module.at/init_tests.at
 ---
+identifier: generate_init_tests_with_input
+type: template
+condition: "python_module_tests_with_input != ''"
+file: test_python_module.at/init_tests_with_input.at
+---
 identifier: generate_run_tests
 type: template
 condition: "python_module_tests != ''"
@@ -47,5 +52,6 @@ operations:
 - generate_helper_functions
 - generate_helper_functions_with_input
 - generate_init_tests
+- generate_init_tests_with_input
 - generate_run_tests
 - generate_run_tests_with_input

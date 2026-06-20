@@ -1,0 +1,13 @@
+# yaldevtools generator specification.
+---
+identifier: generate_build
+type: template
+file: build_package.yml/build.yml
+placeholders:
+- dpkg_package_dependencies
+- rpm_package_dependencies
+---
+identifier: main
+type: group
+operations:
+- generate_build

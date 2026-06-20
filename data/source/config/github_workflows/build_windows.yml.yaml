@@ -47,20 +47,6 @@ type: template
 condition: "'zlib' in library_build_dependencies"
 file: build_windows.yml/build_install-zlib.yml
 ---
-identifier: generate_build_matrix
-type: sequence
-condition: "build_matrix != []"
-input: build_matrix
-placeholder: build_matrix_entry
-operations:
-- generate_build_matrix_entry
----
-identifier: generate_build_matrix_entry
-type: template
-file: build_windows.yml/build-matrix_entry.yml
-placeholders:
-- build_matrix_entry
----
 identifier: generate_build_msys2_mingw_footer
 type: template
 file: build_windows.yml/build_msys2_mingw-footer.yml
@@ -85,10 +71,6 @@ file: build_windows.yml/build_msys2_mingw-matrix_entry.yml
 placeholders:
 - build_msys2_mingw_matrix_entry
 ---
-identifier: generate_build_steps
-type: template
-file: build_windows.yml/build-steps.yml
----
 identifier: generate_header
 type: template
 file: build_windows.yml/header.yml
@@ -98,8 +80,6 @@ type: group
 operations:
 - generate_header
 - generate_build_header
-- generate_build_matrix
-- generate_build_steps
 - generate_build_install_winflexbison
 - generate_build_install_zlib
 - generate_build_install_bzip2
