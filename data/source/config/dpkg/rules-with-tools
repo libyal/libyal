@@ -15,6 +15,10 @@ override_dh_auto_configure:
 override_dh_install:
 	dh_install -X.la
 
+.PHONY: override_dh_missing
+override_dh_missing:
+	dh_missing -X.la --fail-missing
+
 .PHONY: override_dh_strip
 override_dh_strip:
 ifeq (,$$(filter nostrip,$$(DEB_BUILD_OPTIONS)))

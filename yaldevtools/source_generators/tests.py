@@ -3559,8 +3559,6 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
                 for profile in (project_configuration.tests_info_tool_profiles)
             ]
         )
-        template_mappings["tests_input_glob"] = project_configuration.tests_input_glob
-
         template_mappings["tests_option_sets_ps1"] = " ".join(
             project_configuration.tests_option_sets
         )

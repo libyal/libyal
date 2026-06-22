@@ -2,7 +2,7 @@
 ---
 identifier: generate_body
 type: template
-file: synctestdata.sh/body.sh
+file: synctestdata.ps1/body.ps1
 placeholders:
 - test_data_files
 - test_data_repository
@@ -10,12 +10,12 @@ placeholders:
 ---
 identifier: generate_header
 type: template
-file: synctestdata.sh/header.sh
+file: synctestdata.ps1/header.ps1
 ---
 identifier: generate_test_files
 type: template
 condition: "test_data_files != ''"
-file: synctestdata.sh/test_files.sh
+file: synctestdata.ps1/test_files.ps1
 placeholders:
 - test_data_files
 ---
@@ -27,24 +27,29 @@ operations:
 - generate_test_profile_start
 - generate_test_profile_glob
 - generate_test_profile_options
+- generate_test_profile_end
+---
+identifier: generate_test_profile_end
+type: template
+file: synctestdata.ps1/test_profile-end.ps1
 ---
 identifier: generate_test_profile_glob
 type: template
 condition: "test_profile.glob != '*'"
-file: synctestdata.sh/test_profile-glob.sh
+file: synctestdata.ps1/test_profile-glob.ps1
 placeholders:
 - test_profile
 ---
 identifier: generate_test_profile_options
 type: template
 condition: "test_profile.options != ''"
-file: synctestdata.sh/test_profile-options.sh
+file: synctestdata.ps1/test_profile-options.ps1
 placeholders:
 - test_profile
 ---
 identifier: generate_test_profile_start
 type: template
-file: synctestdata.sh/test_profile-start.sh
+file: synctestdata.ps1/test_profile-start.ps1
 placeholders:
 - test_profile
 ---

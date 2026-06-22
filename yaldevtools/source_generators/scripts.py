@@ -6,6 +6,27 @@ import stat
 from yaldevtools.source_generators import interface
 
 
+class TestProfile:
+    """Test profile.
+
+    Attributes:
+      glob (str): glob of the input files.
+      name (str): name of the profile.
+      options (str): options.
+    """
+
+    def __init__(self, name):
+        """Initializes a test profile.
+
+        Args:
+          name (str): name of the profile.
+        """
+        super().__init__()
+        self.glob = "*"
+        self.name = name
+        self.options = ""
+
+
 class ScriptFileGenerator(interface.SourceFileGenerator):
     """Script files generator."""
 
@@ -40,13 +61,6 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
         template_mappings["local_libs"] = " ".join(sorted(makefile_am_file.libraries))
         template_mappings["shared_libs"] = " ".join(shared_libs)
 
-        template_mappings["test_data_files"] = " ".join(
-            project_configuration.test_data_files
-        )
-        template_mappings["test_data_path"] = project_configuration.test_data_path
-        template_mappings["test_data_repository"] = (
-            project_configuration.test_data_repository
-        )
         for directory_entry in os.listdir(self._templates_path):
             template_filename = os.path.join(self._templates_path, directory_entry)
             if not os.path.isfile(template_filename):
@@ -60,7 +74,6 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
 
             if directory_entry in (
                 "syncbzip2.ps1",
-                "synctestdata.ps1",
                 "syncwinflexbison.ps1",
                 "synczlib.ps1",
             ):
@@ -81,10 +94,48 @@ class ScriptFileGenerator(interface.SourceFileGenerator):
                 os.chmod(output_filename, stat_info.st_mode | stat.S_IEXEC)
 
         if os.path.exists("synctestdata.sh"):
-            self._GenerateSectionsFromOperationsFile(
-                "synctestdata.sh.yaml",
-                "main",
-                project_configuration,
-                template_mappings,
-                "synctestdata.sh",
+            test_profiles = []
+
+            for index, name in enumerate(project_configuration.tests_profiles):
+                glob_per_profile = ""
+                options_per_profile = ""
+                if project_configuration.tests_glob_per_profile:
+                    glob_per_profile = project_configuration.tests_glob_per_profile[
+                        index
+                    ]
+                if project_configuration.tests_options_per_profile:
+                    options_per_profile = (
+                        project_configuration.tests_options_per_profile[index]
+                    )
+
+                if glob_per_profile or options_per_profile:
+                    test_profile = TestProfile(name)
+                    if glob_per_profile:
+                        test_profile.glob = glob_per_profile
+                    if options_per_profile:
+                        test_profile.options = options_per_profile
+
+                    test_profiles.append(test_profile)
+
+            template_mappings["test_data_files"] = " ".join(
+                project_configuration.test_data_files
             )
+            template_mappings["test_data_path"] = project_configuration.test_data_path
+            template_mappings["test_data_repository"] = (
+                project_configuration.test_data_repository
+            )
+            template_mappings["test_profiles"] = test_profiles
+
+            for extension in ("ps1", "sh"):
+                self._GenerateSectionsFromOperationsFile(
+                    f"synctestdata.{extension:s}.yaml",
+                    "main",
+                    project_configuration,
+                    template_mappings,
+                    f"synctestdata.{extension:s}",
+                )
+
+            del template_mappings["test_data_files"]
+            del template_mappings["test_data_path"]
+            del template_mappings["test_data_repository"]
+            del template_mappings["test_profiles"]

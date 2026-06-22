@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # pylint: disable=invalid-name
-"""Script to generate documenation based on dtFabric format definitions."""
+"""Script to generate documentation based on dtFabric format definitions."""
 
 import argparse
 import datetime

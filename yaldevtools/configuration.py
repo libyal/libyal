@@ -140,7 +140,7 @@ class ProjectConfiguration(BaseConfiguration):
       project_authors (str): authors of the project.
       project_data_format (str): data format supported by the project.
       project_description (str): description of the project.
-      project_documenation_url (str): URL of the documentation of the project.
+      project_documentation_url (str): URL of the documentation of the project.
       project_downloads_url (str): URL of the downloads of the project.
       project_features (list[str]): features of the project.
       project_git_url (str): URL of the git repository of the project.
@@ -175,10 +175,11 @@ class ProjectConfiguration(BaseConfiguration):
           the info tool.
       tests_info_tool_profiles (list[str]): command line options profiles used by
           the tests of the info tool.
-      tests_input_glob (str): input files glob used by the tests.
+      tests_glob_per_profile (list[str]): input files globs used by the tests, per
+          profile.
       tests_option_sets (list[str]): option sets used by the tests.
-      tests_options_per_profile (list[str]): command line options per
-          profile by the tests.
+      tests_options_per_profile (list[str]): command line options used by the tests,
+          per profile.
       tests_profiles (list[str]): names of the test profiles.
       tests_verify_tool_option_sets (list[str]): option sets used by the tests of
           the verify tool.
@@ -289,10 +290,10 @@ class ProjectConfiguration(BaseConfiguration):
 
         # Tests configuration.
         self.tests_authors = None
-        self.tests_options_per_profile = None
+        self.tests_glob_per_profile = None
         self.tests_option_sets = None
+        self.tests_options_per_profile = None
         self.tests_profiles = None
-        self.tests_input_glob = None
         self.tests_export_tool_option_sets = None
         self.tests_export_tool_output = None
         self.tests_export_tool_profiles = None
@@ -893,6 +894,9 @@ class ProjectConfiguration(BaseConfiguration):
         self.tests_authors = self._GetOptionalConfigValue(
             config_parser, "tests", "authors", default_value=self.project_authors
         )
+        self.tests_glob_per_profile = self._GetOptionalConfigValue(
+            config_parser, "tests", "glob_per_profile", default_value=[]
+        )
         self.tests_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "option_sets", default_value=[]
         )
@@ -901,9 +905,6 @@ class ProjectConfiguration(BaseConfiguration):
         )
         self.tests_profiles = self._GetOptionalConfigValue(
             config_parser, "tests", "profiles", default_value=[]
-        )
-        self.tests_input_glob = self._GetOptionalConfigValue(
-            config_parser, "tests", "input_glob", default_value="*"
         )
         self.tests_export_tool_option_sets = self._GetOptionalConfigValue(
             config_parser, "tests", "export_tool_option_sets", default_value=[]
