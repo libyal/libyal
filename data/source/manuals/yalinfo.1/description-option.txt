@@ -1,0 +1,2 @@
+.It Fl ${option.identifier} Ar ${option.name}
+${option_help_text}

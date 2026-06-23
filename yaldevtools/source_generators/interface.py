@@ -7,6 +7,7 @@ import os
 import string
 import time
 
+from yaldevtools import resources
 from yaldevtools import source_file
 from yaldevtools import source_formatter
 from yaldevtools import yaml_operations_file
@@ -737,7 +738,6 @@ class SourceFileGenerator(BaseSourceFileGenerator):
                 project_configuration.library_name,
                 "Makefile.am",
             )
-
             if os.path.exists(self._library_makefile_am_path):
                 self._library_makefile_am_file = source_file.LibraryMakefileAMFile(
                     self._library_makefile_am_path
@@ -745,6 +745,42 @@ class SourceFileGenerator(BaseSourceFileGenerator):
                 self._library_makefile_am_file.Read(project_configuration)
 
         return self._library_makefile_am_file
+
+    def _GetInfoToolOptions(self, project_configuration, info_tool_name):
+        """Retrieves the info tool options.
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          info_tool_name (str): name of the info tool.
+
+        Returns:
+          list[ToolOption]: info tool options.
+        """
+        # TODO: sort options with lower case before upper case.
+        info_tool_options = []
+
+        if project_configuration.HasInfoToolsFeatureCodepage():
+            option = resources.ToolOption(
+                "c",
+                "codepage",
+                (
+                    "codepage of ASCII strings, options: ascii, windows-874, "
+                    "windows-932, windows-936, windows-949, windows-950, "
+                    "windows-1250, windows-1251, windows-1252 (default), "
+                    "windows-1253, windows-1254, windows-1255, windows-1256, "
+                    "windows-1257 or windows-1258"
+                ),
+            )
+            info_tool_options.append(option)
+
+        info_tool_options.extend(
+            [
+                resources.ToolOption("h", "", "shows this help"),
+                resources.ToolOption("v", "", "verbose output to stderr"),
+                resources.ToolOption("V", "", "print version"),
+            ]
+        )
+        return info_tool_options
 
     def _GetMainMakefileAM(self, project_configuration):
         """Retrieves the main Makefile.am file.
@@ -765,6 +801,147 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         makefile_am_file.Read(project_configuration)
 
         return makefile_am_file
+
+    def _GetMountToolOptions(self, project_configuration, mount_tool_name):
+        """Retrieves the mount tool options.
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          mount_tool_name (str): name of the mount tool.
+
+        Returns:
+          list[ToolOption]: mount tool options.
+        """
+        # TODO: sort options with lower case before upper case.
+        mount_tool_options = []
+
+        if project_configuration.HasMountToolsFeatureCodepage():
+            option = resources.ToolOption(
+                "c",
+                "codepage",
+                (
+                    "codepage of ASCII strings, options: ascii, windows-874, "
+                    "windows-932, windows-936, windows-949, windows-950, windows-1250, "
+                    "windows-1251, windows-1252 (default), windows-1253, windows-1254, "
+                    "windows-1255, windows-1256, windows-1257 or windows-1258"
+                ),
+            )
+            mount_tool_options.append(option)
+
+        if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
+            option = resources.ToolOption(
+                "e",
+                "plist_path",
+                ("specify the path of the EncryptedRoot.plist.wipekey file"),
+            )
+            mount_tool_options.append(option)
+
+        # TODO: set option via configuration
+        if project_configuration.library_name == "libfsapfs":
+            option = resources.ToolOption(
+                "f",
+                "file_system_index",
+                ('specify a specific file system or \\"all\\"'),
+            )
+            mount_tool_options.append(option)
+
+        # TODO: set option via configuration
+        if project_configuration.library_name == "libewf":
+            option = resources.ToolOption(
+                "f",
+                "format",
+                (
+                    "specify the input format, options: raw (default), files "
+                    "(restricted to logical volume files)"
+                ),
+            )
+            mount_tool_options.append(option)
+
+        mount_tool_options.append(resources.ToolOption("h", "", "shows this help"))
+
+        if project_configuration.HasMountToolsFeatureKeys():
+            # TODO: set keys option description via configuration
+            if project_configuration.library_name == "libbde":
+                option = resources.ToolOption(
+                    "k",
+                    "keys",
+                    (
+                        "specify the full volume encryption key and tweak key "
+                        "formatted in base16 and separated by a : character e.g. "
+                        "FVEK:TWEAK"
+                    ),
+                )
+            elif project_configuration.library_name == "libfvde":
+                option = resources.ToolOption(
+                    "k",
+                    "keys",
+                    ("specify the volume master key formatted in base16"),
+                )
+            elif project_configuration.library_name in ("libluksde", "libqcow"):
+                option = resources.ToolOption(
+                    "k", "keys", "specify the key formatted in base16"
+                )
+
+            mount_tool_options.append(option)
+
+        if project_configuration.HasMountToolsFeatureOffset():
+            mount_tool_source_type = project_configuration.mount_tool_source_type
+            option = resources.ToolOption(
+                "o",
+                "offset",
+                f"specify the {{{mount_tool_source_type:s}}} offset in bytes",
+            )
+            mount_tool_options.append(option)
+
+        if project_configuration.HasMountToolsFeaturePassword():
+            option = resources.ToolOption(
+                "p", "password", "specify the password/passphrase"
+            )
+
+            mount_tool_options.append(option)
+
+        if project_configuration.HasMountToolsFeatureRecoveryPassword():
+            option = resources.ToolOption(
+                "r",
+                "recovery_password",
+                "specify the recovery password/passphrase",
+            )
+            mount_tool_options.append(option)
+
+        if project_configuration.HasMountToolsFeatureStartupKey():
+            option = resources.ToolOption(
+                "s",
+                "startup_key_path",
+                (
+                    "specify the path of the file containing the startup key. "
+                    "Typically this file has the extension .BEK"
+                ),
+            )
+            mount_tool_options.append(option)
+
+        mount_tool_options.extend(
+            [
+                resources.ToolOption(
+                    "v",
+                    "",
+                    (
+                        f"verbose output to stderr, while {mount_tool_name:s} will "
+                        f"remain running in the foreground"
+                    ),
+                ),
+                resources.ToolOption("V", "", "print version"),
+                resources.ToolOption(
+                    "X",
+                    "extended_options",
+                    "extended options to pass to sub system",
+                    guard=(
+                        "defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || "
+                        "defined( HAVE_LIBOSXFUSE )"
+                    ),
+                ),
+            ]
+        )
+        return mount_tool_options
 
     def _GetTemplateMappings(self, project_configuration, authors_separator=", "):
         """Retrieves the template mappings.

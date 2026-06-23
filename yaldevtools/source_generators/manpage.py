@@ -5,12 +5,57 @@ import logging
 import os
 import re
 import shutil
+import textwrap
 import time
 
 from yaldevtools.source_generators import interface
 
 
-class LibraryManPageGenerator(interface.SourceFileGenerator):
+class BaseManPageGenerator(interface.SourceFileGenerator):
+    """Man page file generator."""
+
+    def _CheckForChanges(self, original_filename, output_filename):
+        """Compares the generated man page with the original one.
+
+        Args:
+          original_filename (str): filename of the original man page.
+          output_filename (str): filename of the generated man page.
+        """
+        with open(original_filename, "r", encoding="utf8") as backup_file:
+            backup_lines = backup_file.readlines()
+
+        with open(output_filename, "r", encoding="utf8") as output_file:
+            output_lines = output_file.readlines()
+
+        diff_lines = list(difflib.ndiff(backup_lines[1:], output_lines[1:]))
+        diff_lines = [line for line in diff_lines if line[0] in ("-", "+")]
+
+        # Check if there are changes besides the date.
+        return bool(diff_lines)
+
+    def _GetBackupFilename(self, output_filename):
+        """Retrieves a filename for the backup of the original man page.
+
+        Args:
+          output_filename (str): filename of the generated man page.
+
+        Returns:
+          str: backup filename.
+        """
+        pid = os.getpid()
+        return f"{output_filename:s}.{pid:d}"
+
+    def _GetHeaderDateString(self):
+        """Retrieves the header date string.
+
+        Returns:
+          str: header date string.
+        """
+        date_string = time.strftime("%B %d, %Y", time.gmtime())
+        return date_string.replace(" 0", "  ")
+
+
+class LibraryManPageGenerator(BaseManPageGenerator):
     """Library man page file (libyal.3) generator."""
 
     def _GenerateLibraryManPage(
@@ -25,20 +70,17 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
 
         Args:
           project_configuration (ProjectConfiguration): project configuration.
-          template_mappings (dict[str, str]): template mappings, where the key
-              maps to the name of a template variable.
-          include_header_file (LibraryIncludeHeaderFile): library include header
-              file.
+          template_mappings (dict[str, str]): template mappings, where the key maps to
+              the name of a template variable.
+          include_header_file (LibraryIncludeHeaderFile): library include header file.
           output_writer (OutputWriter): output writer.
           output_filename (str): path of the output file.
         """
-        pid = os.getpid()
-        backup_filename = f"{output_filename:s}.{pid:d}"
+        backup_filename = self._GetBackupFilename(output_filename)
         shutil.copyfile(output_filename, backup_filename)
 
-        template_mappings["date"] = time.strftime("%B %d, %Y", time.gmtime()).replace(
-            " 0", "  "
-        )
+        template_mappings["date"] = self._GetHeaderDateString()
+
         template_filename = os.path.join(self._templates_path, "header.txt")
         self._GenerateSection(template_filename, template_mappings, output_filename)
 
@@ -166,17 +208,7 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
         )
-        with open(backup_filename, "r", encoding="utf8") as backup_file:
-            backup_lines = backup_file.readlines()
-
-        with open(output_filename, "r", encoding="utf8") as output_file:
-            output_lines = output_file.readlines()
-
-        diff_lines = list(difflib.ndiff(backup_lines[1:], output_lines[1:]))
-        diff_lines = [line for line in diff_lines if line[0] in ("-", "+")]
-
-        # Check if there are changes besides the date.
-        if diff_lines:
+        if self._CheckForChanges(backup_filename, output_filename):
             os.remove(backup_filename)
         else:
             shutil.move(backup_filename, output_filename)
@@ -210,3 +242,121 @@ class LibraryManPageGenerator(interface.SourceFileGenerator):
                 output_writer,
                 output_filename,
             )
+
+
+class InfoToolManPageGenerator(BaseManPageGenerator):
+    """Info tool man page file (yalinfo.1) generator."""
+
+    def Generate(self, project_configuration, output_writer):
+        """Generates an info tool man page file (yalinfo.1).
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          output_writer (OutputWriter): output writer.
+        """
+        info_tool_name = f"{project_configuration.library_name_suffix:s}info"
+
+        info_tool_options = self._GetInfoToolOptions(
+            project_configuration, info_tool_name
+        )
+        output_filename = os.path.join("manuals", f"{info_tool_name:s}.1")
+        backup_filename = self._GetBackupFilename(output_filename)
+        shutil.copyfile(output_filename, backup_filename)
+
+        template_mappings = self._GetTemplateMappings(project_configuration)
+
+        template_mappings["date"] = self._GetHeaderDateString()
+        template_mappings["library_description"] = "".join(
+            [
+                project_configuration.library_description[0].lower(),
+                project_configuration.library_description[1:],
+            ]
+        )
+        template_mappings["info_tool_name"] = info_tool_name
+        template_mappings["info_tool_source_description"] = (
+            project_configuration.info_tool_source_description
+        )
+        template_mappings["info_tool_source_type"] = (
+            project_configuration.info_tool_source_type
+        )
+
+        template_filename = os.path.join(self._templates_path, "header.txt")
+        self._GenerateSection(template_filename, template_mappings, output_filename)
+
+        nameless_options = []
+        for option in info_tool_options:
+            if not option.name:
+                nameless_options.append(option.identifier)
+                continue
+
+            template_mappings["option"] = option
+            template_filename = os.path.join(
+                self._templates_path, "synopsis-option.txt"
+            )
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["option"]
+
+        if nameless_options:
+            template_mappings["option_identifiers"] = "".join(nameless_options)
+            template_filename = os.path.join(
+                self._templates_path, "synopsis-nameless_options.txt"
+            )
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["option_identifiers"]
+
+        # TODO: generate SYNOPSIS (positional arguments)
+        # TODO: generate DESCRIPTION (positional arguments)
+
+        template_filename = os.path.join(self._templates_path, "description.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        for option in info_tool_options:
+            if not option.name:
+                template_filename = "description-nameless_option.txt"
+            else:
+                template_filename = "description-option.txt"
+
+            template_filename = os.path.join(
+                self._templates_path,
+                template_filename,
+            )
+            template_mappings["option"] = option
+            template_mappings["option_help_text"] = " \\\n".join(
+                textwrap.wrap(option.help_text, width=79, break_long_words=False)
+            )
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["option"]
+            del template_mappings["option_help_text"]
+
+        template_filename = os.path.join(self._templates_path, "environment.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        with open(backup_filename) as input_file_object:
+            with open(output_filename, "a") as output_file_object:
+                in_examples = False
+                for line in input_file_object.readlines():
+                    if line.startswith(".Sh DIAGNOSTICS"):
+                        break
+
+                    if line.startswith(".Sh EXAMPLES"):
+                        in_examples = True
+
+                    if in_examples:
+                        output_file_object.write(line)
+
+        template_filename = os.path.join(self._templates_path, "footer.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        if self._CheckForChanges(backup_filename, output_filename):
+            os.remove(backup_filename)
+        else:
+            shutil.move(backup_filename, output_filename)

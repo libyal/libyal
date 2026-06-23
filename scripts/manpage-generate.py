@@ -84,6 +84,10 @@ def Main():
     SOURCE_GENERATORS = [
         ("libyal.3", manpage_source_generator.LibraryManPageGenerator),
     ]
+    if project_configuration.HasInfoTool():
+        SOURCE_GENERATORS.append(
+            ("yalinfo.1", manpage_source_generator.InfoToolManPageGenerator)
+        )
 
     for source_category, source_generator_class in SOURCE_GENERATORS:
         template_directory = os.path.join(manuals_directory, source_category)

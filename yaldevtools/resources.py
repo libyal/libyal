@@ -51,3 +51,29 @@ class GeneratorOperation:
                 expression_ast, "<string>", mode="eval"
             )
         return self._condition_expression
+
+
+class ToolOption:
+    """Tool option.
+
+    Attributes:
+      guard (str): guard.
+      help_text (str): help text.
+      identifier (str): identifier.
+      name (str): name.
+    """
+
+    def __init__(self, identifier, name, help_text, guard=None):
+        """Initializes a tool option.
+
+        Args:
+          identifier (str): identifier.
+          name (str): name.
+          help_text (str): help text.
+          guard (Optional[str]): condition under which the option should be active.
+        """
+        super().__init__()
+        self.guard = guard
+        self.help_text = help_text
+        self.identifier = identifier
+        self.name = name

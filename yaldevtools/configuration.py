@@ -497,6 +497,9 @@ class ProjectConfiguration(BaseConfiguration):
         Raises:
           ConfigurationError: if the info tool source type is not supported.
         """
+        self.info_tool_features = self._GetOptionalConfigValue(
+            config_parser, "info_tool", "features", default_value=[]
+        )
         self.info_tool_source_description = self._GetOptionalConfigValue(
             config_parser, "info_tool", "source_description"
         )
