@@ -1,0 +1,20 @@
+.Ar source
+.Ar mount_point
+.Sh DESCRIPTION
+.Nm ${mount_tool_name}
+is a utility to mount ${mount_tool_source_description}
+.Pp
+.Nm ${mount_tool_name}
+is part of the
+.Nm ${library_name}
+package.
+.Nm ${library_name}
+is a ${library_description}
+.Pp
+.Ar source
+${mount_tool_source_description}
+.Ar mount_point
+the directory to serve as mount point
+.Pp
+The options are as follows:
+.Bl -tag -width Ds

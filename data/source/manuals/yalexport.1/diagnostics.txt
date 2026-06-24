@@ -1,0 +1,4 @@
+.Sh DIAGNOSTICS
+Errors, verbose and debug output are printed to stderr when verbose output \
+\-v is enabled.
+Verbose and debug output are only printed when enabled at compilation.

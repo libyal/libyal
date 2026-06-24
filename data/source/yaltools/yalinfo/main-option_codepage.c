@@ -1,8 +1,8 @@
-	if( option_ascii_codepage != NULL )
+	if( option_codepage != NULL )
 	{
 		result = info_handle_set_ascii_codepage(
 		          ${info_tool_name}_info_handle,
-		          option_ascii_codepage,
+		          option_codepage,
 		          &error );
 
 		if( result == -1 )

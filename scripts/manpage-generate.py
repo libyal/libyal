@@ -84,9 +84,17 @@ def Main():
     SOURCE_GENERATORS = [
         ("libyal.3", manpage_source_generator.LibraryManPageGenerator),
     ]
+    if project_configuration.HasExportTool():
+        SOURCE_GENERATORS.append(
+            ("yalexport.1", manpage_source_generator.ExportToolManPageGenerator)
+        )
     if project_configuration.HasInfoTool():
         SOURCE_GENERATORS.append(
             ("yalinfo.1", manpage_source_generator.InfoToolManPageGenerator)
+        )
+    if project_configuration.HasMountTool():
+        SOURCE_GENERATORS.append(
+            ("yalmount.1", manpage_source_generator.MountToolManPageGenerator)
         )
 
     for source_category, source_generator_class in SOURCE_GENERATORS:

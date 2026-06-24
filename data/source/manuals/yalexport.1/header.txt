@@ -1,0 +1,8 @@
+.Dd ${date}
+.Dt ${export_tool_name:upper_case} 1
+.Os
+.Sh NAME
+.Nm ${export_tool_name}
+.Nd exports items stored in ${export_tool_source_description}
+.Sh SYNOPSIS
+.Nm ${export_tool_name}

@@ -693,6 +693,109 @@ class SourceFileGenerator(BaseSourceFileGenerator):
 
         return self._definitions_include_header_file
 
+    def _GetExportToolOptions(self, project_configuration, export_tool_name):
+        """Retrieves the export tool options.
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          export_tool_name (str): name of the export tool.
+
+        Returns:
+          list[ToolOption]: export tool options.
+        """
+        # TODO: sort options with lower case before upper case.
+        export_tool_options = []
+
+        if project_configuration.HasExportToolFeatureCodepage():
+            option = resources.ToolOption(
+                "c",
+                "codepage",
+                (
+                    "codepage of ASCII strings, options: ascii, windows-874, "
+                    "windows-932, windows-936, windows-949, windows-950, "
+                    "windows-1250, windows-1251, windows-1252 (default), "
+                    "windows-1253, windows-1254, windows-1255, windows-1256, "
+                    "windows-1257 or windows-1258"
+                ),
+            )
+            export_tool_options.append(option)
+
+        export_tool_options.append(
+            resources.ToolOption("h", "", "shows this help"),
+        )
+        # TODO: set option via configuration
+        if project_configuration.library_name in ("libcreg", "libregf"):
+            option = resources.ToolOption(
+                "K",
+                "key_path",
+                "show information about a specific key path",
+            )
+            export_tool_options.append(option)
+
+        # TODO: set option via configuration
+        if project_configuration.library_name in ("libcreg", "libregf"):
+            option = resources.ToolOption(
+                "l",
+                "log_file",
+                "logs information about the exported items",
+            )
+            export_tool_options.append(option)
+
+        export_tool_options.extend(
+            [
+                resources.ToolOption("v", "", "verbose output to stderr"),
+                resources.ToolOption("V", "", "print version"),
+            ]
+        )
+        return export_tool_options
+
+    def _GetInfoToolOptions(self, project_configuration, info_tool_name):
+        """Retrieves the info tool options.
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          info_tool_name (str): name of the info tool.
+
+        Returns:
+          list[ToolOption]: info tool options.
+        """
+        # TODO: sort options with lower case before upper case.
+        info_tool_options = []
+
+        if project_configuration.HasInfoToolFeatureCodepage():
+            option = resources.ToolOption(
+                "c",
+                "codepage",
+                (
+                    "codepage of ASCII strings, options: ascii, windows-874, "
+                    "windows-932, windows-936, windows-949, windows-950, "
+                    "windows-1250, windows-1251, windows-1252 (default), "
+                    "windows-1253, windows-1254, windows-1255, windows-1256, "
+                    "windows-1257 or windows-1258"
+                ),
+            )
+            info_tool_options.append(option)
+
+        info_tool_options.append(
+            resources.ToolOption("h", "", "shows this help"),
+        )
+        # TODO: set option via configuration
+        if project_configuration.library_name in ("libcreg", "libregf"):
+            option = resources.ToolOption(
+                "H",
+                "",
+                "shows the key and value hierarchy",
+            )
+            info_tool_options.append(option)
+
+        info_tool_options.extend(
+            [
+                resources.ToolOption("v", "", "verbose output to stderr"),
+                resources.ToolOption("V", "", "print version"),
+            ]
+        )
+        return info_tool_options
+
     def _GetLibraryIncludeHeaderFile(self, project_configuration):
         """Retrieves the library include header file.
 
@@ -746,42 +849,6 @@ class SourceFileGenerator(BaseSourceFileGenerator):
 
         return self._library_makefile_am_file
 
-    def _GetInfoToolOptions(self, project_configuration, info_tool_name):
-        """Retrieves the info tool options.
-
-        Args:
-          project_configuration (ProjectConfiguration): project configuration.
-          info_tool_name (str): name of the info tool.
-
-        Returns:
-          list[ToolOption]: info tool options.
-        """
-        # TODO: sort options with lower case before upper case.
-        info_tool_options = []
-
-        if project_configuration.HasInfoToolsFeatureCodepage():
-            option = resources.ToolOption(
-                "c",
-                "codepage",
-                (
-                    "codepage of ASCII strings, options: ascii, windows-874, "
-                    "windows-932, windows-936, windows-949, windows-950, "
-                    "windows-1250, windows-1251, windows-1252 (default), "
-                    "windows-1253, windows-1254, windows-1255, windows-1256, "
-                    "windows-1257 or windows-1258"
-                ),
-            )
-            info_tool_options.append(option)
-
-        info_tool_options.extend(
-            [
-                resources.ToolOption("h", "", "shows this help"),
-                resources.ToolOption("v", "", "verbose output to stderr"),
-                resources.ToolOption("V", "", "print version"),
-            ]
-        )
-        return info_tool_options
-
     def _GetMainMakefileAM(self, project_configuration):
         """Retrieves the main Makefile.am file.
 
@@ -815,7 +882,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         # TODO: sort options with lower case before upper case.
         mount_tool_options = []
 
-        if project_configuration.HasMountToolsFeatureCodepage():
+        if project_configuration.HasMountToolFeatureCodepage():
             option = resources.ToolOption(
                 "c",
                 "codepage",

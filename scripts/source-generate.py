@@ -142,8 +142,12 @@ def Main():
     SOURCE_GENERATORS = [
         ("libyal.3", manpage.LibraryManPageGenerator),
     ]
+    if project_configuration.HasExportTool():
+        SOURCE_GENERATORS.append(("yalexport.1", manpage.ExportToolManPageGenerator))
     if project_configuration.HasInfoTool():
         SOURCE_GENERATORS.append(("yalinfo.1", manpage.InfoToolManPageGenerator))
+    if project_configuration.HasMountTool():
+        SOURCE_GENERATORS.append(("yalmount.1", manpage.MountToolManPageGenerator))
 
     manuals_directory = os.path.join(libyal_directory, "data", "source", "manuals")
     for source_category, source_generator_class in SOURCE_GENERATORS:

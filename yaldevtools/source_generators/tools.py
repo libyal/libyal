@@ -301,7 +301,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         variable_declarations = self._GenerateMainFunctionVariableDeclarations(
             project_configuration, info_tool_options
         )
-        if project_configuration.HasInfoToolsFeatureCodepage():
+        if project_configuration.HasInfoToolFeatureCodepage():
             variable_declarations.append("\tint result = 0;")
 
         getopt_switch = self._GenerateGetoptSwitch(
@@ -330,7 +330,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         del template_mappings["info_tool_options_switch"]
         del template_mappings["info_tool_options_variable_declarations"]
 
-        if project_configuration.HasInfoToolsFeatureCodepage():
+        if project_configuration.HasInfoToolFeatureCodepage():
             template_filename = os.path.join(templates_path, "main-option_codepage.c")
             self._GenerateSection(
                 template_filename, template_mappings, output_filename, access_mode="a"
@@ -1021,7 +1021,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         template_names.append("struct-file_system.h")
 
-        if project_configuration.HasMountToolsFeatureCodepage():
+        if project_configuration.HasMountToolFeatureCodepage():
             template_names.append("struct-codepage.h")
 
         if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
@@ -1066,7 +1066,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         if project_configuration.HasMountToolsFeatureParent():
             template_names.append("set_basename.h")
 
-        if project_configuration.HasMountToolsFeatureCodepage():
+        if project_configuration.HasMountToolFeatureCodepage():
             template_names.append("set_codepage.h")
 
         if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
@@ -1152,7 +1152,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         template_names = ["header.c", "includes-start.c"]
 
-        if project_configuration.HasMountToolsFeatureCodepage():
+        if project_configuration.HasMountToolFeatureCodepage():
             template_names.append("includes-codepage.c")
 
         if project_configuration.HasMountToolsFeatureKeys():
@@ -1174,7 +1174,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         template_names.append("initialize-start.c")
 
-        if project_configuration.HasMountToolsFeatureCodepage():
+        if project_configuration.HasMountToolFeatureCodepage():
             template_names.append("initialize-codepage.c")
 
         # TODO: set option via configuration
@@ -1196,7 +1196,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
         if project_configuration.HasMountToolsFeatureParent():
             template_names.append("set_basename.c")
 
-        if project_configuration.HasMountToolsFeatureCodepage():
+        if project_configuration.HasMountToolFeatureCodepage():
             template_names.append("set_codepage.c")
 
         if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
@@ -1759,7 +1759,7 @@ class ToolSourceFileGenerator(interface.SourceFileGenerator):
 
         template_names.append("main-initialize.c")
 
-        if project_configuration.HasMountToolsFeatureCodepage():
+        if project_configuration.HasMountToolFeatureCodepage():
             template_names.append("main-option_codepage.c")
 
         if project_configuration.HasMountToolsFeatureEncryptedRootPlist():

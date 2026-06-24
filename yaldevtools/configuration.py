@@ -77,6 +77,10 @@ class ProjectConfiguration(BaseConfiguration):
       dpkg_build_dependencies (str): dpkg build dependencies.
       dotnet_bindings_name (str): name of the .Net bindings.
       dtfabric_configuration (DTFabricConfiguration): dtFabric configuration.
+      export_tool_features (list[str]): features of the export tool.
+      export_tool_source_description (str): description of the input source.
+      export_tool_source_type (str): input source type, such as container, file, image
+          or volume.
       freebsd_build_dependencies (str): FreeBSD build dependencies.
       gcc_build_dependencies (list[str]): GCC build dependencies.
       gcc_static_build_dependencies (list[str]): GCC build dependencies for building
@@ -169,8 +173,8 @@ class ProjectConfiguration(BaseConfiguration):
           "stdout". The default is "stdout".
       tests_export_tool_profiles (list[str]): command line options profiles used
           by the tests of the export tool.
-      info_tool_options (str): options necessary for the tests of the info tool, such
-          as "-q" or "-u".
+      tests_info_tool_options (str): options necessary for the tests of the info tool,
+          such as "-q" or "-u".
       tests_info_tool_option_sets (list[str]): option sets used by the tests of
           the info tool.
       tests_info_tool_profiles (list[str]): command line options profiles used by
@@ -254,6 +258,11 @@ class ProjectConfiguration(BaseConfiguration):
         self.tools_names = []
         self.tools_tests = None
         self.tools_tests_with_input = None
+
+        # Export tool configuration.
+        self.export_tool_features = []
+        self.export_tool_source_description = None
+        self.export_tool_source_type = None
 
         # Info tool configuration.
         self.info_tool_features = []
@@ -454,6 +463,35 @@ class ProjectConfiguration(BaseConfiguration):
         """
         self.dotnet_bindings_name = f"{self.library_name_suffix:s}.net"
 
+    def _ReadExportToolConfiguration(self, config_parser):
+        """Reads the export tool configuration.
+
+        Args:
+          config_parser (ConfigParser): configuration file parser.
+
+        Raises:
+          ConfigurationError: if the export tool source type is not supported.
+        """
+        self.export_tool_features = self._GetOptionalConfigValue(
+            config_parser, "export_tool", "features", default_value=[]
+        )
+        self.export_tool_source_description = self._GetOptionalConfigValue(
+            config_parser, "export_tool", "source_description"
+        )
+        self.export_tool_source_type = self._GetOptionalConfigValue(
+            config_parser, "export_tool", "source_type"
+        )
+        if self.export_tool_source_type and self.export_tool_source_type not in (
+            "container",
+            "device",
+            "file",
+            "image",
+            "volume",
+        ):
+            raise errors.ConfigurationError(
+                f"unsupported export tool source type: {self.export_tool_source_type:s}"
+            )
+
     def _ReadFreeBSDConfiguration(self, config_parser):
         """Reads the FreeBSD configuration.
 
@@ -508,6 +546,7 @@ class ProjectConfiguration(BaseConfiguration):
         )
         if self.info_tool_source_type and self.info_tool_source_type not in (
             "container",
+            "device",
             "file",
             "image",
             "volume",
@@ -1124,6 +1163,14 @@ class ProjectConfiguration(BaseConfiguration):
         """
         return "export_tool" in self.tools_features
 
+    def HasExportToolFeatureCodepage(self):
+        """Determines if the export tool has a codepage feature.
+
+        Returns:
+          bool: True if the export tool has a codepage feature.
+        """
+        return "codepage" in self.export_tool_features
+
     def HasInfoTool(self):
         """Determines if the project provides an info tool.
 
@@ -1132,7 +1179,7 @@ class ProjectConfiguration(BaseConfiguration):
         """
         return "info_tool" in self.tools_features
 
-    def HasInfoToolsFeatureCodepage(self):
+    def HasInfoToolFeatureCodepage(self):
         """Determines if the info tool has a codepage feature.
 
         Returns:
@@ -1156,7 +1203,7 @@ class ProjectConfiguration(BaseConfiguration):
         """
         return "mount_tool" in self.tools_features
 
-    def HasMountToolsFeatureCodepage(self):
+    def HasMountToolFeatureCodepage(self):
         """Determines if the mount tool has a codepage feature.
 
         Returns:
@@ -1350,6 +1397,7 @@ class ProjectConfiguration(BaseConfiguration):
         self._ReadDPKGConfiguration(config_parser)
         self._ReadRPMConfiguration(config_parser)
 
+        self._ReadExportToolConfiguration(config_parser)
         self._ReadInfoToolConfiguration(config_parser)
         self._ReadMountToolConfiguration(config_parser)
 

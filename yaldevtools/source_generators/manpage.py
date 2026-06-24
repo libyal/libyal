@@ -244,6 +244,150 @@ class LibraryManPageGenerator(BaseManPageGenerator):
             )
 
 
+class ExportToolManPageGenerator(BaseManPageGenerator):
+    """Export tool man page file (yalexport.1) generator."""
+
+    def Generate(self, project_configuration, output_writer):
+        """Generates an export tool man page file (yalexport.1).
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          output_writer (OutputWriter): output writer.
+        """
+        export_tool_name = f"{project_configuration.library_name_suffix:s}export"
+
+        export_tool_options = self._GetExportToolOptions(
+            project_configuration, export_tool_name
+        )
+        output_filename = os.path.join("manuals", f"{export_tool_name:s}.1")
+        backup_filename = self._GetBackupFilename(output_filename)
+        shutil.copyfile(output_filename, backup_filename)
+
+        template_mappings = self._GetTemplateMappings(project_configuration)
+
+        template_mappings["date"] = self._GetHeaderDateString()
+        template_mappings["library_description"] = "".join(
+            [
+                project_configuration.library_description[0].lower(),
+                project_configuration.library_description[1:],
+            ]
+        )
+        template_mappings["export_tool_name"] = export_tool_name
+        template_mappings["export_tool_source_description"] = (
+            project_configuration.export_tool_source_description
+        )
+        template_mappings["export_tool_source_type"] = (
+            project_configuration.export_tool_source_type
+        )
+
+        template_filename = os.path.join(self._templates_path, "header.txt")
+        self._GenerateSection(template_filename, template_mappings, output_filename)
+
+        nameless_options = []
+        for option in export_tool_options:
+            if not option.name:
+                nameless_options.append(option.identifier)
+                continue
+
+            template_mappings["option"] = option
+            template_filename = os.path.join(
+                self._templates_path, "synopsis-option.txt"
+            )
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["option"]
+
+        if nameless_options:
+            template_mappings["option_identifiers"] = "".join(nameless_options)
+            template_filename = os.path.join(
+                self._templates_path, "synopsis-nameless_options.txt"
+            )
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["option_identifiers"]
+
+        # TODO: generate SYNOPSIS (positional arguments)
+        # TODO: generate DESCRIPTION (positional arguments)
+
+        # TODO: textwrap description
+        template_filename = os.path.join(self._templates_path, "description.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        for option in export_tool_options:
+            if not option.name:
+                template_filename = "description-nameless_option.txt"
+            else:
+                template_filename = "description-option.txt"
+
+            template_filename = os.path.join(
+                self._templates_path,
+                template_filename,
+            )
+            template_mappings["option"] = option
+            template_mappings["option_help_text"] = " \\\n".join(
+                textwrap.wrap(option.help_text, width=79, break_long_words=False)
+            )
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["option"]
+            del template_mappings["option_help_text"]
+
+        template_filename = os.path.join(self._templates_path, "environment.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        with open(backup_filename) as input_file_object:
+            with open(output_filename, "a") as output_file_object:
+                in_examples = False
+                for line in input_file_object.readlines():
+                    if line.startswith(".Sh DIAGNOSTICS"):
+                        break
+
+                    if line.startswith(".Sh EXAMPLES"):
+                        in_examples = True
+
+                    if in_examples:
+                        output_file_object.write(line)
+
+        template_filename = os.path.join(self._templates_path, "diagnostics.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        reference_manpages = []
+
+        if project_configuration.HasInfoTool():
+            reference_manpages.append(
+                f"{project_configuration.library_name_suffix:s}info"
+            )
+        if project_configuration.HasMountTool():
+            reference_manpages.append(
+                f"{project_configuration.library_name_suffix:s}mount"
+            )
+
+        if reference_manpages:
+            template_mappings["see_also_references"] = " ,\n".join(
+                [f".Xr {name:s} 1" for name in reference_manpages]
+            )
+            template_filename = os.path.join(self._templates_path, "see_also.txt")
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["see_also_references"]
+
+        template_filename = os.path.join(self._templates_path, "footer.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        if self._CheckForChanges(backup_filename, output_filename):
+            os.remove(backup_filename)
+        else:
+            shutil.move(backup_filename, output_filename)
+
+
 class InfoToolManPageGenerator(BaseManPageGenerator):
     """Info tool man page file (yalinfo.1) generator."""
 
@@ -311,6 +455,7 @@ class InfoToolManPageGenerator(BaseManPageGenerator):
         # TODO: generate SYNOPSIS (positional arguments)
         # TODO: generate DESCRIPTION (positional arguments)
 
+        # TODO: textwrap description
         template_filename = os.path.join(self._templates_path, "description.txt")
         self._GenerateSection(
             template_filename, template_mappings, output_filename, access_mode="a"
@@ -351,6 +496,175 @@ class InfoToolManPageGenerator(BaseManPageGenerator):
 
                     if in_examples:
                         output_file_object.write(line)
+
+        template_filename = os.path.join(self._templates_path, "diagnostics.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        reference_manpages = []
+
+        if project_configuration.HasExportTool():
+            reference_manpages.append(
+                f"{project_configuration.library_name_suffix:s}export"
+            )
+        if project_configuration.HasMountTool():
+            reference_manpages.append(
+                f"{project_configuration.library_name_suffix:s}mount"
+            )
+
+        if reference_manpages:
+            template_mappings["see_also_references"] = " ,\n".join(
+                [f".Xr {name:s} 1" for name in reference_manpages]
+            )
+            template_filename = os.path.join(self._templates_path, "see_also.txt")
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["see_also_references"]
+
+        template_filename = os.path.join(self._templates_path, "footer.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        if self._CheckForChanges(backup_filename, output_filename):
+            os.remove(backup_filename)
+        else:
+            shutil.move(backup_filename, output_filename)
+
+
+class MountToolManPageGenerator(BaseManPageGenerator):
+    """Mount tool man page file (yalmount.1) generator."""
+
+    def Generate(self, project_configuration, output_writer):
+        """Generates a mount tool man page file (yalmount.1).
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          output_writer (OutputWriter): output writer.
+        """
+        mount_tool_name = f"{project_configuration.library_name_suffix:s}mount"
+
+        mount_tool_options = self._GetMountToolOptions(
+            project_configuration, mount_tool_name
+        )
+        output_filename = os.path.join("manuals", f"{mount_tool_name:s}.1")
+        backup_filename = self._GetBackupFilename(output_filename)
+        shutil.copyfile(output_filename, backup_filename)
+
+        template_mappings = self._GetTemplateMappings(project_configuration)
+
+        template_mappings["date"] = self._GetHeaderDateString()
+        template_mappings["library_description"] = "".join(
+            [
+                project_configuration.library_description[0].lower(),
+                project_configuration.library_description[1:],
+            ]
+        )
+        template_mappings["mount_tool_name"] = mount_tool_name
+        template_mappings["mount_tool_source_description"] = (
+            project_configuration.mount_tool_source_description_long
+        )
+        template_mappings["mount_tool_source_type"] = (
+            project_configuration.mount_tool_source_type
+        )
+
+        template_filename = os.path.join(self._templates_path, "header.txt")
+        self._GenerateSection(template_filename, template_mappings, output_filename)
+
+        nameless_options = []
+        for option in mount_tool_options:
+            if not option.name:
+                nameless_options.append(option.identifier)
+                continue
+
+            template_mappings["option"] = option
+            template_filename = os.path.join(
+                self._templates_path, "synopsis-option.txt"
+            )
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["option"]
+
+        if nameless_options:
+            template_mappings["option_identifiers"] = "".join(nameless_options)
+            template_filename = os.path.join(
+                self._templates_path, "synopsis-nameless_options.txt"
+            )
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["option_identifiers"]
+
+        # TODO: generate SYNOPSIS (positional arguments)
+        # TODO: generate DESCRIPTION (positional arguments)
+
+        # TODO: textwrap description
+        template_filename = os.path.join(self._templates_path, "description.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        for option in mount_tool_options:
+            if not option.name:
+                template_filename = "description-nameless_option.txt"
+            else:
+                template_filename = "description-option.txt"
+
+            template_filename = os.path.join(
+                self._templates_path,
+                template_filename,
+            )
+            template_mappings["option"] = option
+            template_mappings["option_help_text"] = " \\\n".join(
+                textwrap.wrap(option.help_text, width=79, break_long_words=False)
+            )
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["option"]
+            del template_mappings["option_help_text"]
+
+        template_filename = os.path.join(self._templates_path, "environment.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        with open(backup_filename) as input_file_object:
+            with open(output_filename, "a") as output_file_object:
+                in_examples = False
+                for line in input_file_object.readlines():
+                    if line.startswith(".Sh DIAGNOSTICS"):
+                        break
+
+                    if line.startswith(".Sh EXAMPLES"):
+                        in_examples = True
+
+                    if in_examples:
+                        output_file_object.write(line)
+
+        template_filename = os.path.join(self._templates_path, "diagnostics.txt")
+        self._GenerateSection(
+            template_filename, template_mappings, output_filename, access_mode="a"
+        )
+        reference_manpages = []
+
+        if project_configuration.HasExportTool():
+            reference_manpages.append(
+                f"{project_configuration.library_name_suffix:s}export"
+            )
+        if project_configuration.HasInfoTool():
+            reference_manpages.append(
+                f"{project_configuration.library_name_suffix:s}info"
+            )
+
+        if reference_manpages:
+            template_mappings["see_also_references"] = " ,\n".join(
+                [f".Xr {name:s} 1" for name in reference_manpages]
+            )
+            template_filename = os.path.join(self._templates_path, "see_also.txt")
+            self._GenerateSection(
+                template_filename, template_mappings, output_filename, access_mode="a"
+            )
+            del template_mappings["see_also_references"]
 
         template_filename = os.path.join(self._templates_path, "footer.txt")
         self._GenerateSection(

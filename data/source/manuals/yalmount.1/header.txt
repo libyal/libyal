@@ -1,0 +1,8 @@
+.Dd ${date}
+.Dt ${mount_tool_name:upper_case} 1
+.Os
+.Sh NAME
+.Nm ${mount_tool_name}
+.Nd mounts ${mount_tool_source_description}
+.Sh SYNOPSIS
+.Nm ${mount_tool_name}
