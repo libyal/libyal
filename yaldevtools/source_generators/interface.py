@@ -703,26 +703,8 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         Returns:
           list[ToolOption]: export tool options.
         """
-        # TODO: sort options with lower case before upper case.
-        export_tool_options = []
+        export_tool_options = self._GetToolOptions(project_configuration)
 
-        if project_configuration.HasExportToolFeatureCodepage():
-            option = resources.ToolOption(
-                "c",
-                "codepage",
-                (
-                    "codepage of ASCII strings, options: ascii, windows-874, "
-                    "windows-932, windows-936, windows-949, windows-950, "
-                    "windows-1250, windows-1251, windows-1252 (default), "
-                    "windows-1253, windows-1254, windows-1255, windows-1256, "
-                    "windows-1257 or windows-1258"
-                ),
-            )
-            export_tool_options.append(option)
-
-        export_tool_options.append(
-            resources.ToolOption("h", "", "shows this help"),
-        )
         # TODO: set option via configuration
         if project_configuration.library_name in ("libcreg", "libregf"):
             option = resources.ToolOption(
@@ -741,13 +723,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
             )
             export_tool_options.append(option)
 
-        export_tool_options.extend(
-            [
-                resources.ToolOption("v", "", "verbose output to stderr"),
-                resources.ToolOption("V", "", "print version"),
-            ]
-        )
-        return export_tool_options
+        return sorted(export_tool_options)
 
     def _GetInfoToolOptions(self, project_configuration, info_tool_name):
         """Retrieves the info tool options.
@@ -759,26 +735,8 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         Returns:
           list[ToolOption]: info tool options.
         """
-        # TODO: sort options with lower case before upper case.
-        info_tool_options = []
+        info_tool_options = self._GetToolOptions(project_configuration)
 
-        if project_configuration.HasInfoToolFeatureCodepage():
-            option = resources.ToolOption(
-                "c",
-                "codepage",
-                (
-                    "codepage of ASCII strings, options: ascii, windows-874, "
-                    "windows-932, windows-936, windows-949, windows-950, "
-                    "windows-1250, windows-1251, windows-1252 (default), "
-                    "windows-1253, windows-1254, windows-1255, windows-1256, "
-                    "windows-1257 or windows-1258"
-                ),
-            )
-            info_tool_options.append(option)
-
-        info_tool_options.append(
-            resources.ToolOption("h", "", "shows this help"),
-        )
         # TODO: set option via configuration
         if project_configuration.library_name in ("libcreg", "libregf"):
             option = resources.ToolOption(
@@ -788,13 +746,7 @@ class SourceFileGenerator(BaseSourceFileGenerator):
             )
             info_tool_options.append(option)
 
-        info_tool_options.extend(
-            [
-                resources.ToolOption("v", "", "verbose output to stderr"),
-                resources.ToolOption("V", "", "print version"),
-            ]
-        )
-        return info_tool_options
+        return sorted(info_tool_options)
 
     def _GetLibraryIncludeHeaderFile(self, project_configuration):
         """Retrieves the library include header file.
@@ -879,36 +831,21 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         Returns:
           list[ToolOption]: mount tool options.
         """
-        # TODO: sort options with lower case before upper case.
-        mount_tool_options = []
+        mount_tool_options = self._GetToolOptions(project_configuration)
 
-        if project_configuration.HasMountToolFeatureCodepage():
-            option = resources.ToolOption(
-                "c",
-                "codepage",
-                (
-                    "codepage of ASCII strings, options: ascii, windows-874, "
-                    "windows-932, windows-936, windows-949, windows-950, windows-1250, "
-                    "windows-1251, windows-1252 (default), windows-1253, windows-1254, "
-                    "windows-1255, windows-1256, windows-1257 or windows-1258"
-                ),
-            )
-            mount_tool_options.append(option)
-
-        if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
-            option = resources.ToolOption(
-                "e",
-                "plist_path",
-                ("specify the path of the EncryptedRoot.plist.wipekey file"),
-            )
-            mount_tool_options.append(option)
+        for tool_option in mount_tool_options:
+            if tool_option.identifier == 'v':
+                tool_option.help_text = (
+                    f"verbose output to stderr, while {mount_tool_name:s} will remain "
+                    f"running in the foreground"
+                )
 
         # TODO: set option via configuration
         if project_configuration.library_name == "libfsapfs":
             option = resources.ToolOption(
                 "f",
                 "file_system_index",
-                ('specify a specific file system or \\"all\\"'),
+                'specify a specific file system or \\"all\\"',
             )
             mount_tool_options.append(option)
 
@@ -924,57 +861,6 @@ class SourceFileGenerator(BaseSourceFileGenerator):
             )
             mount_tool_options.append(option)
 
-        mount_tool_options.append(resources.ToolOption("h", "", "shows this help"))
-
-        if project_configuration.HasMountToolsFeatureKeys():
-            # TODO: set keys option description via configuration
-            if project_configuration.library_name == "libbde":
-                option = resources.ToolOption(
-                    "k",
-                    "keys",
-                    (
-                        "specify the full volume encryption key and tweak key "
-                        "formatted in base16 and separated by a : character e.g. "
-                        "FVEK:TWEAK"
-                    ),
-                )
-            elif project_configuration.library_name == "libfvde":
-                option = resources.ToolOption(
-                    "k",
-                    "keys",
-                    ("specify the volume master key formatted in base16"),
-                )
-            elif project_configuration.library_name in ("libluksde", "libqcow"):
-                option = resources.ToolOption(
-                    "k", "keys", "specify the key formatted in base16"
-                )
-
-            mount_tool_options.append(option)
-
-        if project_configuration.HasMountToolsFeatureOffset():
-            mount_tool_source_type = project_configuration.mount_tool_source_type
-            option = resources.ToolOption(
-                "o",
-                "offset",
-                f"specify the {{{mount_tool_source_type:s}}} offset in bytes",
-            )
-            mount_tool_options.append(option)
-
-        if project_configuration.HasMountToolsFeaturePassword():
-            option = resources.ToolOption(
-                "p", "password", "specify the password/passphrase"
-            )
-
-            mount_tool_options.append(option)
-
-        if project_configuration.HasMountToolsFeatureRecoveryPassword():
-            option = resources.ToolOption(
-                "r",
-                "recovery_password",
-                "specify the recovery password/passphrase",
-            )
-            mount_tool_options.append(option)
-
         if project_configuration.HasMountToolsFeatureStartupKey():
             option = resources.ToolOption(
                 "s",
@@ -986,29 +872,18 @@ class SourceFileGenerator(BaseSourceFileGenerator):
             )
             mount_tool_options.append(option)
 
-        mount_tool_options.extend(
-            [
-                resources.ToolOption(
-                    "v",
-                    "",
-                    (
-                        f"verbose output to stderr, while {mount_tool_name:s} will "
-                        f"remain running in the foreground"
-                    ),
+        mount_tool_options.append(
+            resources.ToolOption(
+                "X",
+                "extended_options",
+                "extended options to pass to sub system",
+                guard=(
+                    "defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || "
+                    "defined( HAVE_LIBOSXFUSE )"
                 ),
-                resources.ToolOption("V", "", "print version"),
-                resources.ToolOption(
-                    "X",
-                    "extended_options",
-                    "extended options to pass to sub system",
-                    guard=(
-                        "defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || "
-                        "defined( HAVE_LIBOSXFUSE )"
-                    ),
-                ),
-            ]
+            )
         )
-        return mount_tool_options
+        return sorted(mount_tool_options)
 
     def _GetTemplateMappings(self, project_configuration, authors_separator=", "):
         """Retrieves the template mappings.
@@ -1063,6 +938,106 @@ class SourceFileGenerator(BaseSourceFileGenerator):
             "tests_authors": tests_authors,
         }
         return template_mappings
+
+    def _GetToolOptions(self, project_configuration):
+        """Retrieves the tool options.
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+
+        Returns:
+          list[ToolOption]: tool options.
+        """
+        tool_options = [
+            resources.ToolOption("h", "", "shows this help"),
+            resources.ToolOption("v", "", "verbose output to stderr"),
+            resources.ToolOption("V", "", "print version"),
+        ]
+        if project_configuration.HasExportToolFeatureCodepage():
+            option = resources.ToolOption(
+                "c",
+                "codepage",
+                (
+                    "codepage of ASCII strings, options: ascii, windows-874, "
+                    "windows-932, windows-936, windows-949, windows-950, "
+                    "windows-1250, windows-1251, windows-1252 (default), "
+                    "windows-1253, windows-1254, windows-1255, windows-1256, "
+                    "windows-1257 or windows-1258"
+                ),
+            )
+            tool_options.append(option)
+
+        # TODO: change to general tool option in configuration
+        if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
+            option = resources.ToolOption(
+                "e",
+                "plist_path",
+                "specify the path of the EncryptedRoot.plist.wipekey file",
+            )
+            tool_options.append(option)
+
+        # TODO: change to general tool option in configuration
+        if project_configuration.HasMountToolsFeatureKeys():
+            # TODO: set keys option description via configuration
+            if project_configuration.library_name == "libbde":
+                option = resources.ToolOption(
+                    "k",
+                    "keys",
+                    (
+                        "specify the full volume encryption key and tweak key "
+                        "formatted in base16 and separated by a : character e.g. "
+                        "FVEK:TWEAK"
+                    ),
+                )
+            elif project_configuration.library_name == "libfvde":
+                option = resources.ToolOption(
+                    "k",
+                    "key",
+                    "specify the volume master key formatted in base16",
+                )
+            elif project_configuration.library_name in ("libluksde", "libqcow"):
+                option = resources.ToolOption(
+                    "k", "key", "specify the key formatted in base16"
+                )
+
+            tool_options.append(option)
+
+        # TODO: change to general tool option in configuration
+        if project_configuration.HasMountToolsFeatureOffset():
+            tool_source_type = project_configuration.mount_tool_source_type
+            option = resources.ToolOption(
+                "o",
+                "offset",
+                f"specify the {tool_source_type:s} offset in bytes",
+            )
+            tool_options.append(option)
+
+        # TODO: change to general tool option in configuration
+        if project_configuration.HasMountToolsFeaturePassword():
+            option = resources.ToolOption(
+                "p", "password", "specify the password (or passphrase)"
+            )
+            tool_options.append(option)
+
+        # TODO: change to general tool option in configuration
+        if project_configuration.HasMountToolsFeatureRecoveryPassword():
+            option = resources.ToolOption(
+                "r",
+                "recovery_password",
+                "specify the recovery password (or passphrase)",
+            )
+            tool_options.append(option)
+
+        # TODO: set option via configuration
+        if project_configuration.library_name in ("libbde", "libfvde", "libluksde"):
+            option = resources.ToolOption(
+                "u",
+                "",
+                "unattended mode (disables user interaction)",
+            )
+            tool_options.append(option)
+
+        return sorted(tool_options)
 
     def _GetTypeLibraryHeaderFile(self, project_configuration, type_name):
         """Retrieves a type specific library include header file.

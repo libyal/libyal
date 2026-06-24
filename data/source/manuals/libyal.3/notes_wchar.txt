@@ -9,4 +9,5 @@ To compile ${library_name} with wide character support use:
  during compilation.
 .sp
 .Ar ${library_name:upper_case}_WIDE_CHARACTER_TYPE
- in ${library_name}/features.h can be used to determine if ${library_name} was compiled with wide character support.
+ in ${library_name}/features.h can be used to determine if ${library_name} was compiled with \
+wide character support.

@@ -6,10 +6,10 @@ Foreach ($${TestName} in $${ToolsTests} -split " ")
 	{
 		Continue
 	}
-	$$Result = RunTestBinary $${TestExecutablesDirectory} "${library_name_suffix}_test_tools_$${TestName}"
+	$$ResultRun = RunTestBinary $${TestExecutablesDirectory} "${library_name_suffix}_test_tools_$${TestName}"
 
-	If (($${Result} -ne $${ExitSuccess}) -And ($${Result} -ne $${ExitIgnore}))
+	If (($${ResultRun} -ne $${ExitSuccess}) -And ($${ResultRun} -ne $${ExitIgnore}))
 	{
-		Break
+		$$Result = $${ResultRun}
 	}
 }

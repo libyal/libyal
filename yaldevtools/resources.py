@@ -56,6 +56,8 @@ class GeneratorOperation:
 class ToolOption:
     """Tool option.
 
+    Tool options are sorted alphabetically with lower case before upper case.
+
     Attributes:
       guard (str): guard.
       help_text (str): help text.
@@ -77,3 +79,14 @@ class ToolOption:
         self.help_text = help_text
         self.identifier = identifier
         self.name = name
+
+    def __lt__(self, other):
+        """Determines if the tool options is less than an other tool option.
+
+        Args:
+          other (ToolOption): tool option to compare against.
+        """
+        self_key = (ord(self.identifier.lower()), self.identifier.isupper())
+        other_key = (ord(other.identifier.lower()), other.identifier.isupper())
+
+        return self_key < other_key

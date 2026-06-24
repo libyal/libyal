@@ -8,4 +8,4 @@ If (-Not (Test-Path $${TestExecutablesDirectory}))
 	Exit $${ExitFailure}
 }
 
-$$Result = $${ExitIgnore}
+$$Result = $${ExitSuccess}
