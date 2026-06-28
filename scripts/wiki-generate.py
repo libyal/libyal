@@ -1433,14 +1433,14 @@ def Main():
       int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
-        description=("Generates wiki pages of the libyal libraries.")
+        description="Generates wiki pages of the libyal libraries."
     )
     argument_parser.add_argument(
         "configuration_file",
         action="store",
         metavar="CONFIGURATION_FILE",
         default="project-wiki.ini",
-        help=("The wiki generation configuration file."),
+        help="The wiki generation configuration file.",
     )
     argument_parser.add_argument(
         "-o",

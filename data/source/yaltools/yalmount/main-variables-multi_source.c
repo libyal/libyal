@@ -2,6 +2,7 @@ ${mount_tool_options_variable_declarations}
 	system_character_t * const *sources = NULL;
 	char *program                       = "${mount_tool_name}";
 	system_integer_t option             = 0;
+	int number_of_options               = (int) ( sizeof( options ) / sizeof( ${tools_name}_option_t ) );
 	int number_of_sources               = 0;
 	int verbose                         = 0;
 

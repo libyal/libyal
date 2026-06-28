@@ -96,6 +96,10 @@ def Main():
         SOURCE_GENERATORS.append(
             ("yalmount.1", manpage_source_generator.MountToolManPageGenerator)
         )
+    if project_configuration.HasVerifyTool():
+        SOURCE_GENERATORS.append(
+            ("yalverify.1", manpage_source_generator.VerifyToolManPageGenerator)
+        )
 
     for source_category, source_generator_class in SOURCE_GENERATORS:
         template_directory = os.path.join(manuals_directory, source_category)

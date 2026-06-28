@@ -1,0 +1,6 @@
+.Sh EXAMPLES
+.Bd -literal
+# ${mount_tool_name} ${tests_example_filename1} /mnt/${library_name_suffix}
+${mount_tool_name} ${library_version}
+.sp
+.Ed

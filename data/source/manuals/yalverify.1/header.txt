@@ -1,0 +1,8 @@
+.Dd ${date}
+.Dt ${verify_tool_name:upper_case} 1
+.Os
+.Sh NAME
+.Nm ${verify_tool_name}
+.Nd verifys items stored in ${verify_tool_source_description}
+.Sh SYNOPSIS
+.Nm ${verify_tool_name}

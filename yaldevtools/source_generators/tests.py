@@ -3481,6 +3481,23 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         """
         manpages_tests = [f"{project_configuration.library_name:s}.3"]
 
+        if project_configuration.HasExportTool():
+            manpages_tests.append(
+                f"{project_configuration.library_name_suffix:s}export.1"
+            )
+        if project_configuration.HasInfoTool():
+            manpages_tests.append(
+                f"{project_configuration.library_name_suffix:s}info.1"
+            )
+        if project_configuration.HasMountTool():
+            manpages_tests.append(
+                f"{project_configuration.library_name_suffix:s}mount.1"
+            )
+        if project_configuration.HasVerifyTool():
+            manpages_tests.append(
+                f"{project_configuration.library_name_suffix:s}verify.1"
+            )
+
         if makefile_am_file:
             shared_libs = list(makefile_am_file.libraries)
         else:
@@ -3514,7 +3531,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         template_mappings["library_tests_with_input"] = " ".join(
             project_configuration.library_tests_with_input
         )
-        template_mappings["manpages_tests"] = " ".join(manpages_tests)
+        template_mappings["manpages_tests"] = " ".join(sorted(manpages_tests))
 
         template_mappings["python_module_tests"] = " ".join(
             project_configuration.python_module_tests

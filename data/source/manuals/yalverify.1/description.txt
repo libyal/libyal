@@ -1,0 +1,17 @@
+.Ar source
+.Sh DESCRIPTION
+.Nm ${verify_tool_name}
+is a utility to verify items stored in ${verify_tool_source_description}
+.Pp
+.Nm ${verify_tool_name}
+is part of the
+.Nm ${library_name}
+package.
+.Nm ${library_name}
+is a ${library_description}
+.Pp
+.Ar source
+is the source ${verify_tool_source_type}.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds

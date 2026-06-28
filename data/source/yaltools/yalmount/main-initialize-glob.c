@@ -36,5 +36,6 @@
 #else
 	sources           = &( argv[ optind ] );
 	number_of_sources = argc - optind - 1;
-#endif
+
+#endif /* !defined( HAVE_GLOB_H ) */
 

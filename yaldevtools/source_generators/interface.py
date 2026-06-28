@@ -705,6 +705,20 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         """
         export_tool_options = self._GetToolOptions(project_configuration)
 
+        if project_configuration.HasExportToolFeatureCodepage():
+            option = resources.ToolOption(
+                "c",
+                "codepage",
+                (
+                    "codepage of ASCII strings, options: ascii, windows-874, "
+                    "windows-932, windows-936, windows-949, windows-950, "
+                    "windows-1250, windows-1251, windows-1252 (default), "
+                    "windows-1253, windows-1254, windows-1255, windows-1256, "
+                    "windows-1257 or windows-1258"
+                ),
+            )
+            export_tool_options.append(option)
+
         # TODO: set option via configuration
         if project_configuration.library_name in ("libcreg", "libregf"):
             option = resources.ToolOption(
@@ -715,11 +729,37 @@ class SourceFileGenerator(BaseSourceFileGenerator):
             export_tool_options.append(option)
 
         # TODO: set option via configuration
-        if project_configuration.library_name in ("libcreg", "libregf"):
+        if project_configuration.library_name in (
+            "libcreg",
+            "libesedb",
+            "libevt",
+            "libevtx",
+            "libmsiecf",
+            "libnk2",
+            "libnsfdb",
+            "libolecf",
+            "libregf",
+        ):
             option = resources.ToolOption(
                 "l",
                 "log_file",
                 "logs information about the exported items",
+            )
+            export_tool_options.append(option)
+
+        # TODO: set option via configuration
+        if project_configuration.library_name in (
+            "libnk2",
+            "libnsfdb",
+            "libolecf",
+        ):
+            option = resources.ToolOption(
+                "t",
+                "target",
+                (
+                    "specify the target directory to export to (default is the "
+                    "source filename followed by .export)"
+                ),
             )
             export_tool_options.append(option)
 
@@ -736,6 +776,98 @@ class SourceFileGenerator(BaseSourceFileGenerator):
           list[ToolOption]: info tool options.
         """
         info_tool_options = self._GetToolOptions(project_configuration)
+
+        if project_configuration.HasInfoToolFeatureCodepage():
+            option = resources.ToolOption(
+                "c",
+                "codepage",
+                (
+                    "codepage of ASCII strings, options: ascii, windows-874, "
+                    "windows-932, windows-936, windows-949, windows-950, "
+                    "windows-1250, windows-1251, windows-1252 (default), "
+                    "windows-1253, windows-1254, windows-1255, windows-1256, "
+                    "windows-1257 or windows-1258"
+                ),
+            )
+            info_tool_options.append(option)
+
+        # TODO: set option via configuration
+        if project_configuration.library_name in (
+            "libfsapfs",
+            "libfsext",
+            "libfsfat",
+            "libfshfs",
+            "libfsntfs",
+            "libfsxfs",
+        ):
+            option = resources.ToolOption(
+                "B",
+                "bodyfile",
+                "output file system information as a bodyfile",
+            )
+            info_tool_options.append(option)
+
+        # TODO: set option via configuration
+        if project_configuration.library_name in (
+            "libfsapfs",
+            "libfshfs",
+        ):
+            option = resources.ToolOption(
+                "E",
+                "identifier",
+                'show information about a specific file entry identifier or \\"all\\"',
+            )
+            info_tool_options.append(option)
+
+        elif project_configuration.library_name == "libfsfat":
+            option = resources.ToolOption(
+                "E",
+                "identifier",
+                "show information about a specific file entry identifier",
+            )
+            info_tool_options.append(option)
+
+        elif project_configuration.library_name == "libfsntfs":
+            option = resources.ToolOption(
+                "E",
+                "mft_entry_index",
+                'show information about a specific MFT entry index or \\"all\\"',
+            )
+            info_tool_options.append(option)
+
+        elif project_configuration.library_name in (
+            "libfsext",
+            "libfsxfs",
+        ):
+            option = resources.ToolOption(
+                "E",
+                "inode_number",
+                'show information about a specific inode or \\"all\\"',
+            )
+            info_tool_options.append(option)
+
+        # TODO: set option via configuration
+        if project_configuration.library_name in (
+            "libfsapfs",
+            "libfsext",
+            "libfsfat",
+            "libfshfs",
+            "libfsntfs",
+            "libfsxfs",
+        ):
+            option = resources.ToolOption(
+                "F",
+                "path",
+                "show information about a specific file entry path",
+            )
+            info_tool_options.append(option)
+
+            option = resources.ToolOption(
+                "H",
+                "",
+                "shows the file system hierarchy",
+            )
+            info_tool_options.append(option)
 
         # TODO: set option via configuration
         if project_configuration.library_name in ("libcreg", "libregf"):
@@ -834,11 +966,25 @@ class SourceFileGenerator(BaseSourceFileGenerator):
         mount_tool_options = self._GetToolOptions(project_configuration)
 
         for tool_option in mount_tool_options:
-            if tool_option.identifier == 'v':
+            if tool_option.identifier == "v":
                 tool_option.help_text = (
                     f"verbose output to stderr, while {mount_tool_name:s} will remain "
                     f"running in the foreground"
                 )
+
+        if project_configuration.HasMountToolFeatureCodepage():
+            option = resources.ToolOption(
+                "c",
+                "codepage",
+                (
+                    "codepage of ASCII strings, options: ascii, windows-874, "
+                    "windows-932, windows-936, windows-949, windows-950, "
+                    "windows-1250, windows-1251, windows-1252 (default), "
+                    "windows-1253, windows-1254, windows-1255, windows-1256, "
+                    "windows-1257 or windows-1258"
+                ),
+            )
+            mount_tool_options.append(option)
 
         # TODO: set option via configuration
         if project_configuration.library_name == "libfsapfs":
@@ -953,20 +1099,6 @@ class SourceFileGenerator(BaseSourceFileGenerator):
             resources.ToolOption("v", "", "verbose output to stderr"),
             resources.ToolOption("V", "", "print version"),
         ]
-        if project_configuration.HasExportToolFeatureCodepage():
-            option = resources.ToolOption(
-                "c",
-                "codepage",
-                (
-                    "codepage of ASCII strings, options: ascii, windows-874, "
-                    "windows-932, windows-936, windows-949, windows-950, "
-                    "windows-1250, windows-1251, windows-1252 (default), "
-                    "windows-1253, windows-1254, windows-1255, windows-1256, "
-                    "windows-1257 or windows-1258"
-                ),
-            )
-            tool_options.append(option)
-
         # TODO: change to general tool option in configuration
         if project_configuration.HasMountToolsFeatureEncryptedRootPlist():
             option = resources.ToolOption(
@@ -1104,6 +1236,49 @@ class SourceFileGenerator(BaseSourceFileGenerator):
                 self._types_include_header_file.Read(project_configuration)
 
         return self._types_include_header_file
+
+    def _GetVerifyToolOptions(self, project_configuration, verify_tool_name):
+        """Retrieves the verify tool options.
+
+        Args:
+          project_configuration (ProjectConfiguration): project configuration.
+          verify_tool_name (str): name of the verify tool.
+
+        Returns:
+          list[ToolOption]: verify tool options.
+        """
+        verify_tool_options = self._GetToolOptions(project_configuration)
+
+        option = resources.ToolOption(
+            "d",
+            "digest_type",
+            (
+                "calculate additional digest (hash) types besides md5, options: sha1, "
+                "sha256"
+            ),
+        )
+        verify_tool_options.append(option)
+
+        option = resources.ToolOption(
+            "l", "log_file", "logs verification errors and the digest (hash) to a file"
+        )
+        verify_tool_options.append(option)
+
+        option = resources.ToolOption(
+            "p",
+            "buffer_size",
+            "specify the process buffer size (default is the 32768)",
+        )
+        verify_tool_options.append(option)
+
+        option = resources.ToolOption(
+            "q",
+            "",
+            "quiet shows minimal status information",
+        )
+        verify_tool_options.append(option)
+
+        return sorted(verify_tool_options)
 
     # TODO: remove _HasGlob if no longer used, replace with library_features
     def _HasGlob(self, project_configuration, type_name):

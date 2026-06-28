@@ -148,6 +148,8 @@ def Main():
         SOURCE_GENERATORS.append(("yalinfo.1", manpage.InfoToolManPageGenerator))
     if project_configuration.HasMountTool():
         SOURCE_GENERATORS.append(("yalmount.1", manpage.MountToolManPageGenerator))
+    if project_configuration.HasVerifyTool():
+        SOURCE_GENERATORS.append(("yalverify.1", manpage.VerifyToolManPageGenerator))
 
     manuals_directory = os.path.join(libyal_directory, "data", "source", "manuals")
     for source_category, source_generator_class in SOURCE_GENERATORS:
