@@ -46,7 +46,21 @@ int mount_fuse_releasedir(
 	}
 	if( file_info->fh != (uint64_t) NULL )
 	{
-		file_info->fh = (uint64_t) NULL;
+		if( mount_file_entry_free(
+		     (mount_file_entry_t **) &( file_info->fh ),
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free file entry.",
+			 function );
+
+			result = -ENOENT;
+
+			goto on_error;
+		}
 	}
 	return( 0 );
 

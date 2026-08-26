@@ -947,8 +947,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         ):
             dpkg_build_dependencies.append("libssl-dev")
 
-        if "fuse" in tools_build_dependencies:
-            dpkg_build_dependencies.append("libfuse3-dev")
+        # if "fuse" in tools_build_dependencies:
+        #     dpkg_build_dependencies.append("libfuse3-dev")
 
         if "sgutils" in library_build_dependencies:
             dpkg_build_dependencies.append("libsgutils2-dev")

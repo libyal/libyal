@@ -36,7 +36,7 @@ int mount_file_system_signal_abort(
 		return( -1 );
 	}
 	for( ${mount_tool_file_entry_type}_index = number_of_${mount_tool_file_entry_type}s - 1;
-	     ${mount_tool_file_entry_type}_index > 0;
+	     ${mount_tool_file_entry_type}_index >= 0;
 	     ${mount_tool_file_entry_type}_index-- )
 	{
 		if( libcdata_array_get_entry_by_index(

@@ -465,8 +465,7 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
         templates_path = os.path.join(self._templates_path, "Makefile.am")
         output_filename = os.path.join("tests", "Makefile.am")
 
-        # Note that $(check_SCRIPTS) needs to be escaped, and $(check_AUTOTESTS:=.sh)
-        # not.
+        # Note that $(check_SCRIPTS) needs to be escaped
         tests = ["\\$(check_SCRIPTS)"]
         check_autotests = []
 
@@ -696,10 +695,13 @@ class TestSourceFileGenerator(interface.SourceFileGenerator):
             "*.tmp",
         ]
         extra_dist = [
-            "$(check_AUTOTESTS:=.at)",
             "package.m4",
             "test_macros.at",
         ]
+        extra_dist.extend([f"{name:}.at" for name in check_autotests])
+
+        if project_configuration.HasPythonModule():
+            extra_dist.append("test_python_module.at")
         if check_python_scripts:
             extra_dist.append("$(check_SCRIPTS)")
 

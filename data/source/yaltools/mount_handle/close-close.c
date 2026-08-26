@@ -13,7 +13,7 @@
 		result = -1;
 	}
 	for( ${mount_tool_file_system_type}_index = number_of_${mount_tool_file_system_type}s - 1;
-	     ${mount_tool_file_system_type}_index > 0;
+	     ${mount_tool_file_system_type}_index >= 0;
 	     ${mount_tool_file_system_type}_index-- )
 	{
 		if( mount_file_system_get_${mount_tool_file_system_type}_by_index(

@@ -18,6 +18,19 @@ void mount_fuse_destroy(
 #endif
 	if( ${mount_tool_name}_mount_handle != NULL )
 	{
+		if( mount_handle_close(
+		     ${mount_tool_name}_mount_handle,
+		     &error ) != 0 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_CLOSE_FAILED,
+			 "%s: unable to close mount handle.",
+			 function );
+
+			goto on_error;
+		}
 		if( mount_handle_free(
 		     &${mount_tool_name}_mount_handle,
 		     &error ) != 1 )
