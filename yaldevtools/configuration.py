@@ -549,6 +549,7 @@ class ProjectConfiguration(BaseConfiguration):
             "device",
             "file",
             "image",
+            "store",
             "volume",
         ):
             raise errors.ConfigurationError(

@@ -38,6 +38,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         "dpkg_package_dependencies": "_GetDpkgPackageDependencies",
         "freebsd_build_dependencies": "_GetFreeBSDBuildDependencies",
         "msys2_mingw_build_dependencies": "_GetMSYS2MinGWBuildDependencies",
+        "openbsd_build_dependencies": "_GetOpenBSDBuildDependencies",
         "python_module_development_status": "_GetPythonModuleDevelopmentStatus",
         "rpm_package_dependencies": "_GetRpmPackageDependencies",
     }
@@ -947,9 +948,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         ):
             dpkg_build_dependencies.append("libssl-dev")
 
-        # if "fuse" in tools_build_dependencies:
-        #     dpkg_build_dependencies.append("libfuse3-dev")
-
         if "sgutils" in library_build_dependencies:
             dpkg_build_dependencies.append("libsgutils2-dev")
 
@@ -1012,6 +1010,11 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         )
         if "python_bindings" in project_features:
             dpkg_package_dependencies.extend(["python3-dev", "python3-setuptools"])
+
+        tools_build_dependencies = namespace.get("tools_build_dependencies", None) or []
+
+        if "fuse" in tools_build_dependencies:
+            dpkg_package_dependencies.append("libfuse3-dev")
 
         return " ".join(sorted(dpkg_package_dependencies))
 
@@ -1100,6 +1103,37 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             msys2_mingw_build_dependencies.append("mingw-w64-x86_64-python3")
 
         return " ".join(sorted(msys2_mingw_build_dependencies))
+
+    def _GetOpenBSDBuildDependencies(self, namespace):
+        """Retrieves the OpenBSD build dependencies.
+
+        Args:
+          namespace (dict[str, object])): expression namespace.
+
+        Returns:
+          str: OpenBSD build dependencies.
+        """
+        library_build_dependencies = (
+            namespace.get("library_build_dependencies", None) or []
+        )
+        project_features = namespace.get("project_features", None) or []
+
+        openbsd_build_dependencies = [
+            "autoconf%2.72",
+            "automake%1.16",
+            "curl",
+            "gettext-tools",
+            "git",
+            "gmake",
+            "libtool",
+        ]
+        openbsd_build_dependencies.extend(
+            namespace.get("openbsd_build_dependencies", None) or []
+        )
+        if "python_bindings" in project_features:
+            openbsd_build_dependencies.append("python%3.13")
+
+        return " ".join(sorted(openbsd_build_dependencies))
 
     def _GetPythonModuleDevelopmentStatus(self, namespace):
         """Retrieves the Python module development status.
@@ -1299,6 +1333,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             "build_freebsd",
             "build_linux",
             "build_macos",
+            "build_openbsd",
             "build_package",
         ]
         if os.path.isdir("ossfuzz"):

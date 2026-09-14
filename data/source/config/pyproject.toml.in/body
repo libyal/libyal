@@ -23,6 +23,11 @@ Documentation = "https://github.com/libyal/${library_name}/wiki/Home"
 Homepage = "https://github.com/libyal/${library_name}"
 Repository = "https://github.com/libyal/${library_name}"
 
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+include = "\\.pyi?$"
+
 [tool.setuptools]
 py-modules = ["_build"]
 
