@@ -16,8 +16,9 @@ jobs:
     - name: Build
       shell: openbsd {0}
       run: |
-        export AUTOCONF_VERSION='2.72'
-        export AUTOMAKE_VERSION='1.16'
+        export AUTOCONF_VERSION="2.72"
+        export AUTOMAKE_VERSION="1.16"
+        export YACC="bison -y"
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
         ./synclibs.sh --use-head
         ./autogen.sh
@@ -26,6 +27,7 @@ jobs:
     - name: Run tests
       shell: openbsd {0}
       run: |
-        export AUTOCONF_VERSION='2.72'
-        export AUTOMAKE_VERSION='1.16'
+        export AUTOCONF_VERSION="2.72"
+        export AUTOMAKE_VERSION="1.16"
+        export YACC="bison -y"
         tests/runtests.sh -j4 VERBOSE=1

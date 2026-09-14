@@ -1116,6 +1116,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         library_build_dependencies = (
             namespace.get("library_build_dependencies", None) or []
         )
+        tools_build_dependencies = namespace.get("tools_build_dependencies", None) or []
         project_features = namespace.get("project_features", None) or []
 
         openbsd_build_dependencies = [
@@ -1130,6 +1131,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         openbsd_build_dependencies.extend(
             namespace.get("openbsd_build_dependencies", None) or []
         )
+        if "yacc" in library_build_dependencies or "yacc" in tools_build_dependencies:
+            openbsd_build_dependencies.append("bison")
         if "python_bindings" in project_features:
             openbsd_build_dependencies.append("python%3.13")
 
