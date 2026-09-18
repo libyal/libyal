@@ -1,31 +1,31 @@
 
-  def test_is_locked(self):
-    """Tests the is_locked function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+    def test_is_locked(self):
+        """Tests the is_locked function."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-    ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
+        ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
 
-    ${library_name_suffix}_${type_name}.open(test_source)
+        ${library_name_suffix}_${type_name}.open(test_source)
 
-    result = ${library_name_suffix}_${type_name}.is_locked()
-    self.assertTrue(result)
+        result = ${library_name_suffix}_${type_name}.is_locked()
+        self.assertTrue(result)
 
-    ${library_name_suffix}_${type_name}.close()
+        ${library_name_suffix}_${type_name}.close()
 
-    test_password = getattr(unittest, "password", None)
-    test_recovery_password = getattr(unittest, "recovery_password", None)
-    if test_password or test_recovery_password:
-      ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
-      if test_password:
-        ${library_name_suffix}_${type_name}.set_password(test_password)
-      if test_recovery_password:
-        ${library_name_suffix}_${type_name}.set_recovery_password(test_recovery_password)
+        test_password = getattr(unittest, "password", None)
+        test_recovery_password = getattr(unittest, "recovery_password", None)
+        if test_password or test_recovery_password:
+            ${library_name_suffix}_${type_name} = ${python_module_name}.${type_name}()
+            if test_password:
+                ${library_name_suffix}_${type_name}.set_password(test_password)
+            if test_recovery_password:
+                ${library_name_suffix}_${type_name}.set_recovery_password(test_recovery_password)
 
-      ${library_name_suffix}_${type_name}.open(test_source)
+            ${library_name_suffix}_${type_name}.open(test_source)
 
-      result = ${library_name_suffix}_${type_name}.is_locked()
-      self.assertFalse(result)
+            result = ${library_name_suffix}_${type_name}.is_locked()
+            self.assertFalse(result)
 
-      ${library_name_suffix}_${type_name}.close()
+            ${library_name_suffix}_${type_name}.close()

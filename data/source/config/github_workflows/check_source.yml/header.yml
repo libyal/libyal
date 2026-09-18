@@ -1,0 +1,36 @@
+# Run source checks.
+name: source_checks
+on:
+  pull_request:
+  push:
+permissions: read-all
+jobs:
+  asan:
+    name: Check source with asan
+    runs-on: $${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          compiler: 'gcc'
+          configure_options: '--enable-asan'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+    - name: Install build dependencies
+      run: |
+        sudo apt -y install autoconf automake autopoint build-essential git libasan8 libtool pkg-config
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      env:
+        CC: $${{ matrix.compiler }}
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure $${{ matrix.configure_options }}
+        make > /dev/null
+    - name: Run tests
+      run: |
+        tests/runtests.sh VERBOSE=1

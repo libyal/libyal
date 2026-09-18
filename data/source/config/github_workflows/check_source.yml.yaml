@@ -1,10 +1,21 @@
 # yaldevtools generator specification.
 ---
-identifier: generate_body
+identifier: generate_black
 type: template
-file: check_source.yml/body.yml
+condition: "'python_bindings' in project_features"
+file: check_source.yml/black.yml
+---
+identifier: generate_footer
+type: template
+file: check_source.yml/footer.yml
+---
+identifier: generate_header
+type: template
+file: check_source.yml/header.yml
 ---
 identifier: main
 type: group
 operations:
-- generate_body
+- generate_header
+- generate_black
+- generate_footer

@@ -1,5 +1,5 @@
 
-    test_offset = getattr(unittest, "offset", None)
+        test_offset = getattr(unittest, "offset", None)
 
-    with DataRangeFileObject(
-        test_source, test_offset or 0, None) as file_object:
+        with DataRangeFileObject(
+                test_source, test_offset or 0, None) as file_object:
