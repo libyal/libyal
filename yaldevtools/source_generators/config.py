@@ -250,8 +250,13 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                 dependency = Dependency(name="libfuse")
                 tools_dependencies.append(dependency)
 
+        have_libcrypto = False
         spec_library_tests = []
+
         for dependency in library_dependencies:
+            if dependency.name in ("libcaes", "libhmac"):
+                have_libcrypto = True
+
             if dependency.name in makefile_am_file.library_dependencies:
                 spec_dependency_test = f'test "x$ac_cv_{dependency.name:s}" = xyes'
             else:
@@ -259,7 +264,7 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
 
             spec_library_tests.append(spec_dependency_test)
 
-        if "libcaes" in library_dependencies or "libhmac" in library_dependencies:
+        if have_libcrypto:
             spec_library_tests.append('test "x$ac_cv_libcrypto" != xno')
 
         spec_tools_tests = []
@@ -384,6 +389,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
                     build_options.extend(
                         [
                             ("ARC4-ECB support", "$ac_cv_libfcrypto"),
+                            ("Blowfish-CBC support", "$ac_cv_libfcrypto"),
+                            ("Blowfish-ECB support", "$ac_cv_libfcrypto"),
                             ("Serpent-CBC support", "$ac_cv_libfcrypto"),
                             ("Serpent-ECB support", "$ac_cv_libfcrypto"),
                         ]
@@ -502,7 +509,6 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             maximum_description_length = max(
                 maximum_description_length, len(description)
             )
-
             description = "Debug output"
             value = "$ac_cv_enable_debug_output"
             features_information.append((description, value))
@@ -1011,8 +1017,15 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         if "python_bindings" in project_features:
             dpkg_package_dependencies.extend(["python3-dev", "python3-setuptools"])
 
+        library_build_dependencies = (
+            namespace.get("library_build_dependencies", None) or []
+        )
         tools_build_dependencies = namespace.get("tools_build_dependencies", None) or []
 
+        if "yacc" in tools_build_dependencies and "byacc" not in dpkg_package_dependencies:
+            dpkg_package_dependencies.append("byacc")
+        if "lex" in tools_build_dependencies and "flex" not in dpkg_package_dependencies:
+            dpkg_package_dependencies.append("flex")
         if "fuse" in tools_build_dependencies:
             dpkg_package_dependencies.append("libfuse3-dev")
 
@@ -1131,6 +1144,8 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
         openbsd_build_dependencies.extend(
             namespace.get("openbsd_build_dependencies", None) or []
         )
+        if "bzip2" in library_build_dependencies:
+            openbsd_build_dependencies.append("bzip2")
         if "yacc" in library_build_dependencies or "yacc" in tools_build_dependencies:
             openbsd_build_dependencies.append("bison")
         if "python_bindings" in project_features:
@@ -1185,9 +1200,9 @@ class ConfigurationFileGenerator(interface.SourceFileGenerator):
             "pkg-config",
             "rpm-build",
         ]
-        if "yacc" in library_build_dependencies:
+        if "yacc" in library_build_dependencies or "yacc" in tools_build_dependencies:
             rpm_package_dependencies.append("byacc")
-        if "lex" in library_build_dependencies:
+        if "lex" in library_build_dependencies or "lex" in tools_build_dependencies:
             rpm_package_dependencies.append("flex")
 
         if "zlib" in library_build_dependencies:

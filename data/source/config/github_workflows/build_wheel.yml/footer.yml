@@ -1,8 +1,9 @@
         .\synclibs.ps1
         .\autogen.ps1
     - name: Build Python wheels
-      uses: pypa/cibuildwheel@v3.4.1
+      uses: pypa/cibuildwheel@v4.0.0
       env:
+        CIBW_ENABLE: $${{ github.event_name == 'release' && github.event.action == 'published' && '' || 'cpython-prerelease' }}
         CIBW_TEST_COMMAND: python tests/runtests.py
         CIBW_TEST_SOURCES: tests
       with:
