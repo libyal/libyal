@@ -3,7 +3,7 @@
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           configure_options: '--enable-mingw-binmode --host=x86_64-w64-mingw32'
     steps:
     - uses: actions/checkout@v6

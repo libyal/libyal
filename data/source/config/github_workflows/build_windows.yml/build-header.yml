@@ -4,7 +4,7 @@
       matrix:
         include:
         - os: windows-11-arm
-          visual_studio_version: 2022
+          visual_studio_version: 2026
         - os: windows-2022
           visual_studio_version: 2022
         - os: windows-2025

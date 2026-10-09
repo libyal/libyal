@@ -3,7 +3,7 @@
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--enable-python'
           python_version: ''
@@ -34,7 +34,7 @@
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: ''
     steps:
