@@ -1,5 +1,7 @@
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update

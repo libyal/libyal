@@ -12,6 +12,8 @@
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y install autoconf automake autopoint build-essential clang clang-tools git jq libtool pkg-config
@@ -64,6 +66,8 @@
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install shellcheck
       run: |
         sudo apt-get update
@@ -86,6 +90,8 @@
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y install autoconf automake autopoint build-essential git libtool libubsan1 pkg-config

@@ -1,7 +1,11 @@
 # Build from source on Windows.
 name: build_windows
+concurrency:
+  group: $${{ github.workflow }}-$${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
   push:
-permissions: read-all
+permissions:
+  contents: read
 jobs:

@@ -9,6 +9,8 @@
           python_version: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update
@@ -39,6 +41,8 @@
           configure_options: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update

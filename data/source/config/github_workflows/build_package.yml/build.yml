@@ -1,9 +1,13 @@
 # Build packages from source.
 name: build_package
+concurrency:
+  group: $${{ github.workflow }}-$${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
   push:
-permissions: read-all
+permissions:
+  contents: read
 jobs:
   build_dpkg:
     runs-on: ubuntu-latest
@@ -26,6 +30,8 @@ jobs:
         apt update -q
         apt install -y ${dpkg_package_dependencies}
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
@@ -57,6 +63,8 @@ jobs:
       run: |
         dnf install -y @development-tools ${rpm_package_dependencies}
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
@@ -79,6 +87,8 @@ jobs:
           configure_options: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         brew update -q

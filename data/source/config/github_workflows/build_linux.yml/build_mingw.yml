@@ -7,6 +7,8 @@
           configure_options: '--enable-mingw-binmode --host=x86_64-w64-mingw32'
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update

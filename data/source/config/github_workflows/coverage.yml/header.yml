@@ -1,7 +1,11 @@
 # Generate code coverage report and upload to Codecov.
 name: coverage
+concurrency:
+  group: $${{ github.workflow }}-$${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
   push:
-permissions: read-all
+permissions:
+  contents: read
 jobs:

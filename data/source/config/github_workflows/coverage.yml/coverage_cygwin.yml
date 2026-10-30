@@ -9,6 +9,8 @@
     - name: Configure git
       run: git config --global core.autocrlf false
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install Cygwin and build dependencies
       uses: cygwin/cygwin-install-action@v6
       with:

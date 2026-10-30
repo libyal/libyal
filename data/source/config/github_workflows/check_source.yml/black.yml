@@ -2,6 +2,8 @@
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Check format of Python code
       uses: psf/black@stable
       with:
